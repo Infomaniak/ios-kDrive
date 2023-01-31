@@ -17,12 +17,15 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
+
+    @InjectService var accountManager: AccountManager
 
     private var driveFileManager: DriveFileManager!
     private var directory: File! {
@@ -280,7 +283,8 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let folderId = coder.decodeInteger(forKey: "FolderId")
         let convertingFolder = coder.decodeBool(forKey: "ConvertingFolder")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

@@ -21,6 +21,7 @@ import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import kDriveResources
 import Kingfisher
 import QuickLook
@@ -277,6 +278,8 @@ public class FileVersion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
+    // TODO LazyInjectService @InjectService var accountManager: AccountManager
+    
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
     /// Drive identifier
@@ -578,8 +581,10 @@ public class File: Object, Codable {
 
     @discardableResult
     public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        if hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        if hasThumbnail, let currentDriveFileManager = accountManager.currentDriveFileManager {
+            return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
+                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
                 if let image = try? result.get().image {
                     completion(image, true)
                 } else {
@@ -595,8 +600,10 @@ public class File: Object, Codable {
 
     @discardableResult
     public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        if let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        if let currentDriveFileManager = accountManager.currentDriveFileManager {
+            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
+                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
                 if let image = try? result.get().image {
                     completion(image)
                 } else {
@@ -664,7 +671,7 @@ public class File: Object, Codable {
         driveId = try container.decode(Int.self, forKey: .driveId)
         let name = try container.decode(String.self, forKey: .name)
         self.name = name
-        
+
         // TODO: check
         sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? name
         path = try container.decodeIfPresent(String.self, forKey: .path)

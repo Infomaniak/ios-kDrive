@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreUI
@@ -274,7 +275,8 @@ public class FileActionsHelper {
                                       using progressSnack: IKSnackBar?,
                                       observer: AnyObject,
                                       driveFileManager: DriveFileManager) {
-        AccountManager.instance.mqService.observeActionProgress(observer, actionId: actionId) { actionProgress in
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        accountManager.mqService.observeActionProgress(observer, actionId: actionId) { actionProgress in
             Task {
                 switch actionProgress.progress.message {
                 case .starting:

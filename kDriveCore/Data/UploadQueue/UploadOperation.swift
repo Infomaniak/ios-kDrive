@@ -20,41 +20,9 @@ import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 import Sentry
-
-public class UploadTokenManager {
-    public static let instance = UploadTokenManager()
-
-    private var tokens: [Int: UploadToken] = [:]
-    private var lock = DispatchGroup()
-
-    public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
-        lock.wait()
-        lock.enter()
-        if let token = tokens[userId], !token.isNearlyExpired {
-            completionHandler(token)
-            lock.leave()
-        } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
-                  let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
-                switch result {
-                case .success(let token):
-                    self.tokens[userId] = token
-                    completionHandler(token)
-                case .failure(let error):
-                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
-                    completionHandler(nil)
-                }
-                self.lock.leave()
-            }
-        } else {
-            completionHandler(nil)
-            lock.leave()
-        }
-    }
-}
 
 public struct UploadCompletionResult {
     var uploadFile: UploadFile!
@@ -63,6 +31,9 @@ public struct UploadCompletionResult {
 
 public class UploadOperation: Operation {
     // MARK: - Attributes
+
+    @InjectService var accountManager: AccountManager
+    @InjectService var uploadQueue: UploadQueue
 
     private var file: UploadFile
     private let urlSession: FileUploadSession
@@ -177,15 +148,15 @@ public class UploadOperation: Operation {
            FileManager.default.isReadableFile(atPath: filePath.path) {
             let task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
             self.task = task
-            
+
             task.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
             task.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-            
+
             progressObservation = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                 guard let newValue = value.newValue else {
                     return
                 }
-                UploadQueue.instance.publishProgress(newValue, for: fileId)
+                self.uploadQueue.publishProgress(newValue, for: fileId)
             }
             if let itemIdentifier = itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
@@ -271,7 +242,7 @@ public class UploadOperation: Operation {
             DDLogInfo("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
             file.error = nil
-            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
+            if let driveFileManager = accountManager.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
@@ -300,7 +271,7 @@ public class UploadOperation: Operation {
             } else if error == .objectNotFound {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
-                UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
+                uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
                 if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
                     PhotoLibraryUploader.instance.disableSync()
                     NotificationsHelper.sendPhotoSyncErrorNotification()
@@ -334,9 +305,9 @@ public class UploadOperation: Operation {
         } else {
             file.sessionUrl = ""
             file.error = .taskExpirationCancelled
-            UploadQueue.instance.sendPausedNotificationIfNeeded()
+            uploadQueue.sendPausedNotificationIfNeeded()
         }
-        UploadQueue.instance.suspendAllOperations()
+        uploadQueue.suspendAllOperations()
         task?.cancel()
         end()
         completionLock.leave()

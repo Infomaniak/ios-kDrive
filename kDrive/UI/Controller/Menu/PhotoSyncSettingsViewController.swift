@@ -22,9 +22,12 @@ import kDriveResources
 import Photos
 import RealmSwift
 import UIKit
+import InfomaniakDI
 
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @InjectService var accountManager: AccountManager
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -106,7 +109,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         let savedCurrentUserId = newSyncSettings.userId
         let savedCurrentDriveId = newSyncSettings.driveId
         if savedCurrentUserId != -1 && savedCurrentDriveId != -1 {
-            driveFileManager = AccountManager.instance.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
+            driveFileManager = accountManager.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
         }
         updateSaveButtonState()
         updateSectionList()
@@ -293,7 +296,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                         Task {
                             let status = await self.requestAuthorization()
                             DispatchQueue.main.async {
-                                self.driveFileManager = AccountManager.instance.currentDriveFileManager
+                                self.driveFileManager = self.accountManager.currentDriveFileManager
                                 if status == .authorized {
                                     self.photoSyncEnabled = true
                                 } else {
@@ -453,7 +456,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+        driveFileManager = accountManager.getDriveFileManager(for: drive)
         selectedDirectory = nil
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)

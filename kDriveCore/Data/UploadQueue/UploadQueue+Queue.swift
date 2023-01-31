@@ -16,30 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
+import RealmSwift
+import Sentry
 
-/// Something that oversees the splitting of a file or a collection of files.
-public final class ChunkService {
-    
-    public init() {
-        
-    }
-    
-//    func chunkFile(url: URL, ) -> <#return type#> {
-//        <#function body#>
-//    }
+protocol UploadQueueable {
     
 }
 
-//struct ChunkTask {
-//
-//    let chunkProvider: ChunkProvider
-//    let rangeProvider: RangeProvider
-//
-//    init?(fileURL: URL) {
-//        self.chunkProvider =
-//        self.rangeProvider = RangeProvider(fileURL: <#T##URL#>)
-//    }
-//
-//
-//}
+// MARK: - Publish
+
+extension UploadQueue: UploadQueueable {
+    
+}

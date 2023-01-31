@@ -18,11 +18,14 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
+    @InjectService var accountManager: AccountManager
+
     var driveFileManager: DriveFileManager!
     var files = [File]()
     var allItemsSelected = false
@@ -135,7 +138,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                             }
                             group.leave()
                         }
-                        DownloadQueue.instance.addToQueue(file: file)
+                        DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
                     }
                 }
             } else {
@@ -222,8 +225,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     guard !self.files.isEmpty && self.files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
                     if self.files.count <= 1, let file = self.files.first {
                         let message = file.convertedType == .image
-                        ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation
-                        : KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation
+                            ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation
+                            : KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation
                         UIConstants.showSnackBar(message: message)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarImageVideoSaved(self.files.count))
@@ -241,8 +244,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
                     // Present from root view controller if the panel is no longer presented
                     let viewController = self.view.window != nil
-                    ? self
-                    : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+                        ? self
+                        : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
                     guard viewController as? UIDocumentPickerViewController == nil else { return }
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
                     viewController?.present(documentExportViewController, animated: true)
@@ -304,7 +307,9 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         completion(.failure(error ?? .unknownError))
                     }
                 }
-                DownloadQueue.instance.addToQueue(archiveId: response.uuid, driveId: self.driveFileManager.drive.id)
+                DownloadQueue.instance.addToQueue(archiveId: response.uuid,
+                                                  driveId: self.driveFileManager.drive.id,
+                                                  userId: accountManager.currentUserId)
                 self.collectionView.reloadItems(at: [downloadCellPath])
             } catch {
                 completion(.failure(error as? DriveError ?? .unknownError))

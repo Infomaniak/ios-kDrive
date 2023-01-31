@@ -19,6 +19,7 @@
 import Alamofire
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import Kingfisher
 import Sentry
@@ -51,6 +52,9 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 
 public class DriveApiFetcher: ApiFetcher {
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
+
+    // TODO LazyInjectService @InjectService var accountManager: AccountManager
+
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
     override public init() {
@@ -275,14 +279,16 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        AccountManager.instance.refreshTokenLockedQueue.async {
+        // Only resolve locally to break init loop
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        accountManager.refreshTokenLockedQueue.async {
             guard !token.requiresRefresh else {
                 request(token, nil)
                 return
             }
 
-            AccountManager.instance.reloadTokensAndAccounts()
-            guard let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) else {
+            accountManager.reloadTokensAndAccounts()
+            guard let reloadedToken = accountManager.getTokenForUserId(token.userId) else {
                 request(nil, DriveError.unknownToken)
                 return
             }
@@ -296,7 +302,7 @@ public class DriveApiFetcher: ApiFetcher {
             group.enter()
             InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
                 if let newToken = newToken {
-                    AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                    accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
                     request(newToken, nil)
                 } else {
                     request(nil, error)
@@ -423,8 +429,12 @@ public class DriveApiFetcher: ApiFetcher {
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
+    // TODO inject lazy @InjectService var accountManager: AccountManager
+
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
-        AccountManager.instance.refreshTokenLockedQueue.async {
+        // Only resolve locally to break init loop
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        accountManager.refreshTokenLockedQueue.async {
             SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
 
             if !KeychainHelper.isKeychainAccessible {
@@ -435,8 +445,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
             }
 
             // Maybe someone else refreshed our token
-            AccountManager.instance.reloadTokensAndAccounts()
-            if let token = AccountManager.instance.getTokenForUserId(credential.userId),
+            accountManager.reloadTokensAndAccounts()
+            if let token = accountManager.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
                 SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))

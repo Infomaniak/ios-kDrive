@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import UIKit
 
@@ -62,7 +63,8 @@ class LaunchPanelsController {
         // Photo sync activation
         LaunchPanel(
             makePanelController: {
-                guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
+                let accountManager = InjectService<AccountManager>().wrappedValue
+                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     fatalError("Tried to display save photos floating panel with nil currentDriveFileManager")
                 }
                 let driveFloatingPanelController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
@@ -79,7 +81,7 @@ class LaunchPanelsController {
                 }
                 return driveFloatingPanelController
             },
-            displayCondition: AccountManager.instance.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
+            displayCondition: InjectService<AccountManager>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
             priority: 3
         ),
         // Beta invitation

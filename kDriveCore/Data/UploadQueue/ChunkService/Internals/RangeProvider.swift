@@ -57,9 +57,6 @@ public struct RangeProvider: RangeProvidable {
         /// Unable to read file system metadata
         case UnableToReadFileAttributes
         
-        /// file is under the suported size, may be empty
-        case FileTooSmall
-        
         /// file is over the suported size
         case FileTooLarge
     }
@@ -82,11 +79,6 @@ public struct RangeProvider: RangeProvidable {
         get throws {
             let fileSize = try fileSize
             
-            // Small (including empty) files are not suited for chunk upload
-            guard fileSize > APIConsts.chunkMinSize else {
-                throw ErrorDomain.FileTooSmall
-            }
-            
             // Check for files too large to be processed by mobile app or the server
             guard fileSize < APIConsts.fileMaxSizeClient,
                   fileSize < APIConsts.fileMaxSizeServer else {
@@ -95,15 +87,11 @@ public struct RangeProvider: RangeProvidable {
             }
             
             let preferedChunkSize = guts.preferedChunkSize(for: fileSize)
-            
-            // Check the file is larger than one chunk
-            guard fileSize > preferedChunkSize else {
-                throw ErrorDomain.FileTooSmall
-            }
-            
             let totalChunksCount = fileSize / preferedChunkSize
             
-            let ranges = guts.buildRanges(fileSize: fileSize, totalChunksCount: totalChunksCount, chunkSize: preferedChunkSize)
+            let ranges = guts.buildRanges(fileSize: fileSize,
+                                          totalChunksCount: totalChunksCount,
+                                          chunkSize: preferedChunkSize)
             
             return ranges
         }

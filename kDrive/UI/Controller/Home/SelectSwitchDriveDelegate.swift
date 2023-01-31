@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -30,10 +31,12 @@ extension SelectSwitchDriveDelegate {
             present(driveFloatingPanelController, animated: true)
         } else {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")
-            AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
-            AccountManager.instance.saveAccounts()
+            let accountManager = InjectService<AccountManager>().wrappedValue
+
+            accountManager.setCurrentDriveForCurrentAccount(drive: drive)
+            accountManager.saveAccounts()
             // Download root file
-            guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
+            guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                 return
             }
 

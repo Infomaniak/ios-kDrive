@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -24,6 +25,8 @@ import UIKit
 class FileDetailViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
+
+    @InjectService var accountManager: AccountManager
 
     var file: File!
     var driveFileManager: DriveFileManager!
@@ -476,7 +479,7 @@ class FileDetailViewController: UIViewController {
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
 
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
@@ -728,7 +731,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 $0 == answerAction
             }
         }
-        if comments[indexPath.row].user.id != AccountManager.instance.currentUserId {
+        if comments[indexPath.row].user.id != accountManager.currentUserId {
             actions.removeAll {
                 $0 == deleteAction || $0 == editAction
             }
@@ -843,7 +846,7 @@ extension FileDetailViewController: FileCommentDelegate {
                     let comment = self.comments[index]
                     comment.liked.toggle()
                     if shouldLike {
-                        let driveUser = DriveUser(user: AccountManager.instance.currentAccount.user)
+                        let driveUser = DriveUser(user: self.accountManager.currentAccount.user)
                         if comment.likes == nil {
                             comment.likes = [driveUser]
                         } else {
@@ -851,7 +854,7 @@ extension FileDetailViewController: FileCommentDelegate {
                         }
                         comment.likesCount += 1
                     } else {
-                        comment.likes?.removeAll { $0.id == AccountManager.instance.currentAccount.user.id }
+                        comment.likes?.removeAll { $0.id == self.accountManager.currentAccount.user.id }
                         comment.likesCount -= 1
                     }
                     self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)

@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
@@ -39,6 +40,8 @@ class OnboardingViewController: UIViewController {
     @IBOutlet weak var nextButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var registerButtonHeight: NSLayoutConstraint!
 
+    @InjectService var accountManager: AccountManager
+
     var addUser = false
     var slides: [Slide] = []
 
@@ -46,7 +49,12 @@ class OnboardingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
+        InfomaniakLogin.setupWebviewNavbar(title: "",
+                                           titleColor: nil,
+                                           color: nil,
+                                           buttonColor: nil,
+                                           clearCookie: true,
+                                           timeOutMessage: "Timeout")
         nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
         nextButton.imageView?.tintColor = .white
         nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
@@ -226,11 +234,15 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
         return .zero
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
 
@@ -246,21 +258,21 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
 extension OnboardingViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
         MatomoUtils.track(eventWithCategory: .account, name: "loggedIn")
-        let previousAccount = AccountManager.instance.currentAccount
+        let previousAccount = accountManager.currentAccount
         signInButton.setLoading(true)
         registerButton.isEnabled = false
         Task {
             do {
-                _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
+                _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 // Download root files
-                try await AccountManager.instance.currentDriveFileManager?.initRoot()
+                try await accountManager.currentDriveFileManager?.initRoot()
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 MatomoUtils.connectUser()
                 goToMainScreen()
             } catch {
                 if let previousAccount = previousAccount {
-                    AccountManager.instance.switchAccount(newAccount: previousAccount)
+                    accountManager.switchAccount(newAccount: previousAccount)
                 }
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true

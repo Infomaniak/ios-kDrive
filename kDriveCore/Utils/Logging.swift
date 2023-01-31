@@ -24,6 +24,7 @@ import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
 import Sentry
+import InfomaniakDI
 
 public enum Logging {
     public static func initLogging() {
@@ -81,8 +82,10 @@ public enum Logging {
             options.dsn = "https://fb65d0bcbf4c4ce795a6e1c1a964da28@sentry.infomaniak.com/4"
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
+                let uploadQueue = InjectService<UploadQueue>().wrappedValue
+
                 event.context?["AppState"] = [
-                    "UploadQueue size": UploadQueue.instance.operationQueue.operationCount,
+                    "UploadQueue size": uploadQueue.operationQueue.operationCount,
                     "PhotoSync enabled": PhotoLibraryUploader.instance.isSyncEnabled,
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly

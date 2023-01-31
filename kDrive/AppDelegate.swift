@@ -21,6 +21,7 @@ import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
@@ -33,13 +34,14 @@ import UserNotifications
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     var window: UIWindow?
+    
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    let dependencyInjectionHook = EarlyDIHook()
 
-    private var accountManager: AccountManager!
-    private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 2
     private static let appStateVersionKey = "appStateVersionKey"
-    
+
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
@@ -48,8 +50,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
-        accountManager = AccountManager.instance
-        uploadQueue = UploadQueue.instance
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
 
@@ -90,9 +90,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // setup DI ASAP
-        FactoryService.setupDependencyInjection()
-        
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -116,13 +113,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
+        let accountManager = InjectService<AccountManager>().wrappedValue
         if accountManager.accounts.isEmpty {
             completion(false)
             return
         }
 
         _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
-        UploadQueue.instance.waitForCompletion {
+        let uploadQueue = InjectService<UploadQueue>().wrappedValue
+        uploadQueue.waitForCompletion {
             completion(true)
         }
     }
@@ -159,12 +158,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return false
         }
 
+        let accountManager = InjectService<AccountManager>().wrappedValue
+
         if components.path == "store",
-            let userId = params.first(where: { $0.name == "userId" })?.value,
-            let driveId = params.first(where: { $0.name == "driveId" })?.value {
+           let userId = params.first(where: { $0.name == "userId" })?.value,
+           let driveId = params.first(where: { $0.name == "driveId" })?.value {
             if var viewController = window?.rootViewController,
-                let userId = Int(userId), let driveId = Int(driveId),
-                let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
+               let userId = Int(userId), let driveId = Int(driveId),
+               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
                 // Get presented view controller
                 while let presentedViewController = viewController.presentedViewController {
                     viewController = presentedViewController
@@ -178,7 +179,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        UploadQueue.instance.pausedNotificationSent = false
+        let uploadQueue = InjectService<UploadQueue>().wrappedValue
+        uploadQueue.pausedNotificationSent = false
         launchSetup()
     }
 
@@ -191,6 +193,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
         }
 
+        let accountManager = InjectService<AccountManager>().wrappedValue
         if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
@@ -243,7 +246,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        let currentAccount = AccountManager.instance.currentAccount!
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
         if preload {
@@ -266,6 +270,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
         }
 
+        let uploadQueue = InjectService<UploadQueue>().wrappedValue
         Task {
             do {
                 let (_, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
@@ -297,8 +302,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
-                UploadQueue.instance.resumeAllOperations()
-                UploadQueue.instance.addToQueueFromRealm()
+                uploadQueue.resumeAllOperations()
+                uploadQueue.addToQueueFromRealm()
                 BackgroundUploadSessionManager.instance.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
                     _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
@@ -315,7 +320,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
         }
-        
+
+        let accountManager = InjectService<AccountManager>().wrappedValue
         let group = DispatchGroup()
         var shouldCleanFolder = false
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
@@ -329,7 +335,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
-            
+
             for fileFolder in fileFolders {
                 // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
@@ -339,7 +345,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
-                
+
                 let fileURL = fileFolderURL.appendingPathComponent(file.name)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     // Compare modification date
@@ -356,6 +362,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
+                        let uploadQueue = InjectService<UploadQueue>().wrappedValue
                         var observationToken: ObservationToken?
                         observationToken = uploadQueue.observeFileUploaded(self,
                                                                            fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
@@ -379,7 +386,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 }
             }
         }
-        
+
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
@@ -394,6 +401,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
+        let accountManager = InjectService<AccountManager>().wrappedValue
         for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
@@ -483,6 +491,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
+        let accountManager = InjectService<AccountManager>().wrappedValue
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
@@ -511,6 +520,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+        let accountManager = InjectService<AccountManager>().wrappedValue
+
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
 
@@ -556,6 +567,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
                 // Upload notification
                 let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
+                let accountManager = InjectService<AccountManager>().wrappedValue
 
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:
@@ -608,13 +620,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 //
 //        Messaging.messaging().appDidReceiveMessage(userInfo)
     }
-    
 }
 
 // MARK: - Navigation
 
 extension AppDelegate {
-        
     var topMostViewController: UIViewController? {
         var topViewController = window?.rootViewController
         while let presentedViewController = topViewController?.presentedViewController {
@@ -622,5 +632,13 @@ extension AppDelegate {
         }
         return topViewController
     }
-    
 }
+
+/// Something that loads the DI on init
+ public struct EarlyDIHook {
+
+    public init() {
+        // setup DI ASAP
+        FactoryService.setupDependencyInjection()
+    }
+ }

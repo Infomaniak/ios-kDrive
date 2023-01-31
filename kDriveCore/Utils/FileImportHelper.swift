@@ -24,6 +24,7 @@ import Photos
 import QuickLookThumbnailing
 import RealmSwift
 import VisionKit
+import InfomaniakDI
 
 public class ImportedFile {
     public var name: String
@@ -128,8 +129,10 @@ public enum ImportError: LocalizedError {
 }
 
 public class FileImportHelper {
-    public static let instance = FileImportHelper()
+    public static let instance = FileImportHelper() // TODO migrate
 
+    @InjectService var uploadQueue: UploadQueue
+    
     private let imageCompression = 0.8
 
     // MARK: - Public methods
@@ -259,7 +262,7 @@ public class FileImportHelper {
                 url: file.path,
                 name: file.name
             )
-            UploadQueue.instance.addToQueue(file: uploadFile)
+            uploadQueue.addToQueue(file: uploadFile)
         }
     }
 
@@ -503,6 +506,6 @@ public class FileImportHelper {
             url: targetURL,
             name: name
         )
-        UploadQueue.instance.addToQueue(file: newFile)
+        uploadQueue.addToQueue(file: newFile)
     }
 }

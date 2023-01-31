@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import Foundation
 
@@ -26,6 +27,9 @@ public protocol FileDownloadSession: BackgroundSession {
 extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
+    
+    @InjectService var accountManager: AccountManager
+    
     public var identifier: String {
         return backgroundSession.identifier
     }
@@ -132,7 +136,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
+                  let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion

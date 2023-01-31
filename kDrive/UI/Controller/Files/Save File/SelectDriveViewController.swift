@@ -18,6 +18,7 @@
 
 import DropDown
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import UIKit
 
@@ -27,6 +28,9 @@ protocol SelectDriveDelegate: AnyObject {
 
 class SelectDriveViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @InjectService var accountManager: AccountManager
+
     private var driveList: [Drive]!
     private var currentAccount: Account!
     private var accounts: [Account]!
@@ -55,10 +59,10 @@ class SelectDriveViewController: UIViewController {
 
         var selectedAccount: Account?
         if let selectedUserId = selectedDrive?.userId {
-            selectedAccount = AccountManager.instance.account(for: selectedUserId)
+            selectedAccount = accountManager.account(for: selectedUserId)
         }
 
-        if let account = selectedAccount ?? AccountManager.instance.currentAccount {
+        if let account = selectedAccount ?? accountManager.currentAccount {
             initForCurrentAccount(account)
             if !accounts.isEmpty {
                 sections = [.selectAccount, .selectDrive]
@@ -77,7 +81,7 @@ class SelectDriveViewController: UIViewController {
 
     private func initForCurrentAccount(_ account: Account) {
         currentAccount = account
-        accounts = AccountManager.instance.accounts.filter { $0.userId != account.userId }
+        accounts = accountManager.accounts.filter { $0.userId != account.userId }
         driveList = DriveInfosManager.instance.getDrives(for: account.userId, sharedWithMe: nil)
         dropDown.dataSource = accounts.map(\.user.displayName)
     }
@@ -88,7 +92,7 @@ class SelectDriveViewController: UIViewController {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { [unowned self] (index: Index, _: String, cell: DropDownCell) -> Void in
+        dropDown.customCellConfiguration = { [unowned self] (index: Index, _: String, cell: DropDownCell) in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             let account = self.accounts[index]
             cell.configureWith(account: account)

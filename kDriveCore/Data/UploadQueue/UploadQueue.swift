@@ -19,11 +19,15 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 import Sentry
 
 public class UploadQueue {
-    public static let instance = UploadQueue()
+
+    @InjectService var accountManager: AccountManager
+
+//    public static let instance = UploadQueue() still needed ?
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
         return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
@@ -50,11 +54,11 @@ public class UploadQueue {
         urlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         urlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         urlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
-        urlSessionConfiguration.networkServiceType = .default  // dzr .avStreaming
+        urlSessionConfiguration.networkServiceType = .default // dzr .avStreaming
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
 
-    private var fileUploadedCount = 0
+    var fileUploadedCount = 0
     /// This Realm instance is bound to `dispatchQueue`
     private var realm: Realm!
 
@@ -70,14 +74,14 @@ public class UploadQueue {
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     private var forceSuspendQueue = false
-    private var observations = (
+    var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
-        didChangeProgress: [UUID: (UploadedFileId, Progress) -> Void](),
+        didChangeProgress: [UUID: (UploadedFileId, UploadProgress) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
         didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
 
-    private init() {
+    public init() {
         // Create Realm
         dispatchQueue.sync {
             do {
@@ -129,7 +133,7 @@ public class UploadQueue {
     }
 
     public func getUploadingFiles(withParent parentId: Int,
-                                  userId: Int = AccountManager.instance.currentUserId,
+                                  userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
@@ -175,24 +179,24 @@ public class UploadQueue {
                                userId = file.userId,
                                driveId = file.driveId,
                                realm = realm!] in
-            let operation = self.operationsInQueue[fileId]
-            if operation?.isExecuting != true {
-                if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
-                    let publishedToDelete = UploadFile(value: toDelete)
-                    publishedToDelete.error = .taskCancelled
-                    try? realm.safeWrite {
-                        realm.delete(toDelete)
+                let operation = self.operationsInQueue[fileId]
+                if operation?.isExecuting != true {
+                    if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
+                        let publishedToDelete = UploadFile(value: toDelete)
+                        publishedToDelete.error = .taskCancelled
+                        try? realm.safeWrite {
+                            realm.delete(toDelete)
+                        }
+                        self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
+                        self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                     }
-                    self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                 }
-            }
-            operation?.cancel()
+                operation?.cancel()
         }
     }
 
     public func cancelAllOperations(withParent parentId: Int,
-                                    userId: Int = AccountManager.instance.currentUserId,
+                                    userId: Int,
                                     driveId: Int) {
         dispatchQueue.async {
             self.suspendAllOperations()
@@ -231,7 +235,7 @@ public class UploadQueue {
     }
 
     public func retryAllOperations(withParent parentId: Int,
-                                   userId: Int = AccountManager.instance.currentUserId,
+                                   userId: Int,
                                    driveId: Int) {
         dispatchQueue.async {
             let failedUploadFiles = self.getUploadingFiles(withParent: parentId,
@@ -310,33 +314,6 @@ public class UploadQueue {
         publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
     }
 
-    private func publishUploadCount(withParent parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        realm.refresh()
-        publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
-        publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)
-    }
-
-    private func publishUploadCountInParent(parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
-        observations.didChangeUploadCountInParent.values.forEach { closure in
-            closure(parentId, uploadCount)
-        }
-    }
-
-    private func publishUploadCountInDrive(userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        let uploadCount = getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
-        observations.didChangeUploadCountInDrive.values.forEach { closure in
-            closure(driveId, uploadCount)
-        }
-    }
-
-    private func publishFileUploaded(result: UploadCompletionResult) {
-        sendFileUploadedNotificationIfNeeded(with: result)
-        observations.didUploadFile.values.forEach { closure in
-            closure(result.uploadFile, result.driveFile)
-        }
-    }
-
     private func compactRealmIfNeeded() {
         let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
             let fiftyMB = 50 * 1024 * 1024
@@ -356,116 +333,6 @@ public class UploadQueue {
             _ = try Realm(configuration: config)
         } catch {
             DDLogError("Failed to compact uploads realm: \(error)")
-        }
-    }
-
-    private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
-        if let error = result.uploadFile.error,
-           error != .networkError && error != .taskCancelled && error != .taskRescheduled {
-            let uploadedFileName = result.driveFile?.name ?? result.uploadFile.name
-            NotificationsHelper.sendUploadError(filename: uploadedFileName, parentId: result.uploadFile.parentDirectoryId, error: error)
-            if operationQueue.operationCount == 0 {
-                fileUploadedCount = 0
-            }
-        } else if operationQueue.operationCount == 0 {
-            // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
-            if fileUploadedCount == 1 && result.uploadFile.error == nil {
-                let uploadedFileName = result.driveFile?.name ?? result.uploadFile.name
-                NotificationsHelper.sendUploadDoneNotification(filename: uploadedFileName, parentId: result.uploadFile.parentDirectoryId)
-            } else if fileUploadedCount > 0 {
-                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
-            }
-            fileUploadedCount = 0
-        }
-    }
-}
-
-// MARK: - Observation
-
-public extension UploadQueue {
-    typealias UploadedFileId = String
-    typealias Progress = Double
-
-    @discardableResult
-    func observeFileUploaded<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadFile, File?) -> Void)
-        -> ObservationToken {
-        let key = UUID()
-        observations.didUploadFile[key] = { [weak self, weak observer] uploadFile, driveFile in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didUploadFile.removeValue(forKey: key)
-                return
-            }
-
-            if fileId == nil || uploadFile.id == fileId {
-                closure(uploadFile, driveFile)
-            }
-        }
-
-        return ObservationToken { [weak self] in
-            self?.observations.didUploadFile.removeValue(forKey: key)
-        }
-    }
-
-    @discardableResult
-    func observeUploadCount<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
-        let key = UUID()
-        observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
-            guard observer != nil else {
-                self?.observations.didChangeUploadCountInParent.removeValue(forKey: key)
-                return
-            }
-
-            if parentId == updatedParentId {
-                closure(updatedParentId, count)
-            }
-        }
-
-        return ObservationToken { [weak self] in
-            self?.observations.didChangeUploadCountInParent.removeValue(forKey: key)
-        }
-    }
-
-    @discardableResult
-    func observeUploadCount<T: AnyObject>(_ observer: T, driveId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
-        let key = UUID()
-        observations.didChangeUploadCountInDrive[key] = { [weak self, weak observer] updatedDriveId, count in
-            guard observer != nil else {
-                self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
-                return
-            }
-
-            if driveId == updatedDriveId {
-                closure(updatedDriveId, count)
-            }
-        }
-
-        return ObservationToken { [weak self] in
-            self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
-        }
-    }
-
-    @discardableResult
-    func observeFileUploadProgress<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadedFileId, Progress) -> Void)
-        -> ObservationToken {
-        let key = UUID()
-        observations.didChangeProgress[key] = { [weak self, weak observer] uploadedFileId, progress in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didChangeProgress.removeValue(forKey: key)
-                return
-            }
-
-            if fileId == nil || uploadedFileId == fileId {
-                closure(uploadedFileId, progress)
-            }
-        }
-
-        return ObservationToken { [weak self] in
-            self?.observations.didChangeProgress.removeValue(forKey: key)
         }
     }
 }

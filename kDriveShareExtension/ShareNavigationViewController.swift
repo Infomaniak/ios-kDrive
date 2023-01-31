@@ -20,10 +20,11 @@ import UIKit
 import InfomaniakCoreUI
 import InfomaniakLogin
 import kDriveCore
+import InfomaniakDI
 
 class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
-    private var accountManager: AccountManager!
+    @InjectService var accountManager: AccountManager
 
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +32,6 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
         preferredContentSize = CGSize(width: 540, height: 620)
         Logging.initLogging()
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
-        accountManager = AccountManager.instance
 
         let saveViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 

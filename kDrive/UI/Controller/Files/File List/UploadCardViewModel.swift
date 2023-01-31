@@ -17,12 +17,16 @@
  */
 
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
 
 @MainActor
 class UploadCardViewModel {
     @Published var uploadCount: Int
+
+    @InjectService var accountManager: AccountManager
+    @InjectService var uploadQueue: UploadQueue
 
     var driveFileManager: DriveFileManager {
         didSet {
@@ -42,8 +46,12 @@ class UploadCardViewModel {
 
     private func initObservation() {
         let driveId = driveFileManager.drive.id
-        uploadCount = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).count
-        realmObservationToken = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).observe(on: .main) { [weak self] change in
+        uploadCount = uploadQueue.getUploadingFiles(withParent: uploadDirectory.id,
+                                                    userId: accountManager.currentUserId,
+                                                    driveId: driveId).count
+        realmObservationToken = uploadQueue.getUploadingFiles(withParent: uploadDirectory.id,
+                                                              userId: accountManager.currentUserId,
+                                                              driveId: driveId).observe(on: .main) { [weak self] change in
             switch change {
             case .initial(let results):
                 self?.uploadCount = results.count

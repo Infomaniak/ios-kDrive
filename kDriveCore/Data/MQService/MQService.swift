@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import MQTTNIO
 
 public class MQService {
@@ -137,8 +138,9 @@ public class MQService {
     }
 
     private func handleExternalImportNotification(_ notification: ExternalImportNotification) {
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: notification.driveId,
-                                                                                 userId: notification.userId)
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        guard let driveFileManager = accountManager.getDriveFileManager(for: notification.driveId,
+                                                                        userId: notification.userId)
         else { return }
         driveFileManager.updateExternalImport(id: notification.importId, action: notification.action)
     }

@@ -66,12 +66,21 @@ public extension InfomaniakLogin {
     }
 }
 
-public class AccountManager: RefreshTokenDelegate {
+public protocol AccountManagable {
+    
+    var currentUserId: Int { get }
+    var currentDriveId: Int { get }
+    var drives: [Drive] { get }
+    var currentDriveFileManager: DriveFileManager? { get }
+    var mqService: MQService { get }
+    
+}
+
+public class AccountManager: RefreshTokenDelegate, AccountManagable {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
-    public static var instance = AccountManager()
     private let tag = "ch.infomaniak.token".data(using: .utf8)!
     public var currentAccount: Account!
     public var accounts = [Account]()
@@ -111,7 +120,7 @@ public class AccountManager: RefreshTokenDelegate {
     private var apiFetchers = [Int: DriveApiFetcher]()
     public let mqService = MQService()
 
-    private init() {
+    public init() {
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
         setSentryUserId(userId: currentUserId)

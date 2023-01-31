@@ -20,5 +20,23 @@ import Foundation
 import InfomaniakDI
 
 public struct UploadSessionService {
+    
+    @InjectService var freeSpaceWatchdog: FreeSpaceWatchdog
+    
     @InjectService var chunkService: ChunkService
+    
+    public init() { }
+    
+    public func processUpload() {
+        // Fetch DB …
+    }
+    
+}
+
+final class UploadSessionTask: AsynchronousOperation {
+    
+    override func execute() {
+        /// 
+    }
+    
 }

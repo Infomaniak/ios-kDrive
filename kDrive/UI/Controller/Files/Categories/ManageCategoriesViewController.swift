@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -29,6 +30,8 @@ protocol ManageCategoriesDelegate: AnyObject {
 class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
+    @InjectService var accountManager: AccountManager
+    
     var driveFileManager: DriveFileManager!
     var files: [File]?
     /// Disable category edition (can just add/remove).
@@ -111,7 +114,7 @@ class ManageCategoriesViewController: UITableViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         Task {
-           try await fileListViewController?.viewModel.loadActivities()
+            try await fileListViewController?.viewModel.loadActivities()
         }
     }
 
@@ -226,7 +229,8 @@ class ManageCategoriesViewController: UITableViewController {
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let filesId = coder.decodeObject(forKey: "FilesId") as! [Int]
 
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

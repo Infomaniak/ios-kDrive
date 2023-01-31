@@ -20,6 +20,7 @@ import Foundation
 import BackgroundTasks
 import kDriveCore
 import CocoaLumberjackSwift
+import InfomaniakDI
 
 extension AppDelegate {
     
@@ -57,10 +58,10 @@ extension AppDelegate {
     func registerBackgroundTasks() {
         var registered = bgScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
-
+            let uploadQueue = InjectService<UploadQueue>().wrappedValue
             task.expirationHandler = {
-                UploadQueue.instance.suspendAllOperations()
-                UploadQueue.instance.cancelRunningOperations()
+                uploadQueue.suspendAllOperations()
+                uploadQueue.cancelRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 
@@ -71,10 +72,10 @@ extension AppDelegate {
         DDLogInfo("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
         registered = bgScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
-
+            let uploadQueue = InjectService<UploadQueue>().wrappedValue
             task.expirationHandler = {
-                UploadQueue.instance.suspendAllOperations()
-                UploadQueue.instance.cancelRunningOperations()
+                uploadQueue.suspendAllOperations()
+                uploadQueue.cancelRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 

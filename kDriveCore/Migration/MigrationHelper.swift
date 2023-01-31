@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
@@ -50,7 +51,8 @@ public enum MigrationHelper {
                 group.addTask {
                     do {
                         let token = try await InfomaniakLogin.apiToken(username: account, applicationPassword: password)
-                        _ = try await AccountManager.instance.createAndSetCurrentAccount(token: token)
+                        let accountManager = InjectService<AccountManager>().wrappedValue
+                        _ = try await accountManager.createAndSetCurrentAccount(token: token)
                     } catch {
                         SentrySDK.capture(message: "[Migration] Auth failed")
                         throw MigrationError.authFailed

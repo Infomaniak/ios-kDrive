@@ -41,6 +41,12 @@ enum FactoryService {
             Factory(type: ChunkService.self) { _, _ in
                 ChunkService()
             },
+            Factory(type: AccountManager.self) { _, _ in
+                AccountManager()
+            },
+            Factory(type: UploadQueue.self) { _, _ in
+                UploadQueue()
+            }
         ]
 
         return factories

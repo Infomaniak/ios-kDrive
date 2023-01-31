@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
@@ -24,6 +25,8 @@ import InfomaniakLogin
 
 public class DownloadOperation: Operation {
     // MARK: - Attributes
+    
+    @InjectService var accountManager: AccountManager
 
     private let file: File
     private let driveFileManager: DriveFileManager
@@ -128,7 +131,7 @@ public class DownloadOperation: Operation {
 
     private func getToken() -> ApiToken? {
         var apiToken: ApiToken?
-        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
+        if let userToken = accountManager.getTokenForUserId(driveFileManager.drive.userId) {
             let lock = DispatchGroup()
             lock.enter()
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { token, _ in

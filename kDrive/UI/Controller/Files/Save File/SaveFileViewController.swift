@@ -18,12 +18,15 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
+    @InjectService var accountManager: AccountManager
+
     enum SaveFileSection {
         case alert
         case fileName
@@ -40,8 +43,16 @@ class SaveFileViewController: UIViewController {
 
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
-    private var originalDriveId = AccountManager.instance.currentDriveId
-    private var originalUserId = AccountManager.instance.currentUserId
+    private var originalDriveId: Int = {
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        return accountManager.currentDriveId
+    }()
+
+    private var originalUserId: Int = {
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        return accountManager.currentUserId
+    }()
+
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
     var photoFormat = PhotoFileFormat.jpg
@@ -104,7 +115,7 @@ class SaveFileViewController: UIViewController {
 
         // Set selected drive and directory to last values
         if selectedDirectory == nil {
-            if selectedDriveFileManager == nil, let driveFileManager = AccountManager.instance.getDriveFileManager(
+            if selectedDriveFileManager == nil, let driveFileManager = accountManager.getDriveFileManager(
                 for: UserDefaults.shared.lastSelectedDrive,
                 userId: UserDefaults.shared.lastSelectedUser
             ) {
@@ -405,7 +416,7 @@ extension SaveFileViewController: SelectFolderDelegate {
 
 extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+        if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive) {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]

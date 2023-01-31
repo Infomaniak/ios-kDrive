@@ -17,8 +17,9 @@
  */
 
 import Foundation
-import MatomoTracker
+import InfomaniakDI
 import kDriveCore
+import MatomoTracker
 
 class MatomoUtils {
     static let shared: MatomoTracker = {
@@ -26,7 +27,8 @@ class MatomoUtils {
         #if DEBUG
         tracker.isOptedOut = true
         #endif
-        tracker.userId = String(AccountManager.instance.currentUserId)
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        tracker.userId = String(accountManager.currentUserId)
         return tracker
     }()
 
@@ -53,7 +55,8 @@ class MatomoUtils {
     }
 
     static func connectUser() {
-        shared.userId = String(AccountManager.instance.currentUserId)
+        let accountManager = InjectService<AccountManager>().wrappedValue
+        shared.userId = String(accountManager.currentUserId)
     }
 
     static func track(view: [String]) {

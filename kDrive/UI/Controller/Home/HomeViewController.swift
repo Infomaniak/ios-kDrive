@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakCoreUI
@@ -26,6 +27,8 @@ import UIKit
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
+    @InjectService var accountManager: AccountManager
+    
     enum HomeFileType {
         case file([File])
         case fileActivity([FileActivity])
@@ -216,9 +219,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         let drive = driveFileManager.drive
         
         // Test trigger DI
-        let upload = UploadOperationV2()
+//        let upload = UploadOperationV2()
         
-        /*Task {
+        Task {
             do {
                 // get Ranges for file at path
                 let file = "REMOVE_ME"
@@ -268,7 +271,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             } catch {
                 print("\(error)")
             }
-        }*/
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -493,7 +496,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         if isDifferentDrive {
             recentFilesControllersCache.removeAll()
             let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
-            driveHeaderView?.isEnabled = AccountManager.instance.drives.count > 1
+            driveHeaderView?.isEnabled = accountManager.drives.count > 1
             driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
 
             showInsufficientStorage = true
@@ -635,14 +638,14 @@ extension HomeViewController {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
                 let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
-                driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
+                driveHeaderView.isEnabled = accountManager.drives.count > 1
                 UIView.performWithoutAnimation {
                     driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                     driveHeaderView.titleButton.layoutIfNeeded()
                 }
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     guard let self = self else { return }
-                    let drives = AccountManager.instance.drives
+                    let drives = self.accountManager.drives
                     let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive, delegate: self)
                     self.present(floatingPanelViewController, animated: true)
                 }

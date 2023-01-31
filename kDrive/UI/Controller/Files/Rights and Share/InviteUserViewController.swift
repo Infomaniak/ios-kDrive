@@ -17,12 +17,15 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @InjectService var accountManager: AccountManager
 
     var file: File!
     var fileAccess: FileAccess!
@@ -181,7 +184,8 @@ class InviteUserViewController: UIViewController {
         let restoredTeamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
         newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
         message = coder.decodeObject(forKey: "Message") as? String ?? ""
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

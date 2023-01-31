@@ -18,6 +18,7 @@
 
 import CoreServices
 import FileProvider
+import InfomaniakDI
 import kDriveCore
 
 extension NSFileProviderItemIdentifier {
@@ -100,7 +101,8 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         }
         if file.users.count > 1 {
             self.isShared = true
-            self.isSharedByCurrentUser = file.createdBy == AccountManager.instance.currentUserId
+            let accountManager = InjectService<AccountManager>().wrappedValue
+            self.isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
         } else {
             self.isShared = false
             self.isSharedByCurrentUser = false

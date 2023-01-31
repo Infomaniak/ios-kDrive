@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import Sentry
+import InfomaniakDI
 
 // check for existing url session switcheroo
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
@@ -67,12 +68,16 @@ extension URLSession: BackgroundSession {
 }
 
 public protocol FileUploadSession: BackgroundSession {
-    func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
+    func uploadTask(with request: URLRequest,
+                    fromFile fileURL: URL,
+                    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
 }
 
 extension URLSession: FileUploadSession {}
 
 public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionManager, URLSessionDataDelegate, FileUploadSession {
+    @InjectService var uploadQueue: UploadQueue
+
     public typealias Task = URLSessionUploadTask
     public typealias CompletionHandler = (Data?, URLResponse?, Error?) -> Void
     public typealias Operation = UploadOperation
@@ -153,7 +158,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                         guard let newValue = value.newValue else {
                             return
                         }
-                        UploadQueue.instance.publishProgress(newValue, for: fileId)
+                        self.uploadQueue.publishProgress(newValue, for: fileId)
                     }
                 }
             }
@@ -173,7 +178,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         }
     }
 
-    public func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping CompletionHandler) -> Task {
+    public func uploadTask(with request: URLRequest,
+                           fromFile fileURL: URL,
+                           completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.uploadTask(with: request, fromFile: fileURL)
         syncQueue.async(flags: .barrier) { [weak self] in
             guard let self = self else { return }
@@ -182,7 +189,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         return task
     }
 
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    public func urlSession(_ session: URLSession,
+                           dataTask: URLSessionDataTask,
+                           didReceive data: Data) {
         let taskIdentifier = session.identifier(for: dataTask)
         syncQueue.async(flags: .barrier) { [weak self] in
             if self?.tasksData[taskIdentifier] != nil {
