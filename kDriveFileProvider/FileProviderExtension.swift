@@ -74,7 +74,6 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override init() {
         Logging.initLogging()
-        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId) // TODO: bump to new ios-login
         super.init()
     }
 

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
@@ -35,7 +36,8 @@ public protocol AccountManagerDelegate: AnyObject {
 public extension InfomaniakLogin {
     static func apiToken(username: String, applicationPassword: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
+            let tokenable = InjectService<InfomaniakTokenable>().wrappedValue
+            tokenable.getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)
                 } else {
@@ -47,7 +49,8 @@ public extension InfomaniakLogin {
 
     static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
+            let tokenable = InjectService<InfomaniakTokenable>().wrappedValue
+            tokenable.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)
                 } else {
@@ -88,6 +91,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManagable {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
+    
+    @InjectService var tokenable: InfomaniakTokenable
+    
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId
@@ -384,7 +390,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManagable {
         if let account = account(for: token) {
             removeAccount(toDeleteAccount: account)
         }
-        InfomaniakLogin.deleteApiToken(token: token) { error in
+        tokenable.deleteApiToken(token: token) { error in
             DDLogError("Failed to delete api token: \(error.localizedDescription)")
         }
     }

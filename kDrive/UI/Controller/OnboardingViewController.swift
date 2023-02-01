@@ -41,7 +41,8 @@ class OnboardingViewController: UIViewController {
     @IBOutlet weak var registerButtonHeight: NSLayoutConstraint!
 
     @InjectService var accountManager: AccountManager
-
+    @InjectService var infomaniakLogin: InfomaniakLoginable
+    
     var addUser = false
     var slides: [Slide] = []
 
@@ -49,7 +50,7 @@ class OnboardingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        InfomaniakLogin.setupWebviewNavbar(title: "",
+        infomaniakLogin.setupWebviewNavbar(title: "",
                                            titleColor: nil,
                                            color: nil,
                                            buttonColor: nil,
@@ -128,7 +129,9 @@ class OnboardingViewController: UIViewController {
             SentrySDK.capture(message: "Background task expired while logging in")
             self?.endBackgroundTask()
         }
-        InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
+        infomaniakLogin.webviewLoginFrom(viewController: self,
+                                         hideCreateAccountButton: true,
+                                         delegate: self)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {

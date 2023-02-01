@@ -278,7 +278,7 @@ public class FileVersion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
-    // TODO LazyInjectService @InjectService var accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManager
     
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
@@ -581,7 +581,6 @@ public class File: Object, Codable {
 
     @discardableResult
     public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        let accountManager = InjectService<AccountManager>().wrappedValue
         if hasThumbnail, let currentDriveFileManager = accountManager.currentDriveFileManager {
             return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
                                                           options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
@@ -600,7 +599,6 @@ public class File: Object, Codable {
 
     @discardableResult
     public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        let accountManager = InjectService<AccountManager>().wrappedValue
         if let currentDriveFileManager = accountManager.currentDriveFileManager {
             return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
                                                           options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in

@@ -27,8 +27,8 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
-    @InjectService var accountManager: AccountManager
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var uploadQueue: UploadQueue
 
     override var tabBar: MainTabBar {
         return super.tabBar as! MainTabBar

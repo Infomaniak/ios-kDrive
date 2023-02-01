@@ -17,7 +17,10 @@
  */
 
 import Foundation
+import InfomaniakCore
+import InfomaniakCoreUI
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 
 /// Something that setups the service factories
@@ -46,6 +49,33 @@ enum FactoryService {
             },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
+            },
+            Factory(type: InfomaniakNetworkLogin.self) { _, _ in
+                let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
+                let redirectUri = "com.infomaniak.drive://oauth2redirect"
+                return InfomaniakNetworkLogin(clientId: clientId, redirectUri: redirectUri)
+            },
+            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
+                let loginable = try resolver.resolve(type: InfomaniakNetworkLogin.self,
+                                                     forCustomTypeIdentifier: nil,
+                                                     factoryParameters: nil,
+                                                     resolver: resolver)
+                return loginable
+            },
+            
+            Factory(type: InfomaniakLoginable.self) { _, _ in
+                InfomaniakLogin(clientId: DriveApiFetcher.clientId)
+            },
+            Factory(type: InfomaniakTokenable.self) { _, resolver in
+                let tokenable = try resolver.resolve(type: InfomaniakLoginable.self,
+                                                     forCustomTypeIdentifier: nil,
+                                                     factoryParameters: nil,
+                                                     resolver: resolver)
+                return tokenable
+            },
+            
+            Factory(type: AppLockHelper.self) { _, _ in
+                AppLockHelper()
             }
         ]
 

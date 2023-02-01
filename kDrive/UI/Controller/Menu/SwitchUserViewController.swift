@@ -26,7 +26,8 @@ class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @InjectService var accountManager: AccountManager
-
+    @InjectService var infomaniakLogin: InfomaniakLoginable
+    
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
             return navigationController.visibleViewController == self
@@ -37,7 +38,7 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        InfomaniakLogin.setupWebviewNavbar(title: "",
+        infomaniakLogin.setupWebviewNavbar(title: "",
                                            titleColor: nil,
                                            color: nil,
                                            buttonColor: nil,
@@ -99,7 +100,9 @@ extension SwitchUserViewController: UITableViewDelegate {
 
         if !account.isConnected {
             // Ask to reconnect
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
+            infomaniakLogin.webviewLoginFrom(viewController: self,
+                                             hideCreateAccountButton: true,
+                                             delegate: self)
             return
         }
 

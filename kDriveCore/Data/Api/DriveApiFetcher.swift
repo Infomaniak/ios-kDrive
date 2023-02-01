@@ -53,7 +53,8 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 public class DriveApiFetcher: ApiFetcher {
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
 
-    // TODO LazyInjectService @InjectService var accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var tokenable: InfomaniakTokenable
 
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
@@ -280,15 +281,14 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
         // Only resolve locally to break init loop
-        let accountManager = InjectService<AccountManager>().wrappedValue
         accountManager.refreshTokenLockedQueue.async {
             guard !token.requiresRefresh else {
                 request(token, nil)
                 return
             }
 
-            accountManager.reloadTokensAndAccounts()
-            guard let reloadedToken = accountManager.getTokenForUserId(token.userId) else {
+            self.accountManager.reloadTokensAndAccounts()
+            guard let reloadedToken = self.accountManager.getTokenForUserId(token.userId) else {
                 request(nil, DriveError.unknownToken)
                 return
             }
@@ -300,9 +300,9 @@ public class DriveApiFetcher: ApiFetcher {
 
             let group = DispatchGroup()
             group.enter()
-            InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
+            self.tokenable.refreshToken(token: reloadedToken) { newToken, error in
                 if let newToken = newToken {
-                    accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
+                    self.accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
                     request(newToken, nil)
                 } else {
                     request(nil, error)
@@ -429,11 +429,12 @@ public class DriveApiFetcher: ApiFetcher {
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
-    // TODO inject lazy @InjectService var accountManager: AccountManager
+    
+    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var tokenable: InfomaniakTokenable
 
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
         // Only resolve locally to break init loop
-        let accountManager = InjectService<AccountManager>().wrappedValue
         accountManager.refreshTokenLockedQueue.async {
             SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
 
@@ -445,8 +446,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
             }
 
             // Maybe someone else refreshed our token
-            accountManager.reloadTokensAndAccounts()
-            if let token = accountManager.getTokenForUserId(credential.userId),
+            self.accountManager.reloadTokensAndAccounts()
+            if let token = self.accountManager.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
                 SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))
@@ -473,7 +474,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
                     return
                 }
             }
-            InfomaniakLogin.refreshToken(token: credential) { token, error in
+            self.tokenable.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
                     SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))

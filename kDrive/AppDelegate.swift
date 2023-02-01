@@ -21,6 +21,7 @@ import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -34,6 +35,9 @@ import UserNotifications
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     var window: UIWindow?
+
+    @LazyInjectService var lockHelper: AppLockHelper
+    @LazyInjectService var infomaniakLogin: InfomaniakLogin
     
     /// Making sure the DI is registered at a very early stage of the app launch.
     let dependencyInjectionHook = EarlyDIHook()
@@ -49,7 +53,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         Logging.initLogging()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
-        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
 
@@ -130,7 +133,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
-            AppLockHelper.shared.setTime()
+            lockHelper.setTime()
         }
     }
 
@@ -205,7 +208,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
             // Clean File Provider domains on first launch in case we had some dangling
             DriveInfosManager.instance.deleteAllFileProviderDomains()
-        } else if UserDefaults.shared.isAppLockEnabled && AppLockHelper.shared.isAppLocked {
+        } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
             window?.rootViewController = LockedAppViewController.instantiate()
             window?.makeKeyAndVisible()
         } else {
@@ -436,7 +439,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                      open url: URL,
                      sourceApplication: String?,
                      annotation: Any) -> Bool {
-        return InfomaniakLogin.handleRedirectUri(url: url)
+        return infomaniakLogin.handleRedirectUri(url: url)
     }
 
     func setRootViewController(_ vc: UIViewController,
@@ -635,10 +638,9 @@ extension AppDelegate {
 }
 
 /// Something that loads the DI on init
- public struct EarlyDIHook {
-
+public struct EarlyDIHook {
     public init() {
         // setup DI ASAP
         FactoryService.setupDependencyInjection()
     }
- }
+}
