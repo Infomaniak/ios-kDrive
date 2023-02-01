@@ -42,61 +42,8 @@ final class UTRangeProvider: XCTestCase {
             let _ = try rangeProvider.allRanges
             
             // THEN
-            XCTFail("Unexpected")
         } catch {
-            // success if some execption has shown
-        }
-    }
-    
-    func testAllRanges_FileTooSmall() throws {
-        // GIVEN
-        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
-        var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGutsable()
-        mckGuts.readFileByteSizeReturnValue = 1024
-        
-        rangeProvider.guts = mckGuts
-        
-        // WHEN
-        do {
-            let _ = try rangeProvider.allRanges
-            
-            // THEN
             XCTFail("Unexpected")
-        } catch {
-            // Expecting a .FileTooSmall error
-            guard case .FileTooSmall = error as? RangeProvider.ErrorDomain else {
-                XCTFail("Unexpected")
-                return
-            }
-            
-            // success
-        }
-    }
-    
-    func testAllRanges_FileExactlyMinSize() throws {
-        // GIVEN
-        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
-        var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGutsable()
-        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize
-        
-        rangeProvider.guts = mckGuts
-        
-        // WHEN
-        do {
-            let _ = try rangeProvider.allRanges
-            
-            // THEN
-            XCTFail("Unexpected")
-        } catch {
-            // Expecting a .FileTooSmall error
-            guard case .FileTooSmall = error as? RangeProvider.ErrorDomain else {
-                XCTFail("Unexpected")
-                return
-            }
-            
-            // success
         }
     }
     

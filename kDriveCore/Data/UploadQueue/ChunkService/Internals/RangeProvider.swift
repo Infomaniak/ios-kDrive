@@ -59,6 +59,12 @@ public struct RangeProvider: RangeProvidable {
         
         /// file is over the suported size
         case FileTooLarge
+        
+        /// We ask for chunks that do not make sense
+        case ChunkedSizeLargerThanSourceFile
+        
+        /// Absurd chunk parameters
+        case IncorrectRangeRequest
     }
     
     /// The internal methods split into another type, make testing easier
@@ -87,11 +93,13 @@ public struct RangeProvider: RangeProvidable {
             }
             
             let preferedChunkSize = guts.preferedChunkSize(for: fileSize)
-            let totalChunksCount = fileSize / preferedChunkSize
             
-            let ranges = guts.buildRanges(fileSize: fileSize,
-                                          totalChunksCount: totalChunksCount,
-                                          chunkSize: preferedChunkSize)
+            // Make sure an empty file resolves to one chunk
+            let totalChunksCount = max(fileSize / max(preferedChunkSize, 1), 1)
+            
+            let ranges = try guts.buildRanges(fileSize: fileSize,
+                                              totalChunksCount: totalChunksCount,
+                                              chunkSize: preferedChunkSize)
             
             return ranges
         }

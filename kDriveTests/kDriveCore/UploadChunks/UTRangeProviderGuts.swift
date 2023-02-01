@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import XCTest
 @testable import kDriveCore
+import XCTest
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
-
     // MARK: - readFileByteSize
     
     // covered by IT
@@ -32,7 +31,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_0ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(0)
         
@@ -40,14 +39,16 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
-            try Self.checkContinuity(ranges: ranges)
+            let _ = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTFail("Expected to throw")
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            guard case .IncorrectRangeRequest = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
         }
     }
     
@@ -61,11 +62,11 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, 0, "An empty file has no range")
             try Self.checkContinuity(ranges: ranges)
         } catch {
             XCTFail("Chunks not continuous: \(error)")
@@ -74,7 +75,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_0Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(0)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -82,14 +83,16 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
-            try Self.checkContinuity(ranges: ranges)
+            let _ = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTFail("Expected to throw")
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            guard case .IncorrectRangeRequest = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
         }
     }
     
@@ -97,7 +100,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_1ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1)
         
@@ -105,18 +108,44 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 5)
         do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, 5)
+        
             try Self.checkContinuity(ranges: ranges)
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            XCTFail("Unexpected: \(error)")
         }
     }
     
-    func testBuildRanges_1FileLength() {
+    func testBuildRanges_1FileLength_valid() {
+        // GIVEN
+        let fileBytes = UInt64(1)
+        let fileChunks = UInt64(1)
+        let chunksSize = UInt64(1)
+        // read as: The first Byte goes from index O to O
+        let firstByteRange: DataRange = 0 ... 0
+        
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        let guts = RangeProviderGuts(fileURL: stubURL)
+        
+        // WHEN
+        do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, 1)
+            XCTAssertEqual(ranges.first, firstByteRange)
+        
+            try Self.checkContinuity(ranges: ranges)
+        } catch {
+            XCTFail("Unexpected: \(error)")
+        }
+    }
+    
+    func testBuildRanges_1FileLength_invalid() {
         // GIVEN
         let fileBytes = UInt64(1)
         let fileChunks = UInt64(4)
@@ -126,20 +155,22 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
-            try Self.checkContinuity(ranges: ranges)
+            let _ = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTFail("Expected to throw")
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            guard case .ChunkedSizeLargerThanSourceFile = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
         }
     }
     
     func testBuildRanges_1Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(1*1024*1024)
         let expectedChunks = 2 // One plus remainer
@@ -148,20 +179,21 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, expectedChunks)
         do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, expectedChunks)
+        
             try Self.checkContinuity(ranges: ranges)
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            XCTFail("Unexpected: \(error)")
         }
     }
     
     func testBuildRanges_1ChunkBiggerThanFile() {
         // GIVEN
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -169,14 +201,16 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
-            try Self.checkContinuity(ranges: ranges)
+            let _ = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTFail("Expected to throw")
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            guard case .ChunkedSizeLargerThanSourceFile = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
         }
     }
     
@@ -185,7 +219,7 @@ final class UTRangeProviderGuts: XCTestCase {
     func testBuildRanges_ChunkBiggerThanFile() {
         // GIVEN
         // Asking for 4 chunks of 10Mi is larger than the file, should exit
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -193,14 +227,16 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 0)
         do {
-            try Self.checkContinuity(ranges: ranges)
+            let _ = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTFail("Expected to throw")
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            guard case .ChunkedSizeLargerThanSourceFile = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
         }
     }
     
@@ -215,21 +251,22 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 4)
         do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, 4)
+        
             try Self.checkContinuity(ranges: ranges)
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            XCTFail("Unexpected: \(error)")
         }
     }
     
     func testBuildRanges_ChunksWithRemainder() {
         // GIVEN
         // Asking for 4 chunks of 1Mi + some extra chunk with the remainder
-        let fileBytes = UInt64(4_865_229)
+        let fileBytes = UInt64(4865229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1*1024*1024)
         
@@ -237,14 +274,15 @@ final class UTRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: stubURL)
         
         // WHEN
-        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
-        
-        // THEN
-        XCTAssertEqual(ranges.count, 5)
         do {
+            let ranges = try guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+            // THEN
+            XCTAssertEqual(ranges.count, 5)
+        
             try Self.checkContinuity(ranges: ranges)
         } catch {
-            XCTFail("Chunks not continuous: \(error)")
+            XCTFail("Unexpected: \(error)")
         }
     }
     
@@ -328,7 +366,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_10KTimes() {
         // GIVEN
-        let fileBytes = UInt64(10_000*RangeProvider.APIConsts.chunkMaxSizeClient)
+        let fileBytes = UInt64(10000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -342,7 +380,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_100KTimes() {
         // GIVEN
-        let fileBytes = UInt64(100_000*RangeProvider.APIConsts.chunkMaxSizeClient)
+        let fileBytes = UInt64(100000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -356,7 +394,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_100MTimes() {
         // GIVEN
-        let fileBytes = UInt64(100_000_000*RangeProvider.APIConsts.chunkMaxSizeClient)
+        let fileBytes = UInt64(100000000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -410,7 +448,6 @@ final class UTRangeProviderGuts: XCTestCase {
         }
     }
     
-    
     func testContinuityHelper_empty() {
         // GIVEN
         // note: Is ø formally continuous? No, but easier this way.
@@ -443,7 +480,7 @@ final class UTRangeProviderGuts: XCTestCase {
             let leftUpperBound = tuple.0.upperBound
             let rightLowerBound = tuple.1.lowerBound
             
-            //print("range [leftUpperBound: \(leftUpperBound), rightLowerBound: \(rightLowerBound)]")
+            // print("range [leftUpperBound: \(leftUpperBound), rightLowerBound: \(rightLowerBound)]")
             
             guard leftUpperBound + 1 == rightLowerBound else {
                 throw DomainError.gap(leftUpper: leftUpperBound, rightLower: rightLowerBound)

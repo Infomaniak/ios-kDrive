@@ -21,12 +21,17 @@ import Foundation
 /// The internal methods of RangeProviderGuts, made testable
 public protocol RangeProviderGutsable {
     /// Build ranges for a file
+    ///
+    /// Empty file will return zero chunk.
+    /// the range `0...0` represents the first Byte of a file
+    ///
     /// - Parameters:
     ///   - fileSize: the total file size, in **Bytes**
     ///   - totalChunksCount: the total number of chunks that should be used
     ///   - chunkSize: the size of a chunk that should be used
     /// - Returns: a collection of contiguous (so ordered) ranges.
-    func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange]
+    /// - Throws: if some preconditions are not met
+    func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) throws -> [DataRange]
     
     /// Get the size of a file, in **Bytes**
     /// - Returns: the file size at the moment of execution
@@ -43,17 +48,23 @@ public struct RangeProviderGuts: RangeProviderGutsable {
     /// The URL of the local file to scan
     public let fileURL: URL
     
-    public func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {
-        guard fileSize > 0,
-              totalChunksCount > 0,
+    public func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) throws -> [DataRange] {
+        // malformed requests
+        guard totalChunksCount > 0,
               chunkSize > 0 else {
+            throw RangeProvider.ErrorDomain.IncorrectRangeRequest
+        }
+        
+        // Empty files
+        guard fileSize > 0 else {
+            // An empty file is supported but has no range, represented by an empty collection.
             return []
         }
         
-        let totalChunckedSize = totalChunksCount * chunkSize
         // sanity file size check
+        let totalChunckedSize = totalChunksCount * chunkSize
         guard totalChunckedSize <= fileSize else {
-            return []
+            throw RangeProvider.ErrorDomain.ChunkedSizeLargerThanSourceFile
         }
         
         // The high bound for a 0 indexed list of bytes
