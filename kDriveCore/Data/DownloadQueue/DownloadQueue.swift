@@ -44,7 +44,7 @@ public class DownloadTask: Object {
 public class DownloadQueue {
     // MARK: - Attributes
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
@@ -85,7 +85,7 @@ public class DownloadQueue {
                            userId: Int,
                            itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         dispatchQueue.async { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId),
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
@@ -109,7 +109,7 @@ public class DownloadQueue {
 
     public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
         dispatchQueue.async {
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId),
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
                 return
             }
@@ -134,7 +134,7 @@ public class DownloadQueue {
                                   onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
                                   completion: @escaping (DriveError?) -> Void) {
         dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId),
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {

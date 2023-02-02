@@ -27,7 +27,7 @@ import UIKit
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     private enum ShareAndRightsSections: CaseIterable {
         case invite

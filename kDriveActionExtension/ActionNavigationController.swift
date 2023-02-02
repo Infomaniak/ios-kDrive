@@ -23,7 +23,7 @@ import UIKit
 import InfomaniakDI
 
 class ActionNavigationController: TitleSizeAdjustingNavigationController {
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     override func viewDidLoad() {
         super.viewDidLoad()

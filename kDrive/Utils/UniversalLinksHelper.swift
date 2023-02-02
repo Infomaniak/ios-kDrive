@@ -61,7 +61,7 @@ enum UniversalLinksHelper {
     }
 
     private static func processRegex(matches: [[String]], displayMode: DisplayMode, appDelegate: AppDelegate) -> Bool {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
 
         guard let firstMatch = matches.first,
               firstMatch.count > 2,

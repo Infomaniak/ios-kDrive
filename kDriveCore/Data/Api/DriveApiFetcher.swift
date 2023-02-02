@@ -53,7 +53,7 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 public class DriveApiFetcher: ApiFetcher {
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
 
-    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 
     public var authenticatedKF: AuthenticatedImageRequestModifier!
@@ -430,7 +430,7 @@ public class DriveApiFetcher: ApiFetcher {
 
 class SyncedAuthenticator: OAuthAuthenticator {
     
-    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {

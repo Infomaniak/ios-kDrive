@@ -27,7 +27,7 @@ import UIKit
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     
     enum HomeFileType {
         case file([File])

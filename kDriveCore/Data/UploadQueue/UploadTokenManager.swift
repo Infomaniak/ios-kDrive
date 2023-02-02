@@ -27,7 +27,7 @@ import InfomaniakDI
 public class UploadTokenManager {
     public static let instance = UploadTokenManager() // TODO migrate
     
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     private var tokens: [Int: UploadToken] = [:]
     private var lock = DispatchGroup()
@@ -39,7 +39,7 @@ public class UploadTokenManager {
             completionHandler(token)
             lock.leave()
         } else if let userToken = accountManager.getTokenForUserId(userId),
-                  let drive = accountManager.getDrive(for: userId, driveId: driveId),
+                  let drive = accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = accountManager.getDriveFileManager(for: drive) {
             driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
                 switch result {

@@ -27,7 +27,7 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
     @IBOutlet weak var imageStackViewWidth: NSLayoutConstraint!
     @IBOutlet weak var descriptionLabel: UILabel!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     var rights = true
     var fileAccessElements = [FileAccessElement]()

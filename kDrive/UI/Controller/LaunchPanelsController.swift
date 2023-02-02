@@ -63,7 +63,7 @@ class LaunchPanelsController {
         // Photo sync activation
         LaunchPanel(
             makePanelController: {
-                let accountManager = InjectService<AccountManager>().wrappedValue
+                let accountManager = InjectService<AccountManageable>().wrappedValue
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     fatalError("Tried to display save photos floating panel with nil currentDriveFileManager")
                 }
@@ -81,7 +81,7 @@ class LaunchPanelsController {
                 }
                 return driveFloatingPanelController
             },
-            displayCondition: InjectService<AccountManager>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
+            displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
             priority: 3
         ),
         // Beta invitation

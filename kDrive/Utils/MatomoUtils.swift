@@ -27,7 +27,7 @@ class MatomoUtils {
         #if DEBUG
         tracker.isOptedOut = true
         #endif
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         tracker.userId = String(accountManager.currentUserId)
         return tracker
     }()
@@ -55,7 +55,7 @@ class MatomoUtils {
     }
 
     static func connectUser() {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         shared.userId = String(accountManager.currentUserId)
     }
 

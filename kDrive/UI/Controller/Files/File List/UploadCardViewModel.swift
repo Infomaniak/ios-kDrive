@@ -25,7 +25,7 @@ import RealmSwift
 class UploadCardViewModel {
     @Published var uploadCount: Int
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     @InjectService var uploadQueue: UploadQueue
 
     var driveFileManager: DriveFileManager {

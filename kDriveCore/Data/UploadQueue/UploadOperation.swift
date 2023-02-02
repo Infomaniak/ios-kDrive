@@ -32,7 +32,7 @@ public struct UploadCompletionResult {
 public class UploadOperation: Operation {
     // MARK: - Attributes
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     @InjectService var uploadQueue: UploadQueue
 
     private var file: UploadFile

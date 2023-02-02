@@ -28,7 +28,61 @@ import kDriveCore
 /// Trick : enum as no init, perfect for namespacing
 enum FactoryService {
     static func setupDependencyInjection() {
-        for factory in serviceFactories() {
+        let factories = NetworkingServicies + MiscServicies
+        SimpleResolver.register(factories)
+    }
+
+    /// Networking related servicies
+    private static var NetworkingServicies: [Factory] {
+        let servicies = [
+            Factory(type: InfomaniakNetworkLogin.self) { _, _ in
+                let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
+                let redirectUri = "com.infomaniak.drive://oauth2redirect"
+                return InfomaniakNetworkLogin(clientId: clientId, redirectUri: redirectUri)
+            },
+            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
+                try resolver.resolve(type: InfomaniakNetworkLogin.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: InfomaniakLoginable.self) { _, _ in
+                InfomaniakLogin(clientId: DriveApiFetcher.clientId)
+            },
+            Factory(type: InfomaniakTokenable.self) { _, resolver in
+                try resolver.resolve(type: InfomaniakLoginable.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: AccountManageable.self) { _, _ in
+                AccountManager()
+            },
+        ]
+        return servicies
+    }
+
+    /// Misc servicies
+    private static var MiscServicies: [Factory] {
+        let servicies = [
+            // ChunkService factory
+            Factory(type: ChunkService.self) { _, _ in
+                ChunkService()
+            },
+            Factory(type: UploadQueue.self) { _, _ in
+                UploadQueue()
+            },
+            Factory(type: AppLockHelper.self) { _, _ in
+                AppLockHelper()
+            }
+        ]
+        return servicies
+    }
+}
+
+extension SimpleResolver {
+    static func register(_ factories: [Factory]) {
+        for factory in factories {
             do {
                 try SimpleResolver.sharedResolver.store(factory: factory)
             }
@@ -36,49 +90,5 @@ enum FactoryService {
                 assertionFailure("unexpected DI error \(error)")
             }
         }
-    }
-
-    private static func serviceFactories() -> [Factory] {
-        let factories = [
-            // ChunkService factory
-            Factory(type: ChunkService.self) { _, _ in
-                ChunkService()
-            },
-            Factory(type: AccountManager.self) { _, _ in
-                AccountManager()
-            },
-            Factory(type: UploadQueue.self) { _, _ in
-                UploadQueue()
-            },
-            Factory(type: InfomaniakNetworkLogin.self) { _, _ in
-                let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
-                let redirectUri = "com.infomaniak.drive://oauth2redirect"
-                return InfomaniakNetworkLogin(clientId: clientId, redirectUri: redirectUri)
-            },
-            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
-                let loginable = try resolver.resolve(type: InfomaniakNetworkLogin.self,
-                                                     forCustomTypeIdentifier: nil,
-                                                     factoryParameters: nil,
-                                                     resolver: resolver)
-                return loginable
-            },
-            
-            Factory(type: InfomaniakLoginable.self) { _, _ in
-                InfomaniakLogin(clientId: DriveApiFetcher.clientId)
-            },
-            Factory(type: InfomaniakTokenable.self) { _, resolver in
-                let tokenable = try resolver.resolve(type: InfomaniakLoginable.self,
-                                                     forCustomTypeIdentifier: nil,
-                                                     factoryParameters: nil,
-                                                     resolver: resolver)
-                return tokenable
-            },
-            
-            Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
-            }
-        ]
-
-        return factories
     }
 }

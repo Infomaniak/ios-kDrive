@@ -25,7 +25,7 @@ import UIKit
 
 @MainActor
 class FilePresenter {
-    let accountManager = InjectService<AccountManager>().wrappedValue
+    let accountManager = InjectService<AccountManageable>().wrappedValue
 
     weak var viewController: UIViewController?
 

@@ -24,7 +24,7 @@ import Sentry
 import UIKit
 
 class ParameterTableViewController: UITableViewController {
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!
 

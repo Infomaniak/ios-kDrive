@@ -39,7 +39,7 @@ public class DragAndDropFile: NSObject, Codable {
         fileId = try values.decode(Int.self, forKey: .fileId)
         driveId = try values.decode(Int.self, forKey: .driveId)
         userId = try values.decode(Int.self, forKey: .userId)
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         file = accountManager.getDriveFileManager(for: driveId, userId: userId)?.getCachedFile(id: fileId)
     }
 

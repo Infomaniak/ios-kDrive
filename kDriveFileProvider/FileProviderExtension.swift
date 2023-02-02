@@ -53,7 +53,7 @@ class FileProviderExtension: NSFileProviderExtension {
         return fileCoordinator
     }()
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
         if let domain = domain {

@@ -40,7 +40,7 @@ class OnboardingViewController: UIViewController {
     @IBOutlet weak var nextButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var registerButtonHeight: NSLayoutConstraint!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     @InjectService var infomaniakLogin: InfomaniakLoginable
     
     var addUser = false

@@ -29,7 +29,7 @@ class UploadQueueViewController: UIViewController {
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     @InjectService var uploadQueue: UploadQueue
 
     var currentDirectory: File!

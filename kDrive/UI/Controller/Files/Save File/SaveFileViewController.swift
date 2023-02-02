@@ -25,7 +25,7 @@ import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     enum SaveFileSection {
         case alert
@@ -44,12 +44,12 @@ class SaveFileViewController: UIViewController {
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
     private var originalDriveId: Int = {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         return accountManager.currentDriveId
     }()
 
     private var originalUserId: Int = {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         return accountManager.currentUserId
     }()
 

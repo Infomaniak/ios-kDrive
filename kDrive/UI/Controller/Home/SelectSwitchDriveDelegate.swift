@@ -31,7 +31,7 @@ extension SelectSwitchDriveDelegate {
             present(driveFloatingPanelController, animated: true)
         } else {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")
-            let accountManager = InjectService<AccountManager>().wrappedValue
+            let accountManager = InjectService<AccountManageable>().wrappedValue
 
             accountManager.setCurrentDriveForCurrentAccount(drive: drive)
             accountManager.saveAccounts()

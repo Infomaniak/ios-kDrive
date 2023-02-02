@@ -24,7 +24,7 @@ import UIKit
 import InfomaniakDI
 
 class StoreViewController: UICollectionViewController {
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     struct Item {
         let pack: DrivePack

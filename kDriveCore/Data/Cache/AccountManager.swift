@@ -69,17 +69,43 @@ public extension InfomaniakLogin {
     }
 }
 
-public protocol AccountManagable {
-    
+/// Abstract interface on AccountManager
+public protocol AccountManageable {
+    var currentAccount: Account! { get }
+    var accounts: [Account] { get }
+    var tokens: [ApiToken] { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
     var drives: [Drive] { get }
     var currentDriveFileManager: DriveFileManager? { get }
     var mqService: MQService { get }
+    var refreshTokenLockedQueue: DispatchQueue { get }
     
+    func forceReload()
+    func reloadTokensAndAccounts()
+    func getDriveFileManager(for drive: Drive) -> DriveFileManager?
+    func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
+    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
+    func getTokenForUserId(_ id: Int) -> ApiToken?
+    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
+    func didFailRefreshToken(_ token: ApiToken)
+    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account
+    func createAndSetCurrentAccount(token: ApiToken) async throws -> Account
+    func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?)
+    func loadAccounts() -> [Account]
+    func saveAccounts()
+    func switchAccount(newAccount: Account)
+    func setCurrentDriveForCurrentAccount(drive: Drive)
+    func addAccount(account: Account)
+    func removeAccount(toDeleteAccount: Account)
+    func removeTokenAndAccount(token: ApiToken)
+    func account(for token: ApiToken) -> Account?
+    func account(for userId: Int) -> Account?
+    func updateToken(newToken: ApiToken, oldToken: ApiToken)
 }
 
-public class AccountManager: RefreshTokenDelegate, AccountManagable {
+public class AccountManager: RefreshTokenDelegate, AccountManageable {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -92,7 +118,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManagable {
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
     
-    @InjectService var tokenable: InfomaniakTokenable
+    @LazyInjectService var tokenable: InfomaniakTokenable
     
     public var currentUserId: Int {
         didSet {

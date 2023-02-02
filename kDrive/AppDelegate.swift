@@ -116,7 +116,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         if accountManager.accounts.isEmpty {
             completion(false)
             return
@@ -161,7 +161,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return false
         }
 
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
 
         if components.path == "store",
            let userId = params.first(where: { $0.name == "userId" })?.value,
@@ -196,7 +196,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
         }
 
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
@@ -249,7 +249,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
@@ -288,7 +288,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
 
-                if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId),
+                if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId, using: nil),
                    currentDrive.maintenance {
                     if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
@@ -324,7 +324,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         let group = DispatchGroup()
         var shouldCleanFolder = false
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
@@ -404,7 +404,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
@@ -494,7 +494,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
@@ -523,7 +523,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
-        let accountManager = InjectService<AccountManager>().wrappedValue
+        let accountManager = InjectService<AccountManageable>().wrappedValue
 
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
@@ -570,7 +570,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
                 // Upload notification
                 let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
-                let accountManager = InjectService<AccountManager>().wrappedValue
+                let accountManager = InjectService<AccountManageable>().wrappedValue
 
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:

@@ -25,7 +25,7 @@ import InfomaniakDI
 class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     @InjectService var uploadQueue: UploadQueue
 
     private let realm = DriveFileManager.constants.uploadsRealm

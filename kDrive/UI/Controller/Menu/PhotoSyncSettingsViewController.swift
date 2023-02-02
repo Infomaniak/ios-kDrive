@@ -27,7 +27,7 @@ import InfomaniakDI
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     private enum PhotoSyncSection {
         case syncSwitch

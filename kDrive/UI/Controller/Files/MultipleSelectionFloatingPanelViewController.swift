@@ -24,7 +24,7 @@ import kDriveResources
 import UIKit
 
 class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!
     var files = [File]()

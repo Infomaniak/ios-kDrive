@@ -24,7 +24,7 @@ import InfomaniakDI
 
 class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     public override func viewDidLoad() {
         super.viewDidLoad()

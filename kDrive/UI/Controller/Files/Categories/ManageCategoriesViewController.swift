@@ -30,7 +30,7 @@ protocol ManageCategoriesDelegate: AnyObject {
 class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
     
     var driveFileManager: DriveFileManager!
     var files: [File]?

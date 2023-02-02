@@ -51,7 +51,7 @@ public enum MigrationHelper {
                 group.addTask {
                     do {
                         let token = try await InfomaniakLogin.apiToken(username: account, applicationPassword: password)
-                        let accountManager = InjectService<AccountManager>().wrappedValue
+                        let accountManager = InjectService<AccountManageable>().wrappedValue
                         _ = try await accountManager.createAndSetCurrentAccount(token: token)
                     } catch {
                         SentrySDK.capture(message: "[Migration] Auth failed")

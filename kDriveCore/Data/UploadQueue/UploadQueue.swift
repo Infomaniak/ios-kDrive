@@ -25,7 +25,7 @@ import Sentry
 
 public class UploadQueue {
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
 //    public static let instance = UploadQueue() still needed ?
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"

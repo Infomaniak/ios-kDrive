@@ -26,7 +26,7 @@ class FileDetailViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
-    @InjectService var accountManager: AccountManager
+    @InjectService var accountManager: AccountManageable
 
     var file: File!
     var driveFileManager: DriveFileManager!

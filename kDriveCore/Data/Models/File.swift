@@ -278,7 +278,7 @@ public class FileVersion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
-    @LazyInjectService var accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManageable
     
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
