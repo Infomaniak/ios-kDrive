@@ -79,7 +79,10 @@ class FileDetailViewController: UIViewController {
         ///   - file: File for which to build the array
         ///   - fileAccess: Shared file related to `file`
         /// - Returns: Array of row
-        static func getRows(for file: File, fileAccess: FileAccess?, contentCount: FileCount?, categoryRights: CategoryRights) -> [FileInformationRow] {
+        static func getRows(for file: File,
+                            fileAccess: FileAccess?,
+                            contentCount: FileCount?,
+                            categoryRights: CategoryRights) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)

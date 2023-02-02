@@ -82,13 +82,6 @@ enum FactoryService {
 
 extension SimpleResolver {
     static func register(_ factories: [Factory]) {
-        for factory in factories {
-            do {
-                try SimpleResolver.sharedResolver.store(factory: factory)
-            }
-            catch {
-                assertionFailure("unexpected DI error \(error)")
-            }
-        }
+        factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
     }
 }
