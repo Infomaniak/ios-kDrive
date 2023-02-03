@@ -63,7 +63,8 @@ public class UploadQueue {
 
     var bestSession: FileUploadSession {
         if Bundle.main.isExtension {
-            return InjectService<BackgroundUploadSessionManager>().wrappedValue
+            @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
+            return backgroundUploadSessionManager
         } else {
             return foregroundSession
         }

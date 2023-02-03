@@ -67,7 +67,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
     private var newSyncSettings: PhotoSyncSettings = {
-        let photoUploader = InjectService<PhotoLibraryUploader>().wrappedValue
+        @InjectService var photoUploader: PhotoLibraryUploader
         if let _ = photoUploader.settings {
             return PhotoSyncSettings(value: photoUploader.settings as Any)
         } else {

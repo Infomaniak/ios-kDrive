@@ -118,14 +118,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         if accountManager.accounts.isEmpty {
             completion(false)
             return
         }
 
         _ = photoLibraryUploader.addNewPicturesToUploadQueue()
-        let uploadQueue = InjectService<UploadQueue>().wrappedValue
+        @InjectService var uploadQueue: UploadQueue
         uploadQueue.waitForCompletion {
             completion(true)
         }
@@ -163,7 +163,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return false
         }
 
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
 
         if components.path == "store",
            let userId = params.first(where: { $0.name == "userId" })?.value,
@@ -184,7 +184,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        let uploadQueue = InjectService<UploadQueue>().wrappedValue
+        @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
     }
@@ -198,7 +198,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
         }
 
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
@@ -251,7 +251,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
@@ -306,12 +306,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
-                let uploadQueue = InjectService<UploadQueue>().wrappedValue
+                @InjectService var uploadQueue: UploadQueue
                 uploadQueue.resumeAllOperations()
                 uploadQueue.addToQueueFromRealm()
                 backgroundUploadManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    let photoUploader = InjectService<PhotoLibraryUploader>().wrappedValue
+                    @InjectService var photoUploader: PhotoLibraryUploader
                     _ = photoUploader.addNewPicturesToUploadQueue()
                 }
             } catch {
@@ -327,7 +327,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         let group = DispatchGroup()
         var shouldCleanFolder = false
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
@@ -368,7 +368,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
-                        let uploadQueue = InjectService<UploadQueue>().wrappedValue
+                        @InjectService var uploadQueue: UploadQueue
                         var observationToken: ObservationToken?
                         observationToken = uploadQueue.observeFileUploaded(self,
                                                                            fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
@@ -407,7 +407,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
@@ -497,7 +497,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
@@ -526,7 +526,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
 
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
@@ -573,7 +573,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
                 // Upload notification
                 let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
-                let accountManager = InjectService<AccountManageable>().wrappedValue
+                @InjectService var accountManager: AccountManageable
 
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:

@@ -78,7 +78,7 @@ extension PHAsset {
             shouldTransformIntoJPEG = true
         }
         
-        let fileImportHelper = InjectService<FileImportHelper>().wrappedValue
+        @InjectService var fileImportHelper: FileImportHelper
         let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {
             guard shouldTransformIntoJPEG else {

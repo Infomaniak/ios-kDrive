@@ -275,7 +275,7 @@ public class FileActionsHelper {
                                       using progressSnack: IKSnackBar?,
                                       observer: AnyObject,
                                       driveFileManager: DriveFileManager) {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         accountManager.mqService.observeActionProgress(observer, actionId: actionId) { actionProgress in
             Task {
                 switch actionProgress.progress.message {

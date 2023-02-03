@@ -58,7 +58,7 @@ extension AppDelegate {
     func registerBackgroundTasks() {
         var registered = bgScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
-            let uploadQueue = InjectService<UploadQueue>().wrappedValue
+            @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
                 uploadQueue.suspendAllOperations()
                 uploadQueue.cancelRunningOperations()
@@ -72,7 +72,7 @@ extension AppDelegate {
         DDLogInfo("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
         registered = bgScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
-            let uploadQueue = InjectService<UploadQueue>().wrappedValue
+            @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
                 uploadQueue.suspendAllOperations()
                 uploadQueue.cancelRunningOperations()

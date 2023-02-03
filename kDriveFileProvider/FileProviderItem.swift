@@ -101,7 +101,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         }
         if file.users.count > 1 {
             self.isShared = true
-            let accountManager = InjectService<AccountManageable>().wrappedValue
+            @InjectService var accountManager: AccountManageable
             self.isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
         } else {
             self.isShared = false

@@ -36,7 +36,7 @@ public protocol AccountManagerDelegate: AnyObject {
 public extension InfomaniakLogin {
     static func apiToken(username: String, applicationPassword: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            let tokenable = InjectService<InfomaniakTokenable>().wrappedValue
+            @InjectService var tokenable: InfomaniakTokenable
             tokenable.getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)
@@ -49,7 +49,7 @@ public extension InfomaniakLogin {
 
     static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            let tokenable = InjectService<InfomaniakTokenable>().wrappedValue
+            @InjectService var tokenable: InfomaniakTokenable
             tokenable.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)

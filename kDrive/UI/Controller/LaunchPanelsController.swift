@@ -63,7 +63,7 @@ class LaunchPanelsController {
         // Photo sync activation
         LaunchPanel(
             makePanelController: {
-                let accountManager = InjectService<AccountManageable>().wrappedValue
+                @InjectService var accountManager: AccountManageable
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     fatalError("Tried to display save photos floating panel with nil currentDriveFileManager")
                 }

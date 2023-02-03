@@ -45,12 +45,12 @@ class SaveFileViewController: UIViewController {
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
     private var originalDriveId: Int = {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         return accountManager.currentDriveId
     }()
 
     private var originalUserId: Int = {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         return accountManager.currentUserId
     }()
 

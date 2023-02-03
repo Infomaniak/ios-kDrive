@@ -77,7 +77,8 @@ public final class DownloadQueue {
     )
     private var bestSession: FileDownloadSession {
         if Bundle.main.isExtension {
-            return InjectService<BackgroundDownloadSessionManager>().wrappedValue
+            @InjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
+            return backgroundDownloadSessionManager
         } else {
             return foregroundSession
         }

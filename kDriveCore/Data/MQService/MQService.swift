@@ -138,7 +138,7 @@ public class MQService {
     }
 
     private func handleExternalImportNotification(_ notification: ExternalImportNotification) {
-        let accountManager = InjectService<AccountManageable>().wrappedValue
+        @InjectService var accountManager: AccountManageable
         guard let driveFileManager = accountManager.getDriveFileManager(for: notification.driveId,
                                                                         userId: notification.userId)
         else { return }
