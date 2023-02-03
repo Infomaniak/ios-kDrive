@@ -32,16 +32,16 @@ public extension Dictionary where Key == String {
     ///
     /// Uses the URLComponents API
     var urlEncoded: URL? {
-        let URL = urlComponents.url
-        return URL
+        let url = urlComponents.url
+        return url
     }
     
     var urlEncodedData: Data? {
-        guard let URL = self.urlEncoded else {
+        guard let url = self.urlEncoded else {
             return nil
         }
         
-        let string = URL.absoluteString
+        let string = url.absoluteString
         guard let data = string.data(using: .utf8) else {
             return nil
         }

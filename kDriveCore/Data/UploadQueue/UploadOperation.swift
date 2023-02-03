@@ -150,13 +150,13 @@ public final class UploadOperation: Operation, UploadOperationable {
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
-            let task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
-            self.task = task
+            let uploadTask = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
+            self.task = uploadTask
 
-            task.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
-            task.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
+            uploadTask.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
+            uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
 
-            progressObservation = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+            progressObservation = uploadTask.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                 guard let newValue = value.newValue else {
                     return
                 }
@@ -164,10 +164,10 @@ public final class UploadOperation: Operation, UploadOperationable {
             }
             if let itemIdentifier = itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
-                    manager.register(task, forItemWithIdentifier: itemIdentifier) { _ in }
+                    manager.register(uploadTask, forItemWithIdentifier: itemIdentifier) { _ in }
                 }
             }
-            task.resume()
+            uploadTask.resume()
 
             // Save UploadFile state (we are mainly interested in saving sessionUrl)
             BackgroundRealm.uploads.execute { uploadsRealm in

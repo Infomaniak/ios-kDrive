@@ -68,7 +68,7 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     private var newSyncSettings: PhotoSyncSettings = {
         let photoUploader = InjectService<PhotoLibraryUploader>().wrappedValue
-        if let value = photoUploader.settings {
+        if let _ = photoUploader.settings {
             return PhotoSyncSettings(value: photoUploader.settings as Any)
         } else {
             return PhotoSyncSettings()

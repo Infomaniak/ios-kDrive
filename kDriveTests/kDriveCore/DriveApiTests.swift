@@ -30,8 +30,6 @@ class FakeTokenDelegate: RefreshTokenDelegate {
     func didFailRefreshToken(_ token: ApiToken) {}
 }
 
-// FIXME: Missing env
-/*
 final class DriveApiTests: XCTestCase {
     private static let defaultTimeout = 30.0
     private static let token = ApiToken(accessToken: Env.token,
@@ -184,7 +182,11 @@ final class DriveApiTests: XCTestCase {
     }
 
     func testGetDropBox() async throws {
-        let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: .gigabytes(5), password: "newPassword", validUntil: Date())
+        let settings = DropBoxSettings(alias: nil,
+                                       emailWhenFinished: false,
+                                       limitFileSize: .gibibytes(5),
+                                       password: "newPassword",
+                                       validUntil: Date())
         let (testDirectory, dropBoxDir) = try await initDropbox(testName: "Dropbox settings")
         let response = try await currentApiFetcher.updateDropBox(directory: dropBoxDir, settings: settings)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
@@ -703,4 +705,3 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 }
-*/

@@ -66,7 +66,6 @@ public class UploadFile: Object, UploadFilable {
     @Persisted private var rawPriority: Int = 0
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
-    @Persisted var chunks: List<RUploadChunk>
     
     private var localAsset: PHAsset?
 
@@ -139,7 +138,7 @@ public class UploadFile: Object, UploadFilable {
     }
 
     public var queryItems: [URLQueryItem] {
-        var queryItems = [
+        var items = [
             URLQueryItem(name: "conflict", value: conflictOption.rawValue),
             URLQueryItem(name: "file_name", value: name),
             // TODO: Upload route needs relative_path/filename to work correctly, remove when upload is done with apiV2
@@ -148,12 +147,12 @@ public class UploadFile: Object, UploadFilable {
             URLQueryItem(name: "asV2", value: nil)
         ]
         if let creationDate = creationDate {
-            queryItems.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
+            items.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
         }
         if let modificationDate = modificationDate {
-            queryItems.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
+            items.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
         }
-        return queryItems
+        return items
     }
 
     public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
@@ -194,7 +193,9 @@ public class UploadFile: Object, UploadFilable {
         self.rawPriority = priority.rawValue
     }
 
-    override init() {}
+    override public init() {
+        // We have to keep it for Realm
+    }
 
     public enum ThumbnailRequest {
         case phImageRequest(PHImageRequestID)

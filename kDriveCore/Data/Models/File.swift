@@ -667,11 +667,9 @@ public class File: Object, Codable {
         id = try container.decode(Int.self, forKey: .id)
         parentId = try container.decode(Int.self, forKey: .parentId)
         driveId = try container.decode(Int.self, forKey: .driveId)
-        let name = try container.decode(String.self, forKey: .name)
-        self.name = name
-
-        // TODO: check
-        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? name
+        let decodedName = try container.decode(String.self, forKey: .name)
+        self.name = decodedName
+        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
         path = try container.decodeIfPresent(String.self, forKey: .path)
         rawType = try container.decode(String.self, forKey: .rawType)
         rawStatus = try container.decodeIfPresent(String.self, forKey: .rawStatus)

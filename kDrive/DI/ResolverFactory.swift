@@ -28,12 +28,12 @@ import kDriveCore
 /// Trick : enum as no init, perfect for namespacing
 enum FactoryService {
     static func setupDependencyInjection() {
-        let factories = NetworkingServicies + MiscServicies
+        let factories = networkingServicies + miscServicies
         SimpleResolver.register(factories)
     }
 
     /// Networking related servicies
-    private static var NetworkingServicies: [Factory] {
+    private static var networkingServicies: [Factory] {
         let servicies = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
@@ -78,12 +78,8 @@ enum FactoryService {
     }
 
     /// Misc servicies
-    private static var MiscServicies: [Factory] {
+    private static var miscServicies: [Factory] {
         let servicies = [
-            // ChunkService factory
-            Factory(type: ChunkService.self) { _, _ in
-                ChunkService()
-            },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },

@@ -275,7 +275,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
         }
 
-        let uploadQueue = InjectService<UploadQueue>().wrappedValue
         Task {
             do {
                 let (_, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
@@ -307,12 +306,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
+                let uploadQueue = InjectService<UploadQueue>().wrappedValue
                 uploadQueue.resumeAllOperations()
                 uploadQueue.addToQueueFromRealm()
                 backgroundUploadManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    let photoLibraryUploader = InjectService<PhotoLibraryUploader>().wrappedValue
-                    _ = photoLibraryUploader.addNewPicturesToUploadQueue()
+                    let photoUploader = InjectService<PhotoLibraryUploader>().wrappedValue
+                    _ = photoUploader.addNewPicturesToUploadQueue()
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)

@@ -23,10 +23,11 @@ import XCTest
 final class ITRangeProviderGuts: XCTestCase {
     // MARK: - readFileByteSize
     
+    let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
+
     func testReadFileByteSize() {
         // GIVEN
         let expectedFileBytes = UInt64(4865229)
-        let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)
@@ -65,7 +66,6 @@ final class ITRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_fromImage() {
         // GIVEN
-        let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)
@@ -120,7 +120,6 @@ final class ITRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_fromImage() {
         // GIVEN
-        let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)

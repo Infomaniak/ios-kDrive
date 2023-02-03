@@ -116,8 +116,8 @@ public enum BinaryDisplaySize: Encodable {
             measurement = Measurement(value: exbibytes, unit: UnitInformationStorage.exbibytes)
         }
 
-        let bytes = measurement.converted(to: requestedUnit).value
-        return bytes
+        let measuredBytes = measurement.converted(to: requestedUnit).value
+        return measuredBytes
     }
 
     public func encode(to encoder: Encoder) throws {

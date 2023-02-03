@@ -24,7 +24,7 @@ import RealmSwift
 import Sentry
 
 public class UploadQueue {
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {

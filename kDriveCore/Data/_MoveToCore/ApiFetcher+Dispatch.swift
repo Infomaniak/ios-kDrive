@@ -24,6 +24,8 @@ import InfomaniakCore
 ///
 /// this is a draft, there is probably a more aestetic way to do it
 extension ApiFetcher: RequestDispatchable {
+    static let contentType = "Content-Type"
+
     public func dispatch<Result: Decodable>(_ requestable: Requestable,
                                             networkStack: NetworkStack = .Alamofire) async throws -> Result {
         switch networkStack {
@@ -35,7 +37,7 @@ extension ApiFetcher: RequestDispatchable {
             return try await dispatchNSURLSession(requestable, inBackground: true)
         }
     }
-    
+
     // TODO: Update existing method in core with encoding
     func __authenticatedRequest(_ endpoint: Endpoint,
                                 method: HTTPMethod = .get,
@@ -55,7 +57,7 @@ extension ApiFetcher: RequestDispatchable {
         } else {
             endpoint = requestable.route
         }
-        
+
         // Set up body and associated POST parameters or multipart Data
         let request: DataRequest
         let body = requestable.body
@@ -66,18 +68,18 @@ extension ApiFetcher: RequestDispatchable {
                                            method: method,
                                            parameters: parameters)
         case .requestBody(let data):
-                        let headers: HTTPHeaders = ["Content-Type": "application/octet-stream"]
-                        request = __authenticatedRequest(endpoint,
-                                                         method: method,
-                                                         parameters: nil,
-                                                         encoding: BodyDataEncoding(data: data),
-                                                         headers: headers)
+            let headers: HTTPHeaders = [Self.contentType: "application/octet-stream"]
+            request = __authenticatedRequest(endpoint,
+                                             method: method,
+                                             parameters: nil,
+                                             encoding: BodyDataEncoding(data: data),
+                                             headers: headers)
         case .none:
             request = authenticatedRequest(endpoint,
                                            method: method,
                                            parameters: nil)
         }
-        
+
         return try await perform(request: request).data
     }
 
@@ -103,10 +105,10 @@ extension ApiFetcher: RequestDispatchable {
         // append body
         switch requestable.body {
         case .requestBody(let data):
-            urlRequest.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("application/octet-stream", forHTTPHeaderField: Self.contentType)
             urlRequest.httpBody = data
         case .POSTParameters(let parameters):
-            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: Self.contentType)
             urlRequest.httpBody = parameters.urlEncodedData
         case .none:
             break
@@ -116,15 +118,14 @@ extension ApiFetcher: RequestDispatchable {
         if inBackground {
             session = URLSession(configuration: .default)
         } else {
-            /// TODO bgsession handling
+            // TODO: bgsession handling
             session = URLSession(configuration: .background(withIdentifier: "1337"))
         }
-        
+
         let tuple = try await session.data(for: urlRequest)
         print("data: \(tuple.0)\n response: \(tuple.1) \n")
 
         let object = try JSONDecoder().decode(Result.self, from: tuple.0)
         return object
     }
-
 }

@@ -72,7 +72,7 @@ public enum Logging {
     private static func initNetworkLogging() {
         #if DEBUG
             if !Bundle.main.isExtension {
-                Atlantis.start(hostName: "adrien-coye-mbp.local.")
+                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
     }
@@ -82,11 +82,7 @@ public enum Logging {
             options.dsn = "https://fb65d0bcbf4c4ce795a6e1c1a964da28@sentry.infomaniak.com/4"
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
-                let uploadQueue = InjectService<UploadQueue>().wrappedValue
-                let photoLibraryUploader = InjectService<PhotoLibraryUploader>().wrappedValue
                 event.context?["AppState"] = [
-                    "UploadQueue size": uploadQueue.operationQueue.operationCount,
-                    "PhotoSync enabled": photoLibraryUploader.isSyncEnabled,
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]

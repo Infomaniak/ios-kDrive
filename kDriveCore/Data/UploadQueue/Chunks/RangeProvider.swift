@@ -76,28 +76,28 @@ public struct RangeProvider: RangeProvidable {
     
     public var fileSize: UInt64 {
         get throws {
-            let fileSize = try guts.readFileByteSize()
-            return fileSize
+            let size = try guts.readFileByteSize()
+            return size
         }
     }
     
     public var allRanges: [DataRange] {
         get throws {
-            let fileSize = try fileSize
+            let size = try fileSize
             
             // Check for files too large to be processed by mobile app or the server
-            guard fileSize < APIConsts.fileMaxSizeClient,
-                  fileSize < APIConsts.fileMaxSizeServer else {
+            guard size < APIConsts.fileMaxSizeClient,
+                  size < APIConsts.fileMaxSizeServer else {
                 // TODO: notify Sentry
                 throw ErrorDomain.FileTooLarge
             }
             
-            let preferedChunkSize = guts.preferedChunkSize(for: fileSize)
+            let preferedChunkSize = guts.preferedChunkSize(for: size)
             
             // Make sure an empty file resolves to one chunk
-            let totalChunksCount = max(fileSize / max(preferedChunkSize, 1), 1)
+            let totalChunksCount = max(size / max(preferedChunkSize, 1), 1)
             
-            let ranges = try guts.buildRanges(fileSize: fileSize,
+            let ranges = try guts.buildRanges(fileSize: size,
                                               totalChunksCount: totalChunksCount,
                                               chunkSize: preferedChunkSize)
             

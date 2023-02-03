@@ -107,6 +107,7 @@ public protocol AccountManageable {
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var tokenable: InfomaniakTokenable
     
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -119,8 +120,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
-    
-    @LazyInjectService var tokenable: InfomaniakTokenable
     
     public var currentUserId: Int {
         didSet {

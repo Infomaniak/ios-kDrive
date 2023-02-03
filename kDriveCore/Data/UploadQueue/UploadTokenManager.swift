@@ -30,7 +30,9 @@ public class UploadTokenManager {
     private var tokens: [Int: UploadToken] = [:]
     private var lock = DispatchGroup()
     
-    public init() { }
+    public init() {
+        /// Public Service initializer
+    }
     
     public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
         lock.wait()

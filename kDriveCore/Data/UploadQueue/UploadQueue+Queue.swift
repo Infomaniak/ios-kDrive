@@ -23,35 +23,32 @@ import RealmSwift
 import Sentry
 
 protocol UploadQueueable {
-    
     func addToQueueFromRealm()
-    
+
     func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
-    
+
     func suspendAllOperations()
-    
+
     func resumeAllOperations()
-    
+
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
-    
+
     func retry(_ file: UploadFile)
-    
+
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
-    
+
     func cancelAllOperations()
-    
+
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
-    
+
     func cancelRunningOperations()
-    
+
     func cancel(_ file: UploadFile)
-    
 }
 
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
-    
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
@@ -69,7 +66,7 @@ extension UploadQueue: UploadQueueable {
                     uploadingFiles.forEach { uploadFile in
                         // If the upload file has a session URL but it's foreground and doesn't exist anymore (e.g. app was killed), we add it again
                         if uploadFile.sessionUrl.isEmpty || (!uploadFile.sessionUrl.isEmpty && uploadFile.sessionId == self.foregroundSession.identifier && !uploadTasks.contains(where: { $0.originalRequest?.url?.absoluteString == uploadFile.sessionUrl })) {
-                            self.addToQueue(file: uploadFile,  itemIdentifier: nil, using: self.realm)
+                            self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                         }
                     }
                 }
@@ -108,16 +105,15 @@ extension UploadQueue: UploadQueueable {
                                driveId = file.driveId,
                                realm = realm!] in
                 let operation = self.operationsInQueue[fileId]
-                if operation?.isExecuting != true {
-                    if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
-                        let publishedToDelete = UploadFile(value: toDelete)
-                        publishedToDelete.error = .taskCancelled
-                        try? realm.safeWrite {
-                            realm.delete(toDelete)
-                        }
-                        self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-                        self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+                if operation?.isExecuting != true,
+                   let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
+                    let publishedToDelete = UploadFile(value: toDelete)
+                    publishedToDelete.error = .taskCancelled
+                    try? realm.safeWrite {
+                        realm.delete(toDelete)
                     }
+                    self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
+                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                 }
                 operation?.cancel()
         }
@@ -180,7 +176,7 @@ extension UploadQueue: UploadQueueable {
             }
         }
     }
-    
+
     // MARK: - Private methods
 
     private func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil, using realm: Realm) {
@@ -208,7 +204,7 @@ extension UploadQueue: UploadQueueable {
         OperationQueueHelper.disableIdleTimer(true)
 
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
-        
+
         operation.queuePriority = file.priority
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {

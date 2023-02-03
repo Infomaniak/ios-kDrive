@@ -25,16 +25,15 @@ import XCTest
 
 @testable import kDrive
 
-// FIXME: missing ENV
-/*
 final class DriveFileManagerTests: XCTestCase {
     static let defaultTimeout = 10.0
     static var driveFileManager: DriveFileManager!
 
     override class func setUp() {
         super.setUp()
+        let mckAccountManager = AccountManager()
         let drive = DriveInfosManager.instance.getDrive(id: Env.driveId, userId: Env.userId)!
-        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+        driveFileManager = mckAccountManager.getDriveFileManager(for: drive)
         driveFileManager.apiFetcher.setToken(ApiToken(accessToken: Env.token, expiresIn: Int.max, refreshToken: "", scope: "", tokenType: "", userId: Env.userId, expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max))), delegate: FakeTokenDelegate())
     }
 
@@ -280,4 +279,3 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 }
-*/

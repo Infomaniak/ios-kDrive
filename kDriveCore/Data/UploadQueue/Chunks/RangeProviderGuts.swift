@@ -85,8 +85,8 @@ public struct RangeProviderGuts: RangeProviderGutsable {
             let startOffset = totalChunksCount * chunkSize
             assert((startOffset + lastChunkSize) == fileSize, "sanity, this should match")
             
-            let EoFoffset = fileSize - 1
-            let range: DataRange = startOffset...EoFoffset
+            let endOfFileoffset = fileSize - 1
+            let range: DataRange = startOffset...endOfFileoffset
             
             ranges.append(range)
         }

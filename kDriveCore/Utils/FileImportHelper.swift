@@ -135,7 +135,9 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public init() { }
+    public init() {
+        /// Public Service initializer
+    }
     
     @MainActor
     public func importAssets(
