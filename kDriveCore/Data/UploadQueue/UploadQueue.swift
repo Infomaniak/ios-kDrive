@@ -23,7 +23,15 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public class UploadQueue {
+public protocol UploadNotifiable {
+    func sendPausedNotificationIfNeeded()
+}
+
+public protocol UploadProgressable {
+    func publishProgress(_ progress: Double, for fileId: String)
+}
+
+public class UploadQueue: UploadNotifiable, UploadProgressable {
     @LazyInjectService var accountManager: AccountManageable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
@@ -138,7 +146,7 @@ public class UploadQueue {
         }
     }
 
-    func publishProgress(_ progress: Double, for fileId: String) {
+    public func publishProgress(_ progress: Double, for fileId: String) {
         observations.didChangeProgress.values.forEach { closure in
             closure(fileId, progress)
         }

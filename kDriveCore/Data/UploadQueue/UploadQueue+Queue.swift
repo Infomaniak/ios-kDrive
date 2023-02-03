@@ -22,7 +22,7 @@ import InfomaniakCore
 import RealmSwift
 import Sentry
 
-protocol UploadQueueable {
+public protocol UploadQueueable {
     func addToQueueFromRealm()
 
     func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)

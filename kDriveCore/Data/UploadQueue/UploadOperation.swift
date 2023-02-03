@@ -29,11 +29,15 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public final class UploadOperation: Operation, UploadOperationable {
+public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // MARK: - Attributes
 
+    @LazyInjectService var uploadQueue: UploadQueueable
+    @LazyInjectService var uploadNotifiable: UploadNotifiable
+    @LazyInjectService var uploadProgressable: UploadProgressable
+    
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadQueue: UploadQueue
+    
     @LazyInjectService var uploadTokenManager: UploadTokenManager
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
@@ -49,36 +53,6 @@ public final class UploadOperation: Operation, UploadOperationable {
     public var result: UploadCompletionResult
 
     private let completionLock = DispatchGroup()
-
-    private var _executing = false {
-        willSet {
-            willChangeValue(forKey: "isExecuting")
-        }
-        didSet {
-            didChangeValue(forKey: "isExecuting")
-        }
-    }
-
-    private var _finished = false {
-        willSet {
-            willChangeValue(forKey: "isFinished")
-        }
-        didSet {
-            didChangeValue(forKey: "isFinished")
-        }
-    }
-
-    override public var isExecuting: Bool {
-        return _executing
-    }
-
-    override public var isFinished: Bool {
-        return _finished
-    }
-
-    override public var isAsynchronous: Bool {
-        return true
-    }
 
     // MARK: - Public methods
 
@@ -103,9 +77,7 @@ public final class UploadOperation: Operation, UploadOperationable {
         self.result = UploadCompletionResult()
     }
 
-    override public func start() {
-        assert(!isExecuting, "Operation is already started")
-
+    public override func execute() {
         DDLogInfo("[UploadOperation] Job \(file.id) started")
         // Always check for cancellation before launching the task
         if isCancelled {
@@ -125,12 +97,6 @@ public final class UploadOperation: Operation, UploadOperationable {
         getUploadTokenSync()
         getPhAssetIfNeeded()
 
-        // If the operation is not canceled, begin executing the task
-        _executing = true
-        main()
-    }
-
-    override public func main() {
         DDLogInfo("[UploadOperation] Executing job \(file.id)")
         file.maxRetryCount -= 1
         guard let token = uploadToken else {
@@ -160,7 +126,7 @@ public final class UploadOperation: Operation, UploadOperationable {
                 guard let newValue = value.newValue else {
                     return
                 }
-                self.uploadQueue.publishProgress(newValue, for: fileId)
+                self.uploadProgressable.publishProgress(newValue, for: fileId)
             }
             if let itemIdentifier = itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
@@ -310,7 +276,7 @@ public final class UploadOperation: Operation, UploadOperationable {
         } else {
             file.sessionUrl = ""
             file.error = .taskExpirationCancelled
-            uploadQueue.sendPausedNotificationIfNeeded()
+            uploadNotifiable.sendPausedNotificationIfNeeded()
         }
         uploadQueue.suspendAllOperations()
         task?.cancel()
@@ -321,7 +287,13 @@ public final class UploadOperation: Operation, UploadOperationable {
 
     // did finish in time
     private func end() {
-        DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
+        let withErrorMessage: String
+        if let error = file.error {
+            withErrorMessage = "errorCode: \(error.code) error:\(error)"
+        } else {
+            withErrorMessage = ""
+        }
+        DDLogInfo("[UploadOperation] Job \(file.id) endeding \(withErrorMessage)")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
@@ -350,7 +322,9 @@ public final class UploadOperation: Operation, UploadOperationable {
         if backgroundTaskIdentifier != .invalid {
             UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
         }
-        _executing = false
-        _finished = true
+        
+        // Terminate the NSOperation
+        DDLogInfo("[UploadOperation] Job \(file.id) operation terminated")
+        finish()
     }
 }
