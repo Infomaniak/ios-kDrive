@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import RealmSwift
@@ -31,10 +32,30 @@ final class DriveFileManagerTests: XCTestCase {
 
     override class func setUp() {
         super.setUp()
-        let mckAccountManager = AccountManager()
-        let drive = DriveInfosManager.instance.getDrive(id: Env.driveId, userId: Env.userId)!
+
+        // prepare mocking solver
+        MockingHelper.registerConcreteTypes()
+
+        guard let drive = DriveInfosManager.instance.getDrive(id: Env.driveId, userId: Env.userId) else {
+            fatalError("John Appleseed is missing")
+        }
+        @InjectService var mckAccountManager: AccountManageable
         driveFileManager = mckAccountManager.getDriveFileManager(for: drive)
-        driveFileManager.apiFetcher.setToken(ApiToken(accessToken: Env.token, expiresIn: Int.max, refreshToken: "", scope: "", tokenType: "", userId: Env.userId, expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max))), delegate: FakeTokenDelegate())
+        let token = ApiToken(accessToken: Env.token,
+                             expiresIn: Int.max,
+                             refreshToken: "",
+                             scope: "",
+                             tokenType: "",
+                             userId: Env.userId,
+                             expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
+        driveFileManager.apiFetcher.setToken(token, delegate: FakeTokenDelegate())
+    }
+
+    override class func tearDown() {
+        // clear mocking solver so the next test is stable
+        MockingHelper.clearRegisteredTypes()
+
+        super.tearDown()
     }
 
     // MARK: - Tests setup

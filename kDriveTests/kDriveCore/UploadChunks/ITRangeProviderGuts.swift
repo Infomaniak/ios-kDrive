@@ -86,7 +86,7 @@ final class ITRangeProviderGuts: XCTestCase {
             let lastChunk = chunks[expectedChunks-1]
             // The last offset is size -1
             let endOfFileOffset = size-1
-            guard lastChunk.upperBound == endOfFile else {
+            guard lastChunk.upperBound == endOfFileOffset else {
                 XCTFail("EOF not reached")
                 return
             }

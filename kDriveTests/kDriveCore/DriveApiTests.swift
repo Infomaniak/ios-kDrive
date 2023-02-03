@@ -44,12 +44,28 @@ final class DriveApiTests: XCTestCase {
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
 
+    override class func setUp() {
+        super.setUp()
+        
+        // prepare mocking solver
+        MockingHelper.registerConcreteTypes()
+    }
+    
     override class func tearDown() {
+        let group = DispatchGroup()
+        group.enter()
         Task {
             let drive = ProxyDrive(id: Env.driveId)
             let apiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
             _ = try await apiFetcher.emptyTrash(drive: drive)
+            group.leave()
         }
+        group.wait()
+        
+        // clear mocking solver so the next test is stable
+        MockingHelper.clearRegisteredTypes()
+        
+        super.tearDown()
     }
 
     // MARK: - Tests setup
