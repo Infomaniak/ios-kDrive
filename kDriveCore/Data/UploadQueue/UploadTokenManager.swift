@@ -24,14 +24,14 @@ import RealmSwift
 import Sentry
 import InfomaniakDI
 
-public class UploadTokenManager {
-    public static let instance = UploadTokenManager() // TODO migrate
-    
-    @InjectService var accountManager: AccountManageable
+public class UploadTokenManager {    
+    @LazyInjectService var accountManager: AccountManageable
 
     private var tokens: [Int: UploadToken] = [:]
     private var lock = DispatchGroup()
-
+    
+    public init() { }
+    
     public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
         lock.wait()
         lock.enter()

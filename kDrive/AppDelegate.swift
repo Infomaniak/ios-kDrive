@@ -38,6 +38,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
+    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     
     /// Making sure the DI is registered at a very early stage of the app launch.
     let dependencyInjectionHook = EarlyDIHook()
@@ -122,7 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
+        _ = photoLibraryUploader.addNewPicturesToUploadQueue()
         let uploadQueue = InjectService<UploadQueue>().wrappedValue
         uploadQueue.waitForCompletion {
             completion(true)
@@ -232,14 +234,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
             // Ask to remove uploaded pictures
-            if let toRemoveItems = PhotoLibraryUploader.instance.getPicturesToRemove() {
+            if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
                                                     message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
                                                     action: KDriveResourcesStrings.Localizable.buttonDelete,
                                                     destructive: true,
                                                     loading: false) {
                     // Proceed with removal
-                    PhotoLibraryUploader.instance.removePicturesFromPhotoLibrary(toRemoveItems)
+                    self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
                 }
                 DispatchQueue.main.async {
                     self.window?.rootViewController?.present(alert, animated: true)
@@ -307,9 +309,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
                 uploadQueue.resumeAllOperations()
                 uploadQueue.addToQueueFromRealm()
-                BackgroundUploadSessionManager.instance.reconnectBackgroundTasks()
+                backgroundUploadManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
+                    let photoLibraryUploader = InjectService<PhotoLibraryUploader>().wrappedValue
+                    _ = photoLibraryUploader.addNewPicturesToUploadQueue()
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
@@ -426,10 +429,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                      completionHandler: @escaping () -> Void) {
         DDLogInfo("[Background Session] background session relaunched \(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
-            BackgroundDownloadSessionManager.instance.backgroundCompletionHandler = completionHandler
+            backgroundUploadManager.backgroundCompletionHandler = completionHandler
         } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            BackgroundUploadSessionManager.instance.handleEventsForBackgroundURLSession(identifier: identifier,
-                                                                                        completionHandler: completionHandler)
+            backgroundUploadManager.handleEventsForBackgroundURLSession(identifier: identifier,
+                                                                        completionHandler: completionHandler)
         } else {
             completionHandler()
         }

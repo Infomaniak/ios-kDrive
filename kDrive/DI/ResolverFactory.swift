@@ -58,6 +58,21 @@ enum FactoryService {
             Factory(type: AccountManageable.self) { _, _ in
                 AccountManager()
             },
+            Factory(type: UploadTokenManager.self) { _, _ in
+                UploadTokenManager()
+            },
+            Factory(type: BackgroundUploadSessionManager.self) { _, _ in
+                BackgroundUploadSessionManager()
+            },
+            Factory(type: BackgroundDownloadSessionManager.self) { _, _ in
+                BackgroundDownloadSessionManager()
+            },
+            Factory(type: PhotoLibraryUploader.self) { _, _ in
+                PhotoLibraryUploader()
+            },
+            Factory(type: FileImportHelper.self) { _, _ in
+                FileImportHelper()
+            },
         ]
         return servicies
     }
@@ -74,7 +89,7 @@ enum FactoryService {
             },
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()
-            }
+            },
         ]
         return servicies
     }

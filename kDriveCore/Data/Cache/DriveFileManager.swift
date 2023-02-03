@@ -71,7 +71,9 @@ public class DriveFileManager {
             fileURL: rootDocumentsURL.appendingPathComponent("uploads.realm"),
             schemaVersion: currentUploadDbVersion,
             migrationBlock: migrationBlock,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
+            objectTypes: [DownloadTask.self,
+                          UploadFile.self,
+                          PhotoSyncSettings.self])
 
         /// realm db used for file upload
         public var uploadsRealm: Realm {

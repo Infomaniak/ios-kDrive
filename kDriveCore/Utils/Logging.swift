@@ -83,10 +83,10 @@ public enum Logging {
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
                 let uploadQueue = InjectService<UploadQueue>().wrappedValue
-
+                let photoLibraryUploader = InjectService<PhotoLibraryUploader>().wrappedValue
                 event.context?["AppState"] = [
                     "UploadQueue size": uploadQueue.operationQueue.operationCount,
-                    "PhotoSync enabled": PhotoLibraryUploader.instance.isSyncEnabled,
+                    "PhotoSync enabled": photoLibraryUploader.isSyncEnabled,
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]

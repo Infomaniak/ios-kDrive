@@ -38,8 +38,6 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
     public typealias Operation = DownloadOperation
 
-    public static let instance = BackgroundDownloadSessionManager()
-
     public var backgroundCompletionHandler: (() -> Void)?
 
     static let maxBackgroundTasks = 10
@@ -49,7 +47,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     var progressObservers: [String: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
-    override private init() {
+    override public init() {
         super.init()
         let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true

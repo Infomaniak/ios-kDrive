@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import RealmSwift
 
 public struct UploadChunk: Decodable {
     

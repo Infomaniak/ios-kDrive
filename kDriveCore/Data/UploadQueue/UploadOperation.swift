@@ -29,12 +29,15 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public class UploadOperation: Operation {
+public final class UploadOperation: Operation, UploadOperationable {
     // MARK: - Attributes
 
-    @InjectService var accountManager: AccountManageable
-    @InjectService var uploadQueue: UploadQueue
-
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadTokenManager: UploadTokenManager
+    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     private var file: UploadFile
     private let urlSession: FileUploadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
@@ -79,18 +82,19 @@ public class UploadOperation: Operation {
 
     // MARK: - Public methods
 
-    public init(file: UploadFile,
-                urlSession: FileUploadSession = URLSession.shared,
-                itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    required public init(file: UploadFile,
+                         urlSession: FileUploadSession = URLSession.shared,
+                         itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         self.file = UploadFile(value: file)
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
     }
 
-    public init(file: UploadFile,
-                task: URLSessionUploadTask,
-                urlSession: FileUploadSession = URLSession.shared) {
+    // Restore the operation after BG work
+    required public init(file: UploadFile,
+                         task: URLSessionUploadTask,
+                         urlSession: FileUploadSession = URLSession.shared) {
         self.file = UploadFile(value: file)
         self.file.error = nil
         self.task = task
@@ -189,7 +193,7 @@ public class UploadOperation: Operation {
     private func getUploadTokenSync() {
         let syncToken = DispatchGroup()
         syncToken.enter()
-        UploadTokenManager.instance.getToken(userId: file.userId, driveId: file.driveId) { token in
+        uploadTokenManager.getToken(userId: file.userId, driveId: file.driveId) { token in
             self.uploadToken = token
             syncToken.leave()
         }
@@ -200,7 +204,7 @@ public class UploadOperation: Operation {
         if file.type == .phAsset && file.pathURL == nil {
             DDLogInfo("[UploadOperation] Need to fetch photo asset")
             if let asset = file.getPHAsset(),
-               let url = PhotoLibraryUploader.instance.getUrlSync(for: asset) {
+               let url = photoLibraryUploader.getUrlSync(for: asset) {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
@@ -209,6 +213,7 @@ public class UploadOperation: Operation {
         }
     }
 
+    // called on restoration
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         completionLock.wait()
         // Task has called end() in backgroundTaskExpired
@@ -272,8 +277,8 @@ public class UploadOperation: Operation {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
                 uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
-                if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
-                    PhotoLibraryUploader.instance.disableSync()
+                if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
+                    photoLibraryUploader.disableSync()
                     NotificationsHelper.sendPhotoSyncErrorNotification()
                 }
             }
@@ -298,7 +303,7 @@ public class UploadOperation: Operation {
                            "File size": file.size,
                            "File type": file.type.rawValue]
         SentrySDK.addBreadcrumb(crumb: breadcrumb)
-        let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: task, fileUrl: file.pathURL)
+        let rescheduledSessionId = backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: file.pathURL)
         if let sessionId = rescheduledSessionId {
             file.sessionId = sessionId
             file.error = .taskRescheduled

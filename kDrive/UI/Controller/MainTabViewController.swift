@@ -29,6 +29,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var fileImportHelper: FileImportHelper
 
     override var tabBar: MainTabBar {
         return super.tabBar as! MainTabBar
@@ -263,7 +264,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         if let documentPicker = controller as? DriveImportDocumentPickerViewController {
             for url in urls {
-                let targetURL = FileImportHelper.instance.generateImportURL(for: url.uti)
+                let targetURL = fileImportHelper.generateImportURL(for: url.uti)
 
                 do {
                     if FileManager.default.fileExists(atPath: targetURL.path) {

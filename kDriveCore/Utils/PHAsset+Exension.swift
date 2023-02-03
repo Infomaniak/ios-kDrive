@@ -19,6 +19,7 @@
 import Foundation
 import Photos
 import Sentry
+import InfomaniakDI
 
 extension PHAsset {
     public static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
@@ -76,8 +77,9 @@ extension PHAsset {
             resourceUTI = .jpeg
             shouldTransformIntoJPEG = true
         }
-
-        let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
+        
+        let fileImportHelper = InjectService<FileImportHelper>().wrappedValue
+        let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {
             guard shouldTransformIntoJPEG else {
                 try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)

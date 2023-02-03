@@ -25,7 +25,8 @@ import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var fileImportHelper: FileImportHelper
 
     enum SaveFileSection {
         case alert
@@ -177,7 +178,7 @@ class SaveFileViewController: UIViewController {
     private func setAssetIdentifiers() {
         guard let assetIdentifiers else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importAssets(
+        importProgress = fileImportHelper.importAssets(
             assetIdentifiers,
             userPreferredPhotoFormat: userPreferredPhotoFormat
         ) { [weak self] importedFiles, errorCount in
@@ -192,7 +193,7 @@ class SaveFileViewController: UIViewController {
     private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+        importProgress = fileImportHelper.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {
@@ -454,7 +455,7 @@ extension SaveFileViewController: FooterButtonDelegate {
 
         let message: String
         do {
-            try FileImportHelper.instance.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+            try fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
             guard !items.isEmpty else {
                 navigationController?.dismiss(animated: true)
                 return

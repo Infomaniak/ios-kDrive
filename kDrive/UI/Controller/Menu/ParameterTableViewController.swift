@@ -24,8 +24,9 @@ import Sentry
 import UIKit
 
 class ParameterTableViewController: UITableViewController {
-    @InjectService var accountManager: AccountManageable
-
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     var driveFileManager: DriveFileManager!
 
     private enum ParameterRow: CaseIterable {
@@ -128,7 +129,7 @@ class ParameterTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
             if row == .photos {
-                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
+                cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
             } else if row == .theme {
                 cell.valueLabel.text = UserDefaults.shared.theme.title
             } else if row == .notifications {

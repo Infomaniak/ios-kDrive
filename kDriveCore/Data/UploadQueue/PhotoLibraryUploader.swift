@@ -24,9 +24,8 @@ import Sentry
 import InfomaniakDI
 
 public class PhotoLibraryUploader {
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadQueue: UploadQueue
 
-    public static let instance = PhotoLibraryUploader() // TODO migrate
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
@@ -34,7 +33,7 @@ public class PhotoLibraryUploader {
 
     private let dateFormatter = DateFormatter()
 
-    private init() {
+    public init() {
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {

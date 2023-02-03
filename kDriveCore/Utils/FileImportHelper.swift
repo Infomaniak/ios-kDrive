@@ -18,13 +18,13 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import kDriveResources
 import PDFKit
 import Photos
 import QuickLookThumbnailing
 import RealmSwift
 import VisionKit
-import InfomaniakDI
 
 public class ImportedFile {
     public var name: String
@@ -129,14 +129,14 @@ public enum ImportError: LocalizedError {
 }
 
 public class FileImportHelper {
-    public static let instance = FileImportHelper() // TODO migrate
+    @LazyInjectService var uploadQueue: UploadQueue
 
-    @InjectService var uploadQueue: UploadQueue
-    
     private let imageCompression = 0.8
 
     // MARK: - Public methods
 
+    public init() { }
+    
     @MainActor
     public func importAssets(
         _ assetIdentifiers: [String],

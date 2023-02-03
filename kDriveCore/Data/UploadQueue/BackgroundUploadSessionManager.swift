@@ -21,7 +21,6 @@ import Foundation
 import Sentry
 import InfomaniakDI
 
-// check for existing url session switcheroo
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
 
@@ -30,8 +29,6 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     associatedtype Operation
 
     // MARK: - Attributes
-
-    static var instance: Self { get }
 
     var backgroundCompletionHandler: (() -> Void)? { get set }
     var backgroundTaskCount: Int { get }
@@ -83,8 +80,6 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     public typealias Operation = UploadOperation
     public typealias BackgroundCompletionHandler = () -> Void
 
-    public static let instance = BackgroundUploadSessionManager()
-
     public var backgroundCompletionHandler: (() -> Void)?
     private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
     static let maxBackgroundTasks = 10
@@ -105,7 +100,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         attributes: .concurrent
     )
 
-    override private init() {
+    override public init() {
         super.init()
         backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
     }
@@ -240,7 +235,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
+            
             let operation = UploadOperation(file: file, task: task, urlSession: self)
+            
             syncQueue.async(flags: .barrier) { [weak self] in
                 self?.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
                 self?.operations.append(operation)

@@ -41,7 +41,7 @@ public class DownloadTask: Object {
     }
 }
 
-public class DownloadQueue {
+public final class DownloadQueue {
     // MARK: - Attributes
 
     @InjectService var accountManager: AccountManageable
@@ -76,7 +76,11 @@ public class DownloadQueue {
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
     private var bestSession: FileDownloadSession {
-        return Bundle.main.isExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
+        if Bundle.main.isExtension {
+            return InjectService<BackgroundDownloadSessionManager>().wrappedValue
+        } else {
+            return foregroundSession
+        }
     }
 
     // MARK: - Public methods

@@ -20,7 +20,7 @@ import Foundation
 import UIKit
 
 enum OperationQueueHelper {
-    static func disableIdleTimer(_ shouldBeDisabled: Bool, queue: [AnyHashable: Operation]? = nil) {
+    static func disableIdleTimer(_ shouldBeDisabled: Bool, queue: [AnyHashable: Any]? = nil) {
         #if !ISEXTENSION
         DispatchQueue.main.async {
             if shouldBeDisabled {

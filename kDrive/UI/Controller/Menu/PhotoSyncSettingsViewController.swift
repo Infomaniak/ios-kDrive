@@ -27,8 +27,9 @@ import InfomaniakDI
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
-
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     private enum PhotoSyncSection {
         case syncSwitch
         case syncLocation
@@ -65,8 +66,16 @@ class PhotoSyncSettingsViewController: UIViewController {
     private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
     private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
-    private var newSyncSettings = PhotoSyncSettings(value: PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings())
-    private var photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
+    private var newSyncSettings: PhotoSyncSettings = {
+        let photoUploader = InjectService<PhotoLibraryUploader>().wrappedValue
+        if let value = photoUploader.settings {
+            return PhotoSyncSettings(value: photoUploader.settings as Any)
+        } else {
+            return PhotoSyncSettings()
+        }
+    }()
+    
+    private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
             newSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
@@ -191,7 +200,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func updateSaveButtonState() {
-        let isEdited = PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled || PhotoLibraryUploader.instance.settings?.isContentEqual(to: newSyncSettings) == false
+        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?.isContentEqual(to: newSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
         if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
@@ -208,21 +217,21 @@ class PhotoSyncSettingsViewController: UIViewController {
             case .new:
                 newSyncSettings.lastSync = Date()
             case .all:
-                if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all {
+                if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
                     newSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
                 }
             case .fromDate:
-                if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
+                if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
                     newSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     newSyncSettings.lastSync = newSyncSettings.fromDate
                 }
             }
-            PhotoLibraryUploader.instance.enableSync(with: newSyncSettings)
+            photoLibraryUploader.enableSync(with: newSyncSettings)
         } else {
-            PhotoLibraryUploader.instance.disableSync()
+            photoLibraryUploader.disableSync()
         }
     }
 
@@ -495,7 +504,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
-            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+            _ = self.photoLibraryUploader.addNewPicturesToUploadQueue(using: realm)
         }
     }
 }

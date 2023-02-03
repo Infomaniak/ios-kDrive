@@ -163,9 +163,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var refreshControl = UIRefreshControl()
 
-    // TODO: remove
-    var button: UIButton!
-
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
@@ -199,79 +196,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-
-        // TODO: clean
-        let button = UIButton(type: .roundedRect)
-        button.frame = CGRect(x: 0, y: 50, width: 120, height: 40)
-        button.setTitle("Button", for: .normal)
-        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
-        view.addSubview(button)
-        self.button = button
-    }
-
-    // TODO: clean
-    @objc func buttonAction() {
-        // chunk provider
-        let rootDirectoryID = 1
-        let fileName = "\(UUID()).jpg"
-        
-        let apiFetcher = driveFileManager.apiFetcher
-        let drive = driveFileManager.drive
-        
-        // Test trigger DI
-//        let upload = UploadOperationV2()
-        
-        Task {
-            do {
-                // get Ranges for file at path
-                let file = "REMOVE_ME"
-                let bundle = Bundle(for: type(of: self))
-                guard let pathURL = bundle.url(forResource: file, withExtension: "jpg") else {
-                    fatalError("unable to read file")
-                }
-
-                let rangeProvider = RangeProvider(fileURL: pathURL)
-                let fileSize = try rangeProvider.fileSize
-                let ranges = try rangeProvider.allRanges
-                
-                // Get valid session
-                let result = try await apiFetcher.startSession(drive: drive,
-                                                               totalSize: fileSize,
-                                                               fileName: fileName,
-                                                               totalChunks: ranges.count,
-                                                               conflictResolution: .throwError,
-                                                               directoryID: rootDirectoryID)
-                print("result: \(result)")
-                guard let token = result.token else {
-                    fatalError("Missing token")
-                }
-                
-                // Chunks creation from ranges
-                guard let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
-                    fatalError("unable to init a ChunkProvider")
-                }
-                
-                // send each chunk one by one
-                var index = 0
-                while let chunk = chunkProvider.next() {
-                    index += 1 // index start at 1
-
-                    // send each chunk one by one
-                    let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
-                                                                         sessionToken: token,
-                                                                         chunkNumber: index,
-                                                                         chunk: chunk)
-                    print("\(uploadedChunk)")
-                }
-                
-                // finalize upload
-                let remoteFile = try await apiFetcher.closeSession(drive: drive, sessionToken: token)
-                print("🎉🎉🎉 file upload success: \(remoteFile)")
-                
-            } catch {
-                print("\(error)")
-            }
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {

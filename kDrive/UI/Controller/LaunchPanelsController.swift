@@ -81,7 +81,7 @@ class LaunchPanelsController {
                 }
                 return driveFloatingPanelController
             },
-            displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
+            displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled,
             priority: 3
         ),
         // Beta invitation

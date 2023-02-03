@@ -106,6 +106,8 @@ public protocol AccountManageable {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -314,8 +316,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         clearDriveFileManagers()
         var switchedDrive: Drive?
         for driveRemoved in driveRemovedList {
-            if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == user.id && PhotoLibraryUploader.instance.settings?.driveId == driveRemoved.id {
-                PhotoLibraryUploader.instance.disableSync()
+            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader.settings?.driveId == driveRemoved.id {
+                photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
                 switchedDrive = drives.first
@@ -400,8 +402,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentAccount = nil
             currentDriveId = 0
         }
-        if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == toDeleteAccount.userId {
-            PhotoLibraryUploader.instance.disableSync()
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
+            photoLibraryUploader.disableSync()
         }
         DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
