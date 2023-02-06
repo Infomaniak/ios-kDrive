@@ -71,7 +71,10 @@ public class UploadFile: Object, UploadFilable {
 
     public var pathURL: URL? {
         get {
-            return url == nil ? nil : URL(fileURLWithPath: url!)
+            guard let url else {
+                return nil
+            }
+            return URL(fileURLWithPath: url)
         }
         set {
             url = newValue?.path

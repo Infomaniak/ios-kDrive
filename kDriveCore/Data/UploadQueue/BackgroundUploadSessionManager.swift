@@ -239,8 +239,12 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             let operation = UploadOperation(file: file, task: task, urlSession: self)
             
             syncQueue.async(flags: .barrier) { [weak self] in
-                self?.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
-                self?.operations.append(operation)
+                guard let self else {
+                    return
+                }
+                
+                self.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
+                self.operations.append(operation)
             }
             return operation.uploadCompletion
         } else {

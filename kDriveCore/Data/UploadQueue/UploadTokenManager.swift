@@ -24,6 +24,7 @@ import RealmSwift
 import Sentry
 import InfomaniakDI
 
+// TODO: Remove
 public class UploadTokenManager {    
     @LazyInjectService var accountManager: AccountManageable
 
@@ -34,29 +35,29 @@ public class UploadTokenManager {
         /// Public Service initializer
     }
     
-    public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
-        lock.wait()
-        lock.enter()
-        if let token = tokens[userId], !token.isNearlyExpired {
-            completionHandler(token)
-            lock.leave()
-        } else if let userToken = accountManager.getTokenForUserId(userId),
-                  let drive = accountManager.getDrive(for: userId, driveId: driveId, using: nil),
-                  let driveFileManager = accountManager.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
-                switch result {
-                case .success(let token):
-                    self.tokens[userId] = token
-                    completionHandler(token)
-                case .failure(let error):
-                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
-                    completionHandler(nil)
-                }
-                self.lock.leave()
-            }
-        } else {
-            completionHandler(nil)
-            lock.leave()
-        }
-    }
+//    public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
+//        lock.wait()
+//        lock.enter()
+//        if let token = tokens[userId], !token.isNearlyExpired {
+//            completionHandler(token)
+//            lock.leave()
+//        } else if let userToken = accountManager.getTokenForUserId(userId),
+//                  let drive = accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+//                  let driveFileManager = accountManager.getDriveFileManager(for: drive) {
+//            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
+//                switch result {
+//                case .success(let token):
+//                    self.tokens[userId] = token
+//                    completionHandler(token)
+//                case .failure(let error):
+//                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
+//                    completionHandler(nil)
+//                }
+//                self.lock.leave()
+//            }
+//        } else {
+//            completionHandler(nil)
+//            lock.leave()
+//        }
+//    }
 }

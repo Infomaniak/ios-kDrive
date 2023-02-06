@@ -85,8 +85,16 @@ public protocol AbstractToken {
     var token: String { get set }
 }
 
+public struct AbstractTokenWrapper: AbstractToken {
+    public var token: String
+}
+
 public protocol AbstractDrive {
     var id: Int { get set }
+}
+
+public struct AbstractDriveWrapper: AbstractDrive {
+    public var id: Int
 }
 
 public class ProxyDrive: AbstractDrive {

@@ -86,7 +86,10 @@ open class AsynchronousOperation: Operation {
         }
 
         state = .executing
-        execute()
+        
+        Task {
+            await execute()
+        }
     }
 
     // MARK: - Public
@@ -94,7 +97,10 @@ open class AsynchronousOperation: Operation {
     /// Subclasses must implement this to perform their work and they must not
     /// call `super`. The default implementation of this function throws an
     /// exception.
-    open func execute() {
+    ///
+    /// Making this function `async` allows for the seamless integration of modern swift async code.
+    ///
+    open func execute() async {
         fatalError("Subclasses must implement `execute`.")
     }
 
