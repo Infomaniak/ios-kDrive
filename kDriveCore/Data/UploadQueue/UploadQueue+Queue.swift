@@ -206,7 +206,7 @@ extension UploadQueue: UploadQueueable {
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
 
         operation.queuePriority = file.priority
-        operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
+        operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {
                 self.operationsInQueue.removeValue(forKey: fileId)
                 if operation.result.uploadFile.error != .taskRescheduled {

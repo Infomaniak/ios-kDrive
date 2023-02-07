@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import Sentry
 import InfomaniakDI
@@ -102,6 +101,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     override public init() {
         super.init()
+        
+        BackgroundSessionManagerLog("Starting up")
         backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
     }
 
@@ -116,7 +117,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         backgroundUrlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         backgroundUrlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
-        backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 3 // 3 days before giving up
+        backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 1 // 1 days before giving up (chunk upload session not valid after a day)
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [weak self] in
@@ -166,7 +167,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
            let fileUrl = fileUrl {
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
-            DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "")")
+            BackgroundSessionManagerLog("Rescheduled task \(request.url?.absoluteString ?? "")")
             return backgroundSession.identifier
         } else {
             return nil
@@ -212,7 +213,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        DDLogError("[BackgroundUploadSession] Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")")
+        BackgroundSessionManagerLog("Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")",
+                                    level: .error)
         if let error = error {
             SentrySDK.capture(error: error) { scope in
                 scope.setContext(value: [
@@ -238,11 +240,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             
             let operation = UploadOperation(file: file, task: task, urlSession: self)
             
-            syncQueue.async(flags: .barrier) { [weak self] in
-                guard let self else {
-                    return
-                }
-                
+            syncQueue.async(flags: .barrier) { [unowned self] in
                 self.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
                 self.operations.append(operation)
             }
@@ -264,7 +262,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             hasUploadDate = file.uploadDate != nil
         }
 
-        DDLogError("[BackgroundUploadSession] No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")")
+        BackgroundSessionManagerLog("No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")",
+                                    level: .error)
         SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
             scope.setContext(value: [
                 "Session Id": session.identifier,

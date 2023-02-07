@@ -146,14 +146,24 @@ final class ITRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
         
         // WHEN
-        do {
-            let preferedChunkSize = guts.preferedChunkSize(for: 0)
-            
-            // THEN
-            XCTAssertTrue(preferedChunkSize > 0)
-        } catch {
-            XCTFail("Unexpected \(error)")
-        }
+        let preferedChunkSize = guts.preferedChunkSize(for: 0)
+        
+        // THEN
+        XCTAssertTrue(preferedChunkSize == 0)
+    }
+    
+    func testPreferedChunkSize_notLargerThanFileSize() {
+        // GIVEN
+        let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
+        let superSmallFileSize: UInt64 = 10
+        
+        // WHEN
+        let preferedChunkSize = guts.preferedChunkSize(for: superSmallFileSize)
+        
+        // THEN
+        XCTAssertEqual(preferedChunkSize,
+                       superSmallFileSize,
+                       "we expect the chunk size to be capped at the file size for small files")
     }
     
 }

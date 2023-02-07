@@ -293,6 +293,7 @@ final class UTRangeProviderGuts: XCTestCase {
         // GIVEN
         let fileBytes = UInt64(769)
         let chunkMinSize = RangeProvider.APIConsts.chunkMinSize
+        XCTAssertTrue(chunkMinSize > fileBytes, "this precondition should be true")
         
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
@@ -301,7 +302,8 @@ final class UTRangeProviderGuts: XCTestCase {
         let preferedChunkSize = guts.preferedChunkSize(for: fileBytes)
         
         // THEN
-        XCTAssertEqual(preferedChunkSize, chunkMinSize)
+        XCTAssertEqual(preferedChunkSize, fileBytes)
+        
     }
     
     func testPreferedChunkSize_equalsMinChunk() {

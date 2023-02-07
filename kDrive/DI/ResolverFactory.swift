@@ -22,12 +22,19 @@ import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
+import os.log
+
+/// Something that can associate a custom identifier with a `Factory`
+public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 /// Something that setups the service factories
 ///
 /// Trick : enum as no init, perfect for namespacing
 enum FactoryService {
     static func setupDependencyInjection() {
+#if DEBUG
+        SimpleResolver.register(debugServicies)
+#endif
         let factories = networkingServicies + uploadServicies + miscServicies
         SimpleResolver.register(factories)
     }
@@ -114,10 +121,38 @@ enum FactoryService {
         ]
         return servicies
     }
+    
+#if DEBUG
+    /// Debug servicies
+    private static var debugServicies: [FactoryWithIdentifier] {
+        if #available(iOS 14.0, *) {
+            let loggerFactory = Factory(type: Logger.self) { parameters, _ in
+                guard let category = parameters?["category"] as? String else {
+                    fatalError("Please pass a category")
+                }
+                let subsystem = Bundle.main.bundleIdentifier!
+                return Logger(subsystem: subsystem, category: category)
+            }
+            
+            let servicies = [
+                (loggerFactory, "UploadOperation"),
+                (loggerFactory, "BackgroundSessionManager"),
+                (loggerFactory, "UploadQueue"),
+            ]
+            return servicies
+        } else {
+            return []
+        }
+    }
+#endif
 }
 
 extension SimpleResolver {
     static func register(_ factories: [Factory]) {
         factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
+    }
+    
+    static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
+        factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
     }
 }

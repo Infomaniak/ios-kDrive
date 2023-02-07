@@ -150,14 +150,14 @@ public extension DriveApiFetcher {
         return result
     }
     
-    func cancelSession(drive: AbstractDrive) async throws -> Bool {
-        let route: Endpoint = .uploadSession(drive: drive)
+    func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> Bool {
+        let route: Endpoint = .cancelSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .DELETE,
                               route: route,
                               GETParameters: nil,
                               body: .none)
         
-        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
     
@@ -168,7 +168,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
         
-        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
     
@@ -188,7 +188,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .requestBody(chunk))
         
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
     
@@ -205,7 +205,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .none)
         
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
 }

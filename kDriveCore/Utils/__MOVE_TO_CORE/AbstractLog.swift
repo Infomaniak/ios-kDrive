@@ -18,7 +18,10 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import os.log
+import InfomaniakDI
 
+/// A representation of sandard log levels
 public enum AbstractLogLevel {
     case emergency
     case alert
@@ -28,10 +31,32 @@ public enum AbstractLogLevel {
     case notice
     case info
     case debug
+    /// Use this level only to capture system-level or multiprocess information when reporting system errors.
+    case fault
+    
+    /// bridge to OSLogType
+    var logType: OSLogType {
+        switch self {
+        case .warning, .notice, .emergency, .alert, .critical:
+            return .default
+        case .error:
+            return .error
+        case .info:
+            return .info
+        case .debug:
+            return .debug
+        case .fault:
+            return .fault
+        }
+    }
 }
 
+fileprivate let categoryKey = "category"
 
-/// Simple abstract log mechanism, wrapping cocoalumberjack
+/// Abstract log mechanism, wrapping cocoalumberjack and OSLog
+///
+/// OSLog messages are only enabled on iOS 14.0 and up, also enabled if the `DEBUG` flag is set.
+///
 /// - Parameters:
 ///   - message: the message we want to log
 ///   - level: the log level
@@ -41,37 +66,66 @@ public enum AbstractLogLevel {
 ///   - line: the line this event originates from
 ///   - tag: any extra info
 ///   - async: Should this be async?
-@inlinable public func ABLog(_ message: @autoclosure () -> Any,
-                             level: AbstractLogLevel = .info,
-                             context: Int = 0,
-                             file: StaticString = #file,
-                             function: StaticString = #function,
-                             line: UInt = #line,
-                             tag: Any? = nil,
-                             asynchronous async: Bool = asyncLoggingEnabled) {
-    #if DEBUG
-    // Forward to cocoaLumberjack
-    switch level {
-    case .error:
-        DDLogError(message(),
-                   context: context,
-                   file: file,
-                   function: function,
-                   line: line,
-                   tag: tag,
-                   asynchronous: async,
-                   ddlog: .sharedInstance)
-    case.info: fallthrough
-    default:
-        DDLogInfo(message(),
-                  context: context,
-                  file: file,
-                  function: function,
-                  line: line,
-                  tag: tag,
-                  asynchronous: async,
-                  ddlog: .sharedInstance)
-    }
+public func ABLog(_ message: @autoclosure () -> Any,
+                  category: String = "",
+                  subsystem: String = Bundle.main.bundleIdentifier!,
+                  level: AbstractLogLevel = .info,
+                  context: Int = 0,
+                  file: StaticString = #file,
+                  function: StaticString = #function,
+                  line: UInt = #line,
+                  tag: Any? = nil,
+                  asynchronous async: Bool = asyncLoggingEnabled) {
+    let messageString = message() as! String
     
-    #endif
+    // Forward to OS.log
+#if DEBUG
+    if #available(iOS 14.0, *), category.isEmpty == false {
+        let factoryParameters = [categoryKey : category]
+        @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
+        
+        switch level {
+        case .warning, .alert:
+            logger.warning("\(messageString)")
+        case .emergency, .critical:
+            logger.critical("\(messageString)")
+        case .error:
+            logger.error("\(messageString)")
+        case .notice:
+            logger.notice("\(messageString)")
+        case .info:
+            logger.info("\(messageString)")
+        case .debug:
+            logger.debug("\(messageString)")
+        case .fault:
+            logger.fault("\(messageString)")
+        }
+    } else {
+        // os_log() only support `StaticSting`
+    }
+#endif
+    
+    // Forward to cocoaLumberjack
+//    let buffer = "[\(category)] " + messageString
+//    switch level {
+//    case .error:
+//        DDLogError(buffer,
+//                   context: context,
+//                   file: file,
+//                   function: function,
+//                   line: line,
+//                   tag: tag,
+//                   asynchronous: async,
+//                   ddlog: .sharedInstance)
+//    case.info: fallthrough
+//    default:
+//        DDLogInfo(buffer,
+//                  context: context,
+//                  file: file,
+//                  function: function,
+//                  line: line,
+//                  tag: tag,
+//                  asynchronous: async,
+//                  ddlog: .sharedInstance)
+//    }
 }

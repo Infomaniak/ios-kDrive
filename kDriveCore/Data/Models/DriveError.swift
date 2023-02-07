@@ -110,10 +110,11 @@ public struct DriveError: Error, Equatable {
     public static let downloadFailed = DriveError(type: .localError, code: "errorDownload", localizedString: KDriveResourcesStrings.Localizable.errorDownload)
     public static let cachingFailed = DriveError(type: .localError, code: "errorCache", localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let stillUploadingError = DriveError(type: .serverError, code: "still_uploading_error", localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
+    public static let uploadSessionAlreadyExists = DriveError(type: .serverError, code: "upload_not_terminated_error")
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists, stillUploadingError]
+    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists, stillUploadingError, uploadSessionAlreadyExists]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()

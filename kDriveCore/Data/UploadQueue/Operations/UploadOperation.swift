@@ -28,11 +28,12 @@ import UIKit
 /// The current step of the upload with chunks operation
 enum UploadOperationStep {
     case `init`
+    case initCompletionHandler // ? move to linked op ?
     case startup
     case fetchSession
     case chunking
     case schedullingUpload
-    case completionHandler // ? move to linked op ?
+    case terminated
 }
 
 public struct UploadCompletionResult {
@@ -43,21 +44,17 @@ public struct UploadCompletionResult {
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // MARK: - Attributes
 
+    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     @LazyInjectService var uploadQueue: UploadQueueable
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var uploadProgressable: UploadProgressable
-
     @LazyInjectService var accountManager: AccountManageable
-
     @LazyInjectService var uploadTokenManager: UploadTokenManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-
-    #warning("⚠️ prolly should be replaced by a weak var passed at init, leak otherwise.")
-    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     
-    var step: UploadOperationStep {
+    private var step: UploadOperationStep {
         didSet {
-            ABLog("~> moved to step:\(step) for: \n \(self.debugDescription)")
+            UploadOperationLog("~> moved to step:\(step) for: \n \(self.debugDescription)", level: .debug)
         }
     }
     
@@ -65,6 +62,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
         <\(type(of: self)):\(super.debugDescription)
         uploading file:'\(file)'
+        backgroundTaskIdentifier:'\(backgroundTaskIdentifier)'
         step: '\(step)'>
         """
     }
@@ -74,7 +72,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     private let urlSession: FileUploadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid // ? Can I remove UIkit code from this ?
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
     private var uploadToken: UploadToken?
     private var progressObservation: NSKeyValueObservation?
 
@@ -103,7 +101,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         self.urlSession = urlSession
         self.itemIdentifier = nil
         self.result = UploadCompletionResult()
-        self.step = .completionHandler
+        self.step = .initCompletionHandler
         
         let key = task.currentRequest?.url?.absoluteString ?? UUID().uuidString
         self.uploadTasks[key] = task
@@ -111,10 +109,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     override public func execute() async {
         self.step = .startup
-        ABLog("[UploadOperation] Job \(file.id) started")
+        UploadOperationLog("execute \(file.id)")
         // Always check for cancellation before launching the task
         if isCancelled {
-            ABLog("[UploadOperation] Job \(file.id) canceled")
+            UploadOperationLog("upload \(file.id) canceled")
             // Must move the operation to the finished state if it is canceled.
             file.error = .taskCancelled
             end()
@@ -122,7 +120,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         // Start background task
-        // TODO: Ask again about creating only one in the Queue. This is not the NSURLSessionBG Identifier, 30 sec could be split between all tasks. check.
         if !Bundle.main.isExtension {
             backgroundTaskIdentifier = await UIApplication.shared.beginBackgroundTask(withName: "File Uploader",
                                                                                       expirationHandler: backgroundTaskExpired)
@@ -131,20 +128,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Fetch content from local library if needed
         getPhAssetIfNeeded()
 
-        ABLog("[UploadOperation] Fetching Token \(file.id)")
-        file.maxRetryCount -= 1 // TODO: ? what does it mean ?
-//        guard let token = uploadToken else {
-//            ABLog("[UploadOperation] Failed to fetch upload token for job \(file.id)", level: .error)
-//            file.error = .refreshToken
-//            end()
-//            return
-//        }
-
+        UploadOperationLog("Asking for an upload Session \(file.id)")
+        file.maxRetryCount -= 1
         guard let driveFileManager = accountManager.getDriveFileManager(for: accountManager.currentDriveId,
                                                                         userId: accountManager.currentUserId) else {
-            file.error = .refreshToken
-            ABLog("[UploadOperation] Failed to getDriveFileManager fid:\(file.id) userId:\(accountManager.currentUserId)",
-                  level: .error)
+            UploadOperationLog("Failed to getDriveFileManager fid:\(file.id) userId:\(accountManager.currentUserId)",
+                               level: .error)
             file.error = .localError
             end()
             return
@@ -155,8 +144,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Check file is readable
         guard let fileUrl = file.pathURL,
-              FileManager.default.fileExists(atPath: fileUrl) else {
-            ABLog("[UploadOperation] File has not a valid readable URL \(String(describing: file.pathURL)) for \(file.id)", level: .error)
+              FileManager.default.isReadableFile(atPath: fileUrl.absoluteString.replacingOccurrences(of: "file://", with: "")) else {
+            UploadOperationLog("File has not a valid readable URL \(String(describing: file.pathURL)) for \(file.id)",
+                               level: .error)
             file.error = .fileNotFound
             end()
             return
@@ -170,12 +160,18 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             fileSize = try rangeProvider.fileSize
             ranges = try rangeProvider.allRanges
         } catch {
-            ABLog("[UploadOperation] Unable to acquire ranges for \(file.id)", level: .error)
+            UploadOperationLog("Unable to acquire ranges:\(error) for \(file.id)", level: .error)
             file.error = .localError
             end()
             return
         }
+        
+        let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
+        UploadOperationLog("got fileSize:\(mebibytes)MiB ranges:\(ranges) \(file.id)")
 
+        
+        // TODO: Read session from UploadFile if any
+        
         self.step = .fetchSession
         let session: UploadSession
         do {
@@ -184,26 +180,39 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                         totalSize: fileSize,
                                                         fileName: file.name,
                                                         totalChunks: ranges.count,
-                                                        conflictResolution: .throwError,
+                                                        conflictResolution: .version,
                                                         directoryID: file.parentDirectoryId)
         } catch {
-            ABLog("[UploadOperation] Unable to get an UploadSession for \(file.id)", level: .error)
+            UploadOperationLog("Unable to get an UploadSession:\(error) for \(file.id)", level: .error)
+            
+            // delete existing session as we do not have it localy
+            if error == DriveError.uploadSessionAlreadyExists {
+//                // TODO: wait for API team to return
+//                do {
+//                    let result = try await apiFetcher.cancelSession(drive: drive, sessionToken: /*AbstractToken*/)
+//                    UploadOperationLog("cancelSession:\(result) for \(file.id)")
+//                }
+//                catch {
+//                    UploadOperationLog("cancelSession error:\(error) for \(file.id)", level: .error)
+//                }
+            }
+            
+            
             file.error = .refreshToken
             end()
             return
         }
         
         // Save session linked to an upload file + date to invalidate
-//        BackgroundRealm.uploads.execute { uploadsRealm in
-//            try? uploadsRealm.safeWrite {
-//                uploadsRealm.add(UploadFile(value: file), update: .modified)
-//            }
-//        }
+        BackgroundRealm.uploads.execute { uploadsRealm in
+            try? uploadsRealm.safeWrite {
+                uploadsRealm.add(UploadFile(value: file), update: .modified)
+            }
+        }
         
-
         // Chunks creation from ranges
         guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: ranges) else {
-            ABLog("[UploadOperation] Unable to get a ChunkProvider for \(file.id)", level: .error)
+            UploadOperationLog("Unable to get a ChunkProvider for \(file.id)", level: .error)
             file.error = .localError
             end()
             return
@@ -216,16 +225,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         typealias RequestParams = (chunkNumber: Int, chunkSize: Int, chunkHash: String, sessionToken: String, path: URL)
         var resquestBuilder = [RequestParams]()
         while let chunk = chunkProvider.next() {
-            ABLog("[UploadOperation] Storing Chunk [\(index)] \(file.id)")
+            UploadOperationLog("Storing Chunk idx:[\(index)] \(file.id)")
+            if isCancelled {
+                UploadOperationLog("Job \(file.id) canceled")
+                // Must move the operation to the finished state if it is canceled.
+                file.error = .taskCancelled
+                end()
+                break
+            }
+            
             do {
-                if isCancelled {
-                    ABLog("[UploadOperation] Job \(file.id) canceled")
-                    // Must move the operation to the finished state if it is canceled.
-                    file.error = .taskCancelled
-                    end()
-                    return
-                }
-                
                 let chunkPath = try storeChunk(chunk, index: index, file: file)
                 let chunkHash = "sha256:\(chunk.SHA256DigestString)"
                 let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHash, sessionToken: session.token.token, path: chunkPath)
@@ -233,19 +242,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 
                 // TODO: store `RequestParams` in DB
                 // Save UploadFile state
-//                if index/4 == 0 { // ? Store at every step ?
-//                    BackgroundRealm.uploads.execute { uploadsRealm in
-//                        try? uploadsRealm.safeWrite {
-//                            uploadsRealm.add(UploadFile(value: file), update: .modified)
-//                        }
-//                    }
-//                }
-                
+                BackgroundRealm.uploads.execute { uploadsRealm in
+                    try? uploadsRealm.safeWrite {
+                        uploadsRealm.add(UploadFile(value: file), update: .modified)
+                    }
+                }
+
             } catch {
-                ABLog("[UploadOperation] Unable to save a chunk to storage idx:\(index) \(file.id)", level: .error)
+                UploadOperationLog("Unable to save a chunk to storage idx:\(index) error:\(error) for:\(file.id)", level: .error)
                 file.error = .localError
                 end()
-                return
+                break
             }
             index += 1
         }
@@ -253,7 +260,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // schedule all the chunks to be uploaded
         // TODO: read request params from DB
         self.step = .schedullingUpload
-        for (index, params) in resquestBuilder.enumerated() {
+        for params in resquestBuilder {
             do {
                 let request = try buildRequest(chunkNumber: params.0, chunkSize: params.1, chunkHash: params.2, sessionToken: params.3)
                 let uploadTask = urlSession.uploadTask(with: request, fromFile: params.4, completionHandler: uploadCompletion)
@@ -268,7 +275,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 uploadTask.resume()
             }
             catch {
-                ABLog("[UploadOperation] Unable to create an upload request for chunk \(params) - \(file.id)", level: .error)
+                UploadOperationLog("Unable to create an upload request for chunk \(params) error:\(error) - \(file.id)", level: .error)
                 file.error = .localError
                 end()
                 return
@@ -326,7 +333,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 }
             }
         } else {
-//            ABLog("[UploadOperation] No file path found for job \(file.id)", level: .error)
+//            UploadOperationLog("No file path found for job \(file.id)", level: .error)
 //            file.error = .fileNotFound
 //            end()
         }
@@ -393,13 +400,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     private func getPhAssetIfNeeded() {
         if file.type == .phAsset && file.pathURL == nil {
-            ABLog("[UploadOperation] Need to fetch photo asset")
+            UploadOperationLog("Need to fetch photo asset")
             if let asset = file.getPHAsset(),
                let url = photoLibraryUploader.getUrlSync(for: asset) {
-                ABLog("[UploadOperation] Got photo asset, writing URL")
+                UploadOperationLog("Got photo asset, writing URL")
                 file.pathURL = url
             } else {
-                ABLog("[UploadOperation] Failed to get photo asset", level: .error)
+                UploadOperationLog("Failed to get photo asset", level: .error)
             }
         }
     }
@@ -408,16 +415,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     // called on restoration
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
+        UploadOperationLog("completionHandler called for \(file.id)")
+        
         completionLock.wait()
         // Task has called end() in backgroundTaskExpired
         guard !isFinished else { return }
         completionLock.enter()
 
+        // TODO: Close session to validate file.
+        
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
             // Client-side error
-            ABLog("[UploadOperation] Client-side error for job \(file.id): \(error)", level: .error)
+            UploadOperationLog("Client-side error for job \(file.id): \(error)", level: .error)
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
             } else {
@@ -437,7 +448,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                   let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
                   let driveFile = response.data?.first {
             // Success
-            ABLog("[UploadOperation] Job \(file.id) successful")
+            UploadOperationLog("Job \(file.id) successful")
             file.uploadDate = Date()
             file.error = nil
             if let driveFileManager = accountManager.getDriveFileManager(for: file.driveId, userId: file.userId) {
@@ -461,7 +472,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
-            ABLog("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)", level: .error)
+            UploadOperationLog("Server error for job \(file.id) (code: \(statusCode)): \(error)", level: .error)
             file.sessionUrl = ""
             file.error = error
             if error == .quotaExceeded {
@@ -483,12 +494,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // over 30sec
     private func backgroundTaskExpired() {
+        UploadOperationLog("backgroundTaskExpired enter\(file.id)")
+
         completionLock.wait()
         // Task has called end() in uploadCompletion
         guard !isFinished else { return }
         completionLock.enter()
 
-        ABLog("[UploadOperation] Background task expired")
+        UploadOperationLog("backgroundTaskExpired post lock \(file.id)")
         let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
         breadcrumb.message = "Rescheduling file \(file.name)"
         breadcrumb.data = ["File id": file.id,
@@ -521,16 +534,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
         
         end()
+        UploadOperationLog("backgroundTaskExpired relocking \(file.id)")
         completionLock.leave()
-        ABLog("[UploadOperation] Expiration handler end block job \(file.id)")
+        UploadOperationLog("backgroundTaskExpired done \(file.id)")
     }
 
     // did finish in time
     private func end() {
         if let error = file.error {
-            ABLog("[UploadOperation] Job \(file.id) errorCode: \(error.code) error:\(error)", level: .error)
+            UploadOperationLog("end file:\(file.id) errorCode: \(error.code) error:\(error)", level: .error)
         } else {
-            ABLog("[UploadOperation] Job \(file.id)")
+            UploadOperationLog("end file:\(file.id)")
         }
 
         if let path = file.pathURL,
@@ -562,7 +576,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         // Terminate the NSOperation
-        ABLog("[UploadOperation] Job \(file.id) operation terminated")
+        UploadOperationLog("call finish \(file.id)")
+        step = .terminated
         finish()
     }
 }

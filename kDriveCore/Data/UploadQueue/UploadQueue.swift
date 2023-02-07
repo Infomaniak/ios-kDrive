@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
@@ -95,6 +94,8 @@ public class UploadQueue: UploadNotifiable, UploadProgressable {
     )
 
     public init() {
+        UploadQueueLog("Starting up")
+        
         // Create Realm
         dispatchQueue.sync {
             do {
@@ -124,13 +125,17 @@ public class UploadQueue: UploadNotifiable, UploadProgressable {
     public func getUploadingFiles(userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId)).sorted(byKeyPath: "taskCreationDate")
+        return realm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
+            .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds)).sorted(byKeyPath: "taskCreationDate")
+        return realm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
+            .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
@@ -158,7 +163,7 @@ public class UploadQueue: UploadNotifiable, UploadProgressable {
         let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
             let fiftyMB = 50 * 1024 * 1024
             let compactingNeeded = (totalBytes > fiftyMB) && (Double(usedBytes) / Double(totalBytes)) < 0.5
-            DDLogInfo("Compacting uploads realm is needed ? \(compactingNeeded)")
+            UploadQueueLog("Compacting uploads realm is needed ? \(compactingNeeded)")
             return compactingNeeded
         }
 
@@ -172,7 +177,7 @@ public class UploadQueue: UploadNotifiable, UploadProgressable {
         do {
             _ = try Realm(configuration: config)
         } catch {
-            DDLogError("Failed to compact uploads realm: \(error)")
+            UploadQueueLog("Failed to compact uploads realm: \(error)", level: .error)
         }
     }
 }
