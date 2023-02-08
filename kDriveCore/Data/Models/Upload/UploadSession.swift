@@ -19,7 +19,7 @@
 import Foundation
 
 public struct UploadSession: Decodable {
-    public var directoryID: UInt64?
+    public var directoryId: UInt64?
     
     public var directoryPath: String?
     
@@ -34,7 +34,7 @@ public struct UploadSession: Decodable {
     public var token: UploadSessionToken?
     
     enum CodingKeys: String, CodingKey {
-        case directoryID = "directory_id"
+        case directoryId = "directory_id"
         case directoryPath = "directory_path"
         case file
         case fileName = "file_name"

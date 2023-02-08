@@ -25,7 +25,7 @@ import UIKit
 
 @MainActor
 class FilePresenter {
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     weak var viewController: UIViewController?
 

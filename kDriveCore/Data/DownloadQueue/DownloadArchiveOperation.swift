@@ -25,7 +25,7 @@ import InfomaniakDI
 public class DownloadArchiveOperation: Operation {
     // MARK: - Attributes
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     private let archiveId: String
     private let driveFileManager: DriveFileManager

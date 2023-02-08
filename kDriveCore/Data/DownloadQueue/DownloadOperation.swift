@@ -26,7 +26,7 @@ import InfomaniakLogin
 public class DownloadOperation: Operation {
     // MARK: - Attributes
     
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
 
     private let file: File

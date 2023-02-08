@@ -44,7 +44,7 @@ public class DownloadTask: Object {
 public final class DownloadQueue {
     // MARK: - Attributes
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"

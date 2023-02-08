@@ -16,25 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import BackgroundTasks
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
-import kDriveCore
 
 /// Something that setups the service factories
 ///
 /// Trick : enum as no init, perfect for namespacing
-enum FactoryService {
-    static func setupDependencyInjection() {
-        let factories = networkingServicies + miscServicies
+public enum FactoryService {
+    public static func setupDependencyInjection() {
+        let factories = networkingServices + miscServices
         SimpleResolver.register(factories)
     }
 
-    /// Networking related servicies
-    private static var networkingServicies: [Factory] {
-        let servicies = [
+    /// Networking related services
+    private static var networkingServices: [Factory] {
+        let services = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
                 let redirectUri = "com.infomaniak.drive://oauth2redirect"
@@ -74,25 +74,36 @@ enum FactoryService {
                 FileImportHelper()
             },
         ]
-        return servicies
+        return services
     }
 
-    /// Misc servicies
-    private static var miscServicies: [Factory] {
-        let servicies = [
+    /// Misc services
+    private static var miscServices: [Factory] {
+        let services = [
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()
             },
+            Factory(type: BGTaskScheduler.self) { _, _ in
+                BGTaskScheduler.shared
+            },
         ]
-        return servicies
+        return services
     }
 }
 
-extension SimpleResolver {
+public extension SimpleResolver {
     static func register(_ factories: [Factory]) {
         factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
+    }
+}
+
+/// Something that loads the DI on init
+public struct EarlyDIHook {
+    public init() {
+        // setup DI ASAP
+        FactoryService.setupDependencyInjection()
     }
 }

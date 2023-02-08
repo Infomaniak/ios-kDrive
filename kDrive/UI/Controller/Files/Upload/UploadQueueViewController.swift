@@ -29,8 +29,8 @@ class UploadQueueViewController: UIViewController {
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
 
-    @InjectService var accountManager: AccountManageable
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
 
     var currentDirectory: File!
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())

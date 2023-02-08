@@ -24,10 +24,6 @@ import InfomaniakDI
 
 extension AppDelegate {
     
-    var bgScheduler :BGTaskScheduler {
-        BGTaskScheduler.shared
-    }
-    
     /* To debug background tasks:
       Launch ->
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
@@ -47,8 +43,8 @@ extension AppDelegate {
         longBackgroundRefreshRequest.requiresNetworkConnectivity = true
         longBackgroundRefreshRequest.requiresExternalPower = true
         do {
-            try bgScheduler.submit(backgroundRefreshRequest)
-            try bgScheduler.submit(longBackgroundRefreshRequest)
+            try backgroundTaskScheduler.submit(backgroundRefreshRequest)
+            try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
         } catch {
             DDLogError("Error scheduling background task: \(error)")
         }
@@ -56,7 +52,7 @@ extension AppDelegate {
     
     /// Register BackgroundTasks in scheduller for later
     func registerBackgroundTasks() {
-        var registered = bgScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
+        var registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
@@ -70,7 +66,7 @@ extension AppDelegate {
             }
         }
         DDLogInfo("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
-        registered = bgScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
+        registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {

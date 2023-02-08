@@ -19,20 +19,20 @@
 import Foundation
 @testable import InfomaniakDI
 @testable import kDrive
+import kDriveCore
 
 /// Something to help using the DI in the test target
-public struct MockingHelper {
-    
+public enum MockingHelper {
     /// Register "real" instances like in the app
     static func registerConcreteTypes() {
         FactoryService.setupDependencyInjection()
     }
-    
+
     /// Register most instances with mocks
     static func registerMockedTypes() {
         fatalError("TODO")
     }
-    
+
     /// Clear stored types in DI
     static func clearRegisteredTypes() {
         SimpleResolver.sharedResolver.removeAll()

@@ -25,8 +25,8 @@ import InfomaniakDI
 class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
-    @InjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
     
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {

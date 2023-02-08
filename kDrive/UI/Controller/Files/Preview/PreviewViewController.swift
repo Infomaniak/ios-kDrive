@@ -34,7 +34,7 @@ protocol PreviewContentCellDelegate: AnyObject {
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     class PreviewError {
         let fileId: Int

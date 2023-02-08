@@ -30,7 +30,7 @@ class MigrationViewController: UIViewController {
     @IBOutlet weak var retryButton: UIButton!
     @IBOutlet weak var migrationFailedLabel: UILabel!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
     
     private var photoSyncEnabled: Bool?
     private var slides: [Slide] = []
