@@ -20,25 +20,6 @@ import Foundation
 
 // MARK: - Log methods, by "category"
 
-/// shorthand for ABLog, with "UploadOperation" category
-public func UploadOperationLog(_ message: @autoclosure () -> Any,
-                               level: AbstractLogLevel = .info,
-                               context: Int = 0,
-                               file: StaticString = #file,
-                               function: StaticString = #function,
-                               line: UInt = #line,
-                               tag: Any? = nil) {
-    let category = "UploadOperation"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
-
 /// shorthand for ABLog, with "BackgroundSessionManager" category
 public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
                                         level: AbstractLogLevel = .info,
@@ -76,3 +57,44 @@ public func UploadQueueLog(_ message: @autoclosure () -> Any,
           line: line,
           tag: tag)
 }
+
+// MARK: Operations
+
+/// shorthand for ABLog, with "UploadOperation" category
+public func UploadOperationLog(_ message: @autoclosure () -> Any,
+                               level: AbstractLogLevel = .info,
+                               context: Int = 0,
+                               file: StaticString = #file,
+                               function: StaticString = #function,
+                               line: UInt = #line,
+                               tag: Any? = nil) {
+    let category = "UploadOperation"
+    ABLog(message(),
+          category: category,
+          level: level,
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+
+/// shorthand for ABLog, with "CloseUploadSessionOperation" category
+public func CloseUploadSessionOperationLog(_ message: @autoclosure () -> Any,
+                                           level: AbstractLogLevel = .info,
+                                           context: Int = 0,
+                                           file: StaticString = #file,
+                                           function: StaticString = #function,
+                                           line: UInt = #line,
+                                           tag: Any? = nil) {
+    let category = "CloseUploadSessionOperation"
+    ABLog(message(),
+          category: category,
+          level: level,
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+

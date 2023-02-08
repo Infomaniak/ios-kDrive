@@ -32,6 +32,7 @@ enum UploadOperationStep {
     case startup
     case fetchSession
     case chunking
+    case chunk(_ index: Int)
     case schedullingUpload
     case terminated
 }
@@ -42,6 +43,11 @@ public struct UploadCompletionResult {
 }
 
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+    
+    enum ErrorDomain: Error {
+        case unableToBuildRequest
+    }
+    
     // MARK: - Attributes
 
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
@@ -49,8 +55,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var uploadProgressable: UploadProgressable
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadTokenManager: UploadTokenManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var fileManager: FileManagerable
     
     private var step: UploadOperationStep {
         didSet {
@@ -80,6 +86,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     private let completionLock = DispatchGroup()
 
+    //TODO: Remove, store in DB instead
+    var uploadSession: UploadSession!
+    
     // MARK: - Public methods
 
     public required init(file: UploadFile,
@@ -144,7 +153,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Check file is readable
         guard let fileUrl = file.pathURL,
-              FileManager.default.isReadableFile(atPath: fileUrl.absoluteString.replacingOccurrences(of: "file://", with: "")) else {
+              fileManager.isReadableFile(atPath: fileUrl.path) else {
             UploadOperationLog("File has not a valid readable URL \(String(describing: file.pathURL)) for \(file.id)",
                                level: .error)
             file.error = .fileNotFound
@@ -168,10 +177,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         
         let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
         UploadOperationLog("got fileSize:\(mebibytes)MiB ranges:\(ranges) \(file.id)")
-
         
         // TODO: Read session from UploadFile if any
-        
         self.step = .fetchSession
         let session: UploadSession
         do {
@@ -184,24 +191,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                         directoryID: file.parentDirectoryId)
         } catch {
             UploadOperationLog("Unable to get an UploadSession:\(error) for \(file.id)", level: .error)
-            
-            // delete existing session as we do not have it localy
-            if error == DriveError.uploadSessionAlreadyExists {
-//                // TODO: wait for API team to return
-//                do {
-//                    let result = try await apiFetcher.cancelSession(drive: drive, sessionToken: /*AbstractToken*/)
-//                    UploadOperationLog("cancelSession:\(result) for \(file.id)")
-//                }
-//                catch {
-//                    UploadOperationLog("cancelSession error:\(error) for \(file.id)", level: .error)
-//                }
-            }
-            
-            
             file.error = .refreshToken
             end()
             return
         }
+        
+        // TODO: remove
+        uploadSession = session
         
         // Save session linked to an upload file + date to invalidate
         BackgroundRealm.uploads.execute { uploadsRealm in
@@ -220,12 +216,15 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // generate and store chunks asap.
         self.step = .chunking
-        var index: Int = 0
+        // API requires index start at 1
+        var index: Int = 1
         // TODO: store in DB, temp inmemory structure
         typealias RequestParams = (chunkNumber: Int, chunkSize: Int, chunkHash: String, sessionToken: String, path: URL)
         var resquestBuilder = [RequestParams]()
         while let chunk = chunkProvider.next() {
             UploadOperationLog("Storing Chunk idx:[\(index)] \(file.id)")
+            step = .chunk(index)
+            
             if isCancelled {
                 UploadOperationLog("Job \(file.id) canceled")
                 // Must move the operation to the finished state if it is canceled.
@@ -235,9 +234,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             
             do {
-                let chunkPath = try storeChunk(chunk, index: index, file: file)
-                let chunkHash = "sha256:\(chunk.SHA256DigestString)"
-                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHash, sessionToken: session.token.token, path: chunkPath)
+                let chunkSHA256 = chunk.SHA256DigestString
+                let chunkPath = try storeChunk(chunk, index: index, fileId: file.id, sessionToken: session.token.token, hash: chunkSHA256)
+                let chunkHashHeader = "sha256:\(chunkSHA256)"
+                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHashHeader, sessionToken: session.token.token, path: chunkPath)
                 resquestBuilder.append(params)
                 
                 // TODO: store `RequestParams` in DB
@@ -262,10 +262,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         self.step = .schedullingUpload
         for params in resquestBuilder {
             do {
-                let request = try buildRequest(chunkNumber: params.0, chunkSize: params.1, chunkHash: params.2, sessionToken: params.3)
+                let chunkSize = params.1
+                let request = try buildRequest(chunkNumber: params.0, chunkSize: chunkSize, chunkHash: params.2, sessionToken: params.3)
+                UploadOperationLog("chunk request:\(request) idx:\(index) for:\(file.id)")
+
                 let uploadTask = urlSession.uploadTask(with: request, fromFile: params.4, completionHandler: uploadCompletion)
                 // Extra 512 bytes for request headers
-                uploadTask.countOfBytesClientExpectsToSend = file.size + 512
+                uploadTask.countOfBytesClientExpectsToSend = Int64(chunkSize) + 512
                 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
                 uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
                 
@@ -306,7 +309,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         file.sessionId = urlSession.identifier
 
         if let filePath = file.pathURL,
-           FileManager.default.isReadableFile(atPath: filePath.path) {
+           fileManager.isReadableFile(atPath: filePath.path) {
             let uploadTask = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
             task = uploadTask
 
@@ -344,58 +347,67 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     // MARK: Build request
     
-//    func buildRequest(chunkNumber: Int,
-//                      sessionToken: String,
-//                      chunk: Data) throws -> URLRequest {
-//        let chunkSize = chunk.count
-//        let chunkHash = "sha256:\(chunk.SHA256DigestString)"
-//        return try buildRequest(chunkNumber: chunkNumber,
-//                                chunkSize: chunkSize,
-//                                chunkHash: chunkHash,
-//                                sessionToken: sessionToken)
-//    }
-    
     func buildRequest(chunkNumber: Int,
                       chunkSize: Int,
                       chunkHash: String,
                       sessionToken: String) throws -> URLRequest {
-        let parameters: [String: String] = [DriveApiFetcher.APIParameters.chunkNumber.rawValue: "\(chunkNumber)",
-                                            DriveApiFetcher.APIParameters.chunkSize.rawValue: "\(chunkSize)",
-                                            DriveApiFetcher.APIParameters.chunkHash.rawValue: chunkHash]
+        // TODO: Remove accessToken when API updated
+        let accessToken = accountManager.currentAccount.token.accessToken
+        let headerParameters: [String: String] = ["Authorization": "Bearer \(accessToken)"]
+        let headers = HTTPHeaders(headerParameters)
         let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: accountManager.currentDriveId),
                                            sessionToken: AbstractTokenWrapper(token: sessionToken))
         
-        let headers = HTTPHeaders(parameters)
-        return try URLRequest(url: route.url, method: .post, headers: headers)
+        guard var urlComponents = URLComponents(url: route.url, resolvingAgainstBaseURL: false) else {
+            throw ErrorDomain.unableToBuildRequest
+        }
+        
+        let getParameters = [
+            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkNumber.rawValue, value: "\(chunkNumber)"),
+            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkSize.rawValue, value: "\(chunkSize)"),
+            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkHash.rawValue, value: chunkHash),
+        ]
+        urlComponents.queryItems = getParameters
+        
+        guard let url = urlComponents.url else {
+            throw ErrorDomain.unableToBuildRequest
+        }
+        
+        return try URLRequest(url: url, method: .post, headers: headers)
     }
     
     // MARK: Chunks
     
-    func storeChunk(_ buffer: Data, index: Int, file: UploadFile) throws -> URL {
-        let fileUrlString = buildChunkPath(index: index, file: file)
-        let absoluteChunkPath = URL(fileURLWithPath: fileUrlString)
-
-        try storeChunk(buffer, destination: absoluteChunkPath)
-        return absoluteChunkPath
+    func storeChunk(_ buffer: Data, index: Int, fileId: String, sessionToken: String, hash: String) throws -> URL {
+        // Create subfolders if needed
+        let tempChunkFolder = buildFolderPath(fileId: fileId, sessionToken: sessionToken)
+        if fileManager.fileExists(atPath: tempChunkFolder.path, isDirectory: nil) == false {
+            try fileManager.createDirectory(at: tempChunkFolder, withIntermediateDirectories: true, attributes: nil)
+        }
+        
+        // Write buffer
+        let chunkName = chunkName(index: index, fileId: fileId, hash: hash)
+        let chunkPath = tempChunkFolder.appendingPathExtension(chunkName)
+        try buffer.write(to: chunkPath, options:[.atomic])
+        UploadOperationLog("wrote chunk:\(chunkPath) fid:\(file.id)")
+        
+        return chunkPath
     }
     
-    private func buildChunkPath(index: Int, file: UploadFile) -> String {
+    private func buildFolderPath(fileId: String, sessionToken: String) -> URL {
         // NSTemporaryDirectory is perfect for this use case.
         // Cleaned after ≈ 3 days, our session is valid 12h.
         // https://cocoawithlove.com/2009/07/temporary-files-and-folders-in-cocoa.html
         
-        // TODO: add /*+ session ID*/ in folder
-        NSTemporaryDirectory() + "/\(file.id)/" + chunkName(index: index, file: file)
+        let folderUrlString = NSTemporaryDirectory() + "/\(fileId)_\(sessionToken)"
+        let folderPath = URL(fileURLWithPath: folderUrlString)
+        return folderPath.standardizedFileURL
     }
     
-    private func chunkName(index: Int, file: UploadFile) -> String {
-        "upload_\(file.id)_\(index).part"/* TODO: + session ID */
+    private func chunkName(index: Int, fileId: String, hash: String) -> String {
+        "upload_\(fileId)_\(hash)_\(index).part"
     }
     
-    private func storeChunk(_ buffer: Data, destination: URL) throws {
-        try buffer.write(to: destination, options:[.atomic])
-    }
-
     // MARK: PHAssets
     
     private func getPhAssetIfNeeded() {
@@ -422,13 +434,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         guard !isFinished else { return }
         completionLock.enter()
 
-        // TODO: Close session to validate file.
-        
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
             // Client-side error
-            UploadOperationLog("Client-side error for job \(file.id): \(error)", level: .error)
+            UploadOperationLog("completion Client-side error:\(error) fid:\(file.id)", level: .error)
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
             } else {
@@ -448,7 +458,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                   let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
                   let driveFile = response.data?.first {
             // Success
-            UploadOperationLog("Job \(file.id) successful")
+            UploadOperationLog("completion successful \(file.id)")
+            
+            // TODO: Close session to validate file.
+            
+            // All chunks uploaded ?
+            // -> Call close
+            
+            let closeSessionOperation = CloseUploadSessionOperation(file: file, sessionToken: uploadSession.token.token)
+            self.addDependency(closeSessionOperation)
+            
             file.uploadDate = Date()
             file.error = nil
             if let driveFileManager = accountManager.getDriveFileManager(for: file.driveId, userId: file.userId) {
@@ -472,7 +491,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
-            UploadOperationLog("Server error for job \(file.id) (code: \(statusCode)): \(error)", level: .error)
+            
+            UploadOperationLog("completion  Server-side error:\(error) fid:\(file.id) ", level: .error)
+            
             file.sessionUrl = ""
             file.error = error
             if error == .quotaExceeded {
@@ -529,7 +550,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         uploadQueue.suspendAllOperations()
         
         // task?.cancel()
-        for (key, value) in uploadTasks {
+        for (_, value) in uploadTasks {
             value.cancel()
         }
         
@@ -549,7 +570,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
-            try? FileManager.default.removeItem(at: path)
+            try? fileManager.removeItem(at: path)
         }
 
         // Save upload file

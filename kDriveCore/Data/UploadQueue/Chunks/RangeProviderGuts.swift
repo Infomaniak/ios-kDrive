@@ -119,7 +119,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
             chunkSize = RangeProvider.APIConsts.chunkMaxSizeClient
         }
         
-        /// Cap chunk size at the file size
+        /// Set a lower bound to chunk size
         let capChunkSize = min(fileSize, chunkSize)
         return capChunkSize
     }

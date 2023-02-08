@@ -65,9 +65,6 @@ enum FactoryService {
             Factory(type: AccountManageable.self) { _, _ in
                 AccountManager()
             },
-            Factory(type: UploadTokenManager.self) { _, _ in
-                UploadTokenManager()
-            },
             Factory(type: BackgroundUploadSessionManager.self) { _, _ in
                 BackgroundUploadSessionManager()
             },
@@ -118,6 +115,9 @@ enum FactoryService {
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()
             },
+            Factory(type: FileManagerable.self) { _, _ in
+                FileManager.default
+            },
         ]
         return servicies
     }
@@ -136,6 +136,7 @@ enum FactoryService {
             
             let servicies = [
                 (loggerFactory, "UploadOperation"),
+                (loggerFactory, "CloseUploadSessionOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
             ]

@@ -161,10 +161,6 @@ public extension Endpoint {
         return .driveV1.appending(path: "/init", queryItems: [URLQueryItem(name: "with", value: "drives,users,teams,categories")])
     }
 
-    static func uploadToken(drive: AbstractDrive) -> Endpoint {
-        return .driveV1.appending(path: "/\(drive.id)/file/1/upload/token")
-    }
-
     // MARK: Action
 
     static func undoAction(drive: AbstractDrive) -> Endpoint {

@@ -117,7 +117,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         backgroundUrlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         backgroundUrlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
-        backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 1 // 1 days before giving up (chunk upload session not valid after a day)
+        backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 1 // 1 day before giving up (chunk upload session not valid after a day)
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [weak self] in

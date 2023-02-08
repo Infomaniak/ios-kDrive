@@ -150,23 +150,6 @@ final class DriveApiTests: XCTestCase {
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
     }
 
-    func testGetPublicUploadTokenWithToken() {
-        let testName = "Get public upload token with token"
-        let expectation = XCTestExpectation(description: testName)
-
-        currentApiFetcher.getPublicUploadToken(with: DriveApiTests.token, drive: proxyDrive) { result in
-            switch result {
-            case .success:
-                break
-            case .failure:
-                XCTFail(TestsMessages.noError)
-            }
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-    }
-
     // MARK: Create items
 
     func testCreateDirectory() async throws {

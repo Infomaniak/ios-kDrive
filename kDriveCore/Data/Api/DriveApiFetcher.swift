@@ -313,28 +313,6 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    // MARK: Upload V1
-
-    public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive, completion: @escaping (Result<UploadToken, Error>) -> Void) {
-        let url = Endpoint.uploadToken(drive: drive).url
-        performAuthenticatedRequest(token: token) { token, error in
-            if let token = token {
-                Task {
-                    do {
-                        let token: UploadToken = try await self.perform(request: AF.request(url,
-                                                                                            method: .get,
-                                                                                            headers: ["Authorization": "Bearer \(token.accessToken)"])).data
-                        completion(.success(token))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                }
-            } else {
-                completion(.failure(error ?? DriveError.unknownError))
-            }
-        }
-    }
-
     // MARK: -
 
     public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
