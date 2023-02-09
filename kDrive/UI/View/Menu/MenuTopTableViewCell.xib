@@ -19,7 +19,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="322" height="269"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ed8-bN-hQH" customClass="IKLabel" customModule="InfomaniakCore">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ed8-bN-hQH" customClass="IKLabel" customModule="InfomaniakCoreUI">
                         <rect key="frame" x="134.5" y="140" width="53.5" height="26.5"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="22"/>
                         <color key="textColor" name="titleColor"/>
@@ -38,7 +38,7 @@
                                     <constraint firstAttribute="width" constant="16" id="a6z-xT-Lxv"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r21-Wg-UxX" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r21-Wg-UxX" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="22" y="5" width="41.5" height="20.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="titleColor"/>
@@ -67,7 +67,7 @@
                                 <rect key="frame" x="0.0" y="8" width="140" height="4"/>
                                 <color key="tintColor" name="greenColor"/>
                             </progressView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zml-xC-HzQ" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zml-xC-HzQ" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="150" y="1.5" width="36" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -101,7 +101,7 @@
                             <constraint firstAttribute="width" constant="100" id="vhG-Vm-O60"/>
                         </constraints>
                     </view>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gH0-6n-3ox" customClass="IKLabel" customModule="InfomaniakCore">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gH0-6n-3ox" customClass="IKLabel" customModule="InfomaniakCoreUI">
                         <rect key="frame" x="44" y="166.5" width="234" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>

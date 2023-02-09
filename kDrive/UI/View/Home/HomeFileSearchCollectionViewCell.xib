@@ -30,7 +30,7 @@
                                     <constraint firstAttribute="width" constant="20" id="bfA-FG-9Vc"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rechercher un fichier…" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Tj-nW-gTs" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rechercher un fichier…" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Tj-nW-gTs" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="52" y="15.5" width="232" height="19.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <color key="textColor" name="secondaryTextColor"/>
