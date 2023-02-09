@@ -16,16 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import UIKit
-import InfomaniakCore
 
 class AboutDetailTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var detailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
     }
-
 }

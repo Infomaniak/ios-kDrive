@@ -17,21 +17,23 @@
  */
 
 import UIKit
-import InfomaniakCore
+import InfomaniakCoreUI
 import InfomaniakLogin
 import kDriveCore
+import InfomaniakDI
 
 class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
-    private var accountManager: AccountManager!
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    private let dependencyInjectionHook = EarlyDIHook()
+    
+    @LazyInjectService var accountManager: AccountManageable
 
     public override func viewDidLoad() {
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
         preferredContentSize = CGSize(width: 540, height: 620)
         Logging.initLogging()
-        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
-        accountManager = AccountManager.instance
 
         let saveViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 

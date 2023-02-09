@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,17 +18,20 @@
 
 import Foundation
 
-public class UploadToken: Codable {
-    public let token: String
-    public let expiration: Date
-
-    public var isNearlyExpired: Bool {
-        let twoHours = 60 * 60 * 2
-        return Date(timeIntervalSinceNow: TimeInterval(twoHours)) > expiration
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case token
-        case expiration
+public struct UploadLiveSession: Decodable {
+    var expectedChunks: UInt64
+    var receivedChunks: UInt64
+    var uploadingChunks: UInt64
+    var failedChunks: UInt64
+    var expectedSize: UInt64
+    var uploadedSize: UInt64
+    
+    private enum CodingKeys: String, CodingKey {
+        case expectedChunks = "expected_chunks"
+        case receivedChunks = "received_chunks"
+        case uploadingChunks = "uploading_chunks"
+        case failedChunks = "failed_chunks"
+        case expectedSize = "expected_size"
+        case uploadedSize = "uploaded_size"
     }
 }

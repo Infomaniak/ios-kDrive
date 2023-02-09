@@ -16,13 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
-import UIKit
 import Sentry
+import UIKit
 
 class ParameterTableViewController: UITableViewController {
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     var driveFileManager: DriveFileManager!
 
     private enum ParameterRow: CaseIterable {
@@ -125,7 +129,7 @@ class ParameterTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
             if row == .photos {
-                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
+                cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
             } else if row == .theme {
                 cell.valueLabel.text = UserDefaults.shared.theme.title
             } else if row == .notifications {
@@ -179,7 +183,8 @@ class ParameterTableViewController: UITableViewController {
         super.decodeRestorableState(with: coder)
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
@@ -188,17 +193,17 @@ class ParameterTableViewController: UITableViewController {
 
 extension ParameterTableViewController: DeleteAccountDelegate {
     func didCompleteDeleteAccount() {
-        AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
-        if let nextAccount = AccountManager.instance.accounts.first {
-            AccountManager.instance.switchAccount(newAccount: nextAccount)
+        accountManager.removeTokenAndAccount(token: accountManager.currentAccount.token)
+        if let nextAccount = accountManager.accounts.first {
+            accountManager.switchAccount(newAccount: nextAccount)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
-            driveFileManager = AccountManager.instance.currentDriveFileManager
+            driveFileManager = accountManager.currentDriveFileManager
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
         } else {
             SentrySDK.setUser(nil)
             tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
         }
-        AccountManager.instance.saveAccounts()
+        accountManager.saveAccounts()
     }
 
     func didFailDeleteAccount(error: InfomaniakLoginError) {

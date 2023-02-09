@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import Sentry
+import InfomaniakDI
 
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
@@ -28,8 +29,6 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     associatedtype Operation
 
     // MARK: - Attributes
-
-    static var instance: Self { get }
 
     var backgroundCompletionHandler: (() -> Void)? { get set }
     var backgroundTaskCount: Int { get }
@@ -66,18 +65,20 @@ extension URLSession: BackgroundSession {
 }
 
 public protocol FileUploadSession: BackgroundSession {
-    func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
+    func uploadTask(with request: URLRequest,
+                    fromFile fileURL: URL,
+                    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
 }
 
 extension URLSession: FileUploadSession {}
 
 public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionManager, URLSessionDataDelegate, FileUploadSession {
+    @LazyInjectService var uploadQueue: UploadQueue
+
     public typealias Task = URLSessionUploadTask
     public typealias CompletionHandler = (Data?, URLResponse?, Error?) -> Void
     public typealias Operation = UploadOperation
     public typealias BackgroundCompletionHandler = () -> Void
-
-    public static let instance = BackgroundUploadSessionManager()
 
     public var backgroundCompletionHandler: (() -> Void)?
     private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
@@ -99,7 +100,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         attributes: .concurrent
     )
 
-    override private init() {
+    override public init() {
         super.init()
         backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
     }
@@ -152,7 +153,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                         guard let newValue = value.newValue else {
                             return
                         }
-                        UploadQueue.instance.publishProgress(newValue, for: fileId)
+                        self.uploadQueue.publishProgress(newValue, for: fileId)
                     }
                 }
             }
@@ -172,7 +173,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         }
     }
 
-    public func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping CompletionHandler) -> Task {
+    public func uploadTask(with request: URLRequest,
+                           fromFile fileURL: URL,
+                           completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.uploadTask(with: request, fromFile: fileURL)
         syncQueue.async(flags: .barrier) { [weak self] in
             guard let self = self else { return }
@@ -181,7 +184,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         return task
     }
 
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    public func urlSession(_ session: URLSession,
+                           dataTask: URLSessionDataTask,
+                           didReceive data: Data) {
         let taskIdentifier = session.identifier(for: dataTask)
         syncQueue.async(flags: .barrier) { [weak self] in
             if self?.tasksData[taskIdentifier] != nil {
@@ -230,7 +235,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
+            
             let operation = UploadOperation(file: file, task: task, urlSession: self)
+            
             syncQueue.async(flags: .barrier) { [weak self] in
                 self?.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
                 self?.operations.append(operation)

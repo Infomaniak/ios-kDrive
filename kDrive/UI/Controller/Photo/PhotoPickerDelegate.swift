@@ -22,8 +22,11 @@ import kDriveResources
 import Photos
 import PhotosUI
 import UIKit
+import InfomaniakDI
 
 class PhotoPickerDelegate: NSObject {
+    @LazyInjectService var fileImportHelper: FileImportHelper
+
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 
@@ -59,7 +62,11 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             }
             let filename = FileImportHelper.getDefaultFileName()
             do {
-                try FileImportHelper.instance.upload(photo: image, name: filename, format: .jpg, in: currentDirectory, drive: driveFileManager.drive)
+                try fileImportHelper.upload(photo: image,
+                                            name: filename,
+                                            format: .jpg,
+                                            in: currentDirectory,
+                                            drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
             } catch {
                 handleError(error)
@@ -70,7 +77,10 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             }
             let filename = FileImportHelper.getDefaultFileName()
             do {
-                try FileImportHelper.instance.upload(videoUrl: selectedVideo, name: filename, in: currentDirectory, drive: driveFileManager.drive)
+                try fileImportHelper.upload(videoUrl: selectedVideo,
+                                            name: filename,
+                                            in: currentDirectory,
+                                            drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
             } catch {
                 handleError(error)

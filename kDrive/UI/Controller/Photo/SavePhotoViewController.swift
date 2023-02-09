@@ -16,11 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class SavePhotoViewController: SaveFileViewController {
+
     var photo: UIImage!
     var videoUrl: URL!
     var uti: UTI!
@@ -74,14 +76,14 @@ class SavePhotoViewController: SaveFileViewController {
         var success = false
         if uti == .image {
             do {
-                try FileImportHelper.instance.upload(photo: photo, name: filename, format: format, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                try fileImportHelper.upload(photo: photo, name: filename, format: format, in: selectedDirectory, drive: selectedDriveFileManager.drive)
                 success = true
             } catch {
                 success = false
             }
         } else {
             do {
-                try FileImportHelper.instance.upload(videoUrl: videoUrl, name: filename, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                try fileImportHelper.upload(videoUrl: videoUrl, name: filename, in: selectedDirectory, drive: selectedDriveFileManager.drive)
                 success = true
             } catch {
                 success = false

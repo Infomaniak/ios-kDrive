@@ -20,9 +20,13 @@ import CocoaLumberjackSwift
 import kDriveCore
 import RealmSwift
 import UIKit
+import InfomaniakDI
 
 class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
 
     private let realm = DriveFileManager.constants.uploadsRealm
 
@@ -57,7 +61,7 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
         // Observe uploading files
-        notificationToken = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
+        notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
             .observe(on: .main) { [weak self] change in
                 switch change {
@@ -89,7 +93,7 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        folders = files.compactMap { AccountManager.instance.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
+        folders = files.compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         // (Pop view controller if nothing to show)
         if folders.isEmpty {
             DispatchQueue.main.async {

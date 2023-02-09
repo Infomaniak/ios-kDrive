@@ -17,8 +17,9 @@
  */
 
 import Foundation
-import MatomoTracker
+import InfomaniakDI
 import kDriveCore
+import MatomoTracker
 
 class MatomoUtils {
     static let shared: MatomoTracker = {
@@ -26,7 +27,8 @@ class MatomoUtils {
         #if DEBUG
         tracker.isOptedOut = true
         #endif
-        tracker.userId = String(AccountManager.instance.currentUserId)
+        @InjectService var accountManager: AccountManageable
+        tracker.userId = String(accountManager.currentUserId)
         return tracker
     }()
 
@@ -53,7 +55,8 @@ class MatomoUtils {
     }
 
     static func connectUser() {
-        shared.userId = String(AccountManager.instance.currentUserId)
+        @InjectService var accountManager: AccountManageable
+        shared.userId = String(accountManager.currentUserId)
     }
 
     static func track(view: [String]) {
@@ -81,7 +84,7 @@ class MatomoUtils {
         track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: settings.validUntil != nil)
         track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: settings.limitFileSize != nil)
         if let size = settings.limitFileSize {
-            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGigabytes))
+            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGibibytes))
         }
     }
 

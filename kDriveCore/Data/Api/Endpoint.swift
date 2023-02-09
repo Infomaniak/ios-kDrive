@@ -80,6 +80,11 @@ public extension Endpoint {
 
 // MARK: - Proxies
 
+/// Something that can represent a string Token
+public protocol AbstractToken {
+    var token: String { get set }
+}
+
 public protocol AbstractDrive {
     var id: Int { get set }
 }
@@ -585,10 +590,7 @@ public extension Endpoint {
 
     // MARK: Upload
 
-    static func upload(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/upload")
-    }
-
+    // V1
     static func directUpload(file: UploadFile) -> Endpoint {
         // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
         // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
@@ -601,18 +603,27 @@ public extension Endpoint {
         return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
 
-    static func uploadStatus(file: AbstractFile, token: String) -> Endpoint {
-        return .upload(file: file).appending(path: "/\(token)")
+    // V2
+    static func upload(drive: AbstractDrive) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [fileMinimalWithQueryItem])
+    }
+    
+    static func uploadSession(drive: AbstractDrive) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
     }
 
-    static func chunkUpload(file: AbstractFile, token: String) -> Endpoint {
-        return .uploadStatus(file: file, token: token).appending(path: "/chunk")
+    static func startSession(drive: AbstractDrive) -> Endpoint {
+        return .uploadSession(drive: drive).appending(path: "/start")
+    }
+    
+    static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
+        return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/finish")
     }
 
-    static func commitUpload(file: AbstractFile, token: String) -> Endpoint {
-        return .uploadStatus(file: file, token: token).appending(path: "/file")
+    static func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
+        return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/chunk")
     }
-
+    
     // MARK: User invitation
 
     static func userInvitations(drive: AbstractDrive) -> Endpoint {

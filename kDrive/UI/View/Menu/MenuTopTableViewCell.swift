@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -32,6 +33,8 @@ class MenuTopTableViewCell: UITableViewCell {
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var progressLabel: UILabel!
 
+    @LazyInjectService var accountManager: AccountManageable
+    
     func configureCell(with drive: Drive, and account: Account) {
         userAvatarContainerView.clipsToBounds = false
         userAvatarContainerView.layer.shadowOpacity = 0.3
@@ -45,7 +48,7 @@ class MenuTopTableViewCell: UITableViewCell {
 
         switchDriveButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
         switchDriveButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonSwitchDrive
-        switchDriveButton.isHidden = AccountManager.instance.drives.count <= 1
+        switchDriveButton.isHidden = accountManager.drives.count <= 1
 
         driveNameLabel.text = drive.name
         driveImageView.tintColor = UIColor(hex: drive.preferences.color)

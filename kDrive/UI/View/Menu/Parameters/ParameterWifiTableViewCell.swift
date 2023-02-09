@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import UIKit
-import InfomaniakCore
 
 class ParameterWifiTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var valueSwitch: UISwitch!
     @IBOutlet weak var detailsLabel: UILabel!
     var switchHandler: ((UISwitch) -> Void)?
@@ -29,5 +28,5 @@ class ParameterWifiTableViewCell: InsetTableViewCell {
         switchHandler?(sender)
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) { }
+    override func setSelected(_ selected: Bool, animated: Bool) {}
 }

@@ -16,26 +16,24 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
+import InfomaniakCoreUI
 import InfomaniakLogin
-import InfomaniakCore
+import kDriveCore
+import UIKit
+import InfomaniakDI
 
 class ActionNavigationController: TitleSizeAdjustingNavigationController {
-
-    private var accountManager: AccountManager!
+    @LazyInjectService var accountManager: AccountManageable
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
         preferredContentSize = CGSize(width: 540, height: 620)
         Logging.initLogging()
-        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
-        accountManager = AccountManager.instance
 
         let saveFileViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 
-        if let itemProviders = (self.extensionContext?.inputItems as? [NSExtensionItem])?.compactMap(\.attachments).flatMap({ $0 }) {
+        if let itemProviders = (extensionContext?.inputItems as? [NSExtensionItem])?.compactMap(\.attachments).flatMap({ $0 }) {
             saveFileViewController.itemProviders = itemProviders
             viewControllers = [saveFileViewController]
         } else {
@@ -45,7 +43,6 @@ class ActionNavigationController: TitleSizeAdjustingNavigationController {
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-        self.extensionContext!.completeRequest(returningItems: self.extensionContext!.inputItems, completionHandler: nil)
+        extensionContext!.completeRequest(returningItems: extensionContext!.inputItems, completionHandler: nil)
     }
-
 }

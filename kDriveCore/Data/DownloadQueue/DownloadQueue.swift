@@ -19,6 +19,7 @@
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 
 public class DownloadTask: Object {
@@ -40,8 +41,10 @@ public class DownloadTask: Object {
     }
 }
 
-public class DownloadQueue {
+public final class DownloadQueue {
     // MARK: - Attributes
+
+    @LazyInjectService var accountManager: AccountManageable
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
@@ -73,15 +76,22 @@ public class DownloadQueue {
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
     private var bestSession: FileDownloadSession {
-        return Bundle.main.isExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
+        if Bundle.main.isExtension {
+            @InjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
+            return backgroundDownloadSessionManager
+        } else {
+            return foregroundSession
+        }
     }
 
     // MARK: - Public methods
 
-    public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public func addToQueue(file: File,
+                           userId: Int,
+                           itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         dispatchQueue.async { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
                 return
@@ -102,10 +112,10 @@ public class DownloadQueue {
         }
     }
 
-    public func addToQueue(archiveId: String, driveId: Int, userId: Int = AccountManager.instance.currentUserId) {
+    public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
         dispatchQueue.async {
-            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
                 return
             }
 
@@ -124,10 +134,13 @@ public class DownloadQueue {
         }
     }
 
-    public func temporaryDownload(file: File, userId: Int = AccountManager.instance.currentUserId, onOperationCreated: ((DownloadOperation?) -> Void)? = nil, completion: @escaping (DriveError?) -> Void) {
+    public func temporaryDownload(file: File,
+                                  userId: Int,
+                                  onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
+                                  completion: @escaping (DriveError?) -> Void) {
         dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
                 return
@@ -209,7 +222,9 @@ public extension DownloadQueue {
     typealias DownloadedArchiveId = String
 
     @discardableResult
-    func observeFileDownloaded<T: AnyObject>(_ observer: T, fileId: Int? = nil, using closure: @escaping (DownloadedFileId, DriveError?) -> Void)
+    func observeFileDownloaded<T: AnyObject>(_ observer: T,
+                                             fileId: Int? = nil,
+                                             using closure: @escaping (DownloadedFileId, DriveError?) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didDownloadFile[key] = { [weak self, weak observer] downloadedFileId, error in
@@ -231,7 +246,9 @@ public extension DownloadQueue {
     }
 
     @discardableResult
-    func observeFileDownloadProgress<T: AnyObject>(_ observer: T, fileId: Int? = nil, using closure: @escaping (DownloadedFileId, Double) -> Void)
+    func observeFileDownloadProgress<T: AnyObject>(_ observer: T,
+                                                   fileId: Int? = nil,
+                                                   using closure: @escaping (DownloadedFileId, Double) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didChangeProgress[key] = { [weak self, weak observer] downloadedFileId, progress in
@@ -253,7 +270,9 @@ public extension DownloadQueue {
     }
 
     @discardableResult
-    func observeArchiveDownloaded<T: AnyObject>(_ observer: T, archiveId: String? = nil, using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)
+    func observeArchiveDownloaded<T: AnyObject>(_ observer: T,
+                                                archiveId: String? = nil,
+                                                using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didDownloadArchive[key] = { [weak self, weak observer] downloadedArchiveId, archiveUrl, error in

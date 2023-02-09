@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
@@ -111,6 +112,7 @@ public class FloatingPanelAction: Equatable {
 }
 
 class FileActionsFloatingPanelViewController: UICollectionViewController {
+    @LazyInjectService var accountManager: AccountManageable
     var driveFileManager: DriveFileManager!
     var file: File!
     var normalFolderHierarchy = true
@@ -605,7 +607,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         }
-        DownloadQueue.instance.addToQueue(file: file)
+        DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
     }
 
     private func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {

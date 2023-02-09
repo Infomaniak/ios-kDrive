@@ -18,6 +18,7 @@
 
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PDFKit
@@ -33,6 +34,8 @@ protocol PreviewContentCellDelegate: AnyObject {
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
+    @LazyInjectService var accountManager: AccountManageable
+
     class PreviewError {
         let fileId: Int
         var pdfGenerationProgress: Progress?
@@ -501,7 +504,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 }
             }
         }
-        DownloadQueue.instance.addToQueue(file: currentFile)
+        DownloadQueue.instance.addToQueue(file: currentFile, userId: accountManager.currentUserId)
         currentCell.observeProgress(true, file: currentFile)
     }
 
@@ -513,6 +516,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
             DownloadQueue.instance.temporaryDownload(
                 file: currentFile,
+                userId: accountManager.currentUserId,
                 onOperationCreated: { operation in
                     DispatchQueue.main.async { [weak self] in
                         self?.currentDownloadOperation = operation
@@ -578,7 +582,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if fromActivities {
             floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
         }
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             navigationController?.popViewController(animated: true)
             return
         }

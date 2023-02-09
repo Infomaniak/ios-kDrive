@@ -31,7 +31,20 @@ public enum ConflictOption: String, PersistableEnum {
     case error, replace, rename, ignore
 }
 
-public class UploadFile: Object {
+/// An abstract file to upload
+public protocol UploadFilable {
+    var name: String { get }
+    var parentDirectoryId: Int { get }
+    var userId: Int { get }
+    var driveId: Int { get }
+    var uploadDate: Date? { get }
+    var creationDate: Date? { get }
+    var modificationDate: Date? { get }
+    var taskCreationDate: Date? { get }
+    var maxRetryCount: Int { get }
+}
+
+public class UploadFile: Object, UploadFilable {
     public static let defaultMaxRetryCount = 3
 
     @Persisted(primaryKey: true) public var id: String = ""
@@ -53,7 +66,7 @@ public class UploadFile: Object {
     @Persisted private var rawPriority: Int = 0
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
-
+    
     private var localAsset: PHAsset?
 
     public var pathURL: URL? {
@@ -125,7 +138,7 @@ public class UploadFile: Object {
     }
 
     public var queryItems: [URLQueryItem] {
-        var queryItems = [
+        var items = [
             URLQueryItem(name: "conflict", value: conflictOption.rawValue),
             URLQueryItem(name: "file_name", value: name),
             // TODO: Upload route needs relative_path/filename to work correctly, remove when upload is done with apiV2
@@ -134,12 +147,12 @@ public class UploadFile: Object {
             URLQueryItem(name: "asV2", value: nil)
         ]
         if let creationDate = creationDate {
-            queryItems.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
+            items.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
         }
         if let modificationDate = modificationDate {
-            queryItems.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
+            items.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
         }
-        return queryItems
+        return items
     }
 
     public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
@@ -180,7 +193,9 @@ public class UploadFile: Object {
         self.rawPriority = priority.rawValue
     }
 
-    override init() {}
+    override public init() {
+        // We have to keep it for Realm
+    }
 
     public enum ThumbnailRequest {
         case phImageRequest(PHImageRequestID)

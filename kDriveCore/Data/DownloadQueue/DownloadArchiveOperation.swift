@@ -20,9 +20,12 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 public class DownloadArchiveOperation: Operation {
     // MARK: - Attributes
+
+    @LazyInjectService var accountManager: AccountManageable
 
     private let archiveId: String
     private let driveFileManager: DriveFileManager
@@ -102,7 +105,7 @@ public class DownloadArchiveOperation: Operation {
 
         let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
 
-        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
+        if let userToken = accountManager.getTokenForUserId(driveFileManager.drive.userId) {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
                 if let token = token {
                     var request = URLRequest(url: url)

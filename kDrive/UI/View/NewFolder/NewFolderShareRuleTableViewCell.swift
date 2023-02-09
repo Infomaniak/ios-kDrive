@@ -16,7 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -25,6 +26,9 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var imageStackViewWidth: NSLayoutConstraint!
     @IBOutlet weak var descriptionLabel: UILabel!
+
+    @LazyInjectService var accountManager: AccountManageable
+
     var rights = true
     var fileAccessElements = [FileAccessElement]()
     var plusUser: Int = 0
@@ -63,7 +67,7 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
         accessoryImageView.layer.cornerRadius = accessoryImageView.bounds.width / 2
 
-        AccountManager.instance.currentAccount?.user?.getAvatar { image in
+        accountManager.currentAccount?.user?.getAvatar { image in
             self.accessoryImageView.image = image
         }
     }

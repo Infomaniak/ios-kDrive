@@ -17,15 +17,19 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import UIKit
+import InfomaniakDI
 
 class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
+
+    @LazyInjectService var uploadQueue: UploadQueue
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -107,14 +111,17 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.cancelButtonPressedHandler = {
             let realm = DriveFileManager.constants.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
-                UploadQueue.instance.cancel(file)
+                self.uploadQueue.cancel(file)
             }
         }
         cardContentView.retryButtonPressedHandler = { [weak self] in
-            self?.cardContentView.retryButton?.isHidden = true
+            guard let self else {
+                return
+            }
+            self.cardContentView.retryButton?.isHidden = true
             let realm = DriveFileManager.constants.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
-                UploadQueue.instance.retry(file)
+                self.uploadQueue.retry(file)
             }
         }
     }

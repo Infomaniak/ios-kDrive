@@ -21,8 +21,8 @@ import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import kDriveResources
-import Kingfisher
 import QuickLook
 import RealmSwift
 
@@ -277,6 +277,8 @@ public class FileVersion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
+    @LazyInjectService var accountManager: AccountManageable
+    
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
     /// Drive identifier
@@ -576,38 +578,6 @@ public class File: Object, Codable {
         return nil
     }
 
-    @discardableResult
-    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        if hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
-                if let image = try? result.get().image {
-                    completion(image, true)
-                } else {
-                    // The file can become invalidated while retrieving the icon online
-                    completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
-                }
-            }
-        } else {
-            completion(icon, false)
-            return nil
-        }
-    }
-
-    @discardableResult
-    public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        if let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
-                if let image = try? result.get().image {
-                    completion(image)
-                } else {
-                    completion(nil)
-                }
-            }
-        } else {
-            return nil
-        }
-    }
-
     public func getBookmarkURL() -> URL? {
         do {
             var urlStr: String?
@@ -662,8 +632,9 @@ public class File: Object, Codable {
         id = try container.decode(Int.self, forKey: .id)
         parentId = try container.decode(Int.self, forKey: .parentId)
         driveId = try container.decode(Int.self, forKey: .driveId)
-        name = try container.decode(String.self, forKey: .name)
-        sortedName = try container.decode(String.self, forKey: .sortedName)
+        let decodedName = try container.decode(String.self, forKey: .name)
+        self.name = decodedName
+        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
         path = try container.decodeIfPresent(String.self, forKey: .path)
         rawType = try container.decode(String.self, forKey: .rawType)
         rawStatus = try container.decodeIfPresent(String.self, forKey: .rawStatus)
@@ -675,9 +646,9 @@ public class File: Object, Codable {
         deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
-        isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
-        _capabilities = try container.decode(Rights.self, forKey: ._capabilities)
+        _capabilities = try container.decodeIfPresent(Rights.self, forKey: ._capabilities)
         categories = try container.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         color = try container.decodeIfPresent(String.self, forKey: .color)
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)

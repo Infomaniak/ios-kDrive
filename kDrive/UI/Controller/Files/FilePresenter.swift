@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import SafariServices
@@ -24,6 +25,8 @@ import UIKit
 
 @MainActor
 class FilePresenter {
+    @LazyInjectService var accountManager: AccountManageable
+
     weak var viewController: UIViewController?
 
     var navigationController: UINavigationController? {
@@ -128,7 +131,7 @@ class FilePresenter {
                 presentBookmark(for: file, completion: completion)
             } else {
                 // Download file
-                DownloadQueue.instance.temporaryDownload(file: file) { error in
+                DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
                     Task {
                         if let error = error {
                             UIConstants.showSnackBarIfNeeded(error: error)

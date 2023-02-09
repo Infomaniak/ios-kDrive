@@ -22,6 +22,7 @@ import kDriveCore
 import kDriveResources
 import SwiftRegex
 import UIKit
+import InfomaniakDI
 
 #if !ISEXTENSION
 enum UniversalLinksHelper {
@@ -60,13 +61,15 @@ enum UniversalLinksHelper {
     }
 
     private static func processRegex(matches: [[String]], displayMode: DisplayMode, appDelegate: AppDelegate) -> Bool {
+        @InjectService var accountManager: AccountManageable
+
         guard let firstMatch = matches.first,
               firstMatch.count > 2,
               let driveId = Int(firstMatch[1]),
               let last = firstMatch.last,
               let fileId = Int(last),
-              let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId,
-                                                                                 userId: AccountManager.instance.currentUserId)
+              let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId)
         else { return false }
 
         openFile(id: fileId, driveFileManager: driveFileManager, office: displayMode == .office, appDelegate: appDelegate)

@@ -21,11 +21,14 @@ import kDriveCore
 import kDriveResources
 import UIKit
 import WebKit
+import InfomaniakDI
 
 class RegisterViewController: UIViewController {
     @IBOutlet weak var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
+    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    
     private let progressView = UIProgressView(progressViewStyle: .default)
     private var estimatedProgressObserver: NSKeyValueObservation?
 
@@ -118,7 +121,9 @@ extension RegisterViewController: WKNavigationDelegate {
                 decisionHandler(.cancel)
                 if let delegate = delegate,
                    let navigationController = self.navigationController {
-                    InfomaniakLogin.webviewLoginFrom(viewController: navigationController, delegate: delegate)
+                    infomaniakLogin.webviewLoginFrom(viewController: navigationController,
+                                                     hideCreateAccountButton: true,
+                                                     delegate: delegate)
                 }
             } else if host == "login.infomaniak.com" {
                 decisionHandler(.cancel)

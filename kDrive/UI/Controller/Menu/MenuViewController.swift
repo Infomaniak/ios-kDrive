@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Sentry
@@ -27,6 +28,8 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     @IBOutlet weak var userAvatarFrame: UIView!
     @IBOutlet weak var userAvatarImageView: UIImageView!
     @IBOutlet weak var userDisplayNameLabel: UILabel!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager! {
         didSet {
@@ -80,7 +83,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
-        currentAccount = AccountManager.instance.currentAccount
+        currentAccount = accountManager.currentAccount
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
@@ -150,7 +153,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         // Hide shared with me action if no shared with me drive
         guard let sectionIndex = sections.firstIndex(of: .more) else { return }
         let sharedWithMeInList = sections[sectionIndex].actions.contains(.sharedWithMe)
-        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true).isEmpty
+        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
             sections[sectionIndex].actions.removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {
@@ -254,16 +257,19 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 as: PhotoListViewController.self
             )
         case .disconnect:
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle, message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveResourcesStrings.Localizable.buttonConfirm, destructive: true) {
-                AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
-                if let nextAccount = AccountManager.instance.accounts.first {
-                    AccountManager.instance.switchAccount(newAccount: nextAccount)
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle,
+                                                message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName),
+                                                action: KDriveResourcesStrings.Localizable.buttonConfirm,
+                                                destructive: true) {
+                self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
+                if let nextAccount = self.accountManager.accounts.first {
+                    self.accountManager.switchAccount(newAccount: nextAccount)
                     (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
                 } else {
                     SentrySDK.setUser(nil)
                     self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
                 }
-                AccountManager.instance.saveAccounts()
+                self.accountManager.saveAccounts()
             }
             present(alert, animated: true)
         case .help:
@@ -288,8 +294,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
-        let drives = AccountManager.instance.drives
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: driveFileManager.drive, headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive, delegate: self)
+        let drives = accountManager.drives
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives,
+                                                                                                          selectedOption: driveFileManager.drive,
+                                                                                                          headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
+                                                                                                          delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 }

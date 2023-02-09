@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveResources
 import UIKit
 
@@ -39,7 +39,13 @@ open class AlertViewController: UIViewController {
     public var cancelButton: UIButton!
     public var centerConstraint: NSLayoutConstraint!
 
-    public init(title: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() async -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String,
+                action: String,
+                hasCancelButton: Bool = true,
+                destructive: Bool = false,
+                loading: Bool = false,
+                handler: (() async -> Void)?,
+                cancelHandler: (() -> Void)? = nil) {
         self.actionString = action
         self.hasCancelButton = hasCancelButton
         self.destructive = destructive

@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import DropDown
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
@@ -25,6 +26,8 @@ import UIKit
 
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     private enum ShareAndRightsSections: CaseIterable {
         case invite
@@ -94,7 +97,8 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     private func showRightsSelection(userAccess: Bool) {
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file,
+                                                                                                            driveFileManager: driveFileManager)
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
             rightsSelectionVC.delegate = self
@@ -151,7 +155,8 @@ class ShareAndRightsViewController: UIViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
@@ -35,7 +36,8 @@ public protocol AccountManagerDelegate: AnyObject {
 public extension InfomaniakLogin {
     static func apiToken(username: String, applicationPassword: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
+            @InjectService var tokenable: InfomaniakTokenable
+            tokenable.getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)
                 } else {
@@ -47,7 +49,8 @@ public extension InfomaniakLogin {
 
     static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
-            getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
+            @InjectService var tokenable: InfomaniakTokenable
+            tokenable.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
                 if let token = token {
                     continuation.resume(returning: token)
                 } else {
@@ -66,12 +69,50 @@ public extension InfomaniakLogin {
     }
 }
 
-public class AccountManager: RefreshTokenDelegate {
+/// Abstract interface on AccountManager
+public protocol AccountManageable {
+    var currentAccount: Account! { get }
+    var accounts: [Account] { get }
+    var tokens: [ApiToken] { get }
+    var currentUserId: Int { get }
+    var currentDriveId: Int { get }
+    var drives: [Drive] { get }
+    var currentDriveFileManager: DriveFileManager? { get }
+    var mqService: MQService { get }
+    var refreshTokenLockedQueue: DispatchQueue { get }
+    
+    func forceReload()
+    func reloadTokensAndAccounts()
+    func getDriveFileManager(for drive: Drive) -> DriveFileManager?
+    func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
+    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
+    func getTokenForUserId(_ id: Int) -> ApiToken?
+    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
+    func didFailRefreshToken(_ token: ApiToken)
+    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account
+    func createAndSetCurrentAccount(token: ApiToken) async throws -> Account
+    func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?)
+    func loadAccounts() -> [Account]
+    func saveAccounts()
+    func switchAccount(newAccount: Account)
+    func setCurrentDriveForCurrentAccount(drive: Drive)
+    func addAccount(account: Account)
+    func removeAccount(toDeleteAccount: Account)
+    func removeTokenAndAccount(token: ApiToken)
+    func account(for token: ApiToken) -> Account?
+    func account(for userId: Int) -> Account?
+    func updateToken(newToken: ApiToken, oldToken: ApiToken)
+}
+
+public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var tokenable: InfomaniakTokenable
+    
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
-    public static var instance = AccountManager()
     private let tag = "ch.infomaniak.token".data(using: .utf8)!
     public var currentAccount: Account!
     public var accounts = [Account]()
@@ -79,6 +120,7 @@ public class AccountManager: RefreshTokenDelegate {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
+    
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId
@@ -111,7 +153,7 @@ public class AccountManager: RefreshTokenDelegate {
     private var apiFetchers = [Int: DriveApiFetcher]()
     public let mqService = MQService()
 
-    private init() {
+    public init() {
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
         setSentryUserId(userId: currentUserId)
@@ -273,8 +315,8 @@ public class AccountManager: RefreshTokenDelegate {
         clearDriveFileManagers()
         var switchedDrive: Drive?
         for driveRemoved in driveRemovedList {
-            if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == user.id && PhotoLibraryUploader.instance.settings?.driveId == driveRemoved.id {
-                PhotoLibraryUploader.instance.disableSync()
+            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader.settings?.driveId == driveRemoved.id {
+                photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
                 switchedDrive = drives.first
@@ -359,8 +401,8 @@ public class AccountManager: RefreshTokenDelegate {
             currentAccount = nil
             currentDriveId = 0
         }
-        if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == toDeleteAccount.userId {
-            PhotoLibraryUploader.instance.disableSync()
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
+            photoLibraryUploader.disableSync()
         }
         DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
@@ -375,7 +417,7 @@ public class AccountManager: RefreshTokenDelegate {
         if let account = account(for: token) {
             removeAccount(toDeleteAccount: account)
         }
-        InfomaniakLogin.deleteApiToken(token: token) { error in
+        tokenable.deleteApiToken(token: token) { error in
             DDLogError("Failed to delete api token: \(error.localizedDescription)")
         }
     }

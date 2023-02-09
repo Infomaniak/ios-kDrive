@@ -21,9 +21,11 @@ import Foundation
 import Photos
 import RealmSwift
 import Sentry
+import InfomaniakDI
 
 public class PhotoLibraryUploader {
-    public static let instance = PhotoLibraryUploader()
+    @LazyInjectService var uploadQueue: UploadQueue
+
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
@@ -31,7 +33,7 @@ public class PhotoLibraryUploader {
 
     private let dateFormatter = DateFormatter()
 
-    private init() {
+    public init() {
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
@@ -124,11 +126,13 @@ public class PhotoLibraryUploader {
         addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
         DDLogInfo("Photo sync - New assets count \(assets.count)")
         updateLastSyncDate(syncDate, using: realm)
-        UploadQueue.instance.addToQueueFromRealm()
+        uploadQueue.addToQueueFromRealm()
         return assets.count
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
+                                             initial: Bool,
+                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
@@ -192,7 +196,7 @@ public class PhotoLibraryUploader {
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, using: realm)
                     }
-                    UploadQueue.instance.addToQueueFromRealm()
+                    uploadQueue.addToQueueFromRealm()
                     realm.beginWrite()
                 }
             }
@@ -217,11 +221,11 @@ public class PhotoLibraryUploader {
         var toRemoveFiles = [UploadFile]()
         var toRemoveAssets = PHFetchResult<PHAsset>()
         BackgroundRealm.uploads.execute { realm in
-            toRemoveFiles = Array(UploadQueue.instance.getUploadedFiles(using: realm).filter("rawType = %@", UploadFileType.phAsset.rawValue))
+            toRemoveFiles = Array(uploadQueue.getUploadedFiles(using: realm).filter("rawType = %@", UploadFileType.phAsset.rawValue))
             toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFiles.map(\.id), options: nil)
         }
 
-        guard toRemoveAssets.count >= removeAssetsCountThreshold && UploadQueue.instance.operationQueue.operationCount == 0 else {
+        guard toRemoveAssets.count >= removeAssetsCountThreshold && uploadQueue.operationQueue.operationCount == 0 else {
             return nil
         }
 

@@ -20,11 +20,14 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import UIKit
+import InfomaniakDI
 
 class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    let accountManager = AccountManager.instance
 
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
             return navigationController.visibleViewController == self
@@ -35,7 +38,12 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
+        infomaniakLogin.setupWebviewNavbar(title: "",
+                                           titleColor: nil,
+                                           color: nil,
+                                           buttonColor: nil,
+                                           clearCookie: true,
+                                           timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
         // Try to update other accounts infos
         Task {
@@ -92,7 +100,9 @@ extension SwitchUserViewController: UITableViewDelegate {
 
         if !account.isConnected {
             // Ask to reconnect
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
+            infomaniakLogin.webviewLoginFrom(viewController: self,
+                                             hideCreateAccountButton: true,
+                                             delegate: self)
             return
         }
 
@@ -108,7 +118,7 @@ extension SwitchUserViewController: UITableViewDelegate {
             MatomoUtils.track(eventWithCategory: .account, name: "switch")
             MatomoUtils.connectUser()
 
-            AccountManager.instance.switchAccount(newAccount: account)
+            accountManager.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
             if isRootViewController {
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(MainTabViewController.instantiate())
@@ -148,10 +158,10 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
         Task {
             do {
-                _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
+                _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 Task {
                     // Download root files
-                    try await AccountManager.instance.currentDriveFileManager?.initRoot()
+                    try await accountManager.currentDriveFileManager?.initRoot()
                     (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
                 }
             } catch {

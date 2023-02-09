@@ -17,12 +17,15 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     private var driveFileManager: DriveFileManager!
     private var directory: File! {
@@ -139,16 +142,16 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                 .optionDate: dropBox.capabilities.hasValidity,
                 .optionSize: dropBox.capabilities.hasSizeLimit
             ]
-            let sizeLimit: BinarySize?
+            let sizeLimit: BinaryDisplaySize?
             if let size = dropBox.capabilities.size.limit {
-                sizeLimit = .bytes(size)
+                sizeLimit = .bytes(UInt64(size))
             } else {
                 sizeLimit = nil
             }
             settingsValue = [
                 .optionPassword: nil,
                 .optionDate: dropBox.capabilities.validity.date,
-                .optionSize: sizeLimit?.toGigabytes
+                .optionSize: sizeLimit?.toGibibytes
             ]
             newPassword = dropBox.capabilities.hasPassword
             if isViewLoaded {
@@ -280,7 +283,8 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let folderId = coder.decodeInteger(forKey: "FolderId")
         let convertingFolder = coder.decodeBool(forKey: "ConvertingFolder")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
@@ -321,9 +325,9 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-        let limitFileSize: BinarySize?
+        let limitFileSize: BinaryDisplaySize?
         if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Double {
-            limitFileSize = .gigabytes(size)
+            limitFileSize = .gibibytes(size)
         } else {
             limitFileSize = nil
         }

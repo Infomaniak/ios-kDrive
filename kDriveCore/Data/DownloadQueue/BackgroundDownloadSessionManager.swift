@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import Foundation
 
@@ -26,6 +27,9 @@ public protocol FileDownloadSession: BackgroundSession {
 extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
+    
+    @LazyInjectService var accountManager: AccountManageable
+    
     public var identifier: String {
         return backgroundSession.identifier
     }
@@ -33,8 +37,6 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     public typealias Task = URLSessionDownloadTask
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
     public typealias Operation = DownloadOperation
-
-    public static let instance = BackgroundDownloadSessionManager()
 
     public var backgroundCompletionHandler: (() -> Void)?
 
@@ -45,7 +47,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     var progressObservers: [String: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
-    override private init() {
+    override public init() {
         super.init()
         let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
@@ -132,7 +134,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
+                  let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion

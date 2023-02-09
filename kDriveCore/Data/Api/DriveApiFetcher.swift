@@ -19,6 +19,7 @@
 import Alamofire
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import Kingfisher
 import Sentry
@@ -51,6 +52,10 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 
 public class DriveApiFetcher: ApiFetcher {
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var tokenable: InfomaniakTokenable
+
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
     override public init() {
@@ -275,34 +280,40 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        AccountManager.instance.refreshTokenLockedQueue.async {
-            if token.requiresRefresh {
-                AccountManager.instance.reloadTokensAndAccounts()
-                if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
-                    if reloadedToken.requiresRefresh {
-                        let group = DispatchGroup()
-                        group.enter()
-                        InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
-                            if let newToken = newToken {
-                                AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
-                                request(newToken, nil)
-                            } else {
-                                request(nil, error)
-                            }
-                            group.leave()
-                        }
-                        group.wait()
-                    } else {
-                        request(reloadedToken, nil)
-                    }
-                } else {
-                    request(nil, DriveError.unknownToken)
-                }
-            } else {
+        // Only resolve locally to break init loop
+        accountManager.refreshTokenLockedQueue.async {
+            guard !token.requiresRefresh else {
                 request(token, nil)
+                return
             }
+
+            self.accountManager.reloadTokensAndAccounts()
+            guard let reloadedToken = self.accountManager.getTokenForUserId(token.userId) else {
+                request(nil, DriveError.unknownToken)
+                return
+            }
+
+            guard !reloadedToken.requiresRefresh else {
+                request(reloadedToken, nil)
+                return
+            }
+
+            let group = DispatchGroup()
+            group.enter()
+            self.tokenable.refreshToken(token: reloadedToken) { newToken, error in
+                if let newToken = newToken {
+                    self.accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
+                    request(newToken, nil)
+                } else {
+                    request(nil, error)
+                }
+                group.leave()
+            }
+            group.wait()
         }
     }
+
+    // MARK: Upload V1
 
     public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive, completion: @escaping (Result<UploadToken, Error>) -> Void) {
         let url = Endpoint.uploadToken(drive: drive).url
@@ -310,7 +321,9 @@ public class DriveApiFetcher: ApiFetcher {
             if let token = token {
                 Task {
                     do {
-                        let token: UploadToken = try await self.perform(request: AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])).data
+                        let token: UploadToken = try await self.perform(request: AF.request(url,
+                                                                                            method: .get,
+                                                                                            headers: ["Authorization": "Bearer \(token.accessToken)"])).data
                         completion(.success(token))
                     } catch {
                         completion(.failure(error))
@@ -321,6 +334,8 @@ public class DriveApiFetcher: ApiFetcher {
             }
         }
     }
+
+    // MARK: -
 
     public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
         try await perform(request: authenticatedRequest(.trash(drive: drive).paginated(page: page).sorted(by: [sortType]))).data
@@ -414,8 +429,13 @@ public class DriveApiFetcher: ApiFetcher {
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
+    
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var tokenable: InfomaniakTokenable
+
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
-        AccountManager.instance.refreshTokenLockedQueue.async {
+        // Only resolve locally to break init loop
+        accountManager.refreshTokenLockedQueue.async {
             SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
 
             if !KeychainHelper.isKeychainAccessible {
@@ -426,8 +446,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
             }
 
             // Maybe someone else refreshed our token
-            AccountManager.instance.reloadTokensAndAccounts()
-            if let token = AccountManager.instance.getTokenForUserId(credential.userId),
+            self.accountManager.reloadTokensAndAccounts()
+            if let token = self.accountManager.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
                 SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))
@@ -454,7 +474,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
                     return
                 }
             }
-            InfomaniakLogin.refreshToken(token: credential) { token, error in
+            self.tokenable.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
                     SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
@@ -493,7 +513,10 @@ class NetworkRequestRetrier: RequestInterceptor {
         self.maxRetry = maxRetry
     }
 
-    func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
+    func retry(_ request: Alamofire.Request,
+               for session: Session,
+               dueTo error: Error,
+               completion: @escaping (RetryResult) -> Void) {
         guard request.task?.response == nil,
               let url = request.request?.url?.absoluteString else {
             removeCachedUrlRequest(url: request.request?.url?.absoluteString)
@@ -528,6 +551,7 @@ class NetworkRequestRetrier: RequestInterceptor {
         guard let url = url else {
             return
         }
+
         retriedRequests.removeValue(forKey: url)
     }
 }

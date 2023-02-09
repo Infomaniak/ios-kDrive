@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
@@ -24,6 +25,9 @@ import InfomaniakLogin
 
 public class DownloadOperation: Operation {
     // MARK: - Attributes
+    
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
 
     private let file: File
     private let driveFileManager: DriveFileManager
@@ -102,7 +106,7 @@ public class DownloadOperation: Operation {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
-                if let rescheduledSessionId = BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task),
+                if let rescheduledSessionId = self.downloadManager.rescheduleForBackground(task: self.task),
                    let task = self.task,
                    let sessionUrl = task.originalRequest?.url?.absoluteString {
                     self.error = .taskRescheduled
@@ -128,7 +132,7 @@ public class DownloadOperation: Operation {
 
     private func getToken() -> ApiToken? {
         var apiToken: ApiToken?
-        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
+        if let userToken = accountManager.getTokenForUserId(driveFileManager.drive.userId) {
             let lock = DispatchGroup()
             lock.enter()
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { token, _ in

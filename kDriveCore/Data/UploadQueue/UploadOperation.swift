@@ -20,50 +20,24 @@ import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 import Sentry
-
-public class UploadTokenManager {
-    public static let instance = UploadTokenManager()
-
-    private var tokens: [Int: UploadToken] = [:]
-    private var lock = DispatchGroup()
-
-    public func getToken(userId: Int, driveId: Int, completionHandler: @escaping (UploadToken?) -> Void) {
-        lock.wait()
-        lock.enter()
-        if let token = tokens[userId], !token.isNearlyExpired {
-            completionHandler(token)
-            lock.leave()
-        } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
-                  let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
-                switch result {
-                case .success(let token):
-                    self.tokens[userId] = token
-                    completionHandler(token)
-                case .failure(let error):
-                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
-                    completionHandler(nil)
-                }
-                self.lock.leave()
-            }
-        } else {
-            completionHandler(nil)
-            lock.leave()
-        }
-    }
-}
 
 public struct UploadCompletionResult {
     var uploadFile: UploadFile!
     var driveFile: File?
 }
 
-public class UploadOperation: Operation {
+public final class UploadOperation: Operation, UploadOperationable {
     // MARK: - Attributes
 
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadTokenManager: UploadTokenManager
+    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    
     private var file: UploadFile
     private let urlSession: FileUploadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
@@ -108,14 +82,19 @@ public class UploadOperation: Operation {
 
     // MARK: - Public methods
 
-    public init(file: UploadFile, urlSession: FileUploadSession = URLSession.shared, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    required public init(file: UploadFile,
+                         urlSession: FileUploadSession = URLSession.shared,
+                         itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         self.file = UploadFile(value: file)
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
     }
 
-    public init(file: UploadFile, task: URLSessionUploadTask, urlSession: FileUploadSession = URLSession.shared) {
+    // Restore the operation after BG work
+    required public init(file: UploadFile,
+                         task: URLSessionUploadTask,
+                         urlSession: FileUploadSession = URLSession.shared) {
         self.file = UploadFile(value: file)
         self.file.error = nil
         self.task = task
@@ -171,21 +150,24 @@ public class UploadOperation: Operation {
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
-            task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
-            task?.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
-            task?.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+            let uploadTask = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
+            self.task = uploadTask
+
+            uploadTask.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
+            uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
+
+            progressObservation = uploadTask.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                 guard let newValue = value.newValue else {
                     return
                 }
-                UploadQueue.instance.publishProgress(newValue, for: fileId)
+                self.uploadQueue.publishProgress(newValue, for: fileId)
             }
-            if let itemIdentifier = itemIdentifier, let task = task {
+            if let itemIdentifier = itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
-                    manager.register(task, forItemWithIdentifier: itemIdentifier) { _ in }
+                    manager.register(uploadTask, forItemWithIdentifier: itemIdentifier) { _ in }
                 }
             }
-            task?.resume()
+            uploadTask.resume()
 
             // Save UploadFile state (we are mainly interested in saving sessionUrl)
             BackgroundRealm.uploads.execute { uploadsRealm in
@@ -211,7 +193,7 @@ public class UploadOperation: Operation {
     private func getUploadTokenSync() {
         let syncToken = DispatchGroup()
         syncToken.enter()
-        UploadTokenManager.instance.getToken(userId: file.userId, driveId: file.driveId) { token in
+        uploadTokenManager.getToken(userId: file.userId, driveId: file.driveId) { token in
             self.uploadToken = token
             syncToken.leave()
         }
@@ -222,7 +204,7 @@ public class UploadOperation: Operation {
         if file.type == .phAsset && file.pathURL == nil {
             DDLogInfo("[UploadOperation] Need to fetch photo asset")
             if let asset = file.getPHAsset(),
-               let url = PhotoLibraryUploader.instance.getUrlSync(for: asset) {
+               let url = photoLibraryUploader.getUrlSync(for: asset) {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
@@ -231,6 +213,7 @@ public class UploadOperation: Operation {
         }
     }
 
+    // called on restoration
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         completionLock.wait()
         // Task has called end() in backgroundTaskExpired
@@ -264,7 +247,7 @@ public class UploadOperation: Operation {
             DDLogInfo("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
             file.error = nil
-            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
+            if let driveFileManager = accountManager.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
@@ -293,9 +276,9 @@ public class UploadOperation: Operation {
             } else if error == .objectNotFound {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
-                UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
-                if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
-                    PhotoLibraryUploader.instance.disableSync()
+                uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
+                if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
+                    photoLibraryUploader.disableSync()
                     NotificationsHelper.sendPhotoSyncErrorNotification()
                 }
             }
@@ -305,6 +288,7 @@ public class UploadOperation: Operation {
         completionLock.leave()
     }
 
+    // over 30sec
     private func backgroundTaskExpired() {
         completionLock.wait()
         // Task has called end() in uploadCompletion
@@ -319,22 +303,23 @@ public class UploadOperation: Operation {
                            "File size": file.size,
                            "File type": file.type.rawValue]
         SentrySDK.addBreadcrumb(crumb: breadcrumb)
-        let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: task, fileUrl: file.pathURL)
+        let rescheduledSessionId = backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: file.pathURL)
         if let sessionId = rescheduledSessionId {
             file.sessionId = sessionId
             file.error = .taskRescheduled
         } else {
             file.sessionUrl = ""
             file.error = .taskExpirationCancelled
-            UploadQueue.instance.sendPausedNotificationIfNeeded()
+            uploadQueue.sendPausedNotificationIfNeeded()
         }
-        UploadQueue.instance.suspendAllOperations()
+        uploadQueue.suspendAllOperations()
         task?.cancel()
         end()
         completionLock.leave()
         DDLogInfo("[UploadOperation] Expiration handler end block job \(file.id)")
     }
 
+    // did finish in time
     private func end() {
         DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
 

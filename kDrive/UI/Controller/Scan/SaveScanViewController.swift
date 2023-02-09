@@ -75,7 +75,7 @@ class SaveScanViewController: SaveFileViewController {
 
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             do {
-                try FileImportHelper.instance.upload(
+                try fileImportHelper.upload(
                     scan: scan,
                     name: filename,
                     scanType: scanType,
