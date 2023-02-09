@@ -72,8 +72,13 @@ public class DriveFileManager {
             schemaVersion: currentUploadDbVersion,
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
+                          PhotoSyncSettings.self,
+                          /*File.self ask, do I just keep a path ?*/
+                          RUploadSession.self,
                           UploadFile.self,
-                          PhotoSyncSettings.self])
+                          UploadChunkTask.self,
+                          UploadedChunk.self,
+                          UploadingSessionTask.self,])
 
         /// realm db used for file upload
         public var uploadsRealm: Realm {

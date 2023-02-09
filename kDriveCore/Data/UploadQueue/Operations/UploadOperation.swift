@@ -28,13 +28,23 @@ import UIKit
 /// The current step of the upload with chunks operation
 enum UploadOperationStep {
     case `init`
-    case initCompletionHandler // ? move to linked op ?
+    case initCompletionHandler
     case startup
     case fetchSession
     case chunking
     case chunk(_ index: Int)
     case schedullingUpload
+    case closeSession
     case terminated
+    
+//    typealias NextStep = (_ curent: UploadOperationStep, _ next: UploadOperationStep)
+//    private var nextStep -> NextStep {
+//
+//    }
+//
+//    mutating func nextStep() {
+//
+//    }
 }
 
 public struct UploadCompletionResult {
@@ -57,7 +67,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var fileManager: FileManagerable
-    
+        
     private var step: UploadOperationStep {
         didSet {
             UploadOperationLog("~> moved to step:\(step) for: \n \(self.debugDescription)", level: .debug)
@@ -84,9 +94,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     public var result: UploadCompletionResult
 
     private let completionLock = DispatchGroup()
-
-    //TODO: Remove, store in DB instead
-    var uploadSession: UploadSession!
     
     // MARK: - Public methods
 
@@ -115,8 +122,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         self.uploadTasks[key] = task
     }
 
+    var sessionId: String!
+    
     override public func execute() async {
-        self.step = .startup
+        step = .startup
         UploadOperationLog("execute \(file.id)")
         // Always check for cancellation before launching the task
         if isCancelled {
@@ -146,10 +155,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             end()
             return
         }
-
-        let apiFetcher = driveFileManager.apiFetcher
-        let drive = driveFileManager.drive
-
+        
         // Check file is readable
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
@@ -160,9 +166,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             return
         }
 
+        
+        step = .fetchSession
         // Load ranges of the file
         let rangeProvider = RangeProvider(fileURL: fileUrl)
-        let fileSize: UInt64
+        let fileSize: UInt64 // TODO remove, use db
         let ranges: [DataRange]
         do {
             fileSize = try rangeProvider.fileSize
@@ -174,38 +182,59 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             return
         }
         
-        let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
-        UploadOperationLog("got fileSize:\(mebibytes)MiB ranges:\(ranges) \(file.id)")
-        
-        // TODO: Read session from UploadFile if any
-        self.step = .fetchSession
-        let session: UploadSession
+        let sessionToken: String
         do {
-            // Get a valid upload session
-            session = try await apiFetcher.startSession(drive: drive,
-                                                        totalSize: fileSize,
-                                                        fileName: file.name,
-                                                        totalChunks: ranges.count,
-                                                        conflictResolution: .version,
-                                                        directoryId: file.parentDirectoryId)
+            // check for and existing valid session in realm
+            if let uploadingSession = file.uploadingSession,
+               uploadingSession.isExpired == false,
+               let uploadSession = uploadingSession.uploadSession {
+                   sessionToken = uploadSession.token
+            }
+            else {
+                // Get a valid upload session
+                let apiFetcher = driveFileManager.apiFetcher
+                let drive = driveFileManager.drive
+                
+                @InjectService var fileMetadata: FileMetadatable
+                let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl)
+                let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl)
+                guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
+                    UploadOperationLog("Unable to read file size :\(fileUrl) for \(file.id)", level: .error)
+                    file.error = .fileNotFound
+                    end()
+                    return
+                }
+                
+                let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
+                UploadOperationLog("got fileSize:\(mebibytes)MiB ranges:\(ranges) \(file.id)")
+                
+                let session = try await apiFetcher.startSession(drive: drive,
+                                                                totalSize: fileSize,
+                                                                fileName: file.name,
+                                                                totalChunks: ranges.count,
+                                                                conflictResolution: .version,
+                                                                directoryId: file.parentDirectoryId)
+                sessionToken = session.token
+                // TODO remove
+                self.sessionId = session.token
+            }
+            
+            // Save session
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                try? uploadsRealm.safeWrite {
+                    uploadsRealm.add(UploadFile(value: file), update: .modified)
+                }
+            }
         } catch {
             UploadOperationLog("Unable to get an UploadSession:\(error) for \(file.id)", level: .error)
             file.error = .refreshToken
             end()
             return
         }
-        
-        // TODO: remove
-        uploadSession = session
-        
-        // Save session linked to an upload file + date to invalidate
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            try? uploadsRealm.safeWrite {
-                uploadsRealm.add(UploadFile(value: file), update: .modified)
-            }
-        }
-        
+
+        step = .chunking
         // Chunks creation from ranges
+        // TODO: Read ranges from entity
         guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: ranges) else {
             UploadOperationLog("Unable to get a ChunkProvider for \(file.id)", level: .error)
             file.error = .localError
@@ -213,15 +242,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             return
         }
 
-        // generate and store chunks asap.
-        self.step = .chunking
         // API requires index start at 1
         var index: Int = 1
         // TODO: store in DB, temp inmemory structure
         typealias RequestParams = (chunkNumber: Int, chunkSize: Int, chunkHash: String, sessionToken: String, path: URL)
         var resquestBuilder = [RequestParams]()
         while let chunk = chunkProvider.next() {
-            UploadOperationLog("Storing Chunk idx:[\(index)] \(file.id)")
+            UploadOperationLog("Storing Chunk idx:\(index) \(file.id)")
             step = .chunk(index)
             
             if isCancelled {
@@ -234,9 +261,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             
             do {
                 let chunkSHA256 = chunk.SHA256DigestString
-                let chunkPath = try storeChunk(chunk, index: index, fileId: file.id, sessionToken: session.token, hash: chunkSHA256)
+                let chunkPath = try storeChunk(chunk, index: index, fileId: file.id, sessionToken: sessionToken, hash: chunkSHA256)
+                UploadOperationLog("chunk stored index:\(index) for:\(file.id)")
                 let chunkHashHeader = "sha256:\(chunkSHA256)"
-                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHashHeader, sessionToken: session.token, path: chunkPath)
+                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHashHeader, sessionToken: sessionToken, path: chunkPath)
                 resquestBuilder.append(params)
                 
                 // TODO: store `RequestParams` in DB
@@ -255,6 +283,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             index += 1
         }
+        
         
         // schedule all the chunks to be uploaded
         // TODO: read request params from DB
@@ -284,71 +313,41 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
         
-        // schedulle upload of chunks
-//        let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
-//                                                             sessionToken: session.token,
-//                                                             chunkNumber: index,
-//                                                             chunk: chunk)
-        
-//        // Save UploadFile state (we are mainly interested in saving sessionUrl)
-//        BackgroundRealm.uploads.execute { uploadsRealm in
-//            try? uploadsRealm.safeWrite {
-//                uploadsRealm.add(UploadFile(value: file), update: .modified)
+        // TODO: set observation
+//        progressObservation = uploadTask.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+//            guard let newValue = value.newValue else {
+//                return
+//            }
+//            self.uploadProgressable.publishProgress(newValue, for: fileId)
+//        }
+//        if let itemIdentifier = itemIdentifier {
+//            DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
+//                manager.register(uploadTask, forItemWithIdentifier: itemIdentifier) { _ in }
 //            }
 //        }
         
-        // LEGACY
-        /*
-        let url = Endpoint.directUpload(file: file).url
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
-
-        file.sessionUrl = url.absoluteString
-        file.sessionId = urlSession.identifier
-
-        if let filePath = file.pathURL,
-           fileManager.isReadableFile(atPath: filePath.path) {
-            let uploadTask = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
-            task = uploadTask
-
-            uploadTask.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
-            uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-
-            progressObservation = uploadTask.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
-                guard let newValue = value.newValue else {
-                    return
-                }
-                self.uploadProgressable.publishProgress(newValue, for: fileId)
-            }
-            if let itemIdentifier = itemIdentifier {
-                DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
-                    manager.register(uploadTask, forItemWithIdentifier: itemIdentifier) { _ in }
-                }
-            }
-            uploadTask.resume()
-
-            // Save UploadFile state (we are mainly interested in saving sessionUrl)
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                try? uploadsRealm.safeWrite {
-                    uploadsRealm.add(UploadFile(value: file), update: .modified)
-                }
-            }
-        } else {
-//            UploadOperationLog("No file path found for job \(file.id)", level: .error)
-//            file.error = .fileNotFound
-//            end()
-        }
-         */
     }
 
+    // MARK: - Split operations
+    
+    func stopOperationAndReschedule(cleanCache: Bool, error: DriveError) {
+        UploadOperationLog("stopOperationAndReschedule cleanCache:\(cleanCache) fid:\(file.id)")
+        file.error = error
+        end()
+    }
+    
     // MARK: - Private methods
     
     // Close session if needed.
     func closeSession() async {
         UploadOperationLog("closeSession fid:\(file.id)")
         
-        // Try to close the upload
+        guard let uploadSessionToken = self.sessionId /*file.uploadingSession?.uploadSession?.token*/ else {
+            UploadOperationLog("No existing session to close fid:\(file.id)")
+            end()
+            return
+        }
+        
         guard let driveFileManager = accountManager.getDriveFileManager(for: accountManager.currentDriveId,
                                                                         userId: accountManager.currentUserId) else {
             UploadOperationLog("Failed to getDriveFileManager fid:\(file.id) userId:\(accountManager.currentUserId)",
@@ -357,10 +356,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             end()
             return
         }
-
+        
         let apiFetcher = driveFileManager.apiFetcher
         let drive = driveFileManager.drive
-        let abstractToken = AbstractTokenWrapper(token: uploadSession.token)
+        let abstractToken = AbstractTokenWrapper(token: uploadSessionToken)
         
         do {
             let uploadedFile = try await apiFetcher.closeSession(drive: drive, sessionToken: abstractToken)
@@ -461,6 +460,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         UploadOperationLog("completionHandler called for \(file.id)")
         
+        step = .closeSession
+        Task {
+            await closeSession()
+            end()
+        }
+        return
+        
         completionLock.wait()
         // Task has called end() in backgroundTaskExpired
         guard !isFinished else { return }
@@ -492,20 +498,21 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Success
             UploadOperationLog("completion successful \(file.id)")
             
+            
             // All chunks uploaded ?
             // NO -> reschedule to finish upload (todo)
             // YES -> reschedule to closeSession()
             
             // Reschedule the upload task
-            let rescheduledSessionId = backgroundUploadManager.rescheduleForBackground(task: nil, fileUrl: file.pathURL)
-            if let sessionId = rescheduledSessionId {
-                file.sessionId = sessionId
-                file.error = .taskRescheduled
-            } else {
-                file.sessionUrl = ""
-                file.error = .taskExpirationCancelled
-                uploadNotifiable.sendPausedNotificationIfNeeded()
-            }
+//            let rescheduledSessionId = backgroundUploadManager.rescheduleForBackground(task: nil, fileUrl: file.pathURL)
+//            if let sessionId = rescheduledSessionId {
+//                file.sessionId = sessionId
+//                file.error = .taskRescheduled
+//            } else {
+//                file.sessionUrl = ""
+//                file.error = .taskExpirationCancelled
+//                uploadNotifiable.sendPausedNotificationIfNeeded()
+//            }
             
             file.uploadDate = Date()
             file.error = nil
@@ -548,8 +555,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
 
-        end()
-        completionLock.leave()
+//        end()
+//        completionLock.leave()
     }
 
     // over 30sec

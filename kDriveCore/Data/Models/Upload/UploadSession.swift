@@ -20,12 +20,38 @@ import Foundation
 import RealmSwift
 
 /// The object returned at the startSession call
-public final class UploadSession: Object, Decodable {
+public struct UploadSession: Decodable {
+    public var directoryId: Int64?
+    
+    public var directoryPath: String?
+    
+    public var file: File?
+    
+    public var fileName: String
+    
+    public var message: String?
+    
+    public var result: Bool
+    
+    public var token: String
+
+    enum CodingKeys: String, CodingKey {
+        case directoryId = "directory_id"
+        case directoryPath = "directory_path"
+        case file
+        case fileName = "file_name"
+        case message
+        case result
+        case token
+    }
+}
+
+public final class RUploadSession: Object, Decodable {
     @Persisted(primaryKey: true) public var directoryId: Int64?
     
     @Persisted public var directoryPath: String?
     
-    @Persisted public var file: File?
+//    @Persisted public var file: File?
     
     @Persisted public var fileName: String
     
@@ -40,7 +66,7 @@ public final class UploadSession: Object, Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.directoryId = try container.decodeIfPresent(Int64.self, forKey: .directoryId)
         self.directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
-        self.file = try container.decodeIfPresent(File.self, forKey: .file)
+//        self.file = try container.decodeIfPresent(File.self, forKey: .file)
         self.fileName = try container.decode(String.self, forKey: .fileName)
         self.message = try container.decodeIfPresent(String.self, forKey: .message)
         self.result = try container.decode(String.self, forKey: .result)
@@ -57,3 +83,4 @@ public final class UploadSession: Object, Decodable {
         case token
     }
 }
+

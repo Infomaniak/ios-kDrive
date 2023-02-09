@@ -66,6 +66,7 @@ public class UploadFile: Object, UploadFilable {
     @Persisted private var rawPriority: Int = 0
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
+    @Persisted var uploadingSession: UploadingSessionTask?
     
     private var localAsset: PHAsset?
 

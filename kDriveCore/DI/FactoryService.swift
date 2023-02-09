@@ -112,6 +112,9 @@ enum FactoryService {
             Factory(type: FileManagerable.self) { _, _ in
                 FileManager.default
             },
+            Factory(type: FileMetadatable.self) { _, _ in
+                FileMetada()
+            },
         ]
         return services
     }

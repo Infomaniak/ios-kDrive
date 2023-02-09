@@ -22,8 +22,20 @@ import RealmSwift
 /// Tracks the upload of a chunk
 final public class UploadChunkTask: Object {
     @Persisted public var chunk: UploadedChunk?
-    @Persisted public var cacheFilePath: String?
+    
+    @Persisted public var chunkNumber: Int64?
+    @Persisted public var chunkSize: Int64?
+    @Persisted public var chunkHash: String?
+    @Persisted public var sessionToken: String?
+    @Persisted public var path: String?
+    
     @Persisted public var rangeLowBound: Int64?
     @Persisted public var rangeHiBound: Int64?
     
+    public var range: DataRange? {
+        guard let rangeLowBound, let rangeHiBound else {
+            return nil
+        }
+        return UInt64(rangeLowBound)...UInt64(rangeHiBound)
+    }
 }
