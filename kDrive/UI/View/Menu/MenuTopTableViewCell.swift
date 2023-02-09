@@ -33,7 +33,7 @@ class MenuTopTableViewCell: UITableViewCell {
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var progressLabel: UILabel!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
     
     func configureCell(with drive: Drive, and account: Account) {
         userAvatarContainerView.clipsToBounds = false

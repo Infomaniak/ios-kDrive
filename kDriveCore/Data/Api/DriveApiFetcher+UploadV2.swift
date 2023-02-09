@@ -34,12 +34,12 @@ public extension DriveApiFetcher {
     }
 
     enum APIParameters: String {
-        case driveID = "drive_id"
+        case driveId = "drive_id"
         case conflict
         case createdAt = "created_at"
-        case directoryID = "directory_id"
+        case directoryId = "directory_id"
         case directoryPath = "directory_path"
-        case fileID = "file_id"
+        case fileId = "file_id"
         case fileName = "file_name"
         case lastModifiedAt = "last_modified_at"
         case totalChunks = "total_chunks"
@@ -61,7 +61,7 @@ public extension DriveApiFetcher {
     ///   - totalChunks: the count of chunks the backend should expect
     ///   - lastModifiedAt: override last modified date
     ///   - createdAt: override created at
-    ///   - directoryID: The directory destination root of the new file. Must be a directory.
+    ///   - directoryId: The directory destination root of the new file. Must be a directory.
     /// If the identifier is unknown you can use only directory_path.
     /// The identifier 1 is the user root folder.
     /// Required without directory_path
@@ -69,7 +69,7 @@ public extension DriveApiFetcher {
     /// If the directory path does not exist, folders are created automatically.
     /// The path is a destination path, the file name should not be provided at the end.
     /// Required without directory_id.
-    ///   - fileID: File identifier of uploaded file.
+    ///   - fileId: File identifier of uploaded file.
     ///
     /// - Returns: an UploadSession struct.
     func startSession(drive: AbstractDrive,
@@ -79,11 +79,11 @@ public extension DriveApiFetcher {
                       conflictResolution: ConflictResolution? = nil,
                       lastModifiedAt: Date? = nil,
                       createdAt: Date? = nil,
-                      directoryID: Int? = nil,
+                      directoryId: Int? = nil,
                       directoryPath: String? = nil,
-                      fileID: Int? = nil) async throws -> UploadSession {
+                      fileId: Int? = nil) async throws -> UploadSession {
         // Parameter validation
-        guard directoryID != nil || directoryPath != nil else {
+        guard directoryId != nil || directoryPath != nil else {
             throw DriveError.UploadSessionError.invalidDirectoryParameters
         }
         
@@ -97,7 +97,7 @@ public extension DriveApiFetcher {
         }
         
         // Build parameters
-        var parameters: Parameters = [APIParameters.driveID.rawValue: drive.id,
+        var parameters: Parameters = [APIParameters.driveId.rawValue: drive.id,
                                       APIParameters.totalSize.rawValue: totalSize,
                                       APIParameters.fileName.rawValue: fileName,
                                       APIParameters.totalChunks.rawValue: totalChunks]
@@ -116,16 +116,16 @@ public extension DriveApiFetcher {
             parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
         }
         
-        if let directoryID {
-            parameters[APIParameters.directoryID.rawValue] = directoryID
+        if let directoryId {
+            parameters[APIParameters.directoryId.rawValue] = directoryId
         }
         
         if let directoryPath {
             parameters[APIParameters.directoryPath.rawValue] = directoryPath
         }
         
-        if let fileID {
-            parameters[APIParameters.fileID.rawValue] = fileID
+        if let fileId {
+            parameters[APIParameters.fileId.rawValue] = fileId
         }
         
         let route: Endpoint = .startSession(drive: drive)

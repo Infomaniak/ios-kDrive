@@ -44,7 +44,7 @@
                                     <constraint firstAttribute="width" secondItem="LAL-46-wBg" secondAttribute="height" multiplier="1:1" id="qjV-q0-9pY"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C5n-OY-iua" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C5n-OY-iua" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="52" y="18" width="40.5" height="19.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                 <color key="textColor" name="titleColor"/>

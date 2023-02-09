@@ -72,7 +72,7 @@ public protocol FileUploadSession: BackgroundSession {
 extension URLSession: FileUploadSession {}
 
 public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionManager, URLSessionDataDelegate, FileUploadSession {
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadQueue: UploadQueue
 
     public typealias Task = URLSessionUploadTask
     public typealias CompletionHandler = (Data?, URLResponse?, Error?) -> Void

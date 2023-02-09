@@ -23,7 +23,7 @@ import UIKit
 
 class EditCategoryViewController: UITableViewController {
     
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!
     // If we have a category we edit it, otherwise, we create a new one

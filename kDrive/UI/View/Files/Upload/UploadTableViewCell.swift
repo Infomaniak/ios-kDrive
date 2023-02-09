@@ -29,7 +29,7 @@ class UploadTableViewCell: InsetTableViewCell {
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
 
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadQueue: UploadQueue
 
     override func awakeFromNib() {
         super.awakeFromNib()

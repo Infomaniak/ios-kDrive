@@ -187,7 +187,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                         fileName: file.name,
                                                         totalChunks: ranges.count,
                                                         conflictResolution: .version,
-                                                        directoryID: file.parentDirectoryId)
+                                                        directoryId: file.parentDirectoryId)
         } catch {
             UploadOperationLog("Unable to get an UploadSession:\(error) for \(file.id)", level: .error)
             file.error = .refreshToken

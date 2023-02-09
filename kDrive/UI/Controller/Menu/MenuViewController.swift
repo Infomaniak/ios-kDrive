@@ -29,7 +29,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     @IBOutlet weak var userAvatarImageView: UIImageView!
     @IBOutlet weak var userDisplayNameLabel: UILabel!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager! {
         didSet {

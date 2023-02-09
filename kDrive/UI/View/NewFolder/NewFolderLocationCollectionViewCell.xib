@@ -30,7 +30,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="mMg-QI-kts">
                                 <rect key="frame" x="21" y="8" width="57.5" height="10"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FZ2-TI-nEn" customClass="IKLabel" customModule="InfomaniakCore">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FZ2-TI-nEn" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                         <rect key="frame" x="0.0" y="0.0" width="35.5" height="10"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <color key="textColor" name="primaryTextColor"/>

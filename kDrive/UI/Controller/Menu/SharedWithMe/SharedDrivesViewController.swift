@@ -25,7 +25,7 @@ import InfomaniakDI
 class SharedDrivesViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     var drives: [Drive?] = []
 

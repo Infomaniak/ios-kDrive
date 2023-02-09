@@ -23,7 +23,6 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
-import Kingfisher
 import QuickLook
 import RealmSwift
 
@@ -577,40 +576,6 @@ public class File: Object, Codable {
             return Constants.formatFileSize(Int64(value))
         }
         return nil
-    }
-
-    @discardableResult
-    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        if hasThumbnail, let currentDriveFileManager = accountManager.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
-                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
-                if let image = try? result.get().image {
-                    completion(image, true)
-                } else {
-                    // The file can become invalidated while retrieving the icon online
-                    completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
-                }
-            }
-        } else {
-            completion(icon, false)
-            return nil
-        }
-    }
-
-    @discardableResult
-    public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        if let currentDriveFileManager = accountManager.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
-                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
-                if let image = try? result.get().image {
-                    completion(image)
-                } else {
-                    completion(nil)
-                }
-            }
-        } else {
-            return nil
-        }
     }
 
     public func getBookmarkURL() -> URL? {

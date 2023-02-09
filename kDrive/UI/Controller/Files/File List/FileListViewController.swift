@@ -123,7 +123,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants
 

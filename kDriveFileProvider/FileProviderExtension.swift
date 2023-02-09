@@ -45,7 +45,10 @@ class FileProviderExtensionState {
 }
 
 class FileProviderExtension: NSFileProviderExtension {
-    @InjectService var uploadQueue: UploadQueue
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    private let dependencyInjectionHook = EarlyDIHook()
+
+    @LazyInjectService var uploadQueue: UploadQueue
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -53,7 +56,7 @@ class FileProviderExtension: NSFileProviderExtension {
         return fileCoordinator
     }()
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
         if let domain = domain {

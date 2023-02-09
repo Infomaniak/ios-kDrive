@@ -22,7 +22,7 @@ import RealmSwift
 import InfomaniakDI
 
 class UploadCountManager {
-    @InjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadQueue: UploadQueue
 
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void

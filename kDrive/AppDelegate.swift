@@ -40,9 +40,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     
     /// Making sure the DI is registered at a very early stage of the app launch.
-    let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook()
 
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 2
@@ -637,13 +638,5 @@ extension AppDelegate {
             topViewController = presentedViewController
         }
         return topViewController
-    }
-}
-
-/// Something that loads the DI on init
-public struct EarlyDIHook {
-    public init() {
-        // setup DI ASAP
-        FactoryService.setupDependencyInjection()
     }
 }

@@ -31,7 +31,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var notAcceptedView: UIView!
     @IBOutlet weak var externalUserView: UIView!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     override func awakeFromNib() {
         super.awakeFromNib()

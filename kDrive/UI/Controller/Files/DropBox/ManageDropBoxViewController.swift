@@ -25,7 +25,7 @@ import UIKit
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     private var driveFileManager: DriveFileManager!
     private var directory: File! {

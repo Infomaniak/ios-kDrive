@@ -361,7 +361,7 @@
                                     <constraint firstAttribute="height" constant="62" id="a9W-Hv-uK5"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vous n’avez pas encore de kDrive !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-af-Fsa" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vous n’avez pas encore de kDrive !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-af-Fsa" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="24" y="505.66666666666669" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
@@ -371,7 +371,7 @@
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="24" y="543.33333333333337" width="342" height="33.666666666666629"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -518,7 +518,7 @@
                                     <action selector="unlockAppButtonClicked:" destination="KGa-QI-iN2" eventType="touchUpInside" id="YgE-k8-Di3"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="InfomaniakCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                 <rect key="frame" x="24" y="497.33333333333331" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
@@ -596,7 +596,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="y3W-9c-Z7I">
                                 <rect key="frame" x="24" y="745.66666666666663" width="342" height="48.333333333333371"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="InfomaniakCore">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                         <rect key="frame" x="0.0" y="0.0" width="342" height="20.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="secondaryTextColor"/>
@@ -653,7 +653,7 @@
                                             <action selector="retryButtonPressed:" destination="Mc1-Q4-Zh6" eventType="touchUpInside" id="ihv-mZ-x3p"/>
                                         </connections>
                                     </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="InfomaniakCore">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="InfomaniakCoreUI">
                                         <rect key="frame" x="0.0" y="0.0" width="342" height="20.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="titleColor"/>

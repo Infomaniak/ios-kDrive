@@ -25,7 +25,7 @@ import UIKit
 class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     var file: File!
     var fileAccess: FileAccess!

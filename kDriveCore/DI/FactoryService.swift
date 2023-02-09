@@ -16,32 +16,30 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import BackgroundTasks
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
-import kDriveCore
 import os.log
 
 /// Something that can associate a custom identifier with a `Factory`
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 /// Something that setups the service factories
-///
-/// Trick : enum as no init, perfect for namespacing
 enum FactoryService {
     static func setupDependencyInjection() {
 #if DEBUG
-        SimpleResolver.register(debugServicies)
+        SimpleResolver.register(debugServices)
 #endif
-        let factories = networkingServicies + uploadServicies + miscServicies
+        let factories = networkingServices + miscServices
         SimpleResolver.register(factories)
     }
 
-    /// Networking related servicies
-    private static var networkingServicies: [Factory] {
-        let servicies = [
+    /// Networking related services
+    private static var networkingServices: [Factory] {
+        let services = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
                 let redirectUri = "com.infomaniak.drive://oauth2redirect"
@@ -78,12 +76,12 @@ enum FactoryService {
                 FileImportHelper()
             },
         ]
-        return servicies
+        return services
     }
 
-    /// Misc servicies
-    private static var uploadServicies: [Factory] {
-        let servicies = [
+    /// Misc services
+    private static var miscServices: [Factory] {
+        let services = [
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },
@@ -105,13 +103,9 @@ enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
-        ]
-        return servicies
-    }
-    
-    /// Misc servicies
-    private static var miscServicies: [Factory] {
-        let servicies = [
+            Factory(type: BGTaskScheduler.self) { _, _ in
+                BGTaskScheduler.shared
+            },
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()
             },
@@ -119,12 +113,12 @@ enum FactoryService {
                 FileManager.default
             },
         ]
-        return servicies
+        return services
     }
     
 #if DEBUG
-    /// Debug servicies
-    private static var debugServicies: [FactoryWithIdentifier] {
+    /// Debug services
+    private static var debugServices: [FactoryWithIdentifier] {
         if #available(iOS 14.0, *) {
             let loggerFactory = Factory(type: Logger.self) { parameters, _ in
                 guard let category = parameters?["category"] as? String else {
@@ -147,12 +141,20 @@ enum FactoryService {
 #endif
 }
 
-extension SimpleResolver {
+public extension SimpleResolver {
     static func register(_ factories: [Factory]) {
         factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
     }
     
     static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
         factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
+    }
+}
+
+/// Something that loads the DI on init
+public struct EarlyDIHook {
+    public init() {
+        // setup DI ASAP
+        FactoryService.setupDependencyInjection()
     }
 }

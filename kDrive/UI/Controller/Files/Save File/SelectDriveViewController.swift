@@ -29,7 +29,7 @@ protocol SelectDriveDelegate: AnyObject {
 class SelectDriveViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @InjectService var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     private var driveList: [Drive]!
     private var currentAccount: Account!

@@ -24,7 +24,10 @@ import InfomaniakDI
 
 class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
-    @InjectService var accountManager: AccountManageable
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    private let dependencyInjectionHook = EarlyDIHook()
+    
+    @LazyInjectService var accountManager: AccountManageable
 
     public override func viewDidLoad() {
         super.viewDidLoad()
