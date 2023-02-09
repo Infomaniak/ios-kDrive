@@ -175,7 +175,7 @@ public extension DriveApiFetcher {
     func appendChunk(drive: AbstractDrive,
                      sessionToken: AbstractToken,
                      chunkNumber: Int,
-                     chunk: Data) async throws -> UploadChunk {
+                     chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
         let chunkHash = "sha256:\(chunk.SHA256DigestString)"
         let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
@@ -188,14 +188,14 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .requestBody(chunk))
         
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
     
     func upload(drive: AbstractDrive,
                 sessionToken: AbstractToken,
                 chunkNumber: Int,
-                chunk: Data) async throws -> UploadChunk {
+                chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
         let parameters: Parameters = [APIParameters.chunkSize.rawValue: chunkSize]
         let route: Endpoint = .upload(drive: drive)
@@ -205,7 +205,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .none)
         
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
 }

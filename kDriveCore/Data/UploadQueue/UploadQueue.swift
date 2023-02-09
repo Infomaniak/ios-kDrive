@@ -22,15 +22,11 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public protocol UploadNotifiable {
-    func sendPausedNotificationIfNeeded()
-}
-
 public protocol UploadProgressable {
     func publishProgress(_ progress: Double, for fileId: String)
 }
 
-public class UploadQueue: UploadNotifiable, UploadProgressable {
+public class UploadQueue:  UploadProgressable {
     @LazyInjectService var accountManager: AccountManageable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
@@ -140,15 +136,6 @@ public class UploadQueue: UploadNotifiable, UploadProgressable {
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
-    }
-
-    public func sendPausedNotificationIfNeeded() {
-        dispatchQueue.async {
-            if !self.pausedNotificationSent {
-                NotificationsHelper.sendPausedUploadQueueNotification()
-                self.pausedNotificationSent = true
-            }
-        }
     }
 
     public func publishProgress(_ progress: Double, for fileId: String) {

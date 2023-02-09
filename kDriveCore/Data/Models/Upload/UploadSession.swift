@@ -17,21 +17,35 @@
  */
 
 import Foundation
+import RealmSwift
 
-public struct UploadSession: Decodable {
-    public var directoryID: UInt64?
+/// The object returned at the startSession call
+public final class UploadSession: Object, Decodable {
+    @Persisted(primaryKey: true) public var directoryID: Int64?
     
-    public var directoryPath: String?
+    @Persisted public var directoryPath: String?
     
-    public var file: File?
+    @Persisted public var file: File?
     
-    public var fileName: String?
+    @Persisted public var fileName: String
     
-    public var message: String?
+    @Persisted public var message: String?
     
-    public var result: Bool?
+    @Persisted public var result: String
     
-    public var token: UploadSessionToken
+    @Persisted public var token: String
+    
+    public required convenience init(from decoder: Decoder) throws {
+        self.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.directoryID = try container.decodeIfPresent(Int64.self, forKey: .directoryID)
+        self.directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
+        self.file = try container.decodeIfPresent(File.self, forKey: .file)
+        self.fileName = try container.decode(String.self, forKey: .fileName)
+        self.message = try container.decodeIfPresent(String.self, forKey: .message)
+        self.result = try container.decode(String.self, forKey: .result)
+        self.token = try container.decode(String.self, forKey: .token)
+    }
     
     enum CodingKeys: String, CodingKey {
         case directoryID = "directory_id"

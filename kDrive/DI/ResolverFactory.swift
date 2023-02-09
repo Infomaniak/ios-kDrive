@@ -136,7 +136,6 @@ enum FactoryService {
             
             let servicies = [
                 (loggerFactory, "UploadOperation"),
-                (loggerFactory, "CloseUploadSessionOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
             ]

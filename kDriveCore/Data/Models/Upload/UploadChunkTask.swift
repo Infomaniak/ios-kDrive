@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,18 +17,13 @@
  */
 
 import Foundation
+import RealmSwift
 
-final public class UploadToken: Codable {
-    public let token: String
-    public let expiration: Date
-
-    public var isNearlyExpired: Bool {
-        let twoHours = 60 * 60 * 2
-        return Date(timeIntervalSinceNow: TimeInterval(twoHours)) > expiration
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case token
-        case expiration
-    }
+/// Tracks the upload of a chunk
+final public class UploadChunkTask: Object {
+    @Persisted public var chunk: UploadedChunk?
+    @Persisted public var cacheFilePath: String?
+    @Persisted public var rangeLowBound: Int64?
+    @Persisted public var rangeHiBound: Int64?
+    
 }

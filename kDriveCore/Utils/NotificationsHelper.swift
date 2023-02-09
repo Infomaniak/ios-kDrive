@@ -75,6 +75,11 @@ public enum NotificationsHelper {
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
+    // TODO: Send local notif to make space.
+    public static func sendLowSpaceWarning() {
+        // Can we deeplink to cleanup screen ?
+    }
+    
     public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload

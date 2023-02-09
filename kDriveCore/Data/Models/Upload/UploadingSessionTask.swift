@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,20 +19,19 @@
 import Foundation
 import RealmSwift
 
-public struct UploadChunk: Decodable {
-    
-    var number: UInt
-    var status: String
-    var createdAt: UInt64 // TODO date
-    var size: UInt64
-    var hash: String
-    
-    enum CodingKeys: String, CodingKey {
-        case number
-        case status
-        case createdAt = "created_at"
-        case size
-        case hash
+/// Tracks the upload operation, given a session for a file
+final public class UploadingSessionTask: Object {
+    @Persisted public var uploadSession: UploadSession?
+    @Persisted public var sessionExpiration: Date
+    @Persisted public var chunkTasks: List<UploadChunkTask>
+
+    public var isNearlyExpired: Bool {
+        let ellevenHours = 60 * 60 * 11
+        return Date(timeIntervalSinceNow: TimeInterval(ellevenHours)) > sessionExpiration
     }
     
+    public var isExpired: Bool {
+        let twelveHours = 60 * 60 * 12
+        return Date(timeIntervalSinceNow: TimeInterval(twelveHours)) > sessionExpiration
+    }
 }

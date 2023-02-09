@@ -19,6 +19,7 @@
 
 import Foundation
 
+/// The object returned at the getSession call
 public struct UploadLiveSession: Decodable {
     var expectedChunks: UInt64
     var receivedChunks: UInt64

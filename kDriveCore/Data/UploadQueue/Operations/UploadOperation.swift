@@ -79,7 +79,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     private let urlSession: FileUploadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
-    private var uploadToken: UploadToken?
     private var progressObservation: NSKeyValueObservation?
 
     public var result: UploadCompletionResult
@@ -235,9 +234,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             
             do {
                 let chunkSHA256 = chunk.SHA256DigestString
-                let chunkPath = try storeChunk(chunk, index: index, fileId: file.id, sessionToken: session.token.token, hash: chunkSHA256)
+                let chunkPath = try storeChunk(chunk, index: index, fileId: file.id, sessionToken: session.token, hash: chunkSHA256)
                 let chunkHashHeader = "sha256:\(chunkSHA256)"
-                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHashHeader, sessionToken: session.token.token, path: chunkPath)
+                let params: RequestParams = (chunkNumber: index, chunkSize: chunk.count, chunkHash: chunkHashHeader, sessionToken: session.token, path: chunkPath)
                 resquestBuilder.append(params)
                 
                 // TODO: store `RequestParams` in DB
@@ -344,6 +343,39 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     }
 
     // MARK: - Private methods
+    
+    // Close session if needed.
+    func closeSession() async {
+        UploadOperationLog("closeSession fid:\(file.id)")
+        
+        // Try to close the upload
+        guard let driveFileManager = accountManager.getDriveFileManager(for: accountManager.currentDriveId,
+                                                                        userId: accountManager.currentUserId) else {
+            UploadOperationLog("Failed to getDriveFileManager fid:\(file.id) userId:\(accountManager.currentUserId)",
+                               level: .error)
+            file.error = .localError
+            end()
+            return
+        }
+
+        let apiFetcher = driveFileManager.apiFetcher
+        let drive = driveFileManager.drive
+        let abstractToken = AbstractTokenWrapper(token: uploadSession.token)
+        
+        do {
+            let uploadedFile = try await apiFetcher.closeSession(drive: drive, sessionToken: abstractToken)
+            UploadOperationLog("uploadedFile:\(uploadedFile) fid:\(file.id)")
+            
+            // TODO: Store file to DB
+            // and signal upload success / refresh UI
+        }
+        catch {
+            UploadOperationLog("closeSession error:\(error) fid:\(file.id)",
+                               level: .error)
+        }
+        
+        end()
+    }
     
     // MARK: Build request
     
@@ -460,13 +492,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Success
             UploadOperationLog("completion successful \(file.id)")
             
-            // TODO: Close session to validate file.
-            
             // All chunks uploaded ?
-            // -> Call close
+            // NO -> reschedule to finish upload (todo)
+            // YES -> reschedule to closeSession()
             
-            let closeSessionOperation = CloseUploadSessionOperation(file: file, sessionToken: uploadSession.token.token)
-            self.addDependency(closeSessionOperation)
+            // Reschedule the upload task
+            let rescheduledSessionId = backgroundUploadManager.rescheduleForBackground(task: nil, fileUrl: file.pathURL)
+            if let sessionId = rescheduledSessionId {
+                file.sessionId = sessionId
+                file.error = .taskRescheduled
+            } else {
+                file.sessionUrl = ""
+                file.error = .taskExpirationCancelled
+                uploadNotifiable.sendPausedNotificationIfNeeded()
+            }
             
             file.uploadDate = Date()
             file.error = nil
