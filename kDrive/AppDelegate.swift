@@ -117,6 +117,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
     }
 
+
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
         @InjectService var accountManager: AccountManageable

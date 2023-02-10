@@ -46,6 +46,7 @@ public struct UploadSession: Decodable {
     }
 }
 
+// TODO: Fusion UploadSession and RUploadSession
 public final class RUploadSession: Object, Decodable {
     @Persisted(primaryKey: true) public var directoryId: Int64?
     
@@ -57,9 +58,18 @@ public final class RUploadSession: Object, Decodable {
     
     @Persisted public var message: String?
     
-    @Persisted public var result: String
+    @Persisted public var result: Bool
     
     @Persisted public var token: String
+    
+    public convenience init(uploadSession: UploadSession) {
+        self.init()
+
+        self.fileName = uploadSession.fileName
+        self.message = uploadSession.message
+        self.result = uploadSession.result
+        self.token = uploadSession.token
+    }
     
     public required convenience init(from decoder: Decoder) throws {
         self.init()
@@ -69,7 +79,7 @@ public final class RUploadSession: Object, Decodable {
 //        self.file = try container.decodeIfPresent(File.self, forKey: .file)
         self.fileName = try container.decode(String.self, forKey: .fileName)
         self.message = try container.decodeIfPresent(String.self, forKey: .message)
-        self.result = try container.decode(String.self, forKey: .result)
+        self.result = try container.decode(Bool.self, forKey: .result)
         self.token = try container.decode(String.self, forKey: .token)
     }
     

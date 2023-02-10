@@ -113,7 +113,7 @@ enum FactoryService {
                 FileManager.default
             },
             Factory(type: FileMetadatable.self) { _, _ in
-                FileMetada()
+                FileMetadata()
             },
         ]
         return services

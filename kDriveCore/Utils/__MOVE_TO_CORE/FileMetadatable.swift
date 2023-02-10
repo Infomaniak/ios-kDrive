@@ -28,9 +28,11 @@ protocol FileMetadatable {
 
 }
 
-public struct FileMetada: FileMetadatable {
+public struct FileMetadata: FileMetadatable {
     
-    public init() { }
+    public init() {
+        // FileMetadata service init
+    }
     
     func fileModificationDate(url: URL) -> Date? {
         do {

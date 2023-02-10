@@ -76,7 +76,7 @@ public class DriveFileManager {
                           /*File.self ask, do I just keep a path ?*/
                           RUploadSession.self,
                           UploadFile.self,
-                          UploadChunkTask.self,
+                          UploadingChunkTask.self,
                           UploadedChunk.self,
                           UploadingSessionTask.self,])
 
