@@ -59,17 +59,4 @@ final public class UploadingSessionTask: Object {
         return Date(timeIntervalSinceNow: TimeInterval(twelveHours)) > sessionExpiration
     }
     
-    var ranges: [DataRange] {
-        get {
-            var ranges = [DataRange]()
-            for task in chunkTasks {
-                let dataRange: DataRange = task.range
-                ranges.append(dataRange)
-            }
-            return ranges
-        }
-        set {
-            fatalError("Unexpected")
-        }
-    }
 }

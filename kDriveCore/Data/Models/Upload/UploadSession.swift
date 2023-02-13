@@ -54,6 +54,8 @@ public final class RUploadSession: Object, Decodable {
     
 //    @Persisted public var file: File?
     
+//    @Persisted public var fileId: String
+    
     @Persisted public var fileName: String
     
     @Persisted public var message: String?
