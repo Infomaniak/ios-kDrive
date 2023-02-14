@@ -50,8 +50,6 @@ public class UploadFile: Object, UploadFilable {
     @Persisted(primaryKey: true) public var id: String = ""
     @Persisted public var name: String = ""
     @Persisted var relativePath: String = ""
-    @Persisted var sessionId: String?
-    @Persisted var sessionUrl: String = ""
     @Persisted private var url: String?
     @Persisted private var rawType: String = "file"
     @Persisted public var parentDirectoryId: Int = 1

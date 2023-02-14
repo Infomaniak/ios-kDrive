@@ -41,13 +41,17 @@ final public class UploadingChunkTask: Object {
     @Persisted public var chunkSize: Int64
     @Persisted public var sha256: String?
     @Persisted public var sessionToken: String?
-    // The path to the chunk file on the file system
+    
+    /// Tracking the session identifier used for the upload task
+    @Persisted public var sessionIdentifier: String?
+    
+    /// The path to the chunk file on the file system
     @Persisted public var path: String?
     
     @Persisted public var _lowerBound: Int64
     @Persisted public var _upperBound: Int64
     
-    // Set to true as soon as one request is registered
+    /// Set to true as soon as one net request is registered
     @Persisted public var scheduled: Bool = false
     
     @LazyInjectService var fileManager: FileManagerable
@@ -56,10 +60,12 @@ final public class UploadingChunkTask: Object {
         (chunk != nil) || (error != nil)
     }
     
+    /// Precond for starting the upload process
     public var canStartUploading: Bool {
-        (doneUploading == false) && (hasLocalChunk == true)
+        (doneUploading == false) && (hasLocalChunk == true) && (sessionIdentifier == nil) && (scheduled == false) && (chunk == nil)
     }
     
+    /// The chunk is stored localy inside a file, with a path and we have a valid hash of it.
     public var hasLocalChunk: Bool {
         guard let path,
               path.isEmpty == false,

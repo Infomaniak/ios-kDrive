@@ -76,8 +76,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func rescheduleForBackground(task: URLSessionDownloadTask?) -> String? {
         let syncLock = DispatchGroup()
-        if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
-           let request = task?.originalRequest {
+        if let request = task?.originalRequest {
             var sessionIdentifier: String?
             syncLock.enter()
             task?.cancel { data in

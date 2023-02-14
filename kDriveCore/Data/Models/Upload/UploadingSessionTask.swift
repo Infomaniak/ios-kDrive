@@ -22,6 +22,7 @@ import RealmSwift
 /// Tracks the upload operation, given a session for a file
 final public class UploadingSessionTask: Object {
     @Persisted public var uploadSession: RUploadSession?
+    @Persisted public var token: String
     @Persisted public var sessionExpiration: Date
     @Persisted public var chunkTasks: List<UploadingChunkTask>
     

@@ -77,8 +77,8 @@ open class AsynchronousOperation: Operation {
 
     // MARK: - Foundation.Operation
 
-    /// Something to enqueue async await job
-    let asyncAwaitQueue = TaskQueue(concurrency: 0)
+    /// Something to enqueue async await tasks in a serial manner.
+    let asyncAwaitQueue = TaskQueue()
     
     public override final func start() {
         super.start()
@@ -105,8 +105,21 @@ open class AsynchronousOperation: Operation {
     ///
     /// Making this function `async` allows for the seamless integration of modern swift async code.
     ///
+    /// It will be dispatched to the underlaying serial execution queue.
+    ///
     open func execute() async {
         fatalError("Subclasses must implement `execute`.")
+    }
+    
+    /// Enqueue an async/await closure in the underlaying serial execution queue.
+    /// - Parameter asap: The task will be schedulled ASAP in the queue
+    /// - Parameter task: A closure with async await code to be dispatched
+    public func enqueue(asap: Bool = false, _ task: @escaping () async throws -> Void) {
+        Task {
+            try await asyncAwaitQueue.enqueue(asap: asap) {
+                try await task()
+            }
+        }
     }
 
     /// Call this function after any work is done or after a call to `cancel()`
@@ -120,46 +133,4 @@ open class AsynchronousOperation: Operation {
     case ready
     case executing
     case finished
-}
-
-
-public actor TaskQueue {
-    private let concurrency: Int
-    private var running: Int = 0
-    private var queue = [CheckedContinuation<Void, Error>]()
-
-    public init(concurrency: Int) {
-        self.concurrency = concurrency
-    }
-
-    deinit {
-        for continuation in queue {
-            continuation.resume(throwing: CancellationError())
-        }
-    }
-
-    public func enqueue<T>(operation: @escaping @Sendable () async throws -> T) async throws -> T {
-        try Task.checkCancellation()
-
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            queue.append(continuation)
-            tryRunEnqueued()
-        }
-
-        defer {
-            running -= 1
-            tryRunEnqueued()
-        }
-        try Task.checkCancellation()
-        return try await operation()
-    }
-
-    private func tryRunEnqueued() {
-        guard !queue.isEmpty else { return }
-        guard running < concurrency else { return }
-
-        running += 1
-        let continuation = queue.removeFirst()
-        continuation.resume()
-    }
 }

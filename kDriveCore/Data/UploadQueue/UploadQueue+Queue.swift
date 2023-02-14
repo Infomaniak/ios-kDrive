@@ -64,10 +64,15 @@ extension UploadQueue: UploadQueueable {
                     .sorted(byKeyPath: "taskCreationDate")
                 autoreleasepool {
                     uploadingFiles.forEach { uploadFile in
+                        // BEFORE
                         // If the upload file has a session URL but it's foreground and doesn't exist anymore (e.g. app was killed), we add it again
-                        if uploadFile.sessionUrl.isEmpty || (!uploadFile.sessionUrl.isEmpty && uploadFile.sessionId == self.foregroundSession.identifier && !uploadTasks.contains(where: { $0.originalRequest?.url?.absoluteString == uploadFile.sessionUrl })) {
+                        /*if uploadFile.sessionUrl.isEmpty || (!uploadFile.sessionUrl.isEmpty && uploadFile.sessionId == self.foregroundSession.identifier && !uploadTasks.contains(where: { $0.originalRequest?.url?.absoluteString == uploadFile.sessionUrl })) {
                             self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
-                        }
+                        }*/
+                        
+                        // NOW k(eep)i(t)s(uper)s(imple)
+                        // Try to ad it back in. NOOP if already in there.
+                        self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                     }
                 }
             }

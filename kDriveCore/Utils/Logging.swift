@@ -28,7 +28,8 @@ import InfomaniakDI
 
 public enum Logging {
     public static func initLogging() {
-        UserDefaults.standard.set(true, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        // TODO: change
+        UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         initLogger()
         initNetworkLogging()
         initSentry()

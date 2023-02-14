@@ -30,8 +30,6 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Attributes
 
     var backgroundCompletionHandler: (() -> Void)? { get set }
-    var backgroundTaskCount: Int { get }
-
     var backgroundSession: URLSession! { get }
     var tasksCompletionHandler: [String: CompletionHandler] { get set }
     var progressObservers: [String: NSKeyValueObservation] { get set }
@@ -41,12 +39,6 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession)
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler?
-}
-
-extension BackgroundSessionManager {
-    public var backgroundTaskCount: Int {
-        return operations.count
-    }
 }
 
 public protocol BackgroundSession {
@@ -81,7 +73,6 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     public var backgroundCompletionHandler: (() -> Void)?
     private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
-    static let maxBackgroundTasks = 10
 
     private var managedSessions: [String: URLSession] = [:]
     var backgroundSession: URLSession!
@@ -103,10 +94,10 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         super.init()
         
         BackgroundSessionManagerLog("Starting up")
-        backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
+        backgroundSession = getSessionOrCreate(for: UploadQueue.backgroundIdentifier)
     }
 
-    public func getSession(for identifier: String) -> URLSession {
+    public func getSessionOrCreate(for identifier: String) -> URLSession {
         if let session = syncQueue.sync(execute: { managedSessions[identifier] }) {
             return session
         }
@@ -127,19 +118,28 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func handleEventsForBackgroundURLSession(identifier: String, completionHandler: @escaping BackgroundCompletionHandler) {
-        _ = getSession(for: identifier)
+        _ = getSessionOrCreate(for: identifier)
         syncQueue.async(flags: .barrier) { [weak self] in
             self?.backgroundCompletionHandlers[identifier] = completionHandler
         }
     }
 
     public func reconnectBackgroundTasks() {
-        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND sessionUrl != \"\""))
-        let uniqueSessionIdentifiers = Set(uploadedFiles.compactMap(\.sessionId))
-        for sessionIdentifier in uniqueSessionIdentifiers {
-            let session = getSession(for: sessionIdentifier)
-            session.getTasksWithCompletionHandler { [weak self] _, uploadTasks, _ in
-                self?.handleReconnectedTasks(tasks: uploadTasks, for: session)
+        // UploadFiles not uploaded _and_ a uploadingSession is present
+        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND uploadingSession != nil"))
+        
+        // For all NSURLSessionDataTask ID linked to chunk uploading within an uploadingSession …
+        let uploadingFilesWithSession = uploadedFiles.compactMap(\.uploadingSession)
+        for session in uploadingFilesWithSession {
+            for chunkTask in session.chunkTasks {
+                if let sessionIdentifier = chunkTask.sessionIdentifier {
+                    // … we re-register progress
+                    let session = getSessionOrCreate(for: sessionIdentifier)
+                    session.getTasksWithCompletionHandler { [unowned self] _, uploadTasks, _ in
+                        self.handleReconnectedTasks(tasks: uploadTasks, for: session)
+                    }
+                }
             }
         }
     }
@@ -161,19 +161,19 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         }
     }
 
-    public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> String? {
-        if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
-           let request = task?.originalRequest,
+    public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> URLSessionUploadTask? {
+        if let request = task?.originalRequest,
            let fileUrl = fileUrl {
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
             BackgroundSessionManagerLog("Rescheduled task \(request.url?.absoluteString ?? "")")
-            return backgroundSession.identifier
+            return task
         } else {
             return nil
         }
     }
-
+    
+    /// Called on reschedulling BG tasks
     public func uploadTask(with request: URLRequest,
                            fromFile fileURL: URL,
                            completionHandler: @escaping CompletionHandler) -> Task {
@@ -185,6 +185,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         return task
     }
 
+    // MARK: Delegate
+    
     public func urlSession(_ session: URLSession,
                            dataTask: URLSessionDataTask,
                            didReceive data: Data) {
@@ -229,6 +231,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             }
         }
     }
+    
+    // MARK: -
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
         let taskIdentifier = session.identifier(for: task)
