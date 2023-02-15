@@ -139,8 +139,10 @@ public class UploadQueue:  UploadProgressable {
     }
 
     public func publishProgress(_ progress: Double, for fileId: String) {
-        observations.didChangeProgress.values.forEach { closure in
-            closure(fileId, progress)
+        DispatchQueue.main.async {
+            self.observations.didChangeProgress.values.forEach { closure in
+                closure(fileId, progress)
+            }
         }
     }
 

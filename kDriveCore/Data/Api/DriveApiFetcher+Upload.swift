@@ -20,19 +20,10 @@ import Alamofire
 import Foundation
 import InfomaniakCore
 
-public extension DriveApiFetcher {
-    // MARK: Upload V2
-    
-    /// Conflict resolution options
-    enum ConflictResolution: String {
-        /// An error is thrown without creating the file/session.
-        case throwError = "error"
-        /// Rename the new file with an available name (ex. file.txt to file(3).txt).
-        case rename
-        /// Replace the content of the existing file (create a new version of the file).
-        case version
-    }
+// MARK: - Upload APIV2
 
+public extension DriveApiFetcher {
+    
     enum APIParameters: String {
         case driveId = "drive_id"
         case conflict
@@ -76,7 +67,7 @@ public extension DriveApiFetcher {
                       totalSize: UInt64,
                       fileName: String,
                       totalChunks: Int,
-                      conflictResolution: ConflictResolution? = nil,
+                      conflictResolution: ConflictOption? = nil,
                       lastModifiedAt: Date? = nil,
                       createdAt: Date? = nil,
                       directoryId: Int? = nil,

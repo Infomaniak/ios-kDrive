@@ -79,11 +79,14 @@ class UploadQueueViewController: UIViewController {
 
     func setUpObserver() {
         guard currentDirectory != nil else { return }
+        
+        
+        
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,
                                                           driveId: currentDirectory.driveId,
                                                           using: realm)
-            .observe(on: .main) { [weak self] change in
+        .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
                     self?.uploadingFiles = AnyRealmCollection(results)

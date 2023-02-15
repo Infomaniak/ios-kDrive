@@ -18,6 +18,7 @@
 
 import Foundation
 import RealmSwift
+import InfomaniakDI
 
 /// Tracks the upload operation, given a session for a file
 final public class UploadingSessionTask: Object {
@@ -50,14 +51,21 @@ final public class UploadingSessionTask: Object {
         self.filePath = filePath
     }
     
-    public var isNearlyExpired: Bool {
-        let ellevenHours = 60 * 60 * 11
-        return Date(timeIntervalSinceNow: TimeInterval(ellevenHours)) > sessionExpiration
-    }
-    
     public var isExpired: Bool {
-        let twelveHours = 60 * 60 * 12
-        return Date(timeIntervalSinceNow: TimeInterval(twelveHours)) > sessionExpiration
+        return Date() > sessionExpiration
     }
     
+    public var fileIdentityHasNotChanged: Bool {
+        currentFileIdentity == fileIdentity
+    }
+
+    /// Return a string that is expected to change if the file change, without needing to read the whole file
+    public var currentFileIdentity: String {
+        @InjectService var fileMetadata: FileMetadatable
+        let fileUrl = URL(fileURLWithPath: filePath, isDirectory: false)
+        let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl)
+        let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl)
+        let fileUniqIdentity = "\(String(describing: fileCreationDate))_\(String(describing: fileModificationDate))"
+        return fileUniqIdentity
+    }
 }
