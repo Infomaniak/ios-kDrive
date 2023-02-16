@@ -63,7 +63,7 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Observe uploading files
         notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
-            .observe(on: .main) { [weak self] change in
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
                     self?.updateFolders(from: results)

@@ -70,7 +70,7 @@ extension UploadQueue: UploadQueueable {
                             self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                         }*/
                         
-                        // NOW k(eep)i(t)s(uper)s(imple)
+                        // NOW kiss
                         // Try to ad it back in. NOOP if already in there.
                         self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                     }

@@ -19,6 +19,7 @@
 import Foundation
 import Sentry
 import InfomaniakDI
+import RealmSwift
 
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
@@ -33,7 +34,7 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     var backgroundSession: URLSession! { get }
     var tasksCompletionHandler: [String: CompletionHandler] { get set }
     var progressObservers: [String: NSKeyValueObservation] { get set }
-    var operations: [Operation] { get set }
+    var operations: [String: Operation] { get set }
 
     func reconnectBackgroundTasks()
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
@@ -83,7 +84,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var tasksData: [String: Data] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [Operation]()
+    var operations = [String: Operation]()
 
     private var syncQueue = DispatchQueue(
         label: "\(Bundle.main.bundleIdentifier ?? "com.infomaniak.drive").BackgroundUploadSessionManager.syncqueue",
@@ -125,41 +126,48 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func reconnectBackgroundTasks() {
-        // UploadFiles not uploaded _and_ a uploadingSession is present
-        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND uploadingSession != nil"))
+        // TODO: Cleanup, nothing observed now
+        return
         
-        // For all NSURLSessionDataTask ID linked to chunk uploading within an uploadingSession …
-        let uploadingFilesWithSession = uploadedFiles.compactMap(\.uploadingSession)
-        for session in uploadingFilesWithSession {
-            for chunkTask in session.chunkTasks {
-                if let sessionIdentifier = chunkTask.sessionIdentifier {
-                    // … we re-register progress
-                    let session = getSessionOrCreate(for: sessionIdentifier)
-                    session.getTasksWithCompletionHandler { [unowned self] _, uploadTasks, _ in
-                        self.handleReconnectedTasks(tasks: uploadTasks, for: session)
-                    }
-                }
-            }
-        }
+//        // UploadFiles not uploaded _and_ a uploadingSession is present
+//        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+//            .filter(NSPredicate(format: "uploadDate = nil AND uploadingSession != nil"))
+//
+//        // For all NSURLSessionDataTask ID linked to chunk uploading within an uploadingSession …
+//        let uploadingFilesWithSession = uploadedFiles.compactMap(\.uploadingSession)
+//        for session in uploadingFilesWithSession {
+//            for chunkTask in session.chunkTasks {
+//                if let sessionIdentifier = chunkTask.sessionIdentifier {
+//                    // … we re-register progress
+//                    /*
+//                    let session = getSessionOrCreate(for: sessionIdentifier)
+//                    session.getTasksWithCompletionHandler { [unowned self] _, uploadTasks, _ in
+//                        self.handleReconnectedTasks(tasks: uploadTasks, for: session)
+//                    }
+//                     */
+//                }
+//            }
+//        }
     }
 
-    private func handleReconnectedTasks(tasks: [URLSessionUploadTask], for session: URLSession) {
-        syncQueue.async(flags: .barrier) {
-            for task in tasks {
-                if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                    self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
-                        guard let newValue = value.newValue else {
-                            return
-                        }
-                        self.uploadQueue.publishProgress(newValue, for: fileId)
-                    }
-                }
-            }
-        }
-    }
+//    private func handleReconnectedTasks(tasks: [URLSessionUploadTask], for session: URLSession) {
+//        syncQueue.async(flags: .barrier) {
+//            for task in tasks {
+//                if let sessionUrl = task.originalRequest?.url?.absoluteString,
+//                   // TODO: No longer observed
+//                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+//                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
+//
+//                    self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
+//                        guard let newValue = value.newValue else {
+//                            return
+//                        }
+//                        self.uploadQueue.publishProgress(newValue, for: fileId)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> URLSessionUploadTask? {
         if let request = task?.originalRequest,
@@ -235,19 +243,46 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     // MARK: -
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
+        BackgroundSessionManagerLog("getCompletionHandler :\(session)")
+
         let taskIdentifier = session.identifier(for: task)
         if let completionHandler = syncQueue.sync(execute: { tasksCompletionHandler[taskIdentifier] }) {
             return completionHandler
-        } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-                  .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
+        } else if let requestUrl = task.originalRequest?.url?.absoluteString,
+                  requestUrl.isEmpty == false {
             
-            let operation = UploadOperation(file: file, task: task, urlSession: self)
+            /*let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first*/
             
-            syncQueue.async(flags: .barrier) { [unowned self] in
-                self.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
-                self.operations.append(operation)
+            // TODO: test and optimise
+            // Fetch the first upload file WHERE a chunk upload URL is matching
+            let files = Array(DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+                .where {
+                ($0.uploadDate == nil) && ($0.uploadingSession.uploadSession != nil)
+            })
+                .filter {
+                let result = $0.uploadingSession?.chunkTasks.where { $0.requestUrl == requestUrl }
+                return result?.count ?? 0 > 0
             }
+            
+            guard let file = files.first else {
+                // TODO: check this out
+                assertionFailure("Not able to find linked UploadingFile")
+                return nil
+            }
+            
+            var operation: Operation!
+            syncQueue.sync(flags: .barrier) { [unowned self] in
+                if let op = self.operations[requestUrl] {
+                    operation = op
+                } else {
+                    operation = UploadOperation(file: file, task: task, urlSession: self)
+                }
+                
+                self.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
+                self.operations[requestUrl] = operation
+            }
+            
             return operation.uploadCompletion
         } else {
             logMissingCompletionHandler(for: task, session: session)

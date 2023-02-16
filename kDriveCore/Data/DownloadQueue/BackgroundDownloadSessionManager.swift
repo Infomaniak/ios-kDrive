@@ -45,7 +45,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [Operation]()
+    var operations = [String: Operation]()
 
     override public init() {
         super.init()
@@ -137,7 +137,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
-            operations.append(operation)
+            operations[sessionUrl] = operation
             return operation.downloadCompletion
         } else {
             return nil

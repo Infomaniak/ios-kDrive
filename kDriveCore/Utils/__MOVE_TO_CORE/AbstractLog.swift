@@ -84,21 +84,22 @@ public func ABLog(_ message: @autoclosure () -> Any,
         let factoryParameters = [categoryKey : category]
         @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
         
+        // .public is fine as we only use this in #DEBUG
         switch level {
         case .warning, .alert:
-            logger.warning("\(messageString)")
+            logger.warning("\(messageString, privacy: .public)")
         case .emergency, .critical:
-            logger.critical("\(messageString)")
+            logger.critical("\(messageString, privacy: .public)")
         case .error:
-            logger.error("\(messageString)")
+            logger.error("\(messageString, privacy: .public)")
         case .notice:
-            logger.notice("\(messageString)")
+            logger.notice("\(messageString, privacy: .public)")
         case .info:
-            logger.info("\(messageString)")
+            logger.info("\(messageString, privacy: .public)")
         case .debug:
-            logger.debug("\(messageString)")
+            logger.debug("\(messageString, privacy: .public)")
         case .fault:
-            logger.fault("\(messageString)")
+            logger.fault("\(messageString, privacy: .public)")
         }
     } else {
         // os_log() only support `StaticSting`

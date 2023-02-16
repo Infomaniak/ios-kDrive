@@ -80,8 +80,6 @@ class UploadQueueViewController: UIViewController {
     func setUpObserver() {
         guard currentDirectory != nil else { return }
         
-        
-        
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,
                                                           driveId: currentDirectory.driveId,
