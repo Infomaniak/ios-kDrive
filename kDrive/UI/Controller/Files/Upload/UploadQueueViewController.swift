@@ -34,7 +34,6 @@ class UploadQueueViewController: UIViewController {
 
     var currentDirectory: File!
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
-    private var progressForFileId = [String: CGFloat]()
     private var notificationToken: NotificationToken?
 
     private let realm = DriveFileManager.constants.uploadsRealm
@@ -54,7 +53,6 @@ class UploadQueueViewController: UIViewController {
         uploadQueue.observeFileUploadProgress(self) { [weak self] fileId, progress in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.progressForFileId[fileId] = progress
                 for cell in self.tableView.visibleCells {
                     (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress, animated: progress > 0)
                 }
@@ -166,7 +164,8 @@ extension UploadQueueViewController: UITableViewDataSource {
         let file = uploadingFiles[indexPath.row]
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
                                        isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-        cell.configureWith(uploadFile: file, progress: progressForFileId[file.id])
+        let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
+        cell.configureWith(uploadFile: file, progress: progress)
         cell.selectionStyle = .none
         return cell
     }

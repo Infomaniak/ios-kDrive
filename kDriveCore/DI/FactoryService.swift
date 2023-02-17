@@ -115,6 +115,9 @@ enum FactoryService {
             Factory(type: FileMetadatable.self) { _, _ in
                 FileMetadata()
             },
+            Factory(type: FreeSpaceService.self) { _, _ in
+                FreeSpaceService()
+            },
         ]
         return services
     }

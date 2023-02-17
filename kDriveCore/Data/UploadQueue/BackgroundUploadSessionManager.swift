@@ -265,9 +265,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                 return result?.count ?? 0 > 0
             }
             
-            guard let file = files.first else {
-                // TODO: check this out
-                assertionFailure("Not able to find linked UploadingFile")
+            guard let file = files.first?.detached() else {
+                logMissingCompletionHandler(for: task, session: session)
                 return nil
             }
             

@@ -75,9 +75,15 @@ public enum NotificationsHelper {
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
-    // TODO: Send local notif to make space.
-    public static func sendLowSpaceWarning() {
-        // Can we deeplink to cleanup screen ?
+    public func sendNotEnoughSpaceForUpload(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = CategoryIdentifier.upload
+        content.sound = .default
+
+        content.title = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.errorDeviceStorage
+        content.body = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, KDriveResourcesStrings.Localizable.errorDeviceStorage)
+
+        Self.sendImmediately(notification: content, id: UUID().uuidString)
     }
     
     public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {

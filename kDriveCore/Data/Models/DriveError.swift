@@ -86,7 +86,10 @@ public struct DriveError: Error, Equatable {
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
-    public static let localError = DriveError(type: .localError, code: "localError")
+    public static var localError = DriveError(type: .localError, code: "localError")
+    public static var errorDeviceStorage = DriveError(type: .localError,
+                                                      code: "errorDeviceStorage"/*,
+                                                      localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage*/) // TODO: bump localizedString
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
@@ -101,24 +104,6 @@ public struct DriveError: Error, Equatable {
                                                  code: "errorCache",
                                                  localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
-    
-    // TODO: Wrap specific errors into user facing DriveError if needed
-    // new errors
-    /// The local upload session is missing
-    public static let uploadSessionTaskMissing = DriveError(type: .localError, code: "uploadSessionTaskMissing")
-    /// The local upload session is no longer valid
-    public static let uploadSessionInvalid = DriveError(type: .localError, code: "uploadSessionInvalid")
-    /// Unable to match a request callback to a chunk we are trying to upload
-    public static let unableToMatchUploadChunk = DriveError(type: .localError, code: "unableToMatchUploadChunk")
-    /// Unable to split a file into [ranges]
-    public static let splitError = DriveError(type: .localError, code: "unableToSplitFile")
-    /// Unable to split a file into [Data]
-    public static let chunkError = DriveError(type: .localError, code: "unableToChunkFile")
-    /// The file was modified during the upload task
-    public static let fileIdentityHasChanged = DriveError(type: .localError, code: "fileIdentityHasChanged")
-    /// Unable to parse some data
-    public static let parseError = DriveError(type: .localError, code: "unableToParse")
-    
     
     // MARK: Server
     
@@ -164,8 +149,26 @@ public struct DriveError: Error, Equatable {
     public static let stillUploadingError = DriveError(type: .serverError,
                                                        code: "still_uploading_error",
                                                        localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
-    public static let uploadSessionAlreadyExists = DriveError(type: .serverError,
-                                                              code: "upload_not_terminated_error")
+    
+    public static let fileAlreadyExistsError = DriveError(type: .serverError, code: "file_already_exists_error")
+    
+    public static let notAuthorized = DriveError(type: .serverError, code: "not_authorized")
+    
+    public static let uploadDestinationNotFoundError = DriveError(type: .serverError, code: "upload_destination_not_found_error")
+    
+    public static let uploadDestinationNotWritableError = DriveError(type: .serverError, code: "upload_destination_not_writable_error")
+    
+    public static let uploadNotTerminatedError = DriveError(type: .serverError, code: "upload_not_terminated_error")
+    
+    public static let uploadNotTerminated = DriveError(type: .serverError, code: "upload_not_terminated")
+    
+    public static let invalidUploadTokenError = DriveError(type: .serverError, code: "invalid_upload_token_error")
+    
+    public static let uploadError = DriveError(type: .serverError, code: "upload_error")
+    
+    public static let uploadFailedError = DriveError(type: .serverError, code: "upload_failed_error")
+    
+    public static let uploadTokenIsNotValid = DriveError(type: .serverError, code: "upload_token_is_not_valid")
     
     // MARK: Network
     public static let networkError = DriveError(type: .networkError,
@@ -195,12 +198,23 @@ public struct DriveError: Error, Equatable {
                                                   donwloadPermission,
                                                   categoryAlreadyExists,
                                                   stillUploadingError,
-                                                  uploadSessionAlreadyExists,
-                                                  uploadSessionTaskMissing]
+                                                  uploadNotTerminated,
+                                                  uploadNotTerminatedError,
+                                                  notAuthorized,
+                                                  uploadDestinationNotFoundError,
+                                                  uploadDestinationNotWritableError,
+                                                  invalidUploadTokenError,
+                                                  uploadError,
+                                                  uploadFailedError,
+                                                  uploadTokenIsNotValid,
+                                                  fileAlreadyExistsError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
 
+    /// A specific, not user facing, not localized error
+    private var underlyingError: Error?
+    
     public init(apiErrorCode: String, httpStatus: Int = 400) {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
             self = error
@@ -237,6 +251,12 @@ public struct DriveError: Error, Equatable {
 
     static func serverError(statusCode: Int) -> DriveError {
         return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
+    }
+    
+    /// Wraps a specific detailed error into a user facing localized DriveError
+    public mutating func wrapping(_ underlyingError: Error) -> Self {
+        self.underlyingError = underlyingError
+        return self
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {

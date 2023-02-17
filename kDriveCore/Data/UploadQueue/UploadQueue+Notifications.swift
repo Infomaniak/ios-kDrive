@@ -17,10 +17,11 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 public protocol UploadNotifiable {
-    /// Send a low space warning notification to the user
-    func sendLowSpaceWarningIfNeeded()
+    /// Notify the user that we have not enough storage to start an upload.
+    func sendNotEnoughSpaceForUpload(filename: String)
 
     /// Send a local notification if some error is preventing the upload
     func sendPausedNotificationIfNeeded()
@@ -30,9 +31,11 @@ public protocol UploadNotifiable {
 }
 
 extension UploadQueue: UploadNotifiable {
-    public func sendLowSpaceWarningIfNeeded() {
-        // TODO: if needed
-        NotificationsHelper.sendLowSpaceWarning()
+    public func sendNotEnoughSpaceForUpload(filename: String) {
+        DispatchQueue.main.async {
+            @InjectService var notificationsHelper: NotificationsHelper
+            notificationsHelper.sendNotEnoughSpaceForUpload(filename: filename)
+        }
     }
 
     public func sendPausedNotificationIfNeeded() {
