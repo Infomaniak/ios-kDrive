@@ -68,7 +68,7 @@ public class UploadFile: Object, UploadFilable {
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?
     @Persisted public var taskCreationDate: Date?
-    @Persisted public var progress: Double? = 0
+    @Persisted public var progress: Double?
     @Persisted var shouldRemoveAfterUpload = true
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
     @Persisted private var rawPriority: Int = 0

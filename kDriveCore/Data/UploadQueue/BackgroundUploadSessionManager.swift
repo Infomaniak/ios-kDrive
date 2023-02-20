@@ -126,48 +126,9 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func reconnectBackgroundTasks() {
-        // TODO: Cleanup, nothing observed now
+        // NOOP for upload
         return
-        
-//        // UploadFiles not uploaded _and_ a uploadingSession is present
-//        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-//            .filter(NSPredicate(format: "uploadDate = nil AND uploadingSession != nil"))
-//
-//        // For all NSURLSessionDataTask ID linked to chunk uploading within an uploadingSession …
-//        let uploadingFilesWithSession = uploadedFiles.compactMap(\.uploadingSession)
-//        for session in uploadingFilesWithSession {
-//            for chunkTask in session.chunkTasks {
-//                if let sessionIdentifier = chunkTask.sessionIdentifier {
-//                    // … we re-register progress
-//                    /*
-//                    let session = getSessionOrCreate(for: sessionIdentifier)
-//                    session.getTasksWithCompletionHandler { [unowned self] _, uploadTasks, _ in
-//                        self.handleReconnectedTasks(tasks: uploadTasks, for: session)
-//                    }
-//                     */
-//                }
-//            }
-//        }
     }
-
-//    private func handleReconnectedTasks(tasks: [URLSessionUploadTask], for session: URLSession) {
-//        syncQueue.async(flags: .barrier) {
-//            for task in tasks {
-//                if let sessionUrl = task.originalRequest?.url?.absoluteString,
-//                   // TODO: No longer observed
-//                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-//                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-//
-//                    self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
-//                        guard let newValue = value.newValue else {
-//                            return
-//                        }
-//                        self.uploadQueue.publishProgress(newValue, for: fileId)
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> URLSessionUploadTask? {
         if let request = task?.originalRequest,

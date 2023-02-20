@@ -534,7 +534,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     func cleanUploadFileSession() {
         UploadOperationLog("Clean uploading session for \(file.id)")
-        file.uploadingSession = nil // TODO: Is this the correct thing to do ?
+        file.uploadingSession = nil
         file.progress = nil
         synchronousSaveUploadFileToRealm()
     }
@@ -735,9 +735,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
         
             if let error {
-                UploadOperationLog("uploadCompletion data:\(data) response:\(response) error:\(error) fid:\(file.id)", level: .error)
+                UploadOperationLog("uploadCompletion KO data:\(data) response:\(response) error:\(error) fid:\(file.id)", level: .error)
             } else {
-//                UploadOperationLog("uploadCompletion data:\(data) response:\(response) fid:\(file.id)")
+                UploadOperationLog("uploadCompletion OK data:\(data?.count) fid:\(file.id)")
             }
             
             // Success
