@@ -37,10 +37,10 @@ public protocol RangeProviderGutsable {
     /// - Returns: the file size at the moment of execution
     func readFileByteSize() throws -> UInt64
     
-    /// Mimmic the Android logic and returns what is prefered by the API for a specific file size
+    /// Mimmic the Android logic and returns what is preferred by the API for a specific file size
     /// - Parameter fileSize: the input file size, in **Bytes**
-    /// - Returns: The _prefered_ size of one chunk
-    func preferedChunkSize(for fileSize: UInt64) -> UInt64
+    /// - Returns: The _preferred_ size of one chunk
+    func preferredChunkSize(for fileSize: UInt64) -> UInt64
 }
 
 /// Subdivided **RangeProvider**, so it is easier to test
@@ -103,20 +103,20 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         return fileSize
     }
     
-    public func preferedChunkSize(for fileSize: UInt64) -> UInt64 {
-        let potentialChunkSize = fileSize / RangeProvider.APIConsts.optimalChunkCount
+    public func preferredChunkSize(for fileSize: UInt64) -> UInt64 {
+        let potentialChunkSize = fileSize / RangeProvider.APIConstants.optimalChunkCount
         
         let chunkSize: UInt64
         switch potentialChunkSize {
-        case 0 ..< RangeProvider.APIConsts.chunkMinSize:
-            chunkSize = RangeProvider.APIConsts.chunkMinSize
+        case 0 ..< RangeProvider.APIConstants.chunkMinSize:
+            chunkSize = RangeProvider.APIConstants.chunkMinSize
         
-        case RangeProvider.APIConsts.chunkMinSize...RangeProvider.APIConsts.chunkMaxSizeClient:
+        case RangeProvider.APIConstants.chunkMinSize...RangeProvider.APIConstants.chunkMaxSizeClient:
             chunkSize = potentialChunkSize
         
-        /// Strictly higher than `APIConsts.chunkMaxSize`
+        /// Strictly higher than `APIConstants.chunkMaxSize`
         default:
-            chunkSize = RangeProvider.APIConsts.chunkMaxSizeClient
+            chunkSize = RangeProvider.APIConstants.chunkMaxSizeClient
         }
         
         /// Set a lower bound to chunk size

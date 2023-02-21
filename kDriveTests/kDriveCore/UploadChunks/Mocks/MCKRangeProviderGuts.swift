@@ -34,10 +34,10 @@ final class MCKRangeProviderGutsable: RangeProviderGutsable {
         return readFileByteSizeReturnValue
     }
     
-    var preferedChunkSizeCalled: Bool = false
-    var preferedChunkSizeReturnValue: UInt64 = 0
-    func preferedChunkSize(for fileSize: UInt64) -> UInt64 {
-        preferedChunkSizeCalled = true
-        return preferedChunkSizeReturnValue
+    var preferredChunkSizeCalled: Bool = false
+    var preferredChunkSizeReturnValue: UInt64 = 0
+    func preferredChunkSize(for fileSize: UInt64) -> UInt64 {
+        preferredChunkSizeCalled = true
+        return preferredChunkSizeReturnValue
     }
 }

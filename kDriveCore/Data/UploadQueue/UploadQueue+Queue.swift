@@ -23,9 +23,12 @@ import RealmSwift
 import Sentry
 
 public protocol UploadQueueable {
+    
+    func getOperation(forFileId fileId: String) -> UploadOperationable?
+    
     func addToQueueFromRealm()
 
-    func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
+    func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
 
     func suspendAllOperations()
 
@@ -50,60 +53,83 @@ public protocol UploadQueueable {
 
 extension UploadQueue: UploadQueueable {
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
+        UploadQueueLog("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
             completionHandler()
         }
     }
 
+    public func getOperation(forFileId fileId: String) -> UploadOperationable? {
+        UploadQueueLog("getOperation fid:\(fileId)")
+        var operation: UploadOperationable? = nil
+        dispatchQueue.sync {
+            operation = self.operation(fileId: fileId)
+        }
+        return operation
+    }
+    
     public func addToQueueFromRealm() {
+        UploadQueueLog("addToQueueFromRealm")
         foregroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             self.dispatchQueue.async {
                 let uploadingFiles = self.realm.objects(UploadFile.self)
                     .filter("uploadDate = nil AND maxRetryCount > 0")
                     .sorted(byKeyPath: "taskCreationDate")
+                UploadQueueLog("addToQueueFromRealm uploads to restart:\(uploadingFiles.count)")
                 autoreleasepool {
                     uploadingFiles.forEach { uploadFile in
-                        // BEFORE
-                        // If the upload file has a session URL but it's foreground and doesn't exist anymore (e.g. app was killed), we add it again
-                        /*if uploadFile.sessionUrl.isEmpty || (!uploadFile.sessionUrl.isEmpty && uploadFile.sessionId == self.foregroundSession.identifier && !uploadTasks.contains(where: { $0.originalRequest?.url?.absoluteString == uploadFile.sessionUrl })) {
-                            self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
-                        }*/
+                        UploadQueueLog("addToQueueFromRealm fid:\(uploadFile.id)")
                         
-                        // NOW kiss
-                        // Try to ad it back in. NOOP if already in there.
-                        self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
+                        // Get the operation and try to restart it OR add it
+                        guard let operation = self.operation(fileId: uploadFile.id) else {
+                            self.dispatchQueue.async {
+                                self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
+                            }
+                            return
+                        }
+                        
+                        // Check if operation is running and needs to be restarted ?
+                        operation.retryIfNeeded()
                     }
                 }
             }
         }
     }
 
-    public func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        dispatchQueue.async {
-            self.addToQueue(file: file, itemIdentifier: itemIdentifier, using: self.realm)
+    public func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
+        UploadQueueLog("addToQueue fid:\(file.id)")
+        var uploadOperation: UploadOperation? = nil
+        dispatchQueue.sync {
+            uploadOperation = self.addToQueue(file: file, itemIdentifier: itemIdentifier, using: self.realm)
         }
+        return uploadOperation
     }
 
     public func suspendAllOperations() {
+        UploadQueueLog("suspendAllOperations")
         forceSuspendQueue = true
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
+        UploadQueueLog("resumeAllOperations")
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
     }
 
     public func cancelAllOperations() {
+        UploadQueueLog("cancelAllOperations")
         operationQueue.cancelAllOperations()
     }
 
     public func cancelRunningOperations() {
-        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
+        UploadQueueLog("cancelRunningOperations")
+        operationQueue.operations.filter(\.isExecuting).forEach { ($0 as? AsynchronousOperation)?.finish() }
     }
 
     public func cancel(_ file: UploadFile) {
+        UploadQueueLog("cancel fid:\(file.id)")
         dispatchQueue.async { [fileId = file.id,
                                parentId = file.parentDirectoryId,
                                userId = file.userId,
@@ -120,11 +146,12 @@ extension UploadQueue: UploadQueueable {
                     self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                 }
-                operation?.cancel()
+                (operation as? AsynchronousOperation)?.finish()
         }
     }
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
+        UploadQueueLog("cancelAllOperations parentId:\(parentId)")
         dispatchQueue.async {
             self.suspendAllOperations()
             let uploadingFiles = self.getUploadingFiles(withParent: parentId,
@@ -133,8 +160,8 @@ extension UploadQueue: UploadQueueable {
                                                         using: self.realm)
             uploadingFiles.forEach { file in
                 if !file.isInvalidated,
-                   let operation = self.operationsInQueue[file.id] {
-                    operation.cancel()
+                   let operation = self.operationsInQueue[file.id] as? AsynchronousOperation {
+                    operation.finish()
                 }
             }
             try? self.realm.safeWrite {
@@ -149,6 +176,7 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func retry(_ file: UploadFile) {
+        UploadQueueLog("retry fid:\(file.id)")
         let safeFile = ThreadSafeReference(to: file)
         dispatchQueue.async {
             guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
@@ -164,11 +192,13 @@ extension UploadQueue: UploadQueueable {
     public func retryAllOperations(withParent parentId: Int,
                                    userId: Int,
                                    driveId: Int) {
+        UploadQueueLog("retryAllOperations parentId:\(parentId)")
         dispatchQueue.async {
-            let failedUploadFiles = self.getUploadingFiles(withParent: parentId,
-                                                           userId: userId,
-                                                           driveId: driveId,
-                                                           using: self.realm).filter("_error != nil")
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
+                                                        userId: userId,
+                                                        driveId: driveId,
+                                                        using: self.realm)
+            let failedUploadFiles = uploadingFiles.filter("_error != nil")
             try? self.realm.safeWrite {
                 failedUploadFiles.forEach { file in
                     file.error = nil
@@ -179,14 +209,22 @@ extension UploadQueue: UploadQueueable {
                 self.addToQueue(file: $0, using: self.realm)
                 self.publishProgress(0, for: $0.id)
             }
+            
+            self.addToQueueFromRealm()
         }
     }
 
     // MARK: - Private methods
+    
+    private func operation(fileId: String) -> UploadOperationable? {
+        return operationsInQueue[fileId]
+    }
 
-    private func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil, using realm: Realm) {
+    @discardableResult
+    private func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil, using realm: Realm) -> UploadOperation? {
         guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
-            return
+            UploadQueueLog("addToQueue isInvalidated:\(file.isInvalidated) operationsInQueue:\(operationsInQueue[file.id] == nil) maxRetryCount:\(file.maxRetryCount) fid:\(file.id)", level: .error)
+            return nil
         }
 
         if !file.isManagedByRealm {
@@ -214,16 +252,22 @@ extension UploadQueue: UploadQueueable {
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {
                 self.operationsInQueue.removeValue(forKey: fileId)
-                if operation.result.uploadFile.error != .taskRescheduled {
-                    self.publishFileUploaded(result: operation.result)
-                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
-                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
+                guard operation.result.uploadFile?.error != .taskRescheduled else {
+                    return
                 }
+                
+                self.publishFileUploaded(result: operation.result)
+                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
             }
         }
+        
+        UploadQueueLog("add operation :\(operation) fid:\(file.id)")
         operationQueue.addOperation(operation as Operation)
         operationsInQueue[file.id] = operation
 
         publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
+        
+        return operation
     }
 }

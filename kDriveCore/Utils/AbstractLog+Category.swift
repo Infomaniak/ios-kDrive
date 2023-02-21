@@ -20,7 +20,32 @@ import Foundation
 
 // MARK: - Log methods, by "category"
 
+/// shorthand for ABLog, with "BGTaskScheduling" category
+///
+/// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
+///
+public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
+                                        level: AbstractLogLevel = .info,
+                                        context: Int = 0,
+                                        file: StaticString = #file,
+                                        function: StaticString = #function,
+                                        line: UInt = #line,
+                                        tag: Any? = nil) {
+    let category = "BGTaskScheduling"
+    ABLog(message(),
+          category: category,
+          level: .error, // TODO: remove
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+
 /// shorthand for ABLog, with "BackgroundSessionManager" category
+///
+/// In system console, visualize them with `subsystem:com.infomaniak.drive category:BackgroundSessionManager`
+///
 public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
                                         level: AbstractLogLevel = .info,
                                         context: Int = 0,
@@ -31,7 +56,7 @@ public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
     let category = "BackgroundSessionManager"
     ABLog(message(),
           category: category,
-          level: level,
+          level: .error, // TODO: remove
           context: context,
           file: file,
           function: function,
@@ -50,7 +75,7 @@ public func UploadQueueLog(_ message: @autoclosure () -> Any,
     let category = "UploadQueue"
     ABLog(message(),
           category: category,
-          level: level,
+          level: .error, // TODO: remove
           context: context,
           file: file,
           function: function,
@@ -71,7 +96,8 @@ public func UploadOperationLog(_ message: @autoclosure () -> Any,
     let category = "UploadOperation"
     ABLog(message(),
           category: category,
-          level: level,
+//          level: level,
+          level: .error, // TODO: remove
           context: context,
           file: file,
           function: function,

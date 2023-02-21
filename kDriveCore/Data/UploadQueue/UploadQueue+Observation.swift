@@ -77,8 +77,8 @@ extension UploadQueue: UploadQueueObservable {
 
     @discardableResult
     public func observeUploadCount<T: AnyObject>(_ observer: T,
-                                          parentId: Int,
-                                          using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+                                                 parentId: Int,
+                                                 using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         let key = UUID()
         observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
             guard observer != nil else {

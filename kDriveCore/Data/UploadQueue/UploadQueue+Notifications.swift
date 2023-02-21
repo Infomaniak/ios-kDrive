@@ -48,25 +48,30 @@ extension UploadQueue: UploadNotifiable {
     }
 
     public func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
-        if let error = result.uploadFile.error,
+        guard let uploadFile = result.uploadFile, uploadFile.error != .taskRescheduled else {
+            return
+        }
+        
+        //TODO: Query realm
+        fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
+        if let error = uploadFile.error,
            error != .networkError && error != .taskCancelled && error != .taskRescheduled {
-            let uploadedFileName = result.driveFile?.name ?? result.uploadFile.name
+            let uploadedFileName = result.driveFile?.name ?? uploadFile.name
             NotificationsHelper.sendUploadError(filename: uploadedFileName,
-                                                parentId: result.uploadFile.parentDirectoryId,
+                                                parentId: uploadFile.parentDirectoryId,
                                                 error: error)
             if operationQueue.operationCount == 0 {
                 fileUploadedCount = 0
             }
         } else if operationQueue.operationCount == 0 {
             // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
-            if fileUploadedCount == 1 && result.uploadFile.error == nil {
-                let uploadedFileName = result.driveFile?.name ?? result.uploadFile.name
+            if fileUploadedCount == 1 && uploadFile.error == nil {
+                let uploadedFileName = result.driveFile?.name ?? uploadFile.name
                 NotificationsHelper.sendUploadDoneNotification(filename: uploadedFileName,
-                                                               parentId: result.uploadFile.parentDirectoryId)
+                                                               parentId: uploadFile.parentDirectoryId)
             } else if fileUploadedCount > 0 {
                 NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount,
-                                                               parentId: result.uploadFile.parentDirectoryId)
+                                                               parentId: uploadFile.parentDirectoryId)
             }
             fileUploadedCount = 0
         }

@@ -74,7 +74,11 @@ extension UploadQueue: UploadPublishable {
     func publishFileUploaded(result: UploadCompletionResult) {
         sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
-            closure(result.uploadFile, result.driveFile)
+            guard let uploadFile = result.uploadFile else {
+                return
+            }
+            
+            closure(uploadFile, result.driveFile)
         }
     }
 }

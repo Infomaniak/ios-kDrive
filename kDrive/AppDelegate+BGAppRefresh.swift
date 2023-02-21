@@ -27,30 +27,51 @@ extension AppDelegate {
     /* To debug background tasks:
       Launch ->
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+     OR
+      e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.long-refresh"]
+     
       Force early termination ->
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+     OR
+      e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.long-refresh"]
      */
     
     /// schedule background tasks
     func scheduleBackgroundRefresh() {
         // List pictures + upload files (+pictures) / photoKit
         let backgroundRefreshRequest = BGAppRefreshTaskRequest(identifier: Constants.backgroundRefreshIdentifier)
+        #if DEBUG
+        // Required for debugging
+        backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 0)
+        #else
         backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
-
+        #endif
+        
         // Upload files (+pictures) / photokit
         let longBackgroundRefreshRequest = BGProcessingTaskRequest(identifier: Constants.longBackgroundRefreshIdentifier)
+        #if DEBUG
+        // Required for debugging
+        longBackgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 0)
+        #else
         longBackgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
+        #endif
         longBackgroundRefreshRequest.requiresNetworkConnectivity = true
         longBackgroundRefreshRequest.requiresExternalPower = true
         do {
             try backgroundTaskScheduler.submit(backgroundRefreshRequest)
+            BGTaskSchedulingLog("scheduled task: \(backgroundRefreshRequest)")
             try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
+            BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                BGTaskSchedulingLog("try to launch BGTaskScheduler here")
+            }
         } catch {
-            DDLogError("Error scheduling background task: \(error)")
+            BGTaskSchedulingLog("Error scheduling background task: \(error)", level: .error)
         }
     }
     
-    /// Register BackgroundTasks in scheduller for later
+    /// Register BackgroundTasks in scheduler for later
     func registerBackgroundTasks() {
         var registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
@@ -65,7 +86,7 @@ extension AppDelegate {
                 task.setTaskCompleted(success: true)
             }
         }
-        DDLogInfo("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
+        BGTaskSchedulingLog("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)", level: .error)
         registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
@@ -79,7 +100,7 @@ extension AppDelegate {
                 task.setTaskCompleted(success: true)
             }
         }
-        DDLogInfo("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)")
+        BGTaskSchedulingLog("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)", level: .error)
     }
     
 }

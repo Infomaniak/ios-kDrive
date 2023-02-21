@@ -16,26 +16,35 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakDI
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 
-public class DownloadOperation: Operation {
-    // MARK: - Attributes
+/// Something that can download a file.
+public protocol DownloadOperationable: Operationable {
+    /// Called upon request completion
+    func downloadCompletion(url: URL?, response: URLResponse?, error: Error?)
     
+    var file: File { get }
+    
+}
+
+public class DownloadOperation: Operation, DownloadOperationable {
+    // MARK: - Attributes
+
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
 
-    private let file: File
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
+    public let file: File
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
 
@@ -186,9 +195,9 @@ public class DownloadOperation: Operation {
         task?.cancel()
     }
 
-    // MARK: - Private methods
+    // MARK: - methods
 
-    func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
+    public func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {

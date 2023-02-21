@@ -101,8 +101,10 @@ public class UploadQueue:  UploadProgressable {
                 Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
             }
         }
-        // Initialize operation queue with files from Realm
+        // Initialize operation queue with files from Realm, and make sure it restarts
         addToQueueFromRealm()
+        resumeAllOperations()
+        
         // Observe network changes
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             self.operationQueue.isSuspended = shouldSuspendQueue || forceSuspendQueue

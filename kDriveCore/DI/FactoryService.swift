@@ -134,12 +134,13 @@ enum FactoryService {
                 return Logger(subsystem: subsystem, category: category)
             }
             
-            let servicies = [
+            let services = [
                 (loggerFactory, "UploadOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
+                (loggerFactory, "BGTaskScheduling"),
             ]
-            return servicies
+            return services
         } else {
             return []
         }

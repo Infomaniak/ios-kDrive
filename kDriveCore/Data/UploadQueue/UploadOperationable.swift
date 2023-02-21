@@ -24,7 +24,7 @@ import RealmSwift
 import Sentry
 
 /// An abstract NSOperation
-public protocol Operationable {
+public protocol Operationable: AnyObject {
     func start()
     func main()
     var isCancelled: Bool { get }
@@ -55,9 +55,19 @@ public protocol UploadOperationable: Operationable {
          urlSession: FileUploadSession,
          itemIdentifier: NSFileProviderItemIdentifier?)
     
-    init(file: UploadFile,
-         task: URLSessionUploadTask,
-         urlSession: FileUploadSession)
+    // TODO: refactor
+    func restore(task: URLSessionUploadTask)
+    
+    /// Network completion handler
+    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
+    
+    /// Check if the operation needs to be restarted
+    func retryIfNeeded()
+    
+    /// Process errors and terminate the operation
+    func end()
     
     var result: UploadCompletionResult  { get }
+    
+    var file: UploadFile  { get }
 }

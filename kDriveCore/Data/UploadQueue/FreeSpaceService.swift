@@ -29,24 +29,24 @@ public struct FreeSpaceService {
         case notEnoughSpace
         /// Unable to estimate free space
         case unableToEstimate
-        /// An underlaying error has occured
-        case unavaillable(wrapping: Error)
+        /// An underlaying error has occurred
+        case unavailable(wrapping: Error)
     }
 
     private static let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
 
-    ///  The minimum availlable space required to start uploading with chunks
+    ///  The minimum available space required to start uploading with chunks
     ///
     /// ≈ 4chunks with a max chunk size of 50 meg + 20% = 220MiB
     private static let minimalSpaceRequiredForChunkUpload = 220*1024*1024
     
-    public func checkEnoughAvaillableSpaceForChunkUpload() throws {
+    public func checkEnoughAvailableSpaceForChunkUpload() throws {
         let freeSpaceInTemporaryDirectory: Int64
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
         }
         catch {
-            UploadOperationLog("unable to read availlable space \(error)", level: .error)
+            UploadOperationLog("unable to read available space \(error)", level: .error)
             return
         }
         
@@ -69,7 +69,7 @@ public struct FreeSpaceService {
             return capacity
         }
         catch {
-            throw StorageIssues.unavaillable(wrapping: error)
+            throw StorageIssues.unavailable(wrapping: error)
         }
     }
 }

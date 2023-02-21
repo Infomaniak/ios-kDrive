@@ -308,9 +308,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
+                // Resolving an upload queue will restart it
                 @InjectService var uploadQueue: UploadQueue
-                uploadQueue.resumeAllOperations()
-                uploadQueue.addToQueueFromRealm()
+                
                 backgroundUploadManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
                     @InjectService var photoUploader: PhotoLibraryUploader
@@ -423,20 +423,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
                 }
             }
-        }
-    }
-
-    func application(_ application: UIApplication,
-                     handleEventsForBackgroundURLSession identifier: String,
-                     completionHandler: @escaping () -> Void) {
-        DDLogInfo("[Background Session] background session relaunched \(identifier)")
-        if identifier == DownloadQueue.backgroundIdentifier {
-            backgroundUploadManager.backgroundCompletionHandler = completionHandler
-        } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            backgroundUploadManager.handleEventsForBackgroundURLSession(identifier: identifier,
-                                                                        completionHandler: completionHandler)
-        } else {
-            completionHandler()
         }
     }
 

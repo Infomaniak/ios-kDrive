@@ -116,9 +116,9 @@ final class ITRangeProviderGuts: XCTestCase {
         }
     }
     
-    // MARK: - preferedChunkSize(for fileSize:)
+    // MARK: - preferredChunkSize(for fileSize:)
     
-    func testPreferedChunkSize_fromImage() {
+    func testPreferredChunkSize_fromImage() {
         // GIVEN
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
@@ -127,41 +127,41 @@ final class ITRangeProviderGuts: XCTestCase {
         // WHEN
         do {
             let size = try guts.readFileByteSize()
-            let preferedChunkSize = guts.preferedChunkSize(for: size)
+            let preferredChunkSize = guts.preferredChunkSize(for: size)
             
             // THEN
-            XCTAssertTrue(preferedChunkSize > 0)
-            XCTAssertTrue(preferedChunkSize <= size)
+            XCTAssertTrue(preferredChunkSize > 0)
+            XCTAssertTrue(preferredChunkSize <= size)
             
             // this should not be strictly imposed but I can quickly check behaviour here
-            // XCTAssertTrue(preferedChunkSize >= RangeProvider.APIConsts.chunkMinSize)
-            // XCTAssertTrue(preferedChunkSize <= RangeProvider.APIConsts.chunkMaxSize)
+            // XCTAssertTrue(preferredChunkSize >= RangeProvider.APIConstants.chunkMinSize)
+            // XCTAssertTrue(preferredChunkSize <= RangeProvider.APIConstants.chunkMaxSize)
         } catch {
             XCTFail("Unexpected \(error)")
         }
     }
     
-    func testPreferedChunkSize_0() {
+    func testPreferredChunkSize_0() {
         // GIVEN
         let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
         
         // WHEN
-        let preferedChunkSize = guts.preferedChunkSize(for: 0)
+        let preferredChunkSize = guts.preferredChunkSize(for: 0)
         
         // THEN
-        XCTAssertTrue(preferedChunkSize == 0)
+        XCTAssertTrue(preferredChunkSize == 0)
     }
     
-    func testPreferedChunkSize_notLargerThanFileSize() {
+    func testPreferredChunkSize_notLargerThanFileSize() {
         // GIVEN
         let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
         let superSmallFileSize: UInt64 = 10
         
         // WHEN
-        let preferedChunkSize = guts.preferedChunkSize(for: superSmallFileSize)
+        let preferredChunkSize = guts.preferredChunkSize(for: superSmallFileSize)
         
         // THEN
-        XCTAssertEqual(preferedChunkSize,
+        XCTAssertEqual(preferredChunkSize,
                        superSmallFileSize,
                        "we expect the chunk size to be capped at the file size for small files")
     }

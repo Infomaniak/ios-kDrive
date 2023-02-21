@@ -84,6 +84,9 @@ public func ABLog(_ message: @autoclosure () -> Any,
         let factoryParameters = [categoryKey : category]
         @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
         
+        // Make sure I can see it in cosole
+//        logger.error("\(messageString, privacy: .public)")
+        
         // .public is fine as we only use this in #DEBUG
         switch level {
         case .warning, .alert:
@@ -104,29 +107,30 @@ public func ABLog(_ message: @autoclosure () -> Any,
     } else {
         // os_log() only support `StaticSting`
     }
+#else
+    // Forward to cocoaLumberjack
+    let buffer = "[\(category)] " + messageString
+    switch level {
+    case .error:
+        DDLogError(buffer,
+                   context: context,
+                   file: file,
+                   function: function,
+                   line: line,
+                   tag: tag,
+                   asynchronous: async,
+                   ddlog: .sharedInstance)
+    case.info: fallthrough
+    default:
+        DDLogInfo(buffer,
+                  context: context,
+                  file: file,
+                  function: function,
+                  line: line,
+                  tag: tag,
+                  asynchronous: async,
+                  ddlog: .sharedInstance)
+    }
 #endif
     
-    // Forward to cocoaLumberjack
-//    let buffer = "[\(category)] " + messageString
-//    switch level {
-//    case .error:
-//        DDLogError(buffer,
-//                   context: context,
-//                   file: file,
-//                   function: function,
-//                   line: line,
-//                   tag: tag,
-//                   asynchronous: async,
-//                   ddlog: .sharedInstance)
-//    case.info: fallthrough
-//    default:
-//        DDLogInfo(buffer,
-//                  context: context,
-//                  file: file,
-//                  function: function,
-//                  line: line,
-//                  tag: tag,
-//                  asynchronous: async,
-//                  ddlog: .sharedInstance)
-//    }
 }

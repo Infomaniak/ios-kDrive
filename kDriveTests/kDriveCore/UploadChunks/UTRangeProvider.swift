@@ -45,7 +45,7 @@ final class UTRangeProvider: XCTestCase {
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGutsable()
-        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSizeClient + 1
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConstants.fileMaxSizeClient + 1
         rangeProvider.guts = mckGuts
         
         // WHEN
@@ -70,8 +70,8 @@ final class UTRangeProvider: XCTestCase {
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGutsable()
-        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize + 1
-        mckGuts.preferedChunkSizeReturnValue = 1 * 1024 * 1024
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConstants.chunkMinSize + 1
+        mckGuts.preferredChunkSizeReturnValue = 1 * 1024 * 1024
         
         rangeProvider.guts = mckGuts
         
@@ -84,7 +84,7 @@ final class UTRangeProvider: XCTestCase {
             XCTAssertEqual(ranges.count, 0)
             
             XCTAssertTrue(mckGuts.buildRangesCalled)
-            XCTAssertTrue(mckGuts.preferedChunkSizeCalled)
+            XCTAssertTrue(mckGuts.preferredChunkSizeCalled)
             XCTAssertTrue(mckGuts.readFileByteSizeCalled)
         } catch {
             XCTFail("Unexpected \(error)")

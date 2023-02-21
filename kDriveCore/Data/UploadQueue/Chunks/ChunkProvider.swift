@@ -59,7 +59,7 @@ public final class ChunkProvider: ChunkProvidable {
     }
     
     /// Will provide chunks one by one, using the IteratorProtocol
-    /// Starting by the first range availlable.
+    /// Starting by the first range available.
     public func next() -> Data? {
         guard !ranges.isEmpty else {
             return nil
