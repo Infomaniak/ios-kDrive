@@ -76,18 +76,22 @@ public struct DriveError: Error, Equatable {
     public var localizedDescription: String
     public var userInfo: [UserInfoKey: ErrorUserInfo]?
 
-    private init(type: DriveErrorType, code: String, localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric) {
+    private init(type: DriveErrorType,
+                 code: String,
+                 localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
+                 underlyingError: Error? = nil) {
         self.type = type
         self.code = code
-        localizedDescription = localizedString
+        self.underlyingError = underlyingError
+        self.localizedDescription = localizedString
     }
 
-    // MARK: Local
+    // MARK: - Local
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
-    public static var localError = DriveError(type: .localError, code: "localError")
-    public static var errorDeviceStorage = DriveError(type: .localError,
+    public static let localError = DriveError(type: .localError, code: "localError")
+    public static let errorDeviceStorage = DriveError(type: .localError,
                                                       code: "errorDeviceStorage"/*,
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage*/) // TODO: bump localizedString
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
@@ -105,7 +109,7 @@ public struct DriveError: Error, Equatable {
                                                  localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
     
-    // MARK: Server
+    // MARK: - Server
     
     public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
     public static let serverError = DriveError(type: .serverError, code: "serverError")
@@ -170,7 +174,7 @@ public struct DriveError: Error, Equatable {
     
     public static let uploadTokenIsNotValid = DriveError(type: .serverError, code: "upload_token_is_not_valid")
     
-    // MARK: Network
+    // MARK: - Network
     public static let networkError = DriveError(type: .networkError,
                                                 code: "networkError",
                                                 localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
@@ -254,9 +258,12 @@ public struct DriveError: Error, Equatable {
     }
     
     /// Wraps a specific detailed error into a user facing localized DriveError
-    public mutating func wrapping(_ underlyingError: Error) -> Self {
-        self.underlyingError = underlyingError
-        return self
+    public func wrapping(_ underlyingError: Error) -> Self {
+        let error = DriveError(type: self.type,
+                               code: self.code,
+                               localizedString: self.localizedDescription,
+                               underlyingError: underlyingError)
+        return error
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {

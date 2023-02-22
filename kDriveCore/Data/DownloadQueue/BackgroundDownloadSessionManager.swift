@@ -40,7 +40,7 @@ protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler?
 }
 
-public protocol FileDownloadSession: BackgroundSession {
+public protocol FileDownloadSession: Identifiable {
     func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
 }
 

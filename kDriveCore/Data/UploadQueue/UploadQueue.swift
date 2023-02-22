@@ -22,11 +22,7 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public protocol UploadProgressable {
-    func publishProgress(_ progress: Double, for fileId: String)
-}
-
-public class UploadQueue:  UploadProgressable {
+public final class UploadQueue {
     @LazyInjectService var accountManager: AccountManageable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
@@ -64,10 +60,10 @@ public class UploadQueue:  UploadProgressable {
     /// This Realm instance is bound to `dispatchQueue`
     var realm: Realm!
 
-    var bestSession: FileUploadSession {
+    var bestSession: URLSession {
         if Bundle.main.isExtension {
             @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-            return backgroundUploadSessionManager
+            return backgroundUploadSessionManager.backgroundSession
         } else {
             return foregroundSession
         }
@@ -84,7 +80,6 @@ public class UploadQueue:  UploadProgressable {
     
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
-        didChangeProgress: [UUID: (UploadedFileId, UploadProgress) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
         didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
@@ -138,14 +133,6 @@ public class UploadQueue:  UploadProgressable {
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
-    }
-
-    public func publishProgress(_ progress: Double, for fileId: String) {
-        DispatchQueue.main.async {
-            self.observations.didChangeProgress.values.forEach { closure in
-                closure(fileId, progress)
-            }
-        }
     }
 
     // MARK: - Private methods

@@ -18,16 +18,18 @@
 
 import InfomaniakCore
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
-import InfomaniakDI
 
 class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
+    private var progressObservation: NotificationToken?
 
     @LazyInjectService var uploadQueue: UploadQueue
 
@@ -57,6 +59,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = false
         cardContentView.progressView.updateProgress(0, animated: false)
         cardContentView.iconViewHeightConstraint.constant = 24
+        progressObservation?.invalidate()
     }
 
     deinit {
@@ -92,16 +95,36 @@ class UploadTableViewCell: InsetTableViewCell {
             self.cardContentView.iconView.image = image
         }
     }
-
+    
     func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
+        // Set initial progress value
+        if let progress = progress {
+            self.updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
+        }
+        
+        // observe the progres
+        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
+               guard let self else {
+                   return
+               }
+
+               switch change {
+               case .change(let newFile, _):
+                   guard let progress = newFile.progress,
+                         (newFile.error == nil || newFile.error == DriveError.taskRescheduled) == true else {
+                       return
+                   }
+
+                   self.updateProgress(fileId: newFile.id, progress: progress, animated: false)
+               case .error(_), .deleted:
+                   break
+               }
+        }
+        self.progressObservation = uploadFile.observe(keyPaths:  ["progress"], observationClosure)
+        
         currentFileId = uploadFile.id
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
-
-        if let progress = progress, let currentFileId = currentFileId,
-           uploadFile.error == nil || uploadFile.error == .taskRescheduled {
-            updateProgress(fileId: currentFileId, progress: progress, animated: false)
-        }
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in

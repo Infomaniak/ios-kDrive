@@ -41,11 +41,6 @@ public protocol UploadQueueObservable {
     func observeUploadCount<T: AnyObject>(_ observer: T,
                                           driveId: Int,
                                           using closure: @escaping (Int, Int) -> Void) -> ObservationToken
-    
-    @discardableResult
-    func observeFileUploadProgress<T: AnyObject>(_ observer: T,
-                                                 fileId: String?,
-                                                 using closure: @escaping (UploadedFileId, UploadProgress) -> Void) -> ObservationToken
 }
 
 // MARK: - Observation
@@ -114,29 +109,6 @@ extension UploadQueue: UploadQueueObservable {
 
         return ObservationToken { [weak self] in
             self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
-        }
-    }
-
-    @discardableResult
-    public func observeFileUploadProgress<T: AnyObject>(_ observer: T,
-                                                 fileId: String? = nil,
-                                                 using closure: @escaping (UploadedFileId, UploadProgress) -> Void) -> ObservationToken {
-        let key = UUID()
-        observations.didChangeProgress[key] = { [weak self, weak observer] uploadedFileId, progress in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didChangeProgress.removeValue(forKey: key)
-                return
-            }
-
-            if fileId == nil || uploadedFileId == fileId {
-                closure(uploadedFileId, progress)
-            }
-        }
-
-        return ObservationToken { [weak self] in
-            self?.observations.didChangeProgress.removeValue(forKey: key)
         }
     }
 }

@@ -185,7 +185,6 @@ extension UploadQueue: UploadQueueable {
                 file.maxRetryCount = UploadFile.defaultMaxRetryCount
             }
             self.addToQueue(file: file, using: self.realm)
-            self.publishProgress(0, for: file.id)
         }
     }
 
@@ -207,7 +206,6 @@ extension UploadQueue: UploadQueueable {
             }
             failedUploadFiles.forEach {
                 self.addToQueue(file: $0, using: self.realm)
-                self.publishProgress(0, for: $0.id)
             }
             
             self.addToQueueFromRealm()
@@ -217,7 +215,12 @@ extension UploadQueue: UploadQueueable {
     // MARK: - Private methods
     
     private func operation(fileId: String) -> UploadOperationable? {
-        return operationsInQueue[fileId]
+        UploadQueueLog("operation fileId:\(fileId)")
+        guard let operation = operationsInQueue[fileId],
+              operation.isCancelled == false else {
+            return nil
+        }
+        return operation
     }
 
     @discardableResult

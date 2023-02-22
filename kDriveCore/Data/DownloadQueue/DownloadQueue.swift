@@ -75,6 +75,7 @@ public final class DownloadQueue {
         didDownloadArchive: [UUID: (DownloadedArchiveId, URL?, DriveError?) -> Void](),
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
+    
     private var bestSession: FileDownloadSession {
         if Bundle.main.isExtension {
             @InjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager

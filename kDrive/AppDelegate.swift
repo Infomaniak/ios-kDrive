@@ -38,7 +38,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
-    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
+    @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
+    @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     
@@ -308,10 +309,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
-                // Resolving an upload queue will restart it
+                // Resolving an upload queue will restart it once
                 @InjectService var uploadQueue: UploadQueue
                 
-                backgroundUploadManager.reconnectBackgroundTasks()
+                backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
                     @InjectService var photoUploader: PhotoLibraryUploader
                     _ = photoUploader.addNewPicturesToUploadQueue()

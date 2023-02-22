@@ -47,27 +47,3 @@ public protocol Operationable: AnyObject {
 
 /// An abstract Upload Operation
 extension Operation: Operationable { }
-
-/// Something that can upload a file.
-public protocol UploadOperationable: Operationable {
-    
-    init(file: UploadFile,
-         urlSession: FileUploadSession,
-         itemIdentifier: NSFileProviderItemIdentifier?)
-    
-    // TODO: refactor
-    func restore(task: URLSessionUploadTask)
-    
-    /// Network completion handler
-    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
-    
-    /// Check if the operation needs to be restarted
-    func retryIfNeeded()
-    
-    /// Process errors and terminate the operation
-    func end()
-    
-    var result: UploadCompletionResult  { get }
-    
-    var file: UploadFile  { get }
-}

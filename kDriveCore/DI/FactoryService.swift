@@ -97,12 +97,6 @@ enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
-            Factory(type: UploadProgressable.self) { _, resolver in
-                try resolver.resolve(type: UploadQueue.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
             Factory(type: BGTaskScheduler.self) { _, _ in
                 BGTaskScheduler.shared
             },

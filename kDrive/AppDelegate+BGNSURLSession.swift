@@ -26,10 +26,10 @@ extension AppDelegate {
                      completionHandler: @escaping () -> Void) {
         BackgroundSessionManagerLog("background session relaunched identifier:\(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
-            backgroundUploadManager.backgroundCompletionHandler = completionHandler
+            backgroundDownloadSessionManager.backgroundCompletionHandler = completionHandler
         } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            backgroundUploadManager.handleEventsForBackgroundURLSession(identifier: identifier,
-                                                                        completionHandler: completionHandler)
+            backgroundUploadSessionManager.handleEventsForBackgroundURLSession(identifier: identifier,
+                                                                               completionHandler: completionHandler)
         } else {
             completionHandler()
         }

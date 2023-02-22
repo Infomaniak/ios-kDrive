@@ -50,15 +50,6 @@ class UploadQueueViewController: UIViewController {
 
         setUpObserver()
 
-        uploadQueue.observeFileUploadProgress(self) { [weak self] fileId, progress in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                for cell in self.tableView.visibleCells {
-                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress, animated: progress > 0)
-                }
-            }
-        }
-
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -91,7 +82,11 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    print("self?.uploadingFiles : \(self?.uploadingFiles.count)")
+                    self?.uploadingFiles = AnyRealmCollection(results)
+                    
                     guard !results.isEmpty else {
+//                        self?.tableView.reloadData()
                         self?.navigationController?.popViewController(animated: true)
                         return
                     }

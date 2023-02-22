@@ -260,3 +260,24 @@ public class UploadFile: Object, UploadFilable {
         relativePath = dateFormatter.string(from: creationDate ?? Date())
     }
 }
+
+public extension UploadFile {
+    func contains(chunkUrl: String) -> Bool {
+        let result = uploadingSession?.chunkTasks.filter { $0.requestUrl == chunkUrl }
+        return (result?.count ?? 0) > 0
+    }
+}
+
+public extension Array where Element == UploadFile {
+    func firstContaining(chunkUrl: String) -> UploadFile? {
+        // keep only the files with a valid uploading session
+        let files = filter {
+            ($0.uploadDate == nil) && ($0.uploadingSession?.uploadSession != nil)
+        }
+        BackgroundSessionManagerLog("files:\(files.count) :\(chunkUrl)")
+
+        // find the first one that matches [the query (that matches the chunk request)]
+        let file = files.first { $0.contains(chunkUrl: chunkUrl) }
+        return file
+    }
+}

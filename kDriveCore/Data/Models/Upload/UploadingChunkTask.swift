@@ -44,6 +44,9 @@ final public class UploadingChunkTask: Object {
     /// Current upload session token
     @Persisted public var sessionToken: String?
     
+    /// Current task identifier
+    @Persisted public var taskIdentifier: String?
+    
     /// Tracking the session identifier used for the upload task
     @Persisted public var sessionIdentifier: String?
     
@@ -72,7 +75,7 @@ final public class UploadingChunkTask: Object {
         (doneUploading == false) && (hasLocalChunk == true) && (sessionIdentifier == nil) && (scheduled == false)
     }
     
-    /// The chunk is stored localy inside a file, with a path and we have a valid hash of it.
+    /// The chunk is stored locally inside a file, with a path and we have a valid hash of it.
     public var hasLocalChunk: Bool {
         guard let path,
               path.isEmpty == false,
