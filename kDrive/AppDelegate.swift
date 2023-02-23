@@ -55,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-        DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
+        AppDelegateLog("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
@@ -64,7 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
-            DDLogError("Error while setting playback audio category")
+            AppDelegateLog("Error while setting playback audio category", level: .error)
             SentrySDK.capture(error: error)
         }
 
@@ -115,9 +115,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
+        AppDelegateLog("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
-
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
@@ -127,8 +126,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        _ = photoLibraryUploader.addNewPicturesToUploadQueue()
         @InjectService var uploadQueue: UploadQueue
+        
+//        // In background, the system will call us with connectivity
+//        uploadQueue.forceResumeAllOperations()
+//
+//        // Remove all existing tasks in queue
+//        uploadQueue.emptyQueue()
+
+        // Enqueue new pictures
+        photoLibraryUploader.scheduleNewPicturesForUpload()
+        
+//        // Clean errors for all operations
+//        uploadQueue.cleanErrorsForAllOperations()
+        
+        // Reload operations in queue
+        uploadQueue.addToQueueFromRealm()
+        
         uploadQueue.waitForCompletion {
             completion(true)
         }
@@ -162,7 +176,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            DDLogError("Failed to open URL: Invalid URL")
+            AppDelegateLog("Failed to open URL: Invalid URL", level: .error)
             return false
         }
 
@@ -314,12 +328,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 
                 backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
+                    // reload upload queue if new pictures to upload
                     @InjectService var photoUploader: PhotoLibraryUploader
-                    _ = photoUploader.addNewPicturesToUploadQueue()
+                    guard photoUploader.scheduleNewPicturesForUpload() > 0 else {
+                        return
+                    }
+                    
+                    @InjectService var uploadQueue: UploadQueue
+                    uploadQueue.addToQueueFromRealm()
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                DDLogError("Error while updating user account: \(error)")
+                AppDelegateLog("Error while updating user account: \(error)", level: .error)
             }
         }
     }
@@ -341,7 +361,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             guard let driveId = Int(driveFolder),
                   let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
-                DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
+                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
 
@@ -351,7 +371,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 guard let fileId = Int(fileFolder),
                       let driveFileManager = accountManager.getDriveFileManager(for: drive),
                       let file = driveFileManager.getCachedFile(id: fileId) else {
-                    DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
+                    AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
 
@@ -378,7 +398,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
-                                DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
+                                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
                             } else {
                                 // Update file to get the new modification date
                                 Task {
@@ -399,7 +419,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
-                DDLogInfo("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
+                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
                 try? FileManager.default.removeItem(at: folderURL)
             }
         }
@@ -421,7 +441,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     try await driveFileManager.updateAvailableOfflineFiles()
                 } catch {
                     // Silently handle error
-                    DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
+                    AppDelegateLog("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)", level: .error)
                 }
             }
         }

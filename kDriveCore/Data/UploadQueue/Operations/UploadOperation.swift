@@ -232,7 +232,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     func storeBackgroundTaskIdentifier() async {
         if !Bundle.main.isExtension {
-            backgroundTaskIdentifier = await UIApplication.shared.beginBackgroundTask(withName: "File Uploader",
+            backgroundTaskIdentifier = await UIApplication.shared.beginBackgroundTask(withName: "UploadOperation:\(file.id)",
                                                                                       expirationHandler: backgroundTaskExpired)
         }
     }
@@ -620,14 +620,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             UploadOperationLog("Task is cancelled \(file.id)")
             throw DriveError.taskCancelled
         }
+        
+        else if isFinished {
+            UploadOperationLog("Task is isFinished \(file.id)")
+            throw DriveError.taskCancelled
+        }
     }
     
     public func retryIfNeeded() {
+        UploadOperationLog("retryIfNeeded fid:\(self.file.id)")
         // TODO: make sure it works hooking up the sessions again
         enqueueCatching {
-            UploadOperationLog("retryIfNeeded fid:\(self.file.id)")
-            try self.checkCancelation()
-            
             await self.execute()
         }
     }
@@ -885,13 +888,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             self.end()
         }
         
-        guard file.error != .taskRescheduled else {
+        guard file.error != .taskRescheduled || file.error != .taskPaused else {
             return
         }
 
         // save the error
         if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
-            if file.error != .taskExpirationCancelled && file.error != .taskRescheduled {
+            if file.error != .taskExpirationCancelled && file.error != .taskRescheduled && file.error != .taskPaused {
                 file.error = .taskCancelled
                 file.maxRetryCount = 0
                 file.progress = nil
@@ -1036,6 +1039,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // did finish in time
     public func end() {
+        // Prevent duplicate call, as end() finishes the operation
         guard isFinished == false else {
             return
         }
@@ -1043,6 +1047,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         defer {
             // Terminate the NSOperation
             UploadOperationLog("call finish \(file.id)")
+            
+            // Make sure we call endBackgroundTask at the end of the operation
+            if backgroundTaskIdentifier != .invalid {
+                UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+            }
+            
             step = .terminated
             finish()
         }
@@ -1081,10 +1091,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Save upload file
             result.uploadFile = UploadFile(value: file)
             synchronousSaveUploadFileToRealm()
-        }
-        
-        if backgroundTaskIdentifier != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
         }
     }
 }

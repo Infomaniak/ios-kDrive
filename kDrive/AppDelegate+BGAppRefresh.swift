@@ -42,7 +42,7 @@ extension AppDelegate {
         let backgroundRefreshRequest = BGAppRefreshTaskRequest(identifier: Constants.backgroundRefreshIdentifier)
         #if DEBUG
         // Required for debugging
-        backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 0)
+        backgroundRefreshRequest.earliestBeginDate = Date()
         #else
         backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
         #endif
@@ -51,7 +51,7 @@ extension AppDelegate {
         let longBackgroundRefreshRequest = BGProcessingTaskRequest(identifier: Constants.longBackgroundRefreshIdentifier)
         #if DEBUG
         // Required for debugging
-        longBackgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 0)
+        longBackgroundRefreshRequest.earliestBeginDate = Date()
         #else
         longBackgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
         #endif
@@ -63,9 +63,7 @@ extension AppDelegate {
             try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
             BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                BGTaskSchedulingLog("try to launch BGTaskScheduler here")
-            }
+
         } catch {
             BGTaskSchedulingLog("Error scheduling background task: \(error)", level: .error)
         }

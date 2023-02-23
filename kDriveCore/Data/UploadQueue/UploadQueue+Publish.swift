@@ -47,6 +47,7 @@ extension UploadQueue: UploadPublishable {
                             userId: Int,
                             driveId: Int,
                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        UploadQueueLog("publishUploadCount")
         realm.refresh()
         publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
         publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)
@@ -56,6 +57,7 @@ extension UploadQueue: UploadPublishable {
                                     userId: Int,
                                     driveId: Int,
                                     using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        UploadQueueLog("publishUploadCountInParent")
         let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
@@ -65,6 +67,7 @@ extension UploadQueue: UploadPublishable {
     func publishUploadCountInDrive(userId: Int,
                                    driveId: Int,
                                    using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        UploadQueueLog("publishUploadCountInDrive")
         let uploadCount = getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
         observations.didChangeUploadCountInDrive.values.forEach { closure in
             closure(driveId, uploadCount)
@@ -72,6 +75,7 @@ extension UploadQueue: UploadPublishable {
     }
 
     func publishFileUploaded(result: UploadCompletionResult) {
+        UploadQueueLog("publishFileUploaded")
         sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
             guard let uploadFile = result.uploadFile else {

@@ -133,6 +133,8 @@ enum FactoryService {
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
                 (loggerFactory, "BGTaskScheduling"),
+                (loggerFactory, "PhotoLibraryUploader"),
+                (loggerFactory, "AppDelegate"),
             ]
             return services
         } else {

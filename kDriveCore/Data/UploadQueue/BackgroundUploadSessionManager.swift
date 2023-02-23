@@ -252,7 +252,6 @@ public final class BackgroundUploadSessionManager: NSObject,
             tempFile = matchedFile
 
             BackgroundSessionManagerLog("completionHandler fid:\(tempFile?.id) :\(session)")
-
             var operation: UploadOperationable?
             syncQueue.sync(flags: .barrier) { [unowned self] in
                 if let fetchedOperation = self.uploadQueue.getOperation(forFileId: matchedFile.id) {

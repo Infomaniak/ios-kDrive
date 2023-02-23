@@ -20,6 +20,50 @@ import Foundation
 
 // MARK: - Log methods, by "category"
 
+/// shorthand for ABLog, with "AppDelegate" category
+///
+/// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
+///
+public func AppDelegateLog(_ message: @autoclosure () -> Any,
+                            level: AbstractLogLevel = .info,
+                            context: Int = 0,
+                            file: StaticString = #file,
+                            function: StaticString = #function,
+                            line: UInt = #line,
+                            tag: Any? = nil) {
+    let category = "AppDelegate"
+    ABLog(message(),
+          category: category,
+          level: .error, // TODO: remove
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+
+/// shorthand for ABLog, with "PhotoLibraryUploader" category
+///
+/// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
+///
+public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
+                                    level: AbstractLogLevel = .info,
+                                    context: Int = 0,
+                                    file: StaticString = #file,
+                                    function: StaticString = #function,
+                                    line: UInt = #line,
+                                    tag: Any? = nil) {
+    let category = "PhotoLibraryUploader"
+    ABLog(message(),
+          category: category,
+          level: .error, // TODO: remove
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+
 /// shorthand for ABLog, with "BGTaskScheduling" category
 ///
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`

@@ -504,7 +504,10 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
-            _ = self.photoLibraryUploader.addNewPicturesToUploadQueue(using: realm)
+            // Add new pictures to be uploaded and reload upload queue
+            self.photoLibraryUploader.scheduleNewPicturesForUpload(using: realm)
+            @InjectService var uploadQueue: UploadQueue
+            uploadQueue.addToQueueFromRealm()
         }
     }
 }

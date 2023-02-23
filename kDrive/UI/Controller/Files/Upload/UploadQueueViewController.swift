@@ -82,6 +82,7 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    // TODO: Remove
                     print("self?.uploadingFiles : \(self?.uploadingFiles.count)")
                     self?.uploadingFiles = AnyRealmCollection(results)
                     

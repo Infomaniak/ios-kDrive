@@ -100,9 +100,11 @@ public final class UploadQueue {
         addToQueueFromRealm()
         resumeAllOperations()
         
-        // Observe network changes
+        // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
-            self.operationQueue.isSuspended = shouldSuspendQueue || forceSuspendQueue
+            let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
+            UploadQueueLog("observeNetworkChange :\(isSuspended)")
+            self.operationQueue.isSuspended = isSuspended
         }
     }
 
