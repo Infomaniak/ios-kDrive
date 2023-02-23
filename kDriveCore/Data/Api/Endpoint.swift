@@ -124,15 +124,27 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let fileMinimalWithQueryItem = URLQueryItem(name: "with", value: "capabilities,categories,conversion_capabilities,dropbox,external_import,is_favorite,sharelink,sorted_name")
-    private static let fileExtraWithQueryItem = URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",path,users,version"))
+    private static let fileMinimalWithQueryItem = URLQueryItem(
+        name: "with",
+        value: "capabilities,categories,conversion_capabilities,dropbox,dropbox.capabilities,external_import,is_favorite,sharelink,sorted_name"
+    )
+    private static let fileExtraWithQueryItem = URLQueryItem(
+        name: "with",
+        value: fileMinimalWithQueryItem.value?.appending(",path,users,version")
+    )
 
     private static var drive: Endpoint {
         return Endpoint(hostKeypath: \.apiDriveHost, path: "/2/drive")
     }
 
-    static let fileActivitiesWithQueryItem = URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion_capabilities,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name")
-    static let fileActivitiesWithExtraQueryItem = URLQueryItem(name: "with", value: fileActivitiesWithQueryItem.value?.appending(",file.external_import"))
+    static let fileActivitiesWithQueryItem = URLQueryItem(
+        name: "with",
+        value: "file,file.capabilities,file.categories,file.conversion_capabilities,file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name"
+    )
+    static let fileActivitiesWithExtraQueryItem = URLQueryItem(
+        name: "with",
+        value: fileActivitiesWithQueryItem.value?.appending(",file.external_import")
+    )
 
     static var inAppReceipt: Endpoint {
         return Endpoint(path: "/invoicing/inapp/apple/link_receipt")
@@ -265,7 +277,7 @@ public extension Endpoint {
     }
 
     static func dropbox(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/dropbox", queryItems: [
+        return .fileInfo(file).appending(path: "/dropbox?with=capabilities", queryItems: [
             URLQueryItem(name: "with", value: "user")
         ])
     }
