@@ -35,7 +35,7 @@ public final class UploadQueue {
     let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", autoreleaseFrequency: .workItem)
 
     var operationsInQueue: [String: UploadOperationable] = [:]
-    lazy var operationQueue: OperationQueue = {
+    public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated

@@ -42,7 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
-    
+
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
@@ -105,6 +105,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
+        
+        // TODO: remove
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+//            self.handleBackgroundRefresh { bool in
+//                AppDelegateLog("done \(bool)")
+//            }
+//        }
+        
 
         return true
     }
@@ -119,6 +127,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
+        AppDelegateLog("handleBackgroundRefresh")
         // User installed the app but never logged in
         @InjectService var accountManager: AccountManageable
         if accountManager.accounts.isEmpty {
@@ -127,24 +136,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
 
         @InjectService var uploadQueue: UploadQueue
-        
+
 //        // In background, the system will call us with connectivity
 //        uploadQueue.forceResumeAllOperations()
 //
-//        // Remove all existing tasks in queue
-//        uploadQueue.emptyQueue()
-
-        // Enqueue new pictures
-        photoLibraryUploader.scheduleNewPicturesForUpload()
         
-//        // Clean errors for all operations
-//        uploadQueue.cleanErrorsForAllOperations()
-        
-        // Reload operations in queue
-        uploadQueue.addToQueueFromRealm()
+        // Remove all existing tasks in queue
+        uploadQueue.emptyQueue()
         
         uploadQueue.waitForCompletion {
-            completion(true)
+            AppDelegateLog("waitForCompletion: Remaining Operations: \(uploadQueue.operationQueue.operations.count)")
+
+            // Enqueue new pictures
+            @InjectService var photoUploader: PhotoLibraryUploader
+            photoUploader.scheduleNewPicturesForUpload()
+
+            // Clean errors for all operations
+            uploadQueue.cleanErrorsForAllOperations()
+
+            // Reload operations in queue
+            uploadQueue.addToQueueFromRealm()
+
+            uploadQueue.waitForCompletion {
+                completion(true)
+            }
         }
     }
 
@@ -158,6 +173,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        AppDelegateLog("application performFetchWithCompletionHandler")
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
         if MigrationHelper.canMigrate() {
             NotificationsHelper.sendMigrateNotification()
@@ -325,7 +341,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
                 // Resolving an upload queue will restart it once
                 @InjectService var uploadQueue: UploadQueue
-                
+
                 backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
                     // reload upload queue if new pictures to upload
@@ -333,7 +349,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     guard photoUploader.scheduleNewPicturesForUpload() > 0 else {
                         return
                     }
-                    
+
                     @InjectService var uploadQueue: UploadQueue
                     uploadQueue.addToQueueFromRealm()
                 }
@@ -387,7 +403,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     driveId: driveId,
                                                     url: fileURL,
                                                     name: file.name,
-                                                    conflictOption: .replace,
+                                                    conflictOption: .version,
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true

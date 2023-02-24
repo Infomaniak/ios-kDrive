@@ -189,7 +189,7 @@ public class PhotoLibraryUploader {
                     driveId: settings.driveId,
                     name: correctName,
                     asset: asset,
-                    conflictOption: .replace,
+                    conflictOption: .version,
                     priority: initial ? .low : .high)
                 if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()

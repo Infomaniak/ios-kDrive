@@ -25,7 +25,7 @@ import Foundation
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
 ///
 public func AppDelegateLog(_ message: @autoclosure () -> Any,
-                            level: AbstractLogLevel = .info,
+                            level: AbstractLogLevel = .debug,
                             context: Int = 0,
                             file: StaticString = #file,
                             function: StaticString = #function,
@@ -47,7 +47,7 @@ public func AppDelegateLog(_ message: @autoclosure () -> Any,
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
 ///
 public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
-                                    level: AbstractLogLevel = .info,
+                                    level: AbstractLogLevel = .debug,
                                     context: Int = 0,
                                     file: StaticString = #file,
                                     function: StaticString = #function,
@@ -69,7 +69,7 @@ public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
 ///
 public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
-                                        level: AbstractLogLevel = .info,
+                                        level: AbstractLogLevel = .debug,
                                         context: Int = 0,
                                         file: StaticString = #file,
                                         function: StaticString = #function,
@@ -91,7 +91,7 @@ public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BackgroundSessionManager`
 ///
 public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
-                                        level: AbstractLogLevel = .info,
+                                        level: AbstractLogLevel = .debug,
                                         context: Int = 0,
                                         file: StaticString = #file,
                                         function: StaticString = #function,
@@ -110,7 +110,7 @@ public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
 
 /// shorthand for ABLog, with "UploadQueue" category
 public func UploadQueueLog(_ message: @autoclosure () -> Any,
-                           level: AbstractLogLevel = .info,
+                           level: AbstractLogLevel = .debug,
                            context: Int = 0,
                            file: StaticString = #file,
                            function: StaticString = #function,
@@ -131,7 +131,7 @@ public func UploadQueueLog(_ message: @autoclosure () -> Any,
 
 /// shorthand for ABLog, with "UploadOperation" category
 public func UploadOperationLog(_ message: @autoclosure () -> Any,
-                               level: AbstractLogLevel = .info,
+                               level: AbstractLogLevel = .debug,
                                context: Int = 0,
                                file: StaticString = #file,
                                function: StaticString = #function,

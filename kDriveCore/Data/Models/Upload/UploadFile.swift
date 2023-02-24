@@ -28,7 +28,7 @@ enum UploadFileType: String {
 }
 
 public enum ConflictOption: String, PersistableEnum {
-    case error, replace, rename, ignore
+    case error, version, rename
 }
 
 /// An abstract file to upload

@@ -78,7 +78,7 @@ extension UploadQueue: UploadPublishable {
         UploadQueueLog("publishFileUploaded")
         sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
-            guard let uploadFile = result.uploadFile else {
+            guard let uploadFile = result.uploadFile, uploadFile.isInvalidated == false else {
                 return
             }
             

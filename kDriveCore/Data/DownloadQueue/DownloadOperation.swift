@@ -22,6 +22,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+//import RealmSwift
 
 /// Something that can download a file.
 public protocol DownloadOperationable: Operationable {

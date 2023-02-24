@@ -61,7 +61,7 @@ extension AppDelegate {
             try backgroundTaskScheduler.submit(backgroundRefreshRequest)
             BGTaskSchedulingLog("scheduled task: \(backgroundRefreshRequest)")
             try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
-            BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
+                BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
             
 
         } catch {

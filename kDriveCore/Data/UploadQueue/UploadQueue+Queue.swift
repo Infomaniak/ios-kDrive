@@ -23,9 +23,8 @@ import RealmSwift
 import Sentry
 
 public protocol UploadQueueable {
-    
     func getOperation(forFileId fileId: String) -> UploadOperationable?
-    
+
     func addToQueueFromRealm()
 
     func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
@@ -33,7 +32,7 @@ public protocol UploadQueueable {
     func suspendAllOperations()
 
     func resumeAllOperations()
-    
+
     /// In background, we resume regardless of network state
     func forceResumeAllOperations()
 
@@ -66,13 +65,13 @@ extension UploadQueue: UploadQueueable {
 
     public func getOperation(forFileId fileId: String) -> UploadOperationable? {
         UploadQueueLog("getOperation fid:\(fileId)")
-        var operation: UploadOperationable? = nil
+        var operation: UploadOperationable?
         dispatchQueue.sync {
             operation = self.operation(fileId: fileId)
         }
         return operation
     }
-    
+
     public func addToQueueFromRealm() {
         UploadQueueLog("addToQueueFromRealm")
         self.dispatchQueue.sync {
@@ -83,13 +82,13 @@ extension UploadQueue: UploadQueueable {
             autoreleasepool {
                 uploadingFiles.forEach { uploadFile in
                     UploadQueueLog("addToQueueFromRealm fid:\(uploadFile.id)")
-                    
+
                     // Get the operation and try to restart it OR add it
                     guard let operation = self.operation(fileId: uploadFile.id) else {
                         self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                         return
                     }
-                    
+
                     // Check if operation is running and needs to be restarted ?
                     operation.retryIfNeeded()
                 }
@@ -100,7 +99,7 @@ extension UploadQueue: UploadQueueable {
 
     public func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
         UploadQueueLog("addToQueue fid:\(file.id)")
-        var uploadOperation: UploadOperation? = nil
+        var uploadOperation: UploadOperation?
         dispatchQueue.sync {
             uploadOperation = self.addToQueue(file: file, itemIdentifier: itemIdentifier, using: self.realm)
         }
@@ -118,7 +117,7 @@ extension UploadQueue: UploadQueueable {
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
     }
-    
+
     public func forceResumeAllOperations() {
         UploadQueueLog("forceResumeAllOperations")
         operationQueue.isSuspended = false
@@ -138,9 +137,8 @@ extension UploadQueue: UploadQueueable {
                     }
                 }
             }
-            
+
             self.operationsInQueue.removeAll()
-            
             UploadQueueLog("ended operations: \(cleaned). Remaining Operations \(self.operationQueue.operations.count)")
         }
     }
@@ -160,6 +158,7 @@ extension UploadQueue: UploadQueueable {
                 let operation = self.operationsInQueue[fileId]
                 if operation?.isExecuting != true,
                    let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
+                    UploadQueueLog("find operation not executing to cancel:\(operation)")
                     let publishedToDelete = UploadFile(value: toDelete)
                     publishedToDelete.error = .taskCancelled
                     try? realm.safeWrite {
@@ -167,6 +166,8 @@ extension UploadQueue: UploadQueueable {
                     }
                     self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+                } else {
+                    UploadQueueLog("find operation to cancel:\(operation)")
                 }
                 (operation as? UploadOperation)?.end()
         }
@@ -229,7 +230,7 @@ extension UploadQueue: UploadQueueable {
             }
         }
     }
-    
+
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         UploadQueueLog("retryAllOperations parentId:\(parentId)")
         dispatchQueue.async {
@@ -247,13 +248,13 @@ extension UploadQueue: UploadQueueable {
             failedUploadFiles.forEach {
                 self.addToQueue(file: $0, using: self.realm)
             }
-            
+
             DispatchQueue.main.async { self.addToQueueFromRealm() }
         }
     }
 
     // MARK: - Private methods
-    
+
     private func operation(fileId: String) -> UploadOperationable? {
         UploadQueueLog("operation fileId:\(fileId)")
         guard let operation = operationsInQueue[fileId] as? UploadOperation,
@@ -278,7 +279,9 @@ extension UploadQueue: UploadQueueable {
         }
 
         try? realm.safeWrite {
+            UploadQueueLog("safeWrite")
             if !file.isManagedByRealm {
+                UploadQueueLog("safeWrite")
                 realm.add(file, update: .modified)
             }
             file.name = file.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -290,7 +293,6 @@ extension UploadQueue: UploadQueueable {
         OperationQueueHelper.disableIdleTimer(true)
 
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
-
         operation.queuePriority = file.priority
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             UploadQueueLog("operation.completionBlock fid:\(fileId)")
@@ -298,6 +300,7 @@ extension UploadQueue: UploadQueueable {
                 UploadQueueLog("completionBlock for operation:\(operation) fid:\(fileId)")
                 self.operationsInQueue.removeValue(forKey: fileId)
                 guard operation.result.uploadFile?.error != .taskRescheduled else {
+                    UploadQueueLog("task is .taskRescheduled")
                     return
                 }
 
@@ -306,13 +309,13 @@ extension UploadQueue: UploadQueueable {
                 OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
             }
         }
-        
+
         UploadQueueLog("add operation :\(operation) fid:\(file.id)")
         operationQueue.addOperation(operation as Operation)
         operationsInQueue[file.id] = operation
 
         publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
-        
+
         return operation
     }
 }
