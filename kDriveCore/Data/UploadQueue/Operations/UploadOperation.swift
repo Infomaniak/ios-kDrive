@@ -947,9 +947,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 tasks = []
             }
             
+            UploadOperationLog("Rescheduling fid:\(self.fileId)")
             /// Reschedule existing requests to background session
             var didReschedule = false
             for (identifier, task) in self.uploadTasks {
+                UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
                 defer {
                     task.cancel()
                 }
@@ -957,31 +959,42 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 // Match existing UploadingChunkTask with a TaskIdentifier to be updated
                 guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
                       let path = chunkTask.path else {
-                    return
+                    UploadOperationLog("Not able to match existing tasks fid:\(self.fileId)")
+                    break
                 }
                 
+                UploadOperationLog("matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
                 let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
                 let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
                 
                 chunkTask.taskIdentifier = identifier
                 didReschedule = true
+                UploadOperationLog("didReschedule = true fid:\(self.fileId)")
             }
             
             if didReschedule == true {
+                UploadOperationLog("didReschedule .taskRescheduled fid:\(self.fileId)")
                 self.file.error = .taskRescheduled
             } else {
+                UploadOperationLog("didReschedule .taskExpirationCancelled fid:\(self.fileId)")
                 self.file.error = .taskExpirationCancelled
-                self.uploadNotifiable.sendPausedNotificationIfNeeded()
             }
+            
+            // New, send anyway
+            self.uploadNotifiable.sendPausedNotificationIfNeeded()
             
             self.synchronousSaveUploadFileToRealm()
             
             // all operations should be given the chance to call backgroundTaskExpired
-            // self.uploadQueue.suspendAllOperations()
+            self.uploadQueue.suspendAllOperations()
             self.end()
+            
+            UploadOperationLog("end reschedule fid:\(self.fileId)")
             self.expirationLock.leave()
         }
         expirationLock.wait()
+        
+        UploadOperationLog("exit reschedule fid:\(self.fileId)")
     }
 
     // did finish in time
