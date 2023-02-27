@@ -88,17 +88,20 @@ public final class UploadQueue {
         UploadQueueLog("Starting up")
         
         // Create Realm
-        dispatchQueue.sync {
+        self.dispatchQueue.sync {
             do {
-                realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
+                self.realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: self.dispatchQueue)
             } catch {
                 // We can't recover from this error but at least we report it correctly on Sentry
                 Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
             }
         }
-        // Initialize operation queue with files from Realm, and make sure it restarts
-        addToQueueFromRealm()
-        resumeAllOperations()
+        
+        DispatchQueue.global(qos: .utility).async {
+            // Initialize operation queue with files from Realm, and make sure it restarts
+            self.addToQueueFromRealm()
+            self.resumeAllOperations()
+        }
         
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
