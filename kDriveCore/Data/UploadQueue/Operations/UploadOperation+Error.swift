@@ -21,8 +21,8 @@ import Foundation
 extension UploadOperation {
 
     /// Enqueue a task, while making sure we catch the errors in a standard way
-    func enqueueCatching(_ task: @escaping () async throws -> Void) {
-        enqueue {
+    func enqueueCatching(asap: Bool = false, _ task: @escaping () async throws -> Void) {
+        enqueue(asap: asap) {
             await self.catching {
                 try await task()
             }
@@ -34,14 +34,12 @@ extension UploadOperation {
         do {
             try await task()
         }
-        
         catch {
             defer {
-                UploadOperationLog("catching error:\(error) fid:\(fileId)", level: .error)
-                synchronousSaveUploadFileToRealm()
                 end()
             }
             
+            UploadOperationLog("catching error:\(error) fid:\(fileId)", level: .error)
             if !handleLocalErrors(error: error) {
                 handleRemoteErrors(error: error)
             }
@@ -54,112 +52,128 @@ extension UploadOperation {
     
     @discardableResult
     func handleLocalErrors(error: Error) -> Bool {
-        // Not enough space
-        if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
-            self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
-            file.maxRetryCount = 0
-            file.progress = nil
-            file.error = DriveError.errorDeviceStorage.wrapping(error)
-            return true
-        }
-        
-        // Local file has been removed, delete the operation
-        // TODO: Remove stopgap when protective copy is in place when importing form files
-        if let error = error as? DriveError,
-           error == .fileNotFound {
-            file.maxRetryCount = 0
-            file.progress = nil
-            file.error = DriveError.taskCancelled // cascade deletion
-            return true
-        }
-        
-        // specialized local errors
-        if let error = error as? UploadOperation.ErrorDomain {
-            switch error {
-            case .unableToBuildRequest:
-                file.error = DriveError.localError.wrapping(error)
-                
-            case .uploadSessionTaskMissing, .uploadSessionInvalid:
-                cleanUploadFileSession()
-                file.error = DriveError.localError.wrapping(error)
-
-            case .unableToMatchUploadChunk, .splitError, .chunkError, .fileIdentityHasChanged, .parseError, .missingChunkHash:
-                cleanUploadFileSession()
-                file.error = DriveError.localError.wrapping(error)
-                
-            case .operationFinished, .operationCanceled:
-                UploadOperationLog("catching operation is terminating")
-                // the operation is terminating, silent handling
-                break
-                
-            case .databaseUploadFileNotFound:
-                // Silently stop if an UploadFile is no longer in base
-                self.cancel()
+        var errorHandled: Bool = false
+        try? transactionWithFile { file in
+            // Not enough space
+            if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
+                self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
+                file.maxRetryCount = 0
+                file.progress = nil
+                file.error = DriveError.errorDeviceStorage.wrapping(error)
+                errorHandled = true
             }
             
-            return true
+            // Local file has been removed, delete the operation
+            if let error = error as? DriveError,
+               error == .fileNotFound {
+                file.maxRetryCount = 0
+                file.progress = nil
+                file.error = DriveError.taskCancelled // cascade deletion
+                errorHandled = true
+            }
+            
+            // specialized local errors
+            if let error = error as? UploadOperation.ErrorDomain {
+                switch error {
+                case .unableToBuildRequest:
+                    file.error = DriveError.localError.wrapping(error)
+                    
+                case .uploadSessionTaskMissing, .uploadSessionInvalid:
+                    self.cleanUploadFileSession(file: file)
+                    file.error = DriveError.localError.wrapping(error)
+
+                case .unableToMatchUploadChunk, .splitError, .chunkError, .fileIdentityHasChanged, .parseError, .missingChunkHash:
+                    self.cleanUploadFileSession(file: file)
+                    file.error = DriveError.localError.wrapping(error)
+                    
+                case .operationFinished, .operationCanceled:
+                    UploadOperationLog("catching operation is terminating")
+                    // the operation is terminating, silent handling
+                    break
+                    
+                case .databaseUploadFileNotFound:
+                    // Silently stop if an UploadFile is no longer in base
+                    self.cancel()
+                }
+                
+                errorHandled = true
+            }
+            
+            else {
+                // Other DriveError
+                file.error = error as? DriveError
+                errorHandled = false
+            }
         }
-        
-        // Other DriveError
-        file.error = error as? DriveError
-        return false
+        return errorHandled
     }
 
     // MARK: - Remote Errors
     
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
-        guard let error = error as? DriveError else {
+        guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
             return false
         }
         
-        defer {
-            UploadOperationLog("catching remote error:\(error) fid:\(fileId)", level: .error)
-            file.error = error
-        }
-        
-        switch error {
-        case .fileAlreadyExistsError:
-            file.maxRetryCount = 0
-            file.progress = nil
-            
-        case .lock:
-            // simple retry
-            break
-        case .notAuthorized, .maintenance:
-            // simple retry
-            break
-            
-        case .quotaExceeded:
-            file.maxRetryCount = 0
-            file.progress = nil
-    
-        case .uploadNotTerminatedError, .uploadNotTerminated:
-            cleanUploadFileSession()
-            
-        case .invalidUploadTokenError, .uploadError, .uploadFailedError, .uploadTokenIsNotValid:
-            cleanUploadFileSession()
-        
-        case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
-            // If we get an ”object not found“ error, we cancel all further uploads in this folder
-            file.maxRetryCount = 0
-            file.progress = nil
-            cleanUploadFileSession()
-            uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId,
-                                            userId: file.userId,
-                                            driveId: file.driveId)
-                
-            if photoLibraryUploader.isSyncEnabled
-                && photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
-                photoLibraryUploader.disableSync()
-                NotificationsHelper.sendPhotoSyncErrorNotification()
+        var cleanLinkedFiles: (parentDirectoryId: Int, userId: Int, driveId: Int)?
+        var errorHandled: Bool = false
+        try? transactionWithFile { file in
+            defer {
+                UploadOperationLog("catching remote error:\(error) fid:\(self.fileId)", level: .error)
+                file.error = error
             }
             
-        default:
-            // simple retry
-            break
+            switch error {
+            case .fileAlreadyExistsError:
+                file.maxRetryCount = 0
+                file.progress = nil
+                
+            case .lock:
+                // simple retry
+                break
+            case .notAuthorized, .maintenance:
+                // simple retry
+                break
+                
+            case .quotaExceeded:
+                file.maxRetryCount = 0
+                file.progress = nil
+        
+            case .uploadNotTerminatedError, .uploadNotTerminated:
+                self.cleanUploadFileSession(file: file)
+                
+            case .invalidUploadTokenError, .uploadError, .uploadFailedError, .uploadTokenIsNotValid:
+                self.cleanUploadFileSession(file: file)
+            
+            case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
+                // If we get an ”object not found“ error, we cancel all further uploads in this folder
+                file.maxRetryCount = 0
+                file.progress = nil
+                self.cleanUploadFileSession(file: file)
+                cleanLinkedFiles = (file.parentDirectoryId, file.userId, file.driveId)
+                
+            default:
+                // simple retry
+                break
+            }
+            
+            errorHandled = true
         }
         
-        return true
+        if let cleanLinkedFiles {
+            // Chain database queries outside of transactionWithFile
+            self.uploadQueue.cancelAllOperations(withParent: cleanLinkedFiles.parentDirectoryId,
+                                                 userId: cleanLinkedFiles.userId,
+                                                 driveId: cleanLinkedFiles.driveId)
+                
+            if self.photoLibraryUploader.isSyncEnabled
+                && self.photoLibraryUploader.settings?.parentDirectoryId == cleanLinkedFiles.parentDirectoryId {
+                self.photoLibraryUploader.disableSync()
+                NotificationsHelper.sendPhotoSyncErrorNotification()
+            }
+        }
+        
+        return errorHandled
     }
 }

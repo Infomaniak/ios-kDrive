@@ -47,7 +47,6 @@ public struct UploadCompletionResult {
 
 /// Something that can upload a file.
 public protocol UploadOperationable: Operationable {
-    
     /// init an UploadOperationable
     /// - Parameters:
     ///   - file: the uploadFile
@@ -70,14 +69,10 @@ public protocol UploadOperationable: Operationable {
     /// Process errors and terminate the operation
     func end()
     
-    var result: UploadCompletionResult  { get }
-    
-    var file: UploadFile  { get }
+    var result: UploadCompletionResult { get }
 }
 
-
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
-    
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -100,7 +95,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         case parseError
         /// UploadFile is probably deleted in another thread
         case databaseUploadFileNotFound
-        
         /// The operation is canceled
         case operationCanceled
         /// The operation is finished
@@ -120,7 +114,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     private var step: UploadOperationStep {
         didSet {
-            //UploadOperationLog("~> moved to step:\(step) for: \n \(self.debugDescription)", level: .debug)
+            // UploadOperationLog("~> moved to step:\(step) for: \n \(self.debugDescription)", level: .debug)
         }
     }
     
@@ -134,7 +128,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     }
     
     public let fileId: String
-    public var file: UploadFile // TODO: remove
     private var fileObservationToken: NotificationToken?
     
     /// Local tracking of running network tasks
@@ -154,7 +147,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                          itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         let detachedFile = file.detached()
         UploadOperationLog("init fid:\(detachedFile.id)")
-        self.file = detachedFile
         self.fileId = detachedFile.id
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
@@ -163,7 +155,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         
         super.init()
         
-        self.observerDeletion()
+        // TODO: Since the refactor using `transactionWithFile` we do not need this anymore
+//        observerDeletion()
     }
 
     public func restore(task: URLSessionUploadTask, session: URLSession) {
@@ -187,13 +180,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             await self.storeBackgroundTaskIdentifier()
 
             // Fetch content from local library if needed
-            self.getPhAssetIfNeeded()
+            try self.getPhAssetIfNeeded()
         
             // Re-Load or Setup an UploadingSessionTask within the UploadingFile
             try await self.getUploadSessionOrCreate()
         
             // Start chunking
-            try self.generateChunksAndFanOutIfNeeded()
+            try await self.generateChunksAndFanOutIfNeeded()
         }
     }
 
@@ -214,39 +207,52 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         
         defer {
             updateUploadProgress()
-            synchronousSaveUploadFileToRealm()
         }
         
         step = .fetchSession
         UploadOperationLog("Asking for an upload Session \(fileId)")
 
-        // Decrease retry count
-        // TODO: Even if BG task is cancelled by system?
-        file.maxRetryCount -= 1
-
-        // Check file is readable
-        let fileUrl = try getFileUrlIfReadable()
+        var hasUploadingSession: Bool!
+        var fileName: String!
+        var conflictOption: ConflictOption!
+        var parentDirectoryId: Int!
+        var fileUrl: URL!
+        try transactionWithFile { file in
+            // Decrease retry count
+            file.maxRetryCount -= 1
+            
+            hasUploadingSession = (file.uploadingSession != nil)
+            fileName = file.name
+            conflictOption = file.conflictOption
+            parentDirectoryId = file.parentDirectoryId
+            
+            // Check file is readable
+            fileUrl = try self.getFileUrlIfReadable(file: file)
+        }
 
         // fetch stored session
-        if let uploadingSession = file.uploadingSession {
-            guard uploadingSession.isExpired == false,
-                  uploadingSession.fileIdentityHasNotChanged == true else {
-                throw ErrorDomain.uploadSessionInvalid
+        if hasUploadingSession {
+            try transactionWithFile { file in
+                guard let uploadingSession = file.uploadingSession,
+                      uploadingSession.isExpired == false,
+                      uploadingSession.fileIdentityHasNotChanged == true else {
+                    throw ErrorDomain.uploadSessionInvalid
+                }
+                
+                // Cleanup the uploading chunks and session state for re-use
+                let chunkTasksToClean = uploadingSession.chunkTasks.filter { $0.doneUploading == false }
+                chunkTasksToClean.forEach {
+                    // clean in order to re-schedule
+                    
+                    // TODO: refactor sessionIdentifier + requestUrl handling
+                    $0.sessionIdentifier = nil
+                    $0.requestUrl = nil
+                    $0.path = nil
+                    $0.sha256 = nil
+                    $0.error = nil
+                }
             }
             
-            // Cleanup the uploading chunks and session state for re-use
-            let chunkTasksToClean = uploadingSession.chunkTasks.filter { $0.doneUploading == false }
-            chunkTasksToClean.forEach {
-                // clean in order to re-schedule
-                
-                // TODO: refactor sessionIdentifier + requestUrl handling
-                $0.sessionIdentifier = nil
-                $0.requestUrl = nil
-                $0.path = nil
-                $0.sha256 = nil
-                $0.error = nil
-            }
-
             // if we have no more chunks to upload, try to close session
             await catching {
                 guard let chunkTasksToUploadCount = try? self.chunkTasksToUploadCount() else {
@@ -290,40 +296,42 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
             let session = try await apiFetcher.startSession(drive: drive,
                                                             totalSize: fileSize,
-                                                            fileName: file.name,
+                                                            fileName: fileName,
                                                             totalChunks: ranges.count,
-                                                            conflictResolution: file.conflictOption,
-                                                            directoryId: file.parentDirectoryId)
-            // Create an uploading session
-            let uploadingSessionTask = UploadingSessionTask()
+                                                            conflictResolution: conflictOption,
+                                                            directoryId: parentDirectoryId)
+            try transactionWithFile { file in
+                // Create an uploading session
+                let uploadingSessionTask = UploadingSessionTask()
 
-            // Store the session token asap as a non null ivar
-            uploadingSessionTask.token = session.token
-            
-            // The file at the moment we created the UploadingSessionTask
-            uploadingSessionTask.filePath = fileUrl.path
+                // Store the session token asap as a non null ivar
+                uploadingSessionTask.token = session.token
+                
+                // The file at the moment we created the UploadingSessionTask
+                uploadingSessionTask.filePath = fileUrl.path
 
-            // Wrapping the API response type for Realm
-            let dbSession = RUploadSession(uploadSession: session)
-            uploadingSessionTask.uploadSession = dbSession
+                // Wrapping the API response type for Realm
+                let dbSession = RUploadSession(uploadSession: session)
+                uploadingSessionTask.uploadSession = dbSession
 
-            // Make sure we can track the the file has not changed across time, while we run the upload session
-            let fileIdentity = fileIdentity(fileUrl: fileUrl)
-            uploadingSessionTask.fileIdentity = fileIdentity
+                // Make sure we can track the the file has not changed across time, while we run the upload session
+                let fileIdentity = UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
+                uploadingSessionTask.fileIdentity = fileIdentity
 
-            // Session expiration date
-            let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
-            uploadingSessionTask.sessionExpiration = inElevenHours
+                // Session expiration date
+                let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
+                uploadingSessionTask.sessionExpiration = inElevenHours
 
-            // Represent the chunks to be uploaded in DB
-            for (index, object) in ranges.enumerated() {
-                let chunkNumber = Int64(index + 1) // API start at 1
-                let chunkTask = UploadingChunkTask(chunkNumber: chunkNumber, range: object)
-                uploadingSessionTask.chunkTasks.append(chunkTask)
+                // Represent the chunks to be uploaded in DB
+                for (index, object) in ranges.enumerated() {
+                    let chunkNumber = Int64(index + 1) // API start at 1
+                    let chunkTask = UploadingChunkTask(chunkNumber: chunkNumber, range: object)
+                    uploadingSessionTask.chunkTasks.append(chunkTask)
+                }
+                
+                // All prepared, now we store the upload session in DB before moving on
+                file.uploadingSession = uploadingSessionTask
             }
-            
-            // All prepared, now we store the upload session in DB before moving on
-            file.uploadingSession = uploadingSessionTask
         }
     }
 
@@ -333,127 +341,107 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         guard let chunkTasksUploadedCount = try? chunkTasksUploadedCount(),
               let chunkTasksTotalCount = try? chunkTasksTotalCount() else {
             let noProgress: Double = 0
-            file.progress = noProgress
-            synchronousSaveUploadFileToRealm()
+            try? transactionWithFile { file in
+                file.progress = noProgress
+            }
             return noProgress
         }
         
         let progress = Double(chunkTasksUploadedCount) / Double(chunkTasksTotalCount)
+        try? transactionWithFile { file in
+            file.progress = progress
+        }
         
-        file.progress = progress
-        synchronousSaveUploadFileToRealm()
-
         return progress
     }
     
-    /// Count of the chunks to upload, independent of chunk produced on local storage
-    func chunkTasksToUploadCount() throws -> Int {
-        // Get the current uploading session
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == false }
-        return filteredTasks.count
-    }
-    
-    /// Count of the uploaded chunks to upload, independent of chunk produced on local storage
-    func chunkTasksUploadedCount() throws -> Int {
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == true }
-        return filteredTasks.count
-    }
-    
-    /// How many chunk requests are active at the moment
-    func chunkTasksUploadingCount() throws -> Int {
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.scheduled == true }
-        return filteredTasks.count
-    }
-    
-    /// Count of the chunks to upload, independent of chunk produced on local storage
-    func chunkTasksTotalCount() throws -> Int {
-        // Get the current uploading session
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        return uploadingSessionTask.chunkTasks.count
-    }
-    
     /// Generate some chunks into a temporary folder from a file
-    /// - Parameters:
-    /// - Returns: TRUE if this function has generated a chunk to upload and stored it correctly
-    @discardableResult
-    func generateChunksAndFanOutIfNeeded() throws -> Bool {
+    func generateChunksAndFanOutIfNeeded() async throws {
         try checkCancelation()
         
-        // Get the current uploading session
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        try checkFileIdentity(uploadingSession: uploadingSessionTask)
-        
-        // Look for the next chunk to generate
-        let chunksToGenerate = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == false && $0.hasLocalChunk == false }
-        guard let chunkTask = chunksToGenerate.first else {
-            return false // No more chunks to generate
-        }
-        
-        let chunkNumber = chunkTask.chunkNumber
-        step = .chunk(chunkNumber)
-        let range = chunkTask.range
-        let fileUrl = try getFileUrlIfReadable()
-        guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
-              let chunk = chunkProvider.next() else {
-            UploadOperationLog("Unable to get a ChunkProvider for \(fileId)", level: .error)
-            throw ErrorDomain.chunkError
-        }
-        
-        UploadOperationLog("Storing Chunk count:\(chunkNumber) of \(chunksToGenerate.count) to write, fid:\(fileId)")
-        do {
-            try checkFileIdentity(uploadingSession: uploadingSessionTask)
-            try checkCancelation()
-        
+        var filePath: String!
+        var chunksToGenerateCount = 0
+        try transactionWithFile { file in
+            // Get the current uploading session
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+            
+            filePath = uploadingSessionTask.filePath
             let sessionToken = uploadingSessionTask.token
-            let chunkSHA256 = chunk.SHA256DigestString
-            let chunkPath = try storeChunk(chunk,
-                                           number: chunkNumber,
-                                           fileId: fileId,
-                                           sessionToken: sessionToken,
-                                           hash: chunkSHA256)
-            UploadOperationLog("chunk stored count:\(chunkNumber) for:\(fileId)")
+            try self.checkFileIdentity(filePath: filePath, file: file)
+
+            // Look for the next chunk to generate
+            let chunksToGenerate = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == false && $0.hasLocalChunk == false }
+            guard let chunkTask = chunksToGenerate.first else {
+                return
+            }
             
-            // set path + sha
-            chunkTask.path = chunkPath.path
-            chunkTask.sha256 = chunkSHA256
+            chunksToGenerateCount = chunksToGenerate.count
+            let chunkNumber = chunkTask.chunkNumber
+            self.step = .chunk(chunkNumber)
+            let range = chunkTask.range
+            let fileUrl = try self.getFileUrlIfReadable(file: file)
+            guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
+                  let chunk = chunkProvider.next() else {
+                UploadOperationLog("Unable to get a ChunkProvider for \(self.fileId)", level: .error)
+                throw ErrorDomain.chunkError
+            }
             
-            // Save the newly created chunk to the DB
-            synchronousSaveUploadFileToRealm()
+            UploadOperationLog("Storing Chunk count:\(chunkNumber) of \(chunksToGenerateCount) to write, fid:\(self.fileId)")
+            do {
+                try self.checkFileIdentity(filePath: filePath, file: file)
+                try self.checkCancelation()
             
+                let chunkSHA256 = chunk.SHA256DigestString
+                let chunkPath = try self.storeChunk(chunk,
+                                                    number: chunkNumber,
+                                                    fileId: self.fileId,
+                                                    sessionToken: sessionToken,
+                                                    hash: chunkSHA256)
+                UploadOperationLog("chunk stored count:\(chunkNumber) for:\(self.fileId)")
+                
+                // set path + sha
+                chunkTask.path = chunkPath.path
+                chunkTask.sha256 = chunkSHA256
+                
+            } catch {
+                UploadOperationLog("Unable to save a chunk to storage. number:\(chunkNumber) error:\(error) for:\(self.fileId)",
+                                   level: .error)
+                throw error
+            }
+        }
+        
+        // Schedule next step
+        try await scheduleNextChunk(filePath: filePath,
+                                    chunksToGenerateCount: chunksToGenerateCount,
+                                    uploadTasksCount: uploadTasks.count)
+    }
+    
+    /// Prepare chunk upload requests, and start them.
+    private func scheduleNextChunk(filePath: String,
+                                   chunksToGenerateCount: Int,
+                                   uploadTasksCount: Int) async throws {
+        do {
+            try checkFileIdentity(filePath: filePath)
+            try checkCancelation()
+
             // Fan-out the chunk we just made
             enqueueCatching {
                 try await self.fanOutChunks()
             }
             
             // Chain the next chunk generation if necessary
-            UploadOperationLog("chunksToGenerate:\(chunksToGenerate.count) uploadTasks:\(uploadTasks.count) fid:\(fileId)")
-            if chunksToGenerate.count > 1 && uploadTasks.count < 5 {
+            UploadOperationLog("chunksToGenerate:\(chunksToGenerateCount) uploadTasks:\(uploadTasksCount) fid:\(fileId)")
+            if chunksToGenerateCount > 1 && uploadTasksCount < 5 {
                 enqueueCatching {
-                    try self.generateChunksAndFanOutIfNeeded()
+                    try await self.generateChunksAndFanOutIfNeeded()
                 }
             }
             
-            return true
+            return
         } catch {
-            UploadOperationLog("Unable to save a chunk to storage. number:\(chunkNumber) error:\(error) for:\(fileId)",
+            UploadOperationLog("Unable to schedule next chunk. error:\(error) for:\(fileId)",
                                level: .error)
             throw error
         }
@@ -464,123 +452,117 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         try checkCancelation()
         UploadOperationLog("fanOut for:\(fileId)")
 
-        // Get the current uploading session
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        
-        let chunksToUpload = uploadingSessionTask.chunkTasks.filter { uploadingChunkTask in
-            uploadingChunkTask.canStartUploading == true
-        }
-        
-        UploadOperationLog("fanOut chunksToUpload:\(chunksToUpload.count) for:\(fileId)")
-        
-        // Schedule all the chunks to be uploaded
-        for chunkToUpload in chunksToUpload {
-            try checkCancelation()
+        try transactionWithFile { file in
+            // Get the current uploading session
+            guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
             
-            do {
-                guard let chunkPath = chunkToUpload.path,
-                      let sha256 = chunkToUpload.sha256 else {
-                    throw ErrorDomain.missingChunkHash
-                }
+            let chunksToUpload = uploadingSessionTask.chunkTasks.filter { uploadingChunkTask in
+                uploadingChunkTask.canStartUploading == true
+            }
+            
+            UploadOperationLog("fanOut chunksToUpload:\(chunksToUpload.count) for:\(self.fileId)")
+            
+            // Schedule all the chunks to be uploaded
+            for chunkToUpload: UploadingChunkTask in chunksToUpload {
+                try self.checkCancelation()
                 
-                let chunkHashHeader = "sha256:\(sha256)"
-                let chunkUrl = URL(fileURLWithPath: chunkPath, isDirectory: false)
-                let chunkNumber = chunkToUpload.chunkNumber
-                let chunkSize = chunkToUpload.chunkSize
-                let request = try buildRequest(chunkNumber: chunkNumber,
-                                               chunkSize: chunkSize,
-                                               chunkHash: chunkHashHeader,
-                                               sessionToken: uploadingSessionTask.token)
-                let uploadTask = urlSession.uploadTask(with: request, fromFile: chunkUrl, completionHandler: uploadCompletion)
-                // Extra 512 bytes for request headers
-                uploadTask.countOfBytesClientExpectsToSend = Int64(chunkSize) + 512
-                // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-                uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
-                
-                chunkToUpload.sessionIdentifier = urlSession.identifier
-                chunkToUpload.requestUrl = request.url?.absoluteString
-                synchronousSaveUploadFileToRealm()
-                
-                let identifier = urlSession.identifier(for: uploadTask)
-                uploadTasks[identifier] = uploadTask
-                uploadTask.resume()
-                
-                UploadOperationLog("started task identifier:\(identifier) for:\(fileId)")
+                do {
+                    guard let chunkPath = chunkToUpload.path,
+                          let sha256 = chunkToUpload.sha256 else {
+                        throw ErrorDomain.missingChunkHash
+                    }
+                    
+                    let chunkHashHeader = "sha256:\(sha256)"
+                    let chunkUrl = URL(fileURLWithPath: chunkPath, isDirectory: false)
+                    let chunkNumber = chunkToUpload.chunkNumber
+                    let chunkSize = chunkToUpload.chunkSize
+                    let request = try self.buildRequest(chunkNumber: chunkNumber,
+                                                        chunkSize: chunkSize,
+                                                        chunkHash: chunkHashHeader,
+                                                        sessionToken: uploadingSessionTask.token)
+                    let uploadTask = self.urlSession.uploadTask(with: request,
+                                                                fromFile: chunkUrl,
+                                                                completionHandler: self.uploadCompletion)
+                    // Extra 512 bytes for request headers
+                    uploadTask.countOfBytesClientExpectsToSend = Int64(chunkSize) + 512
+                    // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
+                    uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
+                    
+                    chunkToUpload.sessionIdentifier = self.urlSession.identifier
+                    chunkToUpload.requestUrl = request.url?.absoluteString
+                    
+                    let identifier = self.urlSession.identifier(for: uploadTask)
+                    self.uploadTasks[identifier] = uploadTask
+                    uploadTask.resume()
+                    
+                    UploadOperationLog("started task identifier:\(identifier) for:\(self.fileId)")
 
-            } catch {
-                UploadOperationLog("Unable to create an upload request for chunk \(chunkToUpload) error:\(error) - \(fileId)", level: .error)
-                file.error = .localError
-                end()
-                break
+                } catch {
+                    UploadOperationLog("Unable to create an upload request for chunk \(chunkToUpload) error:\(error) - \(self.fileId)",
+                                       level: .error)
+                    throw error
+                }
             }
         }
     }
     
-    func getFileUrlIfReadable() throws -> URL {
+    func getFileUrlIfReadable(file: UploadFile) throws -> URL {
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
-            UploadOperationLog("File has not a valid readable URL \(String(describing: file.pathURL)) for \(fileId)",
+            UploadOperationLog("File has not a valid readable URL for \(fileId)",
                                level: .error)
             throw DriveError.fileNotFound
         }
         return fileUrl
     }
     
-    func cleanUploadFileSession() {
+    func cleanUploadFileSession(file: UploadFile? = nil) {
         UploadOperationLog("Clean uploading session for \(fileId)")
-        file.uploadingSession = nil
-        file.progress = nil
-        synchronousSaveUploadFileToRealm()
-    }
-    
-    func synchronousSaveUploadFileToRealm(function: StaticString = #function) {
-        UploadOperationLog("synchronousSaveUploadFileToRealm \(fileId) in:\(function)")
-        guard file.error != DriveError.taskCancelled else {
-            return
+        
+        let cleanFileClosure: (UploadFile) -> Void = { file in
+            file.uploadingSession = nil
+            file.progress = nil
         }
         
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            try? uploadsRealm.safeWrite {
-                let fileCopy = file.detached() /// We save a copy so the .file ivar is never attached to a realm
-                uploadsRealm.add(fileCopy, update: .modified)
+        // If no file provided, wrap the transaction
+        if let file {
+            cleanFileClosure(file)
+        } else {
+            try? transactionWithFile { file in
+                cleanFileClosure(file)
             }
         }
     }
     
-    func getDriveFileManager() throws -> DriveFileManager {
-        guard let driveFileManager = accountManager.getDriveFileManager(for: accountManager.currentDriveId,
-                                                                        userId: accountManager.currentUserId) else {
-            UploadOperationLog("getDriveFileManager failed \(fileId)", level: .error)
-            throw DriveError.localError
-        }
-        
-        return driveFileManager
-    }
-    
     /// Throws if the file was modified
-    func checkFileIdentity(uploadingSession: UploadingSessionTask) throws {
-        guard fileManager.isReadableFile(atPath: uploadingSession.filePath) else {
-            UploadOperationLog("File has not a valid readable URL \(String(describing: file.pathURL)) for \(fileId)",
+    func checkFileIdentity(filePath: String, file: UploadFile? = nil) throws {
+        guard fileManager.isReadableFile(atPath: filePath) else {
+            UploadOperationLog("File has not a valid readable URL \(filePath) for \(fileId)",
                                level: .error)
             throw DriveError.fileNotFound
         }
         
-        guard uploadingSession.fileIdentityHasNotChanged == true else {
-            UploadOperationLog("File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) fid:\(fileId)",
-                               level: .error)
-            throw ErrorDomain.fileIdentityHasChanged
+        let task: (_ file: UploadFile) throws -> Void = { file in
+            guard let uploadingSession = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+            
+            guard uploadingSession.fileIdentityHasNotChanged == true else {
+                UploadOperationLog("File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) fid:\(self.fileId)",
+                                   level: .error)
+                throw ErrorDomain.fileIdentityHasChanged
+            }
         }
-    }
         
-    func fileIdentity(fileUrl: URL) -> String {
-        // Make sure we can track the file has not changed across time, while we run the upload session
-        @InjectService var fileMetadata: FileMetadatable
-        let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl)
-        let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl)
-        let fileUniqIdentity = "\(String(describing: fileCreationDate))_\(String(describing: fileModificationDate))"
-        return fileUniqIdentity
+        if let file {
+            try task(file)
+        } else {
+            try transactionWithFile { file in
+                try task(file)
+            }
+        }
     }
         
     /// Throws if UploadOperation is canceled
@@ -588,16 +570,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if isCancelled {
             UploadOperationLog("Task is cancelled \(fileId)")
             throw ErrorDomain.operationCanceled
-        }
-        
-        else if isFinished {
+        } else if isFinished {
             UploadOperationLog("Task is isFinished \(fileId)")
             throw ErrorDomain.operationFinished
         }
     }
     
     public func retryIfNeeded() {
-        UploadOperationLog("retryIfNeeded fid:\(self.fileId)")
+        UploadOperationLog("retryIfNeeded fid:\(fileId)")
         // TODO: make sure it works hooking up the sessions again
         enqueueCatching {
             await self.execute()
@@ -610,24 +590,22 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         step = .closeSession
         
         defer {
-            synchronousSaveUploadFileToRealm()
             end()
         }
         
-        guard let uploadSession = file.uploadingSession,
-              let uploadSessionToken = uploadSession.uploadSession?.token else {
+        var uploadSessionToken: String?
+        try? transactionWithFile { file in
+            uploadSessionToken = file.uploadingSession?.token
+        }
+        
+        guard let uploadSessionToken else {
             UploadOperationLog("No existing session to close fid:\(fileId)")
             return
         }
         
-        let driveFileManager: DriveFileManager
-        do {
-            driveFileManager = try getDriveFileManager()
-        } catch {
-            UploadOperationLog("Failed to getDriveFileManager fid:\(fileId) userId:\(accountManager.currentUserId)",
-                               level: .error)
-            file.error = error as? DriveError
-            return
+        var driveFileManager: DriveFileManager!
+        await catching {
+            driveFileManager = try self.getDriveFileManager()
         }
         
         let apiFetcher = driveFileManager.apiFetcher
@@ -639,19 +617,29 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             let driveFile = uploadedFile.file
             UploadOperationLog("uploadedFile 'File' id:\(uploadedFile.file.id) fid:\(self.fileId)")
             
-            self.file.uploadDate = Date()
-            self.file.uploadingSession = nil
-            self.file.error = nil
+            var driveId: Int!
+            var userId: Int!
+            var relativePath: String!
+            var parentDirectoryId: Int!
+            try self.transactionWithFile { file in
+                file.uploadDate = Date()
+                file.uploadingSession = nil
+                file.error = nil
+                driveId = file.driveId
+                userId = file.userId
+                relativePath = file.relativePath
+                parentDirectoryId = file.parentDirectoryId
+            }
                         
-            if let driveFileManager = self.accountManager.getDriveFileManager(for: self.file.driveId, userId: self.file.userId) {
+            if let driveFileManager = self.accountManager.getDriveFileManager(for: driveId, userId: userId) {
                 // File is already or has parent in DB let's update it
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
-                    if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || self.file.relativePath.isEmpty {
+                    if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath.isEmpty {
                         if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id), oldFile.isAvailableOffline {
                             driveFile.isAvailableOffline = true
                         }
-                        let parent = driveFileManager.getCachedFile(id: self.file.parentDirectoryId, freeze: false, using: realm)
+                        let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
                         queue.bufferedWrite(in: parent, file: driveFile)
                         self.result.driveFile = File(value: driveFile)
                     }
@@ -664,7 +652,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     /// listen to deletion events
     private func observerDeletion() {
-        UploadOperationLog("observerDeletion")
+        UploadOperationLog("observerDeletion :\(fileId)")
         var token: NotificationToken?
         BackgroundRealm.uploads.execute { uploadsRealm in
             guard let uploadFile = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) else {
@@ -674,7 +662,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             token = uploadFile.observe { change in
                 switch change {
                 case .deleted:
-                    UploadOperationLog("The source UploadFile was deleted.")
+                    UploadOperationLog("The source UploadFile was deleted. fid:\(self.fileId)")
                     self.cancel()
                 default:
                     break
@@ -682,7 +670,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
         
-        self.fileObservationToken = token
+        fileObservationToken = token
     }
     
     // MARK: Build request
@@ -754,17 +742,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     // MARK: PHAssets
     
-    private func getPhAssetIfNeeded() {
-        UploadOperationLog("getPhAssetIfNeeded type:\(file.type)")
-        if file.type == .phAsset /*&& file.pathURL == nil*/ {
-            UploadOperationLog("Need to fetch photo asset")
-            if let asset = file.getPHAsset(),
-               let url = photoLibraryUploader.getUrlSync(for: asset) {
-                UploadOperationLog("Got photo asset, writing URL \(url)")
-                file.pathURL = url
-                file.uploadingSession?.filePath = url.path
-            } else {
-                UploadOperationLog("Failed to get photo asset", level: .error)
+    private func getPhAssetIfNeeded() throws {
+        try transactionWithFile { file in
+            UploadOperationLog("getPhAssetIfNeeded type:\(file.type)")
+            if file.type == .phAsset /* && file.pathURL == nil */ {
+                UploadOperationLog("Need to fetch photo asset")
+                if let asset = file.getPHAsset(),
+                   let url = self.photoLibraryUploader.getUrlSync(for: asset) {
+                    UploadOperationLog("Got photo asset, writing URL \(url)")
+                    file.pathURL = url
+                    file.uploadingSession?.filePath = url.path
+                } else {
+                    UploadOperationLog("Failed to get photo asset", level: .error)
+                }
             }
         }
     }
@@ -774,7 +764,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // also called on app restoration
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         enqueue(asap: true) {
-            let file = self.file
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
         
             if let error {
@@ -787,18 +776,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             if let data = data,
                error == nil,
                statusCode >= 200, statusCode < 300 {
-                do {
+                await self.catching {
                     try await self.uploadCompletionSuccess(data: data, response: response, error: error)
-                } catch {
-                    UploadOperationLog("Failed to process chunk upload success. error:\(error) fid:\(self.fileId)", level: .error)
-                    self.cleanUploadFileSession()
-                    self.end()
                 }
             }
         
             // Client-side error
             else if let error = error {
-                self.uploadCompletionLocalFailure(data: data, response: response, error: error)
+                await self.catching {
+                    try self.uploadCompletionLocalFailure(data: data, response: response, error: error)
+                }
             }
         
             // Server-side error
@@ -816,38 +803,39 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             throw ErrorDomain.parseError
         }
         UploadOperationLog("chunk:\(uploadedChunk.number)  fid:\(fileId)")
-             
-        // update current UploadFile with chunk
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-         
-        // Store the chunk object into the correct chunkTask
-        if let chunkTask = uploadingSessionTask.chunkTasks.first(where: { $0.chunkNumber == uploadedChunk.number }) {
-            chunkTask.chunk = uploadedChunk
-             
-            // tracking running tasks
-            if let identifier = chunkTask.taskIdentifier {
-                uploadTasks.removeValue(forKey: identifier)
-                chunkTask.taskIdentifier = nil
+    
+        try transactionWithFile { file in
+            // update current UploadFile with chunk
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
             }
-            
-            synchronousSaveUploadFileToRealm()
              
-            // Some cleanup if we have the chance
-            if let path = chunkTask.path {
-                let url = URL(fileURLWithPath: path, isDirectory: false)
-                DispatchQueue.global(qos: .background).async {
-                    UploadOperationLog("cleanup chunk:\(chunkTask.chunkNumber) fid:\(self.fileId)")
-                    try? self.fileManager.removeItem(at: url)
+            // Store the chunk object into the correct chunkTask
+            if let chunkTask = uploadingSessionTask.chunkTasks.first(where: { $0.chunkNumber == uploadedChunk.number }) {
+                chunkTask.chunk = uploadedChunk
+                 
+                // tracking running tasks
+                if let identifier = chunkTask.taskIdentifier {
+                    self.uploadTasks.removeValue(forKey: identifier)
+                    chunkTask.taskIdentifier = nil
                 }
+                
+                // Some cleanup if we have the chance
+                if let path = chunkTask.path {
+                    let url = URL(fileURLWithPath: path, isDirectory: false)
+                    let chunkNumber = chunkTask.chunkNumber
+                    DispatchQueue.global(qos: .background).async {
+                        UploadOperationLog("cleanup chunk:\(chunkNumber) fid:\(self.fileId)")
+                        try? self.fileManager.removeItem(at: url)
+                    }
+                }
+            } else {
+                UploadOperationLog("matching chunk:\(uploadedChunk.number) failed fid:\(self.fileId)")
+                self.cleanUploadFileSession(file: file)
+                throw ErrorDomain.unableToMatchUploadChunk // TODO: This should trigger a Sentry
             }
-        } else {
-            UploadOperationLog("matching chunk:\(uploadedChunk.number) failed fid:\(fileId)")
-            cleanUploadFileSession()
-            throw ErrorDomain.unableToMatchUploadChunk   // TODO: This should trigger a Sentry
         }
-         
+        
         // Update UI progress state
         updateUploadProgress()
         
@@ -866,12 +854,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         else {
             enqueueCatching {
                 UploadOperationLog("Remaining \(toUploadCount) chunks to be uploaded \(self.fileId)")
-                try self.generateChunksAndFanOutIfNeeded()
+                try await self.generateChunksAndFanOutIfNeeded()
             }
         }
     }
     
-    private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) {
+    private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) throws {
         UploadOperationLog("completion Client-side error:\(error) fid:\(fileId)", level: .error)
         
         if let data {
@@ -883,27 +871,26 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             self.end()
         }
         
-        guard file.error != .taskRescheduled || file.error != .taskPaused else {
-            return
-        }
-
-        // save the error
-        if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
-            if file.error != .taskExpirationCancelled && file.error != .taskRescheduled && file.error != .taskPaused {
-                file.error = DriveError.taskCancelled
-                file.maxRetryCount = 0
-                file.progress = nil
+        try transactionWithFile { file in
+            guard file.error != .taskRescheduled || file.error != .taskPaused else {
+                return
             }
-        } else {
-            file.error = .networkError
+
+            // save the error
+            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
+                if file.error != .taskExpirationCancelled && file.error != .taskRescheduled && file.error != .taskPaused {
+                    file.error = DriveError.taskCancelled
+                    file.maxRetryCount = 0
+                    file.progress = nil
+                }
+            } else {
+                file.error = .networkError
+            }
         }
-        
-        synchronousSaveUploadFileToRealm()
     }
     
     private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
         defer {
-            self.synchronousSaveUploadFileToRealm()
             self.end()
         }
         
@@ -921,80 +908,80 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         handleRemoteErrors(error: error)
     }
 
-    
     /// UIKit needs the function to return after the task is stoped to not print an error
     private let expirationLock = DispatchGroup()
 
     // System notification that we took over 30sec, and should cancel the task.
     private func backgroundTaskExpired() {
-        UploadOperationLog("backgroundTaskExpired")
+        UploadOperationLog("backgroundTaskExpired fid:\(fileId)")
         step = .taskExpired
         expirationLock.enter()
-        enqueue(asap: true) {
+        
+        enqueueCatching(asap: true) {
             UploadOperationLog("backgroundTaskExpired fid:\(self.fileId)")
-            let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-            breadcrumb.message = "Rescheduling file \(self.file.name)"
-            breadcrumb.data = ["File id": self.fileId,
-                               "File name": self.file.name,
-                               "File size": self.file.size,
-                               "File type": self.file.type.rawValue]
-            SentrySDK.addBreadcrumb(crumb: breadcrumb)
             
-            let tasks: [UploadingChunkTask]
-            if let uploadingSession = self.file.uploadingSession {
-                tasks = Array(uploadingSession.chunkTasks)
-            } else {
-                tasks = []
-            }
-            
-            UploadOperationLog("Rescheduling fid:\(self.fileId)")
-            /// Reschedule existing requests to background session
-            var didReschedule = false
-            for (identifier, task) in self.uploadTasks {
-                UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
-                defer {
-                    task.cancel()
+            try self.transactionWithFile { file in
+                let tasks: [UploadingChunkTask]
+                if let uploadingSession = file.uploadingSession {
+                    tasks = Array(uploadingSession.chunkTasks)
+                } else {
+                    tasks = []
                 }
-                
-                // Match existing UploadingChunkTask with a TaskIdentifier to be updated
-                guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
-                      let path = chunkTask.path else {
-                    UploadOperationLog("Not able to match existing tasks fid:\(self.fileId)")
-                    break
+
+                UploadOperationLog("Rescheduling fid:\(self.fileId)")
+                /// Reschedule existing requests to background session
+                var didReschedule = false
+                for (identifier, task) in self.uploadTasks {
+                    UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
+                    defer {
+                        task.cancel()
+                    }
+
+                    // Match existing UploadingChunkTask with a TaskIdentifier to be updated
+                    guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
+                          let path = chunkTask.path else {
+                        UploadOperationLog("Not able to match existing tasks fid:\(self.fileId)")
+                        break
+                    }
+
+                    UploadOperationLog("matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
+                    let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
+                    let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
+
+                    chunkTask.taskIdentifier = identifier
+                    didReschedule = true
+                    UploadOperationLog("didReschedule = true fid:\(self.fileId)")
                 }
-                
-                UploadOperationLog("matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
-                let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
-                let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
-                
-                chunkTask.taskIdentifier = identifier
-                didReschedule = true
-                UploadOperationLog("didReschedule = true fid:\(self.fileId)")
+
+                if didReschedule == true {
+                    UploadOperationLog("didReschedule .taskRescheduled fid:\(self.fileId)")
+                    file.error = .taskRescheduled
+                } else {
+                    UploadOperationLog("didReschedule .taskExpirationCancelled fid:\(self.fileId)")
+                    file.error = .taskExpirationCancelled
+                }
+
+                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+                breadcrumb.message = "Rescheduling file \(file.name)"
+                breadcrumb.data = ["File id": self.fileId,
+                                   "File name": file.name,
+                                   "File size": file.size,
+                                   "File type": file.type.rawValue]
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
             }
-            
-            if didReschedule == true {
-                UploadOperationLog("didReschedule .taskRescheduled fid:\(self.fileId)")
-                self.file.error = .taskRescheduled
-            } else {
-                UploadOperationLog("didReschedule .taskExpirationCancelled fid:\(self.fileId)")
-                self.file.error = .taskExpirationCancelled
-            }
-            
-            // New, send anyway
+            // Now, send regardless
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
-            
-            self.synchronousSaveUploadFileToRealm()
-            
+
             // all operations should be given the chance to call backgroundTaskExpired
             self.uploadQueue.suspendAllOperations()
             self.end()
-            
+
             UploadOperationLog("end reschedule fid:\(self.fileId)")
             self.expirationLock.leave()
         }
         expirationLock.wait()
         
-        UploadOperationLog("exit reschedule fid:\(self.fileId)")
+        UploadOperationLog("exit reschedule fid:\(fileId)")
     }
 
     // did finish in time
@@ -1017,42 +1004,43 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             step = .terminated
             finish()
         }
-        
-        if let error = file.error {
-            UploadOperationLog("end file:\(fileId) errorCode: \(error.code) error:\(error)", level: .error)
-        } else {
-            UploadOperationLog("end file:\(fileId)")
-        }
 
-        if let path = file.pathURL,
-           file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
-            try? fileManager.removeItem(at: path)
-        }
+        try? transactionWithFile { file in
+            if let error = file.error {
+                UploadOperationLog("end file:\(self.fileId) errorCode: \(error.code) error:\(error)", level: .error)
+            } else {
+                UploadOperationLog("end file:\(self.fileId)")
+            }
+            
+            if let path = file.pathURL,
+               file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
+                try? self.fileManager.removeItem(at: path)
+            }
 
-        // retry from scratch next time
-        if file.maxRetryCount == 0 {
-            cleanUploadFileSession()
-        }
-        
-        // If task is cancelled, remove it from list
-        if file.error == DriveError.taskCancelled {
-            UploadOperationLog("Delete file:\(fileId)")
-            // Delete UploadFile entry is canceled by the user
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {
-                    try? uploadsRealm.safeWrite {
-                        uploadsRealm.delete(toDelete)
+            // retry from scratch next time
+            if file.maxRetryCount == 0 {
+                self.cleanUploadFileSession(file: file)
+            }
+            
+            // If task is cancelled, remove it from list
+            if file.error == DriveError.taskCancelled {
+                UploadOperationLog("Delete file:\(self.fileId)")
+                // Delete UploadFile entry is canceled by the user
+                BackgroundRealm.uploads.execute { uploadsRealm in
+                    if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {
+                        try? uploadsRealm.safeWrite {
+                            uploadsRealm.delete(toDelete)
+                        }
                     }
                 }
             }
-        }
-        // otherwise only reset success
-        else {
-            file.progress = nil
-            
-            // Save upload file
-            result.uploadFile = UploadFile(value: file)
-            synchronousSaveUploadFileToRealm()
+            // otherwise only reset success
+            else {
+                file.progress = nil
+                
+                // Save upload file
+                self.result.uploadFile = UploadFile(value: file)
+            }
         }
     }
 }

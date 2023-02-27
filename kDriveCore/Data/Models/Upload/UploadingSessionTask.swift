@@ -58,14 +58,32 @@ final public class UploadingSessionTask: Object {
     public var fileIdentityHasNotChanged: Bool {
         currentFileIdentity == fileIdentity
     }
+    
+    static func fileIdentity(fileUrl: URL) -> String {
+        // Make sure we can track the file has not changed across time, while we run the upload session
+        @InjectService var fileMetadata: FileMetadatable
+        let fileCreationString: String
+        let fileModificationString: String
+        
+        if let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl) {
+            fileCreationString = "\(fileCreationDate)"
+        } else {
+            fileCreationString = "nil"
+        }
+        
+        if let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl) {
+            fileModificationString = "\(fileModificationDate)"
+        } else {
+            fileModificationString = "nil"
+        }
+        
+        let fileUniqIdentity = "\(fileCreationString)_\(fileModificationString)"
+        return fileUniqIdentity
+    }
 
     /// Return a string that is expected to change if the file change, without needing to read the whole file
     public var currentFileIdentity: String {
-        @InjectService var fileMetadata: FileMetadatable
         let fileUrl = URL(fileURLWithPath: filePath, isDirectory: false)
-        let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl)
-        let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl)
-        let fileUniqIdentity = "\(String(describing: fileCreationDate))_\(String(describing: fileModificationDate))"
-        return fileUniqIdentity
+        return UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
     }
 }

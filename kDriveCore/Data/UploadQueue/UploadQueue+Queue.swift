@@ -58,7 +58,7 @@ extension UploadQueue: UploadQueueable {
         UploadQueueLog("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
-            UploadQueueLog("AllOperationsAreFinished")
+            UploadQueueLog("🎉 AllOperationsAreFinished")
             completionHandler()
         }
     }
@@ -132,7 +132,9 @@ extension UploadQueue: UploadQueueable {
                 for (_, value) in self.operationsInQueue {
                     if let operation = value as? UploadOperation {
                         operation.cancel()
-                        operation.file.error = .taskRescheduled
+                        try? operation.transactionWithFile { file in
+                            file.error = .taskRescheduled
+                        }
                         cleaned += 1
                     }
                 }
@@ -155,21 +157,20 @@ extension UploadQueue: UploadQueueable {
                                userId = file.userId,
                                driveId = file.driveId,
                                realm = realm!] in
-                let operation = self.operationsInQueue[fileId]
-                if operation?.isExecuting != true,
-                   let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
-                    UploadQueueLog("find operation not executing to cancel:\(operation)")
-                    let publishedToDelete = UploadFile(value: toDelete)
-                    publishedToDelete.error = .taskCancelled
-                    try? realm.safeWrite {
-                        realm.delete(toDelete)
-                    }
-                    self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
-                } else {
-                    UploadQueueLog("find operation to cancel:\(operation)")
+            let operation = self.operationsInQueue[fileId]
+            self.operationsInQueue.removeValue(forKey: fileId)
+            if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
+                UploadQueueLog("find operation to cancel:\(operation)")
+                let publishedToDelete = UploadFile(value: toDelete)
+                publishedToDelete.error = .taskCancelled
+                try? realm.safeWrite {
+                    realm.delete(toDelete)
                 }
-                (operation as? UploadOperation)?.end()
+                self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
+                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+            } else {
+                UploadQueueLog("could not find file to cancel:\(fileId)", level: .error)
+            }
         }
     }
 
@@ -181,6 +182,7 @@ extension UploadQueue: UploadQueueable {
                                                         userId: userId,
                                                         driveId: driveId,
                                                         using: self.realm)
+            UploadQueueLog("cancelAllOperations count:\(uploadingFiles)")
             uploadingFiles.forEach { file in
                 if !file.isInvalidated,
                    let operation = self.operationsInQueue[file.id] as? UploadOperation {
@@ -194,6 +196,7 @@ extension UploadQueue: UploadQueueable {
                                     userId: userId,
                                     driveId: driveId,
                                     using: self.realm)
+            UploadQueueLog("cancelAllOperations finished")
             self.resumeAllOperations()
         }
     }
@@ -238,7 +241,8 @@ extension UploadQueue: UploadQueueable {
                                                         userId: userId,
                                                         driveId: driveId,
                                                         using: self.realm)
-            let failedUploadFiles = uploadingFiles.filter("_error != nil")
+            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
+            UploadQueueLog("will retry failed uploads:\(failedUploadFiles.count)")
             try? self.realm.safeWrite {
                 failedUploadFiles.forEach { file in
                     file.error = nil

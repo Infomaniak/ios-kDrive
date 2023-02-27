@@ -19,29 +19,48 @@
 import Foundation
 
 extension UploadOperation {
-    func transactionWithFile(_ task: @escaping (_ file: UploadFile) throws -> Void,
-                             function: StaticString = #function) throws {
-        UploadOperationLog("transactionWithFile \(fileId) in:\(function)")
+    func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
+//        UploadOperationLog("transactionWithFile \(self.fileId) in:\(function)")
         var bufferError: Error?
+
         BackgroundRealm.uploads.execute { uploadsRealm in
-            let file: UploadFile? = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.file)
-            guard let file else {
+            let file: UploadFile? = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId)
+            guard let file, file.isInvalidated == false else {
                 bufferError = ErrorDomain.databaseUploadFileNotFound
                 return
             }
-            
-            UploadOperationLog("begin transaction fid:\(file.id)")
+
+//            UploadOperationLog("begin transaction fid:\(file.id)")
             do {
-                try task(file)
+                try uploadsRealm.safeWrite {
+                    guard file.isInvalidated == false else {
+                        bufferError = ErrorDomain.databaseUploadFileNotFound
+                        return
+                    }
+                    try task(file)
+                }
             }
             catch {
                 bufferError = error
             }
-            UploadOperationLog("end transaction fid:\(file.id)")
+//            UploadOperationLog("end transaction fid:\(file.id)")
         }
-        
+
         if let bufferError {
             throw bufferError
         }
+    }
+
+    func frozenFile() throws -> UploadFile {
+        var uploadFile: UploadFile?
+        try transactionWithFile { file in
+            uploadFile = file.freezeIfNeeded()
+        }
+
+        guard let uploadFile else {
+            throw ErrorDomain.databaseUploadFileNotFound
+        }
+
+        return uploadFile
     }
 }

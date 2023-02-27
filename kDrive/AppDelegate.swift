@@ -97,6 +97,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AppDelegateLog("application didFinishLaunchingWithOptions")
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -118,6 +119,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        AppDelegateLog("applicationWillTerminate")
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
     }
@@ -135,35 +137,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
+        AppDelegateLog("Enqueue new pictures")
+        @InjectService var photoUploader: PhotoLibraryUploader
+        photoUploader.scheduleNewPicturesForUpload()
+
+        AppDelegateLog("Reload operations in queue")
         @InjectService var uploadQueue: UploadQueue
+        uploadQueue.addToQueueFromRealm()
 
-//        // In background, the system will call us with connectivity
-//        uploadQueue.forceResumeAllOperations()
-//
-        
-        // Remove all existing tasks in queue
-        uploadQueue.emptyQueue()
-        
+        AppDelegateLog("waitForCompletion")
         uploadQueue.waitForCompletion {
-            AppDelegateLog("waitForCompletion: Remaining Operations: \(uploadQueue.operationQueue.operations.count)")
-
-            // Enqueue new pictures
-            @InjectService var photoUploader: PhotoLibraryUploader
-            photoUploader.scheduleNewPicturesForUpload()
-
-            // Clean errors for all operations
-            uploadQueue.cleanErrorsForAllOperations()
-
-            // Reload operations in queue
-            uploadQueue.addToQueueFromRealm()
-
-            uploadQueue.waitForCompletion {
-                completion(true)
-            }
+            completion(true)
         }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
+        AppDelegateLog("applicationDidEnterBackground")
         scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
@@ -190,6 +179,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        AppDelegateLog("application app open url\(url)")
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
             AppDelegateLog("Failed to open URL: Invalid URL", level: .error)
@@ -217,6 +207,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
+        AppDelegateLog("applicationWillEnterForeground")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
@@ -284,6 +275,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
+        AppDelegateLog("refreshCacheData preload:\(preload) isSwitching:\(preload)")
         @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
@@ -361,6 +353,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     private func uploadEditedFiles() {
+        AppDelegateLog("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
@@ -442,6 +435,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
+        AppDelegateLog("updateAvailableOfflineFiles")
         guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
@@ -467,6 +461,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                      open url: URL,
                      sourceApplication: String?,
                      annotation: Any) -> Bool {
+        AppDelegateLog("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
     }
 
@@ -545,6 +540,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        AppDelegateLog("application shouldSaveApplicationState")
         coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
         return true
     }
@@ -561,6 +557,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        AppDelegateLog("application continue restorationHandler")
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL,

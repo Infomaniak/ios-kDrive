@@ -48,7 +48,7 @@ public struct UploadSession: Decodable {
 
 // TODO: Fusion UploadSession and RUploadSession
 public final class RUploadSession: Object, Decodable {
-    @Persisted(primaryKey: true) public var directoryId: Int64?
+    @Persisted public var directoryId: Int64?
     
     @Persisted public var directoryPath: String?
     

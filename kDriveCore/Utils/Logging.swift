@@ -74,7 +74,7 @@ public enum Logging {
         #if DEBUG
             if !Bundle.main.isExtension {
                 // TODO: Remove
-                Atlantis.start(hostName: "adrien-coye-mbp.local.")
+//                A firtlantis.start(hostName: "adrien-coye-mbp.local.")
 //                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
