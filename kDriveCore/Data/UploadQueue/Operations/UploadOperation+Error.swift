@@ -64,7 +64,7 @@ extension UploadOperation {
             }
             
             // Local file has been removed, delete the operation
-            if let error = error as? DriveError,
+            else if let error = error as? DriveError,
                error == .fileNotFound {
                 file.maxRetryCount = 0
                 file.progress = nil
@@ -73,7 +73,7 @@ extension UploadOperation {
             }
             
             // specialized local errors
-            if let error = error as? UploadOperation.ErrorDomain {
+            else if let error = error as? UploadOperation.ErrorDomain {
                 switch error {
                 case .unableToBuildRequest:
                     file.error = DriveError.localError.wrapping(error)

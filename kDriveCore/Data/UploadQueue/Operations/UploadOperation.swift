@@ -154,9 +154,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         self.step = .`init`
         
         super.init()
-        
-        // TODO: Since the refactor using `transactionWithFile` we do not need this anymore
-//        observerDeletion()
     }
 
     public func restore(task: URLSessionUploadTask, session: URLSession) {
@@ -511,7 +508,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     func getFileUrlIfReadable(file: UploadFile) throws -> URL {
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
-            UploadOperationLog("File has not a valid readable URL for \(fileId)",
+            UploadOperationLog("File has not a valid readable URL:\(file.pathURL?.path) for \(fileId)",
                                level: .error)
             throw DriveError.fileNotFound
         }
@@ -539,7 +536,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Throws if the file was modified
     func checkFileIdentity(filePath: String, file: UploadFile? = nil) throws {
         guard fileManager.isReadableFile(atPath: filePath) else {
-            UploadOperationLog("File has not a valid readable URL \(filePath) for \(fileId)",
+            UploadOperationLog("File has not a valid readable URL:'\(filePath)' for \(fileId)",
                                level: .error)
             throw DriveError.fileNotFound
         }
@@ -649,30 +646,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     }
     
     // MARK: - Private methods
-    
-    /// listen to deletion events
-    private func observerDeletion() {
-        UploadOperationLog("observerDeletion :\(fileId)")
-        var token: NotificationToken?
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            guard let uploadFile = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) else {
-                return
-            }
-            
-            token = uploadFile.observe { change in
-                switch change {
-                case .deleted:
-                    UploadOperationLog("The source UploadFile was deleted. fid:\(self.fileId)")
-                    self.cancel()
-                default:
-                    break
-                }
-            }
-        }
-        
-        fileObservationToken = token
-    }
-    
+
     // MARK: Build request
     
     private func buildRequest(chunkNumber: Int64,

@@ -112,6 +112,9 @@ enum FactoryService {
             Factory(type: FreeSpaceService.self) { _, _ in
                 FreeSpaceService()
             },
+            Factory(type: NotificationsHelpable.self) { _, _ in
+                NotificationsHelper()
+            },
         ]
         return services
     }

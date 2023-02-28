@@ -23,7 +23,15 @@ import InfomaniakCoreUI
 import kDriveResources
 import UserNotifications
 
-public enum NotificationsHelper {
+public protocol NotificationsHelpable {
+    
+    /// Send a notification that we cannot perform an operation, as we do not have enough space
+    func sendNotEnoughSpaceForUpload(filename: String)
+    
+}
+
+public struct NotificationsHelper: NotificationsHelpable {
+    
     public enum CategoryIdentifier {
         public static let general = "com.kdrive.notification.general"
         public static let upload = "com.kdrive.notification.upload"
@@ -60,6 +68,24 @@ public enum NotificationsHelper {
         return isNotificationEnabled && UserDefaults.shared.newCommentNotificationsEnabled
     }
 
+    public init() {
+        // used by factory
+    }
+    
+    // MARK: Func
+    
+    public func sendNotEnoughSpaceForUpload(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = CategoryIdentifier.upload
+        content.sound = .default
+        content.title = KDriveResourcesStrings.Localizable.errorDeviceStorage
+        content.body = KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, KDriveResourcesStrings.Localizable.errorDeviceStorage)
+
+        Self.sendImmediately(notification: content, id: UUID().uuidString)
+    }
+    
+    // MARK: Static func
+    
     public static func askForPermissions() {
         let options: UNAuthorizationOptions = [.alert, .sound, .badge, .provisional, .providesAppNotificationSettings]
         UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, _ in
@@ -73,18 +99,6 @@ public enum NotificationsHelper {
         let uploadCategory = UNNotificationCategory(identifier: CategoryIdentifier.upload, actions: [], intentIdentifiers: [], options: [])
         let migrateCategory = UNNotificationCategory(identifier: CategoryIdentifier.general, actions: [], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
-    }
-
-    public func sendNotEnoughSpaceForUpload(filename: String) {
-        let content = UNMutableNotificationContent()
-        content.categoryIdentifier = CategoryIdentifier.upload
-        content.sound = .default
-
-        // TODO
-        content.title = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.errorDeviceStorage
-        content.body = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, KDriveResourcesStrings.Localizable.errorDeviceStorage)
-
-        Self.sendImmediately(notification: content, id: UUID().uuidString)
     }
     
     public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {

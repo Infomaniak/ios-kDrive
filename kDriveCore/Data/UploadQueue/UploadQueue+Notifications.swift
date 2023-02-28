@@ -33,7 +33,7 @@ public protocol UploadNotifiable {
 extension UploadQueue: UploadNotifiable {
     public func sendNotEnoughSpaceForUpload(filename: String) {
         DispatchQueue.main.async {
-            @InjectService var notificationsHelper: NotificationsHelper
+            @InjectService var notificationsHelper: NotificationsHelpable
             notificationsHelper.sendNotEnoughSpaceForUpload(filename: filename)
         }
     }

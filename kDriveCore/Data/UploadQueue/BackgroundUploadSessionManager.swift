@@ -119,6 +119,7 @@ public final class BackgroundUploadSessionManager: NSObject,
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [unowned self] in
+            BackgroundSessionManagerLog("store session:\(session) from identifier:\(identifier)")
             self.managedSessions[identifier] = session
         }
 
