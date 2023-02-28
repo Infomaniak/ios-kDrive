@@ -152,22 +152,32 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         UploadQueueLog("cancelAllOperations parentId:\(parentId)")
-        dispatchQueue.sync {
+        dispatchQueue.async {
+            UploadQueueLog("suspend")
             self.suspendAllOperations()
             let uploadingFiles = self.getUploadingFiles(withParent: parentId,
                                                         userId: userId,
                                                         driveId: driveId,
                                                         using: self.realm)
-            UploadQueueLog("cancelAllOperations count:\(uploadingFiles)")
-            uploadingFiles.forEach { file in
-                if !file.isInvalidated,
-                   let operation = self.operationsInQueue[file.id] as? UploadOperation {
-                    operation.end()
+            UploadQueueLog("cancelAllOperations count:\(uploadingFiles.count)")
+            
+            // Cancel in batches
+            let batches = Array(uploadingFiles).chunked(into: 100)
+            for files in batches {
+                autoreleasepool {
+                    UploadQueueLog("cancel a chunk of files")
+                    files.forEach { file in
+                        if !file.isInvalidated,
+                           let operation = self.operationsInQueue[file.id] as? UploadOperation {
+                            operation.end()
+                        }
+                    }
+                    try? self.realm.safeWrite {
+                        self.realm.delete(files)
+                    }
                 }
             }
-            try? self.realm.safeWrite {
-                self.realm.delete(uploadingFiles)
-            }
+            
             self.publishUploadCount(withParent: parentId,
                                     userId: userId,
                                     driveId: driveId,
@@ -180,7 +190,7 @@ extension UploadQueue: UploadQueueable {
     public func retry(_ file: UploadFile) {
         UploadQueueLog("retry fid:\(file.id)")
         let safeFile = ThreadSafeReference(to: file)
-        dispatchQueue.sync {
+        dispatchQueue.async {
             guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
             try? self.realm.safeWrite {
                 file.error = nil
@@ -208,7 +218,7 @@ extension UploadQueue: UploadQueueable {
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         UploadQueueLog("retryAllOperations parentId:\(parentId)")
-        dispatchQueue.sync {
+        dispatchQueue.async {
             let uploadingFiles = self.getUploadingFiles(withParent: parentId,
                                                         userId: userId,
                                                         driveId: driveId,
@@ -265,14 +275,18 @@ extension UploadQueue: UploadQueueable {
                 file.error = nil
             }
         }
-
+        
         OperationQueueHelper.disableIdleTimer(true)
 
+        // Needed so each UploadOperation is able to do a `transactionWithFile` reliably
+        let refreshed = realm.refresh()
+        UploadQueueLog("refreshed:\(refreshed) fid:\(file.id)")
+        
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = file.priority
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             UploadQueueLog("operation.completionBlock fid:\(fileId)")
-            self.dispatchQueue.sync {
+            self.dispatchQueue.async {
                 UploadQueueLog("completionBlock for operation:\(operation) fid:\(fileId)")
                 self.operationsInQueue.removeValue(forKey: fileId)
                 guard operation.result.uploadFile?.error != .taskRescheduled else {

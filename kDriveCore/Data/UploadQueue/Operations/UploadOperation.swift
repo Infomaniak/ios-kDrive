@@ -990,7 +990,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             
             if let path = file.pathURL,
-               file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
+               file.shouldRemoveAfterUpload && file.uploadDate != nil {
+                UploadOperationLog("Remove local file at path:\(path) fid:\(self.fileId)")
                 try? self.fileManager.removeItem(at: path)
             }
 

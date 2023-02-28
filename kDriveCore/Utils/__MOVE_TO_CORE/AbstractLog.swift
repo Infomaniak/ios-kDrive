@@ -105,7 +105,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
             logger.fault("\(messageString, privacy: .public)")
         }
     } else {
-        // os_log() only support `StaticSting`
+        os_log("[%@] %@", log: .default, type: .error /*level.logType*/, category, messageString)
     }
 #else
     // Forward to cocoaLumberjack

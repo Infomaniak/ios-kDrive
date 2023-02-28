@@ -142,10 +142,12 @@ extension UploadOperation {
         
             case .uploadNotTerminatedError, .uploadNotTerminated:
                 self.cleanUploadFileSession(file: file)
+                file.progress = nil
                 
             case .invalidUploadTokenError, .uploadError, .uploadFailedError, .uploadTokenIsNotValid:
                 self.cleanUploadFileSession(file: file)
-            
+                file.progress = nil
+                
             case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
