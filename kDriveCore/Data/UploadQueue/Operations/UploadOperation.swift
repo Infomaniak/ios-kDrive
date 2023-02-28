@@ -953,12 +953,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     UploadOperationLog("didReschedule = true fid:\(self.fileId)")
                 }
 
+                file.error = .taskRescheduled
                 if didReschedule == true {
                     UploadOperationLog("didReschedule .taskRescheduled fid:\(self.fileId)")
-                    file.error = .taskRescheduled
                 } else {
                     UploadOperationLog("didReschedule .taskExpirationCancelled fid:\(self.fileId)")
-                    file.error = .taskExpirationCancelled
+                    // This breaks LongRunningBackgroundTasks
+//                    file.error = .taskExpirationCancelled
                 }
 
                 let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
@@ -999,12 +1000,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Make sure we call endBackgroundTask at the end of the operation
             if backgroundTaskIdentifier != .invalid {
                 UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+                backgroundTaskIdentifier = .invalid
             }
             
             step = .terminated
             finish()
         }
 
+        var shouldCleanUploadFile: Bool = false
         try? transactionWithFile { file in
             if let error = file.error {
                 UploadOperationLog("end file:\(self.fileId) errorCode: \(error.code) error:\(error)", level: .error)
@@ -1024,15 +1027,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             
             // If task is cancelled, remove it from list
             if file.error == DriveError.taskCancelled {
-                UploadOperationLog("Delete file:\(self.fileId)")
-                // Delete UploadFile entry is canceled by the user
-                BackgroundRealm.uploads.execute { uploadsRealm in
-                    if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {
-                        try? uploadsRealm.safeWrite {
-                            uploadsRealm.delete(toDelete)
-                        }
-                    }
-                }
+                shouldCleanUploadFile = true
             }
             // otherwise only reset success
             else {
@@ -1040,6 +1035,18 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 
                 // Save upload file
                 self.result.uploadFile = UploadFile(value: file)
+            }
+        }
+        
+        if shouldCleanUploadFile {
+            UploadOperationLog("Delete file:\(self.fileId)")
+            // Delete UploadFile as canceled by the user
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {
+                    try? uploadsRealm.safeWrite {
+                        uploadsRealm.delete(toDelete)
+                    }
+                }
             }
         }
     }

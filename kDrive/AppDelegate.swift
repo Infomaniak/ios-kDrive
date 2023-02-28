@@ -106,14 +106,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
-        
-        // TODO: remove
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
-//            self.handleBackgroundRefresh { bool in
-//                AppDelegateLog("done \(bool)")
-//            }
-//        }
-        
 
         return true
     }
@@ -126,29 +118,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         AppDelegateLog("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
-    }
-
-    func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
-        AppDelegateLog("handleBackgroundRefresh")
-        // User installed the app but never logged in
-        @InjectService var accountManager: AccountManageable
-        if accountManager.accounts.isEmpty {
-            completion(false)
-            return
-        }
-
-        AppDelegateLog("Enqueue new pictures")
-        @InjectService var photoUploader: PhotoLibraryUploader
-        photoUploader.scheduleNewPicturesForUpload()
-
-        AppDelegateLog("Reload operations in queue")
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.addToQueueFromRealm()
-
-        AppDelegateLog("waitForCompletion")
-        uploadQueue.waitForCompletion {
-            completion(true)
-        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -214,61 +183,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     private func launchSetup() {
-        // Set global tint color
-        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
-        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-        // Migration from old UserDefaults
-        if UserDefaults.shared.isFirstLaunch {
-            UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
-        }
-
-        @InjectService var accountManager: AccountManageable
-        if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
-            window?.rootViewController = MigrationViewController.instantiate()
+        // TODO: remove
+        if false {
+            window?.rootViewController = UIViewController()
             window?.makeKeyAndVisible()
-        } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
-            if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-                KeychainHelper.deleteAllTokens()
-                window?.rootViewController = OnboardingViewController.instantiate()
-                window?.makeKeyAndVisible()
+            
+            AppDelegateLog("handleBackgroundRefresh begin")
+            DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
+                self.handleBackgroundRefresh { success in
+                    AppDelegateLog("handleBackgroundRefresh success:\(success)")
+                }
             }
-            // Clean File Provider domains on first launch in case we had some dangling
-            DriveInfosManager.instance.deleteAllFileProviderDomains()
-        } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
-            window?.rootViewController = LockedAppViewController.instantiate()
-            window?.makeKeyAndVisible()
+            
         } else {
-            UserDefaults.shared.numberOfConnections += 1
-            // Show launch floating panel
-            let launchPanelsController = LaunchPanelsController()
-            if let viewController = window?.rootViewController {
-                launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+            // Set global tint color
+            window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
+            UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
+            // Migration from old UserDefaults
+            if UserDefaults.shared.isFirstLaunch {
+                UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
             }
-            // Request App Store review
-            if UserDefaults.shared.numberOfConnections == 10 {
-                if #available(iOS 14.0, *) {
-                    if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                        SKStoreReviewController.requestReview(in: scene)
+
+            @InjectService var accountManager: AccountManageable
+            if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
+                window?.rootViewController = MigrationViewController.instantiate()
+                window?.makeKeyAndVisible()
+            } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
+                if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
+                    KeychainHelper.deleteAllTokens()
+                    window?.rootViewController = OnboardingViewController.instantiate()
+                    window?.makeKeyAndVisible()
+                }
+                // Clean File Provider domains on first launch in case we had some dangling
+                DriveInfosManager.instance.deleteAllFileProviderDomains()
+            } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
+                window?.rootViewController = LockedAppViewController.instantiate()
+                window?.makeKeyAndVisible()
+            } else {
+                UserDefaults.shared.numberOfConnections += 1
+                // Show launch floating panel
+                let launchPanelsController = LaunchPanelsController()
+                if let viewController = window?.rootViewController {
+                    launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+                }
+                // Request App Store review
+                if UserDefaults.shared.numberOfConnections == 10 {
+                    if #available(iOS 14.0, *) {
+                        if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                            SKStoreReviewController.requestReview(in: scene)
+                        }
+                    } else {
+                        SKStoreReviewController.requestReview()
                     }
-                } else {
-                    SKStoreReviewController.requestReview()
                 }
-            }
-            // Refresh data
-            refreshCacheData(preload: false, isSwitching: false)
-            uploadEditedFiles()
-            // Ask to remove uploaded pictures
-            if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
-                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
-                                                    message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
-                                                    action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                                    destructive: true,
-                                                    loading: false) {
-                    // Proceed with removal
-                    self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
-                }
-                DispatchQueue.main.async {
-                    self.window?.rootViewController?.present(alert, animated: true)
+                // Refresh data
+                refreshCacheData(preload: false, isSwitching: false)
+                uploadEditedFiles()
+                // Ask to remove uploaded pictures
+                if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
+                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
+                                                        message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
+                                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                        destructive: true,
+                                                        loading: false) {
+                        // Proceed with removal
+                        self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
+                    }
+                    DispatchQueue.main.async {
+                        self.window?.rootViewController?.present(alert, animated: true)
+                    }
                 }
             }
         }

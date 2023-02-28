@@ -80,6 +80,7 @@ public enum NotificationsHelper {
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
 
+        // TODO
         content.title = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.errorDeviceStorage
         content.body = "errorDeviceStorage"// TODO: KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, KDriveResourcesStrings.Localizable.errorDeviceStorage)
 

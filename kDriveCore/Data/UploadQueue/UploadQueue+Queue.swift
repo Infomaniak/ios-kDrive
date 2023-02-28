@@ -25,6 +25,7 @@ import Sentry
 public protocol UploadQueueable {
     func getOperation(forFileId fileId: String) -> UploadOperationable?
 
+    /// Read database to enqueue all non finished upload tasks.
     func addToQueueFromRealm()
 
     func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
@@ -33,22 +34,24 @@ public protocol UploadQueueable {
 
     func resumeAllOperations()
 
-    /// In background, we resume regardless of network state
-    func forceResumeAllOperations()
-
+    /// Wait for all (started or not) enqueued operations to finish.
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
+    // Retry to upload a specific file, this re-enqueue the task.
     func retry(_ file: UploadFile)
 
+    // Retry all uploads within a specified graph, this re-enqueue the tasks.
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
-
-    func emptyQueue()
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    /// Cancel all running operations, regardless of state
     func cancelRunningOperations()
 
     func cancel(_ file: UploadFile)
+    
+    /// Clean errors linked to any upload operation in base. Does not restart the operations.
+    func cleanErrorsForAllOperations()
 }
 
 // MARK: - Publish
@@ -118,33 +121,6 @@ extension UploadQueue: UploadQueueable {
         operationQueue.isSuspended = shouldSuspendQueue
     }
 
-    public func forceResumeAllOperations() {
-        UploadQueueLog("forceResumeAllOperations")
-        operationQueue.isSuspended = false
-    }
-
-    /// Needed to test the Long Background Running Queue. Blocking
-    public func emptyQueue() {
-        UploadQueueLog("emptyQueue")
-        dispatchQueue.sync {
-            var cleaned = 0
-            try? self.realm.safeWrite {
-                for (_, value) in self.operationsInQueue {
-                    if let operation = value as? UploadOperation {
-                        operation.cancel()
-                        try? operation.transactionWithFile { file in
-                            file.error = .taskRescheduled
-                        }
-                        cleaned += 1
-                    }
-                }
-            }
-
-            self.operationsInQueue.removeAll()
-            UploadQueueLog("ended operations: \(cleaned). Remaining Operations \(self.operationQueue.operations.count)")
-        }
-    }
-
     public func cancelRunningOperations() {
         UploadQueueLog("cancelRunningOperations")
         operationQueue.operations.filter(\.isExecuting).forEach { ($0 as? UploadOperation)?.end() }
@@ -152,7 +128,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancel(_ file: UploadFile) {
         UploadQueueLog("cancel fid:\(file.id)")
-        dispatchQueue.async { [fileId = file.id,
+        dispatchQueue.sync { [fileId = file.id,
                                parentId = file.parentDirectoryId,
                                userId = file.userId,
                                driveId = file.driveId,
@@ -176,7 +152,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         UploadQueueLog("cancelAllOperations parentId:\(parentId)")
-        dispatchQueue.async {
+        dispatchQueue.sync {
             self.suspendAllOperations()
             let uploadingFiles = self.getUploadingFiles(withParent: parentId,
                                                         userId: userId,
@@ -204,7 +180,7 @@ extension UploadQueue: UploadQueueable {
     public func retry(_ file: UploadFile) {
         UploadQueueLog("retry fid:\(file.id)")
         let safeFile = ThreadSafeReference(to: file)
-        dispatchQueue.async {
+        dispatchQueue.sync {
             guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
             try? self.realm.safeWrite {
                 file.error = nil
@@ -218,9 +194,8 @@ extension UploadQueue: UploadQueueable {
         UploadQueueLog("cleanErrorsForAllOperations")
         dispatchQueue.sync {
             let failedUploadFiles = self.realm.objects(UploadFile.self)
-                .filter("uploadDate = nil AND maxRetryCount > 0")
-                .sorted(byKeyPath: "taskCreationDate")
-                .filter("_error != nil")
+                .filter("_error != nil OR maxRetryCount == 0")
+            UploadQueueLog("will clean errors for uploads:\(failedUploadFiles.count)")
             try? self.realm.safeWrite {
                 failedUploadFiles.forEach { file in
                     file.error = nil
@@ -228,15 +203,12 @@ extension UploadQueue: UploadQueueable {
                 }
             }
             UploadQueueLog("cleaned errors on \(failedUploadFiles.count) files")
-            failedUploadFiles.forEach {
-                self.addToQueue(file: $0, using: self.realm)
-            }
         }
     }
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         UploadQueueLog("retryAllOperations parentId:\(parentId)")
-        dispatchQueue.async {
+        dispatchQueue.sync {
             let uploadingFiles = self.getUploadingFiles(withParent: parentId,
                                                         userId: userId,
                                                         driveId: driveId,
@@ -300,7 +272,7 @@ extension UploadQueue: UploadQueueable {
         operation.queuePriority = file.priority
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             UploadQueueLog("operation.completionBlock fid:\(fileId)")
-            self.dispatchQueue.async {
+            self.dispatchQueue.sync {
                 UploadQueueLog("completionBlock for operation:\(operation) fid:\(fileId)")
                 self.operationsInQueue.removeValue(forKey: fileId)
                 guard operation.result.uploadFile?.error != .taskRescheduled else {
