@@ -319,11 +319,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
                 backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    // reload upload queue if new pictures to upload
+                    AppDelegateLog("Restart queue")
                     @InjectService var photoUploader: PhotoLibraryUploader
-                    guard photoUploader.scheduleNewPicturesForUpload() > 0 else {
-                        return
-                    }
+                    _ = photoUploader.scheduleNewPicturesForUpload()
 
                     @InjectService var uploadQueue: UploadQueue
                     uploadQueue.addToQueueFromRealm()

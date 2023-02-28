@@ -159,9 +159,10 @@ public final class BackgroundUploadSessionManager: NSObject,
         if let request = task.originalRequest {
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
-            BackgroundSessionManagerLog("Rescheduled task \(request.url?.absoluteString ?? "")")
             
             let identifier = backgroundSession.identifier(for: task)
+            BackgroundSessionManagerLog("Rescheduled identifier:\(identifier) task:\(request.url?.absoluteString ?? "")")
+            
             return identifier
         } else {
             BackgroundSessionManagerLog("Rescheduled task failed task:\(task), fileUrl:\(fileUrl.path)", level: .error)

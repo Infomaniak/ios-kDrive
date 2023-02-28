@@ -63,9 +63,6 @@ public protocol UploadOperationable: Operationable {
     /// Network completion handler
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
     
-    /// Check if the operation needs to be restarted
-    func retryIfNeeded()
-    
     /// Process errors and terminate the operation
     func end()
     
@@ -487,7 +484,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
                     uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
                     
-                    chunkToUpload.sessionIdentifier = self.urlSession.identifier
+                    chunkToUpload.sessionIdentifier = self.urlSession.identifier(for: uploadTask)
                     chunkToUpload.requestUrl = request.url?.absoluteString
                     
                     let identifier = self.urlSession.identifier(for: uploadTask)
@@ -570,14 +567,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         } else if isFinished {
             UploadOperationLog("Task is isFinished \(fileId)")
             throw ErrorDomain.operationFinished
-        }
-    }
-    
-    public func retryIfNeeded() {
-        UploadOperationLog("retryIfNeeded fid:\(fileId)")
-        // TODO: make sure it works hooking up the sessions again
-        enqueueCatching {
-            await self.execute()
         }
     }
     
@@ -892,7 +881,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         expirationLock.enter()
         
         enqueueCatching(asap: true) {
-            UploadOperationLog("backgroundTaskExpired fid:\(self.fileId)")
+            UploadOperationLog("Rescheduling fid:\(self.fileId)")
             
             try self.transactionWithFile { file in
                 let tasks: [UploadingChunkTask]
@@ -901,8 +890,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 } else {
                     tasks = []
                 }
-
-                UploadOperationLog("Rescheduling fid:\(self.fileId)")
+                UploadOperationLog("Rescheduling tasks:\(tasks) count:\(tasks.count) fid:\(self.fileId)  …")
+                UploadOperationLog("Rescheduling … against uploadTasks:\(self.uploadTasks) fid:\(self.fileId)")
+                
                 /// Reschedule existing requests to background session
                 var didReschedule = false
                 for (identifier, task) in self.uploadTasks {
@@ -914,26 +904,23 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     // Match existing UploadingChunkTask with a TaskIdentifier to be updated
                     guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
                           let path = chunkTask.path else {
-                        UploadOperationLog("Not able to match existing tasks fid:\(self.fileId)")
+                        UploadOperationLog("Rescheduling not able to match existing tasks fid:\(self.fileId)")
                         break
                     }
 
-                    UploadOperationLog("matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
+                    UploadOperationLog("Rescheduling matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
                     let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
                     let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
-
                     chunkTask.taskIdentifier = identifier
                     didReschedule = true
-                    UploadOperationLog("didReschedule = true fid:\(self.fileId)")
+                    UploadOperationLog("Rescheduling didReschedule = true fid:\(self.fileId)")
                 }
 
                 file.error = .taskRescheduled
                 if didReschedule == true {
-                    UploadOperationLog("didReschedule .taskRescheduled fid:\(self.fileId)")
+                    UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
                 } else {
-                    UploadOperationLog("didReschedule .taskExpirationCancelled fid:\(self.fileId)")
-                    // This breaks LongRunningBackgroundTasks
-//                    file.error = .taskExpirationCancelled
+                    UploadOperationLog("Rescheduling didReschedule failed .taskRescheduled fid:\(self.fileId)", level: .error)
                 }
 
                 let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
@@ -944,14 +931,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                    "File type": file.type.rawValue]
                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
             }
+            
             // Now, send regardless
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
 
             // all operations should be given the chance to call backgroundTaskExpired
-            self.uploadQueue.suspendAllOperations()
             self.end()
 
-            UploadOperationLog("end reschedule fid:\(self.fileId)")
+            UploadOperationLog("Rescheduling end fid:\(self.fileId)")
             self.expirationLock.leave()
         }
         expirationLock.wait()

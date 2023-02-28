@@ -86,14 +86,15 @@ extension UploadQueue: UploadQueueable {
                 uploadingFiles.forEach { uploadFile in
                     UploadQueueLog("addToQueueFromRealm fid:\(uploadFile.id)")
 
-                    // Get the operation and try to restart it OR add it
+                    // Add operation if none existing
                     guard let operation = self.operation(fileId: uploadFile.id) else {
+                        UploadQueueLog("addToQueueFromRealm ADD fid:\(uploadFile.id)")
                         self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
                         return
                     }
 
-                    // Check if operation is running and needs to be restarted ?
-                    operation.retryIfNeeded()
+                    // Do nothing if an existing running operation is in queue
+                    UploadQueueLog("addToQueueFromRealm NOOP operation:\(operation) fid:\(uploadFile.id)")
                 }
             }
             UploadQueueLog("addToQueueFromRealm exit")
@@ -267,7 +268,7 @@ extension UploadQueue: UploadQueueable {
         try? realm.safeWrite {
             UploadQueueLog("safeWrite")
             if !file.isManagedByRealm {
-                UploadQueueLog("safeWrite")
+                UploadQueueLog("safeWrite isManagedByRealm")
                 realm.add(file, update: .modified)
             }
             file.name = file.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -286,11 +287,12 @@ extension UploadQueue: UploadQueueable {
         operation.queuePriority = file.priority
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             UploadQueueLog("operation.completionBlock fid:\(fileId)")
-            self.dispatchQueue.async {
+            self.dispatchQueue.sync {
                 UploadQueueLog("completionBlock for operation:\(operation) fid:\(fileId)")
                 self.operationsInQueue.removeValue(forKey: fileId)
-                guard operation.result.uploadFile?.error != .taskRescheduled else {
-                    UploadQueueLog("task is .taskRescheduled")
+                guard let error = operation.result.uploadFile?.error,
+                      (error != .taskRescheduled || error != .taskCancelled) else {
+                    UploadQueueLog("skipping task")
                     return
                 }
 
