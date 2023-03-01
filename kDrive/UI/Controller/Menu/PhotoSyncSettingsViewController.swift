@@ -210,28 +210,30 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    func saveSettings(using realm: Realm) {
-        if photoSyncEnabled {
-            guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
-            switch newSyncSettings.syncMode {
-            case .new:
-                newSyncSettings.lastSync = Date()
-            case .all:
-                if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+    func saveSettings() {
+        BackgroundRealm.uploads.execute { realm in
+            if photoSyncEnabled {
+                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
+                switch newSyncSettings.syncMode {
+                case .new:
+                    newSyncSettings.lastSync = Date()
+                case .all:
+                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
+                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    } else {
+                        newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                    }
+                case .fromDate:
+                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
+                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    } else {
+                        newSyncSettings.lastSync = newSyncSettings.fromDate
+                    }
                 }
-            case .fromDate:
-                if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    newSyncSettings.lastSync = newSyncSettings.fromDate
-                }
+                photoLibraryUploader.enableSync(with: newSyncSettings)
+            } else {
+                photoLibraryUploader.disableSync()
             }
-            photoLibraryUploader.enableSync(with: newSyncSettings)
-        } else {
-            photoLibraryUploader.disableSync()
         }
     }
 
@@ -498,14 +500,14 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
-        DispatchQueue.global(qos: .utility).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.saveSettings(using: realm)
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.saveSettings()
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
+            
             // Add new pictures to be uploaded and reload upload queue
-            self.photoLibraryUploader.scheduleNewPicturesForUpload(using: realm)
+            self.photoLibraryUploader.scheduleNewPicturesForUpload()
             @InjectService var uploadQueue: UploadQueue
             uploadQueue.addToQueueFromRealm()
         }

@@ -400,7 +400,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             }
                             group.leave()
                         }
-                        uploadQueue.addToQueue(file: uploadFile)
+                        uploadQueue.saveToRealmAndAddtoQueue(file: uploadFile, itemIdentifier: nil)
                     }
                 }
             }

@@ -266,7 +266,7 @@ class FileProviderExtension: NSFileProviderExtension {
             }
             completion?()
         }
-        uploadQueue.addToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
+        uploadQueue.saveToRealmAndAddtoQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
     }
 
     // MARK: - Enumeration

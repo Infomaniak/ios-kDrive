@@ -31,19 +31,17 @@ extension UploadOperation {
             }
 
 //            UploadOperationLog("begin transaction fid:\(file.id)")
-            autoreleasepool {
-                do {
-                    try uploadsRealm.safeWrite {
-                        guard file.isInvalidated == false else {
-                            bufferError = ErrorDomain.databaseUploadFileNotFound
-                            return
-                        }
-                        try task(file)
+            do {
+                try uploadsRealm.write {
+                    guard file.isInvalidated == false else {
+                        bufferError = ErrorDomain.databaseUploadFileNotFound
+                        return
                     }
+                    try task(file)
                 }
-                catch {
-                    bufferError = error
-                }
+            }
+            catch {
+                bufferError = error
             }
 //            UploadOperationLog("end transaction fid:\(file.id)")
         }

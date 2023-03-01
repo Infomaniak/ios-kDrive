@@ -32,7 +32,9 @@ public final class UploadQueue {
 
     public var pausedNotificationSent = false
 
-    let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", autoreleaseFrequency: .workItem)
+    let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync",
+                                      qos: .userInitiated,
+                                      autoreleaseFrequency: .workItem)
 
     var operationsInQueue: [String: UploadOperationable] = [:]
     public lazy var operationQueue: OperationQueue = {
@@ -97,7 +99,7 @@ public final class UploadQueue {
             }
         }
         
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             // Initialize operation queue with files from Realm, and make sure it restarts
             self.addToQueueFromRealm()
             self.resumeAllOperations()

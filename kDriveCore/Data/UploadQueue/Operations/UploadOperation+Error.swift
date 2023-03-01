@@ -148,6 +148,10 @@ extension UploadOperation {
                 self.cleanUploadFileSession(file: file)
                 file.progress = nil
                 
+            case .uploadTokenCanceled:
+                // We cancelled the upload session, running chunks requests are failing
+                file.progress = nil
+                
             case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0

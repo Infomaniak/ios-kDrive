@@ -25,21 +25,6 @@ import RealmSwift
 import Sentry
 import UIKit
 
-/// The current step of the upload with chunks operation
-enum UploadOperationStep {
-    case `init`
-    case initCompletionHandler
-    case startup
-    case fetchSession
-    case chunking
-    case chunk(_ index: Int64)
-    case schedulingUpload
-    case closeSession
-    case terminated
-    /// System is canceling the BG task
-    case taskExpired
-}
-
 public struct UploadCompletionResult {
     var uploadFile: UploadFile?
     var driveFile: File?
@@ -62,6 +47,10 @@ public protocol UploadOperationable: Operationable {
     
     /// Network completion handler
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
+    
+    /// Clean the local session and send an API call to free the session
+    /// - Parameter file: An UploadFile within a transaction
+    func cleanUploadFileSession(file: UploadFile?)
     
     /// Process errors and terminate the operation
     func end()
@@ -109,18 +98,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var fileMetadata: FileMetadatable
     @LazyInjectService var freeSpaceService: FreeSpaceService
     
-    private var step: UploadOperationStep {
-        didSet {
-            // UploadOperationLog("~> moved to step:\(step) for: \n \(self.debugDescription)", level: .debug)
-        }
-    }
-    
     override public var debugDescription: String {
         """
         <\(type(of: self)):\(super.debugDescription)
         uploading file id:'\(fileId)'
-        backgroundTaskIdentifier:'\(backgroundTaskIdentifier)'
-        step: '\(step)'>
+        backgroundTaskIdentifier:'\(backgroundTaskIdentifier)'>
         """
     }
     
@@ -148,7 +130,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
-        self.step = .`init`
         
         super.init()
     }
@@ -163,7 +144,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     }
     
     override public func execute() async {
-        step = .startup
         UploadOperationLog("execute \(fileId)")
 
         await catching {
@@ -203,7 +183,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             updateUploadProgress()
         }
         
-        step = .fetchSession
         UploadOperationLog("Asking for an upload Session \(fileId)")
 
         var hasUploadingSession: Bool!
@@ -373,7 +352,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             
             chunksToGenerateCount = chunksToGenerate.count
             let chunkNumber = chunkTask.chunkNumber
-            self.step = .chunk(chunkNumber)
             let range = chunkTask.range
             let fileUrl = try self.getFileUrlIfReadable(file: file)
             guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
@@ -512,12 +490,35 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         return fileUrl
     }
     
-    func cleanUploadFileSession(file: UploadFile? = nil) {
+    public func cleanUploadFileSession(file: UploadFile? = nil) {
         UploadOperationLog("Clean uploading session for \(fileId)")
         
         let cleanFileClosure: (UploadFile) -> Void = { file in
+            let sessionTokenToCancel: String? = file.uploadingSession?.token
+            
             file.uploadingSession = nil
             file.progress = nil
+            
+            guard let sessionTokenToCancel = sessionTokenToCancel else {
+                return
+            }
+            
+            // Clean the remote session, and current tasks, to free resources.
+            self.enqueueCatching {
+                let driveFileManager = try self.getDriveFileManager()
+                let abstractToken = AbstractTokenWrapper(token: sessionTokenToCancel)
+                let apiFetcher = driveFileManager.apiFetcher
+                let drive = driveFileManager.drive
+                
+                let cancelledSession = try await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
+                UploadOperationLog("remove cancelledSession:\(cancelledSession) for \(self.fileId)")
+                
+                for (key, value) in self.uploadTasks {
+                    UploadOperationLog("cancelled chunk upload request :\(key) fid:\(self.fileId)")
+                    value.cancel()
+                }
+                self.uploadTasks.removeAll()
+            }
         }
         
         // If no file provided, wrap the transaction
@@ -573,7 +574,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Close session if needed.
     func closeSessionAndEnd() async {
         UploadOperationLog("closeSession fid:\(fileId)")
-        step = .closeSession
         
         defer {
             end()
@@ -708,7 +708,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     private func getPhAssetIfNeeded() throws {
         try transactionWithFile { file in
             UploadOperationLog("getPhAssetIfNeeded type:\(file.type)")
-            if file.type == .phAsset /* && file.pathURL == nil */ {
+            if file.type == .phAsset && file.pathURL == nil {
                 UploadOperationLog("Need to fetch photo asset")
                 if let asset = file.getPHAsset(),
                    let url = self.photoLibraryUploader.getUrlSync(for: asset) {
@@ -877,12 +877,25 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // System notification that we took over 30sec, and should cancel the task.
     private func backgroundTaskExpired() {
         UploadOperationLog("backgroundTaskExpired fid:\(fileId)")
-        step = .taskExpired
         expirationLock.enter()
         
         enqueueCatching(asap: true) {
             UploadOperationLog("Rescheduling fid:\(self.fileId)")
             
+            try self.transactionWithFile { file in
+                file.error = .taskRescheduled
+                UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
+
+                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+                breadcrumb.message = "Rescheduling file \(file.name)"
+                breadcrumb.data = ["File id": self.fileId,
+                                   "File name": file.name,
+                                   "File size": file.size,
+                                   "File type": file.type.rawValue]
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+            }
+            
+            /* disabled
             try self.transactionWithFile { file in
                 let tasks: [UploadingChunkTask]
                 if let uploadingSession = file.uploadingSession {
@@ -931,6 +944,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                    "File type": file.type.rawValue]
                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
             }
+            */
             
             // Now, send regardless
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
@@ -964,7 +978,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 backgroundTaskIdentifier = .invalid
             }
             
-            step = .terminated
             finish()
         }
 

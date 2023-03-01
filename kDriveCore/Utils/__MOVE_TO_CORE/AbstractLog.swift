@@ -84,7 +84,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
         let factoryParameters = [categoryKey : category]
         @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
         
-        // Make sure I can see it in cosole
+        // Make sure I can see it in console
 //        logger.error("\(messageString, privacy: .public)")
         
         // .public is fine as we only use this in #DEBUG

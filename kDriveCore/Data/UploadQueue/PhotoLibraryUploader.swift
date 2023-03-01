@@ -99,39 +99,43 @@ public class PhotoLibraryUploader {
     }
 
     @discardableResult
-    public func scheduleNewPicturesForUpload(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
-        PhotoLibraryUploaderLog("scheduleNewPicturesForUpload")
-        guard let settings = settings,
-              PHPhotoLibrary.authorizationStatus() == .authorized else {
-            PhotoLibraryUploaderLog("0 new assets")
-            return 0
+    public func scheduleNewPicturesForUpload() -> Int {
+        var newAssetsCount: Int = 0
+        BackgroundRealm.uploads.execute { realm in
+            PhotoLibraryUploaderLog("scheduleNewPicturesForUpload")
+            guard let settings = self.settings,
+                  PHPhotoLibrary.authorizationStatus() == .authorized else {
+                PhotoLibraryUploaderLog("0 new assets")
+                return
+            }
+            
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            // Create predicate from settings
+            var typesPredicates = [NSPredicate]()
+            if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
+            } else if settings.syncPicturesEnabled {
+                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+            } else if settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+            }
+            if settings.syncVideosEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
+            }
+            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+            PhotoLibraryUploaderLog("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+            let assets = PHAsset.fetchAssets(with: options)
+            let syncDate = Date()
+            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
+            updateLastSyncDate(syncDate, using: realm)
+            
+            newAssetsCount = assets.count
+            PhotoLibraryUploaderLog("New assets count:\(newAssetsCount)")
         }
-        let options = PHFetchOptions()
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        // Create predicate from settings
-        var typesPredicates = [NSPredicate]()
-        if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
-        } else if settings.syncPicturesEnabled {
-            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-        } else if settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-        }
-        if settings.syncVideosEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
-        }
-        let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
-        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-        PhotoLibraryUploaderLog("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-        let assets = PHAsset.fetchAssets(with: options)
-        let syncDate = Date()
-        addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-        updateLastSyncDate(syncDate, using: realm)
-        
-        let newAssets = assets.count
-        PhotoLibraryUploaderLog("New assets count:\(newAssets)")
-        return newAssets
+        return newAssetsCount
     }
 
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
@@ -197,14 +201,13 @@ public class PhotoLibraryUploader {
                 realm.add(uploadFile, update: .modified)
 
                 if idx < assets.count - 1 && idx % 99 == 0 {
+                    PhotoLibraryUploaderLog("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, using: realm)
                     }
                     
-                    // relaunch queue from other places
-//                    uploadQueue.addToQueueFromRealm()
                     realm.beginWrite()
                 }
             }

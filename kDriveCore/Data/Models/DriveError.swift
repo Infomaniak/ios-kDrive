@@ -179,6 +179,8 @@ public struct DriveError: Error, Equatable {
     
     public static let uploadTokenIsNotValid = DriveError(type: .serverError, code: "upload_token_is_not_valid")
     
+    public static let uploadTokenCanceled = DriveError(type: .serverError, code: "upload_token_canceled")
+    
     // MARK: - Network
     public static let networkError = DriveError(type: .networkError,
                                                 code: "networkError",
