@@ -17,24 +17,29 @@
  */
 
 import Foundation
+import RealmSwift
 
 extension UploadOperation {
     func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-//        UploadOperationLog("transactionWithFile \(self.fileId) in:\(function)")
+//        UploadOperationLog("transactionWithFile in:\(function) fid:\(self.fileId)")
         var bufferError: Error?
-
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            let file: UploadFile? = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId)
-            guard let file, file.isInvalidated == false else {
-                bufferError = ErrorDomain.databaseUploadFileNotFound
-                return
-            }
-
-//            UploadOperationLog("begin transaction fid:\(file.id)")
+        autoreleasepool {
             do {
+                let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+                uploadsRealm.refresh()
+                let file: UploadFile? = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId)
+
+                guard let file, file.isInvalidated == false else {
+                    bufferError = ErrorDomain.databaseUploadFileNotFound
+//                    UploadOperationLog("invalidated file fid:\(self.fileId)")
+                    return
+                }
+
+//                UploadOperationLog("begin transaction fid:\(self.fileId)")
                 try uploadsRealm.write {
                     guard file.isInvalidated == false else {
                         bufferError = ErrorDomain.databaseUploadFileNotFound
+//                        UploadOperationLog("invalidated file fid:\(self.fileId)")
                         return
                     }
                     try task(file)
@@ -43,24 +48,11 @@ extension UploadOperation {
             catch {
                 bufferError = error
             }
-//            UploadOperationLog("end transaction fid:\(file.id)")
         }
-
+        
+//        UploadOperationLog("end transaction in:\(function) fid:\(self.fileId)")
         if let bufferError {
             throw bufferError
         }
-    }
-
-    func frozenFile() throws -> UploadFile {
-        var uploadFile: UploadFile?
-        try transactionWithFile { file in
-            uploadFile = file.freezeIfNeeded()
-        }
-
-        guard let uploadFile else {
-            throw ErrorDomain.databaseUploadFileNotFound
-        }
-
-        return uploadFile
     }
 }

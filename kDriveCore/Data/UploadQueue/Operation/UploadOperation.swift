@@ -21,6 +21,7 @@ import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import Photos
 import RealmSwift
 import Sentry
 import UIKit
@@ -28,34 +29,6 @@ import UIKit
 public struct UploadCompletionResult {
     var uploadFile: UploadFile?
     var driveFile: File?
-}
-
-/// Something that can upload a file.
-public protocol UploadOperationable: Operationable {
-    /// init an UploadOperationable
-    /// - Parameters:
-    ///   - file: the uploadFile
-    ///   - urlSession: the url session to use
-    ///   - itemIdentifier: the itemIdentifier
-    /// - Throws: if the UploadFile is not there
-    init(file: UploadFile,
-         urlSession: URLSession,
-         itemIdentifier: NSFileProviderItemIdentifier?)
-    
-    /// We can restore a running session task to an operation
-    func restore(task: URLSessionUploadTask, session: URLSession)
-    
-    /// Network completion handler
-    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
-    
-    /// Clean the local session and send an API call to free the session
-    /// - Parameter file: An UploadFile within a transaction
-    func cleanUploadFileSession(file: UploadFile?)
-    
-    /// Process errors and terminate the operation
-    func end()
-    
-    var result: UploadCompletionResult { get }
 }
 
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
@@ -154,7 +127,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             await self.storeBackgroundTaskIdentifier()
 
             // Fetch content from local library if needed
-            try self.getPhAssetIfNeeded()
+            try await self.getPhAssetIfNeeded()
         
             // Re-Load or Setup an UploadingSessionTask within the UploadingFile
             try await self.getUploadSessionOrCreate()
@@ -705,20 +678,32 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     // MARK: PHAssets
     
-    private func getPhAssetIfNeeded() throws {
+    private func getPhAssetIfNeeded() async throws {
+        UploadOperationLog("getPhAssetIfNeeded fid:\(self.fileId)")
+        var assetToLoad: PHAsset?
         try transactionWithFile { file in
-            UploadOperationLog("getPhAssetIfNeeded type:\(file.type)")
+            UploadOperationLog("getPhAssetIfNeeded type:\(file.type) fid:\(self.fileId)")
             if file.type == .phAsset && file.pathURL == nil {
-                UploadOperationLog("Need to fetch photo asset")
-                if let asset = file.getPHAsset(),
-                   let url = self.photoLibraryUploader.getUrlSync(for: asset) {
-                    UploadOperationLog("Got photo asset, writing URL \(url)")
-                    file.pathURL = url
-                    file.uploadingSession?.filePath = url.path
-                } else {
-                    UploadOperationLog("Failed to get photo asset", level: .error)
+                UploadOperationLog("Need to fetch photo asset fid:\(self.fileId)")
+                guard let asset = file.getPHAsset() else {
+                    return
                 }
+                assetToLoad = asset
             }
+        }
+        
+        // Async load the url of the asset
+        guard let assetToLoad,
+              let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
+            UploadOperationLog("Failed to get photo asset fid:\(self.fileId)", level: .error)
+            return
+        }
+        
+        // save
+        UploadOperationLog("Got photo asset, writing URL:\(url) fid:\(self.fileId)")
+        try transactionWithFile { file in
+            file.pathURL = url
+            file.uploadingSession?.filePath = url.path
         }
     }
 
@@ -834,14 +819,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             self.end()
         }
         
+        self.handleLocalErrors(error: error)
+        
         try transactionWithFile { file in
-            guard file.error != .taskRescheduled || file.error != .taskPaused else {
+            guard file.error != .taskRescheduled else {
                 return
             }
 
             // save the error
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
-                if file.error != .taskExpirationCancelled && file.error != .taskRescheduled && file.error != .taskPaused {
+                if file.error != .taskExpirationCancelled && file.error != .taskRescheduled {
                     file.error = DriveError.taskCancelled
                     file.maxRetryCount = 0
                     file.progress = nil
@@ -896,55 +883,55 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             
             /* disabled
-            try self.transactionWithFile { file in
-                let tasks: [UploadingChunkTask]
-                if let uploadingSession = file.uploadingSession {
-                    tasks = Array(uploadingSession.chunkTasks)
-                } else {
-                    tasks = []
-                }
-                UploadOperationLog("Rescheduling tasks:\(tasks) count:\(tasks.count) fid:\(self.fileId)  …")
-                UploadOperationLog("Rescheduling … against uploadTasks:\(self.uploadTasks) fid:\(self.fileId)")
+             try self.transactionWithFile { file in
+                 let tasks: [UploadingChunkTask]
+                 if let uploadingSession = file.uploadingSession {
+                     tasks = Array(uploadingSession.chunkTasks)
+                 } else {
+                     tasks = []
+                 }
+                 UploadOperationLog("Rescheduling tasks:\(tasks) count:\(tasks.count) fid:\(self.fileId)  …")
+                 UploadOperationLog("Rescheduling … against uploadTasks:\(self.uploadTasks) fid:\(self.fileId)")
                 
-                /// Reschedule existing requests to background session
-                var didReschedule = false
-                for (identifier, task) in self.uploadTasks {
-                    UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
-                    defer {
-                        task.cancel()
-                    }
+                 /// Reschedule existing requests to background session
+                 var didReschedule = false
+                 for (identifier, task) in self.uploadTasks {
+                     UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
+                     defer {
+                         task.cancel()
+                     }
 
-                    // Match existing UploadingChunkTask with a TaskIdentifier to be updated
-                    guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
-                          let path = chunkTask.path else {
-                        UploadOperationLog("Rescheduling not able to match existing tasks fid:\(self.fileId)")
-                        break
-                    }
+                     // Match existing UploadingChunkTask with a TaskIdentifier to be updated
+                     guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
+                           let path = chunkTask.path else {
+                         UploadOperationLog("Rescheduling not able to match existing tasks fid:\(self.fileId)")
+                         break
+                     }
 
-                    UploadOperationLog("Rescheduling matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
-                    let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
-                    let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
-                    chunkTask.taskIdentifier = identifier
-                    didReschedule = true
-                    UploadOperationLog("Rescheduling didReschedule = true fid:\(self.fileId)")
-                }
+                     UploadOperationLog("Rescheduling matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
+                     let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
+                     let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
+                     chunkTask.taskIdentifier = identifier
+                     didReschedule = true
+                     UploadOperationLog("Rescheduling didReschedule = true fid:\(self.fileId)")
+                 }
 
-                file.error = .taskRescheduled
-                if didReschedule == true {
-                    UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
-                } else {
-                    UploadOperationLog("Rescheduling didReschedule failed .taskRescheduled fid:\(self.fileId)", level: .error)
-                }
+                 file.error = .taskRescheduled
+                 if didReschedule == true {
+                     UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
+                 } else {
+                     UploadOperationLog("Rescheduling didReschedule failed .taskRescheduled fid:\(self.fileId)", level: .error)
+                 }
 
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(file.name)"
-                breadcrumb.data = ["File id": self.fileId,
-                                   "File name": file.name,
-                                   "File size": file.size,
-                                   "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-            }
-            */
+                 let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+                 breadcrumb.message = "Rescheduling file \(file.name)"
+                 breadcrumb.data = ["File id": self.fileId,
+                                    "File name": file.name,
+                                    "File size": file.size,
+                                    "File type": file.type.rawValue]
+                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
+             }
+             */
             
             // Now, send regardless
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
@@ -981,7 +968,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             finish()
         }
 
-        var shouldCleanUploadFile: Bool = false
+        var shouldCleanUploadFile = false
         try? transactionWithFile { file in
             if let error = file.error {
                 UploadOperationLog("end file:\(self.fileId) errorCode: \(error.code) error:\(error)", level: .error)
@@ -1014,7 +1001,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
         
         if shouldCleanUploadFile {
-            UploadOperationLog("Delete file:\(self.fileId)")
+            UploadOperationLog("Delete file:\(fileId)")
             // Delete UploadFile as canceled by the user
             BackgroundRealm.uploads.execute { uploadsRealm in
                 if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {

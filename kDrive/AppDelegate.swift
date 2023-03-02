@@ -184,6 +184,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     private func launchSetup() {
         // TODO: remove
+        // Use this to simulate a "background foreground"
         if false {
             window?.rootViewController = UIViewController()
             window?.makeKeyAndVisible()
@@ -324,7 +325,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     _ = photoUploader.scheduleNewPicturesForUpload()
 
                     @InjectService var uploadQueue: UploadQueue
-                    uploadQueue.addToQueueFromRealm()
+                    uploadQueue.rebuildUploadQueueFromObjectsInRealm()
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)

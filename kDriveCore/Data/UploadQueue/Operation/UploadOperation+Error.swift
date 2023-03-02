@@ -19,7 +19,6 @@
 import Foundation
 
 extension UploadOperation {
-
     /// Enqueue a task, while making sure we catch the errors in a standard way
     func enqueueCatching(asap: Bool = false, _ task: @escaping () async throws -> Void) {
         enqueue(asap: asap) {
@@ -40,8 +39,8 @@ extension UploadOperation {
             }
             
             UploadOperationLog("catching error:\(error) fid:\(fileId)", level: .error)
-            if !handleLocalErrors(error: error) {
-                handleRemoteErrors(error: error)
+            if !self.handleLocalErrors(error: error) {
+                self.handleRemoteErrors(error: error)
             }
             
             return
@@ -52,10 +51,25 @@ extension UploadOperation {
     
     @discardableResult
     func handleLocalErrors(error: Error) -> Bool {
-        var errorHandled: Bool = false
+        var errorHandled = false
         try? transactionWithFile { file in
+            let nsError = error as NSError
+            if nsError.domain == NSURLErrorDomain {
+                UploadOperationLog("NSURLError:\(error) fid:\(self.fileId)")
+                switch nsError.code {
+                case NSURLErrorCancelled:
+                    file.error = DriveError.taskCancelled
+                    file.maxRetryCount = 0
+                    file.progress = nil
+                default:
+                    file.error = .networkError
+                }
+      
+                errorHandled = true
+            }
+            
             // Not enough space
-            if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
+            else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
                 self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
                 file.maxRetryCount = 0
                 file.progress = nil
@@ -65,7 +79,7 @@ extension UploadOperation {
             
             // Local file has been removed, delete the operation
             else if let error = error as? DriveError,
-               error == .fileNotFound {
+                    error == .fileNotFound {
                 file.maxRetryCount = 0
                 file.progress = nil
                 file.error = DriveError.taskCancelled // cascade deletion
@@ -89,7 +103,6 @@ extension UploadOperation {
                 case .operationFinished, .operationCanceled:
                     UploadOperationLog("catching operation is terminating")
                     // the operation is terminating, silent handling
-                    break
                     
                 case .databaseUploadFileNotFound:
                     // Silently stop if an UploadFile is no longer in base
@@ -113,11 +126,12 @@ extension UploadOperation {
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
         guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
+            UploadOperationLog("error:\(error) not a remote one fid:\(self.fileId)")
             return false
         }
         
         var cleanLinkedFiles: (parentDirectoryId: Int, userId: Int, driveId: Int)?
-        var errorHandled: Bool = false
+        var errorHandled = false
         try? transactionWithFile { file in
             defer {
                 UploadOperationLog("catching remote error:\(error) fid:\(self.fileId)", level: .error)
@@ -137,6 +151,7 @@ extension UploadOperation {
                 break
                 
             case .quotaExceeded:
+                file.error = DriveError.quotaExceeded
                 file.maxRetryCount = 0
                 file.progress = nil
         
@@ -158,6 +173,10 @@ extension UploadOperation {
                 file.progress = nil
                 self.cleanUploadFileSession(file: file)
                 cleanLinkedFiles = (file.parentDirectoryId, file.userId, file.driveId)
+                
+            case .networkError:
+                file.error = error
+                self.cancel()
                 
             default:
                 // simple retry

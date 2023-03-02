@@ -509,7 +509,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             // Add new pictures to be uploaded and reload upload queue
             self.photoLibraryUploader.scheduleNewPicturesForUpload()
             @InjectService var uploadQueue: UploadQueue
-            uploadQueue.addToQueueFromRealm()
+            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }

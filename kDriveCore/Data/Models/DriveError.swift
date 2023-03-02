@@ -97,9 +97,6 @@ public struct DriveError: Error, Equatable {
     /// The task is cancelled by the user.
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
     
-    /// The task is paused by the user
-    public static let taskPaused = DriveError(type: .localError, code: "taskPaused")
-    
     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")

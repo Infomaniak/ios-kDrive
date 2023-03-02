@@ -26,7 +26,7 @@ public protocol UploadQueueable {
     func getOperation(forFileId fileId: String) -> UploadOperationable?
 
     /// Read database to enqueue all non finished upload tasks.
-    func addToQueueFromRealm()
+    func rebuildUploadQueueFromObjectsInRealm()
 
     func saveToRealmAndAddtoQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
 
@@ -48,8 +48,9 @@ public protocol UploadQueueable {
     /// Cancel all running operations, regardless of state
     func cancelRunningOperations()
 
+    /// Cancel an upload from an UploadFile. The UploadFile is removed and a matching operation is removed.
     func cancel(_ file: UploadFile)
-    
+
     /// Clean errors linked to any upload operation in base. Does not restart the operations.
     func cleanErrorsForAllOperations()
 }
@@ -75,36 +76,29 @@ extension UploadQueue: UploadQueueable {
         return operation
     }
 
-    public func addToQueueFromRealm() {
-        UploadQueueLog("addToQueueFromRealm")
+    public func rebuildUploadQueueFromObjectsInRealm() {
+        UploadQueueLog("rebuildUploadQueueFromObjectsInRealm")
         self.dispatchQueue.sync {
+            self.realm.refresh()
+
             let uploadingFiles = self.realm.objects(UploadFile.self)
                 .filter("uploadDate = nil AND maxRetryCount > 0")
                 .sorted(byKeyPath: "taskCreationDate")
-            UploadQueueLog("addToQueueFromRealm uploads to restart:\(uploadingFiles.count)")
-            
+            UploadQueueLog("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFiles.count)")
+
             let batches = Array(uploadingFiles).chunked(into: 100)
             UploadQueueLog("batched count:\(batches.count)")
             for batch in batches {
-                self.dispatchQueue.async {
+                autoreleasepool {
+                    UploadQueueLog("rebuildUploadQueueFromObjectsInRealm in batch")
                     batch.forEach { uploadFile in
-                        UploadQueueLog("addToQueueFromRealm fid:\(uploadFile.id)")
-                        
-                        // Add operation if none existing
-                        guard let operation = self.operation(fileId: uploadFile.id) else {
-                            UploadQueueLog("addToQueueFromRealm ADD fid:\(uploadFile.id)")
-                            self.addToQueue(file: uploadFile, itemIdentifier: nil, using: self.realm)
-                            return
-                        }
-                        
-                        // Do nothing if an existing running operation is in queue
-                        UploadQueueLog("addToQueueFromRealm NOOP operation:\(operation) fid:\(uploadFile.id)")
+                        self.addToQueueIfNecessary(file: uploadFile, using: self.realm)
                     }
+                    self.resumeAllOperations()
                 }
             }
-            
-            self.resumeAllOperations()
-            UploadQueueLog("addToQueueFromRealm exit")
+
+            UploadQueueLog("rebuildUploadQueueFromObjectsInRealm exit")
         }
     }
 
@@ -112,17 +106,17 @@ extension UploadQueue: UploadQueueable {
     public func saveToRealmAndAddtoQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
         UploadQueueLog("saveToRealmAndAddtoQueue fid:\(file.id)")
         assert(!file.isManagedByRealm, "we expect the file to be outside of realm at the moment")
-  
+
         // Save drive and directory
         UserDefaults.shared.lastSelectedUser = file.userId
         UserDefaults.shared.lastSelectedDrive = file.driveId
         UserDefaults.shared.lastSelectedDirectory = file.parentDirectoryId
-        
+
         file.name = file.name.trimmingCharacters(in: .whitespacesAndNewlines)
         if file.error != nil {
             file.error = nil
         }
-        
+
         let detachedFile = file.detached()
         BackgroundRealm.uploads.execute { realm in
             UploadQueueLog("save fid:\(file.id)")
@@ -131,7 +125,7 @@ extension UploadQueue: UploadQueueable {
             }
             UploadQueueLog("did save fid:\(file.id)")
         }
-        
+
         var uploadOperation: UploadOperation?
         dispatchQueue.sync {
             uploadOperation = self.addToQueue(file: detachedFile, itemIdentifier: itemIdentifier, using: self.realm)
@@ -153,7 +147,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelRunningOperations() {
         UploadQueueLog("cancelRunningOperations")
-        operationQueue.operations.filter(\.isExecuting).forEach { ($0 as? UploadOperation)?.end() }
+        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     public func cancel(_ file: UploadFile) {
@@ -163,33 +157,30 @@ extension UploadQueue: UploadQueueable {
                                userId = file.userId,
                                driveId = file.driveId,
                                realm = realm!] in
-            if let operation = self.operationsInQueue[fileId] {
-                UploadQueueLog("operation to cancel:\(operation)")
-                DispatchQueue.global(qos: .background).async {
-                    operation.cleanUploadFileSession(file: nil)
-                    operation.end()
+                if let operation = self.operationsInQueue[fileId] {
+                    UploadQueueLog("operation to cancel:\(operation)")
+                    DispatchQueue.global(qos: .background).async {
+                        operation.cleanUploadFileSession(file: nil)
+                        operation.cancel()
+                    }
                 }
-            }
-            
-            self.operationsInQueue.removeValue(forKey: fileId)
-            
-            if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
-                UploadQueueLog("find UploadFile to delete :\(fileId)")
-                
-                // TODO: delete from
-                let publishedToDelete = UploadFile(value: toDelete)
-                publishedToDelete.error = .taskCancelled
-                try? realm.write {
-                    realm.delete(toDelete)
+
+                self.operationsInQueue.removeValue(forKey: fileId)
+
+                if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
+                    UploadQueueLog("find UploadFile to delete :\(fileId)")
+                    let publishedToDelete = UploadFile(value: toDelete)
+                    publishedToDelete.error = .taskCancelled
+                    try? realm.write {
+                        realm.delete(toDelete)
+                    }
+
+                    UploadQueueLog("publishFileUploaded fid:\(fileId)")
+                    self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
+                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+                } else {
+                    UploadQueueLog("could not find file to cancel:\(fileId)", level: .error)
                 }
-                
-                UploadQueueLog("publishFileUploaded fid:\(fileId)")
-                // TODO: check slow
-//                self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-//                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
-            } else {
-                UploadQueueLog("could not find file to cancel:\(fileId)", level: .error)
-            }
         }
     }
 
@@ -202,47 +193,40 @@ extension UploadQueue: UploadQueueable {
                                                         userId: userId,
                                                         driveId: driveId,
                                                         using: self.realm)
-            UploadQueueLog("cancelAllOperations count:\(uploadingFiles.count)")
-            
-            // Cancel in batches
-            let batches = Array(uploadingFiles).chunked(into: 100)
-            for files in batches {
-                self.dispatchQueue.async {
-                    UploadQueueLog("cancel a chunk of files")
-                    files.forEach { file in
-                        if !file.isInvalidated,
-                           let operation = self.operationsInQueue[file.id] as? UploadOperation {
-                            operation.end()
+            UploadQueueLog("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
+            let uploadingFilesIds = uploadingFiles.map(\.id)
+            UploadQueueLog("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+
+            // Delete all the linked UploadFiles from Realm. This is fast.
+            autoreleasepool {
+                try? self.realm.write {
+                    UploadQueueLog("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
+                    self.realm.delete(uploadingFiles)
+                }
+            }
+            UploadQueueLog("Done deleting all matching files for parentId:\(parentId)")
+
+            // Remove in batches from upload queue. This may take a while.
+            let batches = Array(uploadingFilesIds).chunked(into: 100)
+            for fileIds in batches {
+                autoreleasepool {
+                    UploadQueueLog("remove a chunk of file IDs from queue")
+                    fileIds.forEach { id in
+                        if let operation = self.operationsInQueue[id] {
+                            operation.cancel()
                         }
-                    }
-                    try? self.realm.write {
-                        self.realm.delete(files)
+                        self.operationsInQueue.removeValue(forKey: id)
                     }
                 }
             }
-            
+
             self.publishUploadCount(withParent: parentId,
                                     userId: userId,
                                     driveId: driveId,
                                     using: self.realm)
-            
-            self.dispatchQueue.async {
-                UploadQueueLog("cancelAllOperations finished")
-                self.resumeAllOperations()
-            }
-        }
-    }
 
-    public func retry(_ file: UploadFile) {
-        UploadQueueLog("retry fid:\(file.id)")
-        let safeFile = ThreadSafeReference(to: file)
-        dispatchQueue.async {
-            guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
-            try? self.realm.write {
-                file.error = nil
-                file.maxRetryCount = UploadFile.defaultMaxRetryCount
-            }
-            self.addToQueue(file: file, using: self.realm)
+            UploadQueueLog("cancelAllOperations finished")
+            self.resumeAllOperations()
         }
     }
 
@@ -262,29 +246,69 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
-        UploadQueueLog("retryAllOperations parentId:\(parentId)")
+    public func retry(_ file: UploadFile) {
+        UploadQueueLog("retry fid:\(file.id)")
+        let safeFile = ThreadSafeReference(to: file)
         dispatchQueue.async {
-            UploadQueueLog("retryAllOperations in dispatchQueue parentId:\(parentId)")
-            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
-                                                        userId: userId,
-                                                        driveId: driveId,
-                                                        using: self.realm)
-            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
-            UploadQueueLog("will retry failed uploads:\(failedUploadFiles.count)")
-            try? self.realm.write {
-                failedUploadFiles.forEach { file in
-                    file.error = nil
-                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
-                }
-            }
-            failedUploadFiles.forEach {
-                self.addToQueue(file: $0, using: self.realm)
+            guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
+
+            if let operation = self.operation(fileId: file.id) {
+                operation.cancel()
+                self.operationsInQueue.removeValue(forKey: file.id)
             }
 
-            DispatchQueue.global(qos: .userInitiated).async {
-                UploadQueueLog("retryAllOperations addToQueueFromRealm parentId:\(parentId)")
-                self.addToQueueFromRealm()
+            try? self.realm.write {
+                file.error = nil
+                file.maxRetryCount = UploadFile.defaultMaxRetryCount
+            }
+
+            self.addToQueue(file: file, using: self.realm)
+        }
+    }
+
+    public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
+        UploadQueueLog("retryAllOperations parentId:\(parentId)")
+
+        dispatchQueue.async {
+            var files = [UploadFile]()
+            BackgroundRealm.uploads.execute { realm in
+                UploadQueueLog("retryAllOperations in dispatchQueue parentId:\(parentId)")
+                let uploadingFiles = self.getUploadingFiles(withParent: parentId,
+                                                            userId: userId,
+                                                            driveId: driveId,
+                                                            using: realm)
+                UploadQueueLog("uploading:\(uploadingFiles.count)")
+                let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
+                UploadQueueLog("retying:\(failedUploadFiles.count)")
+                files = Array(failedUploadFiles)
+            }
+
+            let batches = Array(files).chunked(into: 100)
+            UploadQueueLog("batches:\(batches.count)")
+            self.resumeAllOperations()
+
+            for batch in batches {
+                autoreleasepool {
+                    BackgroundRealm.uploads.execute { realm in
+                        do {
+                            try realm.write {
+                                batch.forEach { file in
+                                    if let operation = self.operation(fileId: file.id) {
+                                        operation.cancel()
+                                        self.operationsInQueue.removeValue(forKey: file.id)
+                                    }
+                                    file.error = nil
+                                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                                }
+                                batch.forEach { file in
+                                    self.addToQueueIfNecessary(file: file, using: realm)
+                                }
+                            }
+                        } catch {
+                            UploadQueueLog("retryAllOperations realm error:\(error)", level: .error)
+                        }
+                    }
+                }
             }
         }
     }
@@ -293,11 +317,23 @@ extension UploadQueue: UploadQueueable {
 
     private func operation(fileId: String) -> UploadOperationable? {
         UploadQueueLog("operation fileId:\(fileId)")
-        guard let operation = operationsInQueue[fileId] as? UploadOperation,
-              operation.isCancelled == false, operation.isFinished == false else {
+        guard let operation = operationsInQueue[fileId],
+              operation.isCancelled == false,
+              operation.isFinished == false else {
             return nil
         }
         return operation
+    }
+
+    private func addToQueueIfNecessary(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil, using realm: Realm) {
+        UploadQueueLog("rebuildUploadQueueFromObjectsInRealm fid:\(file.id)")
+        guard let _ = self.operation(fileId: file.id) else {
+            UploadQueueLog("rebuildUploadQueueFromObjectsInRealm ADD fid:\(file.id)")
+            self.addToQueue(file: file, itemIdentifier: nil, using: realm)
+            return
+        }
+        
+        UploadQueueLog("rebuildUploadQueueFromObjectsInRealm NOOP fid:\(file.id)")
     }
 
     @discardableResult
@@ -312,7 +348,7 @@ extension UploadQueue: UploadQueueable {
         // Needed so each UploadOperation is able to do a `transactionWithFile` reliably
         let refreshed = realm.refresh()
         UploadQueueLog("refreshed:\(refreshed) fid:\(file.id)")
-        
+
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = file.priority
         operation.completionBlock = { [unowned self, parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
@@ -321,7 +357,7 @@ extension UploadQueue: UploadQueueable {
                 UploadQueueLog("completionBlock for operation:\(operation) fid:\(fileId)")
                 self.operationsInQueue.removeValue(forKey: fileId)
                 guard let error = operation.result.uploadFile?.error,
-                      (error != .taskRescheduled || error != .taskCancelled) else {
+                      error != .taskRescheduled || error != .taskCancelled else {
                     UploadQueueLog("skipping task")
                     return
                 }
@@ -336,8 +372,7 @@ extension UploadQueue: UploadQueueable {
         operationQueue.addOperation(operation as Operation)
         operationsInQueue[file.id] = operation
 
-        // TODO: check this is slow
-        //publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
+        publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
 
         return operation
     }

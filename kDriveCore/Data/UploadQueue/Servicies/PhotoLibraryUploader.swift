@@ -71,31 +71,8 @@ public class PhotoLibraryUploader {
         }
     }
 
-    class AsyncResult<T> {
-        private var result: T?
-        private let group = DispatchGroup()
-
-        init() {
-            group.enter()
-        }
-
-        func get() -> T {
-            group.wait()
-            return result!
-        }
-
-        func set(_ result: T) {
-            self.result = result
-            group.leave()
-        }
-    }
-
-    func getUrlSync(for asset: PHAsset) -> URL? {
-        let result = AsyncResult<URL?>()
-        Task {
-            await result.set(asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg))
-        }
-        return result.get()
+    func getUrl(for asset: PHAsset) async -> URL? {
+        return await asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg)
     }
 
     @discardableResult

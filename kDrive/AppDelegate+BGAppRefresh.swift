@@ -126,7 +126,7 @@ extension AppDelegate {
         uploadQueue.cleanErrorsForAllOperations()
         
         BGTaskSchedulingLog("Reload operations in queue")
-        uploadQueue.addToQueueFromRealm()
+        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
 
         BGTaskSchedulingLog("waitForCompletion")
         uploadQueue.waitForCompletion {

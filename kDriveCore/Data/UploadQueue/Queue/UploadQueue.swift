@@ -101,7 +101,7 @@ public final class UploadQueue {
         
         DispatchQueue.global(qos: .userInitiated).async {
             // Initialize operation queue with files from Realm, and make sure it restarts
-            self.addToQueueFromRealm()
+            self.rebuildUploadQueueFromObjectsInRealm()
             self.resumeAllOperations()
         }
         

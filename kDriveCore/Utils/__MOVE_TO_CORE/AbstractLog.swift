@@ -78,7 +78,6 @@ public func ABLog(_ message: @autoclosure () -> Any,
                   asynchronous async: Bool = asyncLoggingEnabled) {
     let messageString = message() as! String
     
-    // Forward to OS.log
 #if DEBUG
     if #available(iOS 14.0, *), category.isEmpty == false {
         let factoryParameters = [categoryKey : category]
@@ -107,6 +106,31 @@ public func ABLog(_ message: @autoclosure () -> Any,
     } else {
         os_log("[%@] %@", log: .default, type: .error /*level.logType*/, category, messageString)
     }
+    
+    // Forward to cocoaLumberjack
+//    let buffer = "[\(category)] " + messageString
+//    switch level {
+//    case .error:
+//        DDLogError(buffer,
+//                   context: context,
+//                   file: file,
+//                   function: function,
+//                   line: line,
+//                   tag: tag,
+//                   asynchronous: async,
+//                   ddlog: .sharedInstance)
+//    case.info: fallthrough
+//    default:
+//        DDLogInfo(buffer,
+//                  context: context,
+//                  file: file,
+//                  function: function,
+//                  line: line,
+//                  tag: tag,
+//                  asynchronous: async,
+//                  ddlog: .sharedInstance)
+//    }
+    
 #else
     // Forward to cocoaLumberjack
     let buffer = "[\(category)] " + messageString
