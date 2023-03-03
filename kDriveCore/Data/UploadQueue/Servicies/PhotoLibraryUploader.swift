@@ -50,7 +50,7 @@ public class PhotoLibraryUploader {
     }
 
     public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        try? realm.write {
+        try? realm.safeWrite {
             realm.delete(realm.objects(PhotoSyncSettings.self))
         }
         settings = nil
