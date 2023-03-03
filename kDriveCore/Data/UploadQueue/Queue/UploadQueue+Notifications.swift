@@ -39,7 +39,7 @@ extension UploadQueue: UploadNotifiable {
     }
 
     public func sendPausedNotificationIfNeeded() {
-        dispatchQueue.async {
+        self.serialQueue.async {
             if !self.pausedNotificationSent {
                 NotificationsHelper.sendPausedUploadQueueNotification()
                 self.pausedNotificationSent = true

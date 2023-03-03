@@ -125,7 +125,7 @@ public struct ProxyFile: AbstractFile, Sendable {
     }
 
     func resolve(using realm: Realm) throws -> File {
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
         return file

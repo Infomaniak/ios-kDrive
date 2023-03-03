@@ -67,6 +67,10 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     private func setStatusFor(uploadFile: UploadFile) {
+        guard !uploadFile.isInvalidated else {
+            return
+        }
+        
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
             cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
@@ -97,6 +101,10 @@ class UploadTableViewCell: InsetTableViewCell {
     }
     
     func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
+        guard !uploadFile.isInvalidated else {
+            return
+        }
+        
         // Set initial progress value
         if let progress = progress {
             self.updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
@@ -132,18 +140,23 @@ class UploadTableViewCell: InsetTableViewCell {
         }
 
         cardContentView.cancelButtonPressedHandler = {
+            guard !uploadFile.isInvalidated else {
+                return
+            }
+            
             let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
+            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
                 self.uploadQueue.cancel(file)
             }
         }
         cardContentView.retryButtonPressedHandler = { [weak self] in
-            guard let self else {
+            guard let self, !uploadFile.isInvalidated else {
                 return
             }
+            
             self.cardContentView.retryButton?.isHidden = true
             let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
+            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
                 self.uploadQueue.retry(file)
             }
         }

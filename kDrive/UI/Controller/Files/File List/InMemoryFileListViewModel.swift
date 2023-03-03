@@ -75,7 +75,7 @@ class InMemoryFileListViewModel: FileListViewModel {
     func removeFiles(_ files: [ProxyFile]) {
         try? realm.write {
             for file in files {
-                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id), !file.isInvalidated {
                     realm.delete(file)
                 }
             }

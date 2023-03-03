@@ -27,16 +27,15 @@ extension UploadOperation {
             do {
                 let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
                 uploadsRealm.refresh()
-                let file: UploadFile? = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId)
-
-                guard let file, file.isInvalidated == false else {
+                
+                guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
                     bufferError = ErrorDomain.databaseUploadFileNotFound
 //                    UploadOperationLog("invalidated file fid:\(self.fileId)")
                     return
                 }
 
 //                UploadOperationLog("begin transaction fid:\(self.fileId)")
-                try uploadsRealm.write {
+                try uploadsRealm.safeWrite {
                     guard file.isInvalidated == false else {
                         bufferError = ErrorDomain.databaseUploadFileNotFound
 //                        UploadOperationLog("invalidated file fid:\(self.fileId)")

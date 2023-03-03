@@ -94,12 +94,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: - Public methods
 
-    public required init(file: UploadFile,
+    public required init(fileId: String,
                          urlSession: URLSession = URLSession.shared,
                          itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        let detachedFile = file.detached()
-        UploadOperationLog("init fid:\(detachedFile.id)")
-        self.fileId = detachedFile.id
+        UploadOperationLog("init fid:\(fileId)")
+        self.fileId = fileId
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
@@ -595,7 +594,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath.isEmpty {
-                        if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id), oldFile.isAvailableOffline {
+                        if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id),
+                            !oldFile.isInvalidated,
+                            oldFile.isAvailableOffline {
                             driveFile.isAvailableOffline = true
                         }
                         let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
@@ -1004,7 +1005,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             UploadOperationLog("Delete file:\(fileId)")
             // Delete UploadFile as canceled by the user
             BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId) {
+                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !toDelete.isInvalidated {
                     try? uploadsRealm.safeWrite {
                         uploadsRealm.delete(toDelete)
                     }

@@ -157,11 +157,16 @@ extension UploadQueueViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-        let file = uploadingFiles[indexPath.row]
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
                                        isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-        let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-        cell.configureWith(uploadFile: file, progress: progress)
+        
+        /// Make sure the file is valid
+        let file = uploadingFiles[indexPath.row]
+        if !file.isInvalidated {
+            let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
+            cell.configureWith(uploadFile: file, progress: progress)
+        }
+        
         cell.selectionStyle = .none
         return cell
     }

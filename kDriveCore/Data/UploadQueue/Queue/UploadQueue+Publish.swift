@@ -48,7 +48,6 @@ extension UploadQueue: UploadPublishable {
                             driveId: Int,
                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         UploadQueueLog("publishUploadCount")
-        // TODO fetch a realm here
         realm.refresh()
         publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
         publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)

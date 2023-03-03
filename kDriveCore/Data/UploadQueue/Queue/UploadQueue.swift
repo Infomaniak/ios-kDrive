@@ -32,11 +32,17 @@ public final class UploadQueue {
 
     public var pausedNotificationSent = false
 
-    let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync",
-                                      qos: .userInitiated,
-                                      autoreleaseFrequency: .workItem)
+    /// A serial queue to lock access to ivars.
+    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
+    
+    /// A concurrent queue.
+    let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
+                                        qos: .userInitiated,
+                                        attributes: [.concurrent])
 
-    var operationsInQueue: [String: UploadOperationable] = [:]
+    /// Something to track an operation for a File ID
+    let keyedUploadOperations = KeyedUploadOperationable()
+    
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
@@ -58,10 +64,7 @@ public final class UploadQueue {
     }()
 
     var fileUploadedCount = 0
-
-    /// This Realm instance is bound to `dispatchQueue`
-    var realm: Realm!
-
+    
     var bestSession: URLSession {
         if Bundle.main.isExtension {
             @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -89,17 +92,7 @@ public final class UploadQueue {
     public init() {
         UploadQueueLog("Starting up")
         
-        // Create Realm
-        self.dispatchQueue.sync {
-            do {
-                self.realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: self.dispatchQueue)
-            } catch {
-                // We can't recover from this error but at least we report it correctly on Sentry
-                Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async {
+        self.concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
             self.rebuildUploadQueueFromObjectsInRealm()
             self.resumeAllOperations()
