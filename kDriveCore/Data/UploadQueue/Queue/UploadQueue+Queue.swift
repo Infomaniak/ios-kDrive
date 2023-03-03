@@ -38,7 +38,7 @@ public protocol UploadQueueable {
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
     // Retry to upload a specific file, this re-enqueue the task.
-    func retry(_ file: UploadFile)
+    func retry(_ fileId: String)
 
     // Retry all uploads within a specified graph, this re-enqueue the tasks.
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
@@ -167,10 +167,8 @@ extension UploadQueue: UploadQueueable {
         self.concurrentQueue.async {
             if let operation = self.keyedUploadOperations.getObject(forKey: fileId) {
                 UploadQueueLog("operation to cancel:\(operation)")
-                self.concurrentQueue.async {
-                    operation.cleanUploadFileSession(file: nil)
-                    operation.cancel()
-                }
+                operation.cleanUploadFileSession(file: nil)
+                operation.cancel()
             }
             self.keyedUploadOperations.removeObject(forKey: fileId)
 
@@ -262,29 +260,39 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func retry(_ file: UploadFile) {
-        UploadQueueLog("retry fid:\(file.id)")
-        let safeFile = ThreadSafeReference(to: file)
+    public func retry(_ fileId: String) {
+        UploadQueueLog("retry fid:\(fileId)")
         self.concurrentQueue.async {
             try? self.transactionWithUploadRealm { realm in
-                guard !safeFile.isInvalidated,
-                      let file = realm.resolve(safeFile),
-                      !file.isInvalidated else {
+                guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
+                    UploadQueueLog("file invalidated in\(#function) line:\(#line) fid:\(fileId)")
                     return
                 }
-
-                if let operation = self.operation(fileId: file.id) {
+                
+                // Remove operation from tracking
+                if let operation = self.operation(fileId: fileId) {
                     operation.cancel()
-                    self.keyedUploadOperations.removeObject(forKey: file.id)
+                    self.keyedUploadOperations.removeObject(forKey: fileId)
                 }
-
+                
+                // Clean error in base
                 try? realm.safeWrite {
                     file.error = nil
                     file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
-
+            }
+            
+            // re-enqueue UploadOperation
+            try? self.transactionWithUploadRealm { realm in
+                guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
+                    UploadQueueLog("file invalidated in\(#function) line:\(#line) fid:\(fileId)")
+                    return
+                }
+                
                 self.addToQueue(file: file, using: realm)
             }
+            
+            self.resumeAllOperations()
         }
     }
 

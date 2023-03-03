@@ -50,9 +50,11 @@ public struct RangeProviderGuts: RangeProviderGutsable {
     
     public func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) throws -> [DataRange] {
         // malformed requests
-        guard totalChunksCount > 0,
-              chunkSize > 0 else {
-            throw RangeProvider.ErrorDomain.IncorrectRangeRequest
+        guard totalChunksCount > 0 else {
+            throw RangeProvider.ErrorDomain.IncorrectTotalChunksCount
+        }
+        guard chunkSize > 0 else {
+            throw RangeProvider.ErrorDomain.IncorrectChunkSize
         }
         
         // Empty files

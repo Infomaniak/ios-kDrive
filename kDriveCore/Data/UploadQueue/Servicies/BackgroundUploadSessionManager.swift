@@ -145,11 +145,11 @@ public final class BackgroundUploadSessionManager: NSObject,
         return
         
         // Re-generate NSURLSession from identifiers
-        let uploadingChunkTasks = DriveFileManager.constants.uploadsRealm.objects(UploadingChunkTask.self)
+        /*let uploadingChunkTasks = DriveFileManager.constants.uploadsRealm.objects(UploadingChunkTask.self)
         let uniqueSessionIdentifiers = Set(uploadingChunkTasks.compactMap(\.sessionIdentifier))
         for sessionIdentifier in uniqueSessionIdentifiers {
             _ = getSessionOrCreate(for: sessionIdentifier)
-        }
+        }*/
     }
 
     

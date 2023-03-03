@@ -63,8 +63,11 @@ public struct RangeProvider: RangeProvidable {
         /// We ask for chunks that do not make sense
         case ChunkedSizeLargerThanSourceFile
         
-        /// Absurd chunk parameters
-        case IncorrectRangeRequest
+        /// At least one chunk is expected
+        case IncorrectTotalChunksCount
+        
+        /// A non zero size is expected
+        case IncorrectChunkSize
     }
     
     /// The internal methods split into another type, make testing easier

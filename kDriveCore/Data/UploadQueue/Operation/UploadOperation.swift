@@ -216,29 +216,30 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         
         // generate a new session
         else {
-            // Compute ranges for a file
-            let rangeProvider = RangeProvider(fileURL: fileUrl)
-            let ranges: [DataRange]
-            do {
-                ranges = try rangeProvider.allRanges
-            } catch {
-                UploadOperationLog("Unable generate ranges for \(fileId)", level: .error)
-                throw ErrorDomain.splitError
-            }
-
-            // Get a valid APIV2 UploadSession
-            let driveFileManager = try getDriveFileManager()
-            let apiFetcher = driveFileManager.apiFetcher
-            let drive = driveFileManager.drive
-            
             guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
                 UploadOperationLog("Unable to read file size for \(fileId)", level: .error)
                 throw DriveError.fileNotFound
             }
 
             let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
-            UploadOperationLog("got fileSize:\(mebibytes)MiB ranges:\(ranges.count) \(fileId)")
+            UploadOperationLog("got fileSize:\(mebibytes)MiB fid:\(fileId)")
+            
+            // Compute ranges for a file
+            let rangeProvider = RangeProvider(fileURL: fileUrl)
+            let ranges: [DataRange]
+            do {
+                ranges = try rangeProvider.allRanges
+            } catch {
+                UploadOperationLog("Unable generate ranges error:\(error) for \(fileId)", level: .error)
+                throw ErrorDomain.splitError
+            }
+            UploadOperationLog("got ranges:\(ranges.count) \(fileId)")
 
+            // Get a valid APIV2 UploadSession
+            let driveFileManager = try getDriveFileManager()
+            let apiFetcher = driveFileManager.apiFetcher
+            let drive = driveFileManager.drive
+            
             let session = try await apiFetcher.startSession(drive: drive,
                                                             totalSize: fileSize,
                                                             fileName: fileName,
@@ -581,7 +582,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             var parentDirectoryId: Int!
             try self.transactionWithFile { file in
                 file.uploadDate = Date()
-                file.uploadingSession = nil
+                file.uploadingSession = nil // For the sake of keeping the Realm small
                 file.error = nil
                 driveId = file.driveId
                 userId = file.userId
@@ -684,13 +685,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         var assetToLoad: PHAsset?
         try transactionWithFile { file in
             UploadOperationLog("getPhAssetIfNeeded type:\(file.type) fid:\(self.fileId)")
-            if file.type == .phAsset && file.pathURL == nil {
-                UploadOperationLog("Need to fetch photo asset fid:\(self.fileId)")
-                guard let asset = file.getPHAsset() else {
-                    return
-                }
-                assetToLoad = asset
+            guard file.type == .phAsset else {
+                return
             }
+            guard let asset = file.getPHAsset() else {
+                UploadOperationLog("unable to fetch PHAsset fid:\(self.fileId)", level: .error)
+                return
+            }
+            assetToLoad = asset
         }
         
         // Async load the url of the asset

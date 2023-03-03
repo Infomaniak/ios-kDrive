@@ -130,7 +130,6 @@ extension UploadOperation {
             return false
         }
         
-        var cleanLinkedFiles: (parentDirectoryId: Int, userId: Int, driveId: Int)?
         var errorHandled = false
         try? transactionWithFile { file in
             defer {
@@ -146,6 +145,7 @@ extension UploadOperation {
             case .lock:
                 // simple retry
                 break
+                
             case .notAuthorized, .maintenance:
                 // simple retry
                 break
@@ -154,6 +154,7 @@ extension UploadOperation {
                 file.error = DriveError.quotaExceeded
                 file.maxRetryCount = 0
                 file.progress = nil
+                self.uploadQueue.suspendAllOperations()
         
             case .uploadNotTerminatedError, .uploadNotTerminated:
                 self.cleanUploadFileSession(file: file)
@@ -172,7 +173,15 @@ extension UploadOperation {
                 file.maxRetryCount = 0
                 file.progress = nil
                 self.cleanUploadFileSession(file: file)
-                cleanLinkedFiles = (file.parentDirectoryId, file.userId, file.driveId)
+                self.uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId,
+                                                     userId: file.userId,
+                                                     driveId: file.driveId)
+                    
+                if self.photoLibraryUploader.isSyncEnabled
+                    && self.photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
+                    self.photoLibraryUploader.disableSync()
+                    NotificationsHelper.sendPhotoSyncErrorNotification()
+                }
                 
             case .networkError:
                 file.error = error
@@ -184,19 +193,6 @@ extension UploadOperation {
             }
             
             errorHandled = true
-        }
-        
-        if let cleanLinkedFiles {
-            // Chain database queries outside of transactionWithFile
-            self.uploadQueue.cancelAllOperations(withParent: cleanLinkedFiles.parentDirectoryId,
-                                                 userId: cleanLinkedFiles.userId,
-                                                 driveId: cleanLinkedFiles.driveId)
-                
-            if self.photoLibraryUploader.isSyncEnabled
-                && self.photoLibraryUploader.settings?.parentDirectoryId == cleanLinkedFiles.parentDirectoryId {
-                self.photoLibraryUploader.disableSync()
-                NotificationsHelper.sendPhotoSyncErrorNotification()
-            }
         }
         
         return errorHandled

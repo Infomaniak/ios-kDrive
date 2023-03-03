@@ -155,10 +155,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
             
             self.cardContentView.retryButton?.isHidden = true
-            let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
-                self.uploadQueue.retry(file)
-            }
+            self.uploadQueue.retry(uploadFile.id)
         }
     }
 

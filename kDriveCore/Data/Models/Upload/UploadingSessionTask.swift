@@ -21,7 +21,7 @@ import RealmSwift
 import InfomaniakDI
 
 /// Tracks the upload operation, given a session for a file
-final public class UploadingSessionTask: Object {
+final public class UploadingSessionTask: EmbeddedObject {
     @Persisted public var uploadSession: RUploadSession?
     @Persisted public var token: String
     @Persisted public var sessionExpiration: Date

@@ -21,7 +21,7 @@ import RealmSwift
 import InfomaniakDI
 
 /// Tracks the upload of a chunk
-final public class UploadingChunkTask: Object {
+final public class UploadingChunkTask: EmbeddedObject {
     
     override public init() {
         // We have to keep it for Realm
