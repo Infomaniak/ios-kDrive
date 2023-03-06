@@ -180,12 +180,13 @@ extension UploadQueue: UploadQueueable {
                     try? realm.safeWrite {
                         realm.delete(toDelete)
                     }
-
+                    
                     UploadQueueLog("publishFileUploaded fid:\(fileId)")
                     self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
                 } else {
                     UploadQueueLog("could not find file to cancel:\(fileId)", level: .error)
+                    return
                 }
             }
         }
@@ -232,8 +233,7 @@ extension UploadQueue: UploadQueueable {
             try? self.transactionWithUploadRealm { realm in
                 self.publishUploadCount(withParent: parentId,
                                         userId: userId,
-                                        driveId: driveId,
-                                        using: realm)
+                                        driveId: driveId)
             }
 
             UploadQueueLog("cancelAllOperations finished")
@@ -405,16 +405,14 @@ extension UploadQueue: UploadQueueable {
         operation.completionBlock = { [unowned self] in
             UploadQueueLog("operation.completionBlock for operation:\(operation) fid:\(fileId)")
             self.keyedUploadOperations.removeObject(forKey: fileId)
-            guard let error = operation.result.uploadFile?.error,
-                  error != .taskRescheduled || error != .taskCancelled else {
+            if let error = operation.result.uploadFile?.error,
+                  error == .taskRescheduled || error == .taskCancelled {
                 UploadQueueLog("skipping task")
                 return
             }
 
             self.publishFileUploaded(result: operation.result)
-            try? self.transactionWithUploadRealm { realm in
-                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
-            }
+            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
             OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.keyedUploadOperations.isEmpty)
         }
 
@@ -422,9 +420,7 @@ extension UploadQueue: UploadQueueable {
         operationQueue.addOperation(operation as Operation)
         
         keyedUploadOperations.setObject(operation, key: fileId)
-        try? self.transactionWithUploadRealm { realm in
-            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: realm)
-        }
+        self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
 
         return operation
     }

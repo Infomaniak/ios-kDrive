@@ -20,7 +20,9 @@ import Foundation
 
 // MARK: - OperationsInQueue
 
-/// Something to math a FileId to an Operation, thread safe.
+/// Something to match a FileId to an Operation, thread safe.
+///
+/// Not using an actor, as it does not work well with Realm _yet_
 final class KeyedUploadOperationable {
     
     private let queue = DispatchQueue(label: "com.infomaniak.drive.upload-sync")
@@ -53,5 +55,4 @@ final class KeyedUploadOperationable {
         }
         return isEmpty
     }
-    
 }

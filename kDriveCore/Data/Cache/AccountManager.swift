@@ -108,7 +108,8 @@ public protocol AccountManageable {
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenable: InfomaniakTokenable
-    
+    @LazyInjectService var notificationHelper: NotificationsHelpable
+
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -257,7 +258,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             account.token = nil
             if account.userId == currentUserId {
                 delegate?.currentAccountNeedsAuthentication()
-                NotificationsHelper.sendDisconnectedNotification()
+                notificationHelper.sendDisconnectedNotification()
             }
         }
     }

@@ -18,12 +18,13 @@
 
 import Foundation
 import InfomaniakDI
+import UIKit
 
 public protocol UploadNotifiable {
     /// Notify the user that we have not enough storage to start an upload.
     func sendNotEnoughSpaceForUpload(filename: String)
 
-    /// Send a local notification if some error is preventing the upload
+    /// Send a local notification that the system has paused the upload.
     func sendPausedNotificationIfNeeded()
 
     /// Send a local notification that n files were uploaded
@@ -32,48 +33,52 @@ public protocol UploadNotifiable {
 
 extension UploadQueue: UploadNotifiable {
     public func sendNotEnoughSpaceForUpload(filename: String) {
-        DispatchQueue.main.async {
-            @InjectService var notificationsHelper: NotificationsHelpable
-            notificationsHelper.sendNotEnoughSpaceForUpload(filename: filename)
+        UploadQueueLog("sendNotEnoughSpaceForUpload")
+        self.serialQueue.async { [unowned self] in
+            self.notificationHelper.sendNotEnoughSpaceForUpload(filename: filename)
         }
     }
 
     public func sendPausedNotificationIfNeeded() {
-        self.serialQueue.async {
+        UploadQueueLog("sendPausedNotificationIfNeeded")
+        self.serialQueue.async { [unowned self] in
             if !self.pausedNotificationSent {
-                NotificationsHelper.sendPausedUploadQueueNotification()
+                self.notificationHelper.sendPausedUploadQueueNotification()
                 self.pausedNotificationSent = true
             }
         }
     }
 
     public func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        guard let uploadFile = result.uploadFile, uploadFile.error != .taskRescheduled else {
-            return
-        }
-        
-        //TODO: Query realm
-        fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
-        if let error = uploadFile.error,
-           error != .networkError && error != .taskCancelled && error != .taskRescheduled {
-            let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-            NotificationsHelper.sendUploadError(filename: uploadedFileName,
-                                                parentId: uploadFile.parentDirectoryId,
-                                                error: error)
-            if operationQueue.operationCount == 0 {
-                fileUploadedCount = 0
+        UploadQueueLog("sendFileUploadedNotificationIfNeeded")
+        self.serialQueue.async { [unowned self] in
+            guard let uploadFile = result.uploadFile,
+                  uploadFile.error != .taskRescheduled,
+                  uploadFile.error != .taskCancelled else {
+                return
             }
-        } else if operationQueue.operationCount == 0 {
-            // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
-            if fileUploadedCount == 1 && uploadFile.error == nil {
+
+            self.fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
+            if let error = uploadFile.error {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                NotificationsHelper.sendUploadDoneNotification(filename: uploadedFileName,
-                                                               parentId: uploadFile.parentDirectoryId)
-            } else if fileUploadedCount > 0 {
-                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount,
-                                                               parentId: uploadFile.parentDirectoryId)
+                self.notificationHelper.sendUploadError(filename: uploadedFileName,
+                                                        parentId: uploadFile.parentDirectoryId,
+                                                        error: error)
+                if self.operationQueue.operationCount == 0 {
+                    self.fileUploadedCount = 0
+                }
+            } else if self.operationQueue.operationCount == 0 {
+                // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
+                if self.fileUploadedCount == 1 && uploadFile.error == nil {
+                    let uploadedFileName = result.driveFile?.name ?? uploadFile.name
+                    self.notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
+                                                                       parentId: uploadFile.parentDirectoryId)
+                } else if self.fileUploadedCount > 0 {
+                    self.notificationHelper.sendUploadDoneNotification(uploadCount: self.fileUploadedCount,
+                                                                       parentId: uploadFile.parentDirectoryId)
+                }
+                self.fileUploadedCount = 0
             }
-            fileUploadedCount = 0
         }
     }
 }

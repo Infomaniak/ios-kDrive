@@ -42,6 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
+    @LazyInjectService var notificationHelper: NotificationsHelpable
 
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
@@ -72,8 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         // In some cases the application can show the old Nextcloud import notification badge
         UIApplication.shared.applicationIconBadgeNumber = 0
-        NotificationsHelper.askForPermissions()
-        NotificationsHelper.registerCategories()
+        notificationHelper.askForPermissions()
+        notificationHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
 
         if UIApplication.shared.applicationState != .background {
@@ -134,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         AppDelegateLog("application performFetchWithCompletionHandler")
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
         if MigrationHelper.canMigrate() {
-            NotificationsHelper.sendMigrateNotification()
+            notificationHelper.sendMigrateNotification()
             return
         }
 

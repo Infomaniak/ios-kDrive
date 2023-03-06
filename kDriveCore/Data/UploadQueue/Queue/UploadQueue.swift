@@ -24,7 +24,8 @@ import Sentry
 
 public final class UploadQueue {
     @LazyInjectService var accountManager: AccountManageable
-
+    @LazyInjectService var notificationHelper: NotificationsHelpable
+    
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
         return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
@@ -32,7 +33,7 @@ public final class UploadQueue {
 
     public var pausedNotificationSent = false
 
-    /// A serial queue to lock access to ivars.
+    /// A serial queue to lock access to ivars an observations.
     let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
     
     /// A concurrent queue.

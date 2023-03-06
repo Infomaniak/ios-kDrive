@@ -21,6 +21,8 @@ import UIKit
 
 enum OperationQueueHelper {
     static func disableIdleTimer(_ shouldBeDisabled: Bool, hasOperationsInQueue: Bool = false) {
+        UploadQueueLog("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled) hasOperationsInQueue:\(hasOperationsInQueue)")
+
         #if !ISEXTENSION
         DispatchQueue.main.async {
             if shouldBeDisabled {

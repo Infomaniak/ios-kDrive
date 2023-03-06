@@ -180,7 +180,7 @@ extension UploadOperation {
                 if self.photoLibraryUploader.isSyncEnabled
                     && self.photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
                     self.photoLibraryUploader.disableSync()
-                    NotificationsHelper.sendPhotoSyncErrorNotification()
+                    self.notificationHelper.sendPhotoSyncErrorNotification()
                 }
                 
             case .networkError:

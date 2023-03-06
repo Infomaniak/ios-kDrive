@@ -25,17 +25,14 @@ import Sentry
 protocol UploadPublishable {
     func publishUploadCount(withParent parentId: Int,
                             userId: Int,
-                            driveId: Int,
-                            using realm: Realm)
+                            driveId: Int)
 
     func publishUploadCountInParent(parentId: Int,
                                     userId: Int,
-                                    driveId: Int,
-                                    using realm: Realm)
+                                    driveId: Int)
 
     func publishUploadCountInDrive(userId: Int,
-                                   driveId: Int,
-                                   using realm: Realm)
+                                   driveId: Int)
 
     func publishFileUploaded(result: UploadCompletionResult)
 }
@@ -45,44 +42,58 @@ protocol UploadPublishable {
 extension UploadQueue: UploadPublishable {
     func publishUploadCount(withParent parentId: Int,
                             userId: Int,
-                            driveId: Int,
-                            using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+                            driveId: Int) {
         UploadQueueLog("publishUploadCount")
-        realm.refresh()
-        publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
-        publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)
+        self.serialQueue.async { [unowned self] in
+            self.publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
+            self.publishUploadCountInDrive(userId: userId, driveId: driveId)
+        }
     }
 
     func publishUploadCountInParent(parentId: Int,
                                     userId: Int,
-                                    driveId: Int,
-                                    using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+                                    driveId: Int) {
         UploadQueueLog("publishUploadCountInParent")
-        let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
-        observations.didChangeUploadCountInParent.values.forEach { closure in
-            closure(parentId, uploadCount)
+        self.serialQueue.async { [unowned self] in
+            try? self.transactionWithUploadRealm { realm in
+                let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
+                self.observations.didChangeUploadCountInParent.values.forEach { closure in
+                    DispatchQueue.main.async {
+                        closure(parentId, uploadCount)
+                    }
+                }
+            }
         }
     }
 
     func publishUploadCountInDrive(userId: Int,
-                                   driveId: Int,
-                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+                                   driveId: Int) {
         UploadQueueLog("publishUploadCountInDrive")
-        let uploadCount = getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
-        observations.didChangeUploadCountInDrive.values.forEach { closure in
-            closure(driveId, uploadCount)
+        self.serialQueue.async { [unowned self] in
+            try? self.transactionWithUploadRealm { realm in
+                let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
+                self.observations.didChangeUploadCountInDrive.values.forEach { closure in
+                    DispatchQueue.main.async {
+                        closure(driveId, uploadCount)
+                    }
+                }
+            }
         }
     }
 
     func publishFileUploaded(result: UploadCompletionResult) {
         UploadQueueLog("publishFileUploaded")
-        sendFileUploadedNotificationIfNeeded(with: result)
-        observations.didUploadFile.values.forEach { closure in
-            guard let uploadFile = result.uploadFile, uploadFile.isInvalidated == false else {
-                return
+        self.sendFileUploadedNotificationIfNeeded(with: result)
+        self.serialQueue.async { [unowned self] in
+            self.observations.didUploadFile.values.forEach { closure in
+                guard let uploadFile = result.uploadFile, uploadFile.isInvalidated == false else {
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    closure(uploadFile, result.driveFile)
+                }
             }
-            
-            closure(uploadFile, result.driveFile)
         }
     }
 }

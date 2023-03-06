@@ -64,12 +64,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     @LazyInjectService var uploadQueue: UploadQueueable
-    @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var fileManager: FileManagerable
     @LazyInjectService var fileMetadata: FileMetadatable
     @LazyInjectService var freeSpaceService: FreeSpaceService
+    @LazyInjectService var uploadNotifiable: UploadNotifiable
+    @LazyInjectService var notificationHelper: NotificationsHelpable
     
     override public var debugDescription: String {
         """
@@ -189,7 +190,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 chunkTasksToClean.forEach {
                     // clean in order to re-schedule
                     
-                    // TODO: refactor sessionIdentifier + requestUrl handling
+                    // TODO: remove sessionIdentifier once API is ready
                     $0.sessionIdentifier = nil
                     $0.requestUrl = nil
                     $0.path = nil
@@ -812,12 +813,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) throws {
         UploadOperationLog("completion Client-side error:\(error) fid:\(fileId)", level: .error)
-        
-        if let data {
-            // TODO: expected behaviour ?
-            UploadOperationLog("uploadCompletionLocalFailure dataString:\(String(decoding: data, as: UTF8.self)) fid:\(fileId)")
-        }
-        
         defer {
             self.end()
         }
