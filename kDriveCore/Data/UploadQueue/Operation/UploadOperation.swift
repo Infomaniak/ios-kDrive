@@ -80,6 +80,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
     }
     
+    /// The number of requests we try to keep running in one UploadOperation
+    private static let parallelism = 5
+    
     public let fileId: String
     private var fileObservationToken: NotificationToken?
     
@@ -186,12 +189,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 }
                 
                 // Cleanup the uploading chunks and session state for re-use
-                let chunkTasksToClean = uploadingSession.chunkTasks.filter { $0.doneUploading == false }
+                let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
                 chunkTasksToClean.forEach {
                     // clean in order to re-schedule
                     
                     // TODO: remove sessionIdentifier once API is ready
                     $0.sessionIdentifier = nil
+                    $0.taskIdentifier = nil
                     $0.requestUrl = nil
                     $0.path = nil
                     $0.sha256 = nil
@@ -304,6 +308,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     /// Generate some chunks into a temporary folder from a file
     func generateChunksAndFanOutIfNeeded() async throws {
+        UploadOperationLog("generateChunksAndFanOutIfNeeded fid:\(self.fileId)")
         try checkCancelation()
         
         var filePath: String!
@@ -319,10 +324,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             try self.checkFileIdentity(filePath: filePath, file: file)
 
             // Look for the next chunk to generate
-            let chunksToGenerate = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == false && $0.hasLocalChunk == false }
+            let chunksToGenerate = uploadingSessionTask.chunkTasks
+                .filter(UploadingChunkTask.notDoneUploadingPredicate)
+                .filter { $0.hasLocalChunk == false }
             guard let chunkTask = chunksToGenerate.first else {
+                UploadOperationLog("generateChunksAndFanOutIfNeeded no remaining chunks to generate fid:\(self.fileId)")
                 return
             }
+            UploadOperationLog("generateChunksAndFanOutIfNeeded working with:\(chunkTask.chunkNumber) fid:\(self.fileId)")
             
             chunksToGenerateCount = chunksToGenerate.count
             let chunkNumber = chunkTask.chunkNumber
@@ -358,16 +367,21 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
         
+        if self.freeRequestSlots() > 0 {
+            UploadOperationLog("sending ASAP fid:\(self.fileId)")
+            enqueueCatching {
+                try await self.fanOutChunks()
+            }
+        }
+        
         // Schedule next step
         try await scheduleNextChunk(filePath: filePath,
-                                    chunksToGenerateCount: chunksToGenerateCount,
-                                    uploadTasksCount: uploadTasks.count)
+                                    chunksToGenerateCount: chunksToGenerateCount)
     }
     
     /// Prepare chunk upload requests, and start them.
     private func scheduleNextChunk(filePath: String,
-                                   chunksToGenerateCount: Int,
-                                   uploadTasksCount: Int) async throws {
+                                   chunksToGenerateCount: Int) async throws {
         do {
             try checkFileIdentity(filePath: filePath)
             try checkCancelation()
@@ -378,11 +392,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             
             // Chain the next chunk generation if necessary
-            UploadOperationLog("chunksToGenerate:\(chunksToGenerateCount) uploadTasks:\(uploadTasksCount) fid:\(fileId)")
-            if chunksToGenerateCount > 1 && uploadTasksCount < 5 {
+            let slots = self.freeRequestSlots()
+            if chunksToGenerateCount >= 1 && slots > 0 {
+                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(self.fileId)")
                 enqueueCatching {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
+            } else {
+                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) scheduleNextChunk NOOP fid:\(self.fileId)")
             }
             
             return
@@ -395,20 +412,27 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     /// Prepare chunk upload requests, and start them.
     func fanOutChunks() async throws {
-        try checkCancelation()
         UploadOperationLog("fanOut for:\(fileId)")
-
+        try checkCancelation()
+        
+        let freeSlots = self.freeRequestSlots()
+        guard freeSlots > 0 else {
+            UploadOperationLog("fanOut no free slots for:\(fileId)")
+            return
+        }
+        
         try transactionWithFile { file in
             // Get the current uploading session
             guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
             
-            let chunksToUpload = uploadingSessionTask.chunkTasks.filter { uploadingChunkTask in
-                uploadingChunkTask.canStartUploading == true
-            }
+            let chunksToUpload = Array(uploadingSessionTask.chunkTasks
+                .filter(UploadingChunkTask.canStartUploadingPreconditionPredicate)
+                .filter { $0.hasLocalChunk == true })
+                .prefix(freeSlots) // Iterate over only the available worker slots
             
-            UploadOperationLog("fanOut chunksToUpload:\(chunksToUpload.count) for:\(self.fileId)")
+            UploadOperationLog("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.fileId)")
             
             // Schedule all the chunks to be uploaded
             for chunkToUpload: UploadingChunkTask in chunksToUpload {
@@ -436,7 +460,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
                     uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
                     
-                    chunkToUpload.sessionIdentifier = self.urlSession.identifier(for: uploadTask)
+                    chunkToUpload.sessionIdentifier = self.urlSession.identifier
+                    chunkToUpload.taskIdentifier = self.urlSession.identifier(for: uploadTask)
                     chunkToUpload.requestUrl = request.url?.absoluteString
                     
                     let identifier = self.urlSession.identifier(for: uploadTask)
@@ -768,8 +793,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                  
                 // tracking running tasks
                 if let identifier = chunkTask.taskIdentifier {
-                    self.uploadTasks.removeValue(forKey: identifier)
+                    let task = self.uploadTasks.removeValue(forKey: identifier)
                     chunkTask.taskIdentifier = nil
+                } else {
+                    UploadOperationLog("No identifier for chunkId:\(uploadedChunk.number) in SUCCESS fid:\(self.fileId)", level: .error)
+                    assertionFailure("unable to lookup chunk task id")
                 }
                 
                 // Some cleanup if we have the chance
@@ -805,10 +833,21 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Follow up with chunking again
         else {
             enqueueCatching {
-                UploadOperationLog("Remaining \(toUploadCount) chunks to be uploaded \(self.fileId)")
-                try await self.generateChunksAndFanOutIfNeeded()
+                let slots = self.freeRequestSlots()
+                UploadOperationLog("remaining chunks:\(toUploadCount) slots:\(slots) uploadCompletionSuccess fid:\(self.fileId)")
+                if slots > 0 {
+                    try await self.generateChunksAndFanOutIfNeeded()
+                }
             }
         }
+    }
+    
+    /// Return the available request slots.
+    private func freeRequestSlots() -> Int {
+        let uploadTasksCount = self.uploadTasks.count
+        let free = max(Self.parallelism - uploadTasksCount, 0)
+//        UploadOperationLog("freeRequestSlots:\(free) uploadTasksCount:\(uploadTasksCount) fid:\(self.fileId)")
+        return free
     }
     
     private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) throws {

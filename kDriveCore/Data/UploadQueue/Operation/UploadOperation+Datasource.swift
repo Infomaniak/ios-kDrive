@@ -30,7 +30,7 @@ extension UploadOperation {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
             
-            let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == false }
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
             count = filteredTasks.count
         }
         
@@ -45,7 +45,7 @@ extension UploadOperation {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
             
-            let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.doneUploading == true }
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.doneUploadingPredicate)
             count = filteredTasks.count
         }
         return count
@@ -59,7 +59,7 @@ extension UploadOperation {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
         
-            let filteredTasks = uploadingSessionTask.chunkTasks.filter { $0.scheduled == true }
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.scheduledPredicate)
             count = filteredTasks.count
         }
         return count

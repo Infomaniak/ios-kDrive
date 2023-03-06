@@ -22,6 +22,9 @@ import InfomaniakDI
 
 /// Tracks the upload operation, given a session for a file
 final public class UploadingSessionTask: EmbeddedObject {
+    
+    // MARK: - Persisted
+    
     @Persisted public var uploadSession: RUploadSession?
     @Persisted public var token: String
     @Persisted public var sessionExpiration: Date
@@ -50,6 +53,8 @@ final public class UploadingSessionTask: EmbeddedObject {
         self.fileIdentity = fileIdentity
         self.filePath = filePath
     }
+    
+    // MARK: - Computed Properties
     
     public var isExpired: Bool {
         return Date() > sessionExpiration

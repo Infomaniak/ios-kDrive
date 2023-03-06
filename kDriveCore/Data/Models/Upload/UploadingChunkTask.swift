@@ -23,6 +23,8 @@ import InfomaniakDI
 /// Tracks the upload of a chunk
 final public class UploadingChunkTask: EmbeddedObject {
     
+    @LazyInjectService var fileManager: FileManagerable
+    
     override public init() {
         // We have to keep it for Realm
     }
@@ -34,6 +36,8 @@ final public class UploadingChunkTask: EmbeddedObject {
         self.range = range
     }
     
+    // MARK: - Persisted Properties
+    
     @Persisted public var chunk: UploadedChunk?
     @Persisted private var _error: Data?
     
@@ -41,10 +45,11 @@ final public class UploadingChunkTask: EmbeddedObject {
     @Persisted public var chunkSize: Int64
     @Persisted public var sha256: String?
     
+    // TODO: Remove once APIV2 is updated
     /// Current upload session token
     @Persisted public var sessionToken: String?
     
-    /// Current task identifier
+    /// Current task identifier, uniq within a session
     @Persisted public var taskIdentifier: String?
     
     /// Tracking the session identifier used for the upload task
@@ -56,24 +61,26 @@ final public class UploadingChunkTask: EmbeddedObject {
     /// The path to the chunk file on the file system
     @Persisted public var path: String?
     
+    /// The persisted lowerBound of the `DataRange`
     @Persisted public var _lowerBound: Int64
+    
+    /// The persisted upperBound of the `DataRange`
     @Persisted public var _upperBound: Int64
     
-    @LazyInjectService var fileManager: FileManagerable
+    // MARK: - Predicates
     
-    /// Returns true if a network request is in progress.
-    public var scheduled: Bool {
-        requestUrl != nil && requestUrl?.isEmpty == false
-    }
+    public static let scheduledPredicate = NSPredicate(format: "requestUrl != nil")
     
-    public var doneUploading: Bool {
-        (chunk != nil) || (error != nil)
-    }
+    /// A predicate that will allow you to filter only the elements that are done uploading. (regardless of error state)
+    public static let doneUploadingPredicate = NSPredicate(format: "chunk != nil OR _error != nil")
     
-    /// Precond for starting the upload process
-    public var canStartUploading: Bool {
-        (doneUploading == false) && (hasLocalChunk == true) && (sessionIdentifier == nil) && (scheduled == false)
-    }
+    /// A predicate that will allow you to filter only the elements that are not done uploading. (regardless of error state)
+    public static let notDoneUploadingPredicate = NSPredicate(format: "chunk = nil AND _error = nil")
+    
+    /// A precondition to start uploading, but not all of the checks can be added to the predicate.
+    public static let canStartUploadingPreconditionPredicate = NSPredicate(format: "chunk = nil AND _error = nil AND sessionIdentifier = nil AND taskIdentifier = nil AND requestUrl = nil")
+    
+    // MARK: - Computed Properties
     
     /// The chunk is stored locally inside a file, with a path and we have a valid hash of it.
     public var hasLocalChunk: Bool {
@@ -87,16 +94,7 @@ final public class UploadingChunkTask: EmbeddedObject {
         return true
     }
     
-    public var uploadResult: Result<UploadedChunk, DriveError>? {
-        guard let chunk else {
-            guard let error else {
-                return nil
-            }
-            return Result.failure(error)
-        }
-        return Result.success(chunk)
-    }
-    
+    /// The range of the original file
     public var range: DataRange {
         get {
             return UInt64(_lowerBound)...UInt64(_upperBound)
@@ -108,6 +106,7 @@ final public class UploadingChunkTask: EmbeddedObject {
         }
     }
     
+    /// The persisted error, type friendly
     public var error: DriveError? {
         get {
             if let error = _error {
