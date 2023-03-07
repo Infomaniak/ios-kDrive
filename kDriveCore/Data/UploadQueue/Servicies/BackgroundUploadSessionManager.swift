@@ -272,7 +272,7 @@ public final class BackgroundUploadSessionManager: NSObject,
                 if let fetchedOperation = self.uploadQueue.getOperation(forFileId: matchedFile.id) {
                     BackgroundSessionManagerLog("found OP:\(fetchedOperation) in upload queue fid:\(matchedFile.id)")
                     operation = fetchedOperation
-                } else if let newOP = self.uploadQueue.saveToRealmAndAddtoQueue(file: matchedFile) {
+                } else if let newOP = self.uploadQueue.saveToRealmAndAddToQueue(file: matchedFile) {
                     BackgroundSessionManagerLog("added OP:\(newOP) in upload queue fid:\(matchedFile.id)")
                     newOP.restore(task: task, session: session)
                     operation = newOP

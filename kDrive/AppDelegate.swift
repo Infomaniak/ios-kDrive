@@ -43,6 +43,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    
+    /// Use this to simulate a long running background session
+    private static let simulateLongRunningSession = false
 
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
@@ -184,9 +187,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     private func launchSetup() {
-        // TODO: remove
-        // Use this to simulate a "background foreground"
-        if false {
+        // Simulating a "background foreground"
+        if Self.simulateLongRunningSession {
             window?.rootViewController = UIViewController()
             window?.makeKeyAndVisible()
 
@@ -402,7 +404,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             }
                             group.leave()
                         }
-                        uploadQueue.saveToRealmAndAddtoQueue(file: uploadFile, itemIdentifier: nil)
+                        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: nil)
                     }
                 }
             }

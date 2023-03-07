@@ -264,7 +264,7 @@ public class FileImportHelper {
                 url: file.path,
                 name: file.name
             )
-            uploadQueue.saveToRealmAndAddtoQueue(file: uploadFile)
+            uploadQueue.saveToRealmAndAddToQueue(file: uploadFile)
         }
     }
 
@@ -508,6 +508,6 @@ public class FileImportHelper {
             url: targetURL,
             name: name
         )
-        uploadQueue.saveToRealmAndAddtoQueue(file: newFile)
+        uploadQueue.saveToRealmAndAddToQueue(file: newFile)
     }
 }

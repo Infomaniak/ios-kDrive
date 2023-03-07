@@ -28,7 +28,7 @@ public protocol UploadQueueable {
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm()
 
-    func saveToRealmAndAddtoQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
+    func saveToRealmAndAddToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
 
     func suspendAllOperations()
 
@@ -106,8 +106,8 @@ extension UploadQueue: UploadQueueable {
     }
 
     @discardableResult
-    public func saveToRealmAndAddtoQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
-        UploadQueueLog("saveToRealmAndAddtoQueue fid:\(file.id)")
+    public func saveToRealmAndAddToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
+        UploadQueueLog("saveToRealmAndAddToQueue fid:\(file.id)")
         assert(!file.isManagedByRealm, "we expect the file to be outside of realm at the moment")
 
         // Save drive and directory

@@ -272,7 +272,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    uploadQueue.saveToRealmAndAddtoQueue(file:
+                    uploadQueue.saveToRealmAndAddToQueue(file:
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,
