@@ -813,8 +813,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 }
             } else {
                 UploadOperationLog("matching chunk:\(uploadedChunk.number) failed fid:\(self.fileId)")
+                SentrySDK.capture(message: "Upload matching chunk failed") { scope in
+                    scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
+                }
+                
                 self.cleanUploadFileSession(file: file)
-                throw ErrorDomain.unableToMatchUploadChunk // TODO: This should trigger a Sentry
+                throw ErrorDomain.unableToMatchUploadChunk
             }
         }
 

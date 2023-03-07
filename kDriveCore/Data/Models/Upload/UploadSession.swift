@@ -46,7 +46,6 @@ public struct UploadSession: Decodable {
     }
 }
 
-// TODO: Fusion UploadSession and RUploadSession
 public final class RUploadSession: EmbeddedObject, Decodable {
     @Persisted public var directoryId: Int64?
 
