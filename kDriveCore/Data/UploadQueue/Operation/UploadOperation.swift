@@ -402,8 +402,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
             }
-
-            return
         } catch {
             UploadOperationLog("Unable to schedule next chunk. error:\(error) for:\(fileId)",
                                level: .error)
