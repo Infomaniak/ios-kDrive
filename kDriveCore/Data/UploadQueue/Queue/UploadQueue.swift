@@ -48,7 +48,7 @@ public final class UploadQueue {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
-        queue.maxConcurrentOperationCount = 4
+        queue.maxConcurrentOperationCount = max(4, ProcessInfo.processInfo.activeProcessorCount)
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
@@ -105,6 +105,8 @@ public final class UploadQueue {
             UploadQueueLog("observeNetworkChange :\(isSuspended)")
             self.operationQueue.isSuspended = isSuspended
         }
+        
+        UploadQueueLog("UploadQueue parallelism is:\(self.operationQueue.maxConcurrentOperationCount)")
     }
 
     // MARK: - Public methods

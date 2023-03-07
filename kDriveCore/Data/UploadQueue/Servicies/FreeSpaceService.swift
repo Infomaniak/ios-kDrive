@@ -37,8 +37,15 @@ public struct FreeSpaceService {
 
     ///  The minimum available space required to start uploading with chunks
     ///
-    /// ≈ 4chunks with a max chunk size of 50 meg + 20% = 220MiB
-    private static let minimalSpaceRequiredForChunkUpload = 220 * 1024 * 1024
+    /// ≈ n chunks with a max chunk size of 50 meg + 20%. 220MiB for 4 cores.
+    private var minimalSpaceRequiredForChunkUpload: Int64 {
+        let parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
+        var requiredSpace = Int64(parallelism * 50 * 1024 * 1024)
+        requiredSpace += requiredSpace * 100 / 20
+        let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(UInt64(requiredSpace)).toMebibytes)
+        UploadOperationLog("minimalSpaceRequiredForChunkUpload is \(mebibytes)MiB")
+        return requiredSpace
+    }
 
     public func checkEnoughAvailableSpaceForChunkUpload() throws {
         let freeSpaceInTemporaryDirectory: Int64
@@ -49,8 +56,8 @@ public struct FreeSpaceService {
             return
         }
 
-        // Throw only if certain of not enough space
-        guard freeSpaceInTemporaryDirectory > Self.minimalSpaceRequiredForChunkUpload else {
+        // Throw if not enough space
+        guard freeSpaceInTemporaryDirectory > minimalSpaceRequiredForChunkUpload else {
             throw StorageIssues.notEnoughSpace
         }
     }
