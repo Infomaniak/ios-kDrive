@@ -93,8 +93,8 @@ public struct DriveError: Error, Equatable {
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
     public static let localError = DriveError(type: .localError, code: "localError")
     public static let errorDeviceStorage = DriveError(type: .localError,
-                                                      code: "errorDeviceStorage"/*,
-                                                      localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage*/) // TODO: bump localizedString
+                                                      code: "errorDeviceStorage",
+                                                      localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage)
     /// The task is cancelled by the user.
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
 
