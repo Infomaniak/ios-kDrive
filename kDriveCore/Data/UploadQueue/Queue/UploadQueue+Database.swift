@@ -30,8 +30,7 @@ extension UploadQueue {
 //                UploadQueueLog("transactionWithUploadRealm before closure in function:\(function)")
                 try task(uploadsRealm)
 //                UploadQueueLog("transactionWithUploadRealm after closure in function:\(function)")
-            }
-            catch {
+            } catch {
                 bufferError = error
             }
         }

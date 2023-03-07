@@ -43,8 +43,7 @@ extension UploadOperation {
                     }
                     try task(file)
                 }
-            }
-            catch {
+            } catch {
                 bufferError = error
             }
         }

@@ -20,21 +20,21 @@ import kDriveCore
 
 /// A manualy written mock of the RangeProviderGutsable protocol
 final class MCKRangeProviderGutsable: RangeProviderGutsable {
-    var buildRangesCalled: Bool = false
+    var buildRangesCalled = false
     var buildRangesReturnValue: [DataRange] = []
     func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {
         buildRangesCalled = true
         return buildRangesReturnValue
     }
 
-    var readFileByteSizeCalled: Bool = false
+    var readFileByteSizeCalled = false
     var readFileByteSizeReturnValue: UInt64 = 0
     func readFileByteSize() throws -> UInt64 {
         readFileByteSizeCalled = true
         return readFileByteSizeReturnValue
     }
 
-    var preferredChunkSizeCalled: Bool = false
+    var preferredChunkSizeCalled = false
     var preferredChunkSizeReturnValue: UInt64 = 0
     func preferredChunkSize(for fileSize: UInt64) -> UInt64 {
         preferredChunkSizeCalled = true

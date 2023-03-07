@@ -29,11 +29,9 @@ public final class MCKRangeProvidable: RangeProvidable {
             allRangesCallCount += 1
             if let allRangesThrows {
                 throw allRangesThrows
-            }
-            else if let allRangesClosure {
+            } else if let allRangesClosure {
                 return allRangesClosure()
-            }
-            else {
+            } else {
                 return []
             }
         }

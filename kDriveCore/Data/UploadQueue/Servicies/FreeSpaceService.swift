@@ -38,14 +38,13 @@ public struct FreeSpaceService {
     ///  The minimum available space required to start uploading with chunks
     ///
     /// ≈ 4chunks with a max chunk size of 50 meg + 20% = 220MiB
-    private static let minimalSpaceRequiredForChunkUpload = 220*1024*1024
+    private static let minimalSpaceRequiredForChunkUpload = 220 * 1024 * 1024
 
     public func checkEnoughAvailableSpaceForChunkUpload() throws {
         let freeSpaceInTemporaryDirectory: Int64
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
-        }
-        catch {
+        } catch {
             UploadOperationLog("unable to read available space \(error)", level: .error)
             return
         }
@@ -67,8 +66,7 @@ public struct FreeSpaceService {
             }
 
             return capacity
-        }
-        catch {
+        } catch {
             throw StorageIssues.unavailable(wrapping: error)
         }
     }

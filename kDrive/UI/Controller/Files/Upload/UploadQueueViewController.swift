@@ -68,7 +68,7 @@ class UploadQueueViewController: UIViewController {
 
     func setUpObserver() {
         guard currentDirectory != nil else { return }
-        
+
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,
                                                           driveId: currentDirectory.driveId,
@@ -85,7 +85,7 @@ class UploadQueueViewController: UIViewController {
                     // TODO: Remove
                     print("self?.uploadingFiles : \(self?.uploadingFiles.count)")
                     self?.uploadingFiles = AnyRealmCollection(results)
-                    
+
                     guard !results.isEmpty else {
 //                        self?.tableView.reloadData()
                         self?.navigationController?.popViewController(animated: true)
@@ -104,7 +104,7 @@ class UploadQueueViewController: UIViewController {
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
                 }
-            }
+        }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -159,14 +159,14 @@ extension UploadQueueViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
                                        isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-        
+
         /// Make sure the file is valid
         let file = uploadingFiles[indexPath.row]
         if !file.isInvalidated {
             let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
             cell.configureWith(uploadFile: file, progress: progress)
         }
-        
+
         cell.selectionStyle = .none
         return cell
     }

@@ -21,23 +21,23 @@ import Foundation
 /// Something that matches most of the FileHandle specification, used for testing
 protocol FileHandlable {
     var availableData: Data { get }
-    
+
     var description: String { get }
-    
+
     func seek(toOffset offset: UInt64) throws
-    
+
     func truncate(atOffset offset: UInt64) throws
-    
+
     func synchronize() throws
-    
+
     func close() throws
-    
+
     func readToEnd() throws -> Data?
-    
+
     func read(upToCount count: Int) throws -> Data?
-    
+
     func offset() throws -> UInt64
-    
+
     func seekToEnd() throws -> UInt64
 }
 

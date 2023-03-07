@@ -23,23 +23,23 @@ import XCTest
 /// Unit Tests of the ChunkProvider
 final class UTChunkProvider: XCTestCase {
     // MARK: - next
-    
+
     func testNext_emptyRanges() throws {
         // GIVEN
         let ranges = [DataRange]()
         let mckFileHandle = MCKFileHandlable()
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: ranges)
 
         // WHEN
         let chunk = chunkProvider.next()
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 0)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 0)
         XCTAssertNil(chunk)
     }
-    
+
     func testNext_hasOneRange() throws {
         // GIVEN
         let ranges: [DataRange] = [
@@ -47,18 +47,18 @@ final class UTChunkProvider: XCTestCase {
         ]
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: ranges)
 
         // WHEN
         let chunk = chunkProvider.next()
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 1)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 1)
         XCTAssertNotNil(chunk)
     }
-    
+
     func testNext_hasRanges() throws {
         // GIVEN
         let ranges: [DataRange] = [
@@ -68,18 +68,18 @@ final class UTChunkProvider: XCTestCase {
         ]
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: ranges)
 
         // WHEN
         let chunk = chunkProvider.next()
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 1)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 1)
         XCTAssertNotNil(chunk)
     }
-    
+
     func testNext_enumarateAll() throws {
         // GIVEN
         let ranges: [DataRange] = [
@@ -87,11 +87,11 @@ final class UTChunkProvider: XCTestCase {
             1...2,
             2...4
         ]
-        
+
         let expectedRangesCount = ranges.count
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: ranges)
 
         // WHEN
@@ -99,15 +99,15 @@ final class UTChunkProvider: XCTestCase {
         while let chunk = chunkProvider.next() {
             chunks.append(chunk)
         }
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, expectedRangesCount)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, expectedRangesCount)
         XCTAssertEqual(chunks.count, expectedRangesCount)
     }
-    
+
     // MARK: - readChunk(range:)
-    
+
     func testReadChunk_validChunk() throws {
         // GIVEN
         let range: DataRange = 0...1
@@ -116,7 +116,7 @@ final class UTChunkProvider: XCTestCase {
         mckFileHandle.seekToOffsetClosure = { index in
             XCTAssertEqual(index, range.lowerBound)
         }
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: [])
 
         // WHEN
@@ -127,24 +127,24 @@ final class UTChunkProvider: XCTestCase {
             XCTFail("Unexpected :\(error)")
             return
         }
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 1)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 1)
     }
-    
+
     func testReadChunk_throwErrorOnSeek() throws {
         // GIVEN
         let range: DataRange = 0...1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
         mckFileHandle.seekToOffsetError = NSError(domain: "k", code: 1337)
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: [])
 
         // WHEN
         do {
-            let _ = try chunkProvider.readChunk(range: range)
+            _ = try chunkProvider.readChunk(range: range)
             XCTFail("Unexpected")
             return
         } catch {
@@ -154,24 +154,24 @@ final class UTChunkProvider: XCTestCase {
             }
             // all good
         }
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 1)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 0)
     }
-    
+
     func testReadChunk_throwErrorOnRead() throws {
         // GIVEN
         let range: DataRange = 0...1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
         mckFileHandle.readUpToCountError = NSError(domain: "k", code: 1337)
-        
+
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: [])
 
         // WHEN
         do {
-            let _ = try chunkProvider.readChunk(range: range)
+            _ = try chunkProvider.readChunk(range: range)
             XCTFail("Unexpected")
             return
         } catch {
@@ -181,7 +181,7 @@ final class UTChunkProvider: XCTestCase {
             }
             // all good
         }
-        
+
         // THEN
         XCTAssertEqual(mckFileHandle.seekToOffsetCallCount, 1)
         XCTAssertEqual(mckFileHandle.readUpToCountCallCount, 1)

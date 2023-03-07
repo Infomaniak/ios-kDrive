@@ -24,7 +24,7 @@ import Foundation
 /// Inherits from NSObject for free description implementation
 final class MCKFileHandlable: NSObject, FileHandlable {
     var availableData: Data = .init()
-    
+
     // MARK: - seek(toOffset:)
 
     var seekToOffsetCalled: Bool { seekToOffsetCallCount > 0 }
@@ -39,7 +39,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             seekToOffsetClosure(offset)
         }
     }
-    
+
     // MARK: - truncate(atOffset:)
 
     var truncateCalled: Bool { truncateCallCount > 0 }
@@ -51,9 +51,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             truncateClosure(offset)
         }
     }
-    
+
     // MARK: - synchronize
-    
+
     var synchronizeCalled: Bool { synchronizeCallCount > 0 }
     var synchronizeCallCount: Int = 0
     var synchronizeClosure: (() -> Void)?
@@ -63,9 +63,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             synchronizeClosure()
         }
     }
-    
+
     // MARK: - close
-    
+
     var closeCalled: Bool { closeCallCount > 0 }
     var closeCallCount: Int = 0
     var closeClosure: (() -> Void)?
@@ -75,9 +75,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             closeClosure()
         }
     }
-    
+
     // MARK: - readToEnd
-    
+
     var readToEndCalled: Bool { readToEndCallCount > 0 }
     var readToEndCallCount: Int = 0
     var readToEndClosure: (() -> Data)?
@@ -89,9 +89,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             return nil
         }
     }
-    
+
     // MARK: - read(upToCount:)
-    
+
     var readUpToCountCalled: Bool { readUpToCountCallCount > 0 }
     var readUpToCountCallCount: Int = 0
     var readUpToCountClosure: ((Int) -> Data)?
@@ -106,9 +106,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             return nil
         }
     }
-    
+
     // MARK: - offset
-    
+
     var offsetCalled: Bool { offsetCallCount > 0 }
     var offsetCallCount: Int = 0
     var offsetClosure: (() -> UInt64)?
@@ -120,9 +120,9 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             return UInt64(NSNotFound)
         }
     }
-    
+
     // MARK: - seekToEnd
-    
+
     var seekToEndCalled: Bool { seekToEndCallCount > 0 }
     var seekToEndCallCount: Int = 0
     var seekToEndClosure: (() -> UInt64)?

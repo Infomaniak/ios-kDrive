@@ -46,7 +46,7 @@ public protocol UploadFilable {
 
 public class UploadFile: Object, UploadFilable {
     public static let defaultMaxRetryCount = 3
-    
+
     public static let observedProperties = ["name",
                                             "url",
                                             "parentDirectoryId",
@@ -54,7 +54,7 @@ public class UploadFile: Object, UploadFilable {
                                             "driveId",
                                             "uploadDate",
                                             "_error"]
-    
+
     @Persisted(primaryKey: true) public var id: String = ""
     @Persisted public var name: String = ""
     @Persisted var relativePath: String = ""
@@ -74,7 +74,7 @@ public class UploadFile: Object, UploadFilable {
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
     @Persisted var uploadingSession: UploadingSessionTask?
-    
+
     private var localAsset: PHAsset?
 
     public var pathURL: URL? {

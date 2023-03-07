@@ -38,7 +38,7 @@ public extension DriveApiFetcher {
         case chunkSize = "chunk_size"
         case chunkHash = "chunk_hash"
     }
-    
+
     /// Starts a session to upload a file in multiple parts
     ///
     /// https://developer.infomaniak.com/docs/api/post/2/drive/%7Bdrive_id%7D/upload/session/start
@@ -76,55 +76,55 @@ public extension DriveApiFetcher {
         guard directoryId != nil || directoryPath != nil else {
             throw DriveError.UploadSessionError.invalidDirectoryParameters
         }
-        
+
         guard !fileName.isEmpty else {
             throw DriveError.UploadSessionError.fileNameIsEmpty
         }
-        
+
         guard totalChunks < RangeProvider.APIConstants.maxTotalChunks,
               totalChunks >= RangeProvider.APIConstants.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
-        
+
         // Build parameters
         var parameters: Parameters = [APIParameters.driveId.rawValue: drive.id,
                                       APIParameters.totalSize.rawValue: totalSize,
                                       APIParameters.fileName.rawValue: fileName,
                                       APIParameters.totalChunks.rawValue: totalChunks]
-        
+
         if let conflictResolution {
             parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
         }
-        
+
         // TODO: check if doc details data format
         if let lastModifiedAt {
             parameters[APIParameters.lastModifiedAt.rawValue] = "\(lastModifiedAt.timeIntervalSince1970)"
         }
-        
+
         // TODO: check if doc details data format
         if let createdAt {
             parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
         }
-        
+
         if let directoryId {
             parameters[APIParameters.directoryId.rawValue] = directoryId
         }
-        
+
         if let directoryPath {
             parameters[APIParameters.directoryPath.rawValue] = directoryPath
         }
-        
+
         if let fileId {
             parameters[APIParameters.fileId.rawValue] = fileId
         }
-        
+
         let route: Endpoint = .startSession(drive: drive)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: nil,
                               body: .POSTParameters(parameters))
-        
+
         let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
@@ -135,33 +135,33 @@ public extension DriveApiFetcher {
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
+
         let result: UploadLiveSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> Bool {
         let route: Endpoint = .cancelSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .DELETE,
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
+
         let result: Bool = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadedFile {
         let route: Endpoint = .closeSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
+
         let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func appendChunk(drive: AbstractDrive,
                      sessionToken: AbstractToken,
                      chunkNumber: Int,
@@ -172,16 +172,16 @@ public extension DriveApiFetcher {
                                       APIParameters.chunkSize.rawValue: chunkSize,
                                       APIParameters.chunkHash.rawValue: chunkHash]
         let route: Endpoint = .appendChunk(drive: drive, sessionToken: sessionToken)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: parameters,
                               body: .requestBody(chunk))
-        
+
         let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func upload(drive: AbstractDrive,
                 sessionToken: AbstractToken,
                 chunkNumber: Int,
@@ -189,12 +189,12 @@ public extension DriveApiFetcher {
         let chunkSize = chunk.count
         let parameters: Parameters = [APIParameters.chunkSize.rawValue: chunkSize]
         let route: Endpoint = .upload(drive: drive)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: parameters,
                               body: .none)
-        
+
         let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }

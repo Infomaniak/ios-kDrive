@@ -30,9 +30,9 @@ public protocol ChunkProvidable: IteratorProtocol {
 ///
 public final class ChunkProvider: ChunkProvidable {
     public typealias Element = Data
-    
+
     let fileHandle: FileHandlable
-    
+
     var ranges: [DataRange]
 
     deinit {
@@ -41,32 +41,32 @@ public final class ChunkProvider: ChunkProvidable {
             try fileHandle.close()
         } catch {}
     }
-    
+
     public init?(fileURL: URL, ranges: [DataRange]) {
         self.ranges = ranges
-        
+
         do {
             self.fileHandle = try FileHandle(forReadingFrom: fileURL)
         } catch {
             return nil
         }
     }
-    
+
     /// Internal testing method
     init(mockedHandlable: FileHandlable, ranges: [DataRange]) {
         self.ranges = ranges
         self.fileHandle = mockedHandlable
     }
-    
+
     /// Will provide chunks one by one, using the IteratorProtocol
     /// Starting by the first range available.
     public func next() -> Data? {
         guard !ranges.isEmpty else {
             return nil
         }
-        
+
         let range = ranges.removeFirst()
-        
+
         do {
             let chunk = try readChunk(range: range)
             return chunk
@@ -74,9 +74,9 @@ public final class ChunkProvider: ChunkProvidable {
             return nil
         }
     }
-    
+
     // MARK: Internal
-    
+
     func readChunk(range: DataRange) throws -> Data? {
         let offset = range.lowerBound
         try fileHandle.seek(toOffset: offset)
@@ -91,7 +91,7 @@ public final class ChunkProvider: ChunkProvidable {
 extension FileHandle {
     override open var description: String {
         let superDescription = super.description
-        
+
         let offsetString: String
         do {
             let offset = try self.offset()
@@ -99,12 +99,12 @@ extension FileHandle {
         } catch {
             offsetString = "\(error)"
         }
-        
+
         let buffer = """
         <\(superDescription)>
         <offset:\(offsetString)>
         """
-        
+
         return buffer
     }
 }

@@ -26,19 +26,19 @@ final class UTRangeProvider: XCTestCase {
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGutsable( /* all zeroes by default */ )
-        
+
         rangeProvider.guts = mckGuts
-        
+
         // WHEN
         do {
-            let _ = try rangeProvider.allRanges
-            
+            _ = try rangeProvider.allRanges
+
             // THEN
         } catch {
             XCTFail("Unexpected")
         }
     }
-    
+
     func testAllRanges_FileTooLarge() throws {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
@@ -46,11 +46,11 @@ final class UTRangeProvider: XCTestCase {
         let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConstants.fileMaxSizeClient + 1
         rangeProvider.guts = mckGuts
-        
+
         // WHEN
         do {
-            let _ = try rangeProvider.allRanges
-            
+            _ = try rangeProvider.allRanges
+
             // THEN
             XCTFail("Unexpected")
         } catch {
@@ -59,11 +59,11 @@ final class UTRangeProvider: XCTestCase {
                 XCTFail("Unexpected")
                 return
             }
-            
+
             // success
         }
     }
-    
+
     func testAllRanges_Success() throws {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
@@ -71,17 +71,17 @@ final class UTRangeProvider: XCTestCase {
         let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConstants.chunkMinSize + 1
         mckGuts.preferredChunkSizeReturnValue = 1 * 1024 * 1024
-        
+
         rangeProvider.guts = mckGuts
-        
+
         // WHEN
         do {
             let ranges = try rangeProvider.allRanges
-            
+
             // THEN
             XCTAssertNotNil(ranges)
             XCTAssertEqual(ranges.count, 0)
-            
+
             XCTAssertTrue(mckGuts.buildRangesCalled)
             XCTAssertTrue(mckGuts.preferredChunkSizeCalled)
             XCTAssertTrue(mckGuts.readFileByteSizeCalled)

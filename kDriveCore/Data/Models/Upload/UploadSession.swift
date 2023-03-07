@@ -22,17 +22,17 @@ import RealmSwift
 /// The object returned at the startSession call
 public struct UploadSession: Decodable {
     public var directoryId: Int64?
-    
+
     public var directoryPath: String?
-    
+
     public var file: File?
-    
+
     public var fileName: String
-    
+
     public var message: String?
-    
+
     public var result: Bool
-    
+
     public var token: String
 
     enum CodingKeys: String, CodingKey {
@@ -49,17 +49,17 @@ public struct UploadSession: Decodable {
 // TODO: Fusion UploadSession and RUploadSession
 public final class RUploadSession: EmbeddedObject, Decodable {
     @Persisted public var directoryId: Int64?
-    
+
     @Persisted public var directoryPath: String?
-    
+
     @Persisted public var fileName: String
-    
+
     @Persisted public var message: String?
-    
+
     @Persisted public var result: Bool
-    
+
     @Persisted public var token: String
-    
+
     public convenience init(uploadSession: UploadSession) {
         self.init()
 
@@ -68,7 +68,7 @@ public final class RUploadSession: EmbeddedObject, Decodable {
         self.result = uploadSession.result
         self.token = uploadSession.token
     }
-    
+
     public required convenience init(from decoder: Decoder) throws {
         self.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -79,7 +79,7 @@ public final class RUploadSession: EmbeddedObject, Decodable {
         self.result = try container.decode(Bool.self, forKey: .result)
         self.token = try container.decode(String.self, forKey: .token)
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case directoryId = "directory_id"
         case directoryPath = "directory_path"

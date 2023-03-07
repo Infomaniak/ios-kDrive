@@ -20,7 +20,7 @@ import Foundation
 
 extension UploadOperation {
     // MARK: Model
-    
+
     /// Count of the chunks to upload, independent of chunk produced on local storage
     func chunkTasksToUploadCount() throws -> Int {
         var count: Int!
@@ -29,14 +29,14 @@ extension UploadOperation {
             guard let uploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
-            
+
             let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
             count = filteredTasks.count
         }
-        
+
         return count
     }
-    
+
     /// Count of the uploaded chunks to upload, independent of chunk produced on local storage
     func chunkTasksUploadedCount() throws -> Int {
         var count: Int!
@@ -44,13 +44,13 @@ extension UploadOperation {
             guard let uploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
-            
+
             let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.doneUploadingPredicate)
             count = filteredTasks.count
         }
         return count
     }
-    
+
     /// How many chunk requests are active at the moment
     func chunkTasksUploadingCount() throws -> Int {
         var count: Int!
@@ -58,13 +58,13 @@ extension UploadOperation {
             guard let uploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
-        
+
             let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.scheduledPredicate)
             count = filteredTasks.count
         }
         return count
     }
-    
+
     /// Count of the chunks to upload, independent of chunk produced on local storage
     func chunkTasksTotalCount() throws -> Int {
         var count: Int!
@@ -73,12 +73,12 @@ extension UploadOperation {
             guard let uploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
-        
+
             count = uploadingSessionTask.chunkTasks.count
         }
         return count
     }
-    
+
     // MARK: Misc
 
     func getDriveFileManager() throws -> DriveFileManager {

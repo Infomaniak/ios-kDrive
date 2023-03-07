@@ -23,64 +23,64 @@ import RealmSwift
 /// Tracks the upload operation, given a session for a file
 public final class UploadingSessionTask: EmbeddedObject {
     // MARK: - Persisted
-    
+
     @Persisted public var uploadSession: RUploadSession?
     @Persisted public var token: String
     @Persisted public var sessionExpiration: Date
     @Persisted public var chunkTasks: List<UploadingChunkTask>
-    
+
     /// Allows us to make sure the file was not edited while the upload session runs
     @Persisted public var fileIdentity: String
-    
+
     /// The source file path
     @Persisted public var filePath: String
 
     override public init() {
         // We have to keep it for Realm
     }
-    
+
     public convenience init(uploadSession: RUploadSession,
                             sessionExpiration: Date,
                             chunkTasks: List<UploadingChunkTask>,
                             fileIdentity: String,
                             filePath: String) {
         self.init()
-        
+
         self.uploadSession = uploadSession
         self.sessionExpiration = sessionExpiration
         self.chunkTasks = chunkTasks
         self.fileIdentity = fileIdentity
         self.filePath = filePath
     }
-    
+
     // MARK: - Computed Properties
-    
+
     public var isExpired: Bool {
         return Date() > sessionExpiration
     }
-    
+
     public var fileIdentityHasNotChanged: Bool {
         currentFileIdentity == fileIdentity
     }
-    
+
     static func fileIdentity(fileUrl: URL) -> String {
         // Make sure we can track the file has not changed across time, while we run the upload session
         @InjectService var fileMetadata: FileMetadatable
         let fileCreationString: String
         let fileModificationString: String
-        
+
         if let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl) {
             fileCreationString = "\(fileCreationDate)"
         } else {
             fileCreationString = "nil"
         }
-        
+
         if let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl) {
             fileModificationString = "\(fileModificationDate)"
         } else {
             fileModificationString = "nil"
         }
-        
+
         let fileUniqIdentity = "\(fileCreationString)_\(fileModificationString)"
         return fileUniqIdentity
     }

@@ -74,7 +74,7 @@ enum FactoryService {
             },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
-            },
+            }
         ]
         return services
     }
@@ -114,7 +114,7 @@ enum FactoryService {
             },
             Factory(type: NotificationsHelpable.self) { _, _ in
                 NotificationsHelper()
-            },
+            }
         ]
         return services
     }
@@ -137,7 +137,7 @@ enum FactoryService {
                 (loggerFactory, "UploadQueue"),
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
-                (loggerFactory, "AppDelegate"),
+                (loggerFactory, "AppDelegate")
             ]
             return services
         } else {
