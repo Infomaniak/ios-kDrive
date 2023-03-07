@@ -24,7 +24,7 @@ import RealmSwift
 public final class UploadingSessionTask: EmbeddedObject {
     // MARK: - Persisted
 
-    @Persisted public var uploadSession: RUploadSession?
+    @Persisted public var uploadSession: UploadSession?
     @Persisted public var token: String
     @Persisted public var sessionExpiration: Date
     @Persisted public var chunkTasks: List<UploadingChunkTask>
@@ -39,7 +39,7 @@ public final class UploadingSessionTask: EmbeddedObject {
         // We have to keep it for Realm
     }
 
-    public convenience init(uploadSession: RUploadSession,
+    public convenience init(uploadSession: UploadSession,
                             sessionExpiration: Date,
                             chunkTasks: List<UploadingChunkTask>,
                             fileIdentity: String,

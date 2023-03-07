@@ -78,7 +78,7 @@ public class DriveFileManager {
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
                           PhotoSyncSettings.self,
-                          RUploadSession.self,
+                          UploadSession.self,
                           UploadFile.self,
                           UploadingChunkTask.self,
                           UploadedChunk.self,

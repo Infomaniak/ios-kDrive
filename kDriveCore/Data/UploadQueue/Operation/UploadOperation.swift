@@ -265,9 +265,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 // The file at the moment we created the UploadingSessionTask
                 uploadingSessionTask.filePath = fileUrl.path
 
-                // Wrapping the API response type for Realm
-                let dbSession = RUploadSession(uploadSession: session)
-                uploadingSessionTask.uploadSession = dbSession
+                // Store the session
+                uploadingSessionTask.uploadSession = session
 
                 // Make sure we can track the the file has not changed across time, while we run the upload session
                 let fileIdentity = UploadingSessionTask.fileIdentity(fileUrl: fileUrl)

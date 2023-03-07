@@ -20,37 +20,14 @@ import Foundation
 import RealmSwift
 
 /// The object returned at the startSession call
-public struct UploadSession: Decodable {
-    public var directoryId: Int64?
-
-    public var directoryPath: String?
-
-    public var file: File?
-
-    public var fileName: String
-
-    public var message: String?
-
-    public var result: Bool
-
-    public var token: String
-
-    enum CodingKeys: String, CodingKey {
-        case directoryId = "directory_id"
-        case directoryPath = "directory_path"
-        case file
-        case fileName = "file_name"
-        case message
-        case result
-        case token
-    }
-}
-
-public final class RUploadSession: EmbeddedObject, Decodable {
+public final class UploadSession: EmbeddedObject, Decodable {
     @Persisted public var directoryId: Int64?
 
     @Persisted public var directoryPath: String?
 
+    /// Not persisted, as File does not belong to the Upload Realm
+    public var file: File?
+    
     @Persisted public var fileName: String
 
     @Persisted public var message: String?
@@ -59,20 +36,12 @@ public final class RUploadSession: EmbeddedObject, Decodable {
 
     @Persisted public var token: String
 
-    public convenience init(uploadSession: UploadSession) {
-        self.init()
-
-        self.fileName = uploadSession.fileName
-        self.message = uploadSession.message
-        self.result = uploadSession.result
-        self.token = uploadSession.token
-    }
-
     public required convenience init(from decoder: Decoder) throws {
         self.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.directoryId = try container.decodeIfPresent(Int64.self, forKey: .directoryId)
         self.directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
+        self.file = try container.decodeIfPresent(File.self, forKey: .file)
         self.fileName = try container.decode(String.self, forKey: .fileName)
         self.message = try container.decodeIfPresent(String.self, forKey: .message)
         self.result = try container.decode(Bool.self, forKey: .result)
