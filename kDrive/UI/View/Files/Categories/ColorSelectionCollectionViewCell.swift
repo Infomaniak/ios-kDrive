@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveResources
+import UIKit
 
 class ColorSelectionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var checkmark: UIImageView!

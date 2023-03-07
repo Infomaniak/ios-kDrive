@@ -109,7 +109,7 @@ protocol FileCellDelegate: AnyObject {
                   self.file.isInvalidated == false else {
                 return
             }
-            
+
             if self.file.id == requestFileId {
                 imageView.image = image
                 imageView.backgroundColor = nil

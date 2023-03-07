@@ -16,26 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import BackgroundTasks
-import kDriveCore
 import CocoaLumberjackSwift
+import Foundation
 import InfomaniakDI
+import kDriveCore
 
 extension AppDelegate {
-    
     /* To debug background tasks:
       Launch ->
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
      OR
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.long-refresh"]
-     
+
       Force early termination ->
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
      OR
       e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.long-refresh"]
      */
-    
+
     /// schedule background tasks
     func scheduleBackgroundRefresh() {
         BGTaskSchedulingLog("scheduleBackgroundRefresh")
@@ -47,7 +46,7 @@ extension AppDelegate {
         #else
         backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
         #endif
-        
+
         // Upload files (+pictures) / photokit
         let longBackgroundRefreshRequest = BGProcessingTaskRequest(identifier: Constants.longBackgroundRefreshIdentifier)
         #if DEBUG
@@ -62,14 +61,13 @@ extension AppDelegate {
             try backgroundTaskScheduler.submit(backgroundRefreshRequest)
             BGTaskSchedulingLog("scheduled task: \(backgroundRefreshRequest)")
             try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
-                BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
-            
+            BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
 
         } catch {
             BGTaskSchedulingLog("Error scheduling background task: \(error)", level: .error)
         }
     }
-    
+
     /// Register BackgroundTasks in scheduler for later
     func registerBackgroundTasks() {
         BGTaskSchedulingLog("registerBackgroundTasks")
@@ -89,7 +87,7 @@ extension AppDelegate {
             }
         }
         BGTaskSchedulingLog("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
-        
+
         registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
@@ -107,7 +105,7 @@ extension AppDelegate {
         }
         BGTaskSchedulingLog("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)")
     }
-    
+
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         BGTaskSchedulingLog("handleBackgroundRefresh")
         // User installed the app but never logged in
@@ -124,7 +122,7 @@ extension AppDelegate {
         BGTaskSchedulingLog("Clean errors for all uploads")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
-        
+
         BGTaskSchedulingLog("Reload operations in queue")
         uploadQueue.rebuildUploadQueueFromObjectsInRealm()
 
@@ -133,5 +131,4 @@ extension AppDelegate {
             completion(true)
         }
     }
-    
 }

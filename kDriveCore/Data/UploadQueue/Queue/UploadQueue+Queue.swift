@@ -84,7 +84,7 @@ extension UploadQueue: UploadQueueable {
                 uploadingFileIds = uploadingFiles.map(\.id)
                 UploadQueueLog("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
             }
-            
+
             let batches = uploadingFileIds.chunked(into: 100)
             UploadQueueLog("batched count:\(batches.count)")
             for batch in batches {
@@ -102,7 +102,6 @@ extension UploadQueue: UploadQueueable {
             }
 
             UploadQueueLog("rebuildUploadQueueFromObjectsInRealm exit")
-        
         }
     }
 
@@ -136,7 +135,7 @@ extension UploadQueue: UploadQueueable {
         try? self.transactionWithUploadRealm { realm in
             uploadOperation = self.addToQueue(file: detachedFile, itemIdentifier: itemIdentifier, using: realm)
         }
-        
+
         return uploadOperation
     }
 
@@ -180,7 +179,7 @@ extension UploadQueue: UploadQueueable {
                     try? realm.safeWrite {
                         realm.delete(toDelete)
                     }
-                    
+
                     UploadQueueLog("publishFileUploaded fid:\(fileId)")
                     self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
@@ -230,7 +229,7 @@ extension UploadQueue: UploadQueueable {
                 }
             }
 
-            try? self.transactionWithUploadRealm { realm in
+            try? self.transactionWithUploadRealm { _ in
                 self.publishUploadCount(withParent: parentId,
                                         userId: userId,
                                         driveId: driveId)
@@ -251,7 +250,7 @@ extension UploadQueue: UploadQueueable {
                         guard let error = file.error else {
                             return false
                         }
-                        
+
                         return (error.type != .serverError)
                     }
                 UploadQueueLog("will clean errors for uploads:\(failedUploadFiles.count)")
@@ -275,30 +274,30 @@ extension UploadQueue: UploadQueueable {
                     UploadQueueLog("file invalidated in\(#function) line:\(#line) fid:\(fileId)")
                     return
                 }
-                
+
                 // Remove operation from tracking
                 if let operation = self.operation(fileId: fileId) {
                     operation.cancel()
                     self.keyedUploadOperations.removeObject(forKey: fileId)
                 }
-                
+
                 // Clean error in base
                 try? realm.safeWrite {
                     file.error = nil
                     file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
             }
-            
+
             // re-enqueue UploadOperation
             try? self.transactionWithUploadRealm { realm in
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
                     UploadQueueLog("file invalidated in\(#function) line:\(#line) fid:\(fileId)")
                     return
                 }
-                
+
                 self.addToQueue(file: file, using: realm)
             }
-            
+
             self.resumeAllOperations()
         }
     }
@@ -334,7 +333,7 @@ extension UploadQueue: UploadQueueable {
                             operation.cancel()
                             self.keyedUploadOperations.removeObject(forKey: fileId)
                         }
-                        
+
                         // Clean errors in db file
                         guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
                             UploadQueueLog("file invalidated fid:\(fileId) at\(#line)")
@@ -378,7 +377,7 @@ extension UploadQueue: UploadQueueable {
         guard !file.isInvalidated else {
             return
         }
-        
+
         UploadQueueLog("rebuildUploadQueueFromObjectsInRealm fid:\(file.id)")
         guard let _ = self.operation(fileId: file.id) else {
             UploadQueueLog("rebuildUploadQueueFromObjectsInRealm ADD fid:\(file.id)")
@@ -399,7 +398,7 @@ extension UploadQueue: UploadQueueable {
             UploadQueueLog("invalid file in \(#function)", level: .error)
             return nil
         }
-        
+
         let fileId = file.id
         let parentId = file.parentDirectoryId
         let userId = file.userId
@@ -413,7 +412,7 @@ extension UploadQueue: UploadQueueable {
             UploadQueueLog("operation.completionBlock for operation:\(operation) fid:\(fileId)")
             self.keyedUploadOperations.removeObject(forKey: fileId)
             if let error = operation.result.uploadFile?.error,
-                  error == .taskRescheduled || error == .taskCancelled {
+               error == .taskRescheduled || error == .taskCancelled {
                 UploadQueueLog("skipping task")
                 return
             }
@@ -425,7 +424,7 @@ extension UploadQueue: UploadQueueable {
 
         UploadQueueLog("add operation :\(operation) fid:\(fileId)")
         operationQueue.addOperation(operation as Operation)
-        
+
         keyedUploadOperations.setObject(operation, key: fileId)
         self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
 

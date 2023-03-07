@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Lottie
 import UIKit
-import InfomaniakDI
 
 class MigrationViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
@@ -31,7 +31,7 @@ class MigrationViewController: UIViewController {
     @IBOutlet weak var migrationFailedLabel: UILabel!
 
     @LazyInjectService var accountManager: AccountManageable
-    
+
     private var photoSyncEnabled: Bool?
     private var slides: [Slide] = []
 

@@ -303,7 +303,6 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertEqual(preferredChunkSize, fileBytes)
-        
     }
     
     func testPreferredChunkSize_equalsMinChunk() {

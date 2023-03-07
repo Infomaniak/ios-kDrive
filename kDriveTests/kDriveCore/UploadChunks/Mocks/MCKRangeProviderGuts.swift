@@ -26,14 +26,14 @@ final class MCKRangeProviderGutsable: RangeProviderGutsable {
         buildRangesCalled = true
         return buildRangesReturnValue
     }
-    
+
     var readFileByteSizeCalled: Bool = false
     var readFileByteSizeReturnValue: UInt64 = 0
     func readFileByteSize() throws -> UInt64 {
         readFileByteSizeCalled = true
         return readFileByteSizeReturnValue
     }
-    
+
     var preferredChunkSizeCalled: Bool = false
     var preferredChunkSizeReturnValue: UInt64 = 0
     func preferredChunkSize(for fileSize: UInt64) -> UInt64 {

@@ -611,11 +611,11 @@ public extension Endpoint {
     static func upload(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [fileMinimalWithQueryItem])
     }
-    
+
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
     }
-    
+
     static func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload/session/\(sessionToken.token)")
     }
@@ -623,7 +623,7 @@ public extension Endpoint {
     static func startSession(drive: AbstractDrive) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/start")
     }
-    
+
     static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/finish")
     }
@@ -631,7 +631,7 @@ public extension Endpoint {
     static func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/chunk")
     }
-    
+
     // MARK: User invitation
 
     static func userInvitations(drive: AbstractDrive) -> Endpoint {

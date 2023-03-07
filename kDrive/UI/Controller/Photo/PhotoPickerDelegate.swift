@@ -17,12 +17,12 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Photos
 import PhotosUI
 import UIKit
-import InfomaniakDI
 
 class PhotoPickerDelegate: NSObject {
     @LazyInjectService var fileImportHelper: FileImportHelper

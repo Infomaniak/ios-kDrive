@@ -20,11 +20,10 @@ import kDriveCore
 
 /// A mock of RangeProvidable
 public final class MCKRangeProvidable: RangeProvidable {
-    
     var allRangesCalled: Bool { allRangesCallCount > 0 }
     var allRangesCallCount: Int = 0
     var allRangesThrows: Error?
-    var allRangesClosure: (()->[DataRange])?
+    var allRangesClosure: (() -> [DataRange])?
     public var allRanges: [DataRange] {
         get throws {
             allRangesCallCount += 1
@@ -38,7 +37,7 @@ public final class MCKRangeProvidable: RangeProvidable {
                 return []
             }
         }
-     }
-    
+    }
+
     public var fileSize: UInt64 = 0
 }

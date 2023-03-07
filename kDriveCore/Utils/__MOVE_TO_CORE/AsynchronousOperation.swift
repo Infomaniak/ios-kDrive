@@ -34,30 +34,29 @@ open class AsynchronousOperation: Operation {
 
     @objc private dynamic var state: OperationState {
         get {
-            return stateQueue.sync(execute: { rawState })
+            return stateQueue.sync { rawState }
         }
         set {
             willChangeValue(forKey: "state")
             stateQueue.sync(
-                flags: .barrier,
-                execute: { rawState = newValue })
+                flags: .barrier) { rawState = newValue }
             didChangeValue(forKey: "state")
         }
     }
 
-    public final override var isReady: Bool {
+    override public final var isReady: Bool {
         return state == .ready && super.isReady
     }
 
-    public final override var isExecuting: Bool {
+    override public final var isExecuting: Bool {
         return state == .executing
     }
 
-    public final override var isFinished: Bool {
+    override public final var isFinished: Bool {
         return state == .finished
     }
-    
-    public final override var isAsynchronous: Bool {
+
+    override public final var isAsynchronous: Bool {
         return true
     }
 
@@ -79,8 +78,8 @@ open class AsynchronousOperation: Operation {
 
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
-    
-    public override final func start() {
+
+    override public final func start() {
         super.start()
 
         if isCancelled {
@@ -89,7 +88,7 @@ open class AsynchronousOperation: Operation {
         }
 
         state = .executing
-        
+
         Task {
             try await asyncAwaitQueue.enqueue {
                 await self.execute()
@@ -110,9 +109,9 @@ open class AsynchronousOperation: Operation {
     open func execute() async {
         fatalError("Subclasses must implement `execute`.")
     }
-    
+
     /// Enqueue an async/await closure in the underlaying serial execution queue.
-    /// - Parameter asap: The task will be schedulled ASAP in the queue
+    /// - Parameter asap: The task will be scheduled ASAP in the queue
     /// - Parameter task: A closure with async await code to be dispatched
     public func enqueue(asap: Bool = false, _ task: @escaping () async throws -> Void) {
         Task {

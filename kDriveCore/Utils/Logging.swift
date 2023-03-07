@@ -21,10 +21,10 @@ import CocoaLumberjack
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
-import InfomaniakDI
 
 public enum Logging {
     public static func initLogging() {

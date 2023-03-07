@@ -165,5 +165,4 @@ final class ITRangeProviderGuts: XCTestCase {
                        superSmallFileSize,
                        "we expect the chunk size to be capped at the file size for small files")
     }
-    
 }

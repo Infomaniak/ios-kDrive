@@ -407,7 +407,6 @@ public class DriveApiFetcher: ApiFetcher {
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
-    
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 

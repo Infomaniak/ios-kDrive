@@ -83,10 +83,11 @@ public struct DriveError: Error, Equatable {
         self.type = type
         self.code = code
         self.underlyingError = underlyingError
-        self.localizedDescription = localizedString
+        localizedDescription = localizedString
     }
 
     // MARK: - Local
+
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
@@ -96,7 +97,7 @@ public struct DriveError: Error, Equatable {
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage*/) // TODO: bump localizedString
     /// The task is cancelled by the user.
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
-    
+
     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
@@ -110,9 +111,9 @@ public struct DriveError: Error, Equatable {
                                                  code: "errorCache",
                                                  localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
-    
+
     // MARK: - Server
-    
+
     public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
     public static let serverError = DriveError(type: .serverError, code: "serverError")
     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
@@ -155,34 +156,35 @@ public struct DriveError: Error, Equatable {
     public static let stillUploadingError = DriveError(type: .serverError,
                                                        code: "still_uploading_error",
                                                        localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
-    
+
     public static let fileAlreadyExistsError = DriveError(type: .serverError, code: "file_already_exists_error")
-    
+
     public static let notAuthorized = DriveError(type: .serverError, code: "not_authorized")
-    
+
     public static let uploadDestinationNotFoundError = DriveError(type: .serverError, code: "upload_destination_not_found_error")
-    
+
     public static let uploadDestinationNotWritableError = DriveError(type: .serverError, code: "upload_destination_not_writable_error")
-    
+
     public static let uploadNotTerminatedError = DriveError(type: .serverError, code: "upload_not_terminated_error")
-    
+
     public static let uploadNotTerminated = DriveError(type: .serverError, code: "upload_not_terminated")
-    
+
     public static let invalidUploadTokenError = DriveError(type: .serverError, code: "invalid_upload_token_error")
-    
+
     public static let uploadError = DriveError(type: .serverError, code: "upload_error")
-    
+
     public static let uploadFailedError = DriveError(type: .serverError, code: "upload_failed_error")
-    
+
     public static let uploadTokenIsNotValid = DriveError(type: .serverError, code: "upload_token_is_not_valid")
-    
+
     public static let uploadTokenCanceled = DriveError(type: .serverError, code: "upload_token_canceled")
-    
+
     // MARK: - Network
+
     public static let networkError = DriveError(type: .networkError,
                                                 code: "networkError",
                                                 localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
-    
+
     private static let allErrors: [DriveError] = [fileNotFound,
                                                   photoAssetNoLongerExists,
                                                   refreshToken,
@@ -222,7 +224,7 @@ public struct DriveError: Error, Equatable {
 
     /// A specific, not user facing, not localized error
     private var underlyingError: Error?
-    
+
     public init(apiErrorCode: String, httpStatus: Int = 400) {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
             self = error
@@ -260,12 +262,12 @@ public struct DriveError: Error, Equatable {
     static func serverError(statusCode: Int) -> DriveError {
         return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
     }
-    
+
     /// Wraps a specific detailed error into a user facing localized DriveError
     public func wrapping(_ underlyingError: Error) -> Self {
-        let error = DriveError(type: self.type,
-                               code: self.code,
-                               localizedString: self.localizedDescription,
+        let error = DriveError(type: type,
+                               code: code,
+                               localizedString: localizedDescription,
                                underlyingError: underlyingError)
         return error
     }

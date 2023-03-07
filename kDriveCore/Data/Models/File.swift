@@ -278,7 +278,7 @@ public class FileVersion: EmbeddedObject, Codable {
 
 public class File: Object, Codable {
     @LazyInjectService var accountManager: AccountManageable
-    
+
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
     /// Drive identifier
@@ -633,7 +633,7 @@ public class File: Object, Codable {
         parentId = try container.decode(Int.self, forKey: .parentId)
         driveId = try container.decode(Int.self, forKey: .driveId)
         let decodedName = try container.decode(String.self, forKey: .name)
-        self.name = decodedName
+        name = decodedName
         sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
         path = try container.decodeIfPresent(String.self, forKey: .path)
         rawType = try container.decode(String.self, forKey: .rawType)

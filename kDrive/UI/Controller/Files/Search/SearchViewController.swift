@@ -294,8 +294,8 @@ class SearchViewController: FileListViewController {
             if self?.searchViewModel.isDisplayingSearchResults == false {
                 self?.collectionView.reload(using: stagedChangeset, setData: setData)
                 self?.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
-                                    deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
-                                    count: self?.recentSearchesViewModel.recentSearches.count ?? 0)
+                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
+                                                   count: self?.recentSearchesViewModel.recentSearches.count ?? 0)
             } else {
                 // We don't reload the collection view but we still need to set the data
                 if let data = stagedChangeset.last?.data {

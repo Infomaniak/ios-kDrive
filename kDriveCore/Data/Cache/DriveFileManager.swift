@@ -64,7 +64,7 @@ public class DriveFileManager {
                         newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
                     }
                 }
-                
+
                 // Migration for Upload APIV2
                 if oldSchemaVersion < 13 {
                     migration.deleteData(forType: UploadFile.className())
@@ -82,7 +82,7 @@ public class DriveFileManager {
                           UploadFile.self,
                           UploadingChunkTask.self,
                           UploadedChunk.self,
-                          UploadingSessionTask.self,])
+                          UploadingSessionTask.self])
 
         /// realm db used for file upload
         public var uploadsRealm: Realm {
@@ -499,8 +499,7 @@ public class DriveFileManager {
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
                                                  page: page,
-                                                 sortType: sortType
-                                             )
+                                                 sortType: sortType)
                                              return (searchResults, nil)
                                          },
                                          page: page,

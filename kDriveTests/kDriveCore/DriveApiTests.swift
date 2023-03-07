@@ -46,11 +46,11 @@ final class DriveApiTests: XCTestCase {
 
     override class func setUp() {
         super.setUp()
-        
+
         // prepare mocking solver
         MockingHelper.registerConcreteTypes()
     }
-    
+
     override class func tearDown() {
         let group = DispatchGroup()
         group.enter()
@@ -61,10 +61,10 @@ final class DriveApiTests: XCTestCase {
             group.leave()
         }
         group.wait()
-        
+
         // clear mocking solver so the next test is stable
         MockingHelper.clearRegisteredTypes()
-        
+
         super.tearDown()
     }
 

@@ -19,21 +19,18 @@
 import Foundation
 
 protocol FileMetadatable {
-    
     func fileModificationDate(url: URL) -> Date?
-    
-    func fileCreationDate(url: URL) -> Date?
-    
-    func fileSize(url: URL) -> UInt64?
 
+    func fileCreationDate(url: URL) -> Date?
+
+    func fileSize(url: URL) -> UInt64?
 }
 
 public struct FileMetadata: FileMetadatable {
-    
     public init() {
         // FileMetadata service init
     }
-    
+
     func fileModificationDate(url: URL) -> Date? {
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
@@ -42,7 +39,7 @@ public struct FileMetadata: FileMetadatable {
             return nil
         }
     }
-    
+
     func fileCreationDate(url: URL) -> Date? {
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
@@ -51,7 +48,7 @@ public struct FileMetadata: FileMetadatable {
             return nil
         }
     }
-    
+
     func fileSize(url: URL) -> UInt64? {
         do {
             let fileAttributes = try FileManager.default.attributesOfItem(atPath: url.path)
@@ -60,5 +57,4 @@ public struct FileMetadata: FileMetadatable {
             return nil
         }
     }
-    
 }

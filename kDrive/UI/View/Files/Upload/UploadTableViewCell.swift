@@ -70,7 +70,7 @@ class UploadTableViewCell: InsetTableViewCell {
         guard !uploadFile.isInvalidated else {
             return
         }
-        
+
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
             cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
@@ -99,37 +99,37 @@ class UploadTableViewCell: InsetTableViewCell {
             self.cardContentView.iconView.image = image
         }
     }
-    
+
     func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
         guard !uploadFile.isInvalidated else {
             return
         }
-        
+
         // Set initial progress value
         if let progress = progress {
-            self.updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
+            updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
         }
-        
+
         // observe the progres
         let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
-               guard let self else {
-                   return
-               }
+            guard let self else {
+                return
+            }
 
-               switch change {
-               case .change(let newFile, _):
-                   guard let progress = newFile.progress,
-                         (newFile.error == nil || newFile.error == DriveError.taskRescheduled) == true else {
-                       return
-                   }
+            switch change {
+            case .change(let newFile, _):
+                guard let progress = newFile.progress,
+                      (newFile.error == nil || newFile.error == DriveError.taskRescheduled) == true else {
+                    return
+                }
 
-                   self.updateProgress(fileId: newFile.id, progress: progress, animated: false)
-               case .error(_), .deleted:
-                   break
-               }
+                self.updateProgress(fileId: newFile.id, progress: progress, animated: false)
+            case .error(_), .deleted:
+                break
+            }
         }
-        self.progressObservation = uploadFile.observe(keyPaths:  ["progress"], observationClosure)
-        
+        progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
+
         currentFileId = uploadFile.id
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
@@ -143,7 +143,7 @@ class UploadTableViewCell: InsetTableViewCell {
             guard !uploadFile.isInvalidated else {
                 return
             }
-            
+
             let realm = DriveFileManager.constants.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
                 self.uploadQueue.cancel(file)
@@ -153,7 +153,7 @@ class UploadTableViewCell: InsetTableViewCell {
             guard let self, !uploadFile.isInvalidated else {
                 return
             }
-            
+
             self.cardContentView.retryButton?.isHidden = true
             self.uploadQueue.retry(uploadFile.id)
         }

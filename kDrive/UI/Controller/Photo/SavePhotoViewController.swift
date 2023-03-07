@@ -22,7 +22,6 @@ import kDriveResources
 import UIKit
 
 class SavePhotoViewController: SaveFileViewController {
-
     var photo: UIImage!
     var videoUrl: URL!
     var uti: UTI!

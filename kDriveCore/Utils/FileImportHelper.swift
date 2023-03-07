@@ -138,7 +138,7 @@ public class FileImportHelper {
     public init() {
         /// Public Service initializer
     }
-    
+
     @MainActor
     public func importAssets(
         _ assetIdentifiers: [String],

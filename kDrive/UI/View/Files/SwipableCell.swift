@@ -59,12 +59,14 @@ protocol SwipableCell: UICollectionViewCell {
     func showSwipeActions()
     func resetSwipeActions()
 }
-// MARK: SwipableCell default implementation
-extension SwipableCell {
 
+// MARK: SwipableCell default implementation
+
+extension SwipableCell {
     private var closeThreshold: CGFloat {
         return swipeActionsSize / 4
     }
+
     private var openThreshold: CGFloat {
         return swipeActionsSize / 3
     }
@@ -179,5 +181,4 @@ extension SwipableCell {
         swipeStartPoint = .zero
         initialTrailingConstraintValue = 0
     }
-
 }

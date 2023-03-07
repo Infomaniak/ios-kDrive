@@ -25,12 +25,12 @@ import Foundation
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
 ///
 public func AppDelegateLog(_ message: @autoclosure () -> Any,
-                            level: AbstractLogLevel = .debug,
-                            context: Int = 0,
-                            file: StaticString = #file,
-                            function: StaticString = #function,
-                            line: UInt = #line,
-                            tag: Any? = nil) {
+                           level: AbstractLogLevel = .debug,
+                           context: Int = 0,
+                           file: StaticString = #file,
+                           function: StaticString = #function,
+                           line: UInt = #line,
+                           tag: Any? = nil) {
     let category = "AppDelegate"
     ABLog(message(),
           category: category,
@@ -69,12 +69,12 @@ public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
 ///
 public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
-                                        level: AbstractLogLevel = .debug,
-                                        context: Int = 0,
-                                        file: StaticString = #file,
-                                        function: StaticString = #function,
-                                        line: UInt = #line,
-                                        tag: Any? = nil) {
+                                level: AbstractLogLevel = .debug,
+                                context: Int = 0,
+                                file: StaticString = #file,
+                                function: StaticString = #function,
+                                line: UInt = #line,
+                                tag: Any? = nil) {
     let category = "BGTaskScheduling"
     ABLog(message(),
           category: category,

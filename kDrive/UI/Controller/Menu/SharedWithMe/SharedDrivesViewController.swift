@@ -17,10 +17,10 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
-import InfomaniakDI
 
 class SharedDrivesViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!

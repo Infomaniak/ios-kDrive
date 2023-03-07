@@ -22,7 +22,6 @@ import XCTest
 
 /// Unit Tests of the ChunkProvider
 final class UTChunkProvider: XCTestCase {
-
     // MARK: - next
     
     func testNext_emptyRanges() throws {
@@ -114,7 +113,7 @@ final class UTChunkProvider: XCTestCase {
         let range: DataRange = 0...1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
-        mckFileHandle.seekToOffsetClosure =  { index in
+        mckFileHandle.seekToOffsetClosure = { index in
             XCTAssertEqual(index, range.lowerBound)
         }
         

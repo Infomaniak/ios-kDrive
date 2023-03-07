@@ -27,7 +27,7 @@ extension UploadOperation {
             do {
                 let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
                 uploadsRealm.refresh()
-                
+
                 guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
                     bufferError = ErrorDomain.databaseUploadFileNotFound
 //                    UploadOperationLog("invalidated file fid:\(self.fileId)")
@@ -48,7 +48,7 @@ extension UploadOperation {
                 bufferError = error
             }
         }
-        
+
 //        UploadOperationLog("end transaction in:\(function) fid:\(self.fileId)")
         if let bufferError {
             throw bufferError

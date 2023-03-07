@@ -22,15 +22,14 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
-//import RealmSwift
+// import RealmSwift
 
 /// Something that can download a file.
 public protocol DownloadOperationable: Operationable {
     /// Called upon request completion
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?)
-    
+
     var file: File { get }
-    
 }
 
 public class DownloadOperation: Operation, DownloadOperationable {

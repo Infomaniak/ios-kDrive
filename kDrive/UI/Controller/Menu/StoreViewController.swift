@@ -17,11 +17,11 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
-import InfomaniakDI
 
 class StoreViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable

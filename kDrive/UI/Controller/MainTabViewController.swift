@@ -36,7 +36,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     var driveFileManager: DriveFileManager!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in

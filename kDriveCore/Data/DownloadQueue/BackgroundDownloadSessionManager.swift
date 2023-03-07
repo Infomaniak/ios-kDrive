@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakDI
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 
 protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
@@ -47,9 +47,8 @@ public protocol FileDownloadSession: Identifiable {
 extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate, FileDownloadSession {
-    
     @LazyInjectService var accountManager: AccountManageable
-    
+
     public var identifier: String {
         return backgroundSession.identifier
     }

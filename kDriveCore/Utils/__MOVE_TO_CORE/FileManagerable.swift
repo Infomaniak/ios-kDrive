@@ -21,6 +21,7 @@ import Foundation
 /// Interface of FileManager used for testing.
 public protocol FileManagerable {
     // MARK: peer into the abyss 👀
+
     func fileExists(atPath path: String) -> Bool
     func fileExists(atPath path: String, isDirectory: UnsafeMutablePointer<ObjCBool>?) -> Bool
     func isReadableFile(atPath path: String) -> Bool
@@ -29,14 +30,13 @@ public protocol FileManagerable {
     func isDeletableFile(atPath path: String) -> Bool
 
     // MARK: touch tree structure
+
     func createDirectory(at url: URL,
                          withIntermediateDirectories createIntermediates: Bool,
-                         attributes: [FileAttributeKey : Any]?) throws
-    
+                         attributes: [FileAttributeKey: Any]?) throws
+
     func removeItem(at URL: URL) throws
 }
 
 /// Extending FileManager with abstract protocol
-extension FileManager: FileManagerable {
-    
-}
+extension FileManager: FileManagerable {}

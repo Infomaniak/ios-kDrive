@@ -189,14 +189,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         if false {
             window?.rootViewController = UIViewController()
             window?.makeKeyAndVisible()
-            
+
             AppDelegateLog("handleBackgroundRefresh begin")
             DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
                 self.handleBackgroundRefresh { success in
                     AppDelegateLog("handleBackgroundRefresh success:\(success)")
                 }
             }
-            
+
         } else {
             // Set global tint color
             window?.tintColor = KDriveResourcesAsset.infomaniakColor.color

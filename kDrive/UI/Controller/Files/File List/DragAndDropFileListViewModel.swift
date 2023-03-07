@@ -53,7 +53,7 @@ class DraggableFileListViewModel {
 @MainActor
 class DroppableFileListViewModel {
     @LazyInjectService var fileImportHelper: FileImportHelper
-    
+
     var driveFileManager: DriveFileManager
     private var currentDirectory: File
     private var lastDropPosition: DropPosition?

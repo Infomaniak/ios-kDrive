@@ -31,7 +31,7 @@ class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
-    
+
     var driveFileManager: DriveFileManager!
     var files: [File]?
     /// Disable category edition (can just add/remove).

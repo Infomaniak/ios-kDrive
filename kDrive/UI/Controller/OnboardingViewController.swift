@@ -42,7 +42,7 @@ class OnboardingViewController: UIViewController {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
-    
+
     var addUser = false
     var slides: [Slide] = []
 

@@ -23,10 +23,10 @@ import Foundation
 ///
 /// Inherits from NSObject for free description implementation
 final class MCKFileHandlable: NSObject, FileHandlable {
-    
-    var availableData: Data = Data()
+    var availableData: Data = .init()
     
     // MARK: - seek(toOffset:)
+
     var seekToOffsetCalled: Bool { seekToOffsetCallCount > 0 }
     var seekToOffsetCallCount: Int = 0
     var seekToOffsetClosure: ((UInt64) -> Void)?
@@ -35,13 +35,13 @@ final class MCKFileHandlable: NSObject, FileHandlable {
         seekToOffsetCallCount += 1
         if let seekToOffsetError {
             throw seekToOffsetError
-        }
-        else if let seekToOffsetClosure {
+        } else if let seekToOffsetClosure {
             seekToOffsetClosure(offset)
         }
     }
     
     // MARK: - truncate(atOffset:)
+
     var truncateCalled: Bool { truncateCallCount > 0 }
     var truncateCallCount: Int = 0
     var truncateClosure: ((UInt64) -> Void)?
@@ -100,8 +100,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
         readUpToCountCallCount += 1
         if let readUpToCountError {
             throw readUpToCountError
-        }
-        else if let readUpToCountClosure {
+        } else if let readUpToCountClosure {
             return readUpToCountClosure(count)
         } else {
             return nil
@@ -135,5 +134,4 @@ final class MCKFileHandlable: NSObject, FileHandlable {
             return UInt64(NSNotFound)
         }
     }
-    
 }

@@ -89,7 +89,7 @@ extension UploadQueue: UploadPublishable {
                 guard let uploadFile = result.uploadFile, uploadFile.isInvalidated == false else {
                     return
                 }
-                
+
                 DispatchQueue.main.async {
                     closure(uploadFile, result.driveFile)
                 }

@@ -17,19 +17,19 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Photos
 import RealmSwift
 import UIKit
-import InfomaniakDI
 
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    
+
     private enum PhotoSyncSection {
         case syncSwitch
         case syncLocation
@@ -74,7 +74,7 @@ class PhotoSyncSettingsViewController: UIViewController {
             return PhotoSyncSettings()
         }
     }()
-    
+
     private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
@@ -211,7 +211,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings() {
-        BackgroundRealm.uploads.execute { realm in
+        BackgroundRealm.uploads.execute { _ in
             if photoSyncEnabled {
                 guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
                 switch newSyncSettings.syncMode {
@@ -505,7 +505,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
-            
+
             // Add new pictures to be uploaded and reload upload queue
             self.photoLibraryUploader.scheduleNewPicturesForUpload()
             @InjectService var uploadQueue: UploadQueue

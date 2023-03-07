@@ -80,7 +80,7 @@ public protocol AccountManageable {
     var currentDriveFileManager: DriveFileManager? { get }
     var mqService: MQService { get }
     var refreshTokenLockedQueue: DispatchQueue { get }
-    
+
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for drive: Drive) -> DriveFileManager?
@@ -121,7 +121,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
-    
+
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId

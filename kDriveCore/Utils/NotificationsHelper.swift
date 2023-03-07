@@ -24,32 +24,29 @@ import kDriveResources
 import UserNotifications
 
 public protocol NotificationsHelpable {
-    
     func askForPermissions()
-    
+
     func registerCategories()
-    
+
     /// Send a notification that we cannot perform an operation, as we do not have enough space
     func sendNotEnoughSpaceForUpload(filename: String)
-    
+
     func sendUploadError(filename: String, parentId: Int, error: DriveError)
- 
+
     func sendUploadDoneNotification(filename: String, parentId: Int)
-    
+
     func sendUploadDoneNotification(uploadCount: Int, parentId: Int?)
-    
+
     func sendPausedUploadQueueNotification()
-    
+
     func sendDisconnectedNotification()
-    
+
     func sendMigrateNotification()
-    
+
     func sendPhotoSyncErrorNotification()
-    
 }
 
 public struct NotificationsHelper: NotificationsHelpable {
-    
     public enum CategoryIdentifier {
         public static let general = "com.kdrive.notification.general"
         public static let upload = "com.kdrive.notification.upload"
@@ -91,7 +88,7 @@ public struct NotificationsHelper: NotificationsHelpable {
     }
 
     // MARK: - Service setup
-    
+
     public func askForPermissions() {
         let options: UNAuthorizationOptions = [.alert, .sound, .badge, .provisional, .providesAppNotificationSettings]
         UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, _ in
@@ -106,9 +103,9 @@ public struct NotificationsHelper: NotificationsHelpable {
         let migrateCategory = UNNotificationCategory(identifier: CategoryIdentifier.general, actions: [], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
-    
+
     // MARK: - Send Notifications
-    
+
     public func sendNotEnoughSpaceForUpload(filename: String) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
@@ -118,7 +115,7 @@ public struct NotificationsHelper: NotificationsHelpable {
 
         sendImmediately(notification: content, id: UUID().uuidString)
     }
-    
+
     public func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
@@ -196,9 +193,9 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.photoSyncError)
     }
-    
+
     // MARK: - Private
-    
+
     private func sendImmediately(notification: UNMutableNotificationContent, id: String, action: IKSnackBar.Action? = nil) {
         DispatchQueue.main.async {
             if notification.categoryIdentifier == CategoryIdentifier.upload && !NotificationsHelper.importNotificationsEnabled {

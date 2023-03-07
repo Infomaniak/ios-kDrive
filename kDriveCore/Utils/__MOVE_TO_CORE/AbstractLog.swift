@@ -18,8 +18,8 @@
 
 import CocoaLumberjackSwift
 import Foundation
-import os.log
 import InfomaniakDI
+import os.log
 
 /// A representation of sandard log levels
 public enum AbstractLogLevel {
@@ -33,7 +33,7 @@ public enum AbstractLogLevel {
     case debug
     /// Use this level only to capture system-level or multiprocess information when reporting system errors.
     case fault
-    
+
     /// bridge to OSLogType
     var logType: OSLogType {
         switch self {
@@ -51,7 +51,7 @@ public enum AbstractLogLevel {
     }
 }
 
-fileprivate let categoryKey = "category"
+private let categoryKey = "category"
 
 /// Abstract log mechanism, wrapping cocoalumberjack and OSLog
 ///
@@ -77,84 +77,56 @@ public func ABLog(_ message: @autoclosure () -> Any,
                   tag: Any? = nil,
                   asynchronous async: Bool = asyncLoggingEnabled) {
     let messageString = message() as! String
-    
-#if DEBUG
-    if #available(iOS 14.0, *), category.isEmpty == false {
-        let factoryParameters = [categoryKey : category]
-        @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
-        
-        // Make sure I can see it in console
-//        logger.error("\(messageString, privacy: .public)")
-        
-        // .public is fine as we only use this in #DEBUG
-        switch level {
-        case .warning, .alert:
-            logger.warning("\(messageString, privacy: .public)")
-        case .emergency, .critical:
-            logger.critical("\(messageString, privacy: .public)")
-        case .error:
-            logger.error("\(messageString, privacy: .public)")
-        case .notice:
-            logger.notice("\(messageString, privacy: .public)")
-        case .info:
-            logger.info("\(messageString, privacy: .public)")
-        case .debug:
-            logger.debug("\(messageString, privacy: .public)")
-        case .fault:
-            logger.fault("\(messageString, privacy: .public)")
+
+    #if DEBUG
+        if #available(iOS 14.0, *), category.isEmpty == false {
+            let factoryParameters = [categoryKey: category]
+            @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
+
+            // .public is fine as we only use this in #DEBUG
+            switch level {
+            case .warning, .alert:
+                logger.warning("\(messageString, privacy: .public)")
+            case .emergency, .critical:
+                logger.critical("\(messageString, privacy: .public)")
+            case .error:
+                logger.error("\(messageString, privacy: .public)")
+            case .notice:
+                logger.notice("\(messageString, privacy: .public)")
+            case .info:
+                logger.info("\(messageString, privacy: .public)")
+            case .debug:
+                logger.debug("\(messageString, privacy: .public)")
+            case .fault:
+                logger.fault("\(messageString, privacy: .public)")
+            }
+        } else {
+            os_log("[%@] %@", log: .default, type: .error /* level.logType */, category, messageString)
         }
-    } else {
-        os_log("[%@] %@", log: .default, type: .error /*level.logType*/, category, messageString)
-    }
-    
-    // Forward to cocoaLumberjack
-//    let buffer = "[\(category)] " + messageString
-//    switch level {
-//    case .error:
-//        DDLogError(buffer,
-//                   context: context,
-//                   file: file,
-//                   function: function,
-//                   line: line,
-//                   tag: tag,
-//                   asynchronous: async,
-//                   ddlog: .sharedInstance)
-//    case.info: fallthrough
-//    default:
-//        DDLogInfo(buffer,
-//                  context: context,
-//                  file: file,
-//                  function: function,
-//                  line: line,
-//                  tag: tag,
-//                  asynchronous: async,
-//                  ddlog: .sharedInstance)
-//    }
-    
-#else
-    // Forward to cocoaLumberjack
-    let buffer = "[\(category)] " + messageString
-    switch level {
-    case .error:
-        DDLogError(buffer,
-                   context: context,
-                   file: file,
-                   function: function,
-                   line: line,
-                   tag: tag,
-                   asynchronous: async,
-                   ddlog: .sharedInstance)
-    case.info: fallthrough
-    default:
-        DDLogInfo(buffer,
-                  context: context,
-                  file: file,
-                  function: function,
-                  line: line,
-                  tag: tag,
-                  asynchronous: async,
-                  ddlog: .sharedInstance)
-    }
-#endif
-    
+
+    #else
+        // Forward to cocoaLumberjack
+        let buffer = "[\(category)] " + messageString
+        switch level {
+        case .error:
+            DDLogError(buffer,
+                       context: context,
+                       file: file,
+                       function: function,
+                       line: line,
+                       tag: tag,
+                       asynchronous: async,
+                       ddlog: .sharedInstance)
+        case .info: fallthrough
+        default:
+            DDLogInfo(buffer,
+                      context: context,
+                      file: file,
+                      function: function,
+                      line: line,
+                      tag: tag,
+                      asynchronous: async,
+                      ddlog: .sharedInstance)
+        }
+    #endif
 }

@@ -118,7 +118,7 @@ enum FactoryService {
         ]
         return services
     }
-    
+
 #if DEBUG
     /// Debug services
     private static var debugServices: [FactoryWithIdentifier] {
@@ -130,7 +130,7 @@ enum FactoryService {
                 let subsystem = Bundle.main.bundleIdentifier!
                 return Logger(subsystem: subsystem, category: category)
             }
-            
+
             let services = [
                 (loggerFactory, "UploadOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
@@ -151,7 +151,7 @@ public extension SimpleResolver {
     static func register(_ factories: [Factory]) {
         factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
     }
-    
+
     static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
         factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
     }

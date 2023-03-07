@@ -26,7 +26,7 @@ public struct UploadLiveSession: Decodable {
     var failedChunks: UInt64
     var expectedSize: UInt64
     var uploadedSize: UInt64
-    
+
     private enum CodingKeys: String, CodingKey {
         case expectedChunks = "expected_chunks"
         case receivedChunks = "received_chunks"

@@ -26,7 +26,7 @@ import UIKit
 class ParameterTableViewController: UITableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    
+
     var driveFileManager: DriveFileManager!
 
     private enum ParameterRow: CaseIterable {

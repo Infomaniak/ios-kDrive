@@ -22,21 +22,19 @@ import Foundation
 /// Hashing data helpers
 @available(iOS 13.0, *)
 public extension String {
-    
     var SHA256Digest: SHA256Digest {
         SHA256.hash(data: self.data(using: .utf8) ?? Data())
     }
-    
+
     var SHA512Digest: SHA512Digest {
         SHA512.hash(data: self.data(using: .utf8) ?? Data())
     }
-    
+
     var SHA256DigestString: String {
         self.SHA256Digest.compactMap { String(format: "%02x", $0) }.joined()
     }
-    
+
     var SHA512DigestString: String {
         self.SHA512Digest.compactMap { String(format: "%02x", $0) }.joined()
     }
-    
 }

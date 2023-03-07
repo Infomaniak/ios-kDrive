@@ -17,12 +17,11 @@
  */
 
 import Foundation
-import RealmSwift
 import InfomaniakDI
+import RealmSwift
 
 /// Tracks the upload operation, given a session for a file
-final public class UploadingSessionTask: EmbeddedObject {
-    
+public final class UploadingSessionTask: EmbeddedObject {
     // MARK: - Persisted
     
     @Persisted public var uploadSession: RUploadSession?

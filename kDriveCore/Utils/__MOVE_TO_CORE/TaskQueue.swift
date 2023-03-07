@@ -23,10 +23,10 @@ public actor TaskQueue {
     private let concurrency: Int
     private var running: Int = 0
     private var queue = [CheckedContinuation<Void, Error>]()
-    
+
     /// Init function
     /// - Parameter concurrency: execution depth
-    public init(concurrency: Int = 1 /* serial by default */) {
+    public init(concurrency: Int = 1 /* serial by default */ ) {
         assert(concurrency > 0, "zero concurrency locks execution")
         self.concurrency = concurrency
     }
@@ -36,7 +36,7 @@ public actor TaskQueue {
             continuation.resume(throwing: CancellationError())
         }
     }
-    
+
     /// Enqueue some work.
     /// - Parameters:
     ///   - asap: if `true`, the task will be added on top of the execution stack

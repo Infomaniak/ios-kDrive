@@ -18,10 +18,10 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import Photos
 import RealmSwift
 import Sentry
-import InfomaniakDI
 
 public class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
@@ -77,7 +77,7 @@ public class PhotoLibraryUploader {
 
     @discardableResult
     public func scheduleNewPicturesForUpload() -> Int {
-        var newAssetsCount: Int = 0
+        var newAssetsCount = 0
         BackgroundRealm.uploads.execute { realm in
             PhotoLibraryUploaderLog("scheduleNewPicturesForUpload")
             guard let settings = self.settings,
@@ -85,7 +85,7 @@ public class PhotoLibraryUploader {
                 PhotoLibraryUploaderLog("0 new assets")
                 return
             }
-            
+
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
             // Create predicate from settings
@@ -108,7 +108,7 @@ public class PhotoLibraryUploader {
             let syncDate = Date()
             addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
             updateLastSyncDate(syncDate, using: realm)
-            
+
             newAssetsCount = assets.count
             PhotoLibraryUploaderLog("New assets count:\(newAssetsCount)")
         }
@@ -184,7 +184,7 @@ public class PhotoLibraryUploader {
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, using: realm)
                     }
-                    
+
                     realm.beginWrite()
                 }
             }

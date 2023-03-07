@@ -24,32 +24,31 @@ import Foundation
 ///
 /// Not using an actor, as it does not work well with Realm _yet_
 final class KeyedUploadOperationable {
-    
     private let queue = DispatchQueue(label: "com.infomaniak.drive.upload-sync")
-    
+
     /// a FileId to Operation map, bound to `queue` for access
     private var operationsInQueue: [String: UploadOperationable] = [:]
-    
+
     public func getObject(forKey key: String) -> UploadOperationable? {
         queue.sync {
-            return self.operationsInQueue[key]
+            self.operationsInQueue[key]
         }
     }
-    
+
     public func setObject(_ object: UploadOperationable, key: String) {
         queue.sync {
             self.operationsInQueue[key] = object
         }
     }
-    
+
     public func removeObject(forKey key: String) {
         queue.sync {
             self.operationsInQueue.removeValue(forKey: key)
         }
     }
-    
+
     public var isEmpty: Bool {
-        var isEmpty: Bool = true
+        var isEmpty = true
         queue.sync {
             isEmpty = self.operationsInQueue.isEmpty
         }

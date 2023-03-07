@@ -308,7 +308,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     /// Generate some chunks into a temporary folder from a file
     func generateChunksAndFanOutIfNeeded() async throws {
-        UploadOperationLog("generateChunksAndFanOutIfNeeded fid:\(self.fileId)")
+        UploadOperationLog("generateChunksAndFanOutIfNeeded fid:\(fileId)")
         try checkCancelation()
         
         var filePath: String!
@@ -367,8 +367,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
         
-        if self.freeRequestSlots() > 0 {
-            UploadOperationLog("sending ASAP fid:\(self.fileId)")
+        if freeRequestSlots() > 0 {
+            UploadOperationLog("sending ASAP fid:\(fileId)")
             enqueueCatching {
                 try await self.fanOutChunks()
             }
@@ -392,14 +392,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
             
             // Chain the next chunk generation if necessary
-            let slots = self.freeRequestSlots()
+            let slots = freeRequestSlots()
             if chunksToGenerateCount >= 1 && slots > 0 {
-                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(self.fileId)")
+                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(fileId)")
                 enqueueCatching {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
             } else {
-                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) scheduleNextChunk NOOP fid:\(self.fileId)")
+                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) scheduleNextChunk NOOP fid:\(fileId)")
             }
             
             return
@@ -415,7 +415,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         UploadOperationLog("fanOut for:\(fileId)")
         try checkCancelation()
         
-        let freeSlots = self.freeRequestSlots()
+        let freeSlots = freeRequestSlots()
         guard freeSlots > 0 else {
             UploadOperationLog("fanOut no free slots for:\(fileId)")
             return
@@ -622,8 +622,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 queue.execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath.isEmpty {
                         if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id),
-                            !oldFile.isInvalidated,
-                            oldFile.isAvailableOffline {
+                           !oldFile.isInvalidated,
+                           oldFile.isAvailableOffline {
                             driveFile.isAvailableOffline = true
                         }
                         let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
@@ -707,7 +707,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // MARK: PHAssets
     
     private func getPhAssetIfNeeded() async throws {
-        UploadOperationLog("getPhAssetIfNeeded fid:\(self.fileId)")
+        UploadOperationLog("getPhAssetIfNeeded fid:\(fileId)")
         var assetToLoad: PHAsset?
         try transactionWithFile { file in
             UploadOperationLog("getPhAssetIfNeeded type:\(file.type) fid:\(self.fileId)")
@@ -724,12 +724,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Async load the url of the asset
         guard let assetToLoad,
               let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
-            UploadOperationLog("Failed to get photo asset fid:\(self.fileId)", level: .error)
+            UploadOperationLog("Failed to get photo asset fid:\(fileId)", level: .error)
             return
         }
         
         // save
-        UploadOperationLog("Got photo asset, writing URL:\(url) fid:\(self.fileId)")
+        UploadOperationLog("Got photo asset, writing URL:\(url) fid:\(fileId)")
         try transactionWithFile { file in
             file.pathURL = url
             file.uploadingSession?.filePath = url.path
@@ -743,10 +743,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         enqueue(asap: true) {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
         
-            if let error {
-                UploadOperationLog("uploadCompletion KO data:\(data) response:\(response) error:\(error) fid:\(self.fileId)", level: .error)
+            // TODO: remove after beta
+            if (error != nil) || (statusCode < 200 || statusCode >= 300) {
+                let dataString = String(data: data ?? Data(), encoding: .utf8)
+                UploadOperationLog("uploadCompletion KO data:\(dataString) response:\(response) error:\(error) statusCode:\(statusCode) fid:\(self.fileId)", level: .error)
             } else {
-                UploadOperationLog("uploadCompletion OK data:\(data?.count) fid:\(self.fileId)")
+                UploadOperationLog("uploadCompletion OK data:\(data?.count) statusCode:\(statusCode) fid:\(self.fileId)")
             }
             
             // Success
@@ -844,7 +846,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     
     /// Return the available request slots.
     private func freeRequestSlots() -> Int {
-        let uploadTasksCount = self.uploadTasks.count
+        let uploadTasksCount = uploadTasks.count
         let free = max(Self.parallelism - uploadTasksCount, 0)
 //        UploadOperationLog("freeRequestSlots:\(free) uploadTasksCount:\(uploadTasksCount) fid:\(self.fileId)")
         return free
@@ -856,7 +858,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             self.end()
         }
         
-        self.handleLocalErrors(error: error)
+        handleLocalErrors(error: error)
         
         try transactionWithFile { file in
             guard file.error != .taskRescheduled else {

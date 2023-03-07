@@ -90,4 +90,3 @@ public final class RUploadSession: EmbeddedObject, Decodable {
         case token
     }
 }
-

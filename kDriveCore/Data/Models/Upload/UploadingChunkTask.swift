@@ -17,12 +17,11 @@
  */
 
 import Foundation
-import RealmSwift
 import InfomaniakDI
+import RealmSwift
 
 /// Tracks the upload of a chunk
-final public class UploadingChunkTask: EmbeddedObject {
-    
+public final class UploadingChunkTask: EmbeddedObject {
     @LazyInjectService var fileManager: FileManagerable
     
     override public init() {
@@ -97,7 +96,7 @@ final public class UploadingChunkTask: EmbeddedObject {
     /// The range of the original file
     public var range: DataRange {
         get {
-            return UInt64(_lowerBound)...UInt64(_upperBound)
+            return UInt64(_lowerBound) ... UInt64(_upperBound)
         }
         set {
             chunkSize = Int64(newValue.upperBound - newValue.lowerBound) + 1
@@ -119,5 +118,4 @@ final public class UploadingChunkTask: EmbeddedObject {
             _error = newValue?.toRealm()
         }
     }
-
 }

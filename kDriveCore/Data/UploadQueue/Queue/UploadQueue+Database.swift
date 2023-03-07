@@ -40,7 +40,7 @@ extension UploadQueue {
 //            UploadQueueLog("transactionWithUploadRealm error:\(bufferError) function:\(function)", level: .error)
             throw bufferError
         }
-        
+
 //        UploadQueueLog("transactionWithUploadRealm end in function:\(function)")
     }
 }

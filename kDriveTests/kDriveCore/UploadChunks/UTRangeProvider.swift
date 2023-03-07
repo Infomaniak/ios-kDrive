@@ -21,7 +21,6 @@ import XCTest
 
 /// Unit Tests of the RangeProvider
 final class UTRangeProvider: XCTestCase {
-
     func testAllRanges_zeroes() throws {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!

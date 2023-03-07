@@ -23,7 +23,6 @@ import InfomaniakCore
 // MARK: - Upload APIV2
 
 public extension DriveApiFetcher {
-    
     enum APIParameters: String {
         case driveId = "drive_id"
         case conflict

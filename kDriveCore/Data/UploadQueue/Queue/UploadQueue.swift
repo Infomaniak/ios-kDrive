@@ -25,7 +25,7 @@ import Sentry
 public final class UploadQueue {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
-    
+
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
         return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
@@ -35,7 +35,7 @@ public final class UploadQueue {
 
     /// A serial queue to lock access to ivars an observations.
     let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
-    
+
     /// A concurrent queue.
     let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
                                         qos: .userInitiated,
@@ -43,7 +43,7 @@ public final class UploadQueue {
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
-    
+
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
@@ -65,7 +65,7 @@ public final class UploadQueue {
     }()
 
     var fileUploadedCount = 0
-    
+
     var bestSession: URLSession {
         if Bundle.main.isExtension {
             @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -83,7 +83,7 @@ public final class UploadQueue {
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     var forceSuspendQueue = false
-    
+
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
@@ -92,13 +92,13 @@ public final class UploadQueue {
 
     public init() {
         UploadQueueLog("Starting up")
-        
-        self.concurrentQueue.async {
+
+        concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
             self.rebuildUploadQueueFromObjectsInRealm()
             self.resumeAllOperations()
         }
-        
+
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
