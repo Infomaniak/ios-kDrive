@@ -186,7 +186,6 @@ extension UploadQueue: UploadQueueable {
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
                 } else {
                     UploadQueueLog("could not find file to cancel:\(fileId)", level: .error)
-                    return
                 }
             }
         }
@@ -367,8 +366,8 @@ extension UploadQueue: UploadQueueable {
     private func operation(fileId: String) -> UploadOperationable? {
         UploadQueueLog("operation fileId:\(fileId)")
         guard let operation = self.keyedUploadOperations.getObject(forKey: fileId),
-              operation.isCancelled == false,
-              operation.isFinished == false else {
+              !operation.isCancelled,
+              !operation.isFinished else {
             return nil
         }
         return operation

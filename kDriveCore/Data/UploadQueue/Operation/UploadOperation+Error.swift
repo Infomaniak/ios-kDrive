@@ -32,7 +32,8 @@ extension UploadOperation {
     func catching(_ task: @escaping () async throws -> Void) async {
         do {
             try await task()
-        } catch {
+        }
+        catch {
             defer {
                 end()
             }
@@ -91,11 +92,14 @@ extension UploadOperation {
                 case .unableToBuildRequest:
                     file.error = DriveError.localError.wrapping(error)
 
-                case .uploadSessionTaskMissing, .uploadSessionInvalid:
-                    self.cleanUploadFileSession(file: file)
-                    file.error = DriveError.localError.wrapping(error)
-
-                case .unableToMatchUploadChunk, .splitError, .chunkError, .fileIdentityHasChanged, .parseError, .missingChunkHash:
+                case .uploadSessionTaskMissing,
+                     .uploadSessionInvalid,
+                     .unableToMatchUploadChunk,
+                     .splitError,
+                     .chunkError,
+                     .fileIdentityHasChanged,
+                     .parseError,
+                     .missingChunkHash:
                     self.cleanUploadFileSession(file: file)
                     file.error = DriveError.localError.wrapping(error)
 
@@ -109,7 +113,8 @@ extension UploadOperation {
                 }
 
                 errorHandled = true
-            } else {
+            }
+            else {
                 // Other DriveError
                 file.error = error as? DriveError
                 errorHandled = false
@@ -153,11 +158,12 @@ extension UploadOperation {
                 file.progress = nil
                 self.uploadQueue.suspendAllOperations()
 
-            case .uploadNotTerminatedError, .uploadNotTerminated:
-                self.cleanUploadFileSession(file: file)
-                file.progress = nil
-
-            case .invalidUploadTokenError, .uploadError, .uploadFailedError, .uploadTokenIsNotValid:
+            case .uploadNotTerminatedError,
+                 .uploadNotTerminated,
+                 .invalidUploadTokenError,
+                 .uploadError,
+                 .uploadFailedError,
+                 .uploadTokenIsNotValid:
                 self.cleanUploadFileSession(file: file)
                 file.progress = nil
 

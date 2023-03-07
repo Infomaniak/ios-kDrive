@@ -106,7 +106,7 @@ protocol FileCellDelegate: AnyObject {
         // Fetch thumbnail
         thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
             guard let self = self,
-                  self.file.isInvalidated == false else {
+                  !self.file.isInvalidated else {
                 return
             }
 

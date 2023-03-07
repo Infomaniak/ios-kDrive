@@ -34,7 +34,7 @@ public func AppDelegateLog(_ message: @autoclosure () -> Any,
     let category = "AppDelegate"
     ABLog(message(),
           category: category,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,
@@ -56,7 +56,7 @@ public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
     let category = "PhotoLibraryUploader"
     ABLog(message(),
           category: category,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,
@@ -78,7 +78,7 @@ public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
     let category = "BGTaskScheduling"
     ABLog(message(),
           category: category,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,
@@ -100,7 +100,7 @@ public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
     let category = "BackgroundSessionManager"
     ABLog(message(),
           category: category,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,
@@ -119,7 +119,7 @@ public func UploadQueueLog(_ message: @autoclosure () -> Any,
     let category = "UploadQueue"
     ABLog(message(),
           category: category,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,
@@ -140,8 +140,7 @@ public func UploadOperationLog(_ message: @autoclosure () -> Any,
     let category = "UploadOperation"
     ABLog(message(),
           category: category,
-//          level: level,
-          level: .error, // TODO: remove
+          level: level,
           context: context,
           file: file,
           function: function,

@@ -86,7 +86,7 @@ extension UploadQueue: UploadPublishable {
         self.sendFileUploadedNotificationIfNeeded(with: result)
         self.serialQueue.async { [unowned self] in
             self.observations.didUploadFile.values.forEach { closure in
-                guard let uploadFile = result.uploadFile, uploadFile.isInvalidated == false else {
+                guard let uploadFile = result.uploadFile, !uploadFile.isInvalidated else {
                     return
                 }
 

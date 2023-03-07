@@ -105,8 +105,8 @@ public final class UploadQueue {
             UploadQueueLog("observeNetworkChange :\(isSuspended)")
             self.operationQueue.isSuspended = isSuspended
         }
-        
-        UploadQueueLog("UploadQueue parallelism is:\(self.operationQueue.maxConcurrentOperationCount)")
+
+        UploadQueueLog("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
 
     // MARK: - Public methods
@@ -136,29 +136,5 @@ public final class UploadQueue {
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
-    }
-
-    // MARK: - Private methods
-
-    private func compactRealmIfNeeded() {
-        let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
-            let fiftyMB = 50 * 1024 * 1024
-            let compactingNeeded = (totalBytes > fiftyMB) && (Double(usedBytes) / Double(totalBytes)) < 0.5
-            UploadQueueLog("Compacting uploads realm is needed ? \(compactingNeeded)")
-            return compactingNeeded
-        }
-
-        let config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-            schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
-            migrationBlock: DriveFileManager.constants.migrationBlock,
-            shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self]
-        )
-        do {
-            _ = try Realm(configuration: config)
-        } catch {
-            UploadQueueLog("Failed to compact uploads realm: \(error)", level: .error)
-        }
     }
 }

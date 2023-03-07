@@ -162,10 +162,10 @@ public final class BackgroundUploadSessionManager: NSObject,
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
 
-            let identifier = backgroundSession.identifier(for: task)
-            BackgroundSessionManagerLog("Rescheduled identifier:\(identifier) task:\(request.url?.absoluteString ?? "")")
+            let sessionIdentifier = backgroundSession.identifier(for: task)
+            BackgroundSessionManagerLog("Rescheduled identifier:\(sessionIdentifier) task:\(request.url?.absoluteString ?? "")")
 
-            return identifier
+            return sessionIdentifier
         } else {
             BackgroundSessionManagerLog("Rescheduled task failed task:\(task), fileUrl:\(fileUrl.path)", level: .error)
             return nil
@@ -253,7 +253,7 @@ public final class BackgroundUploadSessionManager: NSObject,
         var tempFile: UploadFile?
         let taskIdentifier = session.identifier(for: task)
         if let requestUrl = task.originalRequest?.url?.absoluteString,
-           requestUrl.isEmpty == false {
+           !requestUrl.isEmpty {
             BackgroundSessionManagerLog("completionHandler from URL:\(requestUrl) :\(session)")
 
             let files = Array(DriveFileManager.constants.uploadsRealm.objects(UploadFile.self))
@@ -278,7 +278,7 @@ public final class BackgroundUploadSessionManager: NSObject,
                     operation = newOP
                 }
 
-                guard let operation else {
+                guard operation != nil else {
                     assertionFailure("expecting an operation, not nil")
                     return
                 }

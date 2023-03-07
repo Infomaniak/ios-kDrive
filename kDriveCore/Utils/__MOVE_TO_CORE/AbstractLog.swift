@@ -79,7 +79,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
     let messageString = message() as! String
 
     #if DEBUG
-        if #available(iOS 14.0, *), category.isEmpty == false {
+        if #available(iOS 14.0, *), !category.isEmpty {
             let factoryParameters = [categoryKey: category]
             @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
 

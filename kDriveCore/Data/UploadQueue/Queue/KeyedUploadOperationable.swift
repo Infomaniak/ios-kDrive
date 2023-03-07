@@ -48,10 +48,10 @@ final class KeyedUploadOperationable {
     }
 
     public var isEmpty: Bool {
-        var isEmpty = true
+        var empty = true
         queue.sync {
-            isEmpty = self.operationsInQueue.isEmpty
+            empty = self.operationsInQueue.isEmpty
         }
-        return isEmpty
+        return empty
     }
 }

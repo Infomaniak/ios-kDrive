@@ -75,7 +75,7 @@ class UploadTableViewCell: InsetTableViewCell {
             cardContentView.retryButton?.isHidden = false
             cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
         } else {
-            cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0) ? true : false // Display retry for uploads that reached automatic retry limit
+            cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
@@ -119,7 +119,7 @@ class UploadTableViewCell: InsetTableViewCell {
             switch change {
             case .change(let newFile, _):
                 guard let progress = newFile.progress,
-                      (newFile.error == nil || newFile.error == DriveError.taskRescheduled) == true else {
+                      newFile.error == nil || newFile.error == DriveError.taskRescheduled else {
                     return
                 }
 

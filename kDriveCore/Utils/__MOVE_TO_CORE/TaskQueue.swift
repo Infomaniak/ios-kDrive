@@ -45,7 +45,7 @@ public actor TaskQueue {
         try Task.checkCancellation()
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            if asap == true {
+            if asap {
                 queue.insert(continuation, at: 0)
             } else {
                 queue.append(continuation)

@@ -35,7 +35,7 @@ extension UploadOperation {
 
 //                UploadOperationLog("begin transaction in:\(function) fid:\(self.fileId)")
                 try uploadsRealm.write {
-                    guard file.isInvalidated == false else {
+                    guard !file.isInvalidated else {
 //                        UploadOperationLog("invalidated file in:\(function) fid:\(self.fileId)")
                         throw ErrorDomain.databaseUploadFileNotFound
                     }

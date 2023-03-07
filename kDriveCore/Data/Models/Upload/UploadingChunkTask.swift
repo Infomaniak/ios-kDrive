@@ -84,10 +84,10 @@ public final class UploadingChunkTask: EmbeddedObject {
     /// The chunk is stored locally inside a file, with a path and we have a valid hash of it.
     public var hasLocalChunk: Bool {
         guard let path,
-              path.isEmpty == false,
-              fileManager.isReadableFile(atPath: path) == true,
+              !path.isEmpty,
+              fileManager.isReadableFile(atPath: path),
               let sha256,
-              sha256.isEmpty == false else {
+              !sha256.isEmpty else {
             return false
         }
         return true

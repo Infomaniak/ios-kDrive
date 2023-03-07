@@ -186,8 +186,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             UploadOperationLog("Cleaning session fid:\(fileId)")
             try transactionWithFile { file in
                 guard let uploadingSession = file.uploadingSession,
-                      uploadingSession.isExpired == false,
-                      uploadingSession.fileIdentityHasNotChanged == true else {
+                      !uploadingSession.isExpired,
+                      uploadingSession.fileIdentityHasNotChanged else {
                     throw ErrorDomain.uploadSessionInvalid
                 }
 
@@ -544,7 +544,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
 
-            guard uploadingSession.fileIdentityHasNotChanged == true else {
+            guard uploadingSession.fileIdentityHasNotChanged else {
                 UploadOperationLog("File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) fid:\(self.fileId)",
                                    level: .error)
                 throw ErrorDomain.fileIdentityHasChanged
@@ -675,7 +675,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Create subfolders if needed
         let tempChunkFolder = buildFolderPath(fileId: fileId, sessionToken: sessionToken)
         UploadOperationLog("using chunk folder:'\(tempChunkFolder)' fid:\(fileId)")
-        if fileManager.fileExists(atPath: tempChunkFolder.path, isDirectory: nil) == false {
+        if !fileManager.fileExists(atPath: tempChunkFolder.path, isDirectory: nil) {
             try fileManager.createDirectory(at: tempChunkFolder, withIntermediateDirectories: true, attributes: nil)
         }
 
@@ -796,7 +796,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
                 // tracking running tasks
                 if let identifier = chunkTask.taskIdentifier {
-                    let task = self.uploadTasks.removeValue(forKey: identifier)
+                    self.uploadTasks.removeValue(forKey: identifier)
                     chunkTask.taskIdentifier = nil
                 } else {
                     UploadOperationLog("No identifier for chunkId:\(uploadedChunk.number) in SUCCESS fid:\(self.fileId)", level: .error)
@@ -831,7 +831,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if toUploadCount == 0 {
             enqueue {
                 UploadOperationLog("No more chunks to be uploaded \(self.fileId)")
-                if self.isCancelled == false {
+                if !self.isCancelled {
                     await self.closeSessionAndEnd()
                 }
             }
@@ -994,7 +994,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // did finish in time
     public func end() {
         // Prevent duplicate call, as end() finishes the operation
-        guard isFinished == false else {
+        guard !isFinished else {
             UploadOperationLog("dupe finish \(fileId)")
             return
         }
