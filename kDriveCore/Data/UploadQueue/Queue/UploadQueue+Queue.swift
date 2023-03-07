@@ -26,7 +26,7 @@ public protocol UploadQueueable {
     func getOperation(forFileId fileId: String) -> UploadOperationable?
 
     /// Read database to enqueue all non finished upload tasks.
-    func rebuildUploadQueueFromObjectsInRealm()
+    func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
 
     func saveToRealmAndAddToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
 
@@ -58,6 +58,7 @@ public protocol UploadQueueable {
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
+    
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         UploadQueueLog("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
@@ -73,8 +74,8 @@ extension UploadQueue: UploadQueueable {
         return operation
     }
 
-    public func rebuildUploadQueueFromObjectsInRealm() {
-        UploadQueueLog("rebuildUploadQueueFromObjectsInRealm")
+    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
+        UploadQueueLog("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
         self.concurrentQueue.sync {
             var uploadingFileIds = [String]()
             try? self.transactionWithUploadRealm { realm in

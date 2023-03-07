@@ -179,8 +179,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             fileUrl = try self.getFileUrlIfReadable(file: file)
         }
 
+        UploadOperationLog("conflict resolution:\(conflictOption.rawValue) fid:\(fileId)")
+        
         // fetch stored session
         if hasUploadingSession {
+            UploadOperationLog("Cleaning session fid:\(fileId)")
             try transactionWithFile { file in
                 guard let uploadingSession = file.uploadingSession,
                       uploadingSession.isExpired == false,
@@ -251,6 +254,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                             totalChunks: ranges.count,
                                                             conflictResolution: conflictOption,
                                                             directoryId: parentDirectoryId)
+            UploadOperationLog("New session token:\(session.token) fid:\(fileId)")
             try transactionWithFile { file in
                 // Create an uploading session
                 let uploadingSessionTask = UploadingSessionTask()
@@ -398,8 +402,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 enqueueCatching {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
-            } else {
-                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) scheduleNextChunk NOOP fid:\(fileId)")
             }
 
             return
@@ -412,7 +414,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     /// Prepare chunk upload requests, and start them.
     func fanOutChunks() async throws {
-        UploadOperationLog("fanOut for:\(fileId)")
         try checkCancelation()
 
         let freeSlots = freeRequestSlots()
@@ -424,6 +425,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         try transactionWithFile { file in
             // Get the current uploading session
             guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
+                UploadOperationLog("fanOut no session for:\(self.fileId)")
                 throw ErrorDomain.uploadSessionTaskMissing
             }
 
@@ -746,7 +748,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // TODO: remove after beta
             if (error != nil) || (statusCode < 200 || statusCode >= 300) {
                 let dataString = String(data: data ?? Data(), encoding: .utf8)
-                UploadOperationLog("uploadCompletion KO data:\(dataString) response:\(response) error:\(error) statusCode:\(statusCode) fid:\(self.fileId)", level: .error)
+                UploadOperationLog("uploadCompletion KO fid:\(self.fileId) error:\(error) response:\(response)  statusCode:\(statusCode) data:\(dataString) ", level: .error)
             } else {
                 UploadOperationLog("uploadCompletion OK data:\(data?.count) statusCode:\(statusCode) fid:\(self.fileId)")
             }
