@@ -30,8 +30,6 @@ public final class UploadSession: EmbeddedObject, Decodable {
     
     @Persisted public var fileName: String
 
-    @Persisted public var message: String?
-
     @Persisted public var result: Bool
 
     @Persisted public var token: String
@@ -43,7 +41,6 @@ public final class UploadSession: EmbeddedObject, Decodable {
         self.directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
         self.file = try container.decodeIfPresent(File.self, forKey: .file)
         self.fileName = try container.decode(String.self, forKey: .fileName)
-        self.message = try container.decodeIfPresent(String.self, forKey: .message)
         self.result = try container.decode(Bool.self, forKey: .result)
         self.token = try container.decode(String.self, forKey: .token)
     }
@@ -53,7 +50,6 @@ public final class UploadSession: EmbeddedObject, Decodable {
         case directoryPath = "directory_path"
         case file
         case fileName = "file_name"
-        case message
         case result
         case token
     }
