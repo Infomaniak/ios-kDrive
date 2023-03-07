@@ -29,26 +29,26 @@ extension UploadOperation {
                 uploadsRealm.refresh()
 
                 guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
-                    bufferError = ErrorDomain.databaseUploadFileNotFound
-//                    UploadOperationLog("invalidated file fid:\(self.fileId)")
-                    return
+//                    UploadOperationLog("file not found in:\(function) fid:\(self.fileId)")
+                    throw ErrorDomain.databaseUploadFileNotFound
                 }
 
-//                UploadOperationLog("begin transaction fid:\(self.fileId)")
-                try uploadsRealm.safeWrite {
+//                UploadOperationLog("begin transaction in:\(function) fid:\(self.fileId)")
+                try uploadsRealm.write {
                     guard file.isInvalidated == false else {
-                        bufferError = ErrorDomain.databaseUploadFileNotFound
-//                        UploadOperationLog("invalidated file fid:\(self.fileId)")
-                        return
+//                        UploadOperationLog("invalidated file in:\(function) fid:\(self.fileId)")
+                        throw ErrorDomain.databaseUploadFileNotFound
                     }
                     try task(file)
+                    uploadsRealm.add(file, update: .modified)
                 }
+//                UploadOperationLog("end transaction in:\(function) fid:\(self.fileId)")
             } catch {
+//                UploadOperationLog("transaction error:\(error) in:\(function) fid:\(self.fileId)", level: .error)
                 bufferError = error
             }
         }
 
-//        UploadOperationLog("end transaction in:\(function) fid:\(self.fileId)")
         if let bufferError {
             throw bufferError
         }

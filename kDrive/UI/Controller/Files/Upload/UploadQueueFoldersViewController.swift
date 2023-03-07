@@ -81,21 +81,18 @@ class UploadQueueFoldersViewController: UITableViewController {
                         return
                     }
 
-                    // No animation on updating the same lines
-                    let rowAnimation: UITableView.RowAnimation
+                    // No animation on updating the same lines without changes
                     if deletions == insertions, modifications.isEmpty {
-                        rowAnimation = .none
-                    } else {
-                        rowAnimation = .automatic
+                        return
                     }
 
                     self.tableView.performBatchUpdates {
                         self.updateFolders(from: results)
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
-                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: rowAnimation)
-                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: rowAnimation)
-                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: rowAnimation)
+                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
