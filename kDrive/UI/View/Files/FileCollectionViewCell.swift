@@ -96,7 +96,7 @@ protocol FileCellDelegate: AnyObject {
     }
 
     func setThumbnail(on imageView: UIImageView) {
-        guard (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
+        guard !file.isInvalidated, (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
         // Configure placeholder
         imageView.image = nil
         imageView.contentMode = .scaleAspectFill
@@ -105,7 +105,12 @@ protocol FileCellDelegate: AnyObject {
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
         // Fetch thumbnail
         thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
-            if self?.file.id == requestFileId {
+            guard let self = self,
+                  self.file.isInvalidated == false else {
+                return
+            }
+            
+            if self.file.id == requestFileId {
                 imageView.image = image
                 imageView.backgroundColor = nil
             }
