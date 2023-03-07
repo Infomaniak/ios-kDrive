@@ -52,7 +52,7 @@ public protocol UploadQueueable {
     func cancel(_ file: UploadFile)
 
     /// Clean errors linked to any upload operation in base. Does not restart the operations.
-    func cleanErrorsForAllOperations()
+    func cleanNetworkAndLocalErrorsForAllOperations()
 }
 
 // MARK: - Publish
@@ -241,12 +241,19 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func cleanErrorsForAllOperations() {
+    public func cleanNetworkAndLocalErrorsForAllOperations() {
         UploadQueueLog("cleanErrorsForAllOperations")
         self.concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
                 let failedUploadFiles = realm.objects(UploadFile.self)
                     .filter("_error != nil OR maxRetryCount == 0")
+                    .filter { file in
+                        guard let error = file.error else {
+                            return false
+                        }
+                        
+                        return (error.type != .serverError)
+                    }
                 UploadQueueLog("will clean errors for uploads:\(failedUploadFiles.count)")
 
                 try? realm.safeWrite {

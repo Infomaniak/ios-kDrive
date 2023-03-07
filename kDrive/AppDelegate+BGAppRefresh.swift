@@ -123,7 +123,7 @@ extension AppDelegate {
 
         BGTaskSchedulingLog("Clean errors for all uploads")
         @InjectService var uploadQueue: UploadQueue
-        uploadQueue.cleanErrorsForAllOperations()
+        uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
         
         BGTaskSchedulingLog("Reload operations in queue")
         uploadQueue.rebuildUploadQueueFromObjectsInRealm()
