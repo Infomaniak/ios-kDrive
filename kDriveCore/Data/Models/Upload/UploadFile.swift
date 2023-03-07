@@ -53,7 +53,6 @@ public class UploadFile: Object, UploadFilable {
                                             "userId",
                                             "driveId",
                                             "uploadDate",
-                                            "modificationDate",
                                             "_error"]
     
     @Persisted(primaryKey: true) public var id: String = ""
