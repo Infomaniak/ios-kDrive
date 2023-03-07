@@ -306,63 +306,76 @@ extension UploadQueue: UploadQueueable {
         UploadQueueLog("retryAllOperations parentId:\(parentId)")
 
         self.concurrentQueue.async {
-            var failedFileIds = [String]()
-            try? self.transactionWithUploadRealm { realm in
-                UploadQueueLog("retryAllOperations in dispatchQueue parentId:\(parentId)")
-                let uploadingFiles = self.getUploadingFiles(withParent: parentId,
-                                                            userId: userId,
-                                                            driveId: driveId,
-                                                            using: realm)
-                UploadQueueLog("uploading:\(uploadingFiles.count)")
-                let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
-                failedFileIds = failedUploadFiles.map(\.id)
-                UploadQueueLog("retying:\(failedFileIds.count)")
-            }
-
+            let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
             let batches = failedFileIds.chunked(into: 100)
             UploadQueueLog("batches:\(batches.count)")
+            
             self.resumeAllOperations()
 
             for batch in batches {
                 UploadQueueLog("in batch")
                 // Cancel Operation if any and reset errors
-                try? self.transactionWithUploadRealm { realm in
-                    batch.forEach { fileId in
-                        // Cancel operation if any
-                        if let operation = self.operation(fileId: fileId) {
-                            operation.cancel()
-                            self.keyedUploadOperations.removeObject(forKey: fileId)
-                        }
-
-                        // Clean errors in db file
-                        guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
-                            UploadQueueLog("file invalidated fid:\(fileId) at\(#line)")
-                            return
-                        }
-                        try? realm.safeWrite {
-                            file.error = nil
-                            file.maxRetryCount = UploadFile.defaultMaxRetryCount
-                        }
-                    }
-                }
+                self.cancelAnyInBatch(batch)
 
                 // Second transaction to enqueue the UploadFile to the OperationQueue
-                try? self.transactionWithUploadRealm { realm in
-                    batch.forEach { fileId in
-                        guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
-                            UploadQueueLog("file invalidated fid:\(fileId) at\(#line)")
-                            return
-                        }
-
-                        self.addToQueueIfNecessary(file: file, using: realm)
-                    }
-                }
+                self.enqueueAnyInBatch(batch)
             }
         }
     }
 
     // MARK: - Private methods
 
+    private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
+        var failedFileIds = [String]()
+        try? self.transactionWithUploadRealm { realm in
+            UploadQueueLog("retryAllOperations in dispatchQueue parentId:\(parentId)")
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
+                                                        userId: userId,
+                                                        driveId: driveId,
+                                                        using: realm)
+            UploadQueueLog("uploading:\(uploadingFiles.count)")
+            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
+            failedFileIds = failedUploadFiles.map(\.id)
+            UploadQueueLog("retying:\(failedFileIds.count)")
+        }
+        return failedFileIds
+    }
+
+    private func cancelAnyInBatch(_ batch: [String]) {
+        try? self.transactionWithUploadRealm { realm in
+            batch.forEach { fileId in
+                // Cancel operation if any
+                if let operation = self.operation(fileId: fileId) {
+                    operation.cancel()
+                    self.keyedUploadOperations.removeObject(forKey: fileId)
+                }
+
+                // Clean errors in db file
+                guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
+                    UploadQueueLog("file invalidated fid:\(fileId) at\(#line)")
+                    return
+                }
+                try? realm.safeWrite {
+                    file.error = nil
+                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                }
+            }
+        }
+    }
+    
+    private func enqueueAnyInBatch(_ batch: [String]) {
+        try? self.transactionWithUploadRealm { realm in
+            batch.forEach { fileId in
+                guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId), !file.isInvalidated else {
+                    UploadQueueLog("file invalidated fid:\(fileId) at\(#line)")
+                    return
+                }
+
+                self.addToQueueIfNecessary(file: file, using: realm)
+            }
+        }
+    }
+    
     private func operation(fileId: String) -> UploadOperationable? {
         UploadQueueLog("operation fileId:\(fileId)")
         guard let operation = self.keyedUploadOperations.getObject(forKey: fileId),

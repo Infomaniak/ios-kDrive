@@ -27,7 +27,7 @@ enum OperationQueueHelper {
         DispatchQueue.main.async {
             if shouldBeDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
-            } else if hasOperationsInQueue == false {
+            } else if !hasOperationsInQueue {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }

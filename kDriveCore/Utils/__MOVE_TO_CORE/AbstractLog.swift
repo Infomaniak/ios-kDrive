@@ -68,7 +68,6 @@ private let categoryKey = "category"
 ///   - async: Should this be async?
 public func ABLog(_ message: @autoclosure () -> Any,
                   category: String = "",
-                  subsystem: String = Bundle.main.bundleIdentifier!,
                   level: AbstractLogLevel = .info,
                   context: Int = 0,
                   file: StaticString = #file,
