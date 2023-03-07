@@ -21,7 +21,6 @@ import RealmSwift
 
 extension UploadOperation {
     func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-//        UploadOperationLog("transactionWithFile in:\(function) fid:\(self.fileId)")
         var bufferError: Error?
         autoreleasepool {
             do {
@@ -29,22 +28,17 @@ extension UploadOperation {
                 uploadsRealm.refresh()
 
                 guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
-//                    UploadOperationLog("file not found in:\(function) fid:\(self.fileId)")
                     throw ErrorDomain.databaseUploadFileNotFound
                 }
 
-//                UploadOperationLog("begin transaction in:\(function) fid:\(self.fileId)")
                 try uploadsRealm.write {
                     guard !file.isInvalidated else {
-//                        UploadOperationLog("invalidated file in:\(function) fid:\(self.fileId)")
                         throw ErrorDomain.databaseUploadFileNotFound
                     }
                     try task(file)
                     uploadsRealm.add(file, update: .modified)
                 }
-//                UploadOperationLog("end transaction in:\(function) fid:\(self.fileId)")
             } catch {
-//                UploadOperationLog("transaction error:\(error) in:\(function) fid:\(self.fileId)", level: .error)
                 bufferError = error
             }
         }

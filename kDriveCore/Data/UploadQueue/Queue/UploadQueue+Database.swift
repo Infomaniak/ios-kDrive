@@ -21,25 +21,19 @@ import RealmSwift
 
 extension UploadQueue {
     func transactionWithUploadRealm(function: StaticString = #function, _ task: @escaping (_ realm: Realm) throws -> Void) throws {
-//        UploadQueueLog("transactionWithUploadRealm begin in function:\(function)")
         var bufferError: Error?
         autoreleasepool {
             do {
                 let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
                 uploadsRealm.refresh()
-//                UploadQueueLog("transactionWithUploadRealm before closure in function:\(function)")
                 try task(uploadsRealm)
-//                UploadQueueLog("transactionWithUploadRealm after closure in function:\(function)")
             } catch {
                 bufferError = error
             }
         }
 
         if let bufferError {
-//            UploadQueueLog("transactionWithUploadRealm error:\(bufferError) function:\(function)", level: .error)
             throw bufferError
         }
-
-//        UploadQueueLog("transactionWithUploadRealm end in function:\(function)")
     }
 }
