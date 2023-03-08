@@ -20,20 +20,15 @@ import Foundation
 import RealmSwift
 
 extension UploadQueue {
+    /// The standard way to interact with Realm within an UploadQueue
+    /// - Parameters:
+    ///   - function: The name of the function performing the transaction
+    ///   - task: The closure to perform an operation on a Realm.
     func transactionWithUploadRealm(function: StaticString = #function, _ task: @escaping (_ realm: Realm) throws -> Void) throws {
-        var bufferError: Error?
-        autoreleasepool {
-            do {
-                let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-                uploadsRealm.refresh()
-                try task(uploadsRealm)
-            } catch {
-                bufferError = error
-            }
-        }
-
-        if let bufferError {
-            throw bufferError
+        try autoreleasepool {
+            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+            uploadsRealm.refresh()
+            try task(uploadsRealm)
         }
     }
 }
