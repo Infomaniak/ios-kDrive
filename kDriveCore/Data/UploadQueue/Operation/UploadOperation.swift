@@ -412,7 +412,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         try transactionWithFile { file in
             // Get the current uploading session
             guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
-                UploadOperationLog("fanOut no session for:\(self.fileId)")
+                UploadOperationLog("fanOut no session for:\(self.fileId)", level: .error)
                 throw ErrorDomain.uploadSessionTaskMissing
             }
 
@@ -767,7 +767,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         UploadOperationLog("completion successful \(fileId)")
 
         guard let uploadedChunk = try? ApiFetcher.decoder.decode(ApiResponse<UploadedChunk>.self, from: data).data else {
-            UploadOperationLog("parsing error fid:\(fileId)")
+            UploadOperationLog("parsing error:\(error) fid:\(fileId)", level: .error)
             throw ErrorDomain.parseError
         }
         UploadOperationLog("chunk:\(uploadedChunk.number)  fid:\(fileId)")
@@ -788,7 +788,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     chunkTask.taskIdentifier = nil
                 } else {
                     UploadOperationLog("No identifier for chunkId:\(uploadedChunk.number) in SUCCESS fid:\(self.fileId)", level: .error)
-                    assertionFailure("unable to lookup chunk task id")
+                    SentrySDK.capture(message: "Missing chunk identifier") { scope in
+                        scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
+                    }
+                    assertionFailure("unable to lookup chunk task id, fid:\(self.fileId)")
                 }
 
                 // Some cleanup if we have the chance
@@ -801,7 +804,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     }
                 }
             } else {
-                UploadOperationLog("matching chunk:\(uploadedChunk.number) failed fid:\(self.fileId)")
+                UploadOperationLog("matching chunk:\(uploadedChunk.number) failed fid:\(self.fileId)", level: .error)
                 SentrySDK.capture(message: "Upload matching chunk failed") { scope in
                     scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
                 }
@@ -841,7 +844,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     private func freeRequestSlots() -> Int {
         let uploadTasksCount = uploadTasks.count
         let free = max(Self.parallelism - uploadTasksCount, 0)
-//        UploadOperationLog("freeRequestSlots:\(free) uploadTasksCount:\(uploadTasksCount) fid:\(self.fileId)")
         return free
     }
 
@@ -882,8 +884,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         expirationLock.enter()
 
         enqueueCatching(asap: true) {
-            UploadOperationLog("Rescheduling fid:\(self.fileId)")
-
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
                 UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
@@ -897,61 +897,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
             }
 
-            /* disabled
-             try self.transactionWithFile { file in
-                 let tasks: [UploadingChunkTask]
-                 if let uploadingSession = file.uploadingSession {
-                     tasks = Array(uploadingSession.chunkTasks)
-                 } else {
-                     tasks = []
-                 }
-                 UploadOperationLog("Rescheduling tasks:\(tasks) count:\(tasks.count) fid:\(self.fileId)  …")
-                 UploadOperationLog("Rescheduling … against uploadTasks:\(self.uploadTasks) fid:\(self.fileId)")
-
-                 /// Reschedule existing requests to background session
-                 var didReschedule = false
-                 for (identifier, task) in self.uploadTasks {
-                     UploadOperationLog("Rescheduling identifier:\(identifier) :\(task) fid:\(self.fileId)")
-                     defer {
-                         task.cancel()
-                     }
-
-                     // Match existing UploadingChunkTask with a TaskIdentifier to be updated
-                     guard let chunkTask = tasks.first(where: { $0.taskIdentifier == identifier }),
-                           let path = chunkTask.path else {
-                         UploadOperationLog("Rescheduling not able to match existing tasks fid:\(self.fileId)")
-                         break
-                     }
-
-                     UploadOperationLog("Rescheduling matched task: \(chunkTask) path:\(path) fid:\(self.fileId)")
-                     let fileUrl = URL(fileURLWithPath: path, isDirectory: false)
-                     let identifier = self.backgroundUploadManager.rescheduleForBackground(task: task, fileUrl: fileUrl)
-                     chunkTask.taskIdentifier = identifier
-                     didReschedule = true
-                     UploadOperationLog("Rescheduling didReschedule = true fid:\(self.fileId)")
-                 }
-
-                 file.error = .taskRescheduled
-                 if didReschedule == true {
-                     UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
-                 } else {
-                     UploadOperationLog("Rescheduling didReschedule failed .taskRescheduled fid:\(self.fileId)", level: .error)
-                 }
-
-                 let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                 breadcrumb.message = "Rescheduling file \(file.name)"
-                 breadcrumb.data = ["File id": self.fileId,
-                                    "File name": file.name,
-                                    "File size": file.size,
-                                    "File type": file.type.rawValue]
-                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
-             }
-             */
-
-            // Now, send regardless
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
 
-            // all operations should be given the chance to call backgroundTaskExpired
+            // each and all operations should be given the chance to call backgroundTaskExpired
             self.end()
 
             UploadOperationLog("Rescheduling end fid:\(self.fileId)")
@@ -966,7 +914,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     public func end() {
         // Prevent duplicate call, as end() finishes the operation
         guard !isFinished else {
-            UploadOperationLog("dupe finish \(fileId)")
             return
         }
 
