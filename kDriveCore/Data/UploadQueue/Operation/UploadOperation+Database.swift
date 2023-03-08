@@ -20,31 +20,26 @@ import Foundation
 import RealmSwift
 
 extension UploadOperation {
+    /// The standard way to interact with a UploadFile within an UploadOperation
+    /// - Parameters:
+    ///   - function: The name of the function performing the transaction
+    ///   - task: A closure to mutate the current `UploadFile`
     func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-        var bufferError: Error?
-        autoreleasepool {
-            do {
-                let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-                uploadsRealm.refresh()
+        try autoreleasepool {
+            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+            uploadsRealm.refresh()
 
-                guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
+            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !file.isInvalidated else {
+                throw ErrorDomain.databaseUploadFileNotFound
+            }
+
+            try uploadsRealm.write {
+                guard !file.isInvalidated else {
                     throw ErrorDomain.databaseUploadFileNotFound
                 }
-
-                try uploadsRealm.write {
-                    guard !file.isInvalidated else {
-                        throw ErrorDomain.databaseUploadFileNotFound
-                    }
-                    try task(file)
-                    uploadsRealm.add(file, update: .modified)
-                }
-            } catch {
-                bufferError = error
+                try task(file)
+                uploadsRealm.add(file, update: .modified)
             }
-        }
-
-        if let bufferError {
-            throw bufferError
         }
     }
 }
