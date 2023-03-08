@@ -63,7 +63,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
-    override public func perform<T: Decodable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
+    override public func perform<T: Decodable>(request: DataRequest, decoder: JSONDecoder = ApiFetcher.decoder) async throws -> (data: T, responseAt: Int?) {
         do {
             return try await super.perform(request: request)
         } catch let InfomaniakError.apiError(apiError) {
