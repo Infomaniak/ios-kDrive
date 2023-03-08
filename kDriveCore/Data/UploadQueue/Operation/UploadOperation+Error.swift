@@ -56,33 +56,31 @@ extension UploadOperation {
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain {
                 UploadOperationLog("NSURLError:\(error) fid:\(self.fileId)")
-                switch nsError.code {
-                case NSURLErrorCancelled:
-                    file.error = DriveError.taskCancelled
-                    file.maxRetryCount = 0
-                    file.progress = nil
-                default:
-                    file.error = .networkError
-                }
-
+                file.error = .networkError
                 errorHandled = true
             }
-
-            // Not enough space
-            else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
-                self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
-                file.maxRetryCount = 0
-                file.progress = nil
-                file.error = DriveError.errorDeviceStorage.wrapping(error)
+            
+            // Do nothing on taskRescheduled
+            else if let error = error as? DriveError, error == .taskRescheduled {
+                file.error = .taskRescheduled
                 errorHandled = true
             }
 
             // Local file has been removed, delete the operation
-            else if let error = error as? DriveError,
-                    error == .fileNotFound {
+            else if let error = error as? DriveError, error == .fileNotFound {
                 file.maxRetryCount = 0
                 file.progress = nil
                 file.error = DriveError.taskCancelled // cascade deletion
+                errorHandled = true
+            }
+            
+            // Not enough space
+            else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
+                self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
+                self.uploadQueue.suspendAllOperations()
+                file.maxRetryCount = 0
+                file.progress = nil
+                file.error = DriveError.errorDeviceStorage.wrapping(error)
                 errorHandled = true
             }
 

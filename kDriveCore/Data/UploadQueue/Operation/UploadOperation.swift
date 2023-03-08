@@ -180,7 +180,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         UploadOperationLog("conflict resolution:\(conflictOption.rawValue) fid:\(fileId)")
-        
+
         // fetch stored session
         if hasUploadingSession {
             UploadOperationLog("Cleaning session fid:\(fileId)")
@@ -370,21 +370,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         }
 
-        if freeRequestSlots() > 0 {
-            UploadOperationLog("sending ASAP fid:\(fileId)")
-            enqueueCatching {
-                try await self.fanOutChunks()
-            }
-        }
-
         // Schedule next step
         try await scheduleNextChunk(filePath: filePath,
                                     chunksToGenerateCount: chunksToGenerateCount)
     }
 
     /// Prepare chunk upload requests, and start them.
-    private func scheduleNextChunk(filePath: String,
-                                   chunksToGenerateCount: Int) async throws {
+    private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
         do {
             try checkFileIdentity(filePath: filePath)
             try checkCancelation()
@@ -396,15 +388,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
             // Chain the next chunk generation if necessary
             let slots = freeRequestSlots()
-            if chunksToGenerateCount >= 1 && slots > 0 {
+            if chunksToGenerateCount > 0 && slots > 0 {
                 UploadOperationLog("remaining chunks:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(fileId)")
                 enqueueCatching {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
             }
         } catch {
-            UploadOperationLog("Unable to schedule next chunk. error:\(error) for:\(fileId)",
-                               level: .error)
+            UploadOperationLog("Unable to schedule next chunk. error:\(error) for:\(fileId)", level: .error)
             throw error
         }
     }
@@ -415,7 +406,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         let freeSlots = freeRequestSlots()
         guard freeSlots > 0 else {
-            UploadOperationLog("fanOut no free slots for:\(fileId)")
             return
         }
 
@@ -815,7 +805,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 SentrySDK.capture(message: "Upload matching chunk failed") { scope in
                     scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
                 }
-                
+
                 self.cleanUploadFileSession(file: file)
                 throw ErrorDomain.unableToMatchUploadChunk
             }
@@ -862,23 +852,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         handleLocalErrors(error: error)
-
-        try transactionWithFile { file in
-            guard file.error != .taskRescheduled else {
-                return
-            }
-
-            // save the error
-            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
-                if file.error != .taskExpirationCancelled && file.error != .taskRescheduled {
-                    file.error = DriveError.taskCancelled
-                    file.maxRetryCount = 0
-                    file.progress = nil
-                }
-            } else {
-                file.error = .networkError
-            }
-        }
     }
 
     private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
@@ -934,7 +907,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                  }
                  UploadOperationLog("Rescheduling tasks:\(tasks) count:\(tasks.count) fid:\(self.fileId)  …")
                  UploadOperationLog("Rescheduling … against uploadTasks:\(self.uploadTasks) fid:\(self.fileId)")
-                
+
                  /// Reschedule existing requests to background session
                  var didReschedule = false
                  for (identifier, task) in self.uploadTasks {
