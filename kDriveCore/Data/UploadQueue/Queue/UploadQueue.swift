@@ -67,12 +67,7 @@ public final class UploadQueue {
     var fileUploadedCount = 0
 
     var bestSession: URLSession {
-        if Bundle.main.isExtension {
-            @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-            return backgroundUploadSessionManager.backgroundSession
-        } else {
-            return foregroundSession
-        }
+        return foregroundSession
     }
 
     /// Should suspend operation queue based on network status
