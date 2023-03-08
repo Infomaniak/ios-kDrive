@@ -100,7 +100,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
                 logger.fault("\(messageString, privacy: .public)")
             }
         } else {
-            os_log("[%@] %@", log: .default, type: .error /* level.logType */, category, messageString)
+            os_log("[%@] %@", log: .default, type: level.logType, category, messageString)
         }
 
     #else
