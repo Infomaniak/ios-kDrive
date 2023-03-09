@@ -297,12 +297,12 @@ final class DriveApiTests: XCTestCase {
         let user = response.users.first { $0.id == Env.inviteUserId }?.access
         XCTAssertNotNil(user, TestsMessages.notNil("user"))
         if let user = user {
-            let response = try await currentApiFetcher.updateUserAccess(to: testDirectory, user: user, right: .manage)
+            let response = try await currentApiFetcher.updateUserAccess(to: testDirectory, user: user, right: .write)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedUser = fileAccess.users.first { $0.id == Env.inviteUserId }
             XCTAssertNotNil(updatedUser, TestsMessages.notNil("user"))
-            XCTAssertEqual(updatedUser?.right, .manage, "User permission should be equal to 'manage'")
+            XCTAssertEqual(updatedUser?.right, .write, "User permission should be equal to 'write'")
         }
         tearDownTest(directory: testDirectory)
     }
