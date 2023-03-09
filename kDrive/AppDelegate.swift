@@ -318,7 +318,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
-                // Resolving an upload queue will restart it once
+                // Resolving an upload queue will restart it if this is the first time
                 @InjectService var uploadQueue: UploadQueue
 
                 backgroundUploadSessionManager.reconnectBackgroundTasks()

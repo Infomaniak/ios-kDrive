@@ -245,7 +245,7 @@ extension UploadQueue: UploadQueueable {
         self.concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
                 let failedUploadFiles = realm.objects(UploadFile.self)
-                    .filter("_error != nil OR maxRetryCount == 0")
+                    .filter("_error != nil OR maxRetryCount <= 0")
                     .filter { file in
                         guard let error = file.error else {
                             return false
@@ -334,7 +334,7 @@ extension UploadQueue: UploadQueueable {
                                                         driveId: driveId,
                                                         using: realm)
             UploadQueueLog("uploading:\(uploadingFiles.count)")
-            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount == 0")
+            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount <= 0")
             failedFileIds = failedUploadFiles.map(\.id)
             UploadQueueLog("retying:\(failedFileIds.count)")
         }
