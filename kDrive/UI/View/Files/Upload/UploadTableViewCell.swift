@@ -18,16 +18,18 @@
 
 import InfomaniakCore
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
-import InfomaniakDI
 
 class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
+    private var progressObservation: NotificationToken?
 
     @LazyInjectService var uploadQueue: UploadQueue
 
@@ -57,6 +59,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = false
         cardContentView.progressView.updateProgress(0, animated: false)
         cardContentView.iconViewHeightConstraint.constant = 24
+        progressObservation?.invalidate()
     }
 
     deinit {
@@ -64,11 +67,15 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     private func setStatusFor(uploadFile: UploadFile) {
+        guard !uploadFile.isInvalidated else {
+            return
+        }
+
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
             cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
         } else {
-            cardContentView.retryButton?.isHidden = true
+            cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
@@ -94,14 +101,38 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
+        guard !uploadFile.isInvalidated else {
+            return
+        }
+
+        // Set initial progress value
+        if let progress = progress {
+            updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
+        }
+
+        // observe the progres
+        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            switch change {
+            case .change(let newFile, _):
+                guard let progress = newFile.progress,
+                      newFile.error == nil || newFile.error == DriveError.taskRescheduled else {
+                    return
+                }
+
+                self.updateProgress(fileId: newFile.id, progress: progress, animated: false)
+            case .error(_), .deleted:
+                break
+            }
+        }
+        progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
+
         currentFileId = uploadFile.id
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
-
-        if let progress = progress, let currentFileId = currentFileId,
-           uploadFile.error == nil || uploadFile.error == .taskRescheduled {
-            updateProgress(fileId: currentFileId, progress: progress, animated: false)
-        }
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in
@@ -109,20 +140,22 @@ class UploadTableViewCell: InsetTableViewCell {
         }
 
         cardContentView.cancelButtonPressedHandler = {
+            guard !uploadFile.isInvalidated else {
+                return
+            }
+
             let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
+            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
                 self.uploadQueue.cancel(file)
             }
         }
         cardContentView.retryButtonPressedHandler = { [weak self] in
-            guard let self else {
+            guard let self, !uploadFile.isInvalidated else {
                 return
             }
+
             self.cardContentView.retryButton?.isHidden = true
-            let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
-                self.uploadQueue.retry(file)
-            }
+            self.uploadQueue.retry(uploadFile.id)
         }
     }
 

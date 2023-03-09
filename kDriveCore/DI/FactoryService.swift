@@ -22,12 +22,17 @@ import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
+import os.log
+
+/// Something that can associate a custom identifier with a `Factory`
+public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 /// Something that setups the service factories
-///
-/// Trick : enum as no init, perfect for namespacing
-public enum FactoryService {
-    public static func setupDependencyInjection() {
+enum FactoryService {
+    static func setupDependencyInjection() {
+#if DEBUG
+        SimpleResolver.register(debugServices)
+#endif
         let factories = networkingServices + miscServices
         SimpleResolver.register(factories)
     }
@@ -58,9 +63,6 @@ public enum FactoryService {
             Factory(type: AccountManageable.self) { _, _ in
                 AccountManager()
             },
-            Factory(type: UploadTokenManager.self) { _, _ in
-                UploadTokenManager()
-            },
             Factory(type: BackgroundUploadSessionManager.self) { _, _ in
                 BackgroundUploadSessionManager()
             },
@@ -72,7 +74,7 @@ public enum FactoryService {
             },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
-            },
+            }
         ]
         return services
     }
@@ -83,20 +85,75 @@ public enum FactoryService {
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },
-            Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
+            Factory(type: UploadQueueable.self) { _, resolver in
+                try resolver.resolve(type: UploadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: UploadNotifiable.self) { _, resolver in
+                try resolver.resolve(type: UploadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
             },
             Factory(type: BGTaskScheduler.self) { _, _ in
                 BGTaskScheduler.shared
             },
+            Factory(type: AppLockHelper.self) { _, _ in
+                AppLockHelper()
+            },
+            Factory(type: FileManagerable.self) { _, _ in
+                FileManager.default
+            },
+            Factory(type: FileMetadatable.self) { _, _ in
+                FileMetadata()
+            },
+            Factory(type: FreeSpaceService.self) { _, _ in
+                FreeSpaceService()
+            },
+            Factory(type: NotificationsHelpable.self) { _, _ in
+                NotificationsHelper()
+            }
         ]
         return services
     }
+
+#if DEBUG
+    /// Debug services
+    private static var debugServices: [FactoryWithIdentifier] {
+        if #available(iOS 14.0, *) {
+            let loggerFactory = Factory(type: Logger.self) { parameters, _ in
+                guard let category = parameters?["category"] as? String else {
+                    fatalError("Please pass a category")
+                }
+                let subsystem = Bundle.main.bundleIdentifier!
+                return Logger(subsystem: subsystem, category: category)
+            }
+
+            let services = [
+                (loggerFactory, "UploadOperation"),
+                (loggerFactory, "BackgroundSessionManager"),
+                (loggerFactory, "UploadQueue"),
+                (loggerFactory, "BGTaskScheduling"),
+                (loggerFactory, "PhotoLibraryUploader"),
+                (loggerFactory, "AppDelegate")
+            ]
+            return services
+        } else {
+            return []
+        }
+    }
+#endif
 }
 
 public extension SimpleResolver {
     static func register(_ factories: [Factory]) {
         factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
+    }
+
+    static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
+        factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
     }
 }
 

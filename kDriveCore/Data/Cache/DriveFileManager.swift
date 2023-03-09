@@ -35,7 +35,7 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 12
+        public let currentUploadDbVersion: UInt64 = 13
         public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
@@ -55,7 +55,7 @@ public class DriveFileManager {
                 // Migration from version 9 to version 10
                 if oldSchemaVersion < 10 {
                     migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                        newObject!["conflictOption"] = ConflictOption.replace.rawValue
+                        newObject!["conflictOption"] = ConflictOption.version.rawValue
                     }
                 }
 
@@ -63,6 +63,11 @@ public class DriveFileManager {
                     migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
                         newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
                     }
+                }
+
+                // Migration for Upload APIV2
+                if oldSchemaVersion < 13 {
+                    migration.deleteData(forType: UploadFile.className())
                 }
             }
         }
@@ -72,8 +77,12 @@ public class DriveFileManager {
             schemaVersion: currentUploadDbVersion,
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
+                          PhotoSyncSettings.self,
+                          UploadSession.self,
                           UploadFile.self,
-                          PhotoSyncSettings.self])
+                          UploadingChunkTask.self,
+                          UploadedChunk.self,
+                          UploadingSessionTask.self])
 
         /// realm db used for file upload
         public var uploadsRealm: Realm {
@@ -334,8 +343,10 @@ public class DriveFileManager {
 
     public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm? = nil) -> File? {
         let realm = realm ?? getRealm()
-        let file = realm.object(ofType: File.self, forPrimaryKey: id)
-        return freeze ? file?.freeze() : file
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
+            return nil
+        }
+        return freeze ? file.freeze() : file
     }
 
     public func initRoot() async throws {
@@ -488,8 +499,7 @@ public class DriveFileManager {
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
                                                  page: page,
-                                                 sortType: sortType
-                                             )
+                                                 sortType: sortType)
                                              return (searchResults, nil)
                                          },
                                          page: page,
@@ -740,7 +750,7 @@ public class DriveFileManager {
             if pagedActions[fileId] == nil {
                 switch activity.action {
                 case .fileDelete, .fileTrash:
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
+                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
                         deletedFiles.append(file.freeze())
                     }
                     removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
@@ -750,6 +760,7 @@ public class DriveFileManager {
                     pagedActions[fileId] = .fileDelete
                 case .fileMoveOut:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
+                       !file.isInvalidated,
                        let oldParent = file.parent {
                         oldParent.children.remove(file)
                     }
@@ -759,6 +770,7 @@ public class DriveFileManager {
                     pagedActions[fileId] = .fileDelete
                 case .fileRename:
                     if let oldFile = realm.object(ofType: File.self, forPrimaryKey: fileId),
+                       !file.isInvalidated,
                        let renamedFile = activity.file {
                         try? renameCachedFile(updatedFile: renamedFile, oldFile: oldFile)
                         // If the file is a folder we have to copy the old attributes which are not returned by the API
@@ -775,6 +787,7 @@ public class DriveFileManager {
                         realm.add(newFile, update: .modified)
                         // If was already had a local parent, remove it
                         if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
+                           !file.isInvalidated,
                            let oldParent = file.parent {
                             oldParent.children.remove(file)
                         }
@@ -1207,7 +1220,7 @@ public class DriveFileManager {
 
     private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
             if fileManager.fileExists(atPath: file.localContainerUrl.path) {
                 try? fileManager.removeItem(at: file.localContainerUrl) // Check that it was correctly removed?
             }
@@ -1248,7 +1261,7 @@ public class DriveFileManager {
 
     private func updateFileProperty(fileId: Int, using realm: Realm? = nil, _ block: (File) -> Void) {
         let realm = realm ?? getRealm()
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
             try? realm.write {
                 block(file)
             }
@@ -1293,7 +1306,7 @@ public class DriveFileManager {
 
     private func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
-        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id) else { return }
+        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id), !savedChild.isInvalidated else { return }
         newFile.isAvailableOffline = savedChild.isAvailableOffline
         newFile.versionCode = savedChild.versionCode
         if keepProperties.contains(.fullyDownloaded) {

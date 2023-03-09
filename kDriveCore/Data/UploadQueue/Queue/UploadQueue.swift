@@ -16,15 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public class UploadQueue {
+public final class UploadQueue {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var notificationHelper: NotificationsHelpable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
@@ -33,14 +33,22 @@ public class UploadQueue {
 
     public var pausedNotificationSent = false
 
-    let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", autoreleaseFrequency: .workItem)
+    /// A serial queue to lock access to ivars an observations.
+    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
 
-    var operationsInQueue: [String: UploadOperationable] = [:]
-    lazy var operationQueue: OperationQueue = {
+    /// A concurrent queue.
+    let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
+                                        qos: .userInitiated,
+                                        attributes: [.concurrent])
+
+    /// Something to track an operation for a File ID
+    let keyedUploadOperations = KeyedUploadOperationable()
+
+    public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
-        queue.maxConcurrentOperationCount = 4
+        queue.maxConcurrentOperationCount = max(4, ProcessInfo.processInfo.activeProcessorCount)
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
@@ -58,16 +66,8 @@ public class UploadQueue {
 
     var fileUploadedCount = 0
 
-    /// This Realm instance is bound to `dispatchQueue`
-    var realm: Realm!
-
-    var bestSession: FileUploadSession {
-        if Bundle.main.isExtension {
-            @InjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-            return backgroundUploadSessionManager
-        } else {
-            return foregroundSession
-        }
+    var bestSession: URLSession {
+        return foregroundSession
     }
 
     /// Should suspend operation queue based on network status
@@ -78,30 +78,30 @@ public class UploadQueue {
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     var forceSuspendQueue = false
-    
+
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
-        didChangeProgress: [UUID: (UploadedFileId, UploadProgress) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
         didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
 
     public init() {
-        // Create Realm
-        dispatchQueue.sync {
-            do {
-                realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
-            } catch {
-                // We can't recover from this error but at least we report it correctly on Sentry
-                Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
-            }
+        UploadQueueLog("Starting up")
+
+        concurrentQueue.async {
+            // Initialize operation queue with files from Realm, and make sure it restarts
+            self.rebuildUploadQueueFromObjectsInRealm()
+            self.resumeAllOperations()
         }
-        // Initialize operation queue with files from Realm
-        addToQueueFromRealm()
-        // Observe network changes
+
+        // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
-            self.operationQueue.isSuspended = shouldSuspendQueue || forceSuspendQueue
+            let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
+            UploadQueueLog("observeNetworkChange :\(isSuspended)")
+            self.operationQueue.isSuspended = isSuspended
         }
+
+        UploadQueueLog("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
 
     // MARK: - Public methods
@@ -116,55 +116,20 @@ public class UploadQueue {
     public func getUploadingFiles(userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId)).sorted(byKeyPath: "taskCreationDate")
+        return realm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
+            .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds)).sorted(byKeyPath: "taskCreationDate")
+        return realm.objects(UploadFile.self)
+            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
+            .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
-    }
-
-    public func sendPausedNotificationIfNeeded() {
-        dispatchQueue.async {
-            if !self.pausedNotificationSent {
-                NotificationsHelper.sendPausedUploadQueueNotification()
-                self.pausedNotificationSent = true
-            }
-        }
-    }
-
-    func publishProgress(_ progress: Double, for fileId: String) {
-        observations.didChangeProgress.values.forEach { closure in
-            closure(fileId, progress)
-        }
-    }
-
-    // MARK: - Private methods
-
-    private func compactRealmIfNeeded() {
-        let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
-            let fiftyMB = 50 * 1024 * 1024
-            let compactingNeeded = (totalBytes > fiftyMB) && (Double(usedBytes) / Double(totalBytes)) < 0.5
-            DDLogInfo("Compacting uploads realm is needed ? \(compactingNeeded)")
-            return compactingNeeded
-        }
-
-        let config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-            schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
-            migrationBlock: DriveFileManager.constants.migrationBlock,
-            shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self]
-        )
-        do {
-            _ = try Realm(configuration: config)
-        } catch {
-            DDLogError("Failed to compact uploads realm: \(error)")
-        }
     }
 }

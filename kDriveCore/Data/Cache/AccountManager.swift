@@ -80,7 +80,7 @@ public protocol AccountManageable {
     var currentDriveFileManager: DriveFileManager? { get }
     var mqService: MQService { get }
     var refreshTokenLockedQueue: DispatchQueue { get }
-    
+
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for drive: Drive) -> DriveFileManager?
@@ -108,7 +108,8 @@ public protocol AccountManageable {
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenable: InfomaniakTokenable
-    
+    @LazyInjectService var notificationHelper: NotificationsHelpable
+
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -120,7 +121,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
-    
+
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId
@@ -257,7 +258,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             account.token = nil
             if account.userId == currentUserId {
                 delegate?.currentAccountNeedsAuthentication()
-                NotificationsHelper.sendDisconnectedNotification()
+                notificationHelper.sendDisconnectedNotification()
             }
         }
     }

@@ -16,18 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import UIKit
-import InfomaniakDI
 
 class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
-    
+
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
             return navigationController.visibleViewController == self

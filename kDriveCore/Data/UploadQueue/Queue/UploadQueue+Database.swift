@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,20 +19,16 @@
 import Foundation
 import RealmSwift
 
-public struct UploadChunk: Decodable {
-    
-    var number: UInt
-    var status: String
-    var createdAt: UInt64 // TODO date
-    var size: UInt64
-    var hash: String
-    
-    enum CodingKeys: String, CodingKey {
-        case number
-        case status
-        case createdAt = "created_at"
-        case size
-        case hash
+extension UploadQueue {
+    /// The standard way to interact with Realm within an UploadQueue
+    /// - Parameters:
+    ///   - function: The name of the function performing the transaction
+    ///   - task: The closure to perform an operation on a Realm.
+    func transactionWithUploadRealm(function: StaticString = #function, _ task: @escaping (_ realm: Realm) throws -> Void) throws {
+        try autoreleasepool {
+            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+            uploadsRealm.refresh()
+            try task(uploadsRealm)
+        }
     }
-    
 }

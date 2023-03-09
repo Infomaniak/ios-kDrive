@@ -16,20 +16,39 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakDI
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 
-public protocol FileDownloadSession: BackgroundSession {
+protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
+    // MARK: - Type aliases
+
+    associatedtype Task
+    associatedtype CompletionHandler
+    associatedtype Operationable
+
+    // MARK: - Attributes
+
+    var backgroundCompletionHandler: (() -> Void)? { get set }
+    var backgroundSession: URLSession! { get }
+    var tasksCompletionHandler: [String: CompletionHandler] { get set }
+    var operations: [Operationable] { get set }
+
+    func reconnectBackgroundTasks()
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
+    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession)
+    func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler?
+}
+
+public protocol FileDownloadSession: Identifiable {
     func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
 }
 
 extension URLSession: FileDownloadSession {}
 
-public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
-    
+public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate, FileDownloadSession {
     @LazyInjectService var accountManager: AccountManageable
-    
+
     public var identifier: String {
         return backgroundSession.identifier
     }
@@ -45,7 +64,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [Operation]()
+    var operations = [DownloadOperationable]()
 
     override public init() {
         super.init()
@@ -76,8 +95,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func rescheduleForBackground(task: URLSessionDownloadTask?) -> String? {
         let syncLock = DispatchGroup()
-        if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
-           let request = task?.originalRequest {
+        if let request = task?.originalRequest {
             var sessionIdentifier: String?
             syncLock.enter()
             task?.cancel { data in

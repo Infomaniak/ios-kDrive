@@ -85,8 +85,16 @@ public protocol AbstractToken {
     var token: String { get set }
 }
 
+public struct AbstractTokenWrapper: AbstractToken {
+    public var token: String
+}
+
 public protocol AbstractDrive {
     var id: Int { get set }
+}
+
+public struct AbstractDriveWrapper: AbstractDrive {
+    public var id: Int
 }
 
 public class ProxyDrive: AbstractDrive {
@@ -117,7 +125,7 @@ public struct ProxyFile: AbstractFile, Sendable {
     }
 
     func resolve(using realm: Realm) throws -> File {
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
         return file
@@ -151,10 +159,6 @@ public extension Endpoint {
 
     static var initData: Endpoint {
         return .driveV1.appending(path: "/init", queryItems: [URLQueryItem(name: "with", value: "drives,users,teams,categories")])
-    }
-
-    static func uploadToken(drive: AbstractDrive) -> Endpoint {
-        return .driveV1.appending(path: "/\(drive.id)/file/1/upload/token")
     }
 
     // MARK: Action
@@ -607,15 +611,19 @@ public extension Endpoint {
     static func upload(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [fileMinimalWithQueryItem])
     }
-    
+
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
+    }
+
+    static func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/upload/session/\(sessionToken.token)")
     }
 
     static func startSession(drive: AbstractDrive) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/start")
     }
-    
+
     static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/finish")
     }
@@ -623,7 +631,7 @@ public extension Endpoint {
     static func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/chunk")
     }
-    
+
     // MARK: User invitation
 
     static func userInvitations(drive: AbstractDrive) -> Endpoint {

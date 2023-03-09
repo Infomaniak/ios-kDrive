@@ -72,7 +72,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedBytes)
     }
-    
+
     func testToBytesFromTebibytes() {
         // GIVEN
         let tebibytes: Double = 1
@@ -85,7 +85,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedBytes)
     }
-    
+
     func testToBytesFromPebibytes() {
         // GIVEN
         let pebibytes: Double = 1
@@ -98,7 +98,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedBytes)
     }
-    
+
     func testToBytesFromExbibytes() {
         // GIVEN
         let exbibytes: Double = 1
@@ -165,7 +165,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedKibibytes)
     }
-    
+
     func testToKibibytesFromTebibytes() {
         // GIVEN
         let tebibytes: Double = 1
@@ -178,7 +178,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedKibibytes)
     }
-    
+
     func testToKibibytesFromPebibytes() {
         // GIVEN
         let pebibytes: Double = 1
@@ -191,7 +191,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedKibibytes)
     }
-    
+
     func testToKibibytesFromExbibytes() {
         // GIVEN
         let exbibytes: Double = 1
@@ -205,7 +205,6 @@ final class BinaryDisplaySizeTests: XCTestCase {
         XCTAssertEqual(recBytes, expectedKibibytes)
     }
 
-    
     // MARK: - toMebibytes
 
     func testToMebibytesFromBytes() {
@@ -259,7 +258,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedMebibytes)
     }
-    
+
     func testToMebibytesFromTebibytes() {
         // GIVEN
         let tebibytes: Double = 1
@@ -272,7 +271,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedMebibytes)
     }
-    
+
     func testToMebibytesFromPebibytes() {
         // GIVEN
         let pebibytes: Double = 1
@@ -285,7 +284,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedMebibytes)
     }
-    
+
     func testToMebibytesFromExbibytes() {
         // GIVEN
         let exbibytes: Double = 1
@@ -352,7 +351,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedGibibytes)
     }
-    
+
     func testToGigabytesFromTebibytes() {
         // GIVEN
         let tebibytes: Double = 1
@@ -365,7 +364,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedGibibytes)
     }
-    
+
     func testToGigabytesFromPebibytes() {
         // GIVEN
         let pebibytes: Double = 1
@@ -378,7 +377,7 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedGibibytes)
     }
-    
+
     func testToGigabytesFromExbibytes() {
         // GIVEN
         let exbibytes: Double = 1
@@ -391,5 +390,4 @@ final class BinaryDisplaySizeTests: XCTestCase {
         // THEN
         XCTAssertEqual(recBytes, expectedGibibytes)
     }
-    
 }

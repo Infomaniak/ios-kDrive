@@ -82,17 +82,17 @@ public enum BinaryDisplaySize: Encodable {
         let scaled = scaled(to: .kibibytes)
         return scaled
     }
-    
+
     public var toMebibytes: Double {
         let scaled = scaled(to: .mebibytes)
         return scaled
     }
-    
+
     public var toGibibytes: Double {
         let scaled = scaled(to: .gibibytes)
         return scaled
     }
-    
+
     /// Returns a storage space in the requested scale
     /// - Parameter requestedUnit: the requested scale
     /// - Returns: a scaled value

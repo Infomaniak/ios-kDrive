@@ -26,10 +26,11 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
-    
+
     @LazyInjectService var accountManager: AccountManageable
 
     public override func viewDidLoad() {
+        // log
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
         preferredContentSize = CGSize(width: 540, height: 620)

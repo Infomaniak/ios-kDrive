@@ -36,7 +36,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     var driveFileManager: DriveFileManager!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
@@ -272,7 +272,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    uploadQueue.addToQueue(file:
+                    uploadQueue.saveToRealmAndAddToQueue(file:
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,

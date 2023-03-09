@@ -26,8 +26,8 @@ extension FileProviderExtension {
 
         for identifier in itemIdentifiers {
             if let fileId = identifier.toFileId(),
-                let file = driveFileManager.getCachedFile(id: fileId),
-                let token = driveFileManager.apiFetcher.currentToken {
+               let file = driveFileManager.getCachedFile(id: fileId),
+               let token = driveFileManager.apiFetcher.currentToken {
                 var request = URLRequest(url: file.thumbnailURL)
                 request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 

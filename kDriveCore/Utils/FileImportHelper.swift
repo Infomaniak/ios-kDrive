@@ -138,7 +138,7 @@ public class FileImportHelper {
     public init() {
         /// Public Service initializer
     }
-    
+
     @MainActor
     public func importAssets(
         _ assetIdentifiers: [String],
@@ -264,7 +264,7 @@ public class FileImportHelper {
                 url: file.path,
                 name: file.name
             )
-            uploadQueue.addToQueue(file: uploadFile)
+            uploadQueue.saveToRealmAndAddToQueue(file: uploadFile)
         }
     }
 
@@ -508,6 +508,6 @@ public class FileImportHelper {
             url: targetURL,
             name: name
         )
-        uploadQueue.addToQueue(file: newFile)
+        uploadQueue.saveToRealmAndAddToQueue(file: newFile)
     }
 }

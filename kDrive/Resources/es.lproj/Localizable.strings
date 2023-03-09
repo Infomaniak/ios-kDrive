@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Wed, 14 Dec 2022 11:49:40 +0100
+ * Exported by: Adrien Coye
+ * Exported at: Tue, 28 Feb 2023 11:43:48 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -739,6 +739,9 @@
 
 /* loco:605cacde72147f269369e484 */
 "errorDestinationAlreadyExists" = "El destino ya existe";
+
+/* loco:60a693f631a0a90e163445f2 */
+"errorDeviceStorage" = "Insuficiente almacenamiento telefónico disponible";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "Se ha producido un error. Por favor, conéctese de nuevo para continuar.";
@@ -2109,7 +2112,7 @@
 "uploadNetworkErrorWifiRequired" = "A la espera de red WiFi";
 
 /* loco:60928fcf72952001716b86d2 */
-"uploadPausedDescription" = "Las importaciones siguen en curso en kDrive. Se han puesto en pausa y se reanudarán esta noche o cuando reinicies la aplicación.";
+"uploadPausedDescription" = "Algunas subidas siguen en curso en kDrive. Abre la aplicación y mantén el dispositivo conectado para acelerar la carga.";
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pausa de importación";

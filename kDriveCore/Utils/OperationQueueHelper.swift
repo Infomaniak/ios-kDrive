@@ -20,12 +20,14 @@ import Foundation
 import UIKit
 
 enum OperationQueueHelper {
-    static func disableIdleTimer(_ shouldBeDisabled: Bool, queue: [AnyHashable: Any]? = nil) {
+    static func disableIdleTimer(_ shouldBeDisabled: Bool, hasOperationsInQueue: Bool = false) {
+        UploadQueueLog("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled) hasOperationsInQueue:\(hasOperationsInQueue)")
+
         #if !ISEXTENSION
         DispatchQueue.main.async {
             if shouldBeDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
-            } else if queue?.isEmpty == true {
+            } else if !hasOperationsInQueue {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }

@@ -276,7 +276,7 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             guard let realm = try? Realm(configuration: realmConfiguration) else { return }
             try? realm.write {
                 for file in deletedFiles {
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                    if let file = realm.object(ofType: File.self, forPrimaryKey: file.id), !file.isInvalidated {
                         realm.delete(file)
                     }
                 }

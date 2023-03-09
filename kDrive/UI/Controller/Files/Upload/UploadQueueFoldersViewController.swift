@@ -17,10 +17,10 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
 import UIKit
-import InfomaniakDI
 
 class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
@@ -63,27 +63,36 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Observe uploading files
         notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
-            .observe(on: .main) { [weak self] change in
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
                 switch change {
                 case .initial(let results):
-                    self?.updateFolders(from: results)
-                    self?.tableView.reloadData()
+                    self.updateFolders(from: results)
+                    self.tableView.reloadData()
                     if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     guard !results.isEmpty else {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                         return
                     }
 
-                    self?.tableView.performBatchUpdates {
-                        self?.updateFolders(from: results)
+                    // No animation on updating the same lines without changes
+                    if deletions == insertions, modifications.isEmpty {
+                        return
+                    }
+
+                    self.tableView.performBatchUpdates {
+                        self.updateFolders(from: results)
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
-                        self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")

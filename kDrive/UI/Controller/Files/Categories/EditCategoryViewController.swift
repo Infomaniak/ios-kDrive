@@ -22,7 +22,6 @@ import kDriveResources
 import UIKit
 
 class EditCategoryViewController: UITableViewController {
-    
     @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!

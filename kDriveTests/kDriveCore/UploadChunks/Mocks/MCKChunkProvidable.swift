@@ -21,7 +21,6 @@ import kDriveCore
 
 /// A public mock for the MCKChunkProvidable module
 public final class MCKChunkProvidable: ChunkProvidable {
-    
     var fileURL: URL
     var ranges: [DataRange]
     public init?(fileURL: URL, ranges: [DataRange]) {
@@ -30,11 +29,12 @@ public final class MCKChunkProvidable: ChunkProvidable {
     }
 
     // MARK: - IteratorProtocol
+
     public typealias Element = Data
 
     var nextCalled: Bool { nextCallCount > 0 }
     var nextCallCount: Int = 0
-    var nextClosure: (()->Data?)?
+    var nextClosure: (() -> Data?)?
     public func next() -> Data? {
         nextCallCount += 1
         if let nextClosure {

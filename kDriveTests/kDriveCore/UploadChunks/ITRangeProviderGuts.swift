@@ -22,7 +22,7 @@ import XCTest
 /// Integration Tests of the RangeProviderGuts
 final class ITRangeProviderGuts: XCTestCase {
     // MARK: - readFileByteSize
-    
+
     let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
 
     func testReadFileByteSize() {
@@ -31,27 +31,27 @@ final class ITRangeProviderGuts: XCTestCase {
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)
-        
+
         // WHEN
         do {
             let size = try guts.readFileByteSize()
-            
+
             // THEN
             XCTAssertEqual(size, expectedFileBytes)
         } catch {
             XCTFail("Unexpected \(error)")
         }
     }
-    
+
     func testReadFileByteSize_FileDoesNotExists() {
         // GIVEN
         let notThereFileURL = URL(string: "file:///Arcalod_2117.jpg")!
         let rangeProvider = RangeProviderGuts(fileURL: notThereFileURL)
-        
+
         // WHEN
         do {
-            let _ = try rangeProvider.readFileByteSize()
-            
+            _ = try rangeProvider.readFileByteSize()
+
             // THEN
             XCTFail("Unexpected")
         } catch {
@@ -61,7 +61,7 @@ final class ITRangeProviderGuts: XCTestCase {
             XCTAssertEqual((error as NSError).code, 260)
         }
     }
-    
+
     // MARK: - buildRanges(fileSize: totalChunksCount: chunkSize:)
 
     func testBuildRanges_fromImage() {
@@ -71,31 +71,31 @@ final class ITRangeProviderGuts: XCTestCase {
         let guts = RangeProviderGuts(fileURL: pathURL)
         let fileChunks = UInt64(4)
         let expectedChunks = 5
-        let chunksSize = UInt64(1*1024*1024)
-        
+        let chunksSize = UInt64(1 * 1024 * 1024)
+
         // WHEN
         do {
             let size = try guts.readFileByteSize()
             let chunks = try guts.buildRanges(fileSize: size, totalChunksCount: fileChunks, chunkSize: chunksSize)
-            
+
             // THEN
             try UTRangeProviderGuts.checkContinuity(ranges: chunks)
             XCTAssertEqual(chunks.count, expectedChunks)
-            
+
             // Check that last range is the end of the file
-            let lastChunk = chunks[expectedChunks-1]
+            let lastChunk = chunks[expectedChunks - 1]
             // The last offset is size -1
-            let endOfFileOffset = size-1
+            let endOfFileOffset = size - 1
             guard lastChunk.upperBound == endOfFileOffset else {
                 XCTFail("EOF not reached")
                 return
             }
-            
+
         } catch {
             XCTFail("Unexpected \(error)")
         }
     }
-    
+
     func testBuildRanges_fromEmptyFile() {
         // GIVEN
         let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
@@ -103,11 +103,11 @@ final class ITRangeProviderGuts: XCTestCase {
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(1)
         let expectedChunks = 0
-        
+
         // WHEN
         do {
             let chunks = try guts.buildRanges(fileSize: emptyFileSize, totalChunksCount: fileChunks, chunkSize: chunksSize)
-            
+
             // THEN
             XCTAssertEqual(chunks.count, expectedChunks)
             try UTRangeProviderGuts.checkContinuity(ranges: chunks)
@@ -115,45 +115,54 @@ final class ITRangeProviderGuts: XCTestCase {
             XCTFail("Unexpected \(error)")
         }
     }
-    
-    // MARK: - preferedChunkSize(for fileSize:)
-    
-    func testPreferedChunkSize_fromImage() {
+
+    // MARK: - preferredChunkSize(for fileSize:)
+
+    func testPreferredChunkSize_fromImage() {
         // GIVEN
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)
-        
+
         // WHEN
         do {
             let size = try guts.readFileByteSize()
-            let preferedChunkSize = guts.preferedChunkSize(for: size)
-            
+            let preferredChunkSize = guts.preferredChunkSize(for: size)
+
             // THEN
-            XCTAssertTrue(preferedChunkSize > 0)
-            XCTAssertTrue(preferedChunkSize <= size)
-            
+            XCTAssertTrue(preferredChunkSize > 0)
+            XCTAssertTrue(preferredChunkSize <= size)
+
             // this should not be strictly imposed but I can quickly check behaviour here
-            // XCTAssertTrue(preferedChunkSize >= RangeProvider.APIConsts.chunkMinSize)
-            // XCTAssertTrue(preferedChunkSize <= RangeProvider.APIConsts.chunkMaxSize)
+            // XCTAssertTrue(preferredChunkSize >= RangeProvider.APIConstants.chunkMinSize)
+            // XCTAssertTrue(preferredChunkSize <= RangeProvider.APIConstants.chunkMaxSize)
         } catch {
             XCTFail("Unexpected \(error)")
         }
     }
-    
-    func testPreferedChunkSize_0() {
+
+    func testPreferredChunkSize_0() {
         // GIVEN
         let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
-        
+
         // WHEN
-        do {
-            let preferedChunkSize = guts.preferedChunkSize(for: 0)
-            
-            // THEN
-            XCTAssertTrue(preferedChunkSize > 0)
-        } catch {
-            XCTFail("Unexpected \(error)")
-        }
+        let preferredChunkSize = guts.preferredChunkSize(for: 0)
+
+        // THEN
+        XCTAssertTrue(preferredChunkSize == 0)
     }
-    
+
+    func testPreferredChunkSize_notLargerThanFileSize() {
+        // GIVEN
+        let guts = RangeProviderGuts(fileURL: URL(string: "http://infomaniak.ch")!)
+        let superSmallFileSize: UInt64 = 10
+
+        // WHEN
+        let preferredChunkSize = guts.preferredChunkSize(for: superSmallFileSize)
+
+        // THEN
+        XCTAssertEqual(preferredChunkSize,
+                       superSmallFileSize,
+                       "we expect the chunk size to be capped at the file size for small files")
+    }
 }

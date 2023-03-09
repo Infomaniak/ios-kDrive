@@ -88,7 +88,7 @@ public class DownloadArchiveOperation: Operation {
         if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
-                // We don't support task rescheduling for archive download but still need to pass error to diffrentiate from user cancel
+                // We don't support task rescheduling for archive download but still need to pass error to differentiate from user cancel
                 self.error = .taskRescheduled
                 self.task?.cancel()
                 self.end(sessionUrl: self.task?.originalRequest?.url)

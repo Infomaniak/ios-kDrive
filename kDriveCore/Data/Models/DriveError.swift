@@ -76,47 +76,154 @@ public struct DriveError: Error, Equatable {
     public var localizedDescription: String
     public var userInfo: [UserInfoKey: ErrorUserInfo]?
 
-    private init(type: DriveErrorType, code: String, localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric) {
+    private init(type: DriveErrorType,
+                 code: String,
+                 localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
+                 underlyingError: Error? = nil) {
         self.type = type
         self.code = code
+        self.underlyingError = underlyingError
         localizedDescription = localizedString
     }
 
+    // MARK: - Local
+
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
-    public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
     public static let localError = DriveError(type: .localError, code: "localError")
-    public static let serverError = DriveError(type: .serverError, code: "serverError")
-    public static let networkError = DriveError(type: .networkError, code: "networkError", localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
+    public static let errorDeviceStorage = DriveError(type: .localError,
+                                                      code: "errorDeviceStorage",
+                                                      localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage)
+    /// The task is cancelled by the user.
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
+
     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
-    public static let quotaExceeded = DriveError(type: .serverError, code: "quota_exceeded_error", localizedString: KDriveResourcesStrings.Localizable.notEnoughStorageDescription1)
-    public static let shareLinkAlreadyExists = DriveError(type: .serverError, code: "file_share_link_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorShareLink)
-    public static let objectNotFound = DriveError(type: .serverError, code: "object_not_found", localizedString: KDriveResourcesStrings.Localizable.uploadFolderNotFoundError)
-    public static let cannotCreateFileHere = DriveError(type: .serverError, code: "can_not_create_file_here_error", localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
-    public static let destinationAlreadyExists = DriveError(type: .serverError, code: "destination_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists)
-    public static let forbidden = DriveError(type: .serverError, code: "forbidden_error", localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
-    public static let noDrive = DriveError(type: .serverError, code: "no_drive")
-    public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveResourcesStrings.Localizable.errorConflict)
-    public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
-    public static let blocked = DriveError(type: .serverError, code: "product_blocked", localizedString: KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural)
-    public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
-    public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
-    public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
-    public static let photoLibraryWriteAccessDenied = DriveError(type: .localError, code: "photoLibraryWriteAccessDenied", localizedString: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited)
-    public static let downloadFailed = DriveError(type: .localError, code: "errorDownload", localizedString: KDriveResourcesStrings.Localizable.errorDownload)
-    public static let cachingFailed = DriveError(type: .localError, code: "errorCache", localizedString: KDriveResourcesStrings.Localizable.errorCache)
-    public static let stillUploadingError = DriveError(type: .serverError, code: "still_uploading_error", localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
-
+    public static let photoLibraryWriteAccessDenied = DriveError(type: .localError,
+                                                                 code: "photoLibraryWriteAccessDenied",
+                                                                 localizedString: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited)
+    public static let downloadFailed = DriveError(type: .localError,
+                                                  code: "errorDownload",
+                                                  localizedString: KDriveResourcesStrings.Localizable.errorDownload)
+    public static let cachingFailed = DriveError(type: .localError,
+                                                 code: "errorCache",
+                                                 localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists, stillUploadingError]
+    // MARK: - Server
+
+    public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
+    public static let serverError = DriveError(type: .serverError, code: "serverError")
+    public static let noDrive = DriveError(type: .serverError, code: "no_drive")
+    public static let quotaExceeded = DriveError(type: .serverError,
+                                                 code: "quota_exceeded_error",
+                                                 localizedString: KDriveResourcesStrings.Localizable.notEnoughStorageDescription1)
+    public static let shareLinkAlreadyExists = DriveError(type: .serverError,
+                                                          code: "file_share_link_already_exists",
+                                                          localizedString: KDriveResourcesStrings.Localizable.errorShareLink)
+    public static let objectNotFound = DriveError(type: .serverError,
+                                                  code: "object_not_found",
+                                                  localizedString: KDriveResourcesStrings.Localizable.uploadFolderNotFoundError)
+    public static let cannotCreateFileHere = DriveError(type: .serverError,
+                                                        code: "can_not_create_file_here_error",
+                                                        localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
+    public static let destinationAlreadyExists = DriveError(type: .serverError,
+                                                            code: "destination_already_exists",
+                                                            localizedString: KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists)
+    public static let forbidden = DriveError(type: .serverError,
+                                             code: "forbidden_error",
+                                             localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
+    public static let conflict = DriveError(type: .serverError,
+                                            code: "conflict_error",
+                                            localizedString: KDriveResourcesStrings.Localizable.errorConflict)
+    public static let maintenance = DriveError(type: .serverError,
+                                               code: "product_maintenance",
+                                               localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
+    public static let blocked = DriveError(type: .serverError,
+                                           code: "product_blocked",
+                                           localizedString: KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural)
+    public static let lock = DriveError(type: .serverError,
+                                        code: "lock_error",
+                                        localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
+    public static let donwloadPermission = DriveError(type: .serverError,
+                                                      code: "you_must_add_at_least_one_file",
+                                                      localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
+    public static let categoryAlreadyExists = DriveError(type: .serverError,
+                                                         code: "category_already_exist_error",
+                                                         localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
+    public static let stillUploadingError = DriveError(type: .serverError,
+                                                       code: "still_uploading_error",
+                                                       localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
+
+    public static let fileAlreadyExistsError = DriveError(type: .serverError, code: "file_already_exists_error")
+
+    public static let notAuthorized = DriveError(type: .serverError, code: "not_authorized")
+
+    public static let uploadDestinationNotFoundError = DriveError(type: .serverError, code: "upload_destination_not_found_error")
+
+    public static let uploadDestinationNotWritableError = DriveError(type: .serverError, code: "upload_destination_not_writable_error")
+
+    public static let uploadNotTerminatedError = DriveError(type: .serverError, code: "upload_not_terminated_error")
+
+    public static let uploadNotTerminated = DriveError(type: .serverError, code: "upload_not_terminated")
+
+    public static let invalidUploadTokenError = DriveError(type: .serverError, code: "invalid_upload_token_error")
+
+    public static let uploadError = DriveError(type: .serverError, code: "upload_error")
+
+    public static let uploadFailedError = DriveError(type: .serverError, code: "upload_failed_error")
+
+    public static let uploadTokenIsNotValid = DriveError(type: .serverError, code: "upload_token_is_not_valid")
+
+    public static let uploadTokenCanceled = DriveError(type: .serverError, code: "upload_token_canceled")
+
+    // MARK: - Network
+
+    public static let networkError = DriveError(type: .networkError,
+                                                code: "networkError",
+                                                localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
+
+    private static let allErrors: [DriveError] = [fileNotFound,
+                                                  photoAssetNoLongerExists,
+                                                  refreshToken,
+                                                  unknownToken,
+                                                  localError,
+                                                  serverError,
+                                                  networkError,
+                                                  taskCancelled,
+                                                  taskExpirationCancelled,
+                                                  taskRescheduled,
+                                                  quotaExceeded,
+                                                  shareLinkAlreadyExists,
+                                                  objectNotFound,
+                                                  cannotCreateFileHere,
+                                                  destinationAlreadyExists,
+                                                  forbidden,
+                                                  noDrive,
+                                                  conflict,
+                                                  maintenance,
+                                                  lock,
+                                                  donwloadPermission,
+                                                  categoryAlreadyExists,
+                                                  stillUploadingError,
+                                                  uploadNotTerminated,
+                                                  uploadNotTerminatedError,
+                                                  notAuthorized,
+                                                  uploadDestinationNotFoundError,
+                                                  uploadDestinationNotWritableError,
+                                                  invalidUploadTokenError,
+                                                  uploadError,
+                                                  uploadFailedError,
+                                                  uploadTokenIsNotValid,
+                                                  fileAlreadyExistsError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
+
+    /// A specific, not user facing, not localized error
+    private var underlyingError: Error?
 
     public init(apiErrorCode: String, httpStatus: Int = 400) {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
@@ -154,6 +261,15 @@ public struct DriveError: Error, Equatable {
 
     static func serverError(statusCode: Int) -> DriveError {
         return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
+    }
+
+    /// Wraps a specific detailed error into a user facing localized DriveError
+    public func wrapping(_ underlyingError: Error) -> Self {
+        let error = DriveError(type: type,
+                               code: code,
+                               localizedString: localizedDescription,
+                               underlyingError: underlyingError)
+        return error
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {

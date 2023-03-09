@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Wed, 14 Dec 2022 11:49:40 +0100
+ * Exported by: Adrien Coye
+ * Exported at: Tue, 28 Feb 2023 11:43:48 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -255,7 +255,7 @@
 "buttonCancel" = "Annulla";
 
 /* loco:624e99d3adb6372fb56e5ab8 */
-"buttonCancelImport" = "Annullare l‘importazione";
+"buttonCancelImport" = "Annullare l’importazione";
 
 /* loco:619624bcb9b09f02f0102733 */
 "buttonChangeFolderColor" = "Cambia il colore della cartella";
@@ -739,6 +739,9 @@
 
 /* loco:605cacde72147f269369e484 */
 "errorDestinationAlreadyExists" = "La destinazione è già esistente";
+
+/* loco:60a693f631a0a90e163445f2 */
+"errorDeviceStorage" = "Insufficiente memoria telefonica disponibile";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "Si è verificato un errore. Per favore, accedi di nuovo per continuare.";
@@ -2109,7 +2112,7 @@
 "uploadNetworkErrorWifiRequired" = "In attesa di connessione alla rete Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
-"uploadPausedDescription" = "Le importazioni sono ancora in corso in kDrive. Sono stati messi in pausa e riprenderanno stasera o quando riavvierai l'app.";
+"uploadPausedDescription" = "Alcuni caricamenti sono ancora in corso in kDrive. Aprite l’app e mantenete il dispositivo connesso per accelerare il caricamento.";
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pausa importazione";

@@ -253,8 +253,10 @@ public class DriveInfosManager {
 
     public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
         let realm = realm ?? getRealm()
-        let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId)
-        return freeze ? drive?.freeze() : drive
+        guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
+            return nil
+        }
+        return freeze ? drive.freeze() : drive
     }
 
     public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
@@ -269,7 +271,10 @@ public class DriveInfosManager {
 
     public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
         let realm = realm ?? getRealm()
-        return realm.object(ofType: DriveUser.self, forPrimaryKey: id)?.freeze()
+        guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id), !user.isInvalidated else {
+            return nil
+        }
+        return user.freeze()
     }
 
     public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
@@ -284,6 +289,9 @@ public class DriveInfosManager {
 
     public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
         let realm = realm ?? getRealm()
-        return realm.object(ofType: Team.self, forPrimaryKey: id)?.freeze()
+        guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
+            return nil
+        }
+        return team.freeze()
     }
 }

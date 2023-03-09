@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakDI
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -28,7 +28,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private static let loadingCellCount = 12
 
     @LazyInjectService var accountManager: AccountManageable
-    
+
     enum HomeFileType {
         case file([File])
         case fileActivity([FileActivity])

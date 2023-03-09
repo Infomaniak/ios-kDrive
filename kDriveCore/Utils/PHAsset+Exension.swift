@@ -17,12 +17,12 @@
  */
 
 import Foundation
+import InfomaniakDI
 import Photos
 import Sentry
-import InfomaniakDI
 
-extension PHAsset {
-    public static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
+public extension PHAsset {
+    static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
         var containsHEICPhotos = false
         assets.enumerateObjects { asset, _, stop in
@@ -34,14 +34,14 @@ extension PHAsset {
         return containsHEICPhotos
     }
 
-    public func getFilename(uti: UTI) -> String? {
+    func getFilename(uti: UTI) -> String? {
         guard let resource = bestResource() else { return nil }
 
         let lastPathComponent = resource.originalFilename.split(separator: ".")
         return "\(lastPathComponent[0]).\(uti.preferredFilenameExtension ?? "")"
     }
 
-    public func bestResource() -> PHAssetResource? {
+    func bestResource() -> PHAssetResource? {
         let resources = PHAssetResource.assetResources(for: self)
 
         if mediaType == .video {
@@ -65,7 +65,7 @@ extension PHAsset {
         return nil
     }
 
-    public func getUrl(preferJPEGFormat: Bool) async -> URL? {
+    func getUrl(preferJPEGFormat: Bool) async -> URL? {
         guard let resource = bestResource() else { return nil }
 
         let requestResourceOption = PHAssetResourceRequestOptions()
@@ -77,7 +77,7 @@ extension PHAsset {
             resourceUTI = .jpeg
             shouldTransformIntoJPEG = true
         }
-        
+
         @InjectService var fileImportHelper: FileImportHelper
         let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {
@@ -105,11 +105,11 @@ extension PHAsset {
         let attributes = [
             FileAttributeKey.creationDate: creationDate ?? Date(),
             /*
-             We use the creationDate instead of the modificationDate
-             because this date is not always accurate.
-             (It does not seem to correspond to a real modification of the image)
-             Apple Feedback: FB11923430
-             */
+                We use the creationDate instead of the modificationDate
+                because this date is not always accurate.
+                (It does not seem to correspond to a real modification of the image)
+                Apple Feedback: FB11923430
+                */
             FileAttributeKey.modificationDate: creationDate ?? Date()
         ]
         try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)

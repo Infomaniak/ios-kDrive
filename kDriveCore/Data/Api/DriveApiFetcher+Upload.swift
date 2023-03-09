@@ -20,19 +20,9 @@ import Alamofire
 import Foundation
 import InfomaniakCore
 
-public extension DriveApiFetcher {
-    // MARK: Upload V2
-    
-    /// Conflict resolution options
-    enum ConflictResolution: String {
-        /// An error is thrown without creating the file/session.
-        case throwError = "error"
-        /// Rename the new file with an available name (ex. file.txt to file(3).txt).
-        case rename
-        /// Replace the content of the existing file (create a new version of the file).
-        case version
-    }
+// MARK: - Upload APIV2
 
+public extension DriveApiFetcher {
     enum APIParameters: String {
         case driveId = "drive_id"
         case conflict
@@ -48,7 +38,7 @@ public extension DriveApiFetcher {
         case chunkSize = "chunk_size"
         case chunkHash = "chunk_hash"
     }
-    
+
     /// Starts a session to upload a file in multiple parts
     ///
     /// https://developer.infomaniak.com/docs/api/post/2/drive/%7Bdrive_id%7D/upload/session/start
@@ -76,7 +66,7 @@ public extension DriveApiFetcher {
                       totalSize: UInt64,
                       fileName: String,
                       totalChunks: Int,
-                      conflictResolution: ConflictResolution? = nil,
+                      conflictResolution: ConflictOption? = nil,
                       lastModifiedAt: Date? = nil,
                       createdAt: Date? = nil,
                       directoryId: Int? = nil,
@@ -86,55 +76,55 @@ public extension DriveApiFetcher {
         guard directoryId != nil || directoryPath != nil else {
             throw DriveError.UploadSessionError.invalidDirectoryParameters
         }
-        
+
         guard !fileName.isEmpty else {
             throw DriveError.UploadSessionError.fileNameIsEmpty
         }
-        
-        guard totalChunks < RangeProvider.APIConsts.maxTotalChunks,
-              totalChunks >= RangeProvider.APIConsts.minTotalChunks else {
+
+        guard totalChunks < RangeProvider.APIConstants.maxTotalChunks,
+              totalChunks >= RangeProvider.APIConstants.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
-        
+
         // Build parameters
         var parameters: Parameters = [APIParameters.driveId.rawValue: drive.id,
                                       APIParameters.totalSize.rawValue: totalSize,
                                       APIParameters.fileName.rawValue: fileName,
                                       APIParameters.totalChunks.rawValue: totalChunks]
-        
+
         if let conflictResolution {
             parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
         }
-        
+
         // TODO: check if doc details data format
         if let lastModifiedAt {
             parameters[APIParameters.lastModifiedAt.rawValue] = "\(lastModifiedAt.timeIntervalSince1970)"
         }
-        
+
         // TODO: check if doc details data format
         if let createdAt {
             parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
         }
-        
+
         if let directoryId {
             parameters[APIParameters.directoryId.rawValue] = directoryId
         }
-        
+
         if let directoryPath {
             parameters[APIParameters.directoryPath.rawValue] = directoryPath
         }
-        
+
         if let fileId {
             parameters[APIParameters.fileId.rawValue] = fileId
         }
-        
+
         let route: Endpoint = .startSession(drive: drive)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: nil,
                               body: .POSTParameters(parameters))
-        
+
         let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
@@ -145,67 +135,67 @@ public extension DriveApiFetcher {
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
+
         let result: UploadLiveSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
-    func cancelSession(drive: AbstractDrive) async throws -> Bool {
-        let route: Endpoint = .uploadSession(drive: drive)
+
+    func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> Bool {
+        let route: Endpoint = .cancelSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .DELETE,
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
-        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+
+        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadedFile {
         let route: Endpoint = .closeSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: nil,
                               body: .none)
-        
-        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+
+        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func appendChunk(drive: AbstractDrive,
                      sessionToken: AbstractToken,
                      chunkNumber: Int,
-                     chunk: Data) async throws -> UploadChunk {
+                     chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
         let chunkHash = "sha256:\(chunk.SHA256DigestString)"
         let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
                                       APIParameters.chunkSize.rawValue: chunkSize,
                                       APIParameters.chunkHash.rawValue: chunkHash]
         let route: Endpoint = .appendChunk(drive: drive, sessionToken: sessionToken)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: parameters,
                               body: .requestBody(chunk))
-        
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+
+        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
+
     func upload(drive: AbstractDrive,
                 sessionToken: AbstractToken,
                 chunkNumber: Int,
-                chunk: Data) async throws -> UploadChunk {
+                chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
         let parameters: Parameters = [APIParameters.chunkSize.rawValue: chunkSize]
         let route: Endpoint = .upload(drive: drive)
-        
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: parameters,
                               body: .none)
-        
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+
+        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
 }

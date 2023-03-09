@@ -18,6 +18,7 @@
 
 import Foundation
 
+/// The object returned at the getSession call
 public struct UploadLiveSession: Decodable {
     var expectedChunks: UInt64
     var receivedChunks: UInt64
@@ -25,7 +26,7 @@ public struct UploadLiveSession: Decodable {
     var failedChunks: UInt64
     var expectedSize: UInt64
     var uploadedSize: UInt64
-    
+
     private enum CodingKeys: String, CodingKey {
         case expectedChunks = "expected_chunks"
         case receivedChunks = "received_chunks"

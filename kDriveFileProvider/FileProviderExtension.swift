@@ -76,6 +76,7 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override init() {
+        // log
         Logging.initLogging()
         super.init()
     }
@@ -256,7 +257,7 @@ class FileProviderExtension: NSFileProviderExtension {
             driveId: driveFileManager.drive.id,
             url: item.storageUrl,
             name: item.filename,
-            conflictOption: .replace,
+            conflictOption: .version,
             shouldRemoveAfterUpload: false)
         var observationToken: ObservationToken?
         observationToken = uploadQueue.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
@@ -266,7 +267,7 @@ class FileProviderExtension: NSFileProviderExtension {
             }
             completion?()
         }
-        uploadQueue.addToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
+        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
     }
 
     // MARK: - Enumeration

@@ -18,10 +18,10 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import Photos
 import RealmSwift
 import Sentry
-import InfomaniakDI
 
 public class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
@@ -50,7 +50,7 @@ public class PhotoLibraryUploader {
     }
 
     public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        try? realm.write {
+        try? realm.safeWrite {
             realm.delete(realm.objects(PhotoSyncSettings.self))
         }
         settings = nil
@@ -71,74 +71,61 @@ public class PhotoLibraryUploader {
         }
     }
 
-    class AsyncResult<T> {
-        private var result: T?
-        private let group = DispatchGroup()
-
-        init() {
-            group.enter()
-        }
-
-        func get() -> T {
-            group.wait()
-            return result!
-        }
-
-        func set(_ result: T) {
-            self.result = result
-            group.leave()
-        }
+    func getUrl(for asset: PHAsset) async -> URL? {
+        return await asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg)
     }
 
-    func getUrlSync(for asset: PHAsset) -> URL? {
-        let result = AsyncResult<URL?>()
-        Task {
-            await result.set(asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg))
-        }
-        return result.get()
-    }
+    @discardableResult
+    public func scheduleNewPicturesForUpload() -> Int {
+        var newAssetsCount = 0
+        BackgroundRealm.uploads.execute { realm in
+            PhotoLibraryUploaderLog("scheduleNewPicturesForUpload")
+            guard let settings = self.settings,
+                  PHPhotoLibrary.authorizationStatus() == .authorized else {
+                PhotoLibraryUploaderLog("0 new assets")
+                return
+            }
 
-    public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
-        guard let settings = settings,
-              PHPhotoLibrary.authorizationStatus() == .authorized else {
-            return 0
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            // Create predicate from settings
+            var typesPredicates = [NSPredicate]()
+            if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
+            } else if settings.syncPicturesEnabled {
+                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+            } else if settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+            }
+            if settings.syncVideosEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
+            }
+            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+            PhotoLibraryUploaderLog("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+            let assets = PHAsset.fetchAssets(with: options)
+            let syncDate = Date()
+            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
+            updateLastSyncDate(syncDate, using: realm)
+
+            newAssetsCount = assets.count
+            PhotoLibraryUploaderLog("New assets count:\(newAssetsCount)")
         }
-        let options = PHFetchOptions()
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        // Create predicate from settings
-        var typesPredicates = [NSPredicate]()
-        if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
-        } else if settings.syncPicturesEnabled {
-            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-        } else if settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-        }
-        if settings.syncVideosEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
-        }
-        let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
-        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-        DDLogInfo("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-        let assets = PHAsset.fetchAssets(with: options)
-        let syncDate = Date()
-        addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-        DDLogInfo("Photo sync - New assets count \(assets.count)")
-        updateLastSyncDate(syncDate, using: realm)
-        uploadQueue.addToQueueFromRealm()
-        return assets.count
+        return newAssetsCount
     }
 
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
                                              initial: Bool,
                                              using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        PhotoLibraryUploaderLog("addImageAssetsToUploadQueue")
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
             assets.enumerateObjects { [self] asset, idx, stop in
                 guard let settings = settings else {
+                    PhotoLibraryUploaderLog("no settings")
                     realm.cancelWrite()
                     stop.pointee = true
                     return
@@ -149,7 +136,7 @@ public class PhotoLibraryUploader {
                     let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .album, options: options)
                     // swiftlint:disable:next empty_count
                     if assetCollections.count > 0 {
-                        DDLogInfo("Asset ignored because it already originates from kDrive")
+                        PhotoLibraryUploaderLog("Asset ignored because it already originates from kDrive")
                         return
                     }
                 }
@@ -183,7 +170,7 @@ public class PhotoLibraryUploader {
                     driveId: settings.driveId,
                     name: correctName,
                     asset: asset,
-                    conflictOption: .replace,
+                    conflictOption: .version,
                     priority: initial ? .low : .high)
                 if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()
@@ -191,12 +178,13 @@ public class PhotoLibraryUploader {
                 realm.add(uploadFile, update: .modified)
 
                 if idx < assets.count - 1 && idx % 99 == 0 {
+                    PhotoLibraryUploaderLog("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, using: realm)
                     }
-                    uploadQueue.addToQueueFromRealm()
+
                     realm.beginWrite()
                 }
             }
@@ -211,8 +199,10 @@ public class PhotoLibraryUploader {
     }
 
     public func getPicturesToRemove() -> PicturesAssets? {
+        PhotoLibraryUploaderLog("getPicturesToRemove")
         // Check that we have photo sync enabled with the delete option
         guard let settings = settings, settings.deleteAssetsAfterImport else {
+            PhotoLibraryUploaderLog("no settings")
             return nil
         }
 
@@ -233,6 +223,7 @@ public class PhotoLibraryUploader {
     }
 
     public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
+        PhotoLibraryUploaderLog("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems)")
         PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.deleteAssets(toRemoveItems.assets)
         } completionHandler: { success, _ in

@@ -28,7 +28,7 @@ enum UploadFileType: String {
 }
 
 public enum ConflictOption: String, PersistableEnum {
-    case error, replace, rename, ignore
+    case error, version, rename
 }
 
 /// An abstract file to upload
@@ -47,11 +47,18 @@ public protocol UploadFilable {
 public class UploadFile: Object, UploadFilable {
     public static let defaultMaxRetryCount = 3
 
+    public static let observedProperties = ["name",
+                                            "url",
+                                            "parentDirectoryId",
+                                            "userId",
+                                            "driveId",
+                                            "uploadDate",
+                                            "modificationDate",
+                                            "_error"]
+
     @Persisted(primaryKey: true) public var id: String = ""
     @Persisted public var name: String = ""
     @Persisted var relativePath: String = ""
-    @Persisted var sessionId: String?
-    @Persisted var sessionUrl: String = ""
     @Persisted private var url: String?
     @Persisted private var rawType: String = "file"
     @Persisted public var parentDirectoryId: Int = 1
@@ -61,17 +68,22 @@ public class UploadFile: Object, UploadFilable {
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?
     @Persisted public var taskCreationDate: Date?
+    @Persisted public var progress: Double?
     @Persisted var shouldRemoveAfterUpload = true
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
     @Persisted private var rawPriority: Int = 0
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
-    
+    @Persisted var uploadingSession: UploadingSessionTask?
+
     private var localAsset: PHAsset?
 
     public var pathURL: URL? {
         get {
-            return url == nil ? nil : URL(fileURLWithPath: url!)
+            guard let url else {
+                return nil
+            }
+            return URL(fileURLWithPath: url)
         }
         set {
             url = newValue?.path
@@ -246,5 +258,26 @@ public class UploadFile: Object, UploadFilable {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy/MM/"
         relativePath = dateFormatter.string(from: creationDate ?? Date())
+    }
+}
+
+public extension UploadFile {
+    func contains(chunkUrl: String) -> Bool {
+        let result = uploadingSession?.chunkTasks.filter { $0.requestUrl == chunkUrl }
+        return (result?.count ?? 0) > 0
+    }
+}
+
+public extension Array where Element == UploadFile {
+    func firstContaining(chunkUrl: String) -> UploadFile? {
+        // keep only the files with a valid uploading session
+        let files = filter {
+            ($0.uploadDate == nil) && ($0.uploadingSession?.uploadSession != nil)
+        }
+        BackgroundSessionManagerLog("files:\(files.count) :\(chunkUrl)")
+
+        // find the first one that matches [the query (that matches the chunk request)]
+        let file = files.first { $0.contains(chunkUrl: chunkUrl) }
+        return file
     }
 }

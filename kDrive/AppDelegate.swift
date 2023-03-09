@@ -38,10 +38,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
-    @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
+    @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
+    @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
+    @LazyInjectService var notificationHelper: NotificationsHelpable
     
+    /// Use this to simulate a long running background session
+    private static let simulateLongRunningSession = false
+
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
@@ -54,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-        DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
+        AppDelegateLog("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
@@ -63,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
-            DDLogError("Error while setting playback audio category")
+            AppDelegateLog("Error while setting playback audio category", level: .error)
             SentrySDK.capture(error: error)
         }
 
@@ -71,8 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         // In some cases the application can show the old Nextcloud import notification badge
         UIApplication.shared.applicationIconBadgeNumber = 0
-        NotificationsHelper.askForPermissions()
-        NotificationsHelper.registerCategories()
+        notificationHelper.askForPermissions()
+        notificationHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
 
         if UIApplication.shared.applicationState != .background {
@@ -96,6 +101,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AppDelegateLog("application didFinishLaunchingWithOptions")
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -109,30 +115,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        AppDelegateLog("applicationWillTerminate")
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
-    }
-
-    func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
-        // User installed the app but never logged in
-        @InjectService var accountManager: AccountManageable
-        if accountManager.accounts.isEmpty {
-            completion(false)
-            return
-        }
-
-        _ = photoLibraryUploader.addNewPicturesToUploadQueue()
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.waitForCompletion {
-            completion(true)
-        }
+        AppDelegateLog("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
+        AppDelegateLog("applicationDidEnterBackground")
         scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
@@ -142,9 +135,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        AppDelegateLog("application performFetchWithCompletionHandler")
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
         if MigrationHelper.canMigrate() {
-            NotificationsHelper.sendMigrateNotification()
+            notificationHelper.sendMigrateNotification()
             return
         }
 
@@ -158,9 +152,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        AppDelegateLog("application app open url\(url)")
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            DDLogError("Failed to open URL: Invalid URL")
+            AppDelegateLog("Failed to open URL: Invalid URL", level: .error)
             return false
         }
 
@@ -185,73 +180,89 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
+        AppDelegateLog("applicationWillEnterForeground")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
     }
 
     private func launchSetup() {
-        // Set global tint color
-        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
-        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-        // Migration from old UserDefaults
-        if UserDefaults.shared.isFirstLaunch {
-            UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
-        }
+        // Simulating a "background foreground"
+        if Self.simulateLongRunningSession {
+            window?.rootViewController = UIViewController()
+            window?.makeKeyAndVisible()
 
-        @InjectService var accountManager: AccountManageable
-        if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
-            window?.rootViewController = MigrationViewController.instantiate()
-            window?.makeKeyAndVisible()
-        } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
-            if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-                KeychainHelper.deleteAllTokens()
-                window?.rootViewController = OnboardingViewController.instantiate()
-                window?.makeKeyAndVisible()
+            AppDelegateLog("handleBackgroundRefresh begin")
+            DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
+                self.handleBackgroundRefresh { success in
+                    AppDelegateLog("handleBackgroundRefresh success:\(success)")
+                }
             }
-            // Clean File Provider domains on first launch in case we had some dangling
-            DriveInfosManager.instance.deleteAllFileProviderDomains()
-        } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
-            window?.rootViewController = LockedAppViewController.instantiate()
-            window?.makeKeyAndVisible()
+
         } else {
-            UserDefaults.shared.numberOfConnections += 1
-            // Show launch floating panel
-            let launchPanelsController = LaunchPanelsController()
-            if let viewController = window?.rootViewController {
-                launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+            // Set global tint color
+            window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
+            UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
+            // Migration from old UserDefaults
+            if UserDefaults.shared.isFirstLaunch {
+                UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
             }
-            // Request App Store review
-            if UserDefaults.shared.numberOfConnections == 10 {
-                if #available(iOS 14.0, *) {
-                    if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                        SKStoreReviewController.requestReview(in: scene)
+
+            @InjectService var accountManager: AccountManageable
+            if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
+                window?.rootViewController = MigrationViewController.instantiate()
+                window?.makeKeyAndVisible()
+            } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
+                if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
+                    KeychainHelper.deleteAllTokens()
+                    window?.rootViewController = OnboardingViewController.instantiate()
+                    window?.makeKeyAndVisible()
+                }
+                // Clean File Provider domains on first launch in case we had some dangling
+                DriveInfosManager.instance.deleteAllFileProviderDomains()
+            } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
+                window?.rootViewController = LockedAppViewController.instantiate()
+                window?.makeKeyAndVisible()
+            } else {
+                UserDefaults.shared.numberOfConnections += 1
+                // Show launch floating panel
+                let launchPanelsController = LaunchPanelsController()
+                if let viewController = window?.rootViewController {
+                    launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+                }
+                // Request App Store review
+                if UserDefaults.shared.numberOfConnections == 10 {
+                    if #available(iOS 14.0, *) {
+                        if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                            SKStoreReviewController.requestReview(in: scene)
+                        }
+                    } else {
+                        SKStoreReviewController.requestReview()
                     }
-                } else {
-                    SKStoreReviewController.requestReview()
                 }
-            }
-            // Refresh data
-            refreshCacheData(preload: false, isSwitching: false)
-            uploadEditedFiles()
-            // Ask to remove uploaded pictures
-            if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
-                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
-                                                    message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
-                                                    action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                                    destructive: true,
-                                                    loading: false) {
-                    // Proceed with removal
-                    self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
-                }
-                DispatchQueue.main.async {
-                    self.window?.rootViewController?.present(alert, animated: true)
+                // Refresh data
+                refreshCacheData(preload: false, isSwitching: false)
+                uploadEditedFiles()
+                // Ask to remove uploaded pictures
+                if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
+                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
+                                                        message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
+                                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                        destructive: true,
+                                                        loading: false) {
+                        // Proceed with removal
+                        self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
+                    }
+                    DispatchQueue.main.async {
+                        self.window?.rootViewController?.present(alert, animated: true)
+                    }
                 }
             }
         }
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
+        AppDelegateLog("refreshCacheData preload:\(preload) isSwitching:\(preload)")
         @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
@@ -307,22 +318,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     }
                 }
 
+                // Resolving an upload queue will restart it if this is the first time
                 @InjectService var uploadQueue: UploadQueue
-                uploadQueue.resumeAllOperations()
-                uploadQueue.addToQueueFromRealm()
-                backgroundUploadManager.reconnectBackgroundTasks()
+
+                backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
+                    AppDelegateLog("Restart queue")
                     @InjectService var photoUploader: PhotoLibraryUploader
-                    _ = photoUploader.addNewPicturesToUploadQueue()
+                    _ = photoUploader.scheduleNewPicturesForUpload()
+
+                    @InjectService var uploadQueue: UploadQueue
+                    uploadQueue.rebuildUploadQueueFromObjectsInRealm()
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                DDLogError("Error while updating user account: \(error)")
+                AppDelegateLog("Error while updating user account: \(error)", level: .error)
             }
         }
     }
 
     private func uploadEditedFiles() {
+        AppDelegateLog("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
@@ -339,7 +355,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             guard let driveId = Int(driveFolder),
                   let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
-                DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
+                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
 
@@ -349,7 +365,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 guard let fileId = Int(fileFolder),
                       let driveFileManager = accountManager.getDriveFileManager(for: drive),
                       let file = driveFileManager.getCachedFile(id: fileId) else {
-                    DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
+                    AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
 
@@ -365,7 +381,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     driveId: driveId,
                                                     url: fileURL,
                                                     name: file.name,
-                                                    conflictOption: .replace,
+                                                    conflictOption: .version,
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
@@ -376,7 +392,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
-                                DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
+                                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
                             } else {
                                 // Update file to get the new modification date
                                 Task {
@@ -388,7 +404,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             }
                             group.leave()
                         }
-                        uploadQueue.addToQueue(file: uploadFile)
+                        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: nil)
                     }
                 }
             }
@@ -397,13 +413,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
-                DDLogInfo("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
+                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
                 try? FileManager.default.removeItem(at: folderURL)
             }
         }
     }
 
     func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
+        AppDelegateLog("updateAvailableOfflineFiles")
         guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
@@ -419,23 +436,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     try await driveFileManager.updateAvailableOfflineFiles()
                 } catch {
                     // Silently handle error
-                    DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
+                    AppDelegateLog("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)", level: .error)
                 }
             }
-        }
-    }
-
-    func application(_ application: UIApplication,
-                     handleEventsForBackgroundURLSession identifier: String,
-                     completionHandler: @escaping () -> Void) {
-        DDLogInfo("[Background Session] background session relaunched \(identifier)")
-        if identifier == DownloadQueue.backgroundIdentifier {
-            backgroundUploadManager.backgroundCompletionHandler = completionHandler
-        } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            backgroundUploadManager.handleEventsForBackgroundURLSession(identifier: identifier,
-                                                                        completionHandler: completionHandler)
-        } else {
-            completionHandler()
         }
     }
 
@@ -443,6 +446,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                      open url: URL,
                      sourceApplication: String?,
                      annotation: Any) -> Bool {
+        AppDelegateLog("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
     }
 
@@ -521,6 +525,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        AppDelegateLog("application shouldSaveApplicationState")
         coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
         return true
     }
@@ -537,6 +542,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        AppDelegateLog("application continue restorationHandler")
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL,

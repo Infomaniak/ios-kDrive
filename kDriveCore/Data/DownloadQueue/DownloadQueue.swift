@@ -75,6 +75,7 @@ public final class DownloadQueue {
         didDownloadArchive: [UUID: (DownloadedArchiveId, URL?, DriveError?) -> Void](),
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
+
     private var bestSession: FileDownloadSession {
         if Bundle.main.isExtension {
             @InjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
@@ -104,7 +105,7 @@ public final class DownloadQueue {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     self.publishFileDownloaded(fileId: fileId, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -126,7 +127,7 @@ public final class DownloadQueue {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -152,7 +153,7 @@ public final class DownloadQueue {
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
-                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
                     completion(operation.error)
                 }
             }

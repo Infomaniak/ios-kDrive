@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import kDriveResources
 import UIKit
-import kDriveCore
 
 class AboutTableViewController: UITableViewController {
     private enum AboutRow: CaseIterable {

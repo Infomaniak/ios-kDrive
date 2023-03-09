@@ -34,7 +34,7 @@ class MenuTopTableViewCell: UITableViewCell {
     @IBOutlet weak var progressLabel: UILabel!
 
     @LazyInjectService var accountManager: AccountManageable
-    
+
     func configureCell(with drive: Drive, and account: Account) {
         userAvatarContainerView.clipsToBounds = false
         userAvatarContainerView.layer.shadowOpacity = 0.3

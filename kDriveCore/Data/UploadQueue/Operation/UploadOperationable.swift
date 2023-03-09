@@ -24,7 +24,7 @@ import RealmSwift
 import Sentry
 
 /// An abstract NSOperation
-public protocol Operationable {
+public protocol Operationable: AnyObject {
     func start()
     func main()
     var isCancelled: Bool { get }
@@ -46,18 +46,31 @@ public protocol Operationable {
 }
 
 /// An abstract Upload Operation
-extension Operation: Operationable { }
+extension Operation: Operationable {}
 
 /// Something that can upload a file.
 public protocol UploadOperationable: Operationable {
-    
-    init(file: UploadFile,
-         urlSession: FileUploadSession,
+    /// init an UploadOperationable
+    /// - Parameters:
+    ///   - fileId: the identifier of the UploadFile in base
+    ///   - urlSession: the url session to use
+    ///   - itemIdentifier: the itemIdentifier
+    init(fileId: String,
+         urlSession: URLSession,
          itemIdentifier: NSFileProviderItemIdentifier?)
-    
-    init(file: UploadFile,
-         task: URLSessionUploadTask,
-         urlSession: FileUploadSession)
-    
-    var result: UploadCompletionResult  { get }
+
+    /// We can restore a running session task to an operation
+    func restore(task: URLSessionUploadTask, session: URLSession)
+
+    /// Network completion handler
+    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
+
+    /// Clean the local session and send an API call to free the session
+    /// - Parameter file: An UploadFile within a transaction
+    func cleanUploadFileSession(file: UploadFile?)
+
+    /// Process errors and terminate the operation
+    func end()
+
+    var result: UploadCompletionResult { get }
 }
