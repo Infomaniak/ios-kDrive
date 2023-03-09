@@ -82,7 +82,6 @@ public func ABLog(_ message: @autoclosure () -> Any,
             let factoryParameters = [categoryKey: category]
             @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
 
-             .public is fine as we only use this in #DEBUG
             switch level {
             case .warning, .alert:
                 logger.warning("\(messageString, privacy: .public)")
@@ -100,7 +99,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
                 logger.fault("\(messageString, privacy: .public)")
             }
         } else {
-            os_log("[%@] %@", log: level.logType, type: .error, category, messageString)
+            os_log("[%@] %@", log: .default, type: level.logType, category, messageString)
         }
 
     #else
