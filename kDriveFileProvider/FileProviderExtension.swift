@@ -76,6 +76,7 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override init() {
+        // log
         Logging.initLogging()
         super.init()
     }

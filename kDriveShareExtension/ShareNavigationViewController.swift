@@ -30,6 +30,7 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     @LazyInjectService var accountManager: AccountManageable
 
     public override func viewDidLoad() {
+        // log
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
         preferredContentSize = CGSize(width: 540, height: 620)
