@@ -31,7 +31,8 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+public final class UploadOperation: AsynchronousOperation, UploadOperationable, ExpiringActivityDelegate {
+    
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -76,7 +77,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
         <\(type(of: self)):\(super.debugDescription)
         uploading file id:'\(fileId)'
-        backgroundTaskIdentifier:'\(backgroundTaskIdentifier)'>
+        expiringActivity:'\(expiringActivity)'>
         """
     }
 
@@ -92,8 +93,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     private let urlSession: URLSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
-
+    private var expiringActivity: ExpiringActivityable?
+    
     public var result: UploadCompletionResult
 
     // MARK: - Public methods
@@ -127,7 +128,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             try self.freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
             // Fetch a background task identifier
-            await self.storeBackgroundTaskIdentifier()
+            self.beginExpiringActivity()
 
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()
@@ -142,11 +143,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: - Split operations
 
-    func storeBackgroundTaskIdentifier() async {
-        if !Bundle.main.isExtension {
-            backgroundTaskIdentifier = await UIApplication.shared.beginBackgroundTask(withName: "UploadOperation:\(fileId)",
-                                                                                      expirationHandler: backgroundTaskExpired)
-        }
+    func beginExpiringActivity() {
+        let activity = ExpiringActivity(id: self.fileId, delegate: self)
+        activity.start()
+        expiringActivity = activity
     }
 
     /// Fetch or create something that represents the state of the upload, and store it to self.file
@@ -875,42 +875,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         handleRemoteErrors(error: error)
     }
 
-    /// UIKit needs the function to return after the task is stoped to not print an error
-    private let expirationLock = DispatchGroup()
-
-    // System notification that we took over 30sec, and should cancel the task.
-    private func backgroundTaskExpired() {
-        UploadOperationLog("backgroundTaskExpired fid:\(fileId)")
-        expirationLock.enter()
-
-        enqueueCatching(asap: true) {
-            try self.transactionWithFile { file in
-                file.error = .taskRescheduled
-                UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
-
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(file.name)"
-                breadcrumb.data = ["File id": self.fileId,
-                                   "File name": file.name,
-                                   "File size": file.size,
-                                   "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-            }
-
-            self.uploadNotifiable.sendPausedNotificationIfNeeded()
-
-            // each and all operations should be given the chance to call backgroundTaskExpired
-            self.end()
-
-            UploadOperationLog("Rescheduling end fid:\(self.fileId)")
-            self.expirationLock.leave()
-        }
-        expirationLock.wait()
-
-        UploadOperationLog("exit reschedule fid:\(fileId)")
-    }
-
-    // did finish in time
+    /// The last step in the operation, should be called. In time or not. Regardless of error state.
     public func end() {
         // Prevent duplicate call, as end() finishes the operation
         guard !isFinished else {
@@ -921,11 +886,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Terminate the NSOperation
             UploadOperationLog("call finish \(fileId)")
 
-            // Make sure we call endBackgroundTask at the end of the operation
-            if backgroundTaskIdentifier != .invalid {
-                UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-                backgroundTaskIdentifier = .invalid
-            }
+            // Make sure we stop the expiring activity
+            self.expiringActivity?.end()
 
             finish()
         }
@@ -973,5 +935,33 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 }
             }
         }
+    }
+    
+    // MARK: - ExpiringActivityDelegate
+    
+    public func backgroundActivityExpiring() {
+        UploadOperationLog("backgroundActivityExpiring fid:\(fileId)")
+        enqueueCatching(asap: true) {
+            try self.transactionWithFile { file in
+                file.error = .taskRescheduled
+                UploadOperationLog("Rescheduling didReschedule .taskRescheduled fid:\(self.fileId)")
+
+                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+                breadcrumb.message = "Rescheduling file \(file.name)"
+                breadcrumb.data = ["File id": self.fileId,
+                                   "File name": file.name,
+                                   "File size": file.size,
+                                   "File type": file.type.rawValue]
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+            }
+
+            self.uploadNotifiable.sendPausedNotificationIfNeeded()
+
+            // each and all operations should be given the chance to call backgroundActivityExpiring
+            self.end()
+
+            UploadOperationLog("Rescheduling end fid:\(self.fileId)")
+        }
+        UploadOperationLog("exit reschedule fid:\(fileId)")
     }
 }
