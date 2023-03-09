@@ -109,7 +109,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
-
+    @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
+    
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -274,7 +275,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
-            InfomaniakLogin.deleteApiToken(token: token) { error in
+            networkLogin.deleteApiToken(token: token) { error in
                 DDLogError("Failed to delete api token: \(error.localizedDescription)")
             }
             throw DriveError.noDrive

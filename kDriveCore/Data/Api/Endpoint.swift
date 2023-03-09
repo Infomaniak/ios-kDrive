@@ -602,11 +602,11 @@ public extension Endpoint {
 
     // V2
     static func upload(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
