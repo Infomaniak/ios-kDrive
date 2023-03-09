@@ -137,15 +137,9 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let fileMinimalWithQueryItem = URLQueryItem(name: "with", value: "capabilities,categories,conversion_capabilities,dropbox,external_import,is_favorite,sharelink,sorted_name")
-    private static let fileExtraWithQueryItem = URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",path,users,version"))
-
     private static var drive: Endpoint {
         return Endpoint(hostKeypath: \.apiDriveHost, path: "/2/drive")
     }
-
-    static let fileActivitiesWithQueryItem = URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion_capabilities,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name")
-    static let fileActivitiesWithExtraQueryItem = URLQueryItem(name: "with", value: fileActivitiesWithQueryItem.value?.appending(",file.external_import"))
 
     static var inAppReceipt: Endpoint {
         return Endpoint(path: "/invoicing/inapp/apple/link_receipt")
@@ -171,7 +165,7 @@ public extension Endpoint {
 
     static func recentActivity(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/activities", queryItems: [
-            URLQueryItem(name: "with", value: fileActivitiesWithQueryItem.value?.appending(",user")),
+            (FileWith.fileActivities + [.user]).toQueryItem(),
             URLQueryItem(name: "depth", value: "unlimited"),
             URLQueryItem(name: "actions[]", value: "file_create"),
             URLQueryItem(name: "actions[]", value: "file_update"),
@@ -191,7 +185,7 @@ public extension Endpoint {
 
     static func filesActivities(drive: AbstractDrive, fileIds: [Int], from date: Date) -> Endpoint {
         return .recentActivity(drive: drive).appending(path: "/batch", queryItems: [
-            fileActivitiesWithQueryItem,
+            FileWith.fileActivities.toQueryItem(),
             URLQueryItem(name: "actions[]", value: "file_rename"),
             URLQueryItem(name: "actions[]", value: "file_update"),
             URLQueryItem(name: "file_ids", value: fileIds.map(String.init).joined(separator: ",")),
@@ -275,7 +269,7 @@ public extension Endpoint {
 
     static func dropbox(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/dropbox", queryItems: [
-            URLQueryItem(name: "with", value: "user")
+            URLQueryItem(name: "with", value: "user,capabilities")
         ])
     }
 
@@ -286,7 +280,7 @@ public extension Endpoint {
     // MARK: Favorite
 
     static func favorites(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/favorites", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/favorites", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func favorite(file: AbstractFile) -> Endpoint {
@@ -380,19 +374,20 @@ public extension Endpoint {
     // MARK: File/directory
 
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
-        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [fileExtraWithQueryItem])
+        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)",
+                                                                         queryItems: [FileWith.fileExtra.toQueryItem()])
     }
 
     static func files(of directory: AbstractFile) -> Endpoint {
-        return .fileInfo(directory).appending(path: "/files", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(directory).appending(path: "/files", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func createDirectory(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/directory", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/directory", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func createFile(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/file", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/file", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func thumbnail(file: AbstractFile, at date: Date) -> Endpoint {
@@ -421,7 +416,7 @@ public extension Endpoint {
     }
 
     static func convert(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/convert", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/convert", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func move(file: AbstractFile, destination: AbstractFile) -> Endpoint {
@@ -429,15 +424,15 @@ public extension Endpoint {
     }
 
     static func duplicate(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/duplicate", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/duplicate", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func copy(file: AbstractFile, destination: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/copy/\(destination.id)", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/copy/\(destination.id)", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func rename(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/rename", queryItems: [fileMinimalWithQueryItem])
+        return .fileInfo(file).appending(path: "/rename", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func count(of directory: AbstractFile) -> Endpoint {
@@ -481,7 +476,7 @@ public extension Endpoint {
     }
 
     static func rootFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func bulkFiles(drive: AbstractDrive) -> Endpoint {
@@ -489,7 +484,7 @@ public extension Endpoint {
     }
 
     static func lastModifiedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/last_modified", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/last_modified", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func largestFiles(drive: AbstractDrive) -> Endpoint {
@@ -505,7 +500,7 @@ public extension Endpoint {
     }
 
     static func createTeamDirectory(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func existFiles(drive: AbstractDrive) -> Endpoint {
@@ -517,7 +512,8 @@ public extension Endpoint {
     }
 
     static func mySharedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/my_shared", queryItems: [URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",users"))])
+        return .driveInfo(drive: drive).appending(path: "/files/my_shared",
+                                                  queryItems: [(FileWith.fileMinimal + [.users]).toQueryItem()])
     }
 
     static func countInRoot(drive: AbstractDrive) -> Endpoint {
@@ -528,7 +524,7 @@ public extension Endpoint {
 
     static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileTypes: [ConvertedType] = [], categories: [Category], belongToAllCategories: Bool) -> Endpoint {
         // Query items
-        var queryItems = [fileMinimalWithQueryItem]
+        var queryItems = [FileWith.fileMinimal.toQueryItem()]
         if let query = query, !query.isBlank {
             queryItems.append(URLQueryItem(name: "query", value: query))
         }
@@ -563,7 +559,7 @@ public extension Endpoint {
     // MARK: Trash
 
     static func trash(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/trash", queryItems: [fileMinimalWithQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/trash", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func trashCount(drive: AbstractDrive) -> Endpoint {
@@ -571,11 +567,12 @@ public extension Endpoint {
     }
 
     static func trashedInfo(file: AbstractFile) -> Endpoint {
-        return .trash(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)", queryItems: [fileExtraWithQueryItem])
+        return .trash(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)",
+                                                                     queryItems: [FileWith.fileExtra.toQueryItem()])
     }
 
     static func trashedFiles(of directory: AbstractFile) -> Endpoint {
-        return .trashedInfo(file: directory).appending(path: "/files", queryItems: [fileMinimalWithQueryItem])
+        return .trashedInfo(file: directory).appending(path: "/files", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func restore(file: AbstractFile) -> Endpoint {
@@ -599,11 +596,7 @@ public extension Endpoint {
         // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
         // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
         // Using upload v1 for now
-        let uploadFileQueryItem = URLQueryItem(
-            name: fileMinimalWithQueryItem.name,
-            value: fileMinimalWithQueryItem.value?.replacingOccurrences(of: ",external_import", with: "")
-        )
-        let queryItems = file.queryItems + [uploadFileQueryItem]
+        let queryItems = file.queryItems + [FileWith.fileUpload.toQueryItem()]
         return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
 

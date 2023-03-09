@@ -274,6 +274,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
+            InfomaniakLogin.deleteApiToken(token: token) { error in
+                DDLogError("Failed to delete api token: \(error.localizedDescription)")
+            }
             throw DriveError.noDrive
         }
 
