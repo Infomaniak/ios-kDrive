@@ -180,27 +180,4 @@ public final class BackgroundUploadSessionManager: NSObject,
         BackgroundSessionManagerLog("getCompletionHandler :\(session)")
         return nil
     }
-
-    private func logMissingCompletionHandler(for task: URLSessionUploadTask, session: URLSession, file: UploadFile? = nil) {
-        BackgroundSessionManagerLog("logMissingCompletionHandler :\(task)")
-        var filename: String?
-        var hasUploadDate = false
-
-        if let file {
-            filename = file.name
-            hasUploadDate = file.uploadDate != nil
-        }
-
-        BackgroundSessionManagerLog("No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")",
-                                    level: .error)
-        SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
-            scope.setContext(value: [
-                "Session Id": session.identifier,
-                "Task url": task.originalRequest?.url?.absoluteString ?? "",
-                "Task error": task.error?.localizedDescription ?? "",
-                "Upload file": filename ?? "",
-                "Has Upload Date": hasUploadDate
-            ], key: "Session")
-        }
-    }
 }
