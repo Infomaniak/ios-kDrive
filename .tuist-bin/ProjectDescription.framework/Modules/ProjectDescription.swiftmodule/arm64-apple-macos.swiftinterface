@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.5.1 (swiftlang-1300.0.31.4 clang-1300.0.29.6)
+// swift-compiler-version: Apple Swift version 5.6.1 (swiftlang-5.6.0.323.66 clang-1316.0.20.12)
 // swift-module-flags: -target arm64-apple-macos11.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name ProjectDescription
 import Foundation
 import Swift
@@ -61,7 +61,9 @@ public struct Cache : Swift.Codable, Swift.Equatable {
 }
 public struct Cloud : Swift.Codable, Swift.Equatable {
   public enum Option : Swift.String, Swift.Codable, Swift.Equatable {
+    @available(*, deprecated, message: "Analytics are sent to the cloud backend by default. Use `disableAnalytics` to disable this feature.")
     case analytics
+    case disableAnalytics
     case optional
     public init?(rawValue: Swift.String)
     public typealias RawValue = Swift.String
@@ -248,6 +250,9 @@ public enum DeploymentTarget : Swift.Codable, Swift.Hashable {
   case macOS(targetVersion: Swift.String)
   case watchOS(targetVersion: Swift.String)
   case tvOS(targetVersion: Swift.String)
+  public var targetVersion: Swift.String {
+    get
+  }
   public func hash(into hasher: inout Swift.Hasher)
   public static func == (a: ProjectDescription.DeploymentTarget, b: ProjectDescription.DeploymentTarget) -> Swift.Bool
   public func encode(to encoder: Swift.Encoder) throws
@@ -258,7 +263,6 @@ public enum DeploymentTarget : Swift.Codable, Swift.Hashable {
 }
 @dynamicMemberLookup public enum Environment {
   public enum Value : Swift.Equatable {
-    case boolean(Swift.Bool)
     case string(Swift.String)
     public static func == (a: ProjectDescription.Environment.Value, b: ProjectDescription.Environment.Value) -> Swift.Bool
   }
@@ -509,8 +513,8 @@ public struct Path : Swift.ExpressibleByStringInterpolation, Swift.Codable, Swif
   public static func relativeToManifest(_ pathString: Swift.String) -> ProjectDescription.Path
   public static func relativeToRoot(_ pathString: Swift.String) -> ProjectDescription.Path
   public init(stringLiteral: Swift.String)
-  public static func == (a: ProjectDescription.Path, b: ProjectDescription.Path) -> Swift.Bool
   public func hash(into hasher: inout Swift.Hasher)
+  public static func == (a: ProjectDescription.Path, b: ProjectDescription.Path) -> Swift.Bool
   public typealias ExtendedGraphemeClusterLiteralType = Swift.String
   public typealias StringInterpolation = Swift.DefaultStringInterpolation
   public typealias StringLiteralType = Swift.String
@@ -546,7 +550,7 @@ public struct Plugin : Swift.Codable, Swift.Equatable {
 public struct PluginLocation : Swift.Codable, Swift.Equatable {
   public let type: ProjectDescription.PluginLocation.LocationType
   public static func local(path: ProjectDescription.Path) -> ProjectDescription.PluginLocation
-  public static func git(url: Swift.String, tag: Swift.String, directory: Swift.String? = nil) -> ProjectDescription.PluginLocation
+  public static func git(url: Swift.String, tag: Swift.String, directory: Swift.String? = nil, releaseUrl: Swift.String? = nil) -> ProjectDescription.PluginLocation
   public static func git(url: Swift.String, sha: Swift.String, directory: Swift.String? = nil) -> ProjectDescription.PluginLocation
   public static func == (a: ProjectDescription.PluginLocation, b: ProjectDescription.PluginLocation) -> Swift.Bool
   public func encode(to encoder: Swift.Encoder) throws
@@ -555,7 +559,7 @@ public struct PluginLocation : Swift.Codable, Swift.Equatable {
 extension ProjectDescription.PluginLocation {
   public enum LocationType : Swift.Codable, Swift.Equatable {
     case local(path: ProjectDescription.Path)
-    case gitWithTag(url: Swift.String, tag: Swift.String, directory: Swift.String?)
+    case gitWithTag(url: Swift.String, tag: Swift.String, directory: Swift.String?, releaseUrl: Swift.String?)
     case gitWithSha(url: Swift.String, sha: Swift.String, directory: Swift.String?)
     public static func == (a: ProjectDescription.PluginLocation.LocationType, b: ProjectDescription.PluginLocation.LocationType) -> Swift.Bool
     public func encode(to encoder: Swift.Encoder) throws
@@ -615,13 +619,14 @@ public struct Project : Swift.Codable, Swift.Equatable {
 extension ProjectDescription.Project {
   public struct Options : Swift.Codable, Swift.Equatable {
     public let automaticSchemesOptions: ProjectDescription.Project.Options.AutomaticSchemesOptions
+    public let defaultKnownRegions: [Swift.String]?
     public let developmentRegion: Swift.String?
     public let disableBundleAccessors: Swift.Bool
     public let disableShowEnvironmentVarsInScriptPhases: Swift.Bool
     public let disableSynthesizedResourceAccessors: Swift.Bool
     public let textSettings: ProjectDescription.Project.Options.TextSettings
     public let xcodeProjectName: Swift.String?
-    public static func options(automaticSchemesOptions: ProjectDescription.Project.Options.AutomaticSchemesOptions = .enabled(), developmentRegion: Swift.String? = nil, disableBundleAccessors: Swift.Bool = false, disableShowEnvironmentVarsInScriptPhases: Swift.Bool = false, disableSynthesizedResourceAccessors: Swift.Bool = false, textSettings: ProjectDescription.Project.Options.TextSettings = .textSettings(), xcodeProjectName: Swift.String? = nil) -> ProjectDescription.Project.Options
+    public static func options(automaticSchemesOptions: ProjectDescription.Project.Options.AutomaticSchemesOptions = .enabled(), defaultKnownRegions: [Swift.String]? = nil, developmentRegion: Swift.String? = nil, disableBundleAccessors: Swift.Bool = false, disableShowEnvironmentVarsInScriptPhases: Swift.Bool = false, disableSynthesizedResourceAccessors: Swift.Bool = false, textSettings: ProjectDescription.Project.Options.TextSettings = .textSettings(), xcodeProjectName: Swift.String? = nil) -> ProjectDescription.Project.Options
     public static func == (a: ProjectDescription.Project.Options, b: ProjectDescription.Project.Options) -> Swift.Bool
     public func encode(to encoder: Swift.Encoder) throws
     public init(from decoder: Swift.Decoder) throws
@@ -641,7 +646,7 @@ extension ProjectDescription.Project.Options {
                 build: ["Implementation", "Interface", "Mocks", "Testing"],
                 test: ["Tests", "IntegrationTests", "UITests", "SnapshotTests"],
                 run: ["App", "Demo"]
-            ), codeCoverageEnabled: Swift.Bool = false, testingOptions: ProjectDescription.TestingOptions = [])
+            ), codeCoverageEnabled: Swift.Bool = false, testingOptions: ProjectDescription.TestingOptions = [], testLanguage: ProjectDescription.SchemeLanguage? = nil, testRegion: Swift.String? = nil, runLanguage: ProjectDescription.SchemeLanguage? = nil, runRegion: Swift.String? = nil)
     case disabled
     public static func == (a: ProjectDescription.Project.Options.AutomaticSchemesOptions, b: ProjectDescription.Project.Options.AutomaticSchemesOptions) -> Swift.Bool
     public func encode(to encoder: Swift.Encoder) throws
@@ -762,6 +767,7 @@ public struct RunAction : Swift.Equatable, Swift.Codable {
 }
 public struct RunActionOptions : Swift.Equatable, Swift.Codable {
   public let language: ProjectDescription.SchemeLanguage?
+  public let region: Swift.String?
   public let storeKitConfigurationPath: ProjectDescription.Path?
   public let simulatedLocation: ProjectDescription.RunActionOptions.SimulatedLocation?
   public let enableGPUFrameCaptureMode: ProjectDescription.RunActionOptions.GPUFrameCaptureMode
@@ -849,6 +855,7 @@ public struct Scheme : Swift.Equatable, Swift.Codable {
 }
 public enum SchemeDiagnosticsOption : Swift.String, Swift.Equatable, Swift.Codable {
   case mainThreadChecker
+  case performanceAntipatternChecker
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
@@ -994,11 +1001,15 @@ extension Swift.Dictionary where Key == Swift.String, Value == ProjectDescriptio
   public func swiftCompilationMode(_ mode: ProjectDescription.SwiftCompilationMode) -> ProjectDescription.SettingsDictionary
   public func swiftOptimizationLevel(_ level: ProjectDescription.SwiftOptimizationLevel) -> ProjectDescription.SettingsDictionary
   public func swiftOptimizeObjectLifetimes(_ enabled: Swift.Bool) -> ProjectDescription.SettingsDictionary
-  public func swiftObjcBridingHeaderPath(_ path: Swift.String) -> ProjectDescription.SettingsDictionary
+  public func swiftObjcBridgingHeaderPath(_ path: Swift.String) -> ProjectDescription.SettingsDictionary
   public func otherCFlags(_ flags: [Swift.String]) -> ProjectDescription.SettingsDictionary
   public func otherLinkerFlags(_ flags: [Swift.String]) -> ProjectDescription.SettingsDictionary
   public func bitcodeEnabled(_ enabled: Swift.Bool) -> ProjectDescription.SettingsDictionary
   public func debugInformationFormat(_ format: ProjectDescription.DebugInformationFormat) -> ProjectDescription.SettingsDictionary
+}
+extension Swift.Dictionary where Key == Swift.String, Value == ProjectDescription.SettingValue {
+  @available(*, deprecated, renamed: "swiftObjcBridgingHeaderPath")
+  public func swiftObjcBridingHeaderPath(_ path: Swift.String) -> ProjectDescription.SettingsDictionary
 }
 public struct SourceFileGlob : Swift.Codable, Swift.Equatable {
   public let glob: ProjectDescription.Path
@@ -1092,6 +1103,7 @@ public enum TargetDependency : Swift.Codable, Swift.Hashable {
   case xctest
   case external(name: Swift.String)
   public static func sdk(name: Swift.String, type: ProjectDescription.SDKType) -> ProjectDescription.TargetDependency
+  public static func target(_ target: ProjectDescription.Target) -> ProjectDescription.TargetDependency
   public var typeName: Swift.String {
     get
   }
@@ -1149,16 +1161,17 @@ public struct TargetScript : Swift.Codable, Swift.Equatable {
   public let basedOnDependencyAnalysis: Swift.Bool?
   public let runForInstallBuildsOnly: Swift.Bool
   public let shellPath: Swift.String
-  public static func pre(path: ProjectDescription.Path, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func pre(path: ProjectDescription.Path, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func post(path: ProjectDescription.Path, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func post(path: ProjectDescription.Path, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func pre(tool: Swift.String, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func pre(tool: Swift.String, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func post(tool: Swift.String, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func post(tool: Swift.String, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func pre(script: Swift.String, name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
-  public static func post(script: Swift.String, name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh") -> ProjectDescription.TargetScript
+  public let dependencyFile: ProjectDescription.Path?
+  public static func pre(path: ProjectDescription.Path, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func pre(path: ProjectDescription.Path, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func post(path: ProjectDescription.Path, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func post(path: ProjectDescription.Path, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func pre(tool: Swift.String, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func pre(tool: Swift.String, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func post(tool: Swift.String, arguments: Swift.String..., name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func post(tool: Swift.String, arguments: [Swift.String], name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func pre(script: Swift.String, name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
+  public static func post(script: Swift.String, name: Swift.String, inputPaths: [ProjectDescription.Path] = [], inputFileListPaths: [ProjectDescription.Path] = [], outputPaths: [ProjectDescription.Path] = [], outputFileListPaths: [ProjectDescription.Path] = [], basedOnDependencyAnalysis: Swift.Bool? = nil, runForInstallBuildsOnly: Swift.Bool = false, shellPath: Swift.String = "/bin/sh", dependencyFile: ProjectDescription.Path? = nil) -> ProjectDescription.TargetScript
   public static func == (a: ProjectDescription.TargetScript, b: ProjectDescription.TargetScript) -> Swift.Bool
   public func encode(to encoder: Swift.Encoder) throws
   public init(from decoder: Swift.Decoder) throws
@@ -1296,8 +1309,8 @@ public struct Version : Swift.Hashable, Swift.Codable {
   public let prereleaseIdentifiers: [Swift.String]
   public let buildMetadataIdentifiers: [Swift.String]
   public init(_ major: Swift.Int, _ minor: Swift.Int, _ patch: Swift.Int, prereleaseIdentifiers: [Swift.String] = [], buildMetadataIdentifiers: [Swift.String] = [])
-  public static func == (a: ProjectDescription.Version, b: ProjectDescription.Version) -> Swift.Bool
   public func hash(into hasher: inout Swift.Hasher)
+  public static func == (a: ProjectDescription.Version, b: ProjectDescription.Version) -> Swift.Bool
   public func encode(to encoder: Swift.Encoder) throws
   public var hashValue: Swift.Int {
     get
@@ -1356,7 +1369,7 @@ extension ProjectDescription.Workspace {
         public init(from decoder: Swift.Decoder) throws
       }
       case disabled
-      case enabled(codeCoverageMode: ProjectDescription.Workspace.GenerationOptions.AutogeneratedWorkspaceSchemes.CodeCoverageMode = .disabled, testingOptions: ProjectDescription.TestingOptions = [])
+      case enabled(codeCoverageMode: ProjectDescription.Workspace.GenerationOptions.AutogeneratedWorkspaceSchemes.CodeCoverageMode = .disabled, testingOptions: ProjectDescription.TestingOptions = [], testLanguage: ProjectDescription.SchemeLanguage? = nil, testRegion: Swift.String? = nil)
       public static func == (a: ProjectDescription.Workspace.GenerationOptions.AutogeneratedWorkspaceSchemes, b: ProjectDescription.Workspace.GenerationOptions.AutogeneratedWorkspaceSchemes) -> Swift.Bool
       public func encode(to encoder: Swift.Encoder) throws
       public init(from decoder: Swift.Decoder) throws
