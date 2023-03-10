@@ -282,7 +282,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
         // Only resolve locally to break init loop
         accountManager.refreshTokenLockedQueue.async {
-            guard !token.requiresRefresh else {
+            guard token.requiresRefresh else {
                 request(token, nil)
                 return
             }

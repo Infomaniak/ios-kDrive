@@ -30,9 +30,7 @@ public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 /// Something that setups the service factories
 enum FactoryService {
     static func setupDependencyInjection() {
-#if DEBUG
         SimpleResolver.register(debugServices)
-#endif
         let factories = networkingServices + miscServices
         SimpleResolver.register(factories)
     }
@@ -119,7 +117,6 @@ enum FactoryService {
         return services
     }
 
-#if DEBUG
     /// Debug services
     private static var debugServices: [FactoryWithIdentifier] {
         if #available(iOS 14.0, *) {
@@ -144,7 +141,6 @@ enum FactoryService {
             return []
         }
     }
-#endif
 }
 
 public extension SimpleResolver {
