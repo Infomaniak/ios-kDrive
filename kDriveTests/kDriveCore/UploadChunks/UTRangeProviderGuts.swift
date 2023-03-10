@@ -45,7 +45,7 @@ final class UTRangeProviderGuts: XCTestCase {
             // THEN
             XCTFail("Expected to throw")
         } catch {
-            guard case .IncorrectRangeRequest = error as? RangeProvider.ErrorDomain else {
+            guard case .IncorrectChunkSize = error as? RangeProvider.ErrorDomain else {
                 XCTFail("Unexpected")
                 return
             }
@@ -89,8 +89,8 @@ final class UTRangeProviderGuts: XCTestCase {
             // THEN
             XCTFail("Expected to throw")
         } catch {
-            guard case .IncorrectRangeRequest = error as? RangeProvider.ErrorDomain else {
-                XCTFail("Unexpected")
+            guard case .IncorrectTotalChunksCount = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected \(error)")
                 return
             }
         }

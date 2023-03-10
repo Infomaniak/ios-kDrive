@@ -19,7 +19,7 @@
 import Foundation
 @testable import InfomaniakDI
 @testable import kDrive
-import kDriveCore
+@testable import kDriveCore
 
 /// Something to help using the DI in the test target
 public enum MockingHelper {
