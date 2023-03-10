@@ -17,7 +17,7 @@
  */
 
 import UIKit
-import InfomaniakCore
+import InfomaniakCoreUI
 
 class FolderTypeTableViewCell: InsetTableViewCell {
 

@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import UIKit
-import InfomaniakCore
 
 class DriveTitleTableViewCell: InsetTableViewCell {
-
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -31,5 +30,4 @@ class DriveTitleTableViewCell: InsetTableViewCell {
 
         // Configure the view for the selected state
     }
-
 }

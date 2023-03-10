@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import kDriveCore
-import InfomaniakCore
 import UIKit
 
 class HomeFileSearchCollectionViewCell: InsetCollectionViewCell {

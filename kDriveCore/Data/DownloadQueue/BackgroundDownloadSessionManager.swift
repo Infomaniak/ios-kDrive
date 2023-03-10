@@ -18,14 +18,37 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 
-public protocol FileDownloadSession: BackgroundSession {
+protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
+    // MARK: - Type aliases
+
+    associatedtype Task
+    associatedtype CompletionHandler
+    associatedtype Operationable
+
+    // MARK: - Attributes
+
+    var backgroundCompletionHandler: (() -> Void)? { get set }
+    var backgroundSession: URLSession! { get }
+    var tasksCompletionHandler: [String: CompletionHandler] { get set }
+    var operations: [Operationable] { get set }
+
+    func reconnectBackgroundTasks()
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
+    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession)
+    func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler?
+}
+
+public protocol FileDownloadSession: Identifiable {
     func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
 }
 
 extension URLSession: FileDownloadSession {}
 
-public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
+public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate, FileDownloadSession {
+    @LazyInjectService var accountManager: AccountManageable
+
     public var identifier: String {
         return backgroundSession.identifier
     }
@@ -34,8 +57,6 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
     public typealias Operation = DownloadOperation
 
-    public static let instance = BackgroundDownloadSessionManager()
-
     public var backgroundCompletionHandler: (() -> Void)?
 
     static let maxBackgroundTasks = 10
@@ -43,9 +64,9 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [Operation]()
+    var operations = [DownloadOperationable]()
 
-    override private init() {
+    override public init() {
         super.init()
         let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
@@ -74,8 +95,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func rescheduleForBackground(task: URLSessionDownloadTask?) -> String? {
         let syncLock = DispatchGroup()
-        if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
-           let request = task?.originalRequest {
+        if let request = task?.originalRequest {
             var sessionIdentifier: String?
             syncLock.enter()
             task?.cancel { data in
@@ -132,7 +152,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
+                  let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion

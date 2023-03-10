@@ -31,5 +31,6 @@ opt_in_rules:
  - unused_import
 excluded:
  - .tuist-bin/*
- - Derived/Sources/*
+ - Derived/
+ - DerivedData/
 function_parameter_count: 7

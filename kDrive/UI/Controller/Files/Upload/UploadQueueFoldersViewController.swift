@@ -17,12 +17,16 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
 import UIKit
 
 class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
 
     private let realm = DriveFileManager.constants.uploadsRealm
 
@@ -57,29 +61,38 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
         // Observe uploading files
-        notificationToken = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
+        notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
-            .observe(on: .main) { [weak self] change in
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
                 switch change {
                 case .initial(let results):
-                    self?.updateFolders(from: results)
-                    self?.tableView.reloadData()
+                    self.updateFolders(from: results)
+                    self.tableView.reloadData()
                     if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     guard !results.isEmpty else {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                         return
                     }
 
-                    self?.tableView.performBatchUpdates {
-                        self?.updateFolders(from: results)
+                    // No animation on updating the same lines without changes
+                    if deletions == insertions, modifications.isEmpty {
+                        return
+                    }
+
+                    self.tableView.performBatchUpdates {
+                        self.updateFolders(from: results)
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
-                        self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
@@ -89,7 +102,7 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        folders = files.compactMap { AccountManager.instance.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
+        folders = files.compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         // (Pop view controller if nothing to show)
         if folders.isEmpty {
             DispatchQueue.main.async {

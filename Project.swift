@@ -16,41 +16,43 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import ProjectDescription
 import ProjectDescriptionHelpers
-import Foundation
 
 let project = Project(name: "kDrive",
                       packages: [
-                          .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.2.2")),
-                          .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.1.16")),
-                          .package(url: "https://github.com/Infomaniak/ios-login.git", .upToNextMajor(from: "2.2.0")),
-                          .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.0.0")),
+                          .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
+                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "3.5.0")),
+                          .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "2.1.0")),
+                          .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "4.0.0")),
+                          .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "1.1.9")),
+                          .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.36.0")),
                           .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
                           .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "7.0.0-beta.4")),
                           .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
                           .package(url: "https://github.com/ProxymanApp/atlantis", .upToNextMajor(from: "1.3.0")),
                           .package(url: "https://github.com/ra1028/DifferenceKit", .upToNextMajor(from: "1.1.5")),
-                          .package(url: "https://github.com/immortal79/LocalizeKit", .upToNextMajor(from: "1.0.1")),
-                          .package(url: "https://github.com/airbnb/lottie-ios.git", .upToNextMinor(from: "3.4.0")),
-                          .package(url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git", .upToNextMajor(from: "3.7.0")),
-                          .package(url: "https://github.com/RomanTysiachnik/DropDown.git", .branch("master")),
+                          .package(url: "https://github.com/PhilippeWeidmann/LocalizeKit", .upToNextMajor(from: "1.0.1")),
+                          .package(url: "https://github.com/airbnb/lottie-ios", .upToNextMinor(from: "3.4.0")),
+                          .package(url: "https://github.com/CocoaLumberjack/CocoaLumberjack", .upToNextMajor(from: "3.7.0")),
+                          .package(url: "https://github.com/RomanTysiachnik/DropDown", .branch("master")),
                           .package(url: "https://github.com/PhilippeWeidmann/SnackBar.swift", .upToNextMajor(from: "0.1.2")),
-                          .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
+                          .package(url: "https://github.com/flowbe/SwiftRegex", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "7.2.9")),
                           .package(url: "https://github.com/adam-fowler/mqtt-nio", .upToNextMajor(from: "2.4.0")),
-                          .package(url: "https://github.com/airbnb/HorizonCalendar.git", .upToNextMajor(from: "1.0.0")),
+                          .package(url: "https://github.com/airbnb/HorizonCalendar", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
-                          .package(url: "https://github.com/bmoliveira/MarkdownKit.git", .upToNextMajor(from: "1.7.0")),
-                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios.git", .upToNextMajor(from: "7.5.1")),
+                          .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
+                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1"))
                       ],
                       targets: [
                           Target(name: "kDrive",
                                  platform: .iOS,
                                  product: .app,
                                  bundleId: "com.infomaniak.drive",
-                                 deploymentTarget: Constants.deploymentTarget,
+                                 deploymentTarget: .iOS(targetVersion: "13.4", devices: [.iphone]),
                                  infoPlist: .file(path: "kDrive/Resources/Info.plist"),
                                  sources: "kDrive/**",
                                  resources: [
@@ -86,9 +88,12 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .unitTests,
                                  bundleId: "com.infomaniak.drive.tests",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+                                 deploymentTarget: .iOS(targetVersion: "13.4", devices: [.iphone]),
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
                                  sources: "kDriveTests/**",
+                                 resources: [
+                                     "kDriveTests/**/*.jpg"
+                                 ],
                                  dependencies: [
                                      .target(name: "kDrive")
                                  ],
@@ -97,7 +102,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .uiTests,
                                  bundleId: "com.infomaniak.drive.uitests",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+                                 deploymentTarget: .iOS(targetVersion: "13.4", devices: [.iphone]),
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
                                  sources: "kDriveUITests/**",
                                  dependencies: [
@@ -119,7 +124,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .framework,
                                  bundleId: "com.infomaniak.drive.core",
-                                 deploymentTarget: Constants.deploymentTarget,
+                                 deploymentTarget: .iOS(targetVersion: "13.4", devices: [.iphone]),
                                  infoPlist: .file(path: "kDriveCore/Info.plist"),
                                  sources: "kDriveCore/**",
                                  resources: [
@@ -134,6 +139,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "MQTTNIO"),
                                      .package(product: "InfomaniakCore"),
                                      .package(product: "InfomaniakLogin"),
+                                     .package(product: "InfomaniakDI"),
                                      .package(product: "RealmSwift"),
                                      .package(product: "LocalizeKit"),
                                      .package(product: "Kingfisher"),
@@ -156,16 +162,25 @@ let project = Project(name: "kDrive",
                                  dependencies: [
                                      .target(name: "kDriveCore")
                                  ],
-                                 settings: .settings(base: Constants.fileProviderSettings, debug: Constants.debugFileProviderSettings)),
+                                 settings: .settings(
+                                     base: Constants.fileProviderSettings,
+                                     debug: Constants.debugFileProviderSettings
+                                 )),
                           .extensionTarget(name: "kDriveShareExtension",
                                            bundleId: "com.infomaniak.drive.ShareExtension",
                                            entitlements: "kDriveShareExtension/ShareExtension.entitlements",
-                                           settings: .settings(base: Constants.shareExtensionSettings, debug: Constants.debugShareExtensionSettings)),
+                                           settings: .settings(
+                                               base: Constants.shareExtensionSettings,
+                                               debug: Constants.debugShareExtensionSettings
+                                           )),
                           .extensionTarget(name: "kDriveActionExtension",
                                            bundleId: "com.infomaniak.drive.ActionExtension",
                                            entitlements: "kDriveActionExtension/ActionExtension.entitlements",
                                            additionalResources: ["kDriveActionExtension/**/*.xcassets",
                                                                  "kDriveActionExtension/**/*.strings"],
-                                           settings: .settings(base: Constants.actionExtensionSettings, debug: Constants.debugActionExtensionSettings))
+                                           settings: .settings(
+                                               base: Constants.actionExtensionSettings,
+                                               debug: Constants.debugActionExtensionSettings
+                                           ))
                       ],
                       fileHeaderTemplate: .file("file-header-template.txt"))

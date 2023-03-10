@@ -17,13 +17,17 @@
  */
 
 import CocoaLumberjackSwift
-import InfomaniakCore
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var fileImportHelper: FileImportHelper
+
     enum SaveFileSection {
         case alert
         case fileName
@@ -40,8 +44,16 @@ class SaveFileViewController: UIViewController {
 
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
-    private var originalDriveId = AccountManager.instance.currentDriveId
-    private var originalUserId = AccountManager.instance.currentUserId
+    private var originalDriveId: Int = {
+        @InjectService var accountManager: AccountManageable
+        return accountManager.currentDriveId
+    }()
+
+    private var originalUserId: Int = {
+        @InjectService var accountManager: AccountManageable
+        return accountManager.currentUserId
+    }()
+
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
     var photoFormat = PhotoFileFormat.jpg
@@ -50,22 +62,25 @@ class SaveFileViewController: UIViewController {
             setItemProviders()
         }
     }
+
     var assetIdentifiers: [String]? {
         didSet {
             setAssetIdentifiers()
         }
     }
+
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
             UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
         }
     }
+
     var itemProvidersContainHeicPhotos: Bool {
         if let itemProviders, !itemProviders.isEmpty {
             return itemProviders.contains {
                 $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
-                && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+                    && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
             }
         }
         if let assetIdentifiers, !assetIdentifiers.isEmpty {
@@ -73,6 +88,7 @@ class SaveFileViewController: UIViewController {
         }
         return false
     }
+
     private var errorCount = 0
     private var importProgress: Progress?
     private var enableButton = false {
@@ -100,7 +116,7 @@ class SaveFileViewController: UIViewController {
 
         // Set selected drive and directory to last values
         if selectedDirectory == nil {
-            if selectedDriveFileManager == nil, let driveFileManager = AccountManager.instance.getDriveFileManager(
+            if selectedDriveFileManager == nil, let driveFileManager = accountManager.getDriveFileManager(
                 for: UserDefaults.shared.lastSelectedDrive,
                 userId: UserDefaults.shared.lastSelectedUser
             ) {
@@ -162,7 +178,7 @@ class SaveFileViewController: UIViewController {
     private func setAssetIdentifiers() {
         guard let assetIdentifiers else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importAssets(
+        importProgress = fileImportHelper.importAssets(
             assetIdentifiers,
             userPreferredPhotoFormat: userPreferredPhotoFormat
         ) { [weak self] importedFiles, errorCount in
@@ -177,7 +193,7 @@ class SaveFileViewController: UIViewController {
     private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+        importProgress = fileImportHelper.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {
@@ -401,7 +417,7 @@ extension SaveFileViewController: SelectFolderDelegate {
 
 extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+        if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive) {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]
@@ -439,7 +455,7 @@ extension SaveFileViewController: FooterButtonDelegate {
 
         let message: String
         do {
-            try FileImportHelper.instance.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+            try fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
             guard !items.isEmpty else {
                 navigationController?.dismiss(animated: true)
                 return

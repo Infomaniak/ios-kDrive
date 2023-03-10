@@ -53,7 +53,8 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         guard let fileName = textField.text else { return }
-        textFieldConfiguration.selectedRange = fileName.startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
+        textFieldConfiguration.selectedRange = fileName
+            .startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
         textFieldConfiguration.selectText(in: textField)
     }
 

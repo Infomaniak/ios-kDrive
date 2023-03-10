@@ -3,10 +3,10 @@
     {
       "identity" : "alamofire",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "location" : "https://github.com/Alamofire/Alamofire",
       "state" : {
-        "revision" : "8dd85aee02e39dd280c75eef88ffdb86eed4b07b",
-        "version" : "5.6.2"
+        "revision" : "78424be314842833c04bc3bef5b72e85fff99204",
+        "version" : "5.6.4"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "2b26bf7fe2c5751335dca015b9e77514210d28d4",
-        "version" : "1.18.2"
+        "revision" : "67ed749c6ac1ca8046d759205d6a9b17b4960b54",
+        "version" : "1.20.0"
       }
     },
     {
@@ -39,7 +39,7 @@
     {
       "identity" : "dropdown",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RomanTysiachnik/DropDown.git",
+      "location" : "https://github.com/RomanTysiachnik/DropDown",
       "state" : {
         "branch" : "master",
         "revision" : "d040a7d331a978d0e6b6568a40bb017aac127720"
@@ -75,10 +75,10 @@
     {
       "identity" : "horizoncalendar",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/HorizonCalendar.git",
+      "location" : "https://github.com/airbnb/HorizonCalendar",
       "state" : {
-        "revision" : "0b21e9edb6b0769cd37766d782068fc7a847f0c5",
-        "version" : "1.14.2"
+        "revision" : "b17dbd840dc472f74f31434c081be09a4414da03",
+        "version" : "1.15.0"
       }
     },
     {
@@ -86,8 +86,26 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core.git",
       "state" : {
-        "revision" : "41a14e9e4444e85c4a1b53479e45514365486d11",
-        "version" : "1.1.16"
+        "revision" : "bf5fee633f88f61a9072e4bb4718891347be78b3",
+        "version" : "3.5.0"
+      }
+    },
+    {
+      "identity" : "ios-core-ui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-core-ui.git",
+      "state" : {
+        "revision" : "852ca2ea76a08ebe30fa801b21fc27e111e1ff50",
+        "version" : "2.1.0"
+      }
+    },
+    {
+      "identity" : "ios-dependency-injection",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-dependency-injection",
+      "state" : {
+        "revision" : "41a99aeb652d5294355129bfa70d1ea8c17b9980",
+        "version" : "1.1.10"
       }
     },
     {
@@ -95,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login.git",
       "state" : {
-        "revision" : "ba10750bd4774a1c9c55ac88bfb01604f26f3b92",
-        "version" : "2.2.0"
+        "revision" : "35190f66b67eb8a79cbacdbf54ee9a03ab61d7f7",
+        "version" : "4.0.0"
       }
     },
     {
@@ -104,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "44e891bdb61426a95e31492a67c7c0dfad1f87c5",
-        "version" : "7.4.1"
+        "revision" : "90135885ef506506620c4911cefb55a95ca2a9a2",
+        "version" : "7.5.0"
       }
     },
     {
@@ -120,7 +138,7 @@
     {
       "identity" : "localizekit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/immortal79/LocalizeKit",
+      "location" : "https://github.com/PhilippeWeidmann/LocalizeKit",
       "state" : {
         "revision" : "1abb86ce614ae8d925bf82123c7360ab95827975",
         "version" : "1.0.1"
@@ -167,17 +185,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/mqtt-nio",
       "state" : {
-        "revision" : "29b5cece276e493db8463fbaf21f9bcd7a4c3225",
-        "version" : "2.7.0"
+        "revision" : "a0e1126459ff0efe3b959a53bd48481faab53cf8",
+        "version" : "2.7.1"
       }
     },
     {
       "identity" : "realm-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/realm/realm-core",
+      "location" : "https://github.com/realm/realm-core.git",
       "state" : {
-        "revision" : "3c4b86da569368c4ee5ccca2a112d511cc6fa936",
-        "version" : "12.11.0"
+        "revision" : "a7d486d07b821e28ffd3587e99355a63148cbb43",
+        "version" : "13.4.1"
       }
     },
     {
@@ -185,8 +203,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-swift",
       "state" : {
-        "revision" : "1f5d97d7c3d4d9696a423542b0819b245fcc3339",
-        "version" : "10.32.2"
+        "revision" : "4d55ba88e78ed427eae439e7c15fac2372f95c64",
+        "version" : "10.36.0"
       }
     },
     {
@@ -194,8 +212,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "ccda930f753d0e420d9d3da73692e9ae82f33187",
-        "version" : "7.30.1"
+        "revision" : "cf43eac1aa12017868c257ad3854ad87a5de0758",
+        "version" : "7.31.5"
       }
     },
     {
@@ -221,8 +239,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics.git",
       "state" : {
-        "revision" : "919eb1d83e02121cdb434c7bfc1f0c66ef17febe",
-        "version" : "1.0.2"
+        "revision" : "ff3d2212b6b093db7f177d0855adbc4ef9c5f036",
+        "version" : "1.0.3"
       }
     },
     {
@@ -230,8 +248,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "f504716c27d2e5d4144fa4794b12129301d17729",
-        "version" : "1.0.3"
+        "revision" : "937e904258d22af6e447a0b72c0bc67583ef64a2",
+        "version" : "1.0.4"
       }
     },
     {
@@ -239,8 +257,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "6fe203dc33195667ce1759bf0182975e4653ba1c",
-        "version" : "1.4.4"
+        "revision" : "32e8d724467f8fe623624570367e3d50c5638e46",
+        "version" : "1.5.2"
       }
     },
     {
@@ -248,8 +266,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "edfceecba13d68c1c993382806e72f7e96feaa86",
-        "version" : "2.44.0"
+        "revision" : "45167b8006448c79dda4b7bd604e07a034c15c49",
+        "version" : "2.48.0"
       }
     },
     {

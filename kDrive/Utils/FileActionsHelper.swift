@@ -18,6 +18,8 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Photos
@@ -70,7 +72,12 @@ public class FileActionsHelper {
         }
     }
 
-    public func move(file: File, to destinationDirectory: File, driveFileManager: DriveFileManager, completion: ((Bool) -> Void)? = nil) {
+    public func move(
+        file: File,
+        to destinationDirectory: File,
+        driveFileManager: DriveFileManager,
+        completion: ((Bool) -> Void)? = nil
+    ) {
         guard destinationDirectory.id != file.parentId else { return }
         Task { [proxyFile = file.proxify(),
                 proxyParent = file.parent?.proxify(),
@@ -166,13 +173,13 @@ public class FileActionsHelper {
                                                disabledDirectoriesIdsSelection: disabledDirectoriesIds) { destinationDirectory in
                 Task {
                     await moveToDestination(destinationDirectory,
-                                      from: currentDirectory,
-                                      files: files,
-                                      exceptFileIds: exceptFileIds,
-                                      allItemsSelected: allItemsSelected,
-                                      observer: observer,
-                                      driveFileManager: driveFileManager,
-                                      completion: completion)
+                                            from: currentDirectory,
+                                            files: files,
+                                            exceptFileIds: exceptFileIds,
+                                            allItemsSelected: allItemsSelected,
+                                            observer: observer,
+                                            driveFileManager: driveFileManager,
+                                            completion: completion)
                 }
             }
         presentViewController(selectFolderNavigationController)
@@ -213,7 +220,9 @@ public class FileActionsHelper {
                     }
                     try await group.waitForAll()
                 }
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(files.count, destinationDirectory.name))
+                UIConstants
+                    .showSnackBar(message: KDriveResourcesStrings.Localizable
+                        .fileListMoveFileConfirmationSnackbar(files.count, destinationDirectory.name))
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
@@ -242,8 +251,12 @@ public class FileActionsHelper {
         }
     }
 
-    private static func perform(bulkAction: BulkAction, driveFileManager: DriveFileManager, currentDirectory: File) async throws -> (actionId: String, snackBar: IKSnackBar?) {
-        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
+    private static func perform(bulkAction: BulkAction, driveFileManager: DriveFileManager,
+                                currentDirectory: File) async throws -> (actionId: String, snackBar: IKSnackBar?) {
+        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(
+            drive: driveFileManager.drive,
+            action: bulkAction
+        )
 
         let message: String
         let cancelMessage: String
@@ -273,7 +286,8 @@ public class FileActionsHelper {
                                       using progressSnack: IKSnackBar?,
                                       observer: AnyObject,
                                       driveFileManager: DriveFileManager) {
-        AccountManager.instance.mqService.observeActionProgress(observer, actionId: actionId) { actionProgress in
+        @InjectService var accountManager: AccountManageable
+        accountManager.mqService.observeActionProgress(observer, actionId: actionId) { actionProgress in
             Task {
                 switch actionProgress.progress.message {
                 case .starting:
@@ -281,11 +295,20 @@ public class FileActionsHelper {
                 case .processing:
                     switch actionType {
                     case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(
+                            actionProgress.progress.total - actionProgress.progress.todo,
+                            actionProgress.progress.total
+                        )
                     case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(
+                            actionProgress.progress.total - actionProgress.progress.todo,
+                            actionProgress.progress.total
+                        )
                     case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(
+                            actionProgress.progress.total - actionProgress.progress.todo,
+                            actionProgress.progress.total
+                        )
                     }
                     loadActivitiesForCurrentDirectory(currentDirectory, driveFileManager: driveFileManager)
                 case .done:
@@ -347,7 +370,12 @@ public class FileActionsHelper {
                                  observer: AnyObject,
                                  driveFileManager: DriveFileManager,
                                  completion: (() -> Void)? = nil) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: exceptFileIds, destinationDirectoryId: destinationDirectory.id)
+        let action = BulkAction(
+            action: .move,
+            parentId: currentDirectory.id,
+            exceptFileIds: exceptFileIds,
+            destinationDirectoryId: destinationDirectory.id
+        )
         await performAndObserve(bulkAction: action,
                                 from: currentDirectory,
                                 observer: observer,
@@ -357,7 +385,11 @@ public class FileActionsHelper {
 
     // MARK: - Single file or multiple selection
 
-    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) async -> Void)? = nil) async throws -> Bool {
+    public static func favorite(
+        files: [File],
+        driveFileManager: DriveFileManager,
+        completion: ((File) async -> Void)? = nil
+    ) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -376,8 +408,12 @@ public class FileActionsHelper {
     public static func manageCategories(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
                                         group: DispatchGroup? = nil, presentingParent: UIViewController?) {
         group?.enter()
-        let navigationManageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(files: files, driveFileManager: driveFileManager)
-        let manageCategoriesViewController = (navigationManageCategoriesViewController.topViewController as? ManageCategoriesViewController)
+        let navigationManageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(
+            files: files,
+            driveFileManager: driveFileManager
+        )
+        let manageCategoriesViewController = (navigationManageCategoriesViewController
+            .topViewController as? ManageCategoriesViewController)
         manageCategoriesViewController?.fileListViewController = presentingParent as? FileListViewController
         manageCategoriesViewController?.completionHandler = {
             group?.leave()
@@ -388,6 +424,7 @@ public class FileActionsHelper {
 
     #if !ISEXTENSION
 
+    @discardableResult
     public static func offline(files: [File], driveFileManager: DriveFileManager, group: DispatchGroup? = nil,
                                filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
         let areAvailableOffline = files.allSatisfy(\.isAvailableOffline)
@@ -395,7 +432,8 @@ public class FileActionsHelper {
         if makeFilesAvailableOffline {
             filesNotAvailable?()
             // Update offline files before setting new file to synchronize them
-            (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+            (UIApplication.shared.delegate as? AppDelegate)?
+                .updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         }
 
         for file in files where !file.isDirectory && file.isAvailableOffline == areAvailableOffline {
@@ -410,11 +448,13 @@ public class FileActionsHelper {
     }
 
     public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
-                                   presentingParent: UIViewController?, group: DispatchGroup? = nil, completion: @escaping (Bool) -> Void) {
+                                   presentingParent: UIViewController?, group: DispatchGroup? = nil,
+                                   completion: @escaping (Bool) -> Void) {
         group?.enter()
         if driveFileManager.drive.isFreePack {
             let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
+            let floatingPanelViewController = driveFloatingPanelController
+                .contentViewController as? FolderColorFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { _ in
                 driveFloatingPanelController.dismiss(animated: true) {
@@ -423,7 +463,10 @@ public class FileActionsHelper {
             }
             viewController.present(driveFloatingPanelController, animated: true)
         } else {
-            let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: files, driveFileManager: driveFileManager)
+            let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(
+                files: files,
+                driveFileManager: driveFileManager
+            )
             let floatingPanelViewController = DriveFloatingPanelController()
             floatingPanelViewController.isRemovalInteractionEnabled = true
             floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)

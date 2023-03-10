@@ -21,13 +21,15 @@ import CocoaLumberjack
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
 
 public enum Logging {
     public static func initLogging() {
-        UserDefaults.standard.set(true, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        // TODO: change
+        UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         initLogger()
         initNetworkLogging()
         initSentry()
@@ -71,7 +73,7 @@ public enum Logging {
     private static func initNetworkLogging() {
         #if DEBUG
             if !Bundle.main.isExtension {
-                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+//                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
     }
@@ -82,8 +84,6 @@ public enum Logging {
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
                 event.context?["AppState"] = [
-                    "UploadQueue size": UploadQueue.instance.operationQueue.operationCount,
-                    "PhotoSync enabled": PhotoLibraryUploader.instance.isSyncEnabled,
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]

@@ -19,6 +19,7 @@
 import CoreServices
 import FileProvider
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 
@@ -44,13 +45,18 @@ class FileProviderExtensionState {
 }
 
 class FileProviderExtension: NSFileProviderExtension {
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    private let dependencyInjectionHook = EarlyDIHook()
+
+    @LazyInjectService var uploadQueue: UploadQueue
+
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
         fileCoordinator.purposeIdentifier = manager.providerIdentifier
         return fileCoordinator
     }()
 
-    let accountManager: AccountManager
+    @LazyInjectService var accountManager: AccountManageable
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
         if let domain = domain {
@@ -70,9 +76,8 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override init() {
+        // log
         Logging.initLogging()
-        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
-        accountManager = AccountManager.instance
         super.init()
     }
 
@@ -204,7 +209,7 @@ class FileProviderExtension: NSFileProviderExtension {
         } else {
             do {
                 try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                 completion(nil)
             } catch {
                 completion(error)
@@ -252,17 +257,17 @@ class FileProviderExtension: NSFileProviderExtension {
             driveId: driveFileManager.drive.id,
             url: item.storageUrl,
             name: item.filename,
-            conflictOption: .replace,
+            conflictOption: .version,
             shouldRemoveAfterUpload: false)
         var observationToken: ObservationToken?
-        observationToken = UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
+        observationToken = uploadQueue.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
             observationToken?.cancel()
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }
             completion?()
         }
-        UploadQueue.instance.addToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
+        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
     }
 
     // MARK: - Enumeration

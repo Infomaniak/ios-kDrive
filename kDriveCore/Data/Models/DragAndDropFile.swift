@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 public class DragAndDropFile: NSObject, Codable {
     static let localDragIdentifier = "private.kdrive.file"
@@ -38,7 +39,8 @@ public class DragAndDropFile: NSObject, Codable {
         fileId = try values.decode(Int.self, forKey: .fileId)
         driveId = try values.decode(Int.self, forKey: .driveId)
         userId = try values.decode(Int.self, forKey: .userId)
-        file = AccountManager.instance.getDriveFileManager(for: driveId, userId: userId)?.getCachedFile(id: fileId)
+        @InjectService var accountManager: AccountManageable
+        file = accountManager.getDriveFileManager(for: driveId, userId: userId)?.getCachedFile(id: fileId)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -86,7 +88,8 @@ extension DragAndDropFile: NSItemProviderWriting {
         }
     }
 
-    public func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
+    public func loadData(withTypeIdentifier typeIdentifier: String,
+                         forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
         guard let file = file else {
             completionHandler(nil, nil)
             return nil

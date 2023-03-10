@@ -46,7 +46,7 @@ class SwipableCollectionView: UICollectionView {
 
     func simulateSwipe(at swipedIndexPath: IndexPath) {
         if let swipedCell = cellForItem(at: swipedIndexPath) as? SwipableCell,
-            let actions = swipeDataSource?.collectionView(self, actionsFor: swipedCell, at: swipedIndexPath) {
+           let actions = swipeDataSource?.collectionView(self, actionsFor: swipedCell, at: swipedIndexPath) {
             if currentlySwipedCellPath != swipedIndexPath {
                 currentlySwipedCell?.hideSwipeActions()
                 currentlySwipedCellPath = swipedIndexPath
@@ -73,8 +73,8 @@ class SwipableCollectionView: UICollectionView {
         switch recognizer.state {
         case .began:
             if let swipedIndexPath = swipedIndexPath,
-                let swipedCell = cellForItem(at: swipedIndexPath) as? SwipableCell,
-                let actions = swipeDataSource?.collectionView(self, actionsFor: swipedCell, at: swipedIndexPath) {
+               let swipedCell = cellForItem(at: swipedIndexPath) as? SwipableCell,
+               let actions = swipeDataSource?.collectionView(self, actionsFor: swipedCell, at: swipedIndexPath) {
                 if currentlySwipedCellPath != swipedIndexPath {
                     currentlySwipedCell?.hideSwipeActions()
                     currentlySwipedCellPath = swipedIndexPath
@@ -127,8 +127,8 @@ class SwipableCollectionView: UICollectionView {
 
     @objc private func didSelectAction(_ sender: UIButton) {
         if let actions = currentlySwipedCellActions,
-            let swipedCell = currentlySwipedCell,
-            let indexPath = currentlySwipedCellPath {
+           let swipedCell = currentlySwipedCell,
+           let indexPath = currentlySwipedCellPath {
             if sender.tag < actions.count {
                 let action = actions[sender.tag]
                 swipeDelegate?.collectionView(self, didSelect: action, at: indexPath)
@@ -145,11 +145,13 @@ class SwipableCollectionView: UICollectionView {
         }
     }
 }
+
 // MARK: - UIGestureRecognizerDelegate
+
 extension SwipableCollectionView: UIGestureRecognizerDelegate {
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
-            gestureRecognizer === swipeGestureRecognizer {
+           gestureRecognizer === swipeGestureRecognizer {
             let velocity = gestureRecognizer.velocity(in: self)
             if abs(velocity.y) > abs(velocity.x) {
                 currentlySwipedCell?.hideSwipeActions()

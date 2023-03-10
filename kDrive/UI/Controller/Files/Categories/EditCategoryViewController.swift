@@ -16,11 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class EditCategoryViewController: UITableViewController {
+    @LazyInjectService var accountManager: AccountManageable
+
     var driveFileManager: DriveFileManager!
     // If we have a category we edit it, otherwise, we create a new one
     var category: kDriveCore.Category?
@@ -117,7 +120,7 @@ class EditCategoryViewController: UITableViewController {
             self.color = color as String
         }
 
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

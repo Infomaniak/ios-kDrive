@@ -16,9 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
+import LocalizeKit
 import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {

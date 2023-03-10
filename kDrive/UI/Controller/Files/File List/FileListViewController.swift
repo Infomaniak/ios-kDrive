@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -121,6 +122,8 @@ class ConcreteFileListViewModel: FileListViewModel {
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
+
+    @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants
 
@@ -730,10 +733,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Drive File Manager should be consistent
         let maybeDriveFileManager: DriveFileManager?
         #if ISEXTENSION
-            maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+            maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
         #else
             if viewModelName == String(describing: SharedWithMeViewModel.self) {
-                maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+                maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
             } else {
                 maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
             }

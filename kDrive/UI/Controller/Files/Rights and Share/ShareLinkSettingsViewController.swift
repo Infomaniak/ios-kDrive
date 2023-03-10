@@ -16,12 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @LazyInjectService var accountManager: AccountManageable
+
     var driveFileManager: DriveFileManager!
 
     enum OptionsRow: CaseIterable {
@@ -216,7 +220,8 @@ class ShareLinkSettingsViewController: UIViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager

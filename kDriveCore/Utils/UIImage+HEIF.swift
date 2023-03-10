@@ -16,18 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import AVFoundation
+import UIKit
 
 extension UIImage {
     private var orientationMapping: [Orientation: CGImagePropertyOrientation] {
-        return [.up: .up, .upMirrored: .upMirrored, .down: .down, .downMirrored: .downMirrored, .left: .left, .leftMirrored: .leftMirrored, .right: .right, .rightMirrored: .rightMirrored]
+        return [.up: .up,
+                .upMirrored: .upMirrored,
+                .down: .down,
+                .downMirrored: .downMirrored,
+                .left: .left,
+                .leftMirrored: .leftMirrored,
+                .right: .right,
+                .rightMirrored: .rightMirrored]
     }
 
     public func heicData(compressionQuality: CGFloat) -> Data? {
         let data = NSMutableData()
         guard let imageDestination = CGImageDestinationCreateWithData(data, AVFileType.heic as CFString, 1, nil),
-            let cgImage = self.cgImage else {
+              let cgImage = cgImage else {
             return nil
         }
         let options: NSDictionary = [

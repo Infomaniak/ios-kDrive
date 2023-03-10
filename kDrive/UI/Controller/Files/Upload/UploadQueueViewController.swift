@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakDI
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
@@ -28,9 +29,11 @@ class UploadQueueViewController: UIViewController {
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
 
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
+
     var currentDirectory: File!
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
-    private var progressForFileId = [String: CGFloat]()
     private var notificationToken: NotificationToken?
 
     private let realm = DriveFileManager.constants.uploadsRealm
@@ -46,16 +49,6 @@ class UploadQueueViewController: UIViewController {
         cancelButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCancel
 
         setUpObserver()
-
-        UploadQueue.instance.observeFileUploadProgress(self) { [weak self] fileId, progress in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.progressForFileId[fileId] = progress
-                for cell in self.tableView.visibleCells {
-                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress, animated: progress > 0)
-                }
-            }
-        }
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             DispatchQueue.main.async {
@@ -75,8 +68,12 @@ class UploadQueueViewController: UIViewController {
 
     func setUpObserver() {
         guard currentDirectory != nil else { return }
-        notificationToken = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm)
-            .observe(on: .main) { [weak self] change in
+
+        notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
+                                                          userId: accountManager.currentUserId,
+                                                          driveId: currentDirectory.driveId,
+                                                          using: realm)
+        .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
                     self?.uploadingFiles = AnyRealmCollection(results)
@@ -85,6 +82,8 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    self?.uploadingFiles = AnyRealmCollection(results)
+
                     guard !results.isEmpty else {
                         self?.navigationController?.popViewController(animated: true)
                         return
@@ -102,15 +101,19 @@ class UploadQueueViewController: UIViewController {
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
                 }
-            }
+        }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
-        UploadQueue.instance.cancelAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
+        uploadQueue.cancelAllOperations(withParent: currentDirectory.id,
+                                        userId: accountManager.currentUserId,
+                                        driveId: currentDirectory.driveId)
     }
 
     @IBAction func retryButtonPressed(_ sender: UIBarButtonItem) {
-        UploadQueue.instance.retryAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
+        uploadQueue.retryAllOperations(withParent: currentDirectory.id,
+                                       userId: accountManager.currentUserId,
+                                       driveId: currentDirectory.driveId)
     }
 
     class func instantiate() -> UploadQueueViewController {
@@ -132,7 +135,7 @@ class UploadQueueViewController: UIViewController {
         let driveId = coder.decodeInteger(forKey: "DriveID")
         let directoryId = coder.decodeInteger(forKey: "DirectoryID")
 
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId),
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId),
               let directory = driveFileManager.getCachedFile(id: directoryId) else {
             // Handle error?
             return
@@ -151,10 +154,16 @@ extension UploadQueueViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-        let file = uploadingFiles[indexPath.row]
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
                                        isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-        cell.configureWith(uploadFile: file, progress: progressForFileId[file.id])
+
+        /// Make sure the file is valid
+        let file = uploadingFiles[indexPath.row]
+        if !file.isInvalidated {
+            let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
+            cell.configureWith(uploadFile: file, progress: progress)
+        }
+
         cell.selectionStyle = .none
         return cell
     }

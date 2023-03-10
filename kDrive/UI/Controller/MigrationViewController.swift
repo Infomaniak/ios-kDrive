@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Lottie
@@ -28,6 +29,8 @@ class MigrationViewController: UIViewController {
     @IBOutlet weak var buttonView: UIView!
     @IBOutlet weak var retryButton: UIButton!
     @IBOutlet weak var migrationFailedLabel: UILabel!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     private var photoSyncEnabled: Bool?
     private var slides: [Slide] = []
@@ -99,7 +102,7 @@ class MigrationViewController: UIViewController {
             UserDefaults.shared.numberOfConnections = 1
             let mainTabBarViewController = MainTabViewController.instantiate()
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
-            if photoSyncEnabled && AccountManager.instance.currentDriveFileManager != nil {
+            if photoSyncEnabled && accountManager.currentDriveFileManager != nil {
                 let driveFloatingPanelController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
@@ -152,7 +155,9 @@ extension MigrationViewController: UICollectionViewDelegate, UICollectionViewDat
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
 }

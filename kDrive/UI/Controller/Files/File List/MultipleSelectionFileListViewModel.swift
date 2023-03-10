@@ -121,10 +121,10 @@ class MultipleSelectionFileListViewModel {
                                    allItemsSelected: isSelectAllModeEnabled,
                                    observer: self,
                                    driveFileManager: driveFileManager) { [weak self] viewController in
-                                       self?.onPresentViewController?(.modal, viewController, true)
-                                   } completion: { [weak self] in
-                                       self?.isMultipleSelectionEnabled = false
-                                   }
+                self?.onPresentViewController?(.modal, viewController, true)
+            } completion: { [weak self] in
+                self?.isMultipleSelectionEnabled = false
+            }
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,

@@ -18,12 +18,16 @@
 
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
+
+    @LazyInjectService var accountManager: AccountManageable
 
     enum HomeFileType {
         case file([File])
@@ -416,7 +420,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         if isDifferentDrive {
             recentFilesControllersCache.removeAll()
             let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
-            driveHeaderView?.isEnabled = AccountManager.instance.drives.count > 1
+            driveHeaderView?.isEnabled = accountManager.drives.count > 1
             driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
 
             showInsufficientStorage = true
@@ -558,14 +562,14 @@ extension HomeViewController {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
                 let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
-                driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
+                driveHeaderView.isEnabled = accountManager.drives.count > 1
                 UIView.performWithoutAnimation {
                     driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                     driveHeaderView.titleButton.layoutIfNeeded()
                 }
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     guard let self = self else { return }
-                    let drives = AccountManager.instance.drives
+                    let drives = self.accountManager.drives
                     let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive, delegate: self)
                     self.present(floatingPanelViewController, animated: true)
                 }
@@ -613,7 +617,7 @@ extension HomeViewController {
                 present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
             }
         case .recentFiles:
-            if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1) && !viewModel.recentFilesEmpty {
+            if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1), !viewModel.recentFilesEmpty {
                 switch viewModel.recentFiles {
                 case .file(let files):
                     filePresenter.present(driveFileManager: driveFileManager, file: files[indexPath.row], files: files, normalFolderHierarchy: false)

@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 import Vision
 import VisionKit
-import kDriveCore
 
 class ScanNavigationViewController: UINavigationController {
-
     var currentDriveFileManager: DriveFileManager?
     var currentDirectory: File?
 

@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import UIKit
-import InfomaniakCore
 
 class ParameterSwitchTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var valueLabel: UILabel!
     @IBOutlet weak var valueSwitch: UISwitch!
 
@@ -38,7 +37,6 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        self.contentInsetView.backgroundColor = InfomaniakCoreAsset.backgroundCardView.color
+        contentInsetView.backgroundColor = InfomaniakCoreAsset.backgroundCardView.color
     }
-
 }

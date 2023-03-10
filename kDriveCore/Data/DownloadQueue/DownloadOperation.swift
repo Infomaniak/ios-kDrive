@@ -20,18 +20,31 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
+// import RealmSwift
 
-public class DownloadOperation: Operation {
+/// Something that can download a file.
+public protocol DownloadOperationable: Operationable {
+    /// Called upon request completion
+    func downloadCompletion(url: URL?, response: URLResponse?, error: Error?)
+
+    var file: File { get }
+}
+
+public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
-    private let file: File
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
+    public let file: File
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
 
@@ -102,7 +115,7 @@ public class DownloadOperation: Operation {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
-                if let rescheduledSessionId = BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task),
+                if let rescheduledSessionId = self.downloadManager.rescheduleForBackground(task: self.task),
                    let task = self.task,
                    let sessionUrl = task.originalRequest?.url?.absoluteString {
                     self.error = .taskRescheduled
@@ -128,7 +141,7 @@ public class DownloadOperation: Operation {
 
     private func getToken() -> ApiToken? {
         var apiToken: ApiToken?
-        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
+        if let userToken = accountManager.getTokenForUserId(driveFileManager.drive.userId) {
             let lock = DispatchGroup()
             lock.enter()
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { token, _ in
@@ -182,9 +195,9 @@ public class DownloadOperation: Operation {
         task?.cancel()
     }
 
-    // MARK: - Private methods
+    // MARK: - methods
 
-    func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
+    public func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {

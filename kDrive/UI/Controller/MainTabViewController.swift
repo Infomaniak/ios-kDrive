@@ -18,6 +18,7 @@
 
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -25,6 +26,10 @@ import UIKit
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
     // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var fileImportHelper: FileImportHelper
 
     override var tabBar: MainTabBar {
         return super.tabBar as! MainTabBar
@@ -34,7 +39,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
+        setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
             self.driveFileManager = currentDriveFileManager
         }
 
@@ -112,7 +117,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     func updateTabBarProfilePicture() {
         setProfilePicture(image: KDriveResourcesAsset.placeholderAvatar.image)
 
-        AccountManager.instance.currentAccount?.user?.getAvatar { image in
+        accountManager.currentAccount?.user?.getAvatar { image in
             self.setProfilePicture(image: image)
         }
 
@@ -177,7 +182,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         if let driveFileManager = driveFileManager {
             completion(driveFileManager)
         } else {
-            if AccountManager.instance.drives.isEmpty {
+            if accountManager.drives.isEmpty {
                 let driveErrorVC = DriveErrorViewController.instantiate()
                 driveErrorVC.driveErrorViewType = .noDrive
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(UINavigationController(rootViewController: driveErrorVC))
@@ -230,7 +235,7 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
         }
-        setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
+        setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
             self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
         }
     }
@@ -259,7 +264,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         if let documentPicker = controller as? DriveImportDocumentPickerViewController {
             for url in urls {
-                let targetURL = FileImportHelper.instance.generateImportURL(for: url.uti)
+                let targetURL = fileImportHelper.generateImportURL(for: url.uti)
 
                 do {
                     if FileManager.default.fileExists(atPath: targetURL.path) {
@@ -267,13 +272,14 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    UploadQueue.instance.addToQueue(file:
+                    uploadQueue.saveToRealmAndAddToQueue(file:
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
-                            userId: AccountManager.instance.currentUserId,
+                            userId: accountManager.currentUserId,
                             driveId: documentPicker.importDrive.id,
                             url: targetURL,
-                            name: url.lastPathComponent))
+                            name: url.lastPathComponent
+                        ))
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }

@@ -16,13 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
 
 class StoreViewController: UICollectionViewController {
+    @LazyInjectService var accountManager: AccountManageable
+
     struct Item {
         let pack: DrivePack
         let identifier: String
@@ -308,7 +311,8 @@ class StoreViewController: UICollectionViewController {
         super.decodeRestorableState(with: coder)
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
+                                                                        userId: accountManager.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
@@ -337,7 +341,9 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
     func nextButtonTapped(_ button: IKLargeButton) {
         if let product = displayedItems.first(where: { $0.pack == selectedPack })?.product {
             // Attempt to purchase the tapped product
-            StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
+            StoreObserver.shared.buy(product,
+                                     userId: accountManager.currentUserId,
+                                     driveId: driveFileManager.drive.id)
             button.setLoading(true)
         }
     }
@@ -375,7 +381,7 @@ extension StoreViewController: StoreObserverDelegate {
         MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
         // Send receipt to the server
         let body = ReceiptInfo(latestReceipt: receiptString,
-                               userId: AccountManager.instance.currentUserId,
+                               userId: accountManager.currentUserId,
                                itemId: driveFileManager.drive.id,
                                productId: transaction.payment.productIdentifier,
                                transactionId: transaction.transactionIdentifier ?? "",

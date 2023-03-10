@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import kDriveResources
 import PDFKit
 import Photos
@@ -128,11 +129,15 @@ public enum ImportError: LocalizedError {
 }
 
 public class FileImportHelper {
-    public static let instance = FileImportHelper()
+    @LazyInjectService var uploadQueue: UploadQueue
 
     private let imageCompression = 0.8
 
     // MARK: - Public methods
+
+    public init() {
+        /// Public Service initializer
+    }
 
     @MainActor
     public func importAssets(
@@ -259,7 +264,7 @@ public class FileImportHelper {
                 url: file.path,
                 name: file.name
             )
-            UploadQueue.instance.addToQueue(file: uploadFile)
+            uploadQueue.saveToRealmAndAddToQueue(file: uploadFile)
         }
     }
 
@@ -503,6 +508,6 @@ public class FileImportHelper {
             url: targetURL,
             name: name
         )
-        UploadQueue.instance.addToQueue(file: newFile)
+        uploadQueue.saveToRealmAndAddToQueue(file: newFile)
     }
 }

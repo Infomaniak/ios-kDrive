@@ -16,11 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import Kingfisher
 import UIKit
+import InfomaniakDI
 
 class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var rightsStackView: UIStackView!
@@ -29,6 +30,8 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var rightsLabel: UILabel!
     @IBOutlet weak var notAcceptedView: UIView!
     @IBOutlet weak var externalUserView: UIView!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -54,7 +57,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         }
 
         if let user = element as? UserFileAccess {
-            let blocked = AccountManager.instance.currentUserId == user.id
+            let blocked = accountManager.currentUserId == user.id
             rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
             detailLabel.text = user.email
             notAcceptedView.isHidden = true

@@ -17,12 +17,15 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class SharedDrivesViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @LazyInjectService var accountManager: AccountManageable
 
     var drives: [Drive?] = []
 
@@ -33,7 +36,7 @@ class SharedDrivesViewController: UIViewController {
 
         navigationItem.hideBackButtonText()
 
-        drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true)
+        drives = DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: true)
         showEmptyView()
     }
 
@@ -85,7 +88,7 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
             let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveFloatingPanelController, animated: true)
-        } else if let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+        } else if let driveFileManager = accountManager.getDriveFileManager(for: drive) {
             let viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
             let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
             navigationController?.pushViewController(fileListViewController, animated: true)

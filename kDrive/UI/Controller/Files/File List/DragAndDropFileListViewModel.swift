@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -51,6 +52,8 @@ class DraggableFileListViewModel {
 
 @MainActor
 class DroppableFileListViewModel {
+    @LazyInjectService var fileImportHelper: FileImportHelper
+
     var driveFileManager: DriveFileManager
     private var currentDirectory: File
     private var lastDropPosition: DropPosition?
@@ -61,7 +64,9 @@ class DroppableFileListViewModel {
         self.currentDirectory = currentDirectory
     }
 
-    private func handleDropOverDirectory(_ directory: File, in collectionView: UICollectionView, at indexPath: IndexPath) -> UICollectionViewDropProposal {
+    private func handleDropOverDirectory(_ directory: File,
+                                         in collectionView: UICollectionView,
+                                         at indexPath: IndexPath) -> UICollectionViewDropProposal {
         guard directory.capabilities.canUpload && directory.capabilities.canMoveInto else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
         }
@@ -106,7 +111,7 @@ class DroppableFileListViewModel {
     func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
         if !externalFiles.isEmpty {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
-            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self, frozenDestination = destinationDirectory.freeze()] importedFiles, errorCount in
+            _ = fileImportHelper.importItems(externalFiles) { [weak self, frozenDestination = destinationDirectory.freeze()] importedFiles, errorCount in
                 guard let self = self else { return }
                 if errorCount > 0 {
                     Task {
@@ -117,7 +122,7 @@ class DroppableFileListViewModel {
                     return
                 }
                 do {
-                    try FileImportHelper.instance.upload(files: importedFiles, in: frozenDestination, drive: self.driveFileManager.drive)
+                    try self.fileImportHelper.upload(files: importedFiles, in: frozenDestination, drive: self.driveFileManager.drive)
                 } catch {
                     Task {
                         UIConstants.showSnackBarIfNeeded(error: error)
@@ -127,7 +132,10 @@ class DroppableFileListViewModel {
         }
     }
 
-    func updateDropSession(_ session: UIDropSession, in collectionView: UICollectionView, with destinationIndexPath: IndexPath?, destinationFile: File?) -> UICollectionViewDropProposal {
+    func updateDropSession(_ session: UIDropSession,
+                           in collectionView: UICollectionView,
+                           with destinationIndexPath: IndexPath?,
+                           destinationFile: File?) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
            let destinationFile = destinationFile,
            destinationFile.isDirectory {
@@ -148,7 +156,9 @@ class DroppableFileListViewModel {
         }
     }
 
-    func performDrop(with coordinator: UICollectionViewDropCoordinator, in collectionView: UICollectionView, destinationDirectory: File) {
+    func performDrop(with coordinator: UICollectionViewDropCoordinator,
+                     in collectionView: UICollectionView,
+                     destinationDirectory: File) {
         let itemProviders = coordinator.items.map(\.dragItem.itemProvider)
         // We don't display iOS's progress indicator because we use our own snackbar
         coordinator.session.progressIndicatorStyle = .none

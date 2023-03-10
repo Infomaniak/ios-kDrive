@@ -19,8 +19,11 @@
 import Foundation
 import kDriveCore
 import RealmSwift
+import InfomaniakDI
 
 class UploadCountManager {
+    @LazyInjectService var uploadQueue: UploadQueue
+
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
@@ -46,7 +49,7 @@ class UploadCountManager {
 
     @discardableResult
     func updateUploadCount() -> Int {
-        uploadCount = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).count
+        uploadCount = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds).count
         return uploadCount
     }
 
@@ -58,7 +61,7 @@ class UploadCountManager {
             self?.didUploadCountChange()
         }
 
-        uploadsObserver = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).observe(on: observeQueue) { [weak self] change in
+        uploadsObserver = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds).observe(on: observeQueue) { [weak self] change in
             switch change {
             case .initial(let results):
                 self?.uploadCountThrottler.call(results.count)

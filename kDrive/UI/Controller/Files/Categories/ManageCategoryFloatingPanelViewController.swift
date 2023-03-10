@@ -17,7 +17,7 @@
  */
 
 import FloatingPanel
-import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -36,8 +36,13 @@ class CategoryFloatingPanelAction: Equatable {
         self.tintColor = tintColor
     }
 
-    static let edit = CategoryFloatingPanelAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonEdit, image: KDriveResourcesAsset.edit.image)
-    static let delete = CategoryFloatingPanelAction(id: 2, name: KDriveResourcesStrings.Localizable.buttonDelete, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
+    static let edit = CategoryFloatingPanelAction(id: 1,
+                                                  name: KDriveResourcesStrings.Localizable.buttonEdit,
+                                                  image: KDriveResourcesAsset.edit.image)
+    static let delete = CategoryFloatingPanelAction(id: 2,
+                                                    name: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                    image: KDriveResourcesAsset.delete.image,
+                                                    tintColor: KDriveResourcesAsset.binColor.color)
 
     static var actions: [CategoryFloatingPanelAction] {
         return [edit, delete]
@@ -120,8 +125,13 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(editCategoryViewController, animated: true)
             dismiss(animated: true)
         case .delete:
-            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name), boldText: category.name)
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name),
+                                                       boldText: category.name)
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                message: attrString,
+                                                action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                destructive: true,
+                                                loading: true) {
                 MatomoUtils.track(eventWithCategory: .categories, name: "delete")
                 do {
                     let response = try await self.driveFileManager.delete(category: self.category)
@@ -170,7 +180,11 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
-            cell.configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: false)
+            cell.configure(name: action.name,
+                           icon: action.image,
+                           tintColor: action.tintColor,
+                           isEnabled: action.isEnabled,
+                           isLoading: false)
             return cell
         }
     }

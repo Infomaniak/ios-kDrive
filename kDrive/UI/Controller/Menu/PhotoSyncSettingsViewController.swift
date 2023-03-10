@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Photos
@@ -25,6 +26,9 @@ import UIKit
 
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -62,8 +66,16 @@ class PhotoSyncSettingsViewController: UIViewController {
     private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
     private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
-    private var newSyncSettings = PhotoSyncSettings(value: PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings())
-    private var photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
+    private var newSyncSettings: PhotoSyncSettings = {
+        @InjectService var photoUploader: PhotoLibraryUploader
+        if let _ = photoUploader.settings {
+            return PhotoSyncSettings(value: photoUploader.settings as Any)
+        } else {
+            return PhotoSyncSettings()
+        }
+    }()
+
+    private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
             newSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
@@ -106,7 +118,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         let savedCurrentUserId = newSyncSettings.userId
         let savedCurrentDriveId = newSyncSettings.driveId
         if savedCurrentUserId != -1 && savedCurrentDriveId != -1 {
-            driveFileManager = AccountManager.instance.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
+            driveFileManager = accountManager.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
         }
         updateSaveButtonState()
         updateSectionList()
@@ -188,7 +200,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func updateSaveButtonState() {
-        let isEdited = PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled || PhotoLibraryUploader.instance.settings?.isContentEqual(to: newSyncSettings) == false
+        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?.isContentEqual(to: newSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
         if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
@@ -198,28 +210,30 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    func saveSettings(using realm: Realm) {
-        if photoSyncEnabled {
-            guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
-            switch newSyncSettings.syncMode {
-            case .new:
-                newSyncSettings.lastSync = Date()
-            case .all:
-                if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+    func saveSettings() {
+        BackgroundRealm.uploads.execute { _ in
+            if photoSyncEnabled {
+                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
+                switch newSyncSettings.syncMode {
+                case .new:
+                    newSyncSettings.lastSync = Date()
+                case .all:
+                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
+                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    } else {
+                        newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                    }
+                case .fromDate:
+                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
+                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    } else {
+                        newSyncSettings.lastSync = newSyncSettings.fromDate
+                    }
                 }
-            case .fromDate:
-                if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    newSyncSettings.lastSync = newSyncSettings.fromDate
-                }
+                photoLibraryUploader.enableSync(with: newSyncSettings)
+            } else {
+                photoLibraryUploader.disableSync()
             }
-            PhotoLibraryUploader.instance.enableSync(with: newSyncSettings)
-        } else {
-            PhotoLibraryUploader.instance.disableSync()
         }
     }
 
@@ -293,7 +307,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                         Task {
                             let status = await self.requestAuthorization()
                             DispatchQueue.main.async {
-                                self.driveFileManager = AccountManager.instance.currentDriveFileManager
+                                self.driveFileManager = self.accountManager.currentDriveFileManager
                                 if status == .authorized {
                                     self.photoSyncEnabled = true
                                 } else {
@@ -453,7 +467,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+        driveFileManager = accountManager.getDriveFileManager(for: drive)
         selectedDirectory = nil
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)
@@ -486,13 +500,16 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
-        DispatchQueue.global(qos: .utility).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.saveSettings(using: realm)
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.saveSettings()
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
             }
-            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+
+            // Add new pictures to be uploaded and reload upload queue
+            self.photoLibraryUploader.scheduleNewPicturesForUpload()
+            @InjectService var uploadQueue: UploadQueue
+            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }
