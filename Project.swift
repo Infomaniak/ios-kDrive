@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import ProjectDescription
 import ProjectDescriptionHelpers
-import Foundation
 
 let project = Project(name: "kDrive",
                       packages: [
@@ -45,7 +45,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
                           .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
-                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
+                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1"))
                       ],
                       targets: [
                           Target(name: "kDrive",
@@ -162,16 +162,25 @@ let project = Project(name: "kDrive",
                                  dependencies: [
                                      .target(name: "kDriveCore")
                                  ],
-                                 settings: .settings(base: Constants.fileProviderSettings, debug: Constants.debugFileProviderSettings)),
+                                 settings: .settings(
+                                     base: Constants.fileProviderSettings,
+                                     debug: Constants.debugFileProviderSettings
+                                 )),
                           .extensionTarget(name: "kDriveShareExtension",
                                            bundleId: "com.infomaniak.drive.ShareExtension",
                                            entitlements: "kDriveShareExtension/ShareExtension.entitlements",
-                                           settings: .settings(base: Constants.shareExtensionSettings, debug: Constants.debugShareExtensionSettings)),
+                                           settings: .settings(
+                                               base: Constants.shareExtensionSettings,
+                                               debug: Constants.debugShareExtensionSettings
+                                           )),
                           .extensionTarget(name: "kDriveActionExtension",
                                            bundleId: "com.infomaniak.drive.ActionExtension",
                                            entitlements: "kDriveActionExtension/ActionExtension.entitlements",
                                            additionalResources: ["kDriveActionExtension/**/*.xcassets",
                                                                  "kDriveActionExtension/**/*.strings"],
-                                           settings: .settings(base: Constants.actionExtensionSettings, debug: Constants.debugActionExtensionSettings))
+                                           settings: .settings(
+                                               base: Constants.actionExtensionSettings,
+                                               debug: Constants.debugActionExtensionSettings
+                                           ))
                       ],
                       fileHeaderTemplate: .file("file-header-template.txt"))

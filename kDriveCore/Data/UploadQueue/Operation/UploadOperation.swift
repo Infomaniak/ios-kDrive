@@ -32,7 +32,6 @@ public struct UploadCompletionResult {
 }
 
 public final class UploadOperation: AsynchronousOperation, UploadOperationable, ExpiringActivityDelegate {
-    
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -94,7 +93,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     private let urlSession: URLSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var expiringActivity: ExpiringActivityable?
-    
+
     public var result: UploadCompletionResult
 
     // MARK: - Public methods
@@ -106,7 +105,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         self.fileId = fileId
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
-        self.result = UploadCompletionResult()
+        result = UploadCompletionResult()
 
         super.init()
     }
@@ -144,7 +143,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     // MARK: - Split operations
 
     func beginExpiringActivity() {
-        let activity = ExpiringActivity(id: self.fileId, delegate: self)
+        let activity = ExpiringActivity(id: fileId, delegate: self)
         activity.start()
         expiringActivity = activity
     }
@@ -460,8 +459,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     UploadOperationLog("started task identifier:\(identifier) for:\(self.fileId)")
 
                 } catch {
-                    UploadOperationLog("Unable to create an upload request for chunk \(chunkToUpload) error:\(error) - \(self.fileId)",
-                                       level: .error)
+                    UploadOperationLog(
+                        "Unable to create an upload request for chunk \(chunkToUpload) error:\(error) - \(self.fileId)",
+                        level: .error
+                    )
                     throw error
                 }
             }
@@ -533,8 +534,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             guard uploadingSession.fileIdentityHasNotChanged else {
-                UploadOperationLog("File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) fid:\(self.fileId)",
-                                   level: .error)
+                UploadOperationLog(
+                    "File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) fid:\(self.fileId)",
+                    level: .error
+                )
                 throw ErrorDomain.fileIdentityHasChanged
             }
         }
@@ -609,7 +612,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 // File is already or has parent in DB let's update it
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
-                    if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath.isEmpty {
+                    if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath
+                        .isEmpty {
                         if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id),
                            !oldFile.isInvalidated,
                            oldFile.isAvailableOffline {
@@ -735,7 +739,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // TODO: remove after beta
             if (error != nil) || (statusCode < 200 || statusCode >= 300) {
                 let dataString = String(data: data ?? Data(), encoding: .utf8)
-                UploadOperationLog("uploadCompletion KO fid:\(self.fileId) error:\(error) response:\(response)  statusCode:\(statusCode) data:\(dataString) ", level: .error)
+                UploadOperationLog(
+                    "uploadCompletion KO fid:\(self.fileId) error:\(error) response:\(response)  statusCode:\(statusCode) data:\(dataString) ",
+                    level: .error
+                )
             } else {
                 UploadOperationLog("uploadCompletion OK data:\(data?.count) statusCode:\(statusCode) fid:\(self.fileId)")
             }
@@ -787,7 +794,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     self.uploadTasks.removeValue(forKey: identifier)
                     chunkTask.taskIdentifier = nil
                 } else {
-                    UploadOperationLog("No identifier for chunkId:\(uploadedChunk.number) in SUCCESS fid:\(self.fileId)", level: .error)
+                    UploadOperationLog(
+                        "No identifier for chunkId:\(uploadedChunk.number) in SUCCESS fid:\(self.fileId)",
+                        level: .error
+                    )
                     SentrySDK.capture(message: "Missing chunk identifier") { scope in
                         scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
                     }
@@ -928,7 +938,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             UploadOperationLog("Delete file:\(fileId)")
             // Delete UploadFile as canceled by the user
             BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId), !toDelete.isInvalidated {
+                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.fileId),
+                   !toDelete.isInvalidated {
                     try? uploadsRealm.safeWrite {
                         uploadsRealm.delete(toDelete)
                     }
@@ -936,9 +947,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
         }
     }
-    
+
     // MARK: - ExpiringActivityDelegate
-    
+
     public func backgroundActivityExpiring() {
         UploadOperationLog("backgroundActivityExpiring fid:\(fileId)")
         enqueueCatching(asap: true) {

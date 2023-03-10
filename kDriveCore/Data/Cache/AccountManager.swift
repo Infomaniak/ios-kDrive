@@ -110,7 +110,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
-    
+
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
@@ -156,8 +156,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public let mqService = MQService()
 
     public init() {
-        self.currentDriveId = UserDefaults.shared.currentDriveId
-        self.currentUserId = UserDefaults.shared.currentDriveUserId
+        currentDriveId = UserDefaults.shared.currentDriveId
+        currentUserId = UserDefaults.shared.currentDriveUserId
         setSentryUserId(userId: currentUserId)
 
         forceReload()
@@ -251,7 +251,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func didFailRefreshToken(_ token: ApiToken) {
         SentrySDK.capture(message: "Failed refreshing token") { scope in
-            scope.setContext(value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Token Infos")
+            scope.setContext(
+                value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970],
+                key: "Token Infos"
+            )
         }
         tokens.removeAll { $0.userId == token.userId }
         KeychainHelper.deleteToken(for: token.userId)
@@ -320,7 +323,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         clearDriveFileManagers()
         var switchedDrive: Drive?
         for driveRemoved in driveRemovedList {
-            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader.settings?.driveId == driveRemoved.id {
+            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader
+                .settings?.driveId == driveRemoved.id {
                 photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
@@ -340,7 +344,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func loadAccounts() -> [Account] {
         var accounts = [Account]()
-        if let groupDirectoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?.appendingPathComponent("preferences", isDirectory: true) {
+        if let groupDirectoryURL = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?
+            .appendingPathComponent("preferences", isDirectory: true) {
             let decoder = JSONDecoder()
             do {
                 let data = try Data(contentsOf: groupDirectoryURL.appendingPathComponent("accounts.json"))
@@ -354,7 +360,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func saveAccounts() {
-        if let groupDirectoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?.appendingPathComponent("preferences/", isDirectory: true) {
+        if let groupDirectoryURL = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?
+            .appendingPathComponent("preferences/", isDirectory: true) {
             let encoder = JSONEncoder()
             if let data = try? encoder.encode(accounts) {
                 do {
@@ -444,7 +452,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         tokens.append(newToken)
 
         // Update token for the other drive file manager
-        for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?.userId == newToken.userId {
+        for driveFileManager in driveFileManagers.values
+            where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?
+            .userId == newToken.userId {
             driveFileManager.apiFetcher.currentToken = newToken
         }
     }

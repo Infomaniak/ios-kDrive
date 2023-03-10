@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
-    
+
     /// Use this to simulate a long running background session
     private static let simulateLongRunningSession = false
 
@@ -93,7 +93,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Attach an observer to the payment queue.
         SKPaymentQueue.default().add(StoreObserver.shared)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUploadActionTapped, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLocateUploadNotification),
+            name: .locateUploadActionTapped,
+            object: nil
+        )
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
         return true
@@ -136,7 +141,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         AppDelegateLog("application performFetchWithCompletionHandler")
-        // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
+        // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the
+        // background.
         if MigrationHelper.canMigrate() {
             notificationHelper.sendMigrateNotification()
             return
@@ -233,7 +239,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 // Request App Store review
                 if UserDefaults.shared.numberOfConnections == 10 {
                     if #available(iOS 14.0, *) {
-                        if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                        if let scene = UIApplication.shared.connectedScenes
+                            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
                             SKStoreReviewController.requestReview(in: scene)
                         }
                     } else {
@@ -301,16 +308,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
 
-                if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId, using: nil),
-                   currentDrive.maintenance {
-                    if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
-                       let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
+                if let currentDrive = accountManager.getDrive(
+                    for: accountManager.currentUserId,
+                    driveId: accountManager.currentDriveId,
+                    using: nil
+                ),
+                    currentDrive.maintenance {
+                    if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId)
+                        .first(where: { !$0.maintenance }),
+                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
-                        (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+                        (rootViewController as? SwitchDriveDelegate)?
+                            .didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                     } else {
                         let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
-                        let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
-                        driveErrorViewController?.driveErrorViewType = currentDrive.isInTechnicalMaintenance ? .maintenance : .blocked
+                        let driveErrorViewController = driveErrorViewControllerNav.viewControllers
+                            .first as? DriveErrorViewController
+                        driveErrorViewController?.driveErrorViewType = currentDrive
+                            .isInTechnicalMaintenance ? .maintenance : .blocked
                         if DriveInfosManager.instance.getDrives(for: currentAccount.userId).count == 1 {
                             driveErrorViewController?.drive = currentDrive
                         }
@@ -388,7 +403,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                         @InjectService var uploadQueue: UploadQueue
                         var observationToken: ObservationToken?
                         observationToken = uploadQueue.observeFileUploaded(self,
-                                                                           fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
+                                                                           fileId: uploadFile
+                                                                               .id) { [fileId = file.id] uploadFile, _ in
                             observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
@@ -436,7 +452,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     try await driveFileManager.updateAvailableOfflineFiles()
                 } catch {
                     // Silently handle error
-                    AppDelegateLog("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)", level: .error)
+                    AppDelegateLog(
+                        "Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)",
+                        level: .error
+                    )
                 }
             }
         }
@@ -534,7 +553,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
         @InjectService var accountManager: AccountManageable
 
-        return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+        return AppDelegate
+            .currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
 
     // MARK: - User activity
@@ -593,7 +613,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 default:
                     break
                 }
-            } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.photoSyncError {
+            } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
+                .photoSyncError {
                 // Show photo sync settings
                 guard let rootViewController = window?.rootViewController as? MainTabViewController else {
                     return

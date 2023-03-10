@@ -56,7 +56,7 @@ public final class ExpiringActivity: ExpiringActivityable {
 
     deinit {
         queue.sync {
-            assert(locks.count == 0, "please make sure to balance 'start()' and 'end()' before releasing this object")
+            assert(locks.isEmpty, "please make sure to balance 'start()' and 'end()' before releasing this object")
         }
     }
 

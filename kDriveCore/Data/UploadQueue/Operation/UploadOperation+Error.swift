@@ -32,15 +32,14 @@ extension UploadOperation {
     func catching(_ task: @escaping () async throws -> Void) async {
         do {
             try await task()
-        }
-        catch {
+        } catch {
             defer {
                 end()
             }
 
             UploadOperationLog("catching error:\(error) fid:\(fileId)", level: .error)
-            if !self.handleLocalErrors(error: error) {
-                self.handleRemoteErrors(error: error)
+            if !handleLocalErrors(error: error) {
+                handleRemoteErrors(error: error)
             }
 
             return
@@ -59,7 +58,7 @@ extension UploadOperation {
                 file.error = .networkError
                 errorHandled = true
             }
-            
+
             // Do nothing on taskRescheduled
             else if let error = error as? DriveError, error == .taskRescheduled {
                 file.error = .taskRescheduled
@@ -73,7 +72,7 @@ extension UploadOperation {
                 file.error = DriveError.taskCancelled // cascade deletion
                 errorHandled = true
             }
-            
+
             // Not enough space
             else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
                 self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
@@ -111,8 +110,7 @@ extension UploadOperation {
                 }
 
                 errorHandled = true
-            }
-            else {
+            } else {
                 // Other DriveError
                 file.error = error as? DriveError
                 errorHandled = false
@@ -126,7 +124,7 @@ extension UploadOperation {
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
         guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
-            UploadOperationLog("error:\(error) not a remote one fid:\(self.fileId)")
+            UploadOperationLog("error:\(error) not a remote one fid:\(fileId)")
             return false
         }
 

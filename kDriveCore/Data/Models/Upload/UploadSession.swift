@@ -27,7 +27,7 @@ public final class UploadSession: EmbeddedObject, Decodable {
 
     /// Not persisted, as File does not belong to the Upload Realm
     public var file: File?
-    
+
     @Persisted public var fileName: String
 
     @Persisted public var result: Bool
@@ -37,12 +37,12 @@ public final class UploadSession: EmbeddedObject, Decodable {
     public required convenience init(from decoder: Decoder) throws {
         self.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.directoryId = try container.decodeIfPresent(Int64.self, forKey: .directoryId)
-        self.directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
-        self.file = try container.decodeIfPresent(File.self, forKey: .file)
-        self.fileName = try container.decode(String.self, forKey: .fileName)
-        self.result = try container.decode(Bool.self, forKey: .result)
-        self.token = try container.decode(String.self, forKey: .token)
+        directoryId = try container.decodeIfPresent(Int64.self, forKey: .directoryId)
+        directoryPath = try container.decodeIfPresent(String.self, forKey: .directoryPath)
+        file = try container.decodeIfPresent(File.self, forKey: .file)
+        fileName = try container.decode(String.self, forKey: .fileName)
+        result = try container.decode(Bool.self, forKey: .result)
+        token = try container.decode(String.self, forKey: .token)
     }
 
     enum CodingKeys: String, CodingKey {

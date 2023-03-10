@@ -115,7 +115,6 @@ public func ABLog(_ message: @autoclosure () -> Any,
                        tag: tag,
                        asynchronous: async,
                        ddlog: .sharedInstance)
-        case .info: fallthrough
         default:
             DDLogInfo(buffer,
                       context: context,
