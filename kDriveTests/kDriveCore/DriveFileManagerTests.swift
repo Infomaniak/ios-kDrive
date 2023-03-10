@@ -100,7 +100,7 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func checkIfFileIsInFavorites(file: ProxyFile, shouldBePresent: Bool = true) async throws {
-        let (favorites, _) = try await DriveFileManagerTests.driveFileManager.favorites()
+        let (favorites, _) = try await DriveFileManagerTests.driveFileManager.favorites(forceRefresh: true)
         let isInFavoritesFiles = favorites.contains { $0.id == file.id }
         XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : "n't") be in favorites files")
     }
