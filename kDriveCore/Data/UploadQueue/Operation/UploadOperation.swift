@@ -96,7 +96,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     public var result: UploadCompletionResult
 
-    // MARK: - Public methods
+    // MARK: - Public methods -
 
     public required init(fileId: String,
                          urlSession: URLSession = URLSession.shared,
@@ -203,7 +203,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         UploadOperationLog("generateChunksAndFanOutIfNeeded fid:\(fileId)")
         try checkCancelation()
 
-        var filePath: String!
+        var filePath = ""
         var chunksToGenerateCount = 0
         try transactionWithFile { file in
             // Get the current uploading session
@@ -484,10 +484,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let driveFile = uploadedFile.file
             UploadOperationLog("uploadedFile 'File' id:\(uploadedFile.file.id) fid:\(self.fileId)")
 
-            var driveId: Int!
-            var userId: Int!
-            var relativePath: String!
-            var parentDirectoryId: Int!
+            var driveId: Int?
+            var userId: Int?
+            var relativePath: String?
+            var parentDirectoryId: Int?
             try self.transactionWithFile { file in
                 file.uploadDate = Date()
                 file.uploadingSession = nil // For the sake of keeping the Realm small
@@ -498,33 +498,34 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 parentDirectoryId = file.parentDirectoryId
             }
 
-            if let driveFileManager = self.accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // File is already or has parent in DB let's update it
-                let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
-                queue.execute { realm in
-                    if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || relativePath
-                        .isEmpty {
-                        if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id),
-                           !oldFile.isInvalidated,
-                           oldFile.isAvailableOffline {
-                            driveFile.isAvailableOffline = true
-                        }
-                        let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
-                        queue.bufferedWrite(in: parent, file: driveFile)
-                        self.result.driveFile = File(value: driveFile)
-                    }
+            guard let driveId,
+                  let userId,
+                  let relativePath,
+                  let parentDirectoryId,
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: driveId, userId: userId) else {
+                return
+            }
+
+            // File is already here or has parent in DB let's update it
+            let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
+            queue.execute { realm in
+                if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil
+                    || relativePath.isEmpty {
+                    let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
+                    queue.bufferedWrite(in: parent, file: driveFile)
+                    self.result.driveFile = File(value: driveFile)
                 }
             }
         }
     }
 
-    // MARK: - Private methods
+    // MARK: - Private methods -
 
     // MARK: UploadSession
-
+    
     /// fetch stored session
     private func fetchAndCleanStoredSession() async throws {
-        UploadOperationLog("fetchAndCleanStoredSession fid:\(fileId)")
+        UploadOperationLog("fetchAndCleanStoredSession fid:\(self.fileId)")
         try transactionWithFile { file in
             guard let uploadingSession = file.uploadingSession,
                   !uploadingSession.isExpired,
@@ -981,7 +982,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    // MARK: - ExpiringActivityDelegate
+    // MARK: - ExpiringActivityDelegate -
 
     public func backgroundActivityExpiring() {
         UploadOperationLog("backgroundActivityExpiring fid:\(fileId)")
