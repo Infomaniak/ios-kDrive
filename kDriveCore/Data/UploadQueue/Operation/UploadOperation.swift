@@ -148,10 +148,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         expiringActivity = activity
     }
 
-    /// Fetch or create something that represents the state of the upload, and store it to self.file
+    /// Fetch or create something that represents the state of the upload, and store it to the current UploadFile
     func getUploadSessionOrCreate() async throws {
         try checkCancelation()
-
         try freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
         defer {
@@ -160,140 +159,22 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         UploadOperationLog("Asking for an upload Session \(fileId)")
 
-        var hasUploadingSession: Bool!
-        var fileName: String!
-        var conflictOption: ConflictOption!
-        var parentDirectoryId: Int!
-        var fileUrl: URL!
+        var hasUploadingSession = false
         try transactionWithFile { file in
             // Decrease retry count
             file.maxRetryCount -= 1
 
             hasUploadingSession = (file.uploadingSession != nil)
-            fileName = file.name
-            conflictOption = file.conflictOption
-            parentDirectoryId = file.parentDirectoryId
-
-            // Check file is readable
-            fileUrl = try self.getFileUrlIfReadable(file: file)
         }
-
-        UploadOperationLog("conflict resolution:\(conflictOption.rawValue) fid:\(fileId)")
 
         // fetch stored session
         if hasUploadingSession {
-            UploadOperationLog("Cleaning session fid:\(fileId)")
-            try transactionWithFile { file in
-                guard let uploadingSession = file.uploadingSession,
-                      !uploadingSession.isExpired,
-                      uploadingSession.fileIdentityHasNotChanged else {
-                    throw ErrorDomain.uploadSessionInvalid
-                }
-
-                // Cleanup the uploading chunks and session state for re-use
-                let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
-                chunkTasksToClean.forEach {
-                    // clean in order to re-schedule
-
-                    // TODO: remove sessionIdentifier once API is ready
-                    $0.sessionIdentifier = nil
-                    $0.taskIdentifier = nil
-                    $0.requestUrl = nil
-                    $0.path = nil
-                    $0.sha256 = nil
-                    $0.error = nil
-                }
-            }
-
-            // if we have no more chunks to upload, try to close session
-            await catching {
-                guard let chunkTasksToUploadCount = try? self.chunkTasksToUploadCount() else {
-                    return
-                }
-
-                // All chunks are uploaded, try to close the session
-                if chunkTasksToUploadCount == 0 {
-                    UploadOperationLog("No remaining chunks to upload at restart, closing session \(self.fileId)")
-                    await self.closeSessionAndEnd()
-                }
-            }
-
-            // We have a valid upload session
+            try await fetchAndCleanStoredSession()
         }
 
         // generate a new session
         else {
-            guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
-                UploadOperationLog("Unable to read file size for \(fileId)", level: .error)
-                throw DriveError.fileNotFound
-            }
-
-            let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
-            UploadOperationLog("got fileSize:\(mebibytes)MiB fid:\(fileId)")
-
-            // Compute ranges for a file
-            let rangeProvider = RangeProvider(fileURL: fileUrl)
-            let ranges: [DataRange]
-            do {
-                ranges = try rangeProvider.allRanges
-            } catch {
-                UploadOperationLog("Unable generate ranges error:\(error) for \(fileId)", level: .error)
-                throw ErrorDomain.splitError
-            }
-            UploadOperationLog("got ranges:\(ranges.count) \(fileId)")
-
-            // Get a valid APIV2 UploadSession
-            let driveFileManager = try getDriveFileManager()
-            let apiFetcher = driveFileManager.apiFetcher
-            let drive = driveFileManager.drive
-
-            var modificationDate: Date?
-            var creationDate: Date?
-            try transactionWithFile { file in
-                modificationDate = file.modificationDate
-                creationDate = file.creationDate
-            }
-
-            let session = try await apiFetcher.startSession(drive: drive,
-                                                            totalSize: fileSize,
-                                                            fileName: fileName,
-                                                            totalChunks: ranges.count,
-                                                            conflictResolution: conflictOption,
-                                                            lastModifiedAt: modificationDate,
-                                                            createdAt: creationDate,
-                                                            directoryId: parentDirectoryId)
-            UploadOperationLog("New session token:\(session.token) fid:\(fileId)")
-            try transactionWithFile { file in
-                // Create an uploading session
-                let uploadingSessionTask = UploadingSessionTask()
-
-                // Store the session token asap as a non null ivar
-                uploadingSessionTask.token = session.token
-
-                // The file at the moment we created the UploadingSessionTask
-                uploadingSessionTask.filePath = fileUrl.path
-
-                // Store the session
-                uploadingSessionTask.uploadSession = session
-
-                // Make sure we can track the the file has not changed across time, while we run the upload session
-                let fileIdentity = UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
-                uploadingSessionTask.fileIdentity = fileIdentity
-
-                // Session expiration date
-                let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
-                uploadingSessionTask.sessionExpiration = inElevenHours
-
-                // Represent the chunks to be uploaded in DB
-                for (index, object) in ranges.enumerated() {
-                    let chunkNumber = Int64(index + 1) // API start at 1
-                    let chunkTask = UploadingChunkTask(chunkNumber: chunkNumber, range: object)
-                    uploadingSessionTask.chunkTasks.append(chunkTask)
-                }
-
-                // All prepared, now we store the upload session in DB before moving on
-                file.uploadingSession = uploadingSessionTask
-            }
+            try await generateNewSessionAndStore()
         }
     }
 
@@ -638,6 +519,149 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     // MARK: - Private methods
+
+    // MARK: UploadSession
+
+    /// fetch stored session
+    private func fetchAndCleanStoredSession() async throws {
+        UploadOperationLog("fetchAndCleanStoredSession fid:\(fileId)")
+        try transactionWithFile { file in
+            guard let uploadingSession = file.uploadingSession,
+                  !uploadingSession.isExpired,
+                  uploadingSession.fileIdentityHasNotChanged else {
+                throw ErrorDomain.uploadSessionInvalid
+            }
+
+            // Cleanup the uploading chunks and session state for re-use
+            let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
+            chunkTasksToClean.forEach {
+                // clean in order to re-schedule
+
+                // TODO: remove sessionIdentifier once API is ready
+                $0.sessionIdentifier = nil
+                $0.taskIdentifier = nil
+                $0.requestUrl = nil
+                $0.path = nil
+                $0.sha256 = nil
+                $0.error = nil
+            }
+        }
+
+        // if we have no more chunks to upload, try to close session
+        await catching {
+            guard let chunkTasksToUploadCount = try? self.chunkTasksToUploadCount() else {
+                return
+            }
+
+            // All chunks are uploaded, try to close the session
+            if chunkTasksToUploadCount == 0 {
+                UploadOperationLog("No remaining chunks to upload at restart, closing session \(self.fileId)")
+                await self.closeSessionAndEnd()
+            }
+        }
+
+        // We have a valid upload session
+    }
+
+    /// generate a new session
+    private func generateNewSessionAndStore() async throws {
+        UploadOperationLog("generateNewSession fid:\(fileId)")
+        var hasUploadingSession: Bool?
+        var fileName: String?
+        var conflictOption: ConflictOption?
+        var parentDirectoryId: Int?
+        var fileUrl: URL?
+        var modificationDate: Date?
+        var creationDate: Date?
+        var relativePath: String?
+        try transactionWithFile { file in
+            // Decrease retry count
+            file.maxRetryCount -= 1
+
+            hasUploadingSession = (file.uploadingSession != nil)
+            fileName = file.name
+            conflictOption = file.conflictOption
+            parentDirectoryId = file.parentDirectoryId
+
+            // Check file is readable
+            fileUrl = try self.getFileUrlIfReadable(file: file)
+
+            // Dates and path override, for PHAssets.
+            modificationDate = file.modificationDate
+            creationDate = file.creationDate
+            relativePath = file.relativePath
+        }
+
+        guard let hasUploadingSession, let fileName, let conflictOption, let parentDirectoryId, let fileUrl else {
+            throw ErrorDomain.unableToBuildRequest
+        }
+
+        guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
+            UploadOperationLog("Unable to read file size for \(fileId)", level: .error)
+            throw DriveError.fileNotFound
+        }
+
+        let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
+        UploadOperationLog("got fileSize:\(mebibytes)MiB fid:\(fileId)")
+
+        // Compute ranges for a file
+        let rangeProvider = RangeProvider(fileURL: fileUrl)
+        let ranges: [DataRange]
+        do {
+            ranges = try rangeProvider.allRanges
+        } catch {
+            UploadOperationLog("Unable generate ranges error:\(error) for \(fileId)", level: .error)
+            throw ErrorDomain.splitError
+        }
+        UploadOperationLog("got ranges:\(ranges.count) \(fileId)")
+
+        // Get a valid APIV2 UploadSession
+        let driveFileManager = try getDriveFileManager()
+        let apiFetcher = driveFileManager.apiFetcher
+        let drive = driveFileManager.drive
+
+        let session = try await apiFetcher.startSession(drive: drive,
+                                                        totalSize: fileSize,
+                                                        fileName: fileName,
+                                                        totalChunks: ranges.count,
+                                                        conflictResolution: conflictOption,
+                                                        lastModifiedAt: modificationDate,
+                                                        createdAt: creationDate,
+                                                        directoryId: parentDirectoryId,
+                                                        directoryPath: relativePath)
+        UploadOperationLog("New session token:\(session.token) fid:\(fileId)")
+        try transactionWithFile { file in
+            // Create an uploading session
+            let uploadingSessionTask = UploadingSessionTask()
+
+            // Store the session token asap as a non null ivar
+            uploadingSessionTask.token = session.token
+
+            // The file at the moment we created the UploadingSessionTask
+            uploadingSessionTask.filePath = fileUrl.path
+
+            // Store the session
+            uploadingSessionTask.uploadSession = session
+
+            // Make sure we can track the the file has not changed across time, while we run the upload session
+            let fileIdentity = UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
+            uploadingSessionTask.fileIdentity = fileIdentity
+
+            // Session expiration date
+            let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
+            uploadingSessionTask.sessionExpiration = inElevenHours
+
+            // Represent the chunks to be uploaded in DB
+            for (index, object) in ranges.enumerated() {
+                let chunkNumber = Int64(index + 1) // API start at 1
+                let chunkTask = UploadingChunkTask(chunkNumber: chunkNumber, range: object)
+                uploadingSessionTask.chunkTasks.append(chunkTask)
+            }
+
+            // All prepared, now we store the upload session in DB before moving on
+            file.uploadingSession = uploadingSessionTask
+        }
+    }
 
     // MARK: Build request
 
