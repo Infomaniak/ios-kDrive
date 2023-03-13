@@ -178,26 +178,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    /// Returns  the upload progress. Ranges from 0 to 1.
-    @discardableResult func updateUploadProgress() -> Double {
-        // Get the current uploading session
-        guard let chunkTasksUploadedCount = try? chunkTasksUploadedCount(),
-              let chunkTasksTotalCount = try? chunkTasksTotalCount() else {
-            let noProgress: Double = 0
-            try? transactionWithFile { file in
-                file.progress = noProgress
-            }
-            return noProgress
-        }
-
-        let progress = Double(chunkTasksUploadedCount) / Double(chunkTasksTotalCount)
-        try? transactionWithFile { file in
-            file.progress = progress
-        }
-
-        return progress
-    }
-
     /// Generate some chunks into a temporary folder from a file
     func generateChunksAndFanOutIfNeeded() async throws {
         UploadOperationLog("generateChunksAndFanOutIfNeeded fid:\(fileId)")
@@ -520,6 +500,28 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     // MARK: - Private methods -
+    
+    // MARK: Progress
+    
+    /// Returns  the upload progress. Ranges from 0 to 1.
+    @discardableResult private func updateUploadProgress() -> Double {
+        // Get the current uploading session
+        guard let chunkTasksUploadedCount = try? chunkTasksUploadedCount(),
+              let chunkTasksTotalCount = try? chunkTasksTotalCount() else {
+            let noProgress: Double = 0
+            try? transactionWithFile { file in
+                file.progress = noProgress
+            }
+            return noProgress
+        }
+
+        let progress = Double(chunkTasksUploadedCount) / Double(chunkTasksTotalCount)
+        try? transactionWithFile { file in
+            file.progress = progress
+        }
+
+        return progress
+    }
 
     // MARK: UploadSession
     
