@@ -569,7 +569,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// generate a new session
     private func generateNewSessionAndStore() async throws {
         UploadOperationLog("generateNewSession fid:\(fileId)")
-        var hasUploadingSession: Bool?
         var fileName: String?
         var conflictOption: ConflictOption?
         var parentDirectoryId: Int?
@@ -578,10 +577,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         var creationDate: Date?
         var relativePath: String?
         try transactionWithFile { file in
-            // Decrease retry count
-            file.maxRetryCount -= 1
-
-            hasUploadingSession = (file.uploadingSession != nil)
             fileName = file.name
             conflictOption = file.conflictOption
             parentDirectoryId = file.parentDirectoryId
@@ -595,7 +590,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             relativePath = file.relativePath
         }
 
-        guard let hasUploadingSession, let fileName, let conflictOption, let parentDirectoryId, let fileUrl else {
+        guard let fileName, let conflictOption, let parentDirectoryId, let fileUrl else {
             throw ErrorDomain.unableToBuildRequest
         }
 
