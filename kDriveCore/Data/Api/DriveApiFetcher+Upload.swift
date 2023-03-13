@@ -96,14 +96,14 @@ public extension DriveApiFetcher {
             parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
         }
 
-        // TODO: check if doc details data format
         if let lastModifiedAt {
-            parameters[APIParameters.lastModifiedAt.rawValue] = "\(lastModifiedAt.timeIntervalSince1970)"
+            let formattedDate = "\(Int64(lastModifiedAt.timeIntervalSince1970))"
+            parameters[APIParameters.lastModifiedAt.rawValue] = formattedDate
         }
 
-        // TODO: check if doc details data format
         if let createdAt {
-            parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
+            let formattedDate = "\(Int64(createdAt.timeIntervalSince1970))"
+            parameters[APIParameters.createdAt.rawValue] = formattedDate
         }
 
         if let directoryId {
