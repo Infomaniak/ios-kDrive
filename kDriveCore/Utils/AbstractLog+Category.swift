@@ -20,6 +20,28 @@ import Foundation
 
 // MARK: - Log methods, by "category"
 
+/// shorthand for ABLog, with "FileProvider" category
+///
+/// In system console, visualize them with `subsystem:com.infomaniak.drive category:FileProvider`
+///
+public func FileProviderLog(_ message: @autoclosure () -> Any,
+                            level: AbstractLogLevel = .debug,
+                            context: Int = 0,
+                            file: StaticString = #file,
+                            function: StaticString = #function,
+                            line: UInt = #line,
+                            tag: Any? = nil) {
+    let category = "FileProvider"
+    ABLog(message(),
+          category: category,
+          level: level,
+          context: context,
+          file: file,
+          function: function,
+          line: line,
+          tag: tag)
+}
+
 /// shorthand for ABLog, with "AppDelegate" category
 ///
 /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`

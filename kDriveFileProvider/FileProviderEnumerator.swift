@@ -44,6 +44,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
+        FileProviderLog("enumerateItems for observer")
         if containerItemIdentifier == .workingSet {
             let workingSetFiles = driveFileManager.getWorkingSet()
             var containerItems = [FileProviderItem]()
