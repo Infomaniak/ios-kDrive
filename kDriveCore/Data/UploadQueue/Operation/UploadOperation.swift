@@ -247,11 +247,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let apiFetcher = driveFileManager.apiFetcher
             let drive = driveFileManager.drive
 
+            var modificationDate: Date?
+            var creationDate: Date?
+            try transactionWithFile { file in
+                modificationDate = file.modificationDate
+                creationDate = file.creationDate
+            }
+
             let session = try await apiFetcher.startSession(drive: drive,
                                                             totalSize: fileSize,
                                                             fileName: fileName,
                                                             totalChunks: ranges.count,
                                                             conflictResolution: conflictOption,
+                                                            lastModifiedAt: modificationDate,
+                                                            createdAt: creationDate,
                                                             directoryId: parentDirectoryId)
             UploadOperationLog("New session token:\(session.token) fid:\(fileId)")
             try transactionWithFile { file in
