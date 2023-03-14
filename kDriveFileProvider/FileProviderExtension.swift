@@ -22,6 +22,7 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
+import RealmSwift
 
 class FileProviderExtensionState {
     static let shared = FileProviderExtensionState()
@@ -33,12 +34,14 @@ class FileProviderExtensionState {
     }
 
     func unenumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
+        let children = importedDocuments.values
+            .filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
         children.forEach { $0.alreadyEnumerated = true }
         return children
     }
 
-    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [NSFileProviderItemIdentifier] {
+    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
+        -> [NSFileProviderItemIdentifier] {
         let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && $0.alreadyEnumerated }
         return children.compactMap { importedDocuments.removeValue(forKey: $0.itemIdentifier)?.itemIdentifier }
     }
@@ -77,6 +80,11 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override init() {
         FileProviderLog("init")
+
+        // TODO: Find a more elegant way of solving this. Maybe with DI ?
+        // Load types into realm so it does not scan all classes and uses more that 20MiB or ram
+        let uploadsRealm = try? Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+
         Logging.initLogging()
         super.init()
     }
@@ -127,7 +135,10 @@ class FileProviderExtension: NSFileProviderExtension {
             let fileProviderItem = try item(for: identifier)
 
             let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
-            try? FileManager.default.createDirectory(at: placeholderURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? FileManager.default.createDirectory(
+                at: placeholderURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
             try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: fileProviderItem)
 
             completionHandler(nil)
@@ -186,7 +197,10 @@ class FileProviderExtension: NSFileProviderExtension {
 
     private func fileStorageIsCurrent(item: FileProviderItem, file: File) -> Bool {
         FileProviderLog("fileStorageIsCurrent item file:\(file.id)")
-        return !file.isLocalVersionOlderThanRemote && FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path)
+        return !file.isLocalVersionOlderThanRemote && FileManager.default.contentsEqual(
+            atPath: item.storageUrl.path,
+            andPath: file.localUrl.path
+        )
     }
 
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
@@ -214,7 +228,11 @@ class FileProviderExtension: NSFileProviderExtension {
                     }
                 }
             }
-            DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId, itemIdentifier: item.itemIdentifier)
+            DownloadQueue.instance.addToQueue(
+                file: file,
+                userId: driveFileManager.drive.userId,
+                itemIdentifier: item.itemIdentifier
+            )
             manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
         } else {
             do {
@@ -232,7 +250,8 @@ class FileProviderExtension: NSFileProviderExtension {
         if let identifier = persistentIdentifierForItem(at: url),
            let item = try? item(for: identifier) as? FileProviderItem {
             if let remoteModificationDate = item.contentModificationDate,
-               let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
+               let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey])
+               .contentModificationDate,
                remoteModificationDate > localModificationDate {
                 backgroundUploadItem(item) {
                     self.cleanupAt(url: url)
@@ -262,6 +281,7 @@ class FileProviderExtension: NSFileProviderExtension {
 
     func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
         FileProviderLog("backgroundUploadItem")
+
         let fileId = item.itemIdentifier.rawValue
         let uploadFile = UploadFile(
             id: fileId,
@@ -271,7 +291,8 @@ class FileProviderExtension: NSFileProviderExtension {
             url: item.storageUrl,
             name: item.filename,
             conflictOption: .version,
-            shouldRemoveAfterUpload: false)
+            shouldRemoveAfterUpload: false
+        )
         var observationToken: ObservationToken?
         observationToken = uploadQueue.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
             observationToken?.cancel()
@@ -292,7 +313,11 @@ class FileProviderExtension: NSFileProviderExtension {
         try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
-            return FileProviderEnumerator(containerItemIdentifier: .workingSet, driveFileManager: driveFileManager, domain: domain)
+            return FileProviderEnumerator(
+                containerItemIdentifier: .workingSet,
+                driveFileManager: driveFileManager,
+                domain: domain
+            )
         }
         let item = try self.item(for: containerItemIdentifier)
         return FileProviderEnumerator(containerItem: item, driveFileManager: driveFileManager, domain: domain)
@@ -300,7 +325,8 @@ class FileProviderExtension: NSFileProviderExtension {
 
     // MARK: - Validation
 
-    override func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier) throws -> [NSFileProviderServiceSource] {
+    override func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier) throws
+        -> [NSFileProviderServiceSource] {
         FileProviderLog("supportedServiceSources for :\(itemIdentifier.rawValue)")
         let validationService = FileProviderValidationServiceSource(fileProviderExtension: self, itemIdentifier: itemIdentifier)!
         return [validationService]

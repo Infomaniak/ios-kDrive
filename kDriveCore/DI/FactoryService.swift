@@ -158,6 +158,7 @@ public extension SimpleResolver {
 public struct EarlyDIHook {
     public init() {
         // setup DI ASAP
+        os_log("EarlyDIHook")
         FactoryService.setupDependencyInjection()
     }
 }
