@@ -48,7 +48,16 @@ public final class UploadQueue {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
-        queue.maxConcurrentOperationCount = max(4, ProcessInfo.processInfo.activeProcessorCount)
+
+        // In extension to reduce memory footprint, we reduce drastically parallelism
+        let parallelism: Int
+        if Bundle.main.isExtension {
+            parallelism = 1
+        } else {
+            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
+        }
+
+        queue.maxConcurrentOperationCount = parallelism
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
@@ -58,7 +67,8 @@ public final class UploadQueue {
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         urlSessionConfiguration.allowsCellularAccess = true
         urlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
-        urlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
+        urlSessionConfiguration
+            .httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         urlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
         urlSessionConfiguration.networkServiceType = .default
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
