@@ -299,6 +299,9 @@ class FileProviderExtension: NSFileProviderExtension {
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }
+            
+            // TODO: Is there a specialized func ?
+            self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completion?()
         }
         uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
