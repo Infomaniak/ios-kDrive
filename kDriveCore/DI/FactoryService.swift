@@ -112,6 +112,9 @@ enum FactoryService {
             },
             Factory(type: NotificationsHelpable.self) { _, _ in
                 NotificationsHelper()
+            },
+            Factory(type: FileProviderExtensionStatable.self) { _, _ in
+                FileProviderExtensionState()
             }
         ]
         return services

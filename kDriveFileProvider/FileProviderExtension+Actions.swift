@@ -34,7 +34,7 @@ extension FileProviderExtension {
 
         // Call completion handler with error if the file name already exists
         let itemsWithSameParent = file.children
-            .map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared
+            .map { FileProviderItem(file: $0, domain: self.domain) } + fileProviderState
             .importedDocuments(forParent: parentItemIdentifier)
         let newItemFileName = directoryName.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
@@ -65,10 +65,10 @@ extension FileProviderExtension {
 
         Task {
             do {
-                let response = try await driveFileManager.apiFetcher
-                    .deleteDefinitely(file: ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                let response = try await self.driveFileManager.apiFetcher
+                    .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
-                    FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
+                    self.fileProviderState.workingSet.removeValue(forKey: itemIdentifier)
                     self.manager.signalEnumerator(for: .workingSet) { _ in }
                     self.manager.signalEnumerator(for: itemIdentifier) { _ in }
                     completionHandler(nil)
@@ -96,7 +96,7 @@ extension FileProviderExtension {
             return
         }
         let itemsWithSameParent = file.children
-            .map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared
+            .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
             .importedDocuments(forParent: parentItemIdentifier)
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
@@ -134,7 +134,8 @@ extension FileProviderExtension {
             identifier: importedDocumentIdentifier,
             parentIdentifier: parentItemIdentifier
         )
-        FileProviderExtensionState.shared.importedDocuments[importedDocumentIdentifier] = importedItem
+        var state = self.fileProviderState
+        state.importedDocuments[importedDocumentIdentifier] = importedItem
 
         backgroundUploadItem(importedItem)
 
@@ -149,7 +150,7 @@ extension FileProviderExtension {
     ) {
         FileProviderLog("renameItem")
         // Doc says we should do network request after renaming local file but we could end up with model desync
-        if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
+        if let item = self.fileProviderState.importedDocuments[itemIdentifier] {
             item.filename = itemName
             manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completionHandler(item, nil)
@@ -165,7 +166,7 @@ extension FileProviderExtension {
         // Check if file name already exists
         let item = FileProviderItem(file: file, domain: domain)
         let itemsWithSameParent = file.parent!.children
-            .map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared
+            .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
             .importedDocuments(forParent: item.parentItemIdentifier)
         let newItemFileName = itemName.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
@@ -191,7 +192,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         FileProviderLog("reparentItem")
-        if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
+        if let item = self.fileProviderState.importedDocuments[itemIdentifier] {
             item.parentItemIdentifier = parentItemIdentifier
             manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completionHandler(item, nil)
@@ -274,7 +275,8 @@ extension FileProviderExtension {
         Task { [proxyFile = file.proxify()] in
             do {
                 _ = try await driveFileManager.delete(file: proxyFile)
-                FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
+                var state = self.fileProviderState
+                state.workingSet[itemIdentifier] = item
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)
@@ -296,7 +298,7 @@ extension FileProviderExtension {
         // Trashed items are not cached so we call the API
         Task {
             do {
-                let file = try await driveFileManager.apiFetcher
+                let file = try await self.driveFileManager.apiFetcher
                     .trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
                 let parent: ProxyFile?
                 if let id = parentItemIdentifier?.toFileId() {
@@ -311,7 +313,7 @@ extension FileProviderExtension {
                     item.parentItemIdentifier = parentItemIdentifier
                 }
                 item.isTrashed = false
-                FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
+                self.fileProviderState.workingSet.removeValue(forKey: itemIdentifier)
                 self.manager.signalEnumerator(for: .workingSet) { _ in }
                 self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                 completionHandler(item, nil)

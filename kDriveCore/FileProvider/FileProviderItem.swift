@@ -19,9 +19,8 @@
 import CoreServices
 import FileProvider
 import InfomaniakDI
-import kDriveCore
 
-extension NSFileProviderItemIdentifier {
+public extension NSFileProviderItemIdentifier {
     init(_ directoryId: Int) {
         if directoryId == DriveFileManager.constants.rootID {
             self.init(NSFileProviderItemIdentifier.rootContainer.rawValue)
@@ -39,73 +38,78 @@ extension NSFileProviderItemIdentifier {
     }
 }
 
-class FileProviderItem: NSObject, NSFileProviderItem {
+public final class FileProviderItem: NSObject, NSFileProviderItem {
+    
     // Required properties
 
-    var itemIdentifier: NSFileProviderItemIdentifier
-    var filename: String
-    var typeIdentifier: String
-    var capabilities: NSFileProviderItemCapabilities
-    var parentItemIdentifier: NSFileProviderItemIdentifier
+    public var itemIdentifier: NSFileProviderItemIdentifier
+    public var filename: String
+    public var typeIdentifier: String
+    public var capabilities: NSFileProviderItemCapabilities
+    public var parentItemIdentifier: NSFileProviderItemIdentifier
 
     // Optional properties
 
-    var childItemCount: NSNumber?
-    var documentSize: NSNumber?
-    var isTrashed = false
-    var creationDate: Date?
-    var contentModificationDate: Date?
-    var versionIdentifier: Data?
-    var isMostRecentVersionDownloaded = true
-    var isUploading = false
-    var isUploaded = true
-    var uploadingError: Error?
-    var isDownloading = false
-    var isDownloaded = true
-    var downloadingError: Error?
-    var isShared = false
-    var isSharedByCurrentUser = false
-    var ownerNameComponents: PersonNameComponents?
-    var favoriteRank: NSNumber?
+    public var childItemCount: NSNumber?
+    public var documentSize: NSNumber?
+    public var isTrashed = false
+    public var creationDate: Date?
+    public var contentModificationDate: Date?
+    public var versionIdentifier: Data?
+    public var isMostRecentVersionDownloaded = true
+    public var isUploading = false
+    public var isUploaded = true
+    public var uploadingError: Error?
+    public var isDownloading = false
+    public var isDownloaded = true
+    public var downloadingError: Error?
+    public var isShared = false
+    public var isSharedByCurrentUser = false
+    public var ownerNameComponents: PersonNameComponents?
+    public var favoriteRank: NSNumber?
 
     // Custom properties
 
-    var storageUrl: URL
-    var alreadyEnumerated = false
+    public var storageUrl: URL
+    public var alreadyEnumerated = false
 
-    init(file: File, domain: NSFileProviderDomain?) {
-        self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        self.filename = file.name.isEmpty ? "Root" : file.name
-        self.typeIdentifier = file.typeIdentifier
+    public init(file: File, domain: NSFileProviderDomain?) {
+        FileProviderLog("FileProviderItem init file:\(file.id)")
+        
+        @InjectService var fileProviderState: FileProviderExtensionStatable
+        
+        itemIdentifier = NSFileProviderItemIdentifier(file.id)
+        filename = file.name.isEmpty ? "Root" : file.name
+        typeIdentifier = file.typeIdentifier
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
-        self.capabilities = FileProviderItem.rightsToCapabilities(rights)
+        capabilities = FileProviderItem.rightsToCapabilities(rights)
         // Every file should have a parent, root file parent should not be called
-        self.parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
-        let tmpChildren = FileProviderExtensionState.shared.importedDocuments(forParent: itemIdentifier)
-        self.childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
+        parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
+        let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
+        childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
         if let size = file.size {
-            self.documentSize = NSNumber(value: size)
+            documentSize = NSNumber(value: size)
         }
-        self.isTrashed = file.isTrashed
-        self.creationDate = file.createdAt
-        self.contentModificationDate = file.lastModifiedAt
-        self.versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
+        isTrashed = file.isTrashed
+        creationDate = file.createdAt
+        contentModificationDate = file.lastModifiedAt
+        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
+        isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
         let storageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         if DownloadQueue.instance.hasOperation(for: file) {
-            self.isDownloading = true
-            self.isDownloaded = false
+            isDownloading = true
+            isDownloaded = false
         } else {
-            self.isDownloading = false
-            self.isDownloaded = file.isDownloaded
+            isDownloading = false
+            isDownloaded = file.isDownloaded
         }
         if file.users.count > 1 {
-            self.isShared = true
+            isShared = true
             @InjectService var accountManager: AccountManageable
-            self.isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
+            isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
         } else {
-            self.isShared = false
-            self.isSharedByCurrentUser = false
+            isShared = false
+            isSharedByCurrentUser = false
         }
         if let user = file.creator {
             var ownerNameComponents = PersonNameComponents()
@@ -115,25 +119,28 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.storageUrl = storageUrl
     }
 
-    init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
-        let resourceValues = try? importedFileUrl.resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
-        self.itemIdentifier = identifier
-        self.filename = importedFileUrl.lastPathComponent
-        self.typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
-        self.capabilities = .allowsAll
-        self.parentItemIdentifier = parentIdentifier
+    public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
+        FileProviderLog("FileProviderItem init importedFileUrl:\(importedFileUrl)")
+        let resourceValues = try? importedFileUrl
+            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
+        itemIdentifier = identifier
+        filename = importedFileUrl.lastPathComponent
+        typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
+        capabilities = .allowsAll
+        parentItemIdentifier = parentIdentifier
         if let totalSize = resourceValues?.totalFileSize {
-            self.documentSize = NSNumber(value: totalSize)
+            documentSize = NSNumber(value: totalSize)
         }
-        self.creationDate = resourceValues?.creationDate
-        self.contentModificationDate = resourceValues?.contentModificationDate
-        self.versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        self.isUploading = true
-        self.isUploaded = false
-        self.storageUrl = importedFileUrl
+        creationDate = resourceValues?.creationDate
+        contentModificationDate = resourceValues?.contentModificationDate
+        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
+        isUploading = true
+        isUploaded = false
+        storageUrl = importedFileUrl
     }
 
-    func setUploadingError(_ error: DriveError) {
+    public func setUploadingError(_ error: DriveError) {
+        FileProviderLog("FileProviderItem setUploadingError:\(error)")
         switch error {
         case .fileNotFound, .objectNotFound:
             uploadingError = NSFileProviderError(.noSuchItem)
@@ -185,10 +192,11 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         return capabilities
     }
 
-    class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
+    public class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
         let rootStorageURL: URL
         if let domain = domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
+            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
+                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
         } else {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
@@ -199,10 +207,12 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         return NSFileProviderItemIdentifier(identifier)
     }
 
-    class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String, domain: NSFileProviderDomain?) -> URL {
+    public class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
+                                       domain: NSFileProviderDomain?) -> URL {
         let rootStorageURL: URL
         if let domain = domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
+            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
+                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
         } else {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }

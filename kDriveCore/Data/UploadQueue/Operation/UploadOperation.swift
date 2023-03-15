@@ -810,6 +810,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     SentrySDK.capture(message: "Missing chunk identifier") { scope in
                         scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
                     }
+                    
+                    // We may be running both the app and the extension
                     assertionFailure("unable to lookup chunk task id, fid:\(self.fileId)")
                 }
 

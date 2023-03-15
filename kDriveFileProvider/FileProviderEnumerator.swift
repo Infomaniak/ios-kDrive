@@ -18,6 +18,7 @@
 
 import FileProvider
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
@@ -27,52 +28,75 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     private let driveFileManager: DriveFileManager
     private static let syncAnchorExpireTime = TimeInterval(60 * 60 * 24 * 7) // One week
 
+    @LazyInjectService var fileProviderState: FileProviderExtensionStatable
+
+    /// Something to enqueue async await tasks in a serial manner.
+    let asyncAwaitQueue = TaskQueue()
+
+    /// Enqueue an async/await closure in the underlaying serial execution queue.
+    /// - Parameter task: A closure with async await code to be dispatched
+    private func enqueue(_ task: @escaping () async throws -> Void) {
+        Task {
+            try await asyncAwaitQueue.enqueue(asap: false) {
+                try await task()
+            }
+        }
+    }
+
     init(containerItem: NSFileProviderItem, driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
-        self.containerItemIdentifier = containerItem.itemIdentifier
-        self.isDirectory = containerItem.childItemCount != nil
+        containerItemIdentifier = containerItem.itemIdentifier
+        isDirectory = containerItem.childItemCount != nil
         self.domain = domain
         self.driveFileManager = driveFileManager
     }
 
-    init(containerItemIdentifier: NSFileProviderItemIdentifier, driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
+    init(
+        containerItemIdentifier: NSFileProviderItemIdentifier,
+        driveFileManager: DriveFileManager,
+        domain: NSFileProviderDomain?
+    ) {
         self.containerItemIdentifier = containerItemIdentifier
-        self.isDirectory = false
+        isDirectory = false
         self.domain = domain
         self.driveFileManager = driveFileManager
     }
 
-    func invalidate() {}
+    func invalidate() {
+        FileProviderLog("invalidate")
+    }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         FileProviderLog("enumerateItems for observer")
-        if containerItemIdentifier == .workingSet {
-            let workingSetFiles = driveFileManager.getWorkingSet()
-            var containerItems = [FileProviderItem]()
-            for file in workingSetFiles {
-                autoreleasepool {
-                    containerItems.append(FileProviderItem(file: file, domain: domain))
+        enqueue {
+            if self.containerItemIdentifier == .workingSet {
+                let workingSetFiles = self.driveFileManager.getWorkingSet()
+                var containerItems = [FileProviderItem]()
+                for file in workingSetFiles {
+                    autoreleasepool {
+                        containerItems.append(FileProviderItem(file: file, domain: self.domain))
+                    }
                 }
-            }
-            containerItems += FileProviderExtensionState.shared.workingSet.values
-            observer.didEnumerate(containerItems)
-            observer.finishEnumerating(upTo: nil)
-        } else {
-            guard let fileId = containerItemIdentifier.toFileId() else {
-                observer.finishEnumeratingWithError(nsError(code: .noSuchItem))
-                return
-            }
-            let pageIndex = page.isInitialPage ? 1 : page.toInt
+                containerItems += self.fileProviderState.workingSet.values
+                observer.didEnumerate(containerItems)
+                observer.finishEnumerating(upTo: nil)
+            } else {
+                guard let fileId = self.containerItemIdentifier.toFileId() else {
+                    observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
+                    return
+                }
+                let pageIndex = page.isInitialPage ? 1 : page.toInt
 
-            var forceRefresh = false
-            if let lastResponseAt = driveFileManager.getCachedFile(id: fileId)?.responseAt {
-                let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime).timeIntervalSince1970)
-                forceRefresh = lastResponseAt < anchorExpireTimestamp
-            }
+                var forceRefresh = false
+                if let lastResponseAt = self.driveFileManager.getCachedFile(id: fileId)?.responseAt {
+                    let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime)
+                        .timeIntervalSince1970)
+                    forceRefresh = lastResponseAt < anchorExpireTimestamp
+                }
 
-            Task { [forceRefresh] in
                 do {
-                    let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
-                    let (children, moreComing) = try await driveFileManager.files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
+                    let file = try await self.driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
+                    let (children, moreComing) = try await self.driveFileManager
+                        .files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -80,7 +104,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             containerItems.append(FileProviderItem(file: child, domain: self.domain))
                         }
                     }
-                    containerItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    containerItems += self.fileProviderState.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
                     containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
@@ -92,8 +116,12 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 } catch {
                     // Maybe this is a trashed file
                     do {
-                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
-                        let children = try await driveFileManager.apiFetcher.trashedFiles(of: file.proxify(), page: pageIndex)
+                        let file = try await self.driveFileManager.apiFetcher
+                            .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                        let children = try await self.driveFileManager.apiFetcher.trashedFiles(
+                            of: file.proxify(),
+                            page: pageIndex
+                        )
                         var containerItems = [FileProviderItem]()
                         for child in children {
                             autoreleasepool {
@@ -123,18 +151,21 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from anchor: NSFileProviderSyncAnchor) {
-        if let directoryIdentifier = containerItemIdentifier.toFileId() {
-            let lastTimestamp = anchor.toInt
-            let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime).timeIntervalSince1970)
-            if lastTimestamp < anchorExpireTimestamp {
-                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-                return
-            }
+        FileProviderLog("enumerateChanges for observer")
+        enqueue {
+            if let directoryIdentifier = self.containerItemIdentifier.toFileId() {
+                let lastTimestamp = anchor.toInt
+                let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime)
+                    .timeIntervalSince1970)
+                if lastTimestamp < anchorExpireTimestamp {
+                    observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
+                    return
+                }
 
-            Task {
                 do {
-                    let file = try await driveFileManager.file(id: directoryIdentifier)
-                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file.proxify(), from: lastTimestamp)
+                    let file = try await self.driveFileManager.file(id: directoryIdentifier)
+                    let (results, timestamp) = try await self.driveFileManager
+                        .fileActivities(file: file.proxify(), from: lastTimestamp)
                     let updated = results.inserted + results.updated
                     var updatedItems = [NSFileProviderItem]()
                     for updatedChild in updated {
@@ -142,18 +173,21 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
                         }
                     }
-                    updatedItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    updatedItems += self.fileProviderState
+                        .unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
                     observer.didUpdate(updatedItems)
 
                     var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
-                    deletedItems += FileProviderExtensionState.shared.deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    deletedItems += self.fileProviderState
+                        .deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
                     observer.didDeleteItems(withIdentifiers: deletedItems)
 
                     observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
                 } catch {
                     // Maybe this is a trashed file
                     do {
-                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: directoryIdentifier))
+                        let file = try await self.driveFileManager.apiFetcher
+                            .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: directoryIdentifier))
                         observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
                         observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
                     } catch {
@@ -165,30 +199,33 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         }
                     }
                 }
+            } else {
+                // Update working set
+                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
             }
-        } else {
-            // Update working set
-            observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
         }
     }
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
-        if let fileId = containerItemIdentifier.toFileId() {
-            if let file = driveFileManager.getCachedFile(id: fileId) {
-                if file.isDirectory {
-                    let anchor = NSFileProviderSyncAnchor(file.responseAt)
-                    completionHandler(anchor)
+        FileProviderLog("currentSyncAnchor completionHandler")
+        enqueue {
+            if let fileId = self.containerItemIdentifier.toFileId() {
+                if let file = self.driveFileManager.getCachedFile(id: fileId) {
+                    if file.isDirectory {
+                        let anchor = NSFileProviderSyncAnchor(file.responseAt)
+                        completionHandler(anchor)
+                    } else {
+                        // We don't support changes enumeration for a single file
+                        completionHandler(nil)
+                    }
                 } else {
-                    // We don't support changes enumeration for a single file
+                    // Maybe this is a trashed file
                     completionHandler(nil)
                 }
             } else {
-                // Maybe this is a trashed file
+                // Working set doesn't support enumerating changes yet
                 completionHandler(nil)
             }
-        } else {
-            // Working set doesn't support enumerating changes yet
-            completionHandler(nil)
         }
     }
 }
@@ -203,7 +240,8 @@ extension NSFileProviderPage {
     }
 
     var isInitialPage: Bool {
-        return self == NSFileProviderPage.initialPageSortedByDate as NSFileProviderPage || self == NSFileProviderPage.initialPageSortedByName as NSFileProviderPage
+        return self == NSFileProviderPage.initialPageSortedByDate as NSFileProviderPage || self == NSFileProviderPage
+            .initialPageSortedByName as NSFileProviderPage
     }
 }
 

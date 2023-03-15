@@ -24,34 +24,12 @@ import InfomaniakLogin
 import kDriveCore
 import RealmSwift
 
-class FileProviderExtensionState {
-    static let shared = FileProviderExtensionState()
-    var importedDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
-    var workingSet = [NSFileProviderItemIdentifier: FileProviderItem]()
-
-    func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        return importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier }
-    }
-
-    func unenumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        let children = importedDocuments.values
-            .filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
-        children.forEach { $0.alreadyEnumerated = true }
-        return children
-    }
-
-    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
-        -> [NSFileProviderItemIdentifier] {
-        let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && $0.alreadyEnumerated }
-        return children.compactMap { importedDocuments.removeValue(forKey: $0.itemIdentifier)?.itemIdentifier }
-    }
-}
-
 class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var fileProviderState: FileProviderExtensionStatable
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -81,9 +59,8 @@ class FileProviderExtension: NSFileProviderExtension {
     override init() {
         FileProviderLog("init")
 
-        // TODO: Find a more elegant way of solving this. Maybe with DI ?
         // Load types into realm so it does not scan all classes and uses more that 20MiB or ram
-        let uploadsRealm = try? Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+        _ = try? Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
 
         Logging.initLogging()
         super.init()
@@ -95,9 +72,9 @@ class FileProviderExtension: NSFileProviderExtension {
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
-        if let item = FileProviderExtensionState.shared.workingSet[identifier] {
+        if let item = fileProviderState.workingSet[identifier] {
             return item
-        } else if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
+        } else if let item = fileProviderState.importedDocuments[identifier] {
             return item
         } else if let fileId = identifier.toFileId(),
                   let file = driveFileManager.getCachedFile(id: fileId) {
@@ -109,7 +86,7 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
         FileProviderLog("urlForItem(withPersistentIdentifier identifier:)")
-        if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
+        if let item = fileProviderState.importedDocuments[identifier] {
             return item.storageUrl
         } else if let fileId = identifier.toFileId(),
                   let file = driveFileManager.getCachedFile(id: fileId) {
@@ -299,7 +276,7 @@ class FileProviderExtension: NSFileProviderExtension {
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }
-            
+
             // TODO: Is there a specialized func ?
             self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completion?()
