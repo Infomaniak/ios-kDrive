@@ -76,7 +76,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public init(file: File, domain: NSFileProviderDomain?) {
         FileProviderLog("FileProviderItem init file:\(file.id)")
         
-        @InjectService var fileProviderState: FileProviderExtensionStatable
+        @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
         
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
         filename = file.name.isEmpty ? "Root" : file.name

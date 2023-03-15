@@ -76,12 +76,23 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         """
         <\(type(of: self)):\(super.debugDescription)
         uploading file id:'\(fileId)'
+        parallelism :\(Self.parallelism)
         expiringActivity:'\(expiringActivity)'>
         """
     }
 
     /// The number of requests we try to keep running in one UploadOperation
-    private static let parallelism = 5
+    private static let parallelism: Int = {
+        // In extension to reduce memory footprint, we reduce parallelism in Extension
+        let parallelism: Int
+        if Bundle.main.isExtension {
+            parallelism = 2 // With a chuck of 1MiB max, we allocate 2MiB max in this Operation
+        } else {
+            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
+        }
+
+        return parallelism
+    }()
 
     public let fileId: String
     private var fileObservationToken: NotificationToken?
@@ -810,7 +821,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     SentrySDK.capture(message: "Missing chunk identifier") { scope in
                         scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.fileId], key: "Chunk Infos")
                     }
-                    
+
                     // We may be running both the app and the extension
                     assertionFailure("unable to lookup chunk task id, fid:\(self.fileId)")
                 }

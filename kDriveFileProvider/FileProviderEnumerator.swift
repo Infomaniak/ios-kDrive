@@ -21,14 +21,14 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 
-class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
+final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     private let containerItemIdentifier: NSFileProviderItemIdentifier
     private let isDirectory: Bool
     private let domain: NSFileProviderDomain?
     private let driveFileManager: DriveFileManager
     private static let syncAnchorExpireTime = TimeInterval(60 * 60 * 24 * 7) // One week
 
-    @LazyInjectService var fileProviderState: FileProviderExtensionStatable
+    @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
@@ -68,6 +68,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         FileProviderLog("enumerateItems for observer")
         enqueue {
+            // Recent files folder
             if self.containerItemIdentifier == .workingSet {
                 let workingSetFiles = self.driveFileManager.getWorkingSet()
                 var containerItems = [FileProviderItem]()
@@ -76,10 +77,12 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     }
                 }
-                containerItems += self.fileProviderState.workingSet.values
+                containerItems += self.fileProviderState.getWorkingDocumentValues()
                 observer.didEnumerate(containerItems)
                 observer.finishEnumerating(upTo: nil)
-            } else {
+            }
+            // Any other folder
+            else {
                 guard let fileId = self.containerItemIdentifier.toFileId() else {
                     observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
                     return
@@ -104,7 +107,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             containerItems.append(FileProviderItem(file: child, domain: self.domain))
                         }
                     }
-                    containerItems += self.fileProviderState.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+
                     containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
@@ -173,10 +176,11 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
                         }
                     }
-                    updatedItems += self.fileProviderState
-                        .unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+
                     observer.didUpdate(updatedItems)
 
+                    // We remove placeholder files only on upload success / failure.
+                    // We do not change anything during an enumeration
                     var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
                     deletedItems += self.fileProviderState
                         .deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)

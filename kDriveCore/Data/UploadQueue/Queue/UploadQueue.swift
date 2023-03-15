@@ -52,7 +52,7 @@ public final class UploadQueue {
         // In extension to reduce memory footprint, we reduce drastically parallelism
         let parallelism: Int
         if Bundle.main.isExtension {
-            parallelism = 1
+            parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
         } else {
             parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
         }
