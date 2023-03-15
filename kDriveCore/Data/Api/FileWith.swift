@@ -69,13 +69,17 @@ enum FileWith: String, CaseIterable {
                                          .isFavorite,
                                          .shareLink,
                                          .sortedName]
+
+    static let chunkUpload: [FileWith] = [.capabilities,
+                                          .conversionCapabilities,
+                                          .sortedName]
 }
 
 extension Array where Element == FileWith {
     func toQueryItem() -> URLQueryItem {
         URLQueryItem(
             name: "with",
-            value: self.map { $0.rawValue }.joined(separator: ",")
+            value: map { $0.rawValue }.joined(separator: ",")
         )
     }
 }

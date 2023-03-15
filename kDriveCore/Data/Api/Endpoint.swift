@@ -69,7 +69,8 @@ public extension Endpoint {
         var sortQueryItems = [
             URLQueryItem(name: "order_by", value: sortTypes.map(\.value.apiValue).joined(separator: ","))
         ]
-        sortQueryItems.append(contentsOf: sortTypes.map { URLQueryItem(name: "order_for[\($0.value.apiValue)]", value: $0.value.order) })
+        sortQueryItems
+            .append(contentsOf: sortTypes.map { URLQueryItem(name: "order_for[\($0.value.apiValue)]", value: $0.value.order) })
 
         return Endpoint(hostKeypath: hostKeypath,
                         path: path,
@@ -522,7 +523,14 @@ public extension Endpoint {
 
     // MARK: Search
 
-    static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileTypes: [ConvertedType] = [], categories: [Category], belongToAllCategories: Bool) -> Endpoint {
+    static func search(
+        drive: AbstractDrive,
+        query: String? = nil,
+        date: DateInterval? = nil,
+        fileTypes: [ConvertedType] = [],
+        categories: [Category],
+        belongToAllCategories: Bool
+    ) -> Endpoint {
         // Query items
         var queryItems = [FileWith.fileMinimal.toQueryItem()]
         if let query = query, !query.isBlank {
@@ -618,7 +626,8 @@ public extension Endpoint {
     }
 
     static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
-        return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/finish")
+        return .uploadSession(drive: drive)
+            .appending(path: "/\(sessionToken.token)/finish", queryItems: [FileWith.chunkUpload.toQueryItem()])
     }
 
     static func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
