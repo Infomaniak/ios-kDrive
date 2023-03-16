@@ -420,7 +420,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             }
                             group.leave()
                         }
-                        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: nil)
+                        uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: nil)
                     }
                 }
             }

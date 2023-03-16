@@ -89,6 +89,12 @@ enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
+            Factory(type: UploadQueueObservable.self) { _, resolver in
+                try resolver.resolve(type: UploadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: UploadNotifiable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,

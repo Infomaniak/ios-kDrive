@@ -31,7 +31,8 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
 
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadQueue: UploadQueueable
+    @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
     lazy var fileCoordinator: NSFileCoordinator = {
@@ -72,19 +73,23 @@ final class FileProviderExtension: NSFileProviderExtension {
     }
 
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
-        FileProviderLog("item(for identifier:)")
+        FileProviderLog("item for identifier")
         try isFileProviderExtensionEnabled()
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
         if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
+            FileProviderLog("item for identifier - Working Document")
             return item
         } else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
+            FileProviderLog("item for identifier - Imported Document")
             return item
         } else if let fileId = identifier.toFileId(),
                   let file = driveFileManager.getCachedFile(id: fileId) {
+            FileProviderLog("item for identifier - File:\(fileId)")
             return FileProviderItem(file: file, domain: domain)
         } else {
+            FileProviderLog("item for identifier - nsError(code: .noSuchItem)")
             throw nsError(code: .noSuchItem)
         }
     }
@@ -100,7 +105,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             return nil
         }
     }
-
+    
     override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
         FileProviderLog("persistentIdentifierForItem at url:\(url)")
         return FileProviderItem.identifier(for: url, domain: domain)
@@ -229,14 +234,20 @@ final class FileProviderExtension: NSFileProviderExtension {
                 var observationToken: ObservationToken?
                 observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                     observationToken?.cancel()
+                    item.isDownloading = false
+                    
                     if error != nil {
-                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                        completion(NSFileProviderError(.serverUnreachable))
+                        item.isDownloaded = false
+                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
+                            completion(NSFileProviderError(.serverUnreachable))
+                        }
                     } else {
                         do {
                             try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                            self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                            completion(nil)
+                            item.isDownloaded = true
+                            self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
+                                completion(nil)
+                            }
                         } catch {
                             completion(error)
                         }
@@ -247,13 +258,13 @@ final class FileProviderExtension: NSFileProviderExtension {
                     userId: self.driveFileManager.drive.userId,
                     itemIdentifier: item.itemIdentifier
                 )
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
             }
             // LocalVersion is _not_ OlderThanRemote
             else {
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                    try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                     completion(nil)
                 } catch {
                     completion(error)
@@ -279,11 +290,11 @@ final class FileProviderExtension: NSFileProviderExtension {
     }
 
     func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
-        FileProviderLog("backgroundUploadItem")
+        let uploadFileId = item.itemIdentifier.rawValue
+        FileProviderLog("backgroundUploadItem uploadFileId:\(uploadFileId)")
         enqueue {
-            let fileId = item.itemIdentifier.rawValue
             let uploadFile = UploadFile(
-                id: fileId,
+                id: uploadFileId,
                 parentDirectoryId: item.parentItemIdentifier.toFileId()!,
                 userId: self.driveFileManager.drive.userId,
                 driveId: self.driveFileManager.drive.id,
@@ -293,8 +304,9 @@ final class FileProviderExtension: NSFileProviderExtension {
                 shouldRemoveAfterUpload: false,
                 initiatedFromFileManager: true
             )
+
             var observationToken: ObservationToken?
-            observationToken = self.uploadQueue.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
+            observationToken = self.uploadQueueObservable.observeFileUploaded(self, fileId: uploadFileId) { uploadedFile, _ in
                 observationToken?.cancel()
                 defer {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
@@ -312,7 +324,8 @@ final class FileProviderExtension: NSFileProviderExtension {
 
                 self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
             }
-            self.uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
+
+            _ = self.uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: item.itemIdentifier)
         }
     }
 

@@ -84,7 +84,7 @@ extension UploadOperation {
     func getDriveFileManager() throws -> DriveFileManager {
         guard let driveFileManager = accountManager.getDriveFileManager(for: accountManager.currentDriveId,
                                                                         userId: accountManager.currentUserId) else {
-            UploadOperationLog("getDriveFileManager failed \(fileId)", level: .error)
+            UploadOperationLog("getDriveFileManager failed \(uploadFileId)", level: .error)
             throw DriveError.localError
         }
 

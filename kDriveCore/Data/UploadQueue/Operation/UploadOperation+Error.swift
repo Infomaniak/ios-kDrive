@@ -37,7 +37,7 @@ extension UploadOperation {
                 end()
             }
 
-            UploadOperationLog("catching error:\(error) fid:\(fileId)", level: .error)
+            UploadOperationLog("catching error:\(error) ufid:\(uploadFileId)", level: .error)
             if !handleLocalErrors(error: error) {
                 handleRemoteErrors(error: error)
             }
@@ -54,7 +54,7 @@ extension UploadOperation {
         try? transactionWithFile { file in
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain {
-                UploadOperationLog("NSURLError:\(error) fid:\(self.fileId)")
+                UploadOperationLog("NSURLError:\(error) ufid:\(self.uploadFileId)")
                 file.error = .networkError
                 errorHandled = true
             }
@@ -124,14 +124,14 @@ extension UploadOperation {
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
         guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
-            UploadOperationLog("error:\(error) not a remote one fid:\(fileId)")
+            UploadOperationLog("error:\(error) not a remote one ufid:\(uploadFileId)")
             return false
         }
 
         var errorHandled = false
         try? transactionWithFile { file in
             defer {
-                UploadOperationLog("catching remote error:\(error) fid:\(self.fileId)", level: .error)
+                UploadOperationLog("catching remote error:\(error) ufid:\(self.uploadFileId)", level: .error)
                 file.error = error
             }
 

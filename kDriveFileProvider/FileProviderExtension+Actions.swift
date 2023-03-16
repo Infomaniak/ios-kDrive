@@ -144,7 +144,7 @@ extension FileProviderExtension {
 
             self.backgroundUploadItem(importedItem)
 
-            self.manager.signalEnumerator(for: parentItemIdentifier) { _ in }
+            try await self.manager.signalEnumerator(for: parentItemIdentifier)
             completionHandler(importedItem, nil)
         }
     }
@@ -159,7 +159,7 @@ extension FileProviderExtension {
             // Doc says we should do network request after renaming local file but we could end up with model desync
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.filename = itemName
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
                 return
             }
@@ -202,7 +202,7 @@ extension FileProviderExtension {
         enqueue {
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.parentItemIdentifier = parentItemIdentifier
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
                 return
             }
@@ -231,10 +231,11 @@ extension FileProviderExtension {
         forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("setFavoriteRank forItemIdentifier")
+        let fileId = itemIdentifier.toFileId()
+        FileProviderLog("setFavoriteRank forItemIdentifier:\(fileId)")
         enqueue {
             // How should we save favourite rank in database?
-            guard let fileId = itemIdentifier.toFileId(),
+            guard let fileId,
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
@@ -275,9 +276,14 @@ extension FileProviderExtension {
         withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("trashItem withIdentifier")
+        let fileId = itemIdentifier.toFileId()
+        let uploadFileId = itemIdentifier.rawValue
+        FileProviderLog("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
         enqueue {
-            guard let fileId = itemIdentifier.toFileId(),
+            // Cancel upload if any matching
+            self.uploadQueue.cancel(uploadFileId: uploadFileId)
+
+            guard let fileId,
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
@@ -291,8 +297,7 @@ extension FileProviderExtension {
 
             do {
                 _ = try await self.driveFileManager.delete(file: proxyFile)
-                var state = self.fileProviderState
-                state.setWorkingDocument(item, forKey: itemIdentifier)
+                self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)
@@ -305,9 +310,10 @@ extension FileProviderExtension {
         toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier?,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("untrashItem withIdentifier")
+        let fileId = itemIdentifier.toFileId()
+        FileProviderLog("untrashItem withIdentifier:\(fileId)")
         enqueue {
-            guard let fileId = itemIdentifier.toFileId() else {
+            guard let fileId else {
                 completionHandler(nil, self.nsError(code: .noSuchItem))
                 return
             }
@@ -330,8 +336,8 @@ extension FileProviderExtension {
                 }
                 item.isTrashed = false
                 self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                self.manager.signalEnumerator(for: .workingSet) { _ in }
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                try await self.manager.signalEnumerator(for: .workingSet)
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))

@@ -33,14 +33,14 @@ public extension NSFileProviderItemIdentifier {
         if self == .rootContainer {
             return DriveFileManager.constants.rootID
         } else {
-            return Int(rawValue)
+            let fileId = Int(rawValue)
+            return fileId
         }
     }
 }
 
 public final class FileProviderItem: NSObject, NSFileProviderItem {
-    
-    // Required properties
+    // MARK: Required properties
 
     public var itemIdentifier: NSFileProviderItemIdentifier
     public var filename: String
@@ -48,7 +48,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var capabilities: NSFileProviderItemCapabilities
     public var parentItemIdentifier: NSFileProviderItemIdentifier
 
-    // Optional properties
+    // MARK: Optional properties
 
     public var childItemCount: NSNumber?
     public var documentSize: NSNumber?
@@ -68,16 +68,16 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var ownerNameComponents: PersonNameComponents?
     public var favoriteRank: NSNumber?
 
-    // Custom properties
+    // MARK: Custom properties
 
     public var storageUrl: URL
     public var alreadyEnumerated = false
 
     public init(file: File, domain: NSFileProviderDomain?) {
         FileProviderLog("FileProviderItem init file:\(file.id)")
-        
+
         @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-        
+
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
         filename = file.name.isEmpty ? "Root" : file.name
         typeIdentifier = file.typeIdentifier
