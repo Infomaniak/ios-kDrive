@@ -56,22 +56,23 @@ public class UploadFile: Object, UploadFilable {
                                             "modificationDate",
                                             "_error"]
 
-    @Persisted(primaryKey: true) public var id: String = ""
-    @Persisted public var name: String = ""
-    @Persisted var relativePath: String = ""
+    @Persisted(primaryKey: true) public var id = ""
+    @Persisted public var name = ""
+    @Persisted var relativePath = ""
     @Persisted private var url: String?
-    @Persisted private var rawType: String = "file"
-    @Persisted public var parentDirectoryId: Int = 1
-    @Persisted public var userId: Int = 0
-    @Persisted public var driveId: Int = 0
+    @Persisted private var rawType = "file"
+    @Persisted public var parentDirectoryId = 1
+    @Persisted public var userId = 0
+    @Persisted public var driveId = 0
     @Persisted public var uploadDate: Date?
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?
     @Persisted public var taskCreationDate: Date?
     @Persisted public var progress: Double?
     @Persisted var shouldRemoveAfterUpload = true
+    @Persisted var initiatedFromFileManager = false
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
-    @Persisted private var rawPriority: Int = 0
+    @Persisted private var rawPriority = 0
     @Persisted private var _error: Data?
     @Persisted var conflictOption: ConflictOption
     @Persisted var uploadingSession: UploadingSessionTask?
@@ -167,7 +168,18 @@ public class UploadFile: Object, UploadFilable {
         return items
     }
 
-    public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(
+        id: String = UUID().uuidString,
+        parentDirectoryId: Int,
+        userId: Int,
+        driveId: Int,
+        url: URL,
+        name: String? = nil,
+        conflictOption: ConflictOption = .rename,
+        shouldRemoveAfterUpload: Bool = true,
+        initiatedFromFileManager: Bool = false,
+        priority: Operation.QueuePriority = .normal
+    ) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -175,34 +187,44 @@ public class UploadFile: Object, UploadFilable {
         self.name = name ?? url.lastPathComponent
         self.id = id
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
-        self.rawType = UploadFileType.file.rawValue
-        self.creationDate = url.creationDate
-        self.modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
-        self.taskCreationDate = Date()
+        self.initiatedFromFileManager = initiatedFromFileManager
+        rawType = UploadFileType.file.rawValue
+        creationDate = url.creationDate
+        modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+        taskCreationDate = Date()
         self.conflictOption = conflictOption
-        self.rawPriority = priority.rawValue
+        rawPriority = priority.rawValue
     }
 
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(
+        parentDirectoryId: Int,
+        userId: Int,
+        driveId: Int,
+        name: String,
+        asset: PHAsset,
+        conflictOption: ConflictOption = .rename,
+        shouldRemoveAfterUpload: Bool = true,
+        priority: Operation.QueuePriority = .normal
+    ) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
         self.name = name
-        self.id = asset.localIdentifier
-        self.localAsset = asset
+        id = asset.localIdentifier
+        localAsset = asset
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
-        self.rawType = UploadFileType.phAsset.rawValue
-        self.creationDate = asset.creationDate
+        rawType = UploadFileType.phAsset.rawValue
+        creationDate = asset.creationDate
         /*
          We use the creationDate instead of the modificationDate
          because this date is not always accurate.
          (It does not seem to correspond to a real modification of the image)
          Apple Feedback: FB11923430
          */
-        self.modificationDate = asset.creationDate
-        self.taskCreationDate = Date()
+        modificationDate = asset.creationDate
+        taskCreationDate = Date()
         self.conflictOption = conflictOption
-        self.rawPriority = priority.rawValue
+        rawPriority = priority.rawValue
     }
 
     override public init() {
@@ -231,11 +253,12 @@ public class UploadFile: Object, UploadFilable {
             option.deliveryMode = .fastFormat
             option.isNetworkAccessAllowed = true
             option.resizeMode = .fast
-            let requestID = PHImageManager.default().requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
-                if let image = image {
-                    completion(image)
+            let requestID = PHImageManager.default()
+                .requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
+                    if let image = image {
+                        completion(image)
+                    }
                 }
-            }
             return .phImageRequest(requestID)
         } else if let url = pathURL {
             let request = FilePreviewHelper.instance.getThumbnail(url: url, thumbnailSize: thumbnailSize) { image in
@@ -265,6 +288,18 @@ public extension UploadFile {
     func contains(chunkUrl: String) -> Bool {
         let result = uploadingSession?.chunkTasks.filter { $0.requestUrl == chunkUrl }
         return (result?.count ?? 0) > 0
+    }
+}
+
+public extension UploadFile {
+    /// Centralize error cleaning
+    func clearErrorsForRetry() {
+        // Clear any stored error
+        error = nil
+        // Reset retry count to default
+        maxRetryCount = UploadFile.defaultMaxRetryCount
+        // Assign the UploadFile to the main app, not the FileManager extension
+        initiatedFromFileManager = false
     }
 }
 

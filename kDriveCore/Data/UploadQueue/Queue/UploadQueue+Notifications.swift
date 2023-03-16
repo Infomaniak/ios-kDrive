@@ -54,7 +54,8 @@ extension UploadQueue: UploadNotifiable {
         self.serialQueue.async { [unowned self] in
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
-                  uploadFile.error != .taskCancelled else {
+                  uploadFile.error != .taskCancelled,
+                  uploadFile.initiatedFromFileManager == false else {
                 return
             }
 

@@ -52,6 +52,8 @@ public protocol UploadQueueable {
     func cancel(_ file: UploadFile)
 
     /// Clean errors linked to any upload operation in base. Does not restart the operations.
+    ///
+    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
     func cleanNetworkAndLocalErrorsForAllOperations()
 }
 
@@ -78,8 +80,9 @@ extension UploadQueue: UploadQueueable {
         concurrentQueue.sync {
             var uploadingFileIds = [String]()
             try? self.transactionWithUploadRealm { realm in
+                // Not uploaded yet, And can retry, And not initiated from the Files.app
                 let uploadingFiles = realm.objects(UploadFile.self)
-                    .filter("uploadDate = nil AND maxRetryCount > 0")
+                    .filter("uploadDate = nil AND maxRetryCount > 0 AND initiatedFromFileManager = false")
                     .sorted(byKeyPath: "taskCreationDate")
                 uploadingFileIds = uploadingFiles.map(\.id)
                 UploadQueueLog("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
@@ -244,8 +247,9 @@ extension UploadQueue: UploadQueueable {
         UploadQueueLog("cleanErrorsForAllOperations")
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
+                // UploadFile with an error, Or no more retry, Or is initiatedFromFileManager
                 let failedUploadFiles = realm.objects(UploadFile.self)
-                    .filter("_error != nil OR maxRetryCount <= 0")
+                    .filter("_error != nil OR maxRetryCount <= 0 OR initiatedFromFileManager = true")
                     .filter { file in
                         guard let error = file.error else {
                             return false
@@ -257,8 +261,7 @@ extension UploadQueue: UploadQueueable {
 
                 try? realm.safeWrite {
                     failedUploadFiles.forEach { file in
-                        file.error = nil
-                        file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                        file.clearErrorsForRetry()
                     }
                 }
                 UploadQueueLog("cleaned errors on \(failedUploadFiles.count) files")
@@ -283,8 +286,7 @@ extension UploadQueue: UploadQueueable {
 
                 // Clean error in base
                 try? realm.safeWrite {
-                    file.error = nil
-                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                    file.clearErrorsForRetry()
                 }
             }
 
@@ -334,7 +336,7 @@ extension UploadQueue: UploadQueueable {
                                                         driveId: driveId,
                                                         using: realm)
             UploadQueueLog("uploading:\(uploadingFiles.count)")
-            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount <= 0")
+            let failedUploadFiles = uploadingFiles.filter("_error != nil OR maxRetryCount <= 0 OR initiatedFromFileManager = true")
             failedFileIds = failedUploadFiles.map(\.id)
             UploadQueueLog("retying:\(failedFileIds.count)")
         }
@@ -356,8 +358,7 @@ extension UploadQueue: UploadQueueable {
                     return
                 }
                 try? realm.safeWrite {
-                    file.error = nil
-                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                    file.clearErrorsForRetry()
                 }
             }
         }

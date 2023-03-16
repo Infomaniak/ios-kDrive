@@ -290,7 +290,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 url: item.storageUrl,
                 name: item.filename,
                 conflictOption: .version,
-                shouldRemoveAfterUpload: false
+                shouldRemoveAfterUpload: false,
+                initiatedFromFileManager: true
             )
             var observationToken: ObservationToken?
             observationToken = self.uploadQueue.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in

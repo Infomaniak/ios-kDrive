@@ -408,7 +408,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Chain the next chunk generation if necessary
             let slots = freeRequestSlots()
             if chunksToGenerateCount > 0 && slots > 0 {
-                UploadOperationLog("remaining chunks:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(fileId)")
+                UploadOperationLog("remaining chunks to generate:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP fid:\(fileId)")
                 enqueueCatching {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
@@ -864,7 +864,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         else {
             enqueueCatching {
                 let slots = self.freeRequestSlots()
-                UploadOperationLog("remaining chunks:\(toUploadCount) slots:\(slots) uploadCompletionSuccess fid:\(self.fileId)")
                 if slots > 0 {
                     try await self.generateChunksAndFanOutIfNeeded()
                 }
