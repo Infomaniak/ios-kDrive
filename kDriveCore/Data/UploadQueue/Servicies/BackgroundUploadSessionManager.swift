@@ -94,16 +94,16 @@ public final class BackgroundUploadSessionManager: NSObject,
     )
 
     override public init() {
-        BackgroundSessionManagerLog("init")
+        Log.bgSessionManager("init")
         super.init()
 
         self.backgroundSession = getSessionOrCreate(for: UploadQueue.backgroundIdentifier)
     }
 
     public func getSessionOrCreate(for identifier: String) -> URLSession {
-        BackgroundSessionManagerLog("getSessionOrCreate identifier:\(identifier)")
+        Log.bgSessionManager("getSessionOrCreate identifier:\(identifier)")
         if let session = syncQueue.sync(execute: { managedSessions[identifier] }) {
-            BackgroundSessionManagerLog("fetched session:\(session)")
+            Log.bgSessionManager("fetched session:\(session)")
             return session
         }
 
@@ -117,29 +117,29 @@ public final class BackgroundUploadSessionManager: NSObject,
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [unowned self] in
-            BackgroundSessionManagerLog("store session:\(session) from identifier:\(identifier)")
+            Log.bgSessionManager("store session:\(session) from identifier:\(identifier)")
             self.managedSessions[identifier] = session
         }
 
-        BackgroundSessionManagerLog("generated session:\(session) from identifier:\(identifier)")
+        Log.bgSessionManager("generated session:\(session) from identifier:\(identifier)")
         return session
     }
 
     /// Entry point for app delegate
     public func handleEventsForBackgroundURLSession(identifier: String, completionHandler: @escaping BackgroundCompletionHandler) {
-        BackgroundSessionManagerLog("handleEventsForBackgroundURLSession identifier:\(identifier)")
+        Log.bgSessionManager("handleEventsForBackgroundURLSession identifier:\(identifier)")
     }
 
     public func reconnectBackgroundTasks() {
-        BackgroundSessionManagerLog("reconnectBackgroundTasks")
+        Log.bgSessionManager("reconnectBackgroundTasks")
     }
 
     public func scheduled(task: URLSessionDataTask?, fileUrl: URL?) {
-        BackgroundSessionManagerLog("scheduled task:\(task)")
+        Log.bgSessionManager("scheduled task:\(task)")
     }
 
     public func rescheduleForBackground(task: URLSessionDataTask, fileUrl: URL) -> String? {
-        BackgroundSessionManagerLog("rescheduleForBackground task:\(task)")
+        Log.bgSessionManager("rescheduleForBackground task:\(task)")
         return nil
     }
 
@@ -162,22 +162,22 @@ public final class BackgroundUploadSessionManager: NSObject,
     // MARK: - URLSessionDelegate
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        BackgroundSessionManagerLog("urlSession session:\(session) didCompleteWithError:\(error) identifier:\(session.identifier)")
+        Log.bgSessionManager("urlSession session:\(session) didCompleteWithError:\(error) identifier:\(session.identifier)")
     }
 
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        BackgroundSessionManagerLog("urlSessionDidFinishEvents session:\(session) identifier:\(session.identifier)")
+        Log.bgSessionManager("urlSessionDidFinishEvents session:\(session) identifier:\(session.identifier)")
     }
 
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        BackgroundSessionManagerLog("Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")",
+        Log.bgSessionManager("Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")",
                                     level: .error)
     }
 
     // MARK: - BackgroundUploadSessionCompletionable
 
     func getCompletionHandler(for task: URLSessionUploadTask, session: URLSession) -> RequestCompletionHandler? {
-        BackgroundSessionManagerLog("getCompletionHandler :\(session)")
+        Log.bgSessionManager("getCompletionHandler :\(session)")
         return nil
     }
 }

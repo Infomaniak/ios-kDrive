@@ -59,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-        AppDelegateLog("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
+        Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
@@ -68,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
-            AppDelegateLog("Error while setting playback audio category", level: .error)
+            Log.appDelegate("Error while setting playback audio category", level: .error)
             SentrySDK.capture(error: error)
         }
 
@@ -106,7 +106,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        AppDelegateLog("application didFinishLaunchingWithOptions")
+        Log.appDelegate("application didFinishLaunchingWithOptions")
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -120,17 +120,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        AppDelegateLog("applicationWillTerminate")
+        Log.appDelegate("applicationWillTerminate")
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        AppDelegateLog("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
+        Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        AppDelegateLog("applicationDidEnterBackground")
+        Log.appDelegate("applicationDidEnterBackground")
         scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
@@ -140,7 +140,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication,
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        AppDelegateLog("application performFetchWithCompletionHandler")
+        Log.appDelegate("application performFetchWithCompletionHandler")
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the
         // background.
         if MigrationHelper.canMigrate() {
@@ -158,10 +158,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        AppDelegateLog("application app open url\(url)")
+        Log.appDelegate("application app open url\(url)")
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            AppDelegateLog("Failed to open URL: Invalid URL", level: .error)
+            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
         }
 
@@ -186,7 +186,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        AppDelegateLog("applicationWillEnterForeground")
+        Log.appDelegate("applicationWillEnterForeground")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
@@ -198,10 +198,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             window?.rootViewController = UIViewController()
             window?.makeKeyAndVisible()
 
-            AppDelegateLog("handleBackgroundRefresh begin")
+            Log.appDelegate("handleBackgroundRefresh begin")
             DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
                 self.handleBackgroundRefresh { success in
-                    AppDelegateLog("handleBackgroundRefresh success:\(success)")
+                    Log.appDelegate("handleBackgroundRefresh success:\(success)")
                 }
             }
 
@@ -269,7 +269,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        AppDelegateLog("refreshCacheData preload:\(preload) isSwitching:\(preload)")
+        Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
         @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
@@ -338,7 +338,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
                 backgroundUploadSessionManager.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    AppDelegateLog("Restart queue")
+                    Log.appDelegate("Restart queue")
                     @InjectService var photoUploader: PhotoLibraryUploader
                     _ = photoUploader.scheduleNewPicturesForUpload()
 
@@ -347,13 +347,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 }
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                AppDelegateLog("Error while updating user account: \(error)", level: .error)
+                Log.appDelegate("Error while updating user account: \(error)", level: .error)
             }
         }
     }
 
     private func uploadEditedFiles() {
-        AppDelegateLog("uploadEditedFiles")
+        Log.appDelegate("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
@@ -370,7 +370,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             guard let driveId = Int(driveFolder),
                   let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
-                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
+                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
 
@@ -380,7 +380,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 guard let fileId = Int(fileFolder),
                       let driveFileManager = accountManager.getDriveFileManager(for: drive),
                       let file = driveFileManager.getCachedFile(id: fileId) else {
-                    AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
+                    Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
 
@@ -408,7 +408,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
-                                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
+                                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
                             } else {
                                 // Update file to get the new modification date
                                 Task {
@@ -420,7 +420,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                             }
                             group.leave()
                         }
-                        uploadQueue.saveToRealmAndAddToQueue(file: uploadFile, itemIdentifier: nil)
+                        uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: nil)
                     }
                 }
             }
@@ -429,14 +429,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
-                AppDelegateLog("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
+                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
                 try? FileManager.default.removeItem(at: folderURL)
             }
         }
     }
 
     func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
-        AppDelegateLog("updateAvailableOfflineFiles")
+        Log.appDelegate("updateAvailableOfflineFiles")
         guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
@@ -452,7 +452,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     try await driveFileManager.updateAvailableOfflineFiles()
                 } catch {
                     // Silently handle error
-                    AppDelegateLog(
+                    Log.appDelegate(
                         "Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)",
                         level: .error
                     )
@@ -465,7 +465,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                      open url: URL,
                      sourceApplication: String?,
                      annotation: Any) -> Bool {
-        AppDelegateLog("application open url:\(url)) sourceApplication:\(sourceApplication)")
+        Log.appDelegate("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
     }
 
@@ -544,7 +544,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-        AppDelegateLog("application shouldSaveApplicationState")
+        Log.appDelegate("application shouldSaveApplicationState")
         coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
         return true
     }
@@ -562,7 +562,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        AppDelegateLog("application continue restorationHandler")
+        Log.appDelegate("application continue restorationHandler")
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL,

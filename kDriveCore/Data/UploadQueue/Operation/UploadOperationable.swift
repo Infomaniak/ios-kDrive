@@ -52,10 +52,10 @@ extension Operation: Operationable {}
 public protocol UploadOperationable: Operationable {
     /// init an UploadOperationable
     /// - Parameters:
-    ///   - fileId: the identifier of the UploadFile in base
+    ///   - uploadFileId: the identifier of the UploadFile in base
     ///   - urlSession: the url session to use
     ///   - itemIdentifier: the itemIdentifier
-    init(fileId: String,
+    init(uploadFileId: String,
          urlSession: URLSession,
          itemIdentifier: NSFileProviderItemIdentifier?)
 

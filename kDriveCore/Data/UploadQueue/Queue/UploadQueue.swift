@@ -48,7 +48,16 @@ public final class UploadQueue {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
-        queue.maxConcurrentOperationCount = max(4, ProcessInfo.processInfo.activeProcessorCount)
+
+        // In extension to reduce memory footprint, we reduce drastically parallelism
+        let parallelism: Int
+        if Bundle.main.isExtension {
+            parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
+        } else {
+            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
+        }
+
+        queue.maxConcurrentOperationCount = parallelism
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
@@ -58,7 +67,8 @@ public final class UploadQueue {
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         urlSessionConfiguration.allowsCellularAccess = true
         urlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
-        urlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
+        urlSessionConfiguration
+            .httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         urlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
         urlSessionConfiguration.networkServiceType = .default
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
@@ -86,7 +96,7 @@ public final class UploadQueue {
     )
 
     public init() {
-        UploadQueueLog("Starting up")
+        Log.uploadQueue("Starting up")
 
         concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
@@ -97,11 +107,11 @@ public final class UploadQueue {
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
-            UploadQueueLog("observeNetworkChange :\(isSuspended)")
+            Log.uploadQueue("observeNetworkChange :\(isSuspended)")
             self.operationQueue.isSuspended = isSuspended
         }
 
-        UploadQueueLog("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
+        Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
 
     // MARK: - Public methods

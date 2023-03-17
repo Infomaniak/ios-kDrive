@@ -20,25 +20,37 @@ import FileProvider
 import kDriveCore
 
 extension FileProviderExtension {
-    override func createDirectory(withName directoryName: String, inParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        guard let fileId = parentItemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
-        }
+    override func createDirectory(
+        withName directoryName: String,
+        inParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("createDirectory withName '\(directoryName)'")
+        enqueue {
+            guard let fileId = parentItemIdentifier.toFileId(),
+                  let file = self.driveFileManager.getCachedFile(id: fileId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
 
-        // Call completion handler with error if the file name already exists
-        let itemsWithSameParent = file.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: parentItemIdentifier)
-        let newItemFileName = directoryName.lowercased()
-        if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !collidingItem.isTrashed {
-            completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
-            return
-        }
+            // Call completion handler with error if the file name already exists
+            let itemsWithSameParent = file.children
+                .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
+                .importedDocuments(forParent: parentItemIdentifier)
+            let newItemFileName = directoryName.lowercased()
+            if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
+               !collidingItem.isTrashed {
+                completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
+                return
+            }
 
-        Task { [proxyFile = file.proxify()] in
+            let proxyFile = file.proxify()
             do {
-                let directory = try await driveFileManager.createDirectory(in: proxyFile, name: directoryName, onlyForMe: false)
+                let directory = try await self.driveFileManager.createDirectory(
+                    in: proxyFile,
+                    name: directoryName,
+                    onlyForMe: false
+                )
                 completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
@@ -46,19 +58,24 @@ extension FileProviderExtension {
         }
     }
 
-    override func deleteItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (Error?) -> Void) {
-        guard let fileId = itemIdentifier.toFileId() else {
-            completionHandler(nsError(code: .noSuchItem))
-            return
-        }
+    override func deleteItem(
+        withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (Error?) -> Void
+    ) {
+        Log.fileProvider("deleteItem")
+        enqueue {
+            guard let fileId = itemIdentifier.toFileId() else {
+                completionHandler(self.nsError(code: .noSuchItem))
+                return
+            }
 
-        Task {
             do {
-                let response = try await driveFileManager.apiFetcher.deleteDefinitely(file: ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                let response = try await self.driveFileManager.apiFetcher
+                    .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
-                    FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                    self.manager.signalEnumerator(for: .workingSet) { _ in }
-                    self.manager.signalEnumerator(for: itemIdentifier) { _ in }
+                    self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                    try await self.manager.signalEnumerator(for: .workingSet)
+                    try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
                 } else {
                     completionHandler(self.nsError(code: .serverUnreachable))
@@ -69,74 +86,105 @@ extension FileProviderExtension {
         }
     }
 
-    override func importDocument(at fileURL: URL, toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        let accessingSecurityScopedResource = fileURL.startAccessingSecurityScopedResource()
+    override func importDocument(
+        at fileURL: URL,
+        toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("importDocument")
+        enqueue {
+            let accessingSecurityScopedResource = fileURL.startAccessingSecurityScopedResource()
 
-        // Call completion handler with error if the file name already exists
-        guard let fileId = parentItemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
-        }
-        let itemsWithSameParent = file.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: parentItemIdentifier)
-        let newItemFileName = fileURL.lastPathComponent.lowercased()
-        if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !collidingItem.isTrashed {
-            completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
-            return
-        }
-
-        let id = UUID().uuidString
-        let importedDocumentIdentifier = NSFileProviderItemIdentifier(id)
-        let storageUrl = FileProviderItem.createStorageUrl(identifier: importedDocumentIdentifier, filename: fileURL.lastPathComponent, domain: domain)
-
-        fileCoordinator.coordinate(readingItemAt: fileURL, options: .withoutChanges, writingItemAt: storageUrl, options: .forReplacing, error: nil) { readURL, writeURL in
-            do {
-                try FileManager.default.copyItem(at: readURL, to: writeURL)
-            } catch let error as NSError {
-                print(error.localizedDescription)
+            // Call completion handler with error if the file name already exists
+            guard let fileId = parentItemIdentifier.toFileId(),
+                  let file = self.driveFileManager.getCachedFile(id: fileId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
             }
-        }
-        if accessingSecurityScopedResource {
-            fileURL.stopAccessingSecurityScopedResource()
-        }
-        let importedItem = FileProviderItem(importedFileUrl: storageUrl, identifier: importedDocumentIdentifier, parentIdentifier: parentItemIdentifier)
-        FileProviderExtensionState.shared.importedDocuments[importedDocumentIdentifier] = importedItem
+            let itemsWithSameParent = file.children
+                .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
+                .importedDocuments(forParent: parentItemIdentifier)
+            let newItemFileName = fileURL.lastPathComponent.lowercased()
+            if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
+               !collidingItem.isTrashed {
+                completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
+                return
+            }
 
-        backgroundUploadItem(importedItem)
+            let id = UUID().uuidString
+            let importedDocumentIdentifier = NSFileProviderItemIdentifier(id)
+            let storageUrl = FileProviderItem.createStorageUrl(
+                identifier: importedDocumentIdentifier,
+                filename: fileURL.lastPathComponent,
+                domain: self.domain
+            )
 
-        manager.signalEnumerator(for: parentItemIdentifier) { _ in }
-        completionHandler(importedItem, nil)
+            self.fileCoordinator.coordinate(
+                readingItemAt: fileURL,
+                options: .withoutChanges,
+                writingItemAt: storageUrl,
+                options: .forReplacing,
+                error: nil
+            ) { readURL, writeURL in
+                do {
+                    try FileManager.default.copyItem(at: readURL, to: writeURL)
+                } catch let error as NSError {
+                    print(error.localizedDescription)
+                }
+            }
+            if accessingSecurityScopedResource {
+                fileURL.stopAccessingSecurityScopedResource()
+            }
+            let importedItem = FileProviderItem(
+                importedFileUrl: storageUrl,
+                identifier: importedDocumentIdentifier,
+                parentIdentifier: parentItemIdentifier
+            )
+            self.fileProviderState.setImportedDocument(importedItem, forKey: importedDocumentIdentifier)
+
+            self.backgroundUploadItem(importedItem)
+
+            try await self.manager.signalEnumerator(for: parentItemIdentifier)
+            completionHandler(importedItem, nil)
+        }
     }
 
-    override func renameItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, toName itemName: String, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        // Doc says we should do network request after renaming local file but we could end up with model desync
-        if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
-            item.filename = itemName
-            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-            completionHandler(item, nil)
-            return
-        }
+    override func renameItem(
+        withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        toName itemName: String,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("renameItem")
+        enqueue {
+            // Doc says we should do network request after renaming local file but we could end up with model desync
+            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
+                item.filename = itemName
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
+                completionHandler(item, nil)
+                return
+            }
 
-        guard let fileId = itemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
-        }
+            guard let fileId = itemIdentifier.toFileId(),
+                  let file = self.driveFileManager.getCachedFile(id: fileId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
 
-        // Check if file name already exists
-        let item = FileProviderItem(file: file, domain: domain)
-        let itemsWithSameParent = file.parent!.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: item.parentItemIdentifier)
-        let newItemFileName = itemName.lowercased()
-        if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !collidingItem.isTrashed {
-            completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
-            return
-        }
+            // Check if file name already exists
+            let item = FileProviderItem(file: file, domain: self.domain)
+            let itemsWithSameParent = file.parent!.children
+                .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
+                .importedDocuments(forParent: item.parentItemIdentifier)
+            let newItemFileName = itemName.lowercased()
+            if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
+               !collidingItem.isTrashed {
+                completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
+                return
+            }
 
-        Task { [proxyFile = file.proxify()] in
+            let proxyFile = file.proxify()
             do {
-                let file = try await driveFileManager.rename(file: proxyFile, newName: itemName)
+                let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
@@ -144,72 +192,112 @@ extension FileProviderExtension {
         }
     }
 
-    override func reparentItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, toParentItemWithIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, newName: String?, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
-            item.parentItemIdentifier = parentItemIdentifier
-            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-            completionHandler(item, nil)
-            return
-        }
+    override func reparentItem(
+        withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        toParentItemWithIdentifier parentItemIdentifier: NSFileProviderItemIdentifier,
+        newName: String?,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("reparentItem")
+        enqueue {
+            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
+                item.parentItemIdentifier = parentItemIdentifier
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
+                completionHandler(item, nil)
+                return
+            }
 
-        guard let fileId = itemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId),
-              let parentId = parentItemIdentifier.toFileId(),
-              let parent = driveFileManager.getCachedFile(id: parentId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
-        }
+            guard let fileId = itemIdentifier.toFileId(),
+                  let file = self.driveFileManager.getCachedFile(id: fileId),
+                  let parentId = parentItemIdentifier.toFileId(),
+                  let parent = self.driveFileManager.getCachedFile(id: parentId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
 
-        Task { [proxyFile = file.proxify(), proxyParent = parent.proxify()] in
+            let proxyFile = file.proxify()
+            let proxyParent = parent.proxify()
             do {
-                let (_, file) = try await driveFileManager.move(file: proxyFile, to: proxyParent)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: domain), nil)
+                let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
+                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
             }
         }
     }
 
-    override func setFavoriteRank(_ favoriteRank: NSNumber?, forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        // How should we save favorite rank in database?
-        guard let fileId = itemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
+    override func setFavoriteRank(
+        _ favoriteRank: NSNumber?,
+        forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        let fileId = itemIdentifier.toFileId()
+        Log.fileProvider("setFavoriteRank forItemIdentifier:\(fileId)")
+        enqueue {
+            // How should we save favourite rank in database?
+            guard let fileId,
+                  let file = self.driveFileManager.getCachedFile(id: fileId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
+
+            let item = FileProviderItem(file: file, domain: self.domain)
+            item.favoriteRank = favoriteRank
+
+            completionHandler(item, nil)
         }
-
-        let item = FileProviderItem(file: file, domain: domain)
-        item.favoriteRank = favoriteRank
-
-        completionHandler(item, nil)
     }
 
-    override func setLastUsedDate(_ lastUsedDate: Date?, forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        // kDrive doesn't support this
-        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
-    }
-
-    override func setTagData(_ tagData: Data?, forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        // kDrive doesn't support this
-        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
-    }
-
-    override func trashItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        guard let fileId = itemIdentifier.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nil, NSFileProviderError(.noSuchItem))
-            return
+    override func setLastUsedDate(
+        _ lastUsedDate: Date?,
+        forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("setLastUsedDate forItemIdentifier")
+        enqueue {
+            // kDrive doesn't support this
+            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
         }
+    }
 
-        // Make deleted file copy
-        let deletedFile = file.detached()
-        let item = FileProviderItem(file: deletedFile, domain: domain)
-        item.isTrashed = true
+    override func setTagData(
+        _ tagData: Data?,
+        forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
+        enqueue {
+            // kDrive doesn't support this
+            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
+        }
+    }
 
-        Task { [proxyFile = file.proxify()] in
+    override func trashItem(
+        withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        let fileId = itemIdentifier.toFileId()
+        let uploadFileId = itemIdentifier.rawValue
+        Log.fileProvider("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
+        enqueue {
+            // Cancel upload if any matching
+            self.uploadQueue.cancel(uploadFileId: uploadFileId)
+
+            guard let fileId,
+                  let file = self.driveFileManager.getCachedFile(id: fileId) else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
+
+            // Make deleted file copy
+            let deletedFile = file.detached()
+            let item = FileProviderItem(file: deletedFile, domain: self.domain)
+            item.isTrashed = true
+            let proxyFile = file.proxify()
+
             do {
-                _ = try await driveFileManager.delete(file: proxyFile)
-                FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
+                _ = try await self.driveFileManager.delete(file: proxyFile)
+                self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)
@@ -217,16 +305,23 @@ extension FileProviderExtension {
         }
     }
 
-    override func untrashItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier?, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
-        guard let fileId = itemIdentifier.toFileId() else {
-            completionHandler(nil, nsError(code: .noSuchItem))
-            return
-        }
+    override func untrashItem(
+        withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
+        toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier?,
+        completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
+    ) {
+        let fileId = itemIdentifier.toFileId()
+        Log.fileProvider("untrashItem withIdentifier:\(fileId)")
+        enqueue {
+            guard let fileId else {
+                completionHandler(nil, self.nsError(code: .noSuchItem))
+                return
+            }
 
-        // Trashed items are not cached so we call the API
-        Task {
+            // Trashed items are not cached so we call the API
             do {
-                let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                let file = try await self.driveFileManager.apiFetcher
+                    .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 let parent: ProxyFile?
                 if let id = parentItemIdentifier?.toFileId() {
                     parent = ProxyFile(driveId: self.driveFileManager.drive.id, id: id)
@@ -240,9 +335,9 @@ extension FileProviderExtension {
                     item.parentItemIdentifier = parentItemIdentifier
                 }
                 item.isTrashed = false
-                FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                self.manager.signalEnumerator(for: .workingSet) { _ in }
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                try await self.manager.signalEnumerator(for: .workingSet)
+                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))

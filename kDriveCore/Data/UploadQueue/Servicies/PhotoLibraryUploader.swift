@@ -79,10 +79,10 @@ public class PhotoLibraryUploader {
     public func scheduleNewPicturesForUpload() -> Int {
         var newAssetsCount = 0
         BackgroundRealm.uploads.execute { realm in
-            PhotoLibraryUploaderLog("scheduleNewPicturesForUpload")
+            Log.photoLibraryUploader("scheduleNewPicturesForUpload")
             guard let settings = self.settings,
                   PHPhotoLibrary.authorizationStatus() == .authorized else {
-                PhotoLibraryUploaderLog("0 new assets")
+                Log.photoLibraryUploader("0 new assets")
                 return
             }
 
@@ -103,14 +103,14 @@ public class PhotoLibraryUploader {
             let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-            PhotoLibraryUploaderLog("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
             let assets = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
             addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
             updateLastSyncDate(syncDate, using: realm)
 
             newAssetsCount = assets.count
-            PhotoLibraryUploaderLog("New assets count:\(newAssetsCount)")
+            Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
         }
         return newAssetsCount
     }
@@ -118,14 +118,14 @@ public class PhotoLibraryUploader {
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
                                              initial: Bool,
                                              using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        PhotoLibraryUploaderLog("addImageAssetsToUploadQueue")
+        Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
             assets.enumerateObjects { [self] asset, idx, stop in
                 guard let settings = settings else {
-                    PhotoLibraryUploaderLog("no settings")
+                    Log.photoLibraryUploader("no settings")
                     realm.cancelWrite()
                     stop.pointee = true
                     return
@@ -136,7 +136,7 @@ public class PhotoLibraryUploader {
                     let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .album, options: options)
                     // swiftlint:disable:next empty_count
                     if assetCollections.count > 0 {
-                        PhotoLibraryUploaderLog("Asset ignored because it already originates from kDrive")
+                        Log.photoLibraryUploader("Asset ignored because it already originates from kDrive")
                         return
                     }
                 }
@@ -178,7 +178,7 @@ public class PhotoLibraryUploader {
                 realm.add(uploadFile, update: .modified)
 
                 if idx < assets.count - 1 && idx % 99 == 0 {
-                    PhotoLibraryUploaderLog("Commit assets batch up to :\(idx)")
+                    Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
                     if let creationDate = asset.creationDate {
@@ -199,10 +199,10 @@ public class PhotoLibraryUploader {
     }
 
     public func getPicturesToRemove() -> PicturesAssets? {
-        PhotoLibraryUploaderLog("getPicturesToRemove")
+        Log.photoLibraryUploader("getPicturesToRemove")
         // Check that we have photo sync enabled with the delete option
         guard let settings = settings, settings.deleteAssetsAfterImport else {
-            PhotoLibraryUploaderLog("no settings")
+            Log.photoLibraryUploader("no settings")
             return nil
         }
 
@@ -223,7 +223,7 @@ public class PhotoLibraryUploader {
     }
 
     public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
-        PhotoLibraryUploaderLog("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems)")
+        Log.photoLibraryUploader("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems)")
         PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.deleteAssets(toRemoveItems.assets)
         } completionHandler: { success, _ in

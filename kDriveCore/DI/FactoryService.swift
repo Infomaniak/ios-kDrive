@@ -89,6 +89,12 @@ enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
+            Factory(type: UploadQueueObservable.self) { _, resolver in
+                try resolver.resolve(type: UploadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: UploadNotifiable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
@@ -112,6 +118,9 @@ enum FactoryService {
             },
             Factory(type: NotificationsHelpable.self) { _, _ in
                 NotificationsHelper()
+            },
+            Factory(type: FileProviderExtensionAdditionalStatable.self) { _, _ in
+                FileProviderExtensionAdditionalState()
             }
         ]
         return services
@@ -134,7 +143,8 @@ enum FactoryService {
                 (loggerFactory, "UploadQueue"),
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
-                (loggerFactory, "AppDelegate")
+                (loggerFactory, "AppDelegate"),
+                (loggerFactory, "FileProvider")
             ]
             return services
         } else {
@@ -157,6 +167,7 @@ public extension SimpleResolver {
 public struct EarlyDIHook {
     public init() {
         // setup DI ASAP
+        os_log("EarlyDIHook")
         FactoryService.setupDependencyInjection()
     }
 }

@@ -18,11 +18,11 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import SwiftRegex
 import UIKit
-import InfomaniakDI
 
 #if !ISEXTENSION
 enum UniversalLinksHelper {
@@ -31,11 +31,17 @@ enum UniversalLinksHelper {
         let displayMode: DisplayMode
 
         /// Matches a private share link
-        static let privateShareLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)!, displayMode: .file)
+        static let privateShareLink = Link(
+            regex: Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)!,
+            displayMode: .file
+        )
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
         /// Matches a file preview link
-        static let filePreview = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!, displayMode: .file)
+        static let filePreview = Link(
+            regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!,
+            displayMode: .file
+        )
         /// Matches an office file link
         static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
 
@@ -67,12 +73,12 @@ enum UniversalLinksHelper {
               firstMatch.count > 2,
               let driveId = Int(firstMatch[1]),
               let last = firstMatch.last,
-              let fileId = Int(last),
+              let uploadFileId = Int(last),
               let driveFileManager = accountManager.getDriveFileManager(for: driveId,
                                                                         userId: accountManager.currentUserId)
         else { return false }
 
-        openFile(id: fileId, driveFileManager: driveFileManager, office: displayMode == .office, appDelegate: appDelegate)
+        openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office, appDelegate: appDelegate)
 
         return true
     }
