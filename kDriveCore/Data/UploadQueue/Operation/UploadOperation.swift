@@ -143,6 +143,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()
 
+            // Check if the file is empty, and uses the 1 shot upload method for it if needed.
+            let handledEmptyFile = try await self.handleEmptyFileIfNeeded()
+
+            // Continue if we are dealing with a file with data
+            guard !handledEmptyFile else {
+                return
+            }
+
             // Re-Load or Setup an UploadingSessionTask within the UploadingFile
             try await self.getUploadSessionOrCreate()
 
@@ -157,6 +165,48 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         let activity = ExpiringActivity(id: uploadFileId, delegate: self)
         activity.start()
         expiringActivity = activity
+    }
+
+    func handleEmptyFileIfNeeded() async throws -> Bool {
+        var userId: Int?
+        var fileSize: UInt64?
+        var uploadFile: UploadFile?
+        try transactionWithFile { file in
+            let fileUrl = try self.getFileUrlIfReadable(file: file)
+            guard let size = self.fileMetadata.fileSize(url: fileUrl) else {
+                Log.uploadOperation("Unable to read file size for ufid:\(self.uploadFileId)", level: .error)
+                throw DriveError.fileNotFound
+            }
+
+            fileSize = size
+            userId = file.userId
+            uploadFile = file.detached()
+        }
+
+        guard let userId,
+              let uploadFile,
+              fileSize == 0,
+              let userToken = accountManager.getTokenForUserId(userId) else {
+            return false // Continue with standard upload operation
+        }
+
+        Log.uploadOperation("Processing an empty file ufid:\(uploadFileId)")
+        // Get a oneshot upload token
+        let driveFileManager = try getDriveFileManager()
+        let drive = driveFileManager.drive
+
+        let uploadToken = try await driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive)
+
+        let files = try await driveFileManager.apiFetcher.directUpload(with: uploadToken, uploadfile: uploadFile, drive: drive)
+        guard let driveFile = files.first else {
+            throw ErrorDomain.parseError
+        }
+
+        try handleDriveFilePostUpload(driveFile)
+
+        Log.uploadOperation("Empty file uploaded finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
+        end()
+        return true
     }
 
     /// Fetch or create something that represents the state of the upload, and store it to the current UploadFile
@@ -480,37 +530,68 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let uploadedFile = try await apiFetcher.closeSession(drive: drive, sessionToken: abstractToken)
             let driveFile = uploadedFile.file
             Log.uploadOperation("uploadedFile 'File' id:\(uploadedFile.file.id) ufid:\(self.uploadFileId)")
+            try self.handleDriveFilePostUpload(driveFile)
+        }
+    }
 
-            var driveId: Int?
-            var userId: Int?
-            var relativePath: String?
-            var parentDirectoryId: Int?
-            try self.transactionWithFile { file in
-                file.uploadDate = Date()
-                file.uploadingSession = nil // For the sake of keeping the Realm small
-                file.error = nil
-                driveId = file.driveId
-                userId = file.userId
-                relativePath = file.relativePath
-                parentDirectoryId = file.parentDirectoryId
+    /// The last step in the operation, should be called. In time or not. Regardless of error state.
+    public func end() {
+        // Prevent duplicate call, as end() finishes the operation
+        guard !isFinished else {
+            return
+        }
+
+        defer {
+            // Terminate the NSOperation
+            Log.uploadOperation("call finish ufid:\(uploadFileId)")
+
+            // Make sure we stop the expiring activity
+            self.expiringActivity?.end()
+
+            finish()
+        }
+
+        var shouldCleanUploadFile = false
+        try? transactionWithFile { file in
+            if let error = file.error {
+                Log.uploadOperation("end file ufid:\(self.uploadFileId) errorCode: \(error.code) error:\(error)", level: .error)
+            } else {
+                Log.uploadOperation("end file ufid:\(self.uploadFileId)")
             }
 
-            guard let driveId,
-                  let userId,
-                  let relativePath,
-                  let parentDirectoryId,
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-                return
+            if let path = file.pathURL,
+               file.shouldRemoveAfterUpload && file.uploadDate != nil {
+                Log.uploadOperation("Remove local file at path:\(path) ufid:\(self.uploadFileId)")
+                try? self.fileManager.removeItem(at: path)
             }
 
-            // File is already here or has parent in DB let's update it
-            let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
-            queue.execute { realm in
-                if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil
-                    || relativePath.isEmpty {
-                    let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
-                    queue.bufferedWrite(in: parent, file: driveFile)
-                    self.result.driveFile = File(value: driveFile)
+            // retry from scratch next time
+            if file.maxRetryCount == 0 {
+                self.cleanUploadFileSession(file: file)
+            }
+
+            // If task is cancelled, remove it from list
+            if file.error == DriveError.taskCancelled {
+                shouldCleanUploadFile = true
+            }
+            // otherwise only reset success
+            else {
+                file.progress = nil
+
+                // Save upload file
+                self.result.uploadFile = UploadFile(value: file)
+            }
+        }
+
+        if shouldCleanUploadFile {
+            Log.uploadOperation("Delete file ufid:\(uploadFileId)")
+            // Delete UploadFile as canceled by the user
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
+                   !toDelete.isInvalidated {
+                    try? uploadsRealm.safeWrite {
+                        uploadsRealm.delete(toDelete)
+                    }
                 }
             }
         }
@@ -785,17 +866,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         enqueue(asap: true) {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
-            // TODO: remove after beta
-            if (error != nil) || (statusCode < 200 || statusCode >= 300) {
-                let dataString = String(data: data ?? Data(), encoding: .utf8)
-                Log.uploadOperation(
-                    "uploadCompletion KO ufid:\(self.uploadFileId) error:\(error) response:\(response)  statusCode:\(statusCode) data:\(dataString) ",
-                    level: .error
-                )
-            } else {
-                Log.uploadOperation("uploadCompletion OK data:\(data?.count) statusCode:\(statusCode) ufid:\(self.uploadFileId)")
-            }
-
             // Success
             if let data = data,
                error == nil,
@@ -940,65 +1010,38 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         handleRemoteErrors(error: error)
     }
 
-    /// The last step in the operation, should be called. In time or not. Regardless of error state.
-    public func end() {
-        // Prevent duplicate call, as end() finishes the operation
-        guard !isFinished else {
+    /// Propagate the newly uploaded DriveFile into the specialized Realm
+    private func handleDriveFilePostUpload(_ driveFile: File) throws {
+        var driveId: Int?
+        var userId: Int?
+        var relativePath: String?
+        var parentDirectoryId: Int?
+        try transactionWithFile { file in
+            file.uploadDate = Date()
+            file.uploadingSession = nil // For the sake of keeping the Realm small
+            file.error = nil
+            driveId = file.driveId
+            userId = file.userId
+            relativePath = file.relativePath
+            parentDirectoryId = file.parentDirectoryId
+        }
+
+        guard let driveId,
+              let userId,
+              let relativePath,
+              let parentDirectoryId,
+              let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
             return
         }
 
-        defer {
-            // Terminate the NSOperation
-            Log.uploadOperation("call finish \(uploadFileId)")
-
-            // Make sure we stop the expiring activity
-            self.expiringActivity?.end()
-
-            finish()
-        }
-
-        var shouldCleanUploadFile = false
-        try? transactionWithFile { file in
-            if let error = file.error {
-                Log.uploadOperation("end file:\(self.uploadFileId) errorCode: \(error.code) error:\(error)", level: .error)
-            } else {
-                Log.uploadOperation("end file:\(self.uploadFileId)")
-            }
-
-            if let path = file.pathURL,
-               file.shouldRemoveAfterUpload && file.uploadDate != nil {
-                Log.uploadOperation("Remove local file at path:\(path) ufid:\(self.uploadFileId)")
-                try? self.fileManager.removeItem(at: path)
-            }
-
-            // retry from scratch next time
-            if file.maxRetryCount == 0 {
-                self.cleanUploadFileSession(file: file)
-            }
-
-            // If task is cancelled, remove it from list
-            if file.error == DriveError.taskCancelled {
-                shouldCleanUploadFile = true
-            }
-            // otherwise only reset success
-            else {
-                file.progress = nil
-
-                // Save upload file
-                self.result.uploadFile = UploadFile(value: file)
-            }
-        }
-
-        if shouldCleanUploadFile {
-            Log.uploadOperation("Delete file:\(uploadFileId)")
-            // Delete UploadFile as canceled by the user
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                   !toDelete.isInvalidated {
-                    try? uploadsRealm.safeWrite {
-                        uploadsRealm.delete(toDelete)
-                    }
-                }
+        // File is already here or has parent in DB let's update it
+        let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
+        queue.execute { realm in
+            if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil
+                || relativePath.isEmpty {
+                let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
+                queue.bufferedWrite(in: parent, file: driveFile)
+                self.result.driveFile = File(value: driveFile)
             }
         }
     }
