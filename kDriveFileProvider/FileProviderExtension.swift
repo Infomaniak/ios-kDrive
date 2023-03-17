@@ -105,7 +105,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             return nil
         }
     }
-    
+
     override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
         Log.fileProvider("persistentIdentifierForItem at url:\(url)")
         return FileProviderItem.identifier(for: url, domain: domain)
@@ -165,7 +165,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 // File is in the file provider and is the same, nothing to do...
                 completionHandler(nil)
             } else {
-                self.downloadRemoteFile(file: file, for: item, completion: completionHandler)
+                self.downloadRemoteFile(file, for: item, completion: completionHandler)
             }
         }
     }
@@ -220,56 +220,64 @@ final class FileProviderExtension: NSFileProviderExtension {
         )
     }
 
-    private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
+    private func downloadRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         Log.fileProvider("downloadRemoteFile file:\(file.id)")
         enqueue {
             // LocalVersion is OlderThanRemote
             if file.isLocalVersionOlderThanRemote {
-                // Prevent observing file multiple times
-                guard !DownloadQueue.instance.hasOperation(for: file) else {
-                    completion(nil)
-                    return
-                }
-
-                var observationToken: ObservationToken?
-                observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
-                    observationToken?.cancel()
-                    item.isDownloading = false
-                    
-                    if error != nil {
-                        item.isDownloaded = false
-                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                            completion(NSFileProviderError(.serverUnreachable))
-                        }
-                    } else {
-                        do {
-                            try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                            item.isDownloaded = true
-                            self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                                completion(nil)
-                            }
-                        } catch {
-                            completion(error)
-                        }
-                    }
-                }
-                DownloadQueue.instance.addToQueue(
-                    file: file,
-                    userId: self.driveFileManager.drive.userId,
-                    itemIdentifier: item.itemIdentifier
-                )
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
+                try await self.downloadFreshRemoteFile(file, for: item, completion: completion)
             }
             // LocalVersion is _not_ OlderThanRemote
             else {
+                await self.saveFreshLocalFile(file, for: item, completion: completion)
+            }
+        }
+    }
+
+    private func downloadFreshRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) async throws {
+        // Prevent observing file multiple times
+        guard !DownloadQueue.instance.hasOperation(for: file) else {
+            completion(nil)
+            return
+        }
+
+        var observationToken: ObservationToken?
+        observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+            observationToken?.cancel()
+            item.isDownloading = false
+
+            if error != nil {
+                item.isDownloaded = false
+                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
+                    completion(NSFileProviderError(.serverUnreachable))
+                }
+            } else {
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                    try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-                    completion(nil)
+                    item.isDownloaded = true
+                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
+                        completion(nil)
+                    }
                 } catch {
                     completion(error)
                 }
             }
+        }
+        DownloadQueue.instance.addToQueue(
+            file: file,
+            userId: driveFileManager.drive.userId,
+            itemIdentifier: item.itemIdentifier
+        )
+        try await manager.signalEnumerator(for: item.parentItemIdentifier)
+    }
+
+    private func saveFreshLocalFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) async {
+        do {
+            try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+            try await manager.signalEnumerator(for: item.parentItemIdentifier)
+            completion(nil)
+        } catch {
+            completion(error)
         }
     }
 
