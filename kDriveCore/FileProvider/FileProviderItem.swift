@@ -95,7 +95,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         contentModificationDate = file.lastModifiedAt
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
-        let storageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
+        let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         if DownloadQueue.instance.hasOperation(for: file) {
             isDownloading = true
             isDownloaded = false
@@ -112,11 +112,11 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             isSharedByCurrentUser = false
         }
         if let user = file.creator {
-            var ownerNameComponents = PersonNameComponents()
-            ownerNameComponents.nickname = user.displayName
-            self.ownerNameComponents = ownerNameComponents
+            var nameComponents = PersonNameComponents()
+            nameComponents.nickname = user.displayName
+            self.ownerNameComponents = nameComponents
         }
-        self.storageUrl = storageUrl
+        self.storageUrl = itemStorageUrl
     }
 
     public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
