@@ -79,12 +79,7 @@ public class DriveFileManager {
                     }
                 }
 
-                // Migration for Upload APIV2
-                if oldSchemaVersion < 13 {
-                    migration.deleteData(forType: UploadFile.className())
-                }
-
-                // Migration for Upload APIV2 build3
+                // Migration for Upload With Chunks
                 if oldSchemaVersion < 14 {
                     migration.deleteData(forType: UploadFile.className())
                 }
