@@ -74,8 +74,8 @@ extension FileProviderExtension {
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
                     self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                    self.manager.signalEnumerator(for: .workingSet) { _ in }
-                    self.manager.signalEnumerator(for: itemIdentifier) { _ in }
+                    try await self.manager.signalEnumerator(for: .workingSet)
+                    try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
                 } else {
                     completionHandler(self.nsError(code: .serverUnreachable))
