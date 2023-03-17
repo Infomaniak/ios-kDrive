@@ -25,7 +25,7 @@ extension FileProviderExtension {
         inParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("createDirectory withName '\(directoryName)'")
+        Log.fileProvider("createDirectory withName '\(directoryName)'")
         enqueue {
             guard let fileId = parentItemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
@@ -62,7 +62,7 @@ extension FileProviderExtension {
         withIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (Error?) -> Void
     ) {
-        FileProviderLog("deleteItem")
+        Log.fileProvider("deleteItem")
         enqueue {
             guard let fileId = itemIdentifier.toFileId() else {
                 completionHandler(self.nsError(code: .noSuchItem))
@@ -91,7 +91,7 @@ extension FileProviderExtension {
         toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("importDocument")
+        Log.fileProvider("importDocument")
         enqueue {
             let accessingSecurityScopedResource = fileURL.startAccessingSecurityScopedResource()
 
@@ -154,7 +154,7 @@ extension FileProviderExtension {
         toName itemName: String,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("renameItem")
+        Log.fileProvider("renameItem")
         enqueue {
             // Doc says we should do network request after renaming local file but we could end up with model desync
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
@@ -198,7 +198,7 @@ extension FileProviderExtension {
         newName: String?,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("reparentItem")
+        Log.fileProvider("reparentItem")
         enqueue {
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.parentItemIdentifier = parentItemIdentifier
@@ -232,7 +232,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         let fileId = itemIdentifier.toFileId()
-        FileProviderLog("setFavoriteRank forItemIdentifier:\(fileId)")
+        Log.fileProvider("setFavoriteRank forItemIdentifier:\(fileId)")
         enqueue {
             // How should we save favourite rank in database?
             guard let fileId,
@@ -253,7 +253,7 @@ extension FileProviderExtension {
         forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("setLastUsedDate forItemIdentifier")
+        Log.fileProvider("setLastUsedDate forItemIdentifier")
         enqueue {
             // kDrive doesn't support this
             completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
@@ -265,7 +265,7 @@ extension FileProviderExtension {
         forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        FileProviderLog("setTagData :\(tagData?.count) forItemIdentifier")
+        Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
         enqueue {
             // kDrive doesn't support this
             completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
@@ -278,7 +278,7 @@ extension FileProviderExtension {
     ) {
         let fileId = itemIdentifier.toFileId()
         let uploadFileId = itemIdentifier.rawValue
-        FileProviderLog("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
+        Log.fileProvider("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
         enqueue {
             // Cancel upload if any matching
             self.uploadQueue.cancel(uploadFileId: uploadFileId)
@@ -311,7 +311,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         let fileId = itemIdentifier.toFileId()
-        FileProviderLog("untrashItem withIdentifier:\(fileId)")
+        Log.fileProvider("untrashItem withIdentifier:\(fileId)")
         enqueue {
             guard let fileId else {
                 completionHandler(nil, self.nsError(code: .noSuchItem))

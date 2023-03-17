@@ -61,7 +61,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     let queue = DispatchQueue(label: "com.infomaniak.fileProviderExtensionState.sync", qos: .default)
 
     public func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        FileProviderLog("importedDocuments parent:\(parentItemIdentifier.rawValue)")
+        Log.fileProvider("importedDocuments parent:\(parentItemIdentifier.rawValue)")
         var documents = [FileProviderItem]()
         queue.sync {
             documents = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier }
@@ -71,7 +71,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
 
     public func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
         -> [NSFileProviderItemIdentifier] {
-        FileProviderLog("deleteAlreadyEnumeratedImportedDocuments parent:\(parentItemIdentifier.rawValue)")
+        Log.fileProvider("deleteAlreadyEnumeratedImportedDocuments parent:\(parentItemIdentifier.rawValue)")
         var identifiers = [NSFileProviderItemIdentifier]()
         queue.sync {
             let children = importedDocuments.values
@@ -85,14 +85,14 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     // MARK: importedDocuments
 
     public func setImportedDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
-        FileProviderLog("setImportedDocument key:\(key.rawValue)")
+        Log.fileProvider("setImportedDocument key:\(key.rawValue)")
         queue.sync {
             importedDocuments[key] = item
         }
     }
 
     public func getImportedDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem? {
-        FileProviderLog("getImportedDocument key:\(key.rawValue)")
+        Log.fileProvider("getImportedDocument key:\(key.rawValue)")
         var item: FileProviderItem?
         queue.sync {
             item = importedDocuments[key]
@@ -103,7 +103,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     // MARK: workingDocuments
 
     public func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem? {
-        FileProviderLog("getWorkingDocument key:\(key.rawValue)")
+        Log.fileProvider("getWorkingDocument key:\(key.rawValue)")
         var value: FileProviderItem?
         queue.sync {
             value = workingDocuments[key]
@@ -112,7 +112,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     }
 
     public func getWorkingDocumentValues() -> [FileProviderItem] {
-        FileProviderLog("getWorkingDocumentValues")
+        Log.fileProvider("getWorkingDocumentValues")
         var values = [FileProviderItem]()
         queue.sync {
             values = [FileProviderItem](workingDocuments.values)
@@ -121,14 +121,14 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     }
 
     public func setWorkingDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
-        FileProviderLog("setWorkingDocument key:\(key.rawValue)")
+        Log.fileProvider("setWorkingDocument key:\(key.rawValue)")
         queue.sync {
             workingDocuments[key] = item
         }
     }
 
     public func removeWorkingDocument(forKey key: NSFileProviderItemIdentifier) {
-        FileProviderLog("removeWorkingDocument key:\(key.rawValue)")
+        Log.fileProvider("removeWorkingDocument key:\(key.rawValue)")
         queue.sync {
             workingDocuments.removeValue(forKey: key)
         }

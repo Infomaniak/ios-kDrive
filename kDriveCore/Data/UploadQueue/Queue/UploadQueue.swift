@@ -96,7 +96,7 @@ public final class UploadQueue {
     )
 
     public init() {
-        UploadQueueLog("Starting up")
+        Log.uploadQueue("Starting up")
 
         concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
@@ -107,11 +107,11 @@ public final class UploadQueue {
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
-            UploadQueueLog("observeNetworkChange :\(isSuspended)")
+            Log.uploadQueue("observeNetworkChange :\(isSuspended)")
             self.operationQueue.isSuspended = isSuspended
         }
 
-        UploadQueueLog("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
+        Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
 
     // MARK: - Public methods

@@ -18,154 +18,153 @@
 
 import Foundation
 
-// MARK: - Log methods, by "category"
-
-/// shorthand for ABLog, with "FileProvider" category
-///
-/// In system console, visualize them with `subsystem:com.infomaniak.drive category:FileProvider`
-///
-public func FileProviderLog(_ message: @autoclosure () -> Any,
-                            level: AbstractLogLevel = .debug,
-                            context: Int = 0,
-                            file: StaticString = #file,
-                            function: StaticString = #function,
-                            line: UInt = #line,
-                            tag: Any? = nil) {
-    let category = "FileProvider"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
-
-/// shorthand for ABLog, with "AppDelegate" category
-///
-/// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
-///
-public func AppDelegateLog(_ message: @autoclosure () -> Any,
-                           level: AbstractLogLevel = .debug,
-                           context: Int = 0,
-                           file: StaticString = #file,
-                           function: StaticString = #function,
-                           line: UInt = #line,
-                           tag: Any? = nil) {
-    let category = "AppDelegate"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
-
-/// shorthand for ABLog, with "PhotoLibraryUploader" category
-///
-/// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
-///
-public func PhotoLibraryUploaderLog(_ message: @autoclosure () -> Any,
+/// Name spacing log methods by `category`.
+public enum Log {
+    /// shorthand for ABLog, with "FileProvider" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:FileProvider`
+    ///
+    public static func fileProvider(_ message: @autoclosure () -> Any,
                                     level: AbstractLogLevel = .debug,
                                     context: Int = 0,
                                     file: StaticString = #file,
                                     function: StaticString = #function,
                                     line: UInt = #line,
                                     tag: Any? = nil) {
-    let category = "PhotoLibraryUploader"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
+        let category = "FileProvider"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 
-/// shorthand for ABLog, with "BGTaskScheduling" category
-///
-/// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
-///
-public func BGTaskSchedulingLog(_ message: @autoclosure () -> Any,
-                                level: AbstractLogLevel = .debug,
-                                context: Int = 0,
-                                file: StaticString = #file,
-                                function: StaticString = #function,
-                                line: UInt = #line,
-                                tag: Any? = nil) {
-    let category = "BGTaskScheduling"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
+    /// shorthand for ABLog, with "AppDelegate" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
+    ///
+    public static func appDelegate(_ message: @autoclosure () -> Any,
+                                   level: AbstractLogLevel = .debug,
+                                   context: Int = 0,
+                                   file: StaticString = #file,
+                                   function: StaticString = #function,
+                                   line: UInt = #line,
+                                   tag: Any? = nil) {
+        let category = "AppDelegate"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 
-/// shorthand for ABLog, with "BackgroundSessionManager" category
-///
-/// In system console, visualize them with `subsystem:com.infomaniak.drive category:BackgroundSessionManager`
-///
-public func BackgroundSessionManagerLog(_ message: @autoclosure () -> Any,
+    /// shorthand for ABLog, with "PhotoLibraryUploader" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
+    ///
+    public static func photoLibraryUploader(_ message: @autoclosure () -> Any,
+                                            level: AbstractLogLevel = .debug,
+                                            context: Int = 0,
+                                            file: StaticString = #file,
+                                            function: StaticString = #function,
+                                            line: UInt = #line,
+                                            tag: Any? = nil) {
+        let category = "PhotoLibraryUploader"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
+
+    /// shorthand for ABLog, with "BGTaskScheduling" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
+    ///
+    public static func bgTaskScheduling(_ message: @autoclosure () -> Any,
                                         level: AbstractLogLevel = .debug,
                                         context: Int = 0,
                                         file: StaticString = #file,
                                         function: StaticString = #function,
                                         line: UInt = #line,
                                         tag: Any? = nil) {
-    let category = "BackgroundSessionManager"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
+        let category = "BGTaskScheduling"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 
-/// shorthand for ABLog, with "UploadQueue" category
-public func UploadQueueLog(_ message: @autoclosure () -> Any,
-                           level: AbstractLogLevel = .debug,
-                           context: Int = 0,
-                           file: StaticString = #file,
-                           function: StaticString = #function,
-                           line: UInt = #line,
-                           tag: Any? = nil) {
-    let category = "UploadQueue"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
-}
+    /// shorthand for ABLog, with "BackgroundSessionManager" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BackgroundSessionManager`
+    ///
+    public static func bgSessionManager(_ message: @autoclosure () -> Any,
+                                        level: AbstractLogLevel = .debug,
+                                        context: Int = 0,
+                                        file: StaticString = #file,
+                                        function: StaticString = #function,
+                                        line: UInt = #line,
+                                        tag: Any? = nil) {
+        let category = "BackgroundSessionManager"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 
-// MARK: Operations
+    /// shorthand for ABLog, with "UploadQueue" category
+    public static func uploadQueue(_ message: @autoclosure () -> Any,
+                                   level: AbstractLogLevel = .debug,
+                                   context: Int = 0,
+                                   file: StaticString = #file,
+                                   function: StaticString = #function,
+                                   line: UInt = #line,
+                                   tag: Any? = nil) {
+        let category = "UploadQueue"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 
-/// shorthand for ABLog, with "UploadOperation" category
-public func UploadOperationLog(_ message: @autoclosure () -> Any,
-                               level: AbstractLogLevel = .debug,
-                               context: Int = 0,
-                               file: StaticString = #file,
-                               function: StaticString = #function,
-                               line: UInt = #line,
-                               tag: Any? = nil) {
-    let category = "UploadOperation"
-    ABLog(message(),
-          category: category,
-          level: level,
-          context: context,
-          file: file,
-          function: function,
-          line: line,
-          tag: tag)
+    /// shorthand for ABLog, with "UploadOperation" category
+    public static func uploadOperation(_ message: @autoclosure () -> Any,
+                                       level: AbstractLogLevel = .debug,
+                                       context: Int = 0,
+                                       file: StaticString = #file,
+                                       function: StaticString = #function,
+                                       line: UInt = #line,
+                                       tag: Any? = nil) {
+        let category = "UploadOperation"
+        ABLog(message(),
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
 }

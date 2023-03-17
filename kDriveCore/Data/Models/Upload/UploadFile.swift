@@ -309,7 +309,7 @@ public extension Array where Element == UploadFile {
         let files = filter {
             ($0.uploadDate == nil) && ($0.uploadingSession?.uploadSession != nil)
         }
-        BackgroundSessionManagerLog("files:\(files.count) :\(chunkUrl)")
+        Log.bgSessionManager("files:\(files.count) :\(chunkUrl)")
 
         // find the first one that matches [the query (that matches the chunk request)]
         let file = files.first { $0.contains(chunkUrl: chunkUrl) }

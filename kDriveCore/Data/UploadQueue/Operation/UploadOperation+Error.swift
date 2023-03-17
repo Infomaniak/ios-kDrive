@@ -37,7 +37,7 @@ extension UploadOperation {
                 end()
             }
 
-            UploadOperationLog("catching error:\(error) ufid:\(uploadFileId)", level: .error)
+            Log.uploadOperation("catching error:\(error) ufid:\(uploadFileId)", level: .error)
             if !handleLocalErrors(error: error) {
                 handleRemoteErrors(error: error)
             }
@@ -54,7 +54,7 @@ extension UploadOperation {
         try? transactionWithFile { file in
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain {
-                UploadOperationLog("NSURLError:\(error) ufid:\(self.uploadFileId)")
+                Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
                 file.error = .networkError
                 errorHandled = true
             }
@@ -101,7 +101,7 @@ extension UploadOperation {
                     file.error = DriveError.localError.wrapping(error)
 
                 case .operationFinished, .operationCanceled:
-                    UploadOperationLog("catching operation is terminating")
+                    Log.uploadOperation("catching operation is terminating")
                     // the operation is terminating, silent handling
 
                 case .databaseUploadFileNotFound:
@@ -124,14 +124,14 @@ extension UploadOperation {
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
         guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
-            UploadOperationLog("error:\(error) not a remote one ufid:\(uploadFileId)")
+            Log.uploadOperation("error:\(error) not a remote one ufid:\(uploadFileId)")
             return false
         }
 
         var errorHandled = false
         try? transactionWithFile { file in
             defer {
-                UploadOperationLog("catching remote error:\(error) ufid:\(self.uploadFileId)", level: .error)
+                Log.uploadOperation("catching remote error:\(error) ufid:\(self.uploadFileId)", level: .error)
                 file.error = error
             }
 

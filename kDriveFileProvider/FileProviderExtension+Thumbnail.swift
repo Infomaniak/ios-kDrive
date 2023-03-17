@@ -26,7 +26,7 @@ extension FileProviderExtension {
         perThumbnailCompletionHandler: @escaping (NSFileProviderItemIdentifier, Data?, Error?) -> Void,
         completionHandler: @escaping (Error?) -> Void
     ) -> Progress {
-        FileProviderLog("fetchThumbnails")
+        Log.fileProvider("fetchThumbnails")
         let urlSession = URLSession(configuration: URLSessionConfiguration.default)
         let progress = Progress(totalUnitCount: Int64(itemIdentifiers.count))
 

@@ -74,7 +74,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var alreadyEnumerated = false
 
     public init(file: File, domain: NSFileProviderDomain?) {
-        FileProviderLog("FileProviderItem init file:\(file.id)")
+        Log.fileProvider("FileProviderItem init file:\(file.id)")
 
         @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
@@ -120,7 +120,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     }
 
     public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
-        FileProviderLog("FileProviderItem init importedFileUrl:\(importedFileUrl)")
+        Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
         let resourceValues = try? importedFileUrl
             .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
         itemIdentifier = identifier
@@ -140,7 +140,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     }
 
     public func setUploadingError(_ error: DriveError) {
-        FileProviderLog("FileProviderItem setUploadingError:\(error)")
+        Log.fileProvider("FileProviderItem setUploadingError:\(error)")
         switch error {
         case .fileNotFound, .objectNotFound:
             uploadingError = NSFileProviderError(.noSuchItem)

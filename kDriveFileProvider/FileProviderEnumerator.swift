@@ -62,11 +62,11 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func invalidate() {
-        FileProviderLog("invalidate")
+        Log.fileProvider("invalidate")
     }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        FileProviderLog("enumerateItems for observer")
+        Log.fileProvider("enumerateItems for observer")
         enqueue {
             // Recent files folder
             if self.containerItemIdentifier == .workingSet {
@@ -154,7 +154,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from anchor: NSFileProviderSyncAnchor) {
-        FileProviderLog("enumerateChanges for observer")
+        Log.fileProvider("enumerateChanges for observer")
         enqueue {
             if let directoryIdentifier = self.containerItemIdentifier.toFileId() {
                 let lastTimestamp = anchor.toInt
@@ -211,7 +211,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
-        FileProviderLog("currentSyncAnchor completionHandler")
+        Log.fileProvider("currentSyncAnchor completionHandler")
         enqueue {
             if let fileId = self.containerItemIdentifier.toFileId() {
                 if let file = self.driveFileManager.getCachedFile(id: fileId) {
