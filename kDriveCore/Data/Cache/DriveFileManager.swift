@@ -84,7 +84,7 @@ public class DriveFileManager {
                     migration.deleteData(forType: UploadFile.className())
                 }
 
-                // Migration for Upload APIV2 build2
+                // Migration for Upload APIV2 build3
                 if oldSchemaVersion < 14 {
                     migration.deleteData(forType: UploadFile.className())
                 }
