@@ -63,12 +63,16 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
-    override public func perform<T: Decodable>(request: DataRequest, decoder: JSONDecoder = ApiFetcher.decoder) async throws -> (data: T, responseAt: Int?) {
+    override public func perform<T: Decodable>(request: DataRequest,
+                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> (
+        data: T,
+        responseAt: Int?
+    ) {
         do {
             return try await super.perform(request: request)
-        } catch let InfomaniakError.apiError(apiError) {
+        } catch InfomaniakError.apiError(let apiError) {
             throw DriveError(apiError: apiError)
-        } catch let InfomaniakError.serverError(statusCode: statusCode) {
+        } catch InfomaniakError.serverError(statusCode: let statusCode) {
             throw DriveError.serverError(statusCode: statusCode)
         }
     }
@@ -80,15 +84,24 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func createDirectory(in parentDirectory: ProxyFile, name: String, onlyForMe: Bool) async throws -> File {
-        try await perform(request: authenticatedRequest(.createDirectory(in: parentDirectory), method: .post, parameters: ["name": name, "only_for_me": onlyForMe])).data
+        try await perform(request: authenticatedRequest(
+            .createDirectory(in: parentDirectory),
+            method: .post,
+            parameters: ["name": name, "only_for_me": onlyForMe]
+        )).data
     }
 
     public func createCommonDirectory(drive: AbstractDrive, name: String, forAllUser: Bool) async throws -> File {
-        try await perform(request: authenticatedRequest(.createTeamDirectory(drive: drive), method: .post, parameters: ["name": name, "for_all_user": forAllUser])).data
+        try await perform(request: authenticatedRequest(
+            .createTeamDirectory(drive: drive),
+            method: .post,
+            parameters: ["name": name, "for_all_user": forAllUser]
+        )).data
     }
 
     public func createFile(in parentDirectory: ProxyFile, name: String, type: String) async throws -> File {
-        try await perform(request: authenticatedRequest(.createFile(in: parentDirectory), method: .post, parameters: ["name": name, "type": type])).data
+        try await perform(request: authenticatedRequest(.createFile(in: parentDirectory), method: .post,
+                                                        parameters: ["name": name, "type": type])).data
     }
 
     public func createDropBox(directory: ProxyFile, settings: DropBoxSettings) async throws -> DropBox {
@@ -107,12 +120,16 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .delete)).data
     }
 
-    public func rootFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.rootFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType])))
+    public func rootFiles(drive: AbstractDrive, page: Int = 1,
+                          sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.rootFiles(drive: drive).paginated(page: page)
+                .sorted(by: [.type, sortType])))
     }
 
-    public func files(in directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.files(of: directory).paginated(page: page).sorted(by: [.type, sortType])))
+    public func files(in directory: ProxyFile, page: Int = 1,
+                      sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.files(of: directory).paginated(page: page)
+                .sorted(by: [.type, sortType])))
     }
 
     public func fileInfo(_ file: ProxyFile) async throws -> (data: File, responseAt: Int?) {
@@ -120,11 +137,13 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func favorites(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.favorites(drive: drive).paginated(page: page).sorted(by: [.type, sortType]))).data
+        try await perform(request: authenticatedRequest(.favorites(drive: drive).paginated(page: page)
+                .sorted(by: [.type, sortType]))).data
     }
 
     public func mySharedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.mySharedFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType]))).data
+        try await perform(request: authenticatedRequest(.mySharedFiles(drive: drive).paginated(page: page)
+                .sorted(by: [.type, sortType]))).data
     }
 
     public func lastModifiedFiles(drive: AbstractDrive, page: Int = 1) async throws -> [File] {
@@ -136,7 +155,11 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func createShareLink(for file: ProxyFile, isFreeDrive: Bool) async throws -> ShareLink {
-        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .post, parameters: ShareLinkSettings(right: .public, isFreeDrive: isFreeDrive))).data
+        try await perform(request: authenticatedRequest(
+            .shareLink(file: file),
+            method: .post,
+            parameters: ShareLinkSettings(right: .public, isFreeDrive: isFreeDrive)
+        )).data
     }
 
     public func updateShareLink(for file: ProxyFile, settings: ShareLinkSettings) async throws -> Bool {
@@ -151,7 +174,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.access(file: file))).data
     }
 
-    public func checkAccessChange(to file: ProxyFile, settings: FileAccessSettings) async throws -> [CheckChangeAccessFeedbackResource] {
+    public func checkAccessChange(to file: ProxyFile,
+                                  settings: FileAccessSettings) async throws -> [CheckChangeAccessFeedbackResource] {
         try await perform(request: authenticatedRequest(.checkAccess(file: file), method: .post, parameters: settings)).data
     }
 
@@ -164,7 +188,8 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func updateUserAccess(to file: ProxyFile, user: UserFileAccess, right: UserPermission) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .put, parameters: ["right": right])).data
+        try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .put,
+                                                        parameters: ["right": right])).data
     }
 
     public func removeUserAccess(to file: ProxyFile, user: UserFileAccess) async throws -> Bool {
@@ -172,15 +197,18 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func updateTeamAccess(to file: ProxyFile, team: TeamFileAccess, right: UserPermission) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .put, parameters: ["right": right])).data
+        try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .put,
+                                                        parameters: ["right": right])).data
     }
 
     public func removeTeamAccess(to file: ProxyFile, team: TeamFileAccess) async throws -> Bool {
         try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .delete)).data
     }
 
-    public func updateInvitationAccess(drive: AbstractDrive, invitation: ExternInvitationFileAccess, right: UserPermission) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .put, parameters: ["right": right])).data
+    public func updateInvitationAccess(drive: AbstractDrive, invitation: ExternInvitationFileAccess,
+                                       right: UserPermission) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .put,
+                                                        parameters: ["right": right])).data
     }
 
     public func deleteInvitation(drive: AbstractDrive, invitation: ExternInvitationFileAccess) async throws -> Bool {
@@ -206,11 +234,13 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func editComment(file: ProxyFile, body: String, comment: Comment) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .put, parameters: ["body": body])).data
+        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .put,
+                                                        parameters: ["body": body])).data
     }
 
     public func answerComment(file: ProxyFile, body: String, comment: Comment) async throws -> Comment {
-        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .post, parameters: ["body": body])).data
+        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .post,
+                                                        parameters: ["body": body])).data
     }
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
@@ -230,7 +260,8 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func duplicate(file: ProxyFile, duplicateName: String) async throws -> File {
-        try await perform(request: authenticatedRequest(.duplicate(file: file), method: .post, parameters: ["name": duplicateName])).data
+        try await perform(request: authenticatedRequest(.duplicate(file: file), method: .post,
+                                                        parameters: ["name": duplicateName])).data
     }
 
     public func copy(file: ProxyFile, to destination: ProxyFile) async throws -> File {
@@ -247,14 +278,17 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func fileActivities(file: ProxyFile, page: Int) async throws -> [FileActivity] {
         var queryItems = [URLQueryItem(name: "with", value: "user")]
-        queryItems.append(contentsOf: FileActivityType.displayedFileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        queryItems
+            .append(contentsOf: FileActivityType.displayedFileActivities
+                .map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
             .paginated(page: page)
         return try await perform(request: authenticatedRequest(endpoint)).data
     }
 
-    public func fileActivities(file: ProxyFile, from date: Date, page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
+    public func fileActivities(file: ProxyFile, from date: Date,
+                               page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
         var queryItems = [
             FileWith.fileActivitiesWithExtra.toQueryItem(),
             URLQueryItem(name: "depth", value: "children"),
@@ -267,7 +301,8 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(endpoint))
     }
 
-    public func filesActivities(drive: AbstractDrive, files: [ProxyFile], from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
+    public func filesActivities(drive: AbstractDrive, files: [ProxyFile],
+                                from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
         try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
     }
 
@@ -280,7 +315,6 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        // Only resolve locally to break init loop
         accountManager.refreshTokenLockedQueue.async {
             guard token.requiresRefresh else {
                 request(token, nil)
@@ -313,6 +347,23 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
+    public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive) async throws -> DirectUploadToken {
+        let url = Endpoint.directUploadToken(drive: drive).url
+        let token: DirectUploadToken = try await perform(request: AF
+            .request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])).data
+        return token
+    }
+
+    public func directUpload(with token: DirectUploadToken, uploadfile: UploadFile, drive: AbstractDrive) async throws -> [File] {
+        let url = Endpoint.directUpload(uploadFile: uploadfile).url
+        let files: [File] = try await perform(request: AF.request(
+            url,
+            method: .put,
+            headers: ["Authorization": "Bearer \(token.token)"]
+        )).data
+        return files
+    }
+
     // MARK: -
 
     public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
@@ -324,7 +375,8 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func trashedFiles(of directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: page).sorted(by: [sortType]))).data
+        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: page)
+                .sorted(by: [sortType]))).data
     }
 
     public func restore(file: ProxyFile, in directory: ProxyFile? = nil) async throws -> CancelableResponse {
@@ -337,8 +389,24 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(.restore(file: file), method: .post, parameters: parameters)).data
     }
 
-    public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileTypes: [ConvertedType] = [], categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileTypes: fileTypes, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
+    public func searchFiles(
+        drive: AbstractDrive,
+        query: String? = nil,
+        date: DateInterval? = nil,
+        fileTypes: [ConvertedType] = [],
+        categories: [Category],
+        belongToAllCategories: Bool,
+        page: Int = 1,
+        sortType: SortType = .nameAZ
+    ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.search(
+            drive: drive,
+            query: query,
+            date: date,
+            fileTypes: fileTypes,
+            categories: categories,
+            belongToAllCategories: belongToAllCategories
+        ).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
     public func add(category: Category, to file: ProxyFile) async throws -> CategoryResponse {
@@ -347,7 +415,8 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func add(drive: AbstractDrive, category: Category, to files: [ProxyFile]) async throws -> [CategoryResponse] {
         let parameters: Parameters = ["file_ids": files.map(\.id)]
-        return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .post, parameters: parameters)).data
+        return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .post,
+                                                               parameters: parameters)).data
     }
 
     public func remove(category: Category, from file: ProxyFile) async throws -> Bool {
@@ -356,11 +425,13 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func remove(drive: AbstractDrive, category: Category, from files: [ProxyFile]) async throws -> [CategoryResponse] {
         let parameters: Parameters = ["file_ids": files.map(\.id)]
-        return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .delete, parameters: parameters)).data
+        return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .delete,
+                                                               parameters: parameters)).data
     }
 
     public func createCategory(drive: AbstractDrive, name: String, color: String) async throws -> Category {
-        try await perform(request: authenticatedRequest(.categories(drive: drive), method: .post, parameters: ["name": name, "color": color])).data
+        try await perform(request: authenticatedRequest(.categories(drive: drive), method: .post,
+                                                        parameters: ["name": name, "color": color])).data
     }
 
     public func editCategory(drive: AbstractDrive, category: Category, name: String?, color: String) async throws -> Category {
@@ -369,7 +440,8 @@ public class DriveApiFetcher: ApiFetcher {
             body["name"] = name
         }
 
-        return try await perform(request: authenticatedRequest(.category(drive: drive, category: category), method: .put, parameters: body)).data
+        return try await perform(request: authenticatedRequest(.category(drive: drive, category: category), method: .put,
+                                                               parameters: body)).data
     }
 
     public func deleteCategory(drive: AbstractDrive, category: Category) async throws -> Bool {
@@ -378,7 +450,8 @@ public class DriveApiFetcher: ApiFetcher {
 
     @discardableResult
     public func undoAction(drive: AbstractDrive, cancelId: String) async throws -> Empty {
-        try await perform(request: authenticatedRequest(.undoAction(drive: drive), method: .post, parameters: ["cancel_id": cancelId])).data
+        try await perform(request: authenticatedRequest(.undoAction(drive: drive), method: .post,
+                                                        parameters: ["cancel_id": cancelId])).data
     }
 
     public func convert(file: ProxyFile) async throws -> File {
@@ -398,7 +471,8 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func updateColor(directory: ProxyFile, color: String) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).data
+        try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post,
+                                                        parameters: ["color": color])).data
     }
 
     public func cancelImport(drive: AbstractDrive, id: Int) async throws -> Bool {
@@ -410,13 +484,21 @@ class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 
-    override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
+    override func refresh(
+        _ credential: OAuthAuthenticator.Credential,
+        for session: Session,
+        completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void
+    ) {
         // Only resolve locally to break init loop
         accountManager.refreshTokenLockedQueue.async {
-            SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
+            SentrySDK
+                .addBreadcrumb(crumb: (credential as ApiToken)
+                    .generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
 
             if !KeychainHelper.isKeychainAccessible {
-                SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Keychain unaccessible"))
+                SentrySDK
+                    .addBreadcrumb(crumb: (credential as ApiToken)
+                        .generateBreadcrumb(level: .error, message: "Refreshing token failed - Keychain unaccessible"))
 
                 completion(.failure(DriveError.refreshToken))
                 return
@@ -426,7 +508,9 @@ class SyncedAuthenticator: OAuthAuthenticator {
             self.accountManager.reloadTokensAndAccounts()
             if let token = self.accountManager.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
-                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
+                SentrySDK
+                    .addBreadcrumb(crumb: token
+                        .generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))
                 return
             }
@@ -437,8 +521,11 @@ class SyncedAuthenticator: OAuthAuthenticator {
             if !Bundle.main.isExtension {
                 // It is absolutely necessary that the app stays awake while we refresh the token
                 taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
-                    SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Background task expired"))
-                    // If we didn't fetch the new token in the given time there is not much we can do apart from hoping that it wasn't revoked
+                    SentrySDK
+                        .addBreadcrumb(crumb: (credential as ApiToken)
+                            .generateBreadcrumb(level: .error, message: "Refreshing token failed - Background task expired"))
+                    // If we didn't fetch the new token in the given time there is not much we can do apart from hoping that it
+                    // wasn't revoked
                     if taskIdentifier != .invalid {
                         UIApplication.shared.endBackgroundTask(taskIdentifier)
                         taskIdentifier = .invalid
@@ -454,18 +541,25 @@ class SyncedAuthenticator: OAuthAuthenticator {
             self.tokenable.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
-                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
+                    SentrySDK
+                        .addBreadcrumb(crumb: token
+                            .generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))
                 } else {
                     // Couldn't refresh the token, API says it's invalid
                     if let error = error as NSError?, error.domain == "invalid_grant" {
-                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Invalid grant"))
+                        SentrySDK
+                            .addBreadcrumb(crumb: (credential as ApiToken)
+                                .generateBreadcrumb(level: .error, message: "Refreshing token failed - Invalid grant"))
                         self.refreshTokenDelegate?.didFailRefreshToken(credential)
                         completion(.failure(error))
                     } else {
                         // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
-                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other \(error.debugDescription)"))
+                        SentrySDK
+                            .addBreadcrumb(crumb: (credential as ApiToken)
+                                .generateBreadcrumb(level: .error,
+                                                    message: "Refreshing token failed - Other \(error.debugDescription)"))
                         completion(.success(credential))
                     }
                 }
@@ -483,8 +577,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
 class NetworkRequestRetrier: RequestInterceptor {
     let maxRetry: Int
     private var retriedRequests: [String: Int] = [:]
-    let timeout = -1_001
-    let connectionLost = -1_005
+    let timeout = -1001
+    let connectionLost = -1005
 
     init(maxRetry: Int = 3) {
         self.maxRetry = maxRetry
