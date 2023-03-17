@@ -37,7 +37,7 @@ extension AppDelegate {
 
     /// schedule background tasks
     func scheduleBackgroundRefresh() {
-        BGTaskSchedulingLog("scheduleBackgroundRefresh")
+        Log.bgTaskScheduling("scheduleBackgroundRefresh")
         // List pictures + upload files (+pictures) / photoKit
         let backgroundRefreshRequest = BGAppRefreshTaskRequest(identifier: Constants.backgroundRefreshIdentifier)
         #if DEBUG
@@ -59,55 +59,55 @@ extension AppDelegate {
         longBackgroundRefreshRequest.requiresExternalPower = true
         do {
             try backgroundTaskScheduler.submit(backgroundRefreshRequest)
-            BGTaskSchedulingLog("scheduled task: \(backgroundRefreshRequest)")
+            Log.bgTaskScheduling("scheduled task: \(backgroundRefreshRequest)")
             try backgroundTaskScheduler.submit(longBackgroundRefreshRequest)
-            BGTaskSchedulingLog("scheduled task: \(longBackgroundRefreshRequest)")
+            Log.bgTaskScheduling("scheduled task: \(longBackgroundRefreshRequest)")
 
         } catch {
-            BGTaskSchedulingLog("Error scheduling background task: \(error)", level: .error)
+            Log.bgTaskScheduling("Error scheduling background task: \(error)", level: .error)
         }
     }
 
     /// Register BackgroundTasks in scheduler for later
     func registerBackgroundTasks() {
-        BGTaskSchedulingLog("registerBackgroundTasks")
+        Log.bgTaskScheduling("registerBackgroundTasks")
         var registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
-                BGTaskSchedulingLog("Task \(Constants.backgroundRefreshIdentifier) EXPIRED", level: .error)
+                Log.bgTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) EXPIRED", level: .error)
                 uploadQueue.suspendAllOperations()
                 uploadQueue.cancelRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 
             self.handleBackgroundRefresh { _ in
-                BGTaskSchedulingLog("Task \(Constants.backgroundRefreshIdentifier) completed with SUCCESS")
+                Log.bgTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) completed with SUCCESS")
                 task.setTaskCompleted(success: true)
             }
         }
-        BGTaskSchedulingLog("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
+        Log.bgTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
 
         registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
-                BGTaskSchedulingLog("Task \(Constants.longBackgroundRefreshIdentifier) EXPIRED", level: .error)
+                Log.bgTaskScheduling("Task \(Constants.longBackgroundRefreshIdentifier) EXPIRED", level: .error)
                 uploadQueue.suspendAllOperations()
                 uploadQueue.cancelRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 
             self.handleBackgroundRefresh { _ in
-                BGTaskSchedulingLog("Task \(Constants.longBackgroundRefreshIdentifier) completed with SUCCESS")
+                Log.bgTaskScheduling("Task \(Constants.longBackgroundRefreshIdentifier) completed with SUCCESS")
                 task.setTaskCompleted(success: true)
             }
         }
-        BGTaskSchedulingLog("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)")
+        Log.bgTaskScheduling("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)")
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
-        BGTaskSchedulingLog("handleBackgroundRefresh")
+        Log.bgTaskScheduling("handleBackgroundRefresh")
         // User installed the app but never logged in
         @InjectService var accountManager: AccountManageable
         if accountManager.accounts.isEmpty {
@@ -115,18 +115,18 @@ extension AppDelegate {
             return
         }
 
-        BGTaskSchedulingLog("Enqueue new pictures")
+        Log.bgTaskScheduling("Enqueue new pictures")
         @InjectService var photoUploader: PhotoLibraryUploader
         photoUploader.scheduleNewPicturesForUpload()
 
-        BGTaskSchedulingLog("Clean errors for all uploads")
+        Log.bgTaskScheduling("Clean errors for all uploads")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
 
-        BGTaskSchedulingLog("Reload operations in queue")
+        Log.bgTaskScheduling("Reload operations in queue")
         uploadQueue.rebuildUploadQueueFromObjectsInRealm()
 
-        BGTaskSchedulingLog("waitForCompletion")
+        Log.bgTaskScheduling("waitForCompletion")
         uploadQueue.waitForCompletion {
             completion(true)
         }

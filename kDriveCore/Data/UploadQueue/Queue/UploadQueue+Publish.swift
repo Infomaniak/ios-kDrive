@@ -43,7 +43,7 @@ extension UploadQueue: UploadPublishable {
     func publishUploadCount(withParent parentId: Int,
                             userId: Int,
                             driveId: Int) {
-        UploadQueueLog("publishUploadCount")
+        Log.uploadQueue("publishUploadCount")
         self.serialQueue.async { [unowned self] in
             self.publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
             self.publishUploadCountInDrive(userId: userId, driveId: driveId)
@@ -53,7 +53,7 @@ extension UploadQueue: UploadPublishable {
     func publishUploadCountInParent(parentId: Int,
                                     userId: Int,
                                     driveId: Int) {
-        UploadQueueLog("publishUploadCountInParent")
+        Log.uploadQueue("publishUploadCountInParent")
         self.serialQueue.async { [unowned self] in
             try? self.transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
@@ -68,7 +68,7 @@ extension UploadQueue: UploadPublishable {
 
     func publishUploadCountInDrive(userId: Int,
                                    driveId: Int) {
-        UploadQueueLog("publishUploadCountInDrive")
+        Log.uploadQueue("publishUploadCountInDrive")
         self.serialQueue.async { [unowned self] in
             try? self.transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
@@ -82,7 +82,7 @@ extension UploadQueue: UploadPublishable {
     }
 
     func publishFileUploaded(result: UploadCompletionResult) {
-        UploadQueueLog("publishFileUploaded")
+        Log.uploadQueue("publishFileUploaded")
         self.sendFileUploadedNotificationIfNeeded(with: result)
         self.serialQueue.async { [unowned self] in
             self.observations.didUploadFile.values.forEach { closure in

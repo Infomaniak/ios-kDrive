@@ -43,7 +43,7 @@ public struct FreeSpaceService {
         var requiredSpace = Int64(parallelism * 50 * 1024 * 1024)
         requiredSpace += requiredSpace * 100 / 20
         let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(UInt64(requiredSpace)).toMebibytes)
-        UploadOperationLog("minimalSpaceRequiredForChunkUpload is \(mebibytes)MiB")
+        Log.uploadOperation("minimalSpaceRequiredForChunkUpload is \(mebibytes)MiB")
         return requiredSpace
     }
 
@@ -52,7 +52,7 @@ public struct FreeSpaceService {
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
         } catch {
-            UploadOperationLog("unable to read available space \(error)", level: .error)
+            Log.uploadOperation("unable to read available space \(error)", level: .error)
             return
         }
 

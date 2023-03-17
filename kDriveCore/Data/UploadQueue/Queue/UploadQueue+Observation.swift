@@ -68,7 +68,7 @@ extension UploadQueue: UploadQueueObservable {
                                                   fileId: String? = nil,
                                                   using closure: @escaping (UploadFile, File?) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        self.serialQueue.async { [unowned self] in
+        self.serialQueue.sync { [unowned self] in
             let key = UUID()
             self.observations.didUploadFile[key] = { [unowned self, weak observer] uploadFile, driveFile in
                 // If the observer has been deallocated, we can
@@ -97,7 +97,7 @@ extension UploadQueue: UploadQueueObservable {
                                                  parentId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        self.serialQueue.async { [unowned self] in
+        self.serialQueue.sync { [unowned self] in
             let key = UUID()
             self.observations.didChangeUploadCountInParent[key] = { [unowned self, weak observer] updatedParentId, count in
                 guard observer != nil else {
@@ -124,7 +124,7 @@ extension UploadQueue: UploadQueueObservable {
                                                  driveId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        self.serialQueue.async { [unowned self] in
+        self.serialQueue.sync { [unowned self] in
             let key = UUID()
             self.observations.didChangeUploadCountInDrive[key] = { [unowned self, weak observer] updatedDriveId, count in
                 guard observer != nil else {

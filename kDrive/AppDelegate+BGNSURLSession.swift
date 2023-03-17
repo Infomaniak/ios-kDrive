@@ -24,7 +24,7 @@ extension AppDelegate {
     func application(_ application: UIApplication,
                      handleEventsForBackgroundURLSession identifier: String,
                      completionHandler: @escaping () -> Void) {
-        BackgroundSessionManagerLog("background session relaunched identifier:\(identifier)")
+        Log.bgSessionManager("background session relaunched identifier:\(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
             backgroundDownloadSessionManager.backgroundCompletionHandler = completionHandler
         } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {

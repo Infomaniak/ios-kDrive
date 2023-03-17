@@ -106,6 +106,12 @@ public struct RangeProviderGuts: RangeProviderGutsable {
     }
 
     public func preferredChunkSize(for fileSize: UInt64) -> UInt64 {
+        // In extension to reduce memory footprint, we reduce drastically chunk size
+        guard !Bundle.main.isExtension else {
+            let capChunkSize = min(fileSize, RangeProvider.APIConstants.chunkMinSize)
+            return capChunkSize
+        }
+        
         let potentialChunkSize = fileSize / RangeProvider.APIConstants.optimalChunkCount
 
         let chunkSize: UInt64
