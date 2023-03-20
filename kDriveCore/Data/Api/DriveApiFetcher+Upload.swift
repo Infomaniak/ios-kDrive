@@ -55,7 +55,8 @@ public extension DriveApiFetcher {
     /// If the identifier is unknown you can use only directory_path.
     /// The identifier 1 is the user root folder.
     /// Required without directory_path
-    ///   - directoryPath: The destination path of the new file. If the directory_id is provided the directory path is used as a relative path, otherwise it will be used as an absolute path. The destination should be a directory.
+    ///   - directoryPath: The destination path of the new file. If the directory_id is provided the directory path is used as a
+    /// relative path, otherwise it will be used as an absolute path. The destination should be a directory.
     /// If the directory path does not exist, folders are created automatically.
     /// The path is a destination path, the file name should not be provided at the end.
     /// Required without directory_id.
@@ -125,7 +126,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .POSTParameters(parameters))
 
-        let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadSession = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -136,7 +137,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadLiveSession = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadLiveSession = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -147,7 +148,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: Bool = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -158,7 +159,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedFile = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -178,7 +179,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .requestBody(chunk))
 
-        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -195,7 +196,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters,
                               body: .none)
 
-        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
