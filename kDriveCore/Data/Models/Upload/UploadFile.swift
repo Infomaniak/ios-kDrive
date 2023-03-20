@@ -150,24 +150,6 @@ public class UploadFile: Object, UploadFilable {
         }
     }
 
-    public var queryItems: [URLQueryItem] {
-        var items = [
-            URLQueryItem(name: "conflict", value: conflictOption.rawValue),
-            URLQueryItem(name: "file_name", value: name),
-            // TODO: Upload route needs relative_path/filename to work correctly, remove when upload is done with apiV2
-            URLQueryItem(name: "relative_path", value: relativePath + name),
-            // URLQueryItem(name: "total_size", value: "\(size)")
-            URLQueryItem(name: "asV2", value: nil)
-        ]
-        if let creationDate = creationDate {
-            items.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
-        }
-        if let modificationDate = modificationDate {
-            items.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
-        }
-        return items
-    }
-
     public init(
         id: String = UUID().uuidString,
         parentDirectoryId: Int,

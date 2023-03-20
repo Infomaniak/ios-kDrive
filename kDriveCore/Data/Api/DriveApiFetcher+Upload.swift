@@ -198,4 +198,60 @@ public extension DriveApiFetcher {
         let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
+
+    func directUpload(drive: AbstractDrive,
+                      totalSize: UInt64,
+                      fileName: String,
+                      conflictResolution: ConflictOption? = nil,
+                      lastModifiedAt: Date? = nil,
+                      createdAt: Date? = nil,
+                      directoryId: Int? = nil,
+                      directoryPath: String? = nil,
+                      fileData: Data) async throws -> File {
+        // Parameter validation
+        guard directoryId != nil || directoryPath != nil else {
+            throw DriveError.UploadSessionError.invalidDirectoryParameters
+        }
+
+        guard !fileName.isEmpty else {
+            throw DriveError.UploadSessionError.fileNameIsEmpty
+        }
+
+        // Build parameters
+        var parameters: Parameters = [APIParameters.driveId.rawValue: drive.id,
+                                      APIParameters.totalSize.rawValue: totalSize,
+                                      APIParameters.fileName.rawValue: fileName]
+
+        if let conflictResolution {
+            parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
+        }
+
+        if let lastModifiedAt {
+            let formattedDate = "\(Int64(lastModifiedAt.timeIntervalSince1970))"
+            parameters[APIParameters.lastModifiedAt.rawValue] = formattedDate
+        }
+
+        if let createdAt {
+            let formattedDate = "\(Int64(createdAt.timeIntervalSince1970))"
+            parameters[APIParameters.createdAt.rawValue] = formattedDate
+        }
+
+        if let directoryId {
+            parameters[APIParameters.directoryId.rawValue] = directoryId
+        }
+
+        if let directoryPath {
+            parameters[APIParameters.directoryPath.rawValue] = directoryPath
+        }
+
+        let route: Endpoint = .directUpload(drive: drive)
+
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: parameters,
+                              body: .requestBody(fileData))
+
+        let result: File = try await dispatch(request, networkStack: .Alamofire)
+        return result
+    }
 }

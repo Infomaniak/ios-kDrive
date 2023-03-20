@@ -601,19 +601,8 @@ public extension Endpoint {
 
     // Direct Upload
 
-    static func directUploadToken(drive: AbstractDrive) -> Endpoint {
-        return .driveV1.appending(path: "/\(drive.id)/file/1/upload/token", queryItems: [FileWith.fileMinimal.toQueryItem()])
-    }
-
-    static func directUpload(uploadFile: UploadFile) -> Endpoint {
-        // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
-        // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
-        // Using upload v1 for now
-        let queryItems = uploadFile.queryItems + [FileWith.fileUpload.toQueryItem()]
-        return .driveV1.appending(
-            path: "/\(uploadFile.driveId)/public/file/\(uploadFile.parentDirectoryId)/upload",
-            queryItems: queryItems
-        )
+    static func directUpload(drive: AbstractDrive) -> Endpoint {
+        return .drive.appending(path: "/\(drive.id)/upload", queryItems: [FileWith.chunkUpload.toQueryItem()])
     }
 
     // Chunk Upload

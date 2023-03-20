@@ -168,7 +168,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     func handleEmptyFileIfNeeded() async throws -> Bool {
-        var userId: Int?
         var fileSize: UInt64?
         var uploadFile: UploadFile?
         try transactionWithFile { file in
@@ -179,28 +178,27 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             fileSize = size
-            userId = file.userId
             uploadFile = file.detached()
         }
 
-        guard let userId,
-              let uploadFile,
-              fileSize == 0,
-              let userToken = accountManager.getTokenForUserId(userId) else {
+        guard let uploadFile,
+              fileSize == 0 else {
             return false // Continue with standard upload operation
         }
 
         Log.uploadOperation("Processing an empty file ufid:\(uploadFileId)")
-        // Get a oneshot upload token
         let driveFileManager = try getDriveFileManager()
         let drive = driveFileManager.drive
 
-        let uploadToken = try await driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive)
-
-        let files = try await driveFileManager.apiFetcher.directUpload(with: uploadToken, uploadfile: uploadFile, drive: drive)
-        guard let driveFile = files.first else {
-            throw ErrorDomain.parseError
-        }
+        let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
+                                                                           totalSize: 0,
+                                                                           fileName: uploadFile.name,
+                                                                           conflictResolution: uploadFile.conflictOption,
+                                                                           lastModifiedAt: uploadFile.modificationDate,
+                                                                           createdAt: uploadFile.creationDate,
+                                                                           directoryId: uploadFile.parentDirectoryId,
+                                                                           directoryPath: uploadFile.relativePath,
+                                                                           fileData: Data())
 
         try handleDriveFilePostUpload(driveFile)
 
@@ -410,7 +408,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
             Log.uploadOperation("File has not a valid readable URL:\(file.pathURL?.path) for \(uploadFileId)",
-                               level: .error)
+                                level: .error)
             throw DriveError.fileNotFound
         }
         return fileUrl
@@ -461,7 +459,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     func checkFileIdentity(filePath: String, file: UploadFile? = nil) throws {
         guard fileManager.isReadableFile(atPath: filePath) else {
             Log.uploadOperation("File has not a valid readable URL:'\(filePath)' for \(uploadFileId)",
-                               level: .error)
+                                level: .error)
             throw DriveError.fileNotFound
         }
 
