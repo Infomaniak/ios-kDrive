@@ -775,9 +775,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
 
         let getParameters = [
-            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkNumber.rawValue, value: "\(chunkNumber)"),
-            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkSize.rawValue, value: "\(chunkSize)"),
-            URLQueryItem(name: DriveApiFetcher.APIParameters.chunkHash.rawValue, value: chunkHash)
+            URLQueryItem(name: APIUploadParameter.chunkNumber.rawValue, value: "\(chunkNumber)"),
+            URLQueryItem(name: APIUploadParameter.chunkSize.rawValue, value: "\(chunkSize)"),
+            URLQueryItem(name: APIUploadParameter.chunkHash.rawValue, value: chunkHash)
         ]
         urlComponents.queryItems = getParameters
 
