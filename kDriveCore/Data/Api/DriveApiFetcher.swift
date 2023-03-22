@@ -347,23 +347,6 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive) async throws -> DirectUploadToken {
-        let url = Endpoint.directUploadToken(drive: drive).url
-        let token: DirectUploadToken = try await perform(request: AF
-            .request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])).data
-        return token
-    }
-
-    public func directUpload(with token: DirectUploadToken, uploadfile: UploadFile, drive: AbstractDrive) async throws -> [File] {
-        let url = Endpoint.directUpload(uploadFile: uploadfile).url
-        let files: [File] = try await perform(request: AF.request(
-            url,
-            method: .put,
-            headers: ["Authorization": "Bearer \(token.token)"]
-        )).data
-        return files
-    }
-
     // MARK: -
 
     public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {

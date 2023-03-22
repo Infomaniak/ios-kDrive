@@ -22,23 +22,24 @@ import InfomaniakCore
 
 // MARK: - Upload APIV2
 
-public extension DriveApiFetcher {
-    enum APIParameters: String {
-        case driveId = "drive_id"
-        case conflict
-        case createdAt = "created_at"
-        case directoryId = "directory_id"
-        case directoryPath = "directory_path"
-        case fileId = "file_id"
-        case fileName = "file_name"
-        case lastModifiedAt = "last_modified_at"
-        case totalChunks = "total_chunks"
-        case totalSize = "total_size"
-        case chunkNumber = "chunk_number"
-        case chunkSize = "chunk_size"
-        case chunkHash = "chunk_hash"
-    }
+enum APIUploadParameter: String {
+    case driveId = "drive_id"
+    case conflict
+    case createdAt = "created_at"
+    case directoryId = "directory_id"
+    case directoryPath = "directory_path"
+    case fileId = "file_id"
+    case fileName = "file_name"
+    case lastModifiedAt = "last_modified_at"
+    case totalChunks = "total_chunks"
+    case totalSize = "total_size"
+    case chunkNumber = "chunk_number"
+    case chunkSize = "chunk_size"
+    case chunkHash = "chunk_hash"
+}
 
+public extension DriveApiFetcher {
+    internal typealias APIParameters = [APIUploadParameter: Any?]
     /// Starts a session to upload a file in multiple parts
     ///
     /// https://developer.infomaniak.com/docs/api/post/2/drive/%7Bdrive_id%7D/upload/session/start
@@ -55,7 +56,8 @@ public extension DriveApiFetcher {
     /// If the identifier is unknown you can use only directory_path.
     /// The identifier 1 is the user root folder.
     /// Required without directory_path
-    ///   - directoryPath: The destination path of the new file. If the directory_id is provided the directory path is used as a relative path, otherwise it will be used as an absolute path. The destination should be a directory.
+    ///   - directoryPath: The destination path of the new file. If the directory_id is provided the directory path is used as a
+    /// relative path, otherwise it will be used as an absolute path. The destination should be a directory.
     /// If the directory path does not exist, folders are created automatically.
     /// The path is a destination path, the file name should not be provided at the end.
     /// Required without directory_id.
@@ -87,35 +89,25 @@ public extension DriveApiFetcher {
         }
 
         // Build parameters
-        var parameters: Parameters = [APIParameters.driveId.rawValue: drive.id,
-                                      APIParameters.totalSize.rawValue: totalSize,
-                                      APIParameters.fileName.rawValue: fileName,
-                                      APIParameters.totalChunks.rawValue: totalChunks]
-
-        if let conflictResolution {
-            parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
-        }
+        var apiParameters: APIParameters = [
+            .driveId: drive.id,
+            .totalSize: totalSize,
+            .fileName: fileName,
+            .totalChunks: totalChunks,
+            .conflict: conflictResolution?.rawValue,
+            .directoryId: directoryId,
+            .directoryPath: directoryPath,
+            .fileId: fileId
+        ]
 
         if let lastModifiedAt {
             let formattedDate = "\(Int64(lastModifiedAt.timeIntervalSince1970))"
-            parameters[APIParameters.lastModifiedAt.rawValue] = formattedDate
+            apiParameters[.lastModifiedAt] = formattedDate
         }
 
         if let createdAt {
             let formattedDate = "\(Int64(createdAt.timeIntervalSince1970))"
-            parameters[APIParameters.createdAt.rawValue] = formattedDate
-        }
-
-        if let directoryId {
-            parameters[APIParameters.directoryId.rawValue] = directoryId
-        }
-
-        if let directoryPath {
-            parameters[APIParameters.directoryPath.rawValue] = directoryPath
-        }
-
-        if let fileId {
-            parameters[APIParameters.fileId.rawValue] = fileId
+            apiParameters[.createdAt] = formattedDate
         }
 
         let route: Endpoint = .startSession(drive: drive)
@@ -123,9 +115,9 @@ public extension DriveApiFetcher {
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: nil,
-                              body: .POSTParameters(parameters))
+                              body: .POSTParameters(apiParameters.toParameters()))
 
-        let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadSession = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -136,7 +128,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadLiveSession = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadLiveSession = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -147,7 +139,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: Bool = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -158,7 +150,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedFile = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -168,17 +160,17 @@ public extension DriveApiFetcher {
                      chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
         let chunkHash = "sha256:\(chunk.SHA256DigestString)"
-        let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
-                                      APIParameters.chunkSize.rawValue: chunkSize,
-                                      APIParameters.chunkHash.rawValue: chunkHash]
+        let parameters: APIParameters = [.chunkNumber: chunkNumber,
+                                         .chunkSize: chunkSize,
+                                         .chunkHash: chunkHash]
         let route: Endpoint = .appendChunk(drive: drive, sessionToken: sessionToken)
 
         let request = Request(method: .POST,
                               route: route,
-                              GETParameters: parameters,
+                              GETParameters: parameters.toParameters(),
                               body: .requestBody(chunk))
 
-        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
         return result
     }
 
@@ -187,15 +179,75 @@ public extension DriveApiFetcher {
                 chunkNumber: Int,
                 chunk: Data) async throws -> UploadedChunk {
         let chunkSize = chunk.count
-        let parameters: Parameters = [APIParameters.chunkSize.rawValue: chunkSize]
+        let parameters: APIParameters = [.chunkSize: chunkSize]
         let route: Endpoint = .upload(drive: drive)
 
         let request = Request(method: .POST,
                               route: route,
-                              GETParameters: parameters,
+                              GETParameters: parameters.toParameters(),
                               body: .none)
 
-        let result: UploadedChunk = try await self.dispatch(request, networkStack: .Alamofire)
+        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
         return result
+    }
+
+    func directUpload(drive: AbstractDrive,
+                      totalSize: UInt64,
+                      fileName: String,
+                      conflictResolution: ConflictOption? = nil,
+                      lastModifiedAt: Date? = nil,
+                      createdAt: Date? = nil,
+                      directoryId: Int? = nil,
+                      directoryPath: String? = nil,
+                      fileData: Data) async throws -> File {
+        // Parameter validation
+        guard directoryId != nil || directoryPath != nil else {
+            throw DriveError.UploadSessionError.invalidDirectoryParameters
+        }
+
+        guard !fileName.isEmpty else {
+            throw DriveError.UploadSessionError.fileNameIsEmpty
+        }
+
+        // Build parameters
+        var apiParameters: APIParameters = [
+            .driveId: drive.id,
+            .totalSize: totalSize,
+            .fileName: fileName,
+            .conflict: conflictResolution?.rawValue,
+            .directoryId: directoryId,
+            .directoryPath: directoryPath
+        ]
+        if let lastModifiedAt {
+            let formattedDate = "\(Int64(lastModifiedAt.timeIntervalSince1970))"
+            apiParameters[.lastModifiedAt] = formattedDate
+        }
+
+        if let createdAt {
+            let formattedDate = "\(Int64(createdAt.timeIntervalSince1970))"
+            apiParameters[.createdAt] = formattedDate
+        }
+
+        let route: Endpoint = .directUpload(drive: drive)
+
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: apiParameters.toParameters(),
+                              body: .requestBody(fileData))
+
+        let result: File = try await dispatch(request, networkStack: .Alamofire)
+        return result
+    }
+}
+
+extension Dictionary where Key == APIUploadParameter, Value == Any? {
+    func toParameters() -> Parameters {
+        var parameters = Parameters()
+        for rawParameter in self {
+            if let nonNilValue = rawParameter.value {
+                parameters[rawParameter.key.rawValue] = nonNilValue
+            }
+        }
+        return parameters
     }
 }
