@@ -187,7 +187,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
 
         Log.uploadOperation("Processing an empty file ufid:\(uploadFileId)")
-        let driveFileManager = try getDriveFileManager()
+        let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
         let drive = driveFileManager.drive
 
         let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
@@ -357,6 +357,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
 
+            // TODO: Remove once we use session identifier
+            let accessToken = self.accountManager.getTokenForUserId(file.userId)?.accessToken
+            guard let accessToken else {
+                Log.uploadOperation("no access token found", level: .error)
+                throw ErrorDomain.unableToBuildRequest
+            }
+
             // Schedule all the chunks to be uploaded
             for chunkToUpload: UploadingChunkTask in chunksToUpload {
                 try self.checkCancelation()
@@ -374,7 +381,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     let request = try self.buildRequest(chunkNumber: chunkNumber,
                                                         chunkSize: chunkSize,
                                                         chunkHash: chunkHashHeader,
-                                                        sessionToken: uploadingSessionTask.token)
+                                                        sessionToken: uploadingSessionTask.token,
+                                                        driveId: file.driveId,
+                                                        accessToken: accessToken)
                     let uploadTask = self.urlSession.uploadTask(with: request,
                                                                 fromFile: chunkUrl,
                                                                 completionHandler: self.uploadCompletion)
@@ -429,7 +438,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Clean the remote session, and current tasks, to free resources.
             self.enqueueCatching {
-                let driveFileManager = try self.getDriveFileManager()
+                let driveFileManager = try self.getDriveFileManager(for: file.driveId, userId: file.userId)
                 let abstractToken = AbstractTokenWrapper(token: sessionTokenToCancel)
                 let apiFetcher = driveFileManager.apiFetcher
                 let drive = driveFileManager.drive
@@ -506,18 +515,27 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
 
         var uploadSessionToken: String?
+        var userId: Int?
+        var driveId: Int?
         try? transactionWithFile { file in
             uploadSessionToken = file.uploadingSession?.token
+            userId = file.userId
+            driveId = file.driveId
         }
 
-        guard let uploadSessionToken else {
+        guard let uploadSessionToken, let userId, let driveId else {
             Log.uploadOperation("No existing session to close ufid:\(uploadFileId)")
             return
         }
 
-        var driveFileManager: DriveFileManager!
+        var driveFileManager: DriveFileManager?
         await catching {
-            driveFileManager = try self.getDriveFileManager()
+            driveFileManager = try self.getDriveFileManager(for: driveId, userId: userId)
+        }
+
+        guard let driveFileManager else {
+            Log.uploadOperation("No drivefilemanager to close ufid:\(uploadFileId)")
+            return
         }
 
         let apiFetcher = driveFileManager.apiFetcher
@@ -672,6 +690,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         var modificationDate: Date?
         var creationDate: Date?
         var relativePath: String?
+        var userId: Int?
+        var driveId: Int?
         try transactionWithFile { file in
             fileName = file.name
             conflictOption = file.conflictOption
@@ -684,9 +704,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             modificationDate = file.modificationDate
             creationDate = file.creationDate
             relativePath = file.relativePath
+
+            userId = file.userId
+            driveId = file.driveId
         }
 
-        guard let fileName, let conflictOption, let parentDirectoryId, let fileUrl else {
+        guard let fileName, let conflictOption, let parentDirectoryId, let fileUrl, let userId, let driveId else {
             throw ErrorDomain.unableToBuildRequest
         }
 
@@ -710,7 +733,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("got ranges:\(ranges.count) ufid:\(uploadFileId)")
 
         // Get a valid APIV2 UploadSession
-        let driveFileManager = try getDriveFileManager()
+        let driveFileManager = try getDriveFileManager(for: driveId, userId: userId)
         let apiFetcher = driveFileManager.apiFetcher
         let drive = driveFileManager.drive
 
@@ -762,12 +785,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     private func buildRequest(chunkNumber: Int64,
                               chunkSize: Int64,
                               chunkHash: String,
-                              sessionToken: String) throws -> URLRequest {
+                              sessionToken: String,
+                              driveId: Int,
+                              accessToken: String) throws -> URLRequest {
         // TODO: Remove accessToken when API updated
-        let accessToken = accountManager.currentAccount.token.accessToken
         let headerParameters = ["Authorization": "Bearer \(accessToken)"]
         let headers = HTTPHeaders(headerParameters)
-        let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: accountManager.currentDriveId),
+        let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: driveId),
                                            sessionToken: AbstractTokenWrapper(token: sessionToken))
 
         guard var urlComponents = URLComponents(url: route.url, resolvingAgainstBaseURL: false) else {

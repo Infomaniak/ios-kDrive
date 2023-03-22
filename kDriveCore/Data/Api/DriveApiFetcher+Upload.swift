@@ -36,6 +36,7 @@ enum APIUploadParameter: String {
     case chunkNumber = "chunk_number"
     case chunkSize = "chunk_size"
     case chunkHash = "chunk_hash"
+    case with
 }
 
 public extension DriveApiFetcher {
@@ -216,7 +217,8 @@ public extension DriveApiFetcher {
             .fileName: fileName,
             .conflict: conflictResolution?.rawValue,
             .directoryId: directoryId,
-            .directoryPath: directoryPath
+            .directoryPath: directoryPath,
+            .with: FileWith.chunkUpload.toQueryItem().value
         ]
         if let lastModifiedAt {
             let formattedDate = "\(Int64(lastModifiedAt.timeIntervalSince1970))"

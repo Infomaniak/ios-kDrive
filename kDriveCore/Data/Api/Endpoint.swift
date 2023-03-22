@@ -602,7 +602,7 @@ public extension Endpoint {
     // Direct Upload
 
     static func directUpload(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/\(drive.id)/upload", queryItems: [FileWith.chunkUpload.toQueryItem()])
+        return .drive.appending(path: "/\(drive.id)/upload")
     }
 
     // Chunk Upload
