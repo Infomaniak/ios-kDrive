@@ -437,8 +437,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             // Clean the remote session, and current tasks, to free resources.
+            let driveId = file.driveId
+            let userId = file.userId
             self.enqueueCatching {
-                let driveFileManager = try self.getDriveFileManager(for: file.driveId, userId: file.userId)
+                let driveFileManager = try self.getDriveFileManager(for: driveId, userId: userId)
                 let abstractToken = AbstractTokenWrapper(token: sessionTokenToCancel)
                 let apiFetcher = driveFileManager.apiFetcher
                 let drive = driveFileManager.drive
