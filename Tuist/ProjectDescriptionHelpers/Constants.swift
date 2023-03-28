@@ -21,7 +21,7 @@ import ProjectDescription
 public enum Constants {
     public static let baseSettings = SettingsDictionary()
         .automaticCodeSigning(devTeam: "864VDCS2QY")
-        .currentProjectVersion("4")
+        .currentProjectVersion("5")
         .marketingVersion("4.3.0")
 
     public static let deploymentTarget = DeploymentTarget.iOS(targetVersion: "13.4", devices: [.iphone, .ipad])
