@@ -126,31 +126,3 @@ public enum Logging {
         #endif
     }
 }
-
-// MARK: - Token logging
-
-extension ApiToken {
-    var truncatedAccessToken: String {
-        truncateToken(accessToken)
-    }
-
-    var truncatedRefreshToken: String {
-        truncateToken(refreshToken)
-    }
-
-    private func truncateToken(_ token: String) -> String {
-        String(token.prefix(4) + "-*****-" + token.suffix(4))
-    }
-
-    func generateBreadcrumb(level: SentryLevel, message: String, keychainError: OSStatus = noErr) -> Breadcrumb {
-        let crumb = Breadcrumb(level: level, category: "Token")
-        crumb.type = level == .info ? "info" : "error"
-        crumb.message = message
-        crumb.data = ["User id": userId,
-                      "Expiration date": expirationDate.timeIntervalSince1970,
-                      "Access Token": truncatedAccessToken,
-                      "Refresh Token": truncatedRefreshToken,
-                      "Keychain error code": keychainError]
-        return crumb
-    }
-}
