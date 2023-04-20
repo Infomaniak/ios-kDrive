@@ -1085,7 +1085,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                                    "File name": file.name,
                                    "File size": file.size,
                                    "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+                SentrySDK.addBreadcrumb(breadcrumb)
             }
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
