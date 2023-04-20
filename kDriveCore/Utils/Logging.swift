@@ -80,7 +80,7 @@ public enum Logging {
 
     private static func initSentry() {
         SentrySDK.start { options in
-            options.dsn = "https://fb65d0bcbf4c4ce795a6e1c1a964da28@sentry.infomaniak.com/4"
+            options.dsn = "https://ba647a8cc6fc437baf797d2eb33dfafb@sentry-mobile.infomaniak.com/6"
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
                 event.context?["AppState"] = [
