@@ -190,7 +190,9 @@ public class FileImportHelper {
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
-            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && itemProvider.registeredTypeIdentifiers.count == 1 {
+            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier)
+                && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
+                && itemProvider.registeredTypeIdentifiers.count == 1 {
                 let childProgress = getURL(from: itemProvider) { [weak self] result in
                     self?.handleLoadObjectResult(result, for: itemProvider,
                                                  uti: .internetShortcut,
@@ -203,7 +205,8 @@ public class FileImportHelper {
             } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
                 && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
                 && itemProvider.canLoadObject(ofClass: String.self) {
-                let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { [weak self] result in
+                let childProgress = getTextFile(from: itemProvider,
+                                                typeIdentifier: UTI.plainText.identifier) { [weak self] result in
                     self?.handleLoadObjectResult(result, for: itemProvider,
                                                  uti: .plainText,
                                                  extension: UTI.plainText.preferredFilenameExtension ?? "txt",
@@ -227,9 +230,9 @@ public class FileImportHelper {
                                                                       userPreferredPhotoFormat: userPreferredPhotoFormat) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
-                    case let .success((filename, fileURL)):
+                    case .success((let filename, let fileURL)):
                         items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
-                    case let .failure(error):
+                    case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting file: \(error)")
                         errorCount += 1
                     }
@@ -307,7 +310,13 @@ public class FileImportHelper {
         try upload(data: data, name: name, uti: uti, drive: drive, directory: directory)
     }
 
-    public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
+    public func upload(
+        scan: VNDocumentCameraScan,
+        name: String,
+        scanType: ScanFileFormat,
+        in directory: File,
+        drive: Drive
+    ) throws {
         if !directory.capabilities.canUpload {
             throw ImportError.accessDenied
         }
@@ -360,23 +369,30 @@ public class FileImportHelper {
                                         importedItems: inout [ImportedFile],
                                         errorCount: inout Int) {
         switch result {
-        case let .success(fileURL):
+        case .success(let fileURL):
             let name = (itemProvider.suggestedName ?? FileImportHelper.getDefaultFileName()).addingExtension(`extension`)
 
             importedItems.append(ImportedFile(name: name, path: fileURL, uti: uti))
-        case let .failure(error):
+        case .failure(let error):
             DDLogError("[FileImportHelper] Error while getting image: \(error)")
             errorCount += 1
         }
     }
 
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
+    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider,
+                                            userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider
+            .hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
             if let userPreferredPhotoFormat = userPreferredPhotoFormat,
                itemProvider.hasItemConformingToTypeIdentifier(userPreferredPhotoFormat.uti.identifier) {
                 return userPreferredPhotoFormat.uti.identifier
             }
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
+        }
+
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier) && !itemProvider
+            .hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+            return UTI.fileURL.identifier
         }
 
         if itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
