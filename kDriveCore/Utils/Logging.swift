@@ -80,7 +80,7 @@ public enum Logging {
 
     private static func initSentry() {
         SentrySDK.start { options in
-            options.dsn = "https://fb65d0bcbf4c4ce795a6e1c1a964da28@sentry.infomaniak.com/4"
+            options.dsn = "https://ba647a8cc6fc437baf797d2eb33dfafb@sentry-mobile.infomaniak.com/6"
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
                 event.context?["AppState"] = [
@@ -124,33 +124,5 @@ public enum Logging {
                 DDLogError("Failed to copy debug informations \(error)")
             }
         #endif
-    }
-}
-
-// MARK: - Token logging
-
-extension ApiToken {
-    var truncatedAccessToken: String {
-        truncateToken(accessToken)
-    }
-
-    var truncatedRefreshToken: String {
-        truncateToken(refreshToken)
-    }
-
-    private func truncateToken(_ token: String) -> String {
-        String(token.prefix(4) + "-*****-" + token.suffix(4))
-    }
-
-    func generateBreadcrumb(level: SentryLevel, message: String, keychainError: OSStatus = noErr) -> Breadcrumb {
-        let crumb = Breadcrumb(level: level, category: "Token")
-        crumb.type = level == .info ? "info" : "error"
-        crumb.message = message
-        crumb.data = ["User id": userId,
-                      "Expiration date": expirationDate.timeIntervalSince1970,
-                      "Access Token": truncatedAccessToken,
-                      "Refresh Token": truncatedRefreshToken,
-                      "Keychain error code": keychainError]
-        return crumb
     }
 }
