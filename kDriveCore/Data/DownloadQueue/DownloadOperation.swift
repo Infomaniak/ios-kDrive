@@ -233,19 +233,15 @@ public class DownloadOperation: Operation, DownloadOperationable {
     }
 
     private func moveFileToCache(downloadPath: URL) throws {
-        if FileManager.default.fileExists(atPath: file.localUrl.path) {
-            try? FileManager.default.removeItem(at: file.localUrl)
-        }
-        try FileManager.default.createDirectory(at: file.localUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.removeItemIfExists(at: file.localContainerUrl)
+        try FileManager.default.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
         try FileManager.default.moveItem(at: downloadPath, to: file.localUrl)
         file.applyLastModifiedDateToLocalFile()
     }
 
     private func moveFileToTemporaryDirectory(downloadPath: URL) throws {
-        if FileManager.default.fileExists(atPath: file.temporaryUrl.path) {
-            try? FileManager.default.removeItem(at: file.temporaryUrl)
-        }
-        try FileManager.default.createDirectory(at: file.temporaryUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.removeItemIfExists(at: file.temporaryContainerUrl)
+        try FileManager.default.createDirectory(at: file.temporaryContainerUrl, withIntermediateDirectories: true)
         try FileManager.default.moveItem(at: downloadPath, to: file.temporaryUrl)
     }
 
