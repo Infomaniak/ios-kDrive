@@ -25,4 +25,10 @@ public extension FileManager {
         }
         try copyItem(at: sourceUrl, to: destinationUrl)
     }
+
+    func removeItemIfExists(at url: URL) throws {
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
+    }
 }
