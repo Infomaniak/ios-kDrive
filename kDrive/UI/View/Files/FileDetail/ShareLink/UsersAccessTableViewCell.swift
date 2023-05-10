@@ -61,7 +61,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
             detailLabel.text = user.email
             notAcceptedView.isHidden = true
-            externalUserView.isHidden = user.role == .external
+            externalUserView.isHidden = user.role != .external
             accessoryImageView.isHidden = blocked
         } else if let invitation = element as? ExternInvitationFileAccess {
             detailLabel.text = invitation.email
