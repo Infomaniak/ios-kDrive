@@ -237,6 +237,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
         try FileManager.default.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
         try FileManager.default.moveItem(at: downloadPath, to: file.localUrl)
         file.applyLastModifiedDateToLocalFile()
+        file.excludeFileFromSystemBackup()
     }
 
     private func moveFileToTemporaryDirectory(downloadPath: URL) throws {

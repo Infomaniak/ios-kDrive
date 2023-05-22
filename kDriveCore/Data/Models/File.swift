@@ -140,7 +140,8 @@ public enum ConvertedType: String, CaseIterable {
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
-    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .form, .pdf, .presentation, .spreadsheet, .text, .url)
+    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .form, .pdf, .presentation, .spreadsheet, .text,
+                                                             .url)
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
@@ -172,23 +173,68 @@ public enum SortType: String {
     public var value: SortTypeValue {
         switch self {
         case .nameAZ:
-            return SortTypeValue(apiValue: "path", order: "asc", translation: KDriveResourcesStrings.Localizable.sortNameAZ, realmKeyPath: \.sortedName)
+            return SortTypeValue(
+                apiValue: "path",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortNameAZ,
+                realmKeyPath: \.sortedName
+            )
         case .nameZA:
-            return SortTypeValue(apiValue: "path", order: "desc", translation: KDriveResourcesStrings.Localizable.sortNameZA, realmKeyPath: \.sortedName)
+            return SortTypeValue(
+                apiValue: "path",
+                order: "desc",
+                translation: KDriveResourcesStrings.Localizable.sortNameZA,
+                realmKeyPath: \.sortedName
+            )
         case .older:
-            return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.lastModifiedAt)
+            return SortTypeValue(
+                apiValue: "last_modified_at",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortOlder,
+                realmKeyPath: \.lastModifiedAt
+            )
         case .newer:
-            return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.lastModifiedAt)
+            return SortTypeValue(
+                apiValue: "last_modified_at",
+                order: "desc",
+                translation: KDriveResourcesStrings.Localizable.sortRecent,
+                realmKeyPath: \.lastModifiedAt
+            )
         case .biggest:
-            return SortTypeValue(apiValue: "size", order: "desc", translation: KDriveResourcesStrings.Localizable.sortBigger, realmKeyPath: \.size)
+            return SortTypeValue(
+                apiValue: "size",
+                order: "desc",
+                translation: KDriveResourcesStrings.Localizable.sortBigger,
+                realmKeyPath: \.size
+            )
         case .smallest:
-            return SortTypeValue(apiValue: "size", order: "asc", translation: KDriveResourcesStrings.Localizable.sortSmaller, realmKeyPath: \.size)
+            return SortTypeValue(
+                apiValue: "size",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortSmaller,
+                realmKeyPath: \.size
+            )
         case .ext:
-            return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveResourcesStrings.Localizable.sortExtension, realmKeyPath: \.name)
+            return SortTypeValue(
+                apiValue: "files",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortExtension,
+                realmKeyPath: \.name
+            )
         case .olderDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
+            return SortTypeValue(
+                apiValue: "deleted_at",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortOlder,
+                realmKeyPath: \.deletedAt
+            )
         case .newerDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
+            return SortTypeValue(
+                apiValue: "deleted_at",
+                order: "desc",
+                translation: KDriveResourcesStrings.Localizable.sortRecent,
+                realmKeyPath: \.deletedAt
+            )
         case .type:
             return SortTypeValue(apiValue: "type", order: "asc", translation: "", realmKeyPath: \.type)
         }
@@ -279,7 +325,7 @@ public class FileVersion: EmbeddedObject, Codable {
 public class File: Object, Codable {
     @LazyInjectService var accountManager: AccountManageable
 
-    @Persisted(primaryKey: true) public var id: Int = 0
+    @Persisted(primaryKey: true) public var id = 0
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int
@@ -419,7 +465,8 @@ public class File: Object, Codable {
     }
 
     public var temporaryContainerUrl: URL {
-        return FileManager.default.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
+        return FileManager.default.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true)
+            .appendingPathComponent("\(id)", isDirectory: true)
     }
 
     public var localUrl: URL {
@@ -427,8 +474,10 @@ public class File: Object, Codable {
     }
 
     public var localContainerUrl: URL {
-        let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants.cacheDirectoryURL
-        return directory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
+        let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants
+            .cacheDirectoryURL
+        return directory.appendingPathComponent("\(driveId)", isDirectory: true)
+            .appendingPathComponent("\(id)", isDirectory: true)
     }
 
     public var imagePreviewUrl: URL {
@@ -436,7 +485,8 @@ public class File: Object, Codable {
     }
 
     public var thumbnailURL: URL {
-        let endpoint: Endpoint = isTrashed ? .trashThumbnail(file: self, at: lastModifiedAt) : .thumbnail(file: self, at: lastModifiedAt)
+        let endpoint: Endpoint = isTrashed ? .trashThumbnail(file: self, at: lastModifiedAt) :
+            .thumbnail(file: self, at: lastModifiedAt)
         return endpoint.url
     }
 
@@ -495,7 +545,8 @@ public class File: Object, Codable {
     }
 
     public var isLocalVersionOlderThanRemote: Bool {
-        if let modificationDate = try? FileManager.default.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date, modificationDate >= lastModifiedAt {
+        if let modificationDate = try? FileManager.default.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date,
+           modificationDate >= lastModifiedAt {
             return false
         }
         return true
@@ -570,6 +621,13 @@ public class File: Object, Codable {
         try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
     }
 
+    public func excludeFileFromSystemBackup() {
+        var metadata = URLResourceValues()
+        metadata.isExcludedFromBackup = true
+        var pathCopy = localUrl
+        try? pathCopy.setResourceValues(metadata)
+    }
+
     public func getFileSize(withVersion: Bool = false) -> String? {
         let value = withVersion ? version?.totalSize : size
         if let value = value {
@@ -613,7 +671,8 @@ public class File: Object, Codable {
         if isDirectory {
             identifier = id == DriveFileManager.constants.rootID ? .rootContainer : NSFileProviderItemIdentifier("\(id)")
         } else if let parentId = parent?.id {
-            identifier = parentId == DriveFileManager.constants.rootID ? .rootContainer : NSFileProviderItemIdentifier("\(parentId)")
+            identifier = parentId == DriveFileManager.constants
+                .rootID ? .rootContainer : NSFileProviderItemIdentifier("\(parentId)")
         } else {
             identifier = .rootContainer
         }

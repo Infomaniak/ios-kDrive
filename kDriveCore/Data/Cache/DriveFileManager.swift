@@ -46,7 +46,7 @@ public class DriveFileManager {
         public let rootDocumentsURL: URL
         public let importDirectoryURL: URL
         public let groupDirectoryURL: URL
-        public let cacheDirectoryURL: URL
+        public var cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
         public let currentUploadDbVersion: UInt64 = 14
@@ -86,8 +86,11 @@ public class DriveFileManager {
             }
         }
 
+        /// Path of the upload DB
+        public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
+
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
-            fileURL: rootDocumentsURL.appendingPathComponent("uploads.realm"),
+            fileURL: uploadsRealmURL,
             schemaVersion: currentUploadDbVersion,
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
@@ -101,6 +104,19 @@ public class DriveFileManager {
 
         /// realm db used for file upload
         public var uploadsRealm: Realm {
+            // Change file metadata after creation of the realm file.
+            defer {
+                // Exclude "upload file realm" and custom cache from system backup.
+                var metadata = URLResourceValues()
+                metadata.isExcludedFromBackup = true
+                do {
+                    try uploadsRealmURL.setResourceValues(metadata)
+                    try cacheDirectoryURL.setResourceValues(metadata)
+                } catch {
+                    DDLogError(error)
+                }
+            }
+
             do {
                 return try Realm(configuration: uploadsRealmConfiguration)
             } catch {
@@ -208,12 +224,16 @@ public class DriveFileManager {
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
 
+    /// Path of the main Realm DB
+    var realmURL: URL
+
     init(drive: Drive, apiFetcher: DriveApiFetcher) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        let realmName = "\(drive.userId)-\(drive.id).realm"
+        realmURL = DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
+            fileURL: realmURL,
             schemaVersion: 9,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
@@ -366,6 +386,19 @@ public class DriveFileManager {
     }
 
     public func getRealm() -> Realm {
+        // Change file metadata after creation of the realm file.
+        defer {
+            // Exclude "file cache realm" from system backup.
+            var metadata = URLResourceValues()
+            metadata.isExcludedFromBackup = true
+            do {
+                try realmURL.setResourceValues(metadata)
+            } catch {
+                DDLogError(error)
+            }
+            DDLogInfo("realmURL : \(realmURL)")
+        }
+
         do {
             return try Realm(configuration: realmConfiguration)
         } catch {
