@@ -90,9 +90,9 @@ class SearchFilesViewModel: FileListViewModel {
     }
 
     var isDisplayingSearchResults: Bool {
-        let isDisplayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
-        _isDisplayingSearchResults = isDisplayingSearchResults
-        return isDisplayingSearchResults
+        let displayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
+        _isDisplayingSearchResults = displayingSearchResults
+        return displayingSearchResults
     }
     
     /// Detect flip/flop of displayed content type
@@ -323,16 +323,16 @@ class SearchViewController: FileListViewController {
 
     private func bindSearchViewModel() {
         recentSearchesViewModel.onReloadWithChangeset = { [unowned self] stagedChangeset, setData in
-            if self.searchViewModel.isDisplayingSearchResults == false {
-                self.collectionView.reload(using: stagedChangeset, setData: setData)
-                self.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
-                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
-                                                   count: self.recentSearchesViewModel.recentSearches.count ?? 0)
-            } else {
+            if self.searchViewModel.isDisplayingSearchResults {
                 // We don't reload the collection view but we still need to set the data
                 if let data = stagedChangeset.last?.data {
                     setData(data)
                 }
+            } else {
+                self.collectionView.reload(using: stagedChangeset, setData: setData)
+                self.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
+                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
+                                                  count: self.recentSearchesViewModel.recentSearches.count)
             }
         }
 
