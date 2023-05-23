@@ -163,7 +163,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         switch Self.sections[indexPath.section] {
         case .header:
             let wrapperCell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let cell = wrapperCell.initWith(cell: FloatingPanelSortOptionTableViewCell.self)
+            let cell = wrapperCell.reuse(withCellType: FloatingPanelSortOptionTableViewCell.self)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.buttonChangeFolderColor
             cell.isHeader = true
             cell.iconImageView.image = KDriveResourcesAsset.colorBucket.image

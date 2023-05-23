@@ -19,7 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 
-public class Mutex {
+public final class Mutex {
     let semaphore = DispatchSemaphore(value: 1)
 
     @discardableResult
@@ -37,7 +37,7 @@ public class Mutex {
  in an interval, it will use the most recent call's parameters when eventually calling the wrapped block (after `interval`
  has elapsed since the last call to the wrapped function) - i.e. calls are not queued and may get 'lost' by being superseded
  by a newer call. */
-public class Throttler<T> {
+public final class Throttler<T> {
     public typealias Handler = (T) -> Void
 
     public var handler: Handler?

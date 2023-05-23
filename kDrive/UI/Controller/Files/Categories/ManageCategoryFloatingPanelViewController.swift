@@ -172,7 +172,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         switch Section.allCases[indexPath.section] {
         case .header:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let tableCell = cell.initWith(cell: CategoryTableViewCell.self)
+            let tableCell = cell.reuse(withCellType: CategoryTableViewCell.self)
             tableCell.initWithPositionAndShadow()
             tableCell.configure(with: category, showMoreButton: false)
             tableCell.leadingConstraint.constant = 0

@@ -55,19 +55,63 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         let image: UIImage
         let segue: String?
 
-        static let store = MenuAction(name: KDriveResourcesStrings.Localizable.upgradeOfferTitle, image: KDriveResourcesAsset.upgradeKdrive.image, segue: "toStoreSegue")
+        static let store = MenuAction(
+            name: KDriveResourcesStrings.Localizable.upgradeOfferTitle,
+            image: KDriveResourcesAsset.upgradeKdrive.image,
+            segue: "toStoreSegue"
+        )
 
-        static let sharedWithMe = MenuAction(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle, image: KDriveResourcesAsset.folderSelect2.image, segue: "toDriveListSegue")
-        static let lastModifications = MenuAction(name: KDriveResourcesStrings.Localizable.lastEditsTitle, image: KDriveResourcesAsset.clock.image, segue: nil)
-        static let images = MenuAction(name: KDriveResourcesStrings.Localizable.galleryTitle, image: KDriveResourcesAsset.images.image, segue: nil)
-        static let myShares = MenuAction(name: KDriveResourcesStrings.Localizable.mySharesTitle, image: KDriveResourcesAsset.folderSelect.image, segue: nil)
-        static let offline = MenuAction(name: KDriveResourcesStrings.Localizable.offlineFileTitle, image: KDriveResourcesAsset.availableOffline.image, segue: nil)
-        static let trash = MenuAction(name: KDriveResourcesStrings.Localizable.trashTitle, image: KDriveResourcesAsset.delete.image, segue: nil)
+        static let sharedWithMe = MenuAction(
+            name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+            image: KDriveResourcesAsset.folderSelect2.image,
+            segue: "toDriveListSegue"
+        )
+        static let lastModifications = MenuAction(
+            name: KDriveResourcesStrings.Localizable.lastEditsTitle,
+            image: KDriveResourcesAsset.clock.image,
+            segue: nil
+        )
+        static let images = MenuAction(
+            name: KDriveResourcesStrings.Localizable.galleryTitle,
+            image: KDriveResourcesAsset.images.image,
+            segue: nil
+        )
+        static let myShares = MenuAction(
+            name: KDriveResourcesStrings.Localizable.mySharesTitle,
+            image: KDriveResourcesAsset.folderSelect.image,
+            segue: nil
+        )
+        static let offline = MenuAction(
+            name: KDriveResourcesStrings.Localizable.offlineFileTitle,
+            image: KDriveResourcesAsset.availableOffline.image,
+            segue: nil
+        )
+        static let trash = MenuAction(
+            name: KDriveResourcesStrings.Localizable.trashTitle,
+            image: KDriveResourcesAsset.delete.image,
+            segue: nil
+        )
 
-        static let switchUser = MenuAction(name: KDriveResourcesStrings.Localizable.switchUserTitle, image: KDriveResourcesAsset.userSwitch.image, segue: "switchUserSegue")
-        static let parameters = MenuAction(name: KDriveResourcesStrings.Localizable.settingsTitle, image: KDriveResourcesAsset.parameters.image, segue: "toParameterSegue")
-        static let help = MenuAction(name: KDriveResourcesStrings.Localizable.supportTitle, image: KDriveResourcesAsset.supportLink.image, segue: nil)
-        static let disconnect = MenuAction(name: KDriveResourcesStrings.Localizable.buttonLogout, image: KDriveResourcesAsset.logout.image, segue: nil)
+        static let switchUser = MenuAction(
+            name: KDriveResourcesStrings.Localizable.switchUserTitle,
+            image: KDriveResourcesAsset.userSwitch.image,
+            segue: "switchUserSegue"
+        )
+        static let parameters = MenuAction(
+            name: KDriveResourcesStrings.Localizable.settingsTitle,
+            image: KDriveResourcesAsset.parameters.image,
+            segue: "toParameterSegue"
+        )
+        static let help = MenuAction(
+            name: KDriveResourcesStrings.Localizable.supportTitle,
+            image: KDriveResourcesAsset.supportLink.image,
+            segue: nil
+        )
+        static let disconnect = MenuAction(
+            name: KDriveResourcesStrings.Localizable.buttonLogout,
+            image: KDriveResourcesAsset.logout.image,
+            segue: nil
+        )
     }
 
     private var sections: [Section] = []
@@ -118,24 +162,27 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
 
     private func observeUploadCount() {
         guard driveFileManager != nil else { return }
+
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self, self.tableView?.window != nil else { return }
-            if let index = self.sections.firstIndex(where: { $0 == .uploads }),
-               let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell {
-                if self.uploadCountManager.uploadCount > 0 {
-                    // Update cell
-                    cell.setUploadCount(self.uploadCountManager.uploadCount)
-                } else {
-                    // Delete cell
-                    self.updateTableContent()
-                    self.tableView.reloadData()
-                }
-            } else {
-                // Add cell
-                self.updateTableContent()
-                self.tableView.reloadData()
+            guard let self = self else { return }
+
+            guard let index = self.sections.firstIndex(where: { $0 == .uploads }),
+                  let cell = self.tableView?.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell,
+                  self.uploadCountManager.uploadCount > 0 else {
+                // Delete / Add cell
+                self.reloadData()
+                return
             }
+
+            // Update cell
+            cell.setUploadCount(self.uploadCountManager.uploadCount)
         }
+    }
+
+    private func reloadData() {
+        updateTableContent()
+        // We need to make sure the table view is not nil as observation might call us early
+        tableView?.reloadData()
     }
 
     private func updateTableContent() {
@@ -258,7 +305,8 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             )
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle,
-                                                message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName),
+                                                message: KDriveResourcesStrings.Localizable
+                                                    .alertRemoveUserDescription(currentAccount.user.displayName),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
                 self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
@@ -296,8 +344,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         let drives = accountManager.drives
         let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives,
-                                                                                                          selectedOption: driveFileManager.drive,
-                                                                                                          headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
+                                                                                                          selectedOption: driveFileManager
+                                                                                                              .drive,
+                                                                                                          headerTitle: KDriveResourcesStrings
+                                                                                                              .Localizable
+                                                                                                              .buttonSwitchDrive,
                                                                                                           delegate: self)
         present(floatingPanelViewController, animated: true)
     }
