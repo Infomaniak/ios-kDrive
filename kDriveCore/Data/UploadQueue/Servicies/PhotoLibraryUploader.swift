@@ -116,6 +116,7 @@ public class PhotoLibraryUploader {
             let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+
             Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
             let assets = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
@@ -181,6 +182,13 @@ public class PhotoLibraryUploader {
                 }
                 correctName += "." + fileExtension.lowercased()
 
+                // Check if picture uploaded before
+                guard !assetAlreadyUploaded(assetName: correctName, realm: realm) else {
+                    Log.photoLibraryUploader("Asset ignored because it was uploaded before")
+                    return
+                }
+
+                // Store a new upload file in base
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
@@ -208,6 +216,19 @@ public class PhotoLibraryUploader {
             }
             try? realm.commitWrite()
         }
+    }
+
+    func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
+        // TODO: optimize query
+        guard let object = realm.objects(UploadFile.self).first(where: { uploadFile in
+            uploadFile.type == .phAsset
+                && uploadFile.name == assetName
+                && uploadFile.uploadDate != nil
+        }) else {
+            return false
+        }
+
+        return true
     }
 
     /// Wrapper type to map an "UploadFile" to a "PHAsset"
