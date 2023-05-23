@@ -26,6 +26,8 @@ import UIKit
 
 extension String: Differentiable {}
 
+// MARK: - RecentSearchesViewModel
+
 @MainActor
 class RecentSearchesViewModel {
     private let maxRecentSearch = 5
@@ -63,25 +65,45 @@ class RecentSearchesViewModel {
     }
 }
 
+// MARK: - SearchFilesViewModel
+
 class SearchFilesViewModel: FileListViewModel {
     typealias SearchCompletedCallback = (String?) -> Void
-    typealias FiltersChangedCallback = () -> Void
+    typealias Callback = () -> Void
 
     private let minSearchCount = 1
 
     var onSearchCompleted: SearchCompletedCallback?
-    var onFiltersChanged: FiltersChangedCallback?
+    var onFiltersChanged: Callback?
+    var onContentTypeChanged: Callback?
 
     var currentSearchText: String? {
-        didSet { search() }
+        didSet {
+            search()
+        }
     }
 
     var filters: Filters {
-        didSet { search() }
+        didSet {
+            search()
+        }
     }
 
     var isDisplayingSearchResults: Bool {
-        (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
+        let displayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
+        _isDisplayingSearchResults = displayingSearchResults
+        return displayingSearchResults
+    }
+    
+    /// Detect flip/flop of displayed content type
+    var _isDisplayingSearchResults = true {
+        willSet {
+            guard newValue != _isDisplayingSearchResults else {
+                return
+            }
+
+            onContentTypeChanged?()
+        }
     }
 
     private var currentTask: Task<Void, Never>?
@@ -167,7 +189,8 @@ class SearchFilesViewModel: FileListViewModel {
 
     override func barButtonPressed(type: FileListBarButtonType) {
         if type == .searchFilters {
-            let navigationController = SearchFiltersViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let navigationController = SearchFiltersViewController
+                .instantiateInNavigationController(driveFileManager: driveFileManager)
             let searchFiltersViewController = navigationController.topViewController as? SearchFiltersViewController
             searchFiltersViewController?.filters = filters
             searchFiltersViewController?.delegate = self
@@ -208,13 +231,15 @@ class SearchFilesViewModel: FileListViewModel {
     }
 }
 
-// MARK: - Search filters delegate
+// MARK: Search filters delegate
 
 extension SearchFilesViewModel: SearchFiltersDelegate {
     func didUpdateFilters(_ filters: Filters) {
         self.filters = filters
     }
 }
+
+// MARK: - SearchViewController
 
 class SearchViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.search }
@@ -224,7 +249,10 @@ class SearchViewController: FileListViewController {
 
     private let minSearchCount = 1
     private let searchHeaderIdentifier = "BasicTitleCollectionReusableView"
-    private let sectionTitles = [KDriveResourcesStrings.Localizable.searchLastTitle, KDriveResourcesStrings.Localizable.searchFilterTitle]
+    private let sectionTitles = [
+        KDriveResourcesStrings.Localizable.searchLastTitle,
+        KDriveResourcesStrings.Localizable.searchFilterTitle
+    ]
     private let searchController = UISearchController(searchResultsController: nil)
     private let recentSearchesViewModel = RecentSearchesViewModel()
 
@@ -239,7 +267,11 @@ class SearchViewController: FileListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        collectionView.register(UINib(nibName: searchHeaderIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier)
+        collectionView.register(
+            UINib(nibName: searchHeaderIdentifier, bundle: nil),
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: searchHeaderIdentifier
+        )
         collectionView.register(cellView: RecentSearchCollectionViewCell.self)
         collectionView.keyboardDismissMode = .onDrag
 
@@ -290,22 +322,27 @@ class SearchViewController: FileListViewController {
     // MARK: - Private methods
 
     private func bindSearchViewModel() {
-        recentSearchesViewModel.onReloadWithChangeset = { [weak self] stagedChangeset, setData in
-            if self?.searchViewModel.isDisplayingSearchResults == false {
-                self?.collectionView.reload(using: stagedChangeset, setData: setData)
-                self?.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
-                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
-                                                   count: self?.recentSearchesViewModel.recentSearches.count ?? 0)
-            } else {
+        recentSearchesViewModel.onReloadWithChangeset = { [unowned self] stagedChangeset, setData in
+            if self.searchViewModel.isDisplayingSearchResults {
                 // We don't reload the collection view but we still need to set the data
                 if let data = stagedChangeset.last?.data {
                     setData(data)
                 }
+            } else {
+                self.collectionView.reload(using: stagedChangeset, setData: setData)
+                self.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
+                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
+                                                  count: self.recentSearchesViewModel.recentSearches.count)
             }
         }
 
-        searchViewModel.onFiltersChanged = { [weak self] in
-            guard let self = self, self.isViewLoaded else { return }
+        // Clear collection view on content type changed without animation
+        searchViewModel.onContentTypeChanged = { [unowned self] in
+            self.collectionView.reloadData()
+        }
+
+        searchViewModel.onFiltersChanged = { [unowned self] in
+            guard self.isViewLoaded else { return }
             // Update UI
             self.collectionView.refreshControl = self.searchViewModel.isDisplayingSearchResults ? self.refreshControl : nil
             self.collectionViewLayout?.sectionHeadersPinToVisibleBounds = self.searchViewModel.isDisplayingSearchResults
@@ -316,9 +353,9 @@ class SearchViewController: FileListViewController {
             self.collectionView.performBatchUpdates(nil)
         }
 
-        searchViewModel.onSearchCompleted = { [weak self] searchTerm in
+        searchViewModel.onSearchCompleted = { [unowned self] searchTerm in
             guard let searchTerm = searchTerm else { return }
-            self?.recentSearchesViewModel.add(searchTerm: searchTerm)
+            self.recentSearchesViewModel.add(searchTerm: searchTerm)
         }
     }
 
@@ -355,11 +392,19 @@ class SearchViewController: FileListViewController {
         }
     }
 
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
         if searchViewModel.isDisplayingSearchResults {
             return super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
         } else {
-            let titleHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier, for: indexPath) as! BasicTitleCollectionReusableView
+            let titleHeaderView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: UICollectionView.elementKindSectionHeader,
+                withReuseIdentifier: searchHeaderIdentifier,
+                for: indexPath
+            ) as! BasicTitleCollectionReusableView
             titleHeaderView.titleLabel.text = sectionTitles[indexPath.section]
             return titleHeaderView
         }
@@ -370,7 +415,10 @@ class SearchViewController: FileListViewController {
             return super.collectionView(collectionView, cellForItemAt: indexPath)
         } else {
             let cell = collectionView.dequeueReusableCell(type: RecentSearchCollectionViewCell.self, for: indexPath)
-            cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == self.collectionView(collectionView, numberOfItemsInSection: indexPath.section) - 1)
+            cell.initStyle(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == self.collectionView(collectionView, numberOfItemsInSection: indexPath.section) - 1
+            )
             let recentSearch = recentSearchesViewModel.recentSearches[indexPath.row]
             cell.configureWith(recentSearch: recentSearch)
             cell.removeButtonHandler = { [weak self] _ in
@@ -394,15 +442,27 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Collection view delegate flow layout
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         if searchViewModel.isDisplayingSearchResults {
             return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
         } else {
             if recentSearchesViewModel.recentSearches.isEmpty {
                 return .zero
             } else {
-                let view = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: IndexPath(row: 0, section: section))
-                return view.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
+                let view = self.collectionView(
+                    collectionView,
+                    viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
+                    at: IndexPath(row: 0, section: section)
+                )
+                return view.systemLayoutSizeFitting(
+                    CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
+                    withHorizontalFittingPriority: .required,
+                    verticalFittingPriority: .fittingSizeLevel
+                )
             }
         }
     }
@@ -422,7 +482,11 @@ class SearchViewController: FileListViewController {
 
     // MARK: - UICollectionViewDragDelegate
 
-    override func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        itemsForBeginning session: UIDragSession,
+        at indexPath: IndexPath
+    ) -> [UIDragItem] {
         if searchViewModel.isDisplayingSearchResults {
             return super.collectionView(collectionView, itemsForBeginning: session, at: indexPath)
         } else {
