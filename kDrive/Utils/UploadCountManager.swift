@@ -17,20 +17,22 @@
  */
 
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
-import InfomaniakDI
 
-class UploadCountManager {
+final class UploadCountManager {
     @LazyInjectService var uploadQueue: UploadQueue
 
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
-    private let observeQueue = DispatchQueue(label: "com.infomaniak.drive.uploadThrottler", qos: .utility, autoreleaseFrequency: .workItem)
+    private let observeQueue = DispatchQueue(label: "com.infomaniak.drive.uploadThrottler",
+                                             qos: .utility, autoreleaseFrequency: .workItem)
 
     private lazy var userId = driveFileManager.drive.userId
-    private lazy var driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
+    private lazy var driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance
+        .getDrives(for: userId, sharedWithMe: true).map(\.id)
 
     public var uploadCount = 0
 
@@ -61,15 +63,17 @@ class UploadCountManager {
             self?.didUploadCountChange()
         }
 
-        uploadsObserver = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds).observe(on: observeQueue) { [weak self] change in
-            switch change {
-            case .initial(let results):
-                self?.uploadCountThrottler.call(results.count)
-            case .update(let results, deletions: _, insertions: _, modifications: _):
-                self?.uploadCountThrottler.call(results.count)
-            case .error(let error):
-                print(error)
+        uploadsObserver = uploadQueue
+            .getUploadingFiles(userId: userId, driveIds: driveIds)
+            .observe(on: observeQueue) { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.uploadCountThrottler.call(results.count)
+                case .update(let results, deletions: _, insertions: _, modifications: _):
+                    self?.uploadCountThrottler.call(results.count)
+                case .error(let error):
+                    print(error)
+                }
             }
-        }
     }
 }

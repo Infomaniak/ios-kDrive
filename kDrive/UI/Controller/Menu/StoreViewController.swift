@@ -246,7 +246,7 @@ class StoreViewController: UICollectionViewController {
         switch sections[indexPath.section] {
         case .warning:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let tableCell = cell.initWith(cell: AlertTableViewCell.self)
+            let tableCell = cell.reuse(withCellType: AlertTableViewCell.self)
             tableCell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
             return cell
         case .offers:
@@ -258,7 +258,7 @@ class StoreViewController: UICollectionViewController {
         case .storage:
             // Will need to convert this to collection view cell when we actually use it
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let tableCell = cell.initWith(cell: StoreStorageTableViewCell.self)
+            let tableCell = cell.reuse(withCellType: StoreStorageTableViewCell.self)
             tableCell.delegate = self
             return cell
         case .nextButton:
