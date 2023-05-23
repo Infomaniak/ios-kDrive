@@ -26,6 +26,9 @@ import Sentry
 public class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
 
+    /// Threshold value to trigger cleaning of photo roll if enabled
+    static let removeAssetsCountThreshold = 10
+
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
@@ -93,9 +96,19 @@ public class PhotoLibraryUploader {
             if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
                 typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
             } else if settings.syncPicturesEnabled {
-                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+                typesPredicates.append(NSPredicate(
+                    format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)",
+                    PHAssetMediaType.image.rawValue,
+                    PHAssetMediaSubtype.photoScreenshot.rawValue,
+                    PHAssetMediaSubtype.photoScreenshot.rawValue
+                ))
             } else if settings.syncScreenshotsEnabled {
-                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+                typesPredicates.append(NSPredicate(
+                    format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)",
+                    PHAssetMediaType.image.rawValue,
+                    PHAssetMediaSubtype.photoScreenshot.rawValue,
+                    PHAssetMediaSubtype.photoScreenshot.rawValue
+                ))
             }
             if settings.syncVideosEnabled {
                 typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
@@ -133,7 +146,11 @@ public class PhotoLibraryUploader {
                 if let assetCollectionIdentifier = PhotoLibrarySaver.instance.assetCollection?.localIdentifier {
                     let options = PHFetchOptions()
                     options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
-                    let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .album, options: options)
+                    let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(
+                        asset,
+                        with: .album,
+                        options: options
+                    )
                     // swiftlint:disable:next empty_count
                     if assetCollections.count > 0 {
                         Log.photoLibraryUploader("Asset ignored because it already originates from kDrive")
@@ -171,7 +188,8 @@ public class PhotoLibraryUploader {
                     name: correctName,
                     asset: asset,
                     conflictOption: .version,
-                    priority: initial ? .low : .high)
+                    priority: initial ? .low : .high
+                )
                 if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()
                 }
@@ -192,9 +210,12 @@ public class PhotoLibraryUploader {
         }
     }
 
+    /// Wrapper type to map an "UploadFile" to a "PHAsset"
     public struct PicturesAssets {
-        /// This array should only be accessed from the BackgroundRealm thread
-        public let files: [UploadFile]
+        /// Collection of primary keys of "UploadFile"
+        public let filesPrimaryKeys: [String]
+
+        /// collection of PHAsset
         public let assets: PHFetchResult<PHAsset>
     }
 
@@ -206,32 +227,45 @@ public class PhotoLibraryUploader {
             return nil
         }
 
-        let removeAssetsCountThreshold = 10
-
-        var toRemoveFiles = [UploadFile]()
+        var toRemoveFileIDs = [String]()
         var toRemoveAssets = PHFetchResult<PHAsset>()
         BackgroundRealm.uploads.execute { realm in
-            toRemoveFiles = Array(uploadQueue.getUploadedFiles(using: realm).filter("rawType = %@", UploadFileType.phAsset.rawValue))
-            toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFiles.map(\.id), options: nil)
+            toRemoveFileIDs = uploadQueue
+                .getUploadedFiles(using: realm)
+                .filter("rawType = %@", UploadFileType.phAsset.rawValue)
+                .map { $0.id }
+            toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFileIDs, options: nil)
         }
 
-        guard toRemoveAssets.count >= removeAssetsCountThreshold && uploadQueue.operationQueue.operationCount == 0 else {
+        guard toRemoveAssets.count >= Self.removeAssetsCountThreshold,
+              uploadQueue.operationQueue.operationCount == 0 else {
             return nil
         }
 
-        return PicturesAssets(files: toRemoveFiles, assets: toRemoveAssets)
+        return PicturesAssets(filesPrimaryKeys: toRemoveFileIDs, assets: toRemoveAssets)
     }
 
     public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
-        Log.photoLibraryUploader("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems)")
+        Log.photoLibraryUploader("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems.filesPrimaryKeys.count)")
         PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.deleteAssets(toRemoveItems.assets)
         } completionHandler: { success, _ in
-            if success {
-                BackgroundRealm.uploads.execute { realm in
-                    try? realm.write {
-                        realm.delete(toRemoveItems.files)
+            guard success else {
+                return
+            }
+
+            BackgroundRealm.uploads.execute { realm in
+                do {
+                    try realm.write {
+                        let filesInContext = realm
+                            .objects(UploadFile.self)
+                            .filter("id IN %@", toRemoveItems.filesPrimaryKeys)
+                            .filter { $0.isInvalidated == false }
+                        realm.delete(filesInContext)
                     }
+                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary success")
+                } catch {
+                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary error:\(error)", level: .error)
                 }
             }
         }
