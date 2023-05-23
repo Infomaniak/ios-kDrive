@@ -262,7 +262,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self = self else { return }
 
-            guard let cell = getUploadsInProgressTableViewCell(),
+            guard let cell = self.getUploadsInProgressTableViewCell(),
                   self.uploadCountManager.uploadCount > 0 else {
                 // Delete / Add cell
                 self.reloadTopRows()
