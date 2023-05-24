@@ -29,12 +29,15 @@ public class PhotoLibraryUploader {
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
+    /// Predicate to quickly narrow down on uploaded assets
+    static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
+
+    private let dateFormatter = DateFormatter()
+
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
     }
-
-    private let dateFormatter = DateFormatter()
 
     public init() {
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
@@ -116,6 +119,7 @@ public class PhotoLibraryUploader {
             let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+
             Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
             let assets = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
@@ -181,6 +185,13 @@ public class PhotoLibraryUploader {
                 }
                 correctName += "." + fileExtension.lowercased()
 
+                // Check if picture uploaded before
+                guard !assetAlreadyUploaded(assetName: correctName, realm: realm) else {
+                    Log.photoLibraryUploader("Asset ignored because it was uploaded before")
+                    return
+                }
+
+                // Store a new upload file in base
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
@@ -208,6 +219,19 @@ public class PhotoLibraryUploader {
             }
             try? realm.commitWrite()
         }
+    }
+
+    func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
+        // Roughly 10x faster than '.first(where:'
+        guard realm
+            .objects(UploadFile.self)
+            .filter(Self.uploadedAssetPredicate)
+            .filter(NSPredicate(format: "name = %@", assetName))
+            .first != nil else {
+            return false
+        }
+
+        return true
     }
 
     /// Wrapper type to map an "UploadFile" to a "PHAsset"
