@@ -218,16 +218,36 @@ public class PhotoLibraryUploader {
         }
     }
 
+    static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
+
     func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
-        // TODO: optimize query
-        guard let object = realm.objects(UploadFile.self).first(where: { uploadFile in
+        let start = CFAbsoluteTimeGetCurrent()
+        let obj = realm
+            .objects(UploadFile.self)
+            .filter(Self.uploadedAssetPredicate)
+            .filter(NSPredicate(format: "name = %@", assetName))
+            .first
+        // run your work
+        let diff = CFAbsoluteTimeGetCurrent() - start
+        
+        let start2 = CFAbsoluteTimeGetCurrent()
+        guard let _ = realm.objects(UploadFile.self).first(where: { uploadFile in
             uploadFile.type == .phAsset
                 && uploadFile.name == assetName
                 && uploadFile.uploadDate != nil
         }) else {
             return false
         }
+        let diff2 = CFAbsoluteTimeGetCurrent() - start2
 
+        if diff > diff2 {
+            print("•>")
+        } else {
+            print("•<")
+        }
+
+        print("diff:\(diff)")
+        print("diff2:\(diff2)")
         return true
     }
 
