@@ -29,12 +29,15 @@ public class PhotoLibraryUploader {
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
+    /// Predicate to quickly narrow down on uploaded assets
+    static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
+
+    private let dateFormatter = DateFormatter()
+
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
     }
-
-    private let dateFormatter = DateFormatter()
 
     public init() {
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
@@ -218,36 +221,16 @@ public class PhotoLibraryUploader {
         }
     }
 
-    static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
-
     func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
-        let start = CFAbsoluteTimeGetCurrent()
-        let obj = realm
+        // Roughly 10x faster than '.first(where:'
+        guard realm
             .objects(UploadFile.self)
             .filter(Self.uploadedAssetPredicate)
             .filter(NSPredicate(format: "name = %@", assetName))
-            .first
-        // run your work
-        let diff = CFAbsoluteTimeGetCurrent() - start
-        
-        let start2 = CFAbsoluteTimeGetCurrent()
-        guard let _ = realm.objects(UploadFile.self).first(where: { uploadFile in
-            uploadFile.type == .phAsset
-                && uploadFile.name == assetName
-                && uploadFile.uploadDate != nil
-        }) else {
+            .first != nil else {
             return false
         }
-        let diff2 = CFAbsoluteTimeGetCurrent() - start2
 
-        if diff > diff2 {
-            print("•>")
-        } else {
-            print("•<")
-        }
-
-        print("diff:\(diff)")
-        print("diff2:\(diff2)")
         return true
     }
 
