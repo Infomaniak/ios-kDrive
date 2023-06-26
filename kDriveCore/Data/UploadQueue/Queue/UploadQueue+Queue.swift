@@ -194,7 +194,7 @@ extension UploadQueue: UploadQueueable {
         concurrentQueue.async {
             if let operation = self.keyedUploadOperations.getObject(forKey: uploadFileId) {
                 Log.uploadQueue("operation to cancel:\(operation)")
-                operation.cleanUploadFileSession(file: nil)
+                operation.cleanUploadFileSession(file: nil, remotely: true)
                 operation.cancel()
             }
             self.keyedUploadOperations.removeObject(forKey: uploadFileId)

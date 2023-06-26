@@ -423,7 +423,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return fileUrl
     }
 
-    public func cleanUploadFileSession(file: UploadFile? = nil) {
+    public func cleanUploadFileSession(file: UploadFile? = nil, remotely: Bool = true) {
         Log.uploadOperation("Clean uploading session for \(uploadFileId)")
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
@@ -433,6 +433,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             file.progress = nil
 
             guard let sessionTokenToCancel = sessionTokenToCancel else {
+                return
+            }
+
+            guard remotely == true else {
                 return
             }
 
