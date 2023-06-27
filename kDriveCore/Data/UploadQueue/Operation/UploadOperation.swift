@@ -436,7 +436,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 return
             }
 
-            guard remotely == true else {
+            guard remotely else {
                 return
             }
 
