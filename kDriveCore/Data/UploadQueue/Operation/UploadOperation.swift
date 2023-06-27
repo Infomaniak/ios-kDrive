@@ -423,7 +423,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return fileUrl
     }
 
-    public func cleanUploadFileSession(file: UploadFile? = nil) {
+    public func cleanUploadFileSession(file: UploadFile? = nil, remotely: Bool = true) {
         Log.uploadOperation("Clean uploading session for \(uploadFileId)")
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
@@ -436,16 +436,24 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 return
             }
 
+            guard remotely else {
+                return
+            }
+
             // Clean the remote session, and current tasks, to free resources.
             let driveId = file.driveId
             let userId = file.userId
-            self.enqueueCatching {
-                let driveFileManager = try self.getDriveFileManager(for: driveId, userId: userId)
+            self.enqueue {
+                guard let driveFileManager = try? self.getDriveFileManager(for: driveId, userId: userId) else {
+                    return
+                }
+
                 let abstractToken = AbstractTokenWrapper(token: sessionTokenToCancel)
                 let apiFetcher = driveFileManager.apiFetcher
                 let drive = driveFileManager.drive
 
-                let cancelledSession = try await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
+                // We try to cancel the upload session, we do not watch results
+                let cancelledSession = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
                 Log.uploadOperation("remove cancelledSession:\(cancelledSession) for \(self.uploadFileId)")
 
                 for (key, value) in self.uploadTasks {

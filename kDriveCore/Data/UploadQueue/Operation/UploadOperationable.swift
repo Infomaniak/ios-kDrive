@@ -67,7 +67,8 @@ public protocol UploadOperationable: Operationable {
 
     /// Clean the local session and send an API call to free the session
     /// - Parameter file: An UploadFile within a transaction
-    func cleanUploadFileSession(file: UploadFile?)
+    /// - Parameter remotely: try to delete remote session object if true
+    func cleanUploadFileSession(file: UploadFile?, remotely: Bool)
 
     /// Process errors and terminate the operation
     func end()
