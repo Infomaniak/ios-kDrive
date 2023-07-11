@@ -191,21 +191,27 @@ extension OnlyOfficeViewController: WKUIDelegate {
 // MARK: - WKNavigationDelegate
 
 extension OnlyOfficeViewController: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if let url = navigationAction.request.url {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            dismiss()
+            return
+        }
+
+        // If destination is an href open in default browser
             if navigationAction.navigationType == .linkActivated {
                 UIApplication.shared.open(url)
                 decisionHandler(.cancel)
                 return
             }
 
-            let urlString = url.absoluteString
-            if url == file.officeUrl
-                || urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
-                // Validate all requests that will be displayed in an iframe
-                || navigationAction.targetFrame?.isMainFrame == false {
-                // HACK: Print/download a file if the URL contains "/output." because `shouldPerformDownload` doesn't work
-                if urlString.contains("/output.") {
+        // If destination is a file download or print. This is a hack because `shouldPerformDownload` doesn't work
+        if url.host == ApiEnvironment.current.onlyOfficeDocumentServerHost,
+           url.path.contains("/output.") {
                     if UIPrintInteractionController.canPrint(url) {
                         let printController = UIPrintInteractionController()
                         printController.printingItem = url
@@ -216,12 +222,18 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
                     }
                     decisionHandler(.cancel)
                     return
-                } else {
+        }
+
+        // If destination is inside OnlyOffice or login route
+        if url == file.officeUrl
+            || url.absoluteString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
+            // Validate all requests that will be displayed in an iframe
+            || navigationAction.targetFrame?.isMainFrame == false {
                     decisionHandler(.allow)
                     return
                 }
-            }
-        }
+
+        // If destination is outside OnlyOffice close ViewController
         decisionHandler(.cancel)
         dismiss()
     }
