@@ -168,9 +168,20 @@ class OnlyOfficeViewController: UIViewController {
 // MARK: - WKUIDelegate
 
 extension OnlyOfficeViewController: WKUIDelegate {
-    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        // Open target="_blank" links in Safari
-        if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
+    func webView(
+        _ webView: WKWebView,
+        createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction,
+        windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        guard let url = navigationAction.request.url else { return nil }
+        if navigationAction.targetFrame == nil && url.host == ApiEnvironment.current.driveHost {
+            dismiss()
+            return nil
+        }
+
+        // Open target="_blank" links outside drive in Safari
+        if navigationAction.targetFrame == nil {
             UIApplication.shared.open(url)
         }
         return nil
