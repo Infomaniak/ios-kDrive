@@ -190,7 +190,10 @@ public class FileImportHelper {
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
-            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && itemProvider.registeredTypeIdentifiers.count == 1 {
+
+            let underlyingType = itemProvider.underlyingType
+            switch underlyingType {
+            case .isURL:
                 let childProgress = getURL(from: itemProvider) { [weak self] result in
                     self?.handleLoadObjectResult(result, for: itemProvider,
                                                  uti: .internetShortcut,
@@ -200,10 +203,9 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
-                && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
-                && itemProvider.canLoadObject(ofClass: String.self) {
-                let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { [weak self] result in
+            case .isText:
+                let childProgress = getTextFile(from: itemProvider,
+                                                typeIdentifier: UTI.plainText.identifier) { [weak self] result in
                     self?.handleLoadObjectResult(result, for: itemProvider,
                                                  uti: .plainText,
                                                  extension: UTI.plainText.preferredFilenameExtension ?? "txt",
@@ -212,8 +214,7 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if itemProvider.registeredTypeIdentifiers.count == 1 &&
-                itemProvider.registeredTypeIdentifiers.first == UTI.image.identifier {
+            case .isUIImage:
                 let childProgress = getImage(from: itemProvider) { [weak self] result in
                     self?.handleLoadObjectResult(result, for: itemProvider,
                                                  uti: .image,
@@ -223,20 +224,43 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider,
-                                                                      userPreferredPhotoFormat: userPreferredPhotoFormat) {
+            case .isImageData:
+                guard let typeIdentifier = getPreferredImageTypeIdentifier(
+                    for: itemProvider,
+                    userPreferredPhotoFormat: userPreferredPhotoFormat
+                ) else {
+                    progress.completedUnitCount += perItemUnitCount
+                    errorCount += 1
+                    dispatchGroup.leave()
+                    continue
+                }
+
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
-                    case let .success((filename, fileURL)):
+                    case .success((let filename, let fileURL)):
                         items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
-                    case let .failure(error):
-                        DDLogError("[FileImportHelper] Error while getting file: \(error)")
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting imageData file: \(error)")
                         errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else {
+            case .isCompressedData(let typeIdentifier):
+                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
+                    switch result {
+                    case .success((let filename, let fileURL)):
+                        items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting compressedData file: \(error)")
+                        errorCount += 1
+                    }
+                    dispatchGroup.leave()
+                }
+                progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
+            case .isDirectory:
+                fatalError("isDirectory")
+            case .isMiscellaneous(_), .none:
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 progress.completedUnitCount += perItemUnitCount
                 errorCount += 1
@@ -307,7 +331,13 @@ public class FileImportHelper {
         try upload(data: data, name: name, uti: uti, drive: drive, directory: directory)
     }
 
-    public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
+    public func upload(
+        scan: VNDocumentCameraScan,
+        name: String,
+        scanType: ScanFileFormat,
+        in directory: File,
+        drive: Drive
+    ) throws {
         if !directory.capabilities.canUpload {
             throw ImportError.accessDenied
         }
@@ -360,18 +390,20 @@ public class FileImportHelper {
                                         importedItems: inout [ImportedFile],
                                         errorCount: inout Int) {
         switch result {
-        case let .success(fileURL):
+        case .success(let fileURL):
             let name = (itemProvider.suggestedName ?? FileImportHelper.getDefaultFileName()).addingExtension(`extension`)
 
             importedItems.append(ImportedFile(name: name, path: fileURL, uti: uti))
-        case let .failure(error):
+        case .failure(let error):
             DDLogError("[FileImportHelper] Error while getting image: \(error)")
             errorCount += 1
         }
     }
 
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
+    private func getPreferredImageTypeIdentifier(for itemProvider: NSItemProvider,
+                                                 userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider
+            .hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
             if let userPreferredPhotoFormat = userPreferredPhotoFormat,
                itemProvider.hasItemConformingToTypeIdentifier(userPreferredPhotoFormat.uti.identifier) {
                 return userPreferredPhotoFormat.uti.identifier
@@ -379,11 +411,7 @@ public class FileImportHelper {
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
         }
 
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
-            // We cannot upload folders so we ignore them
-            return nil
-        }
-        return itemProvider.registeredTypeIdentifiers.first
+        return nil
     }
 
     private func getURL(from itemProvider: NSItemProvider, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
