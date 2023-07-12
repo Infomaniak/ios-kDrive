@@ -26,7 +26,7 @@ import QuickLookThumbnailing
 import RealmSwift
 import VisionKit
 
-public class ImportedFile {
+public final class ImportedFile: CustomStringConvertible {
     public var name: String
     public var path: URL
     public var uti: UTI
@@ -44,6 +44,18 @@ public class ImportedFile {
         return FilePreviewHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
             completion(image)
         }
+    }
+
+    // MARK: CustomStringConvertible
+
+    public var description: String {
+        """
+        <\(String(describing: self)) :
+        name:\(name)
+        path:\(path)
+        uti:\(uti)
+        >
+        """
     }
 }
 
@@ -128,8 +140,9 @@ public enum ImportError: LocalizedError {
     }
 }
 
-public class FileImportHelper {
-    @LazyInjectService var uploadQueue: UploadQueue
+public final class FileImportHelper {
+    @LazyInjectService private var uploadQueue: UploadQueue
+    @LazyInjectService private var pathProvider: AppGroupPathProvidable
 
     private let imageCompression = 0.8
 
@@ -187,6 +200,8 @@ public class FileImportHelper {
         let dispatchGroup = DispatchGroup()
         var items = [ImportedFile]()
         var errorCount = 0
+        let fileManager = FileManager.default
+        let coordinator = NSFileCoordinator()
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
@@ -259,8 +274,41 @@ public class FileImportHelper {
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             case .isDirectory:
-                fatalError("isDirectory")
-            case .isMiscellaneous(_), .none:
+                
+                // TODO abstract zipping a folder to share with ikMail
+                
+                let tmpDirectoryURL = pathProvider.tmpDirectoryURL
+                let tempURL = tmpDirectoryURL.appendingPathComponent("\(UUID().uuidString).zip")
+
+                _ = itemProvider.loadObject(ofClass: URL.self) { path, error in
+                    guard error == nil, let path: URL = path else {
+                        progress.completedUnitCount += perItemUnitCount
+                        errorCount += 1
+                        dispatchGroup.leave()
+                        return
+                    }
+
+                    // compress content of folder and move it somewhere we can safely store it for upload
+                    var error: NSError?
+                    coordinator.coordinate(readingItemAt: path, options: [.forUploading], error: &error) { zipURL in
+                        do {
+                            let zipName = zipURL.lastPathComponent
+                            try fileManager.moveItem(at: zipURL, to: tempURL)
+
+                            items.append(ImportedFile(name: zipName, path: tempURL, uti: UTI.zip))
+                            progress.completedUnitCount += perItemUnitCount
+                            dispatchGroup.leave()
+                        } catch {
+                            DDLogError("could not move zipped file:\(error)")
+                            progress.completedUnitCount += perItemUnitCount
+                            errorCount += 1
+                            dispatchGroup.leave()
+                            return
+                        }
+                    }
+                }
+
+            case .isMiscellaneous, .none:
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 progress.completedUnitCount += perItemUnitCount
                 errorCount += 1

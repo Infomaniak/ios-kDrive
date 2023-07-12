@@ -27,6 +27,8 @@ import os.log
 /// Something that can associate a custom identifier with a `Factory`
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
+private let appGroupName = "group.com.infomaniak.drive"
+
 /// Something that setups the service factories
 enum FactoryService {
     static func setupDependencyInjection() {
@@ -121,6 +123,12 @@ enum FactoryService {
             },
             Factory(type: FileProviderExtensionAdditionalStatable.self) { _, _ in
                 FileProviderExtensionAdditionalState()
+            },
+            Factory(type: AppGroupPathProvidable.self) { _, _ in
+                guard let provider = AppGroupPathProvider(appGroupIdentifier: appGroupName) else {
+                    fatalError("unable to initialise AppGroupPathProvider securely")
+                }
+                return provider
             }
         ]
         return services

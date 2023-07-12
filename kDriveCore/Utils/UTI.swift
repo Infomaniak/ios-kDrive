@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// TODO: Move to Core /all
+
 import Foundation
 import MobileCoreServices
 
@@ -47,7 +49,128 @@ public struct UTI: RawRepresentable {
     }
 
     public init?(_ identifier: String) {
-        let allUTIs: [UTI] = [.item, .content, .compositeContent, .diskImage, .data, .directory, .resolvable, .symbolicLink, .executable, .mountPoint, .aliasFile, .urlBookmarkData, .url, .fileURL, .text, .plainText, .utf8PlainText, .utf16ExternalPlainText, .utf16PlainText, .delimitedText, .commaSeparatedText, .tabSeparatedText, .utf8TabSeparatedText, .rtf, .html, .xml, .sourceCode, .assemblyLanguageSource, .cSource, .objectiveCSource, .swiftSource, .cPlusPlusSource, .objectiveCPlusPlusSource, .cHeader, .cPlusPlusHeader, .script, .appleScript, .osaScript, .osaScriptBundle, .javaScript, .shellScript, .perlScript, .pythonScript, .rubyScript, .phpScript, .json, .propertyList, .xmlPropertyList, .binaryPropertyList, .pdf, .rtfd, .flatRTFD, .webArchive, .image, .jpeg, .tiff, .gif, .png, .icns, .bmp, .ico, .rawImage, .svg, .livePhoto, .heic, .threeDContent, .audiovisualContent, .movie, .video, .audio, .quickTimeMovie, .mpeg, .mpeg2Video, .mpeg2TransportStream, .mp3, .mpeg4Movie, .mpeg4Audio, .appleProtectedMPEG4Audio, .appleProtectedMPEG4Video, .avi, .aiff, .wav, .midi, .playlist, .m3uPlaylist, .folder, .volume, .package, .bundle, .pluginBundle, .spotlightImporter, .quickLookGenerator, .xpcService, .framework, .application, .applicationBundle, .unixExecutable, .exe, .systemPreferencesPane, .archive, .gzip, .bz2, .zip, .spreadsheet, .presentation, .database, .message, .contact, .vCard, .toDoItem, .calendarEvent, .emailMessage, .internetLocation, .internetShortcut, .font, .bookmark, .pkcs12, .x509Certificate, .epub, .log]
+        let allUTIs: [UTI] = [
+            .item,
+            .content,
+            .compositeContent,
+            .diskImage,
+            .data,
+            .directory,
+            .resolvable,
+            .symbolicLink,
+            .executable,
+            .mountPoint,
+            .aliasFile,
+            .urlBookmarkData,
+            .url,
+            .fileURL,
+            .text,
+            .plainText,
+            .utf8PlainText,
+            .utf16ExternalPlainText,
+            .utf16PlainText,
+            .delimitedText,
+            .commaSeparatedText,
+            .tabSeparatedText,
+            .utf8TabSeparatedText,
+            .rtf,
+            .html,
+            .xml,
+            .sourceCode,
+            .assemblyLanguageSource,
+            .cSource,
+            .objectiveCSource,
+            .swiftSource,
+            .cPlusPlusSource,
+            .objectiveCPlusPlusSource,
+            .cHeader,
+            .cPlusPlusHeader,
+            .script,
+            .appleScript,
+            .osaScript,
+            .osaScriptBundle,
+            .javaScript,
+            .shellScript,
+            .perlScript,
+            .pythonScript,
+            .rubyScript,
+            .phpScript,
+            .json,
+            .propertyList,
+            .xmlPropertyList,
+            .binaryPropertyList,
+            .pdf,
+            .rtfd,
+            .flatRTFD,
+            .webArchive,
+            .image,
+            .jpeg,
+            .tiff,
+            .gif,
+            .png,
+            .icns,
+            .bmp,
+            .ico,
+            .rawImage,
+            .svg,
+            .livePhoto,
+            .heic,
+            .threeDContent,
+            .audiovisualContent,
+            .movie,
+            .video,
+            .audio,
+            .quickTimeMovie,
+            .mpeg,
+            .mpeg2Video,
+            .mpeg2TransportStream,
+            .mp3,
+            .mpeg4Movie,
+            .mpeg4Audio,
+            .appleProtectedMPEG4Audio,
+            .appleProtectedMPEG4Video,
+            .avi,
+            .aiff,
+            .wav,
+            .midi,
+            .playlist,
+            .m3uPlaylist,
+            .folder,
+            .volume,
+            .package,
+            .bundle,
+            .pluginBundle,
+            .spotlightImporter,
+            .quickLookGenerator,
+            .xpcService,
+            .framework,
+            .application,
+            .applicationBundle,
+            .unixExecutable,
+            .exe,
+            .systemPreferencesPane,
+            .archive,
+            .gzip,
+            .bz2,
+            .zip,
+            .spreadsheet,
+            .presentation,
+            .database,
+            .message,
+            .contact,
+            .vCard,
+            .toDoItem,
+            .calendarEvent,
+            .emailMessage,
+            .internetLocation,
+            .internetShortcut,
+            .font,
+            .bookmark,
+            .pkcs12,
+            .x509Certificate,
+            .epub,
+            .log
+        ]
         guard let rawValue = allUTIs.first(where: { $0.identifier == identifier })?.rawValue else {
             return nil
         }
@@ -55,14 +178,22 @@ public struct UTI: RawRepresentable {
     }
 
     public init?(filenameExtension: String, conformingTo supertype: UTI = .data) {
-        guard let rawValue = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, filenameExtension as CFString, supertype.identifier as CFString)?.takeRetainedValue() else {
+        guard let rawValue = UTTypeCreatePreferredIdentifierForTag(
+            kUTTagClassFilenameExtension,
+            filenameExtension as CFString,
+            supertype.identifier as CFString
+        )?.takeRetainedValue() else {
             return nil
         }
         self.rawValue = rawValue
     }
 
     public init?(mimeType: String, conformingTo supertype: UTI = .data) {
-        guard let rawValue = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType as CFString, supertype.identifier as CFString)?.takeRetainedValue() else {
+        guard let rawValue = UTTypeCreatePreferredIdentifierForTag(
+            kUTTagClassMIMEType,
+            mimeType as CFString,
+            supertype.identifier as CFString
+        )?.takeRetainedValue() else {
             return nil
         }
         self.rawValue = rawValue
@@ -247,6 +378,9 @@ public struct UTI: RawRepresentable {
     public static let m3uPlaylist = UTI(rawValue: kUTTypeM3UPlaylist)
 
     public static let folder = UTI(rawValue: kUTTypeFolder)
+
+    /// Files.app folder type
+    public static let filesAppFolder = UTI(rawValue: "dyn.age8u" as CFString)
 
     public static let volume = UTI(rawValue: kUTTypeVolume)
 

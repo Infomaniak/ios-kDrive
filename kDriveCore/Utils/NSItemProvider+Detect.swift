@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// TODO: Move to Core /all
+
 import Foundation
 
 /// Extending NSItemProvider for detecting file type
@@ -47,8 +49,9 @@ extension NSItemProvider {
             && !hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
             && canLoadObject(ofClass: String.self) {
             return .isText
-        } else if hasItemConformingToTypeIdentifier(UTI.directory.identifier) ||
-            hasItemConformingToTypeIdentifier(UTI.folder.identifier) {
+        } else if hasItemConformingToTypeIdentifier(UTI.directory.identifier)
+            || hasItemConformingToTypeIdentifier(UTI.folder.identifier)
+            || hasItemConformingToTypeIdentifier(UTI.filesAppFolder.identifier) {
             return .isDirectory
         } else if hasItemConformingToTypeIdentifier(UTI.zip.identifier)
             || hasItemConformingToTypeIdentifier(UTI.bz2.identifier)
