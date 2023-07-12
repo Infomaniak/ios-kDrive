@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
@@ -144,8 +145,18 @@ class SaveFileViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         updateButton()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -193,13 +204,15 @@ class SaveFileViewController: UIViewController {
     private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = fileImportHelper.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
-            self?.items = importedFiles
-            self?.errorCount = errorCount
-            DispatchQueue.main.async {
-                self?.updateTableViewAfterImport()
+        importProgress = fileImportHelper
+            .importItems(itemProviders,
+                         userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+                self?.items = importedFiles
+                self?.errorCount = errorCount
+                DispatchQueue.main.async {
+                    self?.updateTableViewAfterImport()
+                }
             }
-        }
     }
 
     private func updateButton() {
@@ -243,12 +256,14 @@ class SaveFileViewController: UIViewController {
     }
 
     class func instantiate(driveFileManager: DriveFileManager?) -> SaveFileViewController {
-        let viewController = Storyboard.saveFile.instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
+        let viewController = Storyboard.saveFile
+            .instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }
 
-    class func instantiateInNavigationController(driveFileManager: DriveFileManager?, file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
+                                                 file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
         if let file = file {
             saveViewController.items = [file]
@@ -290,7 +305,10 @@ extension SaveFileViewController: UITableViewDataSource {
             let item = items[indexPath.row]
             if items.count > 1 {
                 let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(
+                    isFirst: indexPath.row == 0,
+                    isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1
+                )
                 cell.configureWith(importedFile: item)
                 return cell
             } else {
@@ -372,12 +390,19 @@ extension SaveFileViewController: UITableViewDelegate {
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
-                let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename, placeholder: KDriveResourcesStrings.Localizable.hintInputFileName, text: item.name, action: KDriveResourcesStrings.Localizable.buttonSave, loading: false) { newName in
+                let alert = AlertFieldViewController(
+                    title: KDriveResourcesStrings.Localizable.buttonRename,
+                    placeholder: KDriveResourcesStrings.Localizable.hintInputFileName,
+                    text: item.name,
+                    action: KDriveResourcesStrings.Localizable.buttonSave,
+                    loading: false
+                ) { newName in
                     item.name = newName
                     tableView.reloadRows(at: [indexPath], with: .automatic)
                 }
                 alert.textFieldConfiguration = .fileNameConfiguration
-                alert.textFieldConfiguration.selectedRange = item.name.startIndex ..< (item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
+                alert.textFieldConfiguration.selectedRange = item.name
+                    .startIndex ..< (item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
                 present(alert, animated: true)
             }
         case .driveSelection:
@@ -387,10 +412,15 @@ extension SaveFileViewController: UITableViewDelegate {
             navigationController?.pushViewController(selectDriveViewController, animated: true)
         case .directorySelection:
             guard let driveFileManager = selectedDriveFileManager else { return }
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, delegate: self)
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
+                driveFileManager: driveFileManager,
+                startDirectory: selectedDirectory,
+                delegate: self
+            )
             present(selectFolderNavigationController, animated: true)
         case .photoFormatOption:
-            let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: userPreferredPhotoFormat)
+            let selectPhotoFormatViewController = SelectPhotoFormatViewController
+                .instantiate(selectedFormat: userPreferredPhotoFormat)
             selectPhotoFormatViewController.delegate = self
             navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
         default:
@@ -460,7 +490,8 @@ extension SaveFileViewController: FooterButtonDelegate {
                 navigationController?.dismiss(animated: true)
                 return
             }
-            message = items.count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable.allUploadInProgress(items[0].name)
+            message = items.count > 1 ? KDriveResourcesStrings.Localizable
+                .allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable.allUploadInProgress(items[0].name)
         } catch {
             message = error.localizedDescription
         }

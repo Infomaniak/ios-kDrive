@@ -18,6 +18,7 @@
 
 import AVFoundation
 import FloatingPanel
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import PhotosUI
@@ -36,20 +37,66 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         let name: String
         let image: UIImage
         var color: UIColor = KDriveResourcesAsset.iconColor.color
-        var docType: String = ""
-        var matomoName: String = ""
+        var docType = ""
+        var matomoName = ""
 
-        static let takePictureAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonTakePhotoOrVideo, image: KDriveResourcesAsset.camera.image, matomoName: "takePhotoOrVideo")
-        static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image, matomoName: "uploadMedia")
-        static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image, matomoName: "uploadFile")
-        static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image, matomoName: "scan")
-        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate))
+        static let takePictureAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.buttonTakePhotoOrVideo,
+            image: KDriveResourcesAsset.camera.image,
+            matomoName: "takePhotoOrVideo"
+        )
+        static let importMediaAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo,
+            image: KDriveResourcesAsset.images.image,
+            matomoName: "uploadMedia"
+        )
+        static let importAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.buttonUploadFile,
+            image: KDriveResourcesAsset.upload.image,
+            matomoName: "uploadFile"
+        )
+        static let scanAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.buttonDocumentScanning,
+            image: KDriveResourcesAsset.scan.image,
+            matomoName: "scan"
+        )
+        static let folderAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allFolder,
+            image: KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate)
+        )
 
-        static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx", matomoName: "createDocument")
-        static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx", matomoName: "createPresentation")
-        static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx", matomoName: "createTable")
-        static let formAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeForm, image: KDriveResourcesAsset.fileForm.image, docType: "docxf", matomoName: "createForm")
-        static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt", matomoName: "createText")
+        static let docsAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allOfficeDocs,
+            image: KDriveResourcesAsset.fileText.image,
+            color: KDriveResourcesAsset.infomaniakColor.color,
+            docType: "docx",
+            matomoName: "createDocument"
+        )
+        static let pointsAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allOfficePoints,
+            image: KDriveResourcesAsset.filePresentation.image,
+            docType: "pptx",
+            matomoName: "createPresentation"
+        )
+        static let gridsAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allOfficeGrids,
+            image: KDriveResourcesAsset.fileSheets.image,
+            docType: "xlsx",
+            matomoName: "createTable"
+        )
+        static let formAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allOfficeForm,
+            image: KDriveResourcesAsset.fileForm.image,
+            docType: "docxf",
+            matomoName: "createForm"
+        )
+        static let noteAction = PlusButtonMenuAction(
+            name: KDriveResourcesStrings.Localizable.allOfficeNote,
+            image: KDriveResourcesAsset.fileText.image,
+            color: KDriveResourcesAsset.secondaryTextColor.color,
+            docType: "txt",
+            matomoName: "createText"
+        )
     }
 
     private var content: [[PlusButtonMenuAction]] = [
@@ -58,9 +105,14 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
-    init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true, presentedAboveFileList: Bool = true) {
+    init(
+        driveFileManager: DriveFileManager,
+        folder: File,
+        presentedFromPlusButton: Bool = true,
+        presentedAboveFileList: Bool = true
+    ) {
         self.driveFileManager = driveFileManager
-        self.currentDirectory = folder
+        currentDirectory = folder
         self.presentedFromPlusButton = presentedFromPlusButton
         self.presentedAboveFileList = presentedAboveFileList
         super.init(nibName: nil, bundle: nil)
@@ -114,9 +166,12 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesStrings.Localizable.allRootName(driveFileManager.drive.name) : currentDirectory.name
-            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesAsset.drive.image : KDriveResourcesAsset.folderFilled.image
-            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants.rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
+            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesStrings.Localizable
+                .allRootName(driveFileManager.drive.name) : currentDirectory.name
+            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesAsset.drive
+                .image : KDriveResourcesAsset.folderFilled.image
+            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants
+                .rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
             cell.separator?.isHidden = false
             cell.selectionStyle = .none
             cell.accessibilityTraits = .header
@@ -162,7 +217,10 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             documentPicker.delegate = mainTabViewController
             mainTabViewController.present(documentPicker, animated: true)
         case .folderAction:
-            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
+            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
+                parentDirectory: currentDirectory,
+                driveFileManager: driveFileManager
+            )
             mainTabViewController.present(newFolderViewController, animated: true)
         case .scanAction:
             if VNDocumentCameraViewController.isSupported {
@@ -212,7 +270,11 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
 
                 guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
-                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle, message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription, action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
+                    let alert = AlertTextViewController(
+                        title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle,
+                        message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription,
+                        action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                    ) {
                         Constants.openSettings()
                     }
                     mainTabViewController.present(alert, animated: true)
@@ -223,7 +285,8 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                     let picker = UIImagePickerController()
                     picker.sourceType = sourceType
                     picker.delegate = mainTabViewController.photoPickerDelegate
-                    picker.mediaTypes = UIImagePickerController.availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
+                    picker.mediaTypes = UIImagePickerController
+                        .availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
                     mainTabViewController.present(picker, animated: true)
                 } else {
                     print("Source type \(sourceType) is not available on this device")

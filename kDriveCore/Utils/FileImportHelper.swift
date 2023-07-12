@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 import PDFKit
@@ -25,7 +26,6 @@ import Photos
 import QuickLookThumbnailing
 import RealmSwift
 import VisionKit
-import InfomaniakCore
 
 public final class ImportedFile: CustomStringConvertible {
     public var name: String
@@ -275,8 +275,8 @@ public final class FileImportHelper {
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             case .isDirectory:
-                
-                // TODO use itemProvider.zippedRepresentation
+
+                // TODO: use itemProvider.zippedRepresentation
 
                 let tmpDirectoryURL = pathProvider.tmpDirectoryURL
                 let tempURL = tmpDirectoryURL.appendingPathComponent("\(UUID().uuidString).zip")

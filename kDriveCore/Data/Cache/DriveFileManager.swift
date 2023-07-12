@@ -129,7 +129,7 @@ public final class DriveFileManager {
         init() {
             @InjectService var pathProvider: AppGroupPathProvidable
             groupDirectoryURL = pathProvider.groupDirectoryURL
-            rootDocumentsURL = pathProvider.driveRootDocumentsURL
+            rootDocumentsURL = pathProvider.realmRootURL
             importDirectoryURL = pathProvider.importDirectoryURL
             cacheDirectoryURL = pathProvider.cacheDirectoryURL
             openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL

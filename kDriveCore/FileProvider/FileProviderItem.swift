@@ -18,6 +18,7 @@
 
 import CoreServices
 import FileProvider
+import InfomaniakCore
 import InfomaniakDI
 
 public extension NSFileProviderItemIdentifier {
@@ -114,9 +115,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         if let user = file.creator {
             var nameComponents = PersonNameComponents()
             nameComponents.nickname = user.displayName
-            self.ownerNameComponents = nameComponents
+            ownerNameComponents = nameComponents
         }
-        self.storageUrl = itemStorageUrl
+        storageUrl = itemStorageUrl
     }
 
     public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {

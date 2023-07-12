@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import Photos
 import Sentry
@@ -82,7 +83,8 @@ public extension PHAsset {
         let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {
             guard shouldTransformIntoJPEG else {
-                try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+                try await PHAssetResourceManager.default()
+                    .writeData(for: resource, toFile: targetURL, options: requestResourceOption)
                 return targetURL
             }
 
@@ -99,7 +101,8 @@ public extension PHAsset {
         return nil
     }
 
-    private func writeJpegData(to url: URL, resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Bool {
+    private func writeJpegData(to url: URL, resource: PHAssetResource,
+                               options: PHAssetResourceRequestOptions) async throws -> Bool {
         guard let jpegData = try await getJpegData(for: resource, options: options) else { return false }
         try jpegData.write(to: url)
         let attributes = [

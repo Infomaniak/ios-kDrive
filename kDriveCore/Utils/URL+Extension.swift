@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 public extension URL {
     var typeIdentifier: String? {

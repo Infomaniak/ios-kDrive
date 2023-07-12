@@ -27,8 +27,18 @@ import RealmSwift
 import UIKit
 
 extension SwipeCellAction {
-    static let share = SwipeCellAction(identifier: "share", title: KDriveResourcesStrings.Localizable.buttonFileRights, backgroundColor: KDriveResourcesAsset.infomaniakColor.color, icon: KDriveResourcesAsset.share.image)
-    static let delete = SwipeCellAction(identifier: "delete", title: KDriveResourcesStrings.Localizable.buttonDelete, backgroundColor: KDriveResourcesAsset.binColor.color, icon: KDriveResourcesAsset.delete.image)
+    static let share = SwipeCellAction(
+        identifier: "share",
+        title: KDriveResourcesStrings.Localizable.buttonFileRights,
+        backgroundColor: KDriveResourcesAsset.infomaniakColor.color,
+        icon: KDriveResourcesAsset.share.image
+    )
+    static let delete = SwipeCellAction(
+        identifier: "delete",
+        title: KDriveResourcesStrings.Localizable.buttonDelete,
+        backgroundColor: KDriveResourcesAsset.binColor.color,
+        icon: KDriveResourcesAsset.delete.image
+    )
 }
 
 extension SortType: Selectable {
@@ -73,7 +83,11 @@ class FileListBarButton: UIBarButtonItem {
 
 class ConcreteFileListViewModel: FileListViewModel {
     required convenience init(driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let configuration = FileListViewModel.Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
+        let configuration = FileListViewModel.Configuration(
+            emptyViewType: .emptyFolder,
+            supportsDrop: true,
+            rightBarButtons: [.search]
+        )
         self.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
@@ -94,7 +108,12 @@ class ConcreteFileListViewModel: FileListViewModel {
                 endRefreshing()
             }
 
-            let (_, moreComing) = try await driveFileManager.files(in: currentDirectory.proxify(), page: page, sortType: sortType, forceRefresh: forceRefresh)
+            let (_, moreComing) = try await driveFileManager.files(
+                in: currentDirectory.proxify(),
+                page: page,
+                sortType: sortType,
+                forceRefresh: forceRefresh
+            )
             endRefreshing()
             if moreComing {
                 try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
@@ -119,7 +138,8 @@ class ConcreteFileListViewModel: FileListViewModel {
     }
 }
 
-class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate,
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -148,7 +168,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     #if !ISEXTENSION
-        lazy var filePresenter = FilePresenter(viewController: self)
+    lazy var filePresenter = FilePresenter(viewController: self)
     #endif
 
     private var networkObserver: ObservationToken?
@@ -171,7 +191,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Set up collection view
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
+        collectionView.register(
+            UINib(nibName: headerViewIdentifier, bundle: nil),
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: headerViewIdentifier
+        )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
@@ -184,7 +208,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         // Set up observers
         observeNetwork()
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
 
         if viewModel != nil {
             setupViewModel()
@@ -197,13 +226,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            let plusButtonDirectory: File
-            if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-                plusButtonDirectory = viewModel.currentDirectory
-            } else {
-                plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
-            }
-            (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
+        let plusButtonDirectory: File
+        if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            plusButtonDirectory = viewModel.currentDirectory
+        } else {
+            plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
+        }
+        (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
         #endif
 
         tryLoadingFilesOrDisplayError()
@@ -284,13 +313,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         viewModel.$currentLeftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
             guard let self = self else { return }
-            self.navigationItem.leftBarButtonItems = leftBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+            self.navigationItem.leftBarButtonItems = leftBarButtons?
+                .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
-        navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+        navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?
+            .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         viewModel.$currentRightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
             guard let self = self else { return }
-            self.navigationItem.rightBarButtonItems = rightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+            self.navigationItem.rightBarButtonItems = rightBarButtons?
+                .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
         viewModel.onPresentViewController = { [weak self] presentationType, viewController, animated in
@@ -309,9 +341,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func bindMultipleSelectionViewModel() {
-        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
-            self?.toggleMultipleSelection(isMultipleSelectionEnabled)
-        }
+        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled
+            .receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
+                self?.toggleMultipleSelection(isMultipleSelectionEnabled)
+            }
 
         viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
             guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
@@ -408,55 +441,61 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
-            var floatingPanelViewController: DriveFloatingPanelController
-            switch actionType {
-            case .file:
-                floatingPanelViewController = DriveFloatingPanelController()
-                let fileInformationsViewController = FileActionsFloatingPanelViewController()
+        var floatingPanelViewController: DriveFloatingPanelController
+        switch actionType {
+        case .file:
+            floatingPanelViewController = DriveFloatingPanelController()
+            let fileInformationsViewController = FileActionsFloatingPanelViewController()
 
-                fileInformationsViewController.presentingParent = self
-                fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
+            fileInformationsViewController.presentingParent = self
+            fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-                floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
+            floatingPanelViewController.layout = FileFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
 
-                if let file = files.first {
-                    fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
-                }
-
-                floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-                floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
-            case .trash:
-                floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-                let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
-                trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
-
-                trashFloatingPanelTableViewController.trashedFiles = files
-
-                floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
-                (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?.trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
-            case .multipleSelection:
-                floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-                let selectViewController = MultipleSelectionFloatingPanelViewController()
-                selectViewController.presentingParent = self
-                selectViewController.currentDirectory = viewModel.currentDirectory
-
-                if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
-                    selectViewController.allItemsSelected = true
-                    selectViewController.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
-                } else {
-                    selectViewController.allItemsSelected = false
-                    selectViewController.files = files
-                }
-                selectViewController.driveFileManager = driveFileManager
-                selectViewController.reloadAction = { [weak self] in
-                    self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-                }
-
-                floatingPanelViewController.set(contentViewController: selectViewController)
-                (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?.trackAndObserve(scrollView: selectViewController.collectionView)
+            if let file = files.first {
+                fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
             }
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            present(floatingPanelViewController, animated: true)
+
+            floatingPanelViewController.set(contentViewController: fileInformationsViewController)
+            floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
+        case .trash:
+            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+            let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
+            trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
+
+            trashFloatingPanelTableViewController.trashedFiles = files
+
+            floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
+            (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
+                .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
+        case .multipleSelection:
+            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+            let selectViewController = MultipleSelectionFloatingPanelViewController()
+            selectViewController.presentingParent = self
+            selectViewController.currentDirectory = viewModel.currentDirectory
+
+            if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
+                selectViewController.allItemsSelected = true
+                selectViewController.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
+            } else {
+                selectViewController.allItemsSelected = false
+                selectViewController.files = files
+            }
+            selectViewController.driveFileManager = driveFileManager
+            selectViewController.reloadAction = { [weak self] in
+                self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+            }
+
+            floatingPanelViewController.set(contentViewController: selectViewController)
+            (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
+                .trackAndObserve(scrollView: selectViewController.collectionView)
+        }
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        present(floatingPanelViewController, animated: true)
         #endif
     }
 
@@ -522,11 +561,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func onFilePresented(_ file: File) {
         #if !ISEXTENSION
-            filePresenter.present(driveFileManager: viewModel.driveFileManager,
-                                  file: file,
-                                  files: viewModel.getAllFiles(),
-                                  normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
-                                  fromActivities: viewModel.configuration.fromActivities)
+        filePresenter.present(driveFileManager: viewModel.driveFileManager,
+                              file: file,
+                              files: viewModel.getAllFiles(),
+                              normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
+                              fromActivities: viewModel.configuration.fromActivities)
         #endif
     }
 
@@ -624,7 +663,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                  Scrolling when the view is not visible causes the layout to break
                  */
                 let scrollPosition: UICollectionView.ScrollPosition = viewIfLoaded?.window != nil ? .centeredVertically : []
-                for i in 0 ..< viewModel.files.count where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
+                for i in 0 ..< viewModel.files.count
+                    where multipleSelectionViewModel.selectedItems
+                    .contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
                     collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: scrollPosition)
                 }
             }
@@ -637,8 +678,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         return viewModel.files.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(
+            ofKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: headerViewIdentifier,
+            for: indexPath
+        ) as! FilesHeaderView
         setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.files.isEmpty)
 
         headerView = dequeuedHeaderView
@@ -658,7 +707,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         let file = viewModel.getFile(at: indexPath)!
         cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.files.count - 1)
-        cell.configureWith(driveFileManager: viewModel.driveFileManager, file: file, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+        cell.configureWith(
+            driveFileManager: viewModel.driveFileManager,
+            file: file,
+            selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
+        )
         cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
@@ -672,13 +725,18 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
            let file = viewModel.getFile(at: indexPath),
            viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
-        (cell as? FileCollectionViewCell)?.setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+        (cell as? FileCollectionViewCell)?
+            .setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
     }
 
     // MARK: - Collection view delegate
@@ -707,7 +765,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Swipe action collection view data source
 
-    func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
+    func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell,
+                        at indexPath: IndexPath) -> [SwipeCellAction]? {
         return viewModel.getSwipeActions(at: indexPath)
     }
 
@@ -733,13 +792,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Drive File Manager should be consistent
         let maybeDriveFileManager: DriveFileManager?
         #if ISEXTENSION
-            maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
+        maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
         #else
-            if viewModelName == String(describing: SharedWithMeViewModel.self) {
-                maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
-            } else {
-                maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
-            }
+        if viewModelName == String(describing: SharedWithMeViewModel.self) {
+            maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
+        } else {
+            maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
+        }
         #endif
         guard let driveFileManager = maybeDriveFileManager else {
             // Handle error?
@@ -749,13 +808,20 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
            let viewModelName = viewModelName,
-           let viewModel = getViewModel(viewModelName: viewModelName, driveFileManager: driveFileManager, currentDirectory: maybeCurrentDirectory) {
+           let viewModel = getViewModel(
+               viewModelName: viewModelName,
+               driveFileManager: driveFileManager,
+               currentDirectory: maybeCurrentDirectory
+           ) {
             self.viewModel = viewModel
             setupViewModel()
             tryLoadingFilesOrDisplayError()
         } else {
             // We need some view model to restore the view controller and pop it...
-            viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: driveFileManager.getCachedRootFile())
+            viewModel = ConcreteFileListViewModel(
+                driveFileManager: driveFileManager,
+                currentDirectory: driveFileManager.getCachedRootFile()
+            )
             navigationController?.popViewController(animated: true)
         }
     }
@@ -771,11 +837,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     #if !ISEXTENSION
-        func uploadCardSelected() {
-            let uploadViewController = UploadQueueViewController.instantiate()
-            uploadViewController.currentDirectory = viewModel.currentDirectory
-            navigationController?.pushViewController(uploadViewController, animated: true)
-        }
+    func uploadCardSelected() {
+        let uploadViewController = UploadQueueViewController.instantiate()
+        uploadViewController.currentDirectory = viewModel.currentDirectory
+        navigationController?.pushViewController(uploadViewController, animated: true)
+    }
     #endif
 
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
@@ -790,8 +856,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 // MARK: - Collection view delegate flow layout
 
 extension FileListViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let effectiveContentWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let effectiveContentWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView
+            .safeAreaInsets.right - leftRightInset * 2
         switch viewModel.listStyle {
         case .list:
             // Important: subtract safe area insets
@@ -803,7 +874,11 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
         switch viewModel.listStyle {
         case .list:
             return 0
@@ -812,7 +887,11 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
         switch viewModel.listStyle {
         case .list:
             return 0
@@ -821,18 +900,39 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: leftRightInset, bottom: 0, right: leftRightInset)
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         if headerView == nil {
-            headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: IndexPath(row: 0, section: section)) as? FilesHeaderView
+            headerView = self.collectionView(
+                collectionView,
+                viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
+                at: IndexPath(row: 0, section: section)
+            ) as? FilesHeaderView
         }
-        return headerView!.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
+        return headerView!.systemLayoutSizeFitting(
+            CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
     }
 
-    func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveOfItemFromOriginalIndexPath originalIndexPath: IndexPath, atCurrentIndexPath currentIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        targetIndexPathForMoveOfItemFromOriginalIndexPath originalIndexPath: IndexPath,
+        atCurrentIndexPath currentIndexPath: IndexPath,
+        toProposedIndexPath proposedIndexPath: IndexPath
+    ) -> IndexPath {
         return originalIndexPath
     }
 }
@@ -851,34 +951,34 @@ extension FileListViewController: FileCellDelegate {
 // MARK: - Switch drive delegate
 
 #if !ISEXTENSION
-    extension FileListViewController: SwitchDriveDelegate {
-        var driveFileManager: DriveFileManager! {
-            get {
-                viewModel.driveFileManager
-            }
-            set {
-                guard viewModel != nil else { return }
-                let isDifferentDrive = newValue.drive.objectId != driveFileManager.drive.objectId
-                if isDifferentDrive {
-                    viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newValue)
-                } else {
-                    viewModel.driveFileManager = newValue
-                }
-            }
+extension FileListViewController: SwitchDriveDelegate {
+    var driveFileManager: DriveFileManager! {
+        get {
+            viewModel.driveFileManager
         }
-
-        func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-            let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
+        set {
+            guard viewModel != nil else { return }
+            let isDifferentDrive = newValue.drive.objectId != driveFileManager.drive.objectId
             if isDifferentDrive {
-                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
-                setupViewModel()
-                tryLoadingFilesOrDisplayError()
-                navigationController?.popToRootViewController(animated: false)
+                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newValue)
             } else {
-                viewModel.driveFileManager = newDriveFileManager
+                viewModel.driveFileManager = newValue
             }
         }
     }
+
+    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+        let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
+        if isDifferentDrive {
+            viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
+            setupViewModel()
+            tryLoadingFilesOrDisplayError()
+            navigationController?.popToRootViewController(animated: false)
+        } else {
+            viewModel.driveFileManager = newDriveFileManager
+        }
+    }
+}
 #endif
 
 // MARK: - Top scrollable
@@ -894,7 +994,8 @@ extension FileListViewController: TopScrollable {
 // MARK: - UICollectionViewDragDelegate
 
 extension FileListViewController: UICollectionViewDragDelegate {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
+                        at indexPath: IndexPath) -> [UIDragItem] {
         if let draggableViewModel = viewModel.draggableFileListViewModel,
            let draggedFile = viewModel.getFile(at: indexPath) {
             return draggableViewModel.dragItems(for: draggedFile, in: collectionView, at: indexPath, with: session)
@@ -912,10 +1013,19 @@ extension FileListViewController: UICollectionViewDropDelegate {
         return !session.items.allSatisfy { $0.itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) }
     }
 
-    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        dropSessionDidUpdate session: UIDropSession,
+        withDestinationIndexPath destinationIndexPath: IndexPath?
+    ) -> UICollectionViewDropProposal {
         if let droppableViewModel = viewModel.droppableFileListViewModel {
             let file = destinationIndexPath != nil ? viewModel.getFile(at: destinationIndexPath!) : nil
-            return droppableViewModel.updateDropSession(session, in: collectionView, with: destinationIndexPath, destinationFile: file)
+            return droppableViewModel.updateDropSession(
+                session,
+                in: collectionView,
+                with: destinationIndexPath,
+                destinationFile: file
+            )
         } else {
             return UICollectionViewDropProposal(operation: .cancel, intent: .unspecified)
         }

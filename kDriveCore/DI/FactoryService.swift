@@ -28,6 +28,7 @@ import os.log
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 private let appGroupName = "group.com.infomaniak.drive"
+private let realmRootPath = "drives"
 
 /// Something that setups the service factories
 enum FactoryService {
@@ -125,7 +126,7 @@ enum FactoryService {
                 FileProviderExtensionAdditionalState()
             },
             Factory(type: AppGroupPathProvidable.self) { _, _ in
-                guard let provider = AppGroupPathProvider(appGroupIdentifier: appGroupName) else {
+                guard let provider = AppGroupPathProvider(realmRootPath: realmRootPath, appGroupIdentifier: appGroupName) else {
                     fatalError("unable to initialise AppGroupPathProvider securely")
                 }
                 return provider
