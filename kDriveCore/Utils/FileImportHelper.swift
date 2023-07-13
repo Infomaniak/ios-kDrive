@@ -308,8 +308,19 @@ public final class FileImportHelper {
                         }
                     }
                 }
-
-            case .isMiscellaneous, .none:
+            case .isMiscellaneous(let typeIdentifier):
+                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
+                    switch result {
+                    case .success((let filename, let fileURL)):
+                        items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting miscellaneous file: \(error)")
+                        errorCount += 1
+                    }
+                    dispatchGroup.leave()
+                }
+                progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
+            case .none:
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 progress.completedUnitCount += perItemUnitCount
                 errorCount += 1
