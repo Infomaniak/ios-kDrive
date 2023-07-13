@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -75,14 +76,25 @@ class SavePhotoViewController: SaveFileViewController {
         var success = false
         if uti == .image {
             do {
-                try fileImportHelper.upload(photo: photo, name: filename, format: format, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                try fileImportHelper.upload(
+                    photo: photo,
+                    name: filename,
+                    format: format,
+                    in: selectedDirectory,
+                    drive: selectedDriveFileManager.drive
+                )
                 success = true
             } catch {
                 success = false
             }
         } else {
             do {
-                try fileImportHelper.upload(videoUrl: videoUrl, name: filename, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                try fileImportHelper.upload(
+                    videoUrl: videoUrl,
+                    name: filename,
+                    in: selectedDirectory,
+                    drive: selectedDriveFileManager.drive
+                )
                 success = true
             } catch {
                 success = false
@@ -91,16 +103,21 @@ class SavePhotoViewController: SaveFileViewController {
         dismiss(animated: true) {
             if let parent = self.presentingViewController {
                 parent.dismiss(animated: true) {
-                    UIConstants.showSnackBar(message: success ? KDriveResourcesStrings.Localizable.allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
+                    UIConstants
+                        .showSnackBar(message: success ? KDriveResourcesStrings.Localizable
+                            .allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
                 }
             } else {
-                UIConstants.showSnackBar(message: success ? KDriveResourcesStrings.Localizable.allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
+                UIConstants
+                    .showSnackBar(message: success ? KDriveResourcesStrings.Localizable
+                        .allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
             }
         }
     }
 
     override class func instantiate(driveFileManager: DriveFileManager?) -> SavePhotoViewController {
-        let viewController = Storyboard.photo.instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
+        let viewController = Storyboard.photo
+            .instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }

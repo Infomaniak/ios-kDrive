@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -40,7 +41,8 @@ class PhotoPickerDelegate: NSObject {
 
     @MainActor
     private func showUploadSnackbar(count: Int, filename: String) {
-        let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings.Localizable.allUploadInProgress(filename)
+        let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings
+            .Localizable.allUploadInProgress(filename)
         UIConstants.showSnackBar(message: message)
     }
 }
@@ -48,7 +50,10 @@ class PhotoPickerDelegate: NSObject {
 // MARK: - Image picker controller delegate
 
 extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
         picker.dismiss(animated: true)
 
         guard let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
@@ -99,7 +104,8 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         picker.dismiss(animated: true)
 
         if !results.isEmpty {
-            let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let saveNavigationViewController = SaveFileViewController
+                .instantiateInNavigationController(driveFileManager: driveFileManager)
             if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
                 saveViewController.assetIdentifiers = results.compactMap(\.assetIdentifier)
                 saveViewController.selectedDirectory = currentDirectory

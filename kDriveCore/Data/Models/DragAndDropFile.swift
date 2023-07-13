@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 
 public class DragAndDropFile: NSObject, Codable {
@@ -73,7 +74,12 @@ extension DragAndDropFile: NSItemProviderWriting {
 
     public var writableTypeIdentifiersForItemProvider: [String] {
         if let file = file {
-            return [DragAndDropFile.localDragIdentifier, file.isDirectory ? UTI.zip.identifier : file.uti.identifier, UTI.item.identifier, UTI.data.identifier]
+            return [
+                DragAndDropFile.localDragIdentifier,
+                file.isDirectory ? UTI.zip.identifier : file.uti.identifier,
+                UTI.item.identifier,
+                UTI.data.identifier
+            ]
         } else {
             return [DragAndDropFile.localDragIdentifier, UTI.item.identifier, UTI.data.identifier]
         }

@@ -16,20 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCoreUI
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
-import InfomaniakDI
+import UIKit
 
 class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
-
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
     @LazyInjectService var accountManager: AccountManageable
 
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         // log
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
@@ -38,7 +37,7 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
 
         let saveViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 
-        if let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments {
+        if let attachments = (extensionContext?.inputItems.first as? NSExtensionItem)?.attachments {
             saveViewController.itemProviders = attachments
             viewControllers = [saveViewController]
         } else {
@@ -47,7 +46,9 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-        self.extensionContext!.completeRequest(returningItems: nil, completionHandler: nil)
+        guard let extensionContext = extensionContext else {
+            return
+        }
+        extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
     }
-
 }

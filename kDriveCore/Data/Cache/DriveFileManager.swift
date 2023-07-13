@@ -20,12 +20,13 @@ import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
 import Sentry
 import SwiftRegex
 
-public class DriveFileManager {
+public final class DriveFileManager {
     public class DriveFileManagerConstants {
         public let driveObjectTypes = [
             File.self,
@@ -126,31 +127,12 @@ public class DriveFileManager {
         }
 
         init() {
-            groupDirectoryURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)!
-            rootDocumentsURL = groupDirectoryURL.appendingPathComponent("drives", isDirectory: true)
-            importDirectoryURL = groupDirectoryURL.appendingPathComponent("import", isDirectory: true)
-            cacheDirectoryURL = groupDirectoryURL.appendingPathComponent("Library/Caches", isDirectory: true)
-            openInPlaceDirectoryURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?
-                .appendingPathComponent(".shared", isDirectory: true)
-            try? fileManager.setAttributes(
-                [FileAttributeKey.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
-                ofItemAtPath: groupDirectoryURL.path
-            )
-            try? FileManager.default.createDirectory(
-                atPath: rootDocumentsURL.path,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-            try? FileManager.default.createDirectory(
-                atPath: importDirectoryURL.path,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-            try? FileManager.default.createDirectory(
-                atPath: cacheDirectoryURL.path,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
+            @InjectService var pathProvider: AppGroupPathProvidable
+            groupDirectoryURL = pathProvider.groupDirectoryURL
+            rootDocumentsURL = pathProvider.realmRootURL
+            importDirectoryURL = pathProvider.importDirectoryURL
+            cacheDirectoryURL = pathProvider.cacheDirectoryURL
+            openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
 
             DDLogInfo(
                 "App working path is: \(fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? "")"

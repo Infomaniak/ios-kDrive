@@ -18,6 +18,7 @@
 
 import DifferenceKit
 import Foundation
+import InfomaniakCore
 import Photos
 import QuickLookThumbnailing
 import RealmSwift
