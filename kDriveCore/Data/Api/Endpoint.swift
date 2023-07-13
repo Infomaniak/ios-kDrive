@@ -31,6 +31,10 @@ public extension ApiEnvironment {
         return "api.\(driveHost)"
     }
 
+    var onlyOfficeDocumentServerHost: String {
+        return "documentserver.\(driveHost)"
+    }
+
     var mqttHost: String {
         switch self {
         case .prod:
