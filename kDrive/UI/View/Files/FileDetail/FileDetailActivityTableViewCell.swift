@@ -46,12 +46,12 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         contentInsetView.backgroundColor = .clear
     }
 
-    // swiftlint:disable cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity
     func configure(with activity: FileActivity, file: File) {
         let user = activity.user
         titleLabel.text = user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
 
-        if let user = user {
+        if let user {
             user.getAvatar { image in
                 self.accessoryImageView.image = image
                     .resize(size: CGSize(width: 35, height: 35))
@@ -91,11 +91,14 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         case .fileShareDelete:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderShareDelete" : "fileDetailsActivityFileShareDelete"
         case .shareLinkCreate:
-            localizedKey = file.isDirectory ? "fileDetailsActivityFolderShareLinkCreate" : "fileDetailsActivityFileShareLinkCreate"
+            localizedKey = file
+                .isDirectory ? "fileDetailsActivityFolderShareLinkCreate" : "fileDetailsActivityFileShareLinkCreate"
         case .shareLinkUpdate:
-            localizedKey = file.isDirectory ? "fileDetailsActivityFolderShareLinkUpdate" : "fileDetailsActivityFileShareLinkUpdate"
+            localizedKey = file
+                .isDirectory ? "fileDetailsActivityFolderShareLinkUpdate" : "fileDetailsActivityFileShareLinkUpdate"
         case .shareLinkDelete:
-            localizedKey = file.isDirectory ? "fileDetailsActivityFolderShareLinkDelete" : "fileDetailsActivityFileShareLinkDelete"
+            localizedKey = file
+                .isDirectory ? "fileDetailsActivityFolderShareLinkDelete" : "fileDetailsActivityFileShareLinkDelete"
         case .shareLinkShow:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderShareLinkShow" : "fileDetailsActivityFileShareLinkShow"
         case .commentCreate:

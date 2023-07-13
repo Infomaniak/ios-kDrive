@@ -24,13 +24,17 @@ public extension NSMutableAttributedString {
         self.init(string: string)
         let range = (string as NSString).localizedStandardRange(of: boldText)
         addAttribute(.strokeWidth, value: NSNumber(value: -3.0), range: range)
-        if let color = color {
+        if let color {
             addAttribute(.foregroundColor, value: color, range: range)
         }
     }
 
     convenience init(string: String, highlightedText: String) {
         self.init(string: string)
-        addAttribute(.foregroundColor, value: KDriveResourcesAsset.infomaniakColor.color, range: (string as NSString).localizedStandardRange(of: highlightedText))
+        addAttribute(
+            .foregroundColor,
+            value: KDriveResourcesAsset.infomaniakColor.color,
+            range: (string as NSString).localizedStandardRange(of: highlightedText)
+        )
     }
 }

@@ -56,13 +56,14 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        if let selectedOption = selectedOption,
+        if let selectedOption,
            let selectedIndex = options.firstIndex(of: selectedOption) {
             tableView.selectRow(at: IndexPath(row: selectedIndex + 1, section: 0), animated: false, scrollPosition: .none)
         }
     }
 
-    static func instantiatePanel(options: [T], selectedOption: T? = nil, headerTitle: String, delegate: SelectDelegate? = nil) -> DriveFloatingPanelController {
+    static func instantiatePanel(options: [T], selectedOption: T? = nil, headerTitle: String,
+                                 delegate: SelectDelegate? = nil) -> DriveFloatingPanelController {
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let viewController = FloatingPanelSelectOptionViewController<T>()
 

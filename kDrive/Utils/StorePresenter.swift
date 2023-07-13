@@ -22,7 +22,10 @@ import UIKit
 class StorePresenter {
     static func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
         #if ISEXTENSION
-        UIConstants.openUrl("kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)", from: viewController)
+        UIConstants.openUrl(
+            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
+            from: viewController
+        )
         #else
         let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
         viewController.present(storeViewController, animated: true)

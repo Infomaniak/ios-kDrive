@@ -36,7 +36,10 @@ class BetaInviteFloatingPanelViewController: InformationFloatingPanelViewControl
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, BetaInviteFloatingPanelViewController.self)
         return contentViewController
     }

@@ -85,7 +85,7 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
     func configureWithoutPreview(file: File?, more: Int?) {
         previewImage.isHidden = true
         noPreviewView.isHidden = false
-        if let file = file {
+        if let file {
             logoImage.image = file.icon
             logoImage.tintColor = file.tintColor
         } else {

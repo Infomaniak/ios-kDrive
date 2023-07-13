@@ -21,8 +21,7 @@ import UIKit
 // MARK: - 🦆 Type definitions
 
 /// An abstract protocol that defines an alignment.
-protocol Alignment {
-}
+protocol Alignment {}
 
 /// Defines a horizontal alignment for UI elements.
 public enum HorizontalAlignment: Alignment {
@@ -50,7 +49,6 @@ private enum EffectiveHorizontalAlignment: Alignment {
 
 /// Describes an axis with respect to which items can be aligned.
 private struct AlignmentAxis<A: Alignment> {
-
     /// Determines how items are aligned relative to the axis.
     let alignment: A
 
@@ -67,7 +65,6 @@ private struct AlignmentAxis<A: Alignment> {
 /// You can use it to align the cells like words in a left- or right-aligned text
 /// and you can specify how the cells are vertically aligned in their row.
 open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
-
     // MARK: - 🔶 Properties
 
     /// Determines how the cells are horizontally aligned in a row.
@@ -82,12 +79,11 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     /// i.e. `.leading` and `.trailing` alignments are mapped to `.left` or `right`,
     /// depending on the current layout direction.
     fileprivate var effectiveHorizontalAlignment: EffectiveHorizontalAlignment {
-
         var trivialMapping: [HorizontalAlignment: EffectiveHorizontalAlignment] {
             return [
-                    .left: .left,
-                    .right: .right,
-                    .justified: .justified
+                .left: .left,
+                .right: .right,
+                .justified: .justified
             ]
         }
 
@@ -144,14 +140,13 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
         self.verticalAlignment = verticalAlignment
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
     // MARK: - 🅾️ Overrides
 
     override open func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-
         // 💡 IDEA:
         // The approach for computing a cell's frame is to create a rectangle that covers the current line.
         // Then we check if the preceding cell's frame intersects with this rectangle.
@@ -175,7 +170,8 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
         //    If there is only one item in a line UICollectionViewFlowLayout will center it.
 
         // We may not change the original layout attributes or UICollectionViewFlowLayout might complain.
-        guard let layoutAttributes = super.layoutAttributesForItem(at: indexPath)?.copy() as? UICollectionViewLayoutAttributes else {
+        guard let layoutAttributes = super.layoutAttributesForItem(at: indexPath)?.copy() as? UICollectionViewLayoutAttributes
+        else {
             return nil
         }
 
@@ -232,15 +228,18 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     ///   - secondItemAttributes: The second layout attributes object to be compared.
     /// - Returns: `true` if the frames of the two layout attributes are in the same line, else `false`.
     ///            `false` is also returned when the layout's `collectionView` property is `nil`.
-    fileprivate func isFrame(for firstItemAttributes: UICollectionViewLayoutAttributes, inSameLineAsFrameFor secondItemAttributes: UICollectionViewLayoutAttributes) -> Bool {
+    fileprivate func isFrame(
+        for firstItemAttributes: UICollectionViewLayoutAttributes,
+        inSameLineAsFrameFor secondItemAttributes: UICollectionViewLayoutAttributes
+    ) -> Bool {
         guard let lineWidth = contentWidth else {
             return false
         }
         let firstItemFrame = firstItemAttributes.frame
         let lineFrame = CGRect(x: sectionInset.left,
-            y: firstItemFrame.origin.y,
-            width: lineWidth,
-            height: firstItemFrame.size.height)
+                               y: firstItemFrame.origin.y,
+                               width: lineWidth,
+                               height: firstItemFrame.size.height)
         return lineFrame.intersects(secondItemAttributes.frame)
     }
 
@@ -250,7 +249,8 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     /// - Parameter layoutAttributes: The layout attributed that represents the reference item.
     /// - Returns: The layout attributes objects representing all other items in the same line.
     ///            The passed `layoutAttributes` object itself is always contained in the returned array.
-    fileprivate func layoutAttributes(forItemsInLineWith layoutAttributes: UICollectionViewLayoutAttributes) -> [UICollectionViewLayoutAttributes] {
+    fileprivate func layoutAttributes(forItemsInLineWith layoutAttributes: UICollectionViewLayoutAttributes)
+        -> [UICollectionViewLayoutAttributes] {
         guard let lineWidth = contentWidth else {
             return [layoutAttributes]
         }
@@ -265,8 +265,8 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     /// - Parameter layoutAttributes: The layout attributes objects to be vertically aligned.
     /// - Returns: The axis with respect to which the layout attributes can be aligned
     ///            or `nil` if the `layoutAttributes` array is empty.
-    private func verticalAlignmentAxisForLine(with layoutAttributes: [UICollectionViewLayoutAttributes]) -> AlignmentAxis<VerticalAlignment>? {
-
+    private func verticalAlignmentAxisForLine(with layoutAttributes: [UICollectionViewLayoutAttributes])
+        -> AlignmentAxis<VerticalAlignment>? {
         guard let firstAttribute = layoutAttributes.first else {
             return nil
         }
@@ -294,7 +294,8 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     ///
     /// - Parameter currentLayoutAttributes: The layout attributes representing the item to be vertically aligned.
     /// - Returns: The axis with respect to which the item can be aligned.
-    fileprivate func verticalAlignmentAxis(for currentLayoutAttributes: UICollectionViewLayoutAttributes) -> AlignmentAxis<VerticalAlignment> {
+    fileprivate func verticalAlignmentAxis(for currentLayoutAttributes: UICollectionViewLayoutAttributes)
+        -> AlignmentAxis<VerticalAlignment> {
         let layoutAttributesInLine = layoutAttributes(forItemsInLineWith: currentLayoutAttributes)
         // It's okay to force-unwrap here because we pass a non-empty array.
         return verticalAlignmentAxisForLine(with: layoutAttributesInLine)!
@@ -309,13 +310,11 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
             $0.copy()
         } as? [UICollectionViewLayoutAttributes]
     }
-
 }
 
 // MARK: - 👷 Layout attributes helpers
 
-fileprivate extension UICollectionViewLayoutAttributes {
-
+private extension UICollectionViewLayoutAttributes {
     private var currentSection: Int {
         return indexPath.section
     }
@@ -342,7 +341,8 @@ fileprivate extension UICollectionViewLayoutAttributes {
         if currentItem <= 0 {
             return true
         } else {
-            if let layoutAttributesForPrecedingItem = collectionViewLayout.originalLayoutAttribute(forItemAt: precedingIndexPath) {
+            if let layoutAttributesForPrecedingItem = collectionViewLayout
+                .originalLayoutAttribute(forItemAt: precedingIndexPath) {
                 return !collectionViewLayout.isFrame(for: self, inSameLineAsFrameFor: layoutAttributesForPrecedingItem)
             } else {
                 return true
@@ -362,7 +362,8 @@ fileprivate extension UICollectionViewLayoutAttributes {
         if currentItem >= itemCount - 1 {
             return true
         } else {
-            if let layoutAttributesForFollowingItem = collectionViewLayout.originalLayoutAttribute(forItemAt: followingIndexPath) {
+            if let layoutAttributesForFollowingItem = collectionViewLayout
+                .originalLayoutAttribute(forItemAt: followingIndexPath) {
                 return !collectionViewLayout.isFrame(for: self, inSameLineAsFrameFor: layoutAttributesForFollowingItem)
             } else {
                 return true
@@ -423,13 +424,11 @@ fileprivate extension UICollectionViewLayoutAttributes {
     /// - Parameters:
     ///   - collectionViewLayout: The layout providing the alignment information.
     func alignHorizontally(collectionViewLayout: AlignedCollectionViewFlowLayout) {
-
         guard let alignmentAxis = collectionViewLayout.alignmentAxis else {
             return
         }
 
         switch collectionViewLayout.effectiveHorizontalAlignment {
-
         case .left:
             if isRepresentingFirstItemInLine(collectionViewLayout: collectionViewLayout) {
                 align(toAlignmentAxis: alignmentAxis)
@@ -456,5 +455,4 @@ fileprivate extension UICollectionViewLayoutAttributes {
         let alignmentAxis = collectionViewLayout.verticalAlignmentAxis(for: self)
         align(toAlignmentAxis: alignmentAxis)
     }
-
 }

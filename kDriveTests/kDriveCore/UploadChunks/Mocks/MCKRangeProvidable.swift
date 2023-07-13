@@ -21,7 +21,7 @@ import kDriveCore
 /// A mock of RangeProvidable
 public final class MCKRangeProvidable: RangeProvidable {
     var allRangesCalled: Bool { allRangesCallCount > 0 }
-    var allRangesCallCount: Int = 0
+    var allRangesCallCount = 0
     var allRangesThrows: Error?
     var allRangesClosure: (() -> [DataRange])?
     public var allRanges: [DataRange] {

@@ -71,8 +71,18 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         tableView.sectionHeaderHeight = 0
         tableView.sectionFooterHeight = 16
 
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -85,8 +95,10 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    class func instantiate(driveFileManager: DriveFileManager, convertingFolder: Bool = false, folder: File) -> ManageDropBoxViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
+    class func instantiate(driveFileManager: DriveFileManager, convertingFolder: Bool = false,
+                           folder: File) -> ManageDropBoxViewController {
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
         viewController.convertingFolder = convertingFolder
         viewController.driveFileManager = driveFileManager
         viewController.directory = folder
@@ -114,11 +126,15 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         guard directory != nil else { return }
         let truncatedName: String
         if directory.name.count > 20 {
-            truncatedName = directory.name[directory.name.startIndex ..< directory.name.index(directory.name.startIndex, offsetBy: 20)] + "…"
+            truncatedName = directory.name[directory.name.startIndex ..< directory.name.index(
+                directory.name.startIndex,
+                offsetBy: 20
+            )] + "…"
         } else {
             truncatedName = directory.name
         }
-        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(directory.name)
+        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable
+            .convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(directory.name)
     }
 
     private func getSettings() {
@@ -220,7 +236,12 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             let cell = tableView.dequeueReusableCell(type: NewFolderSettingsTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == optionsRows.count - 1)
             cell.delegate = self
-            cell.configureFor(index: indexPath.row, switchValue: getSetting(for: option), actionButtonVisible: option == .optionPassword && newPassword, settingValue: getValue(for: option))
+            cell.configureFor(
+                index: indexPath.row,
+                switchValue: getSetting(for: option),
+                actionButtonVisible: option == .optionPassword && newPassword,
+                settingValue: getValue(for: option)
+            )
             return cell
         case .disable:
             let cell = tableView.dequeueReusableCell(type: DropBoxDisableTableViewCell.self, for: indexPath)
@@ -331,18 +352,29 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         } else {
             limitFileSize = nil
         }
-        let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
+        let settings = DropBoxSettings(
+            alias: nil,
+            emailWhenFinished: getSetting(for: .optionMail),
+            limitFileSize: limitFileSize,
+            password: password,
+            validUntil: validUntil
+        )
 
         MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
 
         Task { [proxyDirectory = directory.proxify()] in
             if convertingFolder {
                 do {
-                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: proxyDirectory, settings: settings)
+                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(
+                        directory: proxyDirectory,
+                        settings: settings
+                    )
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
-                    let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
+                    let floatingPanelViewController = driveFloatingPanelController
+                        .contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
-                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.directory.name)
+                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable
+                        .dropBoxResultTitle(self.directory.name)
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
                     self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: dropBox)

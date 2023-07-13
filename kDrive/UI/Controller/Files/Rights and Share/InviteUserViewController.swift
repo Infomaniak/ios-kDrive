@@ -67,11 +67,25 @@ class InviteUserViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         setTitle()
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .stop,
+            target: self,
+            action: #selector(closeButtonPressed)
+        )
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -107,24 +121,40 @@ class InviteUserViewController: UIViewController {
 
     func setTitle() {
         guard file != nil else { return }
-        navigationItem.title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareFolderTitle : KDriveResourcesStrings.Localizable.fileShareFileTitle
+        navigationItem.title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareFolderTitle : KDriveResourcesStrings
+            .Localizable.fileShareFileTitle
     }
 
     func showConflictDialog(conflictList: [CheckChangeAccessFeedbackResource]) {
         let message: NSMutableAttributedString
         if conflictList.count == 1, let user = fileAccess.users.first(where: { $0.id == conflictList[0].userId }) {
-            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictDescription(user.name, user.right.title, newPermission.title), boldText: user.name)
+            message = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable
+                    .sharedConflictDescription(user.name, user.right.title, newPermission.title),
+                boldText: user.name
+            )
         } else {
-            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable
+                .sharedConflictManyUserDescription(newPermission.title))
         }
-        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.sharedConflictTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonShare) {
+        let alert = AlertTextViewController(
+            title: KDriveResourcesStrings.Localizable.sharedConflictTitle,
+            message: message,
+            action: KDriveResourcesStrings.Localizable.buttonShare
+        ) {
             self.shareAndDismiss()
         }
         present(alert, animated: true)
     }
 
     func shareAndDismiss() {
-        let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
+        let settings = FileAccessSettings(
+            message: message,
+            right: newPermission,
+            emails: emails,
+            teamIds: teamIds,
+            userIds: userIds
+        )
         Task { [proxyFile = file.proxify()] in
             _ = try await driveFileManager.apiFetcher.addAccess(to: proxyFile, settings: settings)
         }
@@ -249,7 +279,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .message:
             let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            if let message = message, !message.isEmpty {
+            if let message, !message.isEmpty {
                 cell.messageTextView.text = message
             }
             cell.selectionStyle = .none
@@ -265,7 +295,10 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             break
         case .rights:
-            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(
+                file: file,
+                driveFileManager: driveFileManager
+            )
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.delegate = self
@@ -338,7 +371,13 @@ extension InviteUserViewController: RightsSelectionDelegate {
 extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
-        let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
+        let settings = FileAccessSettings(
+            message: message,
+            right: newPermission,
+            emails: emails,
+            teamIds: teamIds,
+            userIds: userIds
+        )
         Task { [proxyFile = file.proxify()] in
             let results = try await driveFileManager.apiFetcher.checkAccessChange(to: proxyFile, settings: settings)
             let conflictList = results.filter { !$0.needChange }

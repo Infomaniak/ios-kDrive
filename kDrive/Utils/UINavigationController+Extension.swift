@@ -26,17 +26,17 @@ extension UINavigationController {
         let navbarAppearance = UINavigationBarAppearance()
         navbarAppearance.configureWithTransparentBackground()
         navbarAppearance.shadowImage = UIImage()
-        self.navigationBar.standardAppearance = navbarAppearance
-        self.navigationBar.compactAppearance = navbarAppearance
-        self.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationBar.standardAppearance = navbarAppearance
+        navigationBar.compactAppearance = navbarAppearance
+        navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
     func setDefaultStandardAppearanceNavigationBar() {
         let navbarAppearance = UINavigationBarAppearance()
         navbarAppearance.configureWithDefaultBackground()
-        self.navigationBar.standardAppearance = navbarAppearance
-        self.navigationBar.compactAppearance = navbarAppearance
-        self.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationBar.standardAppearance = navbarAppearance
+        navigationBar.compactAppearance = navbarAppearance
+        navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
     func setInfomaniakAppearanceNavigationBar() {
@@ -49,9 +49,9 @@ extension UINavigationController {
         let titleStyle = TextStyle.header3
         navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
         navbarAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
-        self.navigationBar.standardAppearance = navbarAppearance
-        self.navigationBar.compactAppearance = navbarAppearance
-        self.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationBar.standardAppearance = navbarAppearance
+        navigationBar.compactAppearance = navbarAppearance
+        navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
     override open var childForStatusBarStyle: UIViewController? {

@@ -432,7 +432,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             file.uploadingSession = nil
             file.progress = nil
 
-            guard let sessionTokenToCancel = sessionTokenToCancel else {
+            guard let sessionTokenToCancel else {
                 return
             }
 
@@ -899,7 +899,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
             // Success
-            if let data = data,
+            if let data,
                error == nil,
                statusCode >= 200, statusCode < 300 {
                 await self.catching {
@@ -908,7 +908,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             // Client-side error
-            else if let error = error {
+            else if let error {
                 await self.catching {
                     try self.uploadCompletionLocalFailure(data: data, response: response, error: error)
                 }
@@ -1033,7 +1033,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
 
         var error = DriveError.serverError
-        if let data = data,
+        if let data,
            let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
             error = DriveError(apiError: apiError)
         }

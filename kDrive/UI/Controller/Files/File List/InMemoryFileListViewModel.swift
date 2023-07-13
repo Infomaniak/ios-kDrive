@@ -28,7 +28,10 @@ class InMemoryFileListViewModel: FileListViewModel {
         if let realm = currentDirectory.realm {
             self.realm = realm
         } else {
-            let unCachedRealmConfiguration = Realm.Configuration(inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)", objectTypes: DriveFileManager.constants.driveObjectTypes)
+            let unCachedRealmConfiguration = Realm.Configuration(
+                inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
+                objectTypes: DriveFileManager.constants.driveObjectTypes
+            )
             do {
                 realm = try Realm(configuration: unCachedRealmConfiguration)
             } catch {
@@ -47,7 +50,8 @@ class InMemoryFileListViewModel: FileListViewModel {
         fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
-    /// Use this method to add fetched files to the file list. It will replace the list on first page and append the files on following pages.
+    /// Use this method to add fetched files to the file list. It will replace the list on first page and append the files on
+    /// following pages.
     /// - Parameters:
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.

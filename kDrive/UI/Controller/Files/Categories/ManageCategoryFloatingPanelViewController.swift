@@ -125,8 +125,10 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(editCategoryViewController, animated: true)
             dismiss(animated: true)
         case .delete:
-            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name),
-                                                       boldText: category.name)
+            let attrString = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name),
+                boldText: category.name
+            )
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete,
                                                 message: attrString,
                                                 action: KDriveResourcesStrings.Localizable.buttonDelete,
@@ -171,7 +173,10 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch Section.allCases[indexPath.section] {
         case .header:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "WrapperCollectionViewCell",
+                for: indexPath
+            ) as! WrapperCollectionViewCell
             let tableCell = cell.reuse(withCellType: CategoryTableViewCell.self)
             tableCell.initWithPositionAndShadow()
             tableCell.configure(with: category, showMoreButton: false)

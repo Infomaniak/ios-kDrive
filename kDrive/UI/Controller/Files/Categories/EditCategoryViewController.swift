@@ -44,7 +44,7 @@ class EditCategoryViewController: UITableViewController {
     }
 
     private var saveButtonEnabled: Bool {
-        if let category = category {
+        if let category {
             return category.isPredefined || !category.name.isBlank
         } else {
             return !name.isBlank
@@ -71,7 +71,8 @@ class EditCategoryViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = create ? KDriveResourcesStrings.Localizable.createCategoryTitle : KDriveResourcesStrings.Localizable.editCategoryTitle
+        title = create ? KDriveResourcesStrings.Localizable.createCategoryTitle : KDriveResourcesStrings.Localizable
+            .editCategoryTitle
     }
 
     private func setRows() {
@@ -86,7 +87,8 @@ class EditCategoryViewController: UITableViewController {
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> EditCategoryViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
         viewController.driveFileManager = driveFileManager
         return viewController
     }
@@ -148,14 +150,15 @@ class EditCategoryViewController: UITableViewController {
             cell.textField.setHint(KDriveResourcesStrings.Localizable.categoryNameField)
             cell.textField.text = category?.name ?? name
             cell.textDidChange = { [unowned self] text in
-                if let text = text {
-                    if self.create {
-                        self.name = text
+                if let text {
+                    if create {
+                        name = text
                     } else {
-                        self.category?.name = text
+                        category?.name = text
                     }
                     // Update save button
-                    guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
+                    guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView
+                    else {
                         return
                     }
                     footer.footerButton.isEnabled = saveButtonEnabled
@@ -203,9 +206,13 @@ extension EditCategoryViewController: FooterButtonDelegate {
         MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
         Task { [proxyFilesToAdd = filesToAdd?.map { $0.proxify() }] in
             do {
-                if let category = category {
+                if let category {
                     // Edit category
-                    _ = try await driveFileManager.edit(category: category, name: category.isPredefined ? nil : category.name, color: category.colorHex)
+                    _ = try await driveFileManager.edit(
+                        category: category,
+                        name: category.isPredefined ? nil : category.name,
+                        color: category.colorHex
+                    )
                     navigationController?.popViewController(animated: true)
                 } else {
                     // Create category

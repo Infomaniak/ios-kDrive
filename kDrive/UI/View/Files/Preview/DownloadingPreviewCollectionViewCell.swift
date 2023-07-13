@@ -104,10 +104,10 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
         }
 
         previewDownloadTask = file.getPreview { [weak previewImageView] preview in
-            guard let previewImageView = previewImageView else {
+            guard let previewImageView else {
                 return
             }
-            if let preview = preview {
+            if let preview {
                 previewImageView.image = preview
             }
         }
@@ -119,7 +119,10 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 }
 
 extension DownloadingPreviewCollectionViewCell: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
         // Don't recognize a single tap until a double-tap fails.
         if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == tapToZoomRecognizer {
             return true

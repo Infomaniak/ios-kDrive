@@ -19,6 +19,7 @@
 import UIKit
 
 // MARK: - Direction
+
 enum Direction {
     case UP
     case DOWN
@@ -57,6 +58,7 @@ extension Direction {
 }
 
 // MARK: - Arrow
+
 private struct Arrow {
     let height: CGFloat = 10.0
     let base: CGFloat = 20.0
@@ -104,8 +106,8 @@ private struct Arrow {
 }
 
 // MARK: - PopoverBackground
-class PopoverBackground: UIPopoverBackgroundView {
 
+class PopoverBackground: UIPopoverBackgroundView {
     var backgroundView = UIImageView()
     private var arrow = Arrow()
     private static let PROTO_ARROW = Arrow()
@@ -137,7 +139,7 @@ class PopoverBackground: UIPopoverBackgroundView {
     }
 
     override static func contentViewInsets() -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        return .zero
     }
 
     override static func arrowHeight() -> CGFloat {
@@ -145,8 +147,8 @@ class PopoverBackground: UIPopoverBackgroundView {
     }
 
     override func layoutSubviews() {
-        let arrowFrame = arrow.frame(container: self.bounds)
-        var backgroundFrame = self.bounds
+        let arrowFrame = arrow.frame(container: bounds)
+        var backgroundFrame = bounds
 
         switch arrow.direction {
         case .UP:
@@ -164,7 +166,6 @@ class PopoverBackground: UIPopoverBackgroundView {
         backgroundView.frame = backgroundFrame
         backgroundView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.8)
         backgroundView.cornerRadius = 6
-        self.addSubview(backgroundView)
+        addSubview(backgroundView)
     }
-
 }

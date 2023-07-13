@@ -94,7 +94,7 @@ class DriveErrorViewController: UIViewController {
         case .maintenance:
             imageView.image = KDriveResourcesAsset.maintenance.image
             imageView.tintColor = KDriveResourcesAsset.iconColor.color
-            if let driveName = driveName {
+            if let driveName {
                 titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(driveName)
             } else {
                 titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitlePlural
@@ -106,7 +106,10 @@ class DriveErrorViewController: UIViewController {
             mainButton.isHidden = true
             if let drive {
                 titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitle(drive.name)
-                descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(drive.updatedAt, style: .date))
+                descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(
+                    drive.updatedAt,
+                    style: .date
+                ))
                 if drive.isUserAdmin {
                     mainButton.isHidden = false
                     mainButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)

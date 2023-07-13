@@ -36,7 +36,7 @@ struct AppVersion: Codable {
         let request = URLRequest(url: URLConstants.appVersion.url)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
-            if let data = data {
+            if let data {
                 if let decodedResponse = try? JSONDecoder().decode(Response.self, from: data) {
                     DispatchQueue.main.async {
                         handler(decodedResponse.results[0])
@@ -59,12 +59,13 @@ struct AppVersion: Codable {
         // Check if the App Store version is newer than the currently installed version.
         let currentInstalledVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
 
-        guard DataParser.isAppStoreVersionNewer(installedVersion: currentInstalledVersion, appStoreVersion: currentAppStoreVersion) else {
+        guard DataParser
+            .isAppStoreVersionNewer(installedVersion: currentInstalledVersion, appStoreVersion: currentAppStoreVersion) else {
             return false
         }
 
         // Check the release date of the current version.
-        guard let currentVersionReleaseDate = currentVersionReleaseDate, let daysSinceRelease = Date.days(since: currentVersionReleaseDate) else {
+        guard let currentVersionReleaseDate, let daysSinceRelease = Date.days(since: currentVersionReleaseDate) else {
             return false
         }
 

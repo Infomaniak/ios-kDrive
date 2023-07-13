@@ -331,7 +331,7 @@ extension FileProviderExtension {
                 // Restore in given parent
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
                 let item = FileProviderItem(file: file, domain: self.domain)
-                if let parentItemIdentifier = parentItemIdentifier {
+                if let parentItemIdentifier {
                     item.parentItemIdentifier = parentItemIdentifier
                 }
                 item.isTrashed = false

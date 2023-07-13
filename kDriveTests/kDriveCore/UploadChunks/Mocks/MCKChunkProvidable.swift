@@ -33,7 +33,7 @@ public final class MCKChunkProvidable: ChunkProvidable {
     public typealias Element = Data
 
     var nextCalled: Bool { nextCallCount > 0 }
-    var nextCallCount: Int = 0
+    var nextCallCount = 0
     var nextClosure: (() -> Data?)?
     public func next() -> Data? {
         nextCallCount += 1

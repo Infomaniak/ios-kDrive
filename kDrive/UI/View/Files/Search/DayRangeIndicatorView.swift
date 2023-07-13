@@ -74,7 +74,11 @@ class DayRangeIndicatorView: UIView {
             if i == dayRowFrames.count - 1 {
                 roundingCorners = roundingCorners.union([.topRight, .bottomRight])
             }
-            let bezierPath = UIBezierPath(roundedRect: dayRowFrame, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+            let bezierPath = UIBezierPath(
+                roundedRect: dayRowFrame,
+                byRoundingCorners: roundingCorners,
+                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+            )
             context?.addPath(bezierPath.cgPath)
             context?.fillPath()
         }

@@ -41,9 +41,10 @@ public enum UIConstants {
 
     @discardableResult
     @MainActor
-    public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
+    public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong,
+                                    action: IKSnackBar.Action? = nil) -> IKSnackBar? {
         let snackbar = IKSnackBar.make(message: message, duration: duration)
-        if let action = action {
+        if let action {
             snackbar?.setAction(action).show()
         } else {
             snackbar?.show()
@@ -53,22 +54,33 @@ public enum UIConstants {
 
     @discardableResult
     @MainActor
-    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, parentFile: ProxyFile?, driveFileManager: DriveFileManager) -> IKSnackBar? {
-        return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-            Task {
-                do {
-                    let now = Date()
-                    try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
-                    if let parentFile = parentFile {
-                        _ = try? await driveFileManager.fileActivities(file: parentFile, from: Int(now.timeIntervalSince1970))
-                    }
+    public static func showCancelableSnackBar(
+        message: String,
+        cancelSuccessMessage: String,
+        duration: SnackBar.Duration = .lengthLong,
+        cancelableResponse: CancelableResponse,
+        parentFile: ProxyFile?,
+        driveFileManager: DriveFileManager
+    ) -> IKSnackBar? {
+        return UIConstants.showSnackBar(
+            message: message,
+            duration: duration,
+            action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+                Task {
+                    do {
+                        let now = Date()
+                        try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
+                        if let parentFile {
+                            _ = try? await driveFileManager.fileActivities(file: parentFile, from: Int(now.timeIntervalSince1970))
+                        }
 
-                    UIConstants.showSnackBar(message: cancelSuccessMessage)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
+                        UIConstants.showSnackBar(message: cancelSuccessMessage)
+                    } catch {
+                        UIConstants.showSnackBarIfNeeded(error: error)
+                    }
                 }
             }
-        })
+        )
     }
 
     @MainActor
@@ -93,17 +105,24 @@ public enum UIConstants {
 
     public static func openUrl(_ url: URL, from viewController: UIViewController) {
         #if ISEXTENSION
-            viewController.extensionContext?.open(url)
+        viewController.extensionContext?.open(url)
         #else
-            UIApplication.shared.open(url)
+        UIApplication.shared.open(url)
         #endif
     }
 
-    public static func presentLinkPreviewForFile(_ file: File, link: String, from viewController: UIViewController, sourceView: UIView) {
+    public static func presentLinkPreviewForFile(
+        _ file: File,
+        link: String,
+        from viewController: UIViewController,
+        sourceView: UIView
+    ) {
         guard let url = URL(string: link) else { return }
         createLinkPreviewForFile(file, link: url) { linkPreviewMetadata in
-            let activityViewController = UIActivityViewController(activityItems: [ShareLinkPreviewDelegate(shareSheetLinkMetadata: linkPreviewMetadata)],
-                                                                  applicationActivities: nil)
+            let activityViewController = UIActivityViewController(
+                activityItems: [ShareLinkPreviewDelegate(shareSheetLinkMetadata: linkPreviewMetadata)],
+                applicationActivities: nil
+            )
             activityViewController.popoverPresentationController?.sourceView = sourceView
             viewController.present(activityViewController, animated: true)
         }
@@ -123,7 +142,8 @@ public enum UIConstants {
         let metadata = LPLinkMetadata()
         metadata.originalURL = url
         metadata.url = metadata.originalURL
-        metadata.title = file.isDropbox ? KDriveResourcesStrings.Localizable.buttonShareDropboxLink : KDriveResourcesStrings.Localizable.buttonSharePublicLink
+        metadata.title = file.isDropbox ? KDriveResourcesStrings.Localizable.buttonShareDropboxLink : KDriveResourcesStrings
+            .Localizable.buttonSharePublicLink
         metadata.iconProvider = NSItemProvider(object: thumbnail)
         return metadata
     }
@@ -141,7 +161,10 @@ private class ShareLinkPreviewDelegate: NSObject, UIActivityItemSource {
         return shareSheetLinkMetadata.url!
     }
 
-    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+    func activityViewController(
+        _ activityViewController: UIActivityViewController,
+        itemForActivityType activityType: UIActivity.ActivityType?
+    ) -> Any? {
         return shareSheetLinkMetadata.url
     }
 

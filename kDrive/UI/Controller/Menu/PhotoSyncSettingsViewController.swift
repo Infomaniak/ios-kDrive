@@ -68,7 +68,7 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     private var newSyncSettings: PhotoSyncSettings = {
         @InjectService var photoUploader: PhotoLibraryUploader
-        if let _ = photoUploader.settings {
+        if photoUploader.settings != nil {
             return PhotoSyncSettings(value: photoUploader.settings as Any)
         } else {
             return PhotoSyncSettings()
@@ -191,16 +191,21 @@ class PhotoSyncSettingsViewController: UIViewController {
         updateSectionList()
         let commonSections = Set(previousSections).intersection(sections)
         tableView.performBatchUpdates {
-            tableView.deleteSections(IndexSet(commonSections.count..<previousSections.count), with: .fade)
-            tableView.insertSections(IndexSet(commonSections.count..<sections.count), with: .fade)
+            tableView.deleteSections(IndexSet(commonSections.count ..< previousSections.count), with: .fade)
+            tableView.insertSections(IndexSet(commonSections.count ..< sections.count), with: .fade)
         }
         // Scroll to bottom
         let lastSection = sections.count - 1
-        tableView.scrollToRow(at: IndexPath(row: tableView(tableView, numberOfRowsInSection: lastSection) - 1, section: lastSection), at: .middle, animated: true)
+        tableView.scrollToRow(
+            at: IndexPath(row: tableView(tableView, numberOfRowsInSection: lastSection) - 1, section: lastSection),
+            at: .middle,
+            animated: true
+        )
     }
 
     func updateSaveButtonState() {
-        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?.isContentEqual(to: newSyncSettings) == false
+        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?
+            .isContentEqual(to: newSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
         if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
@@ -213,7 +218,8 @@ class PhotoSyncSettingsViewController: UIViewController {
     func saveSettings() {
         BackgroundRealm.uploads.execute { _ in
             if photoSyncEnabled {
-                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
+                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
+                else { return }
                 switch newSyncSettings.syncMode {
                 case .new:
                     newSyncSettings.lastSync = Date()
@@ -224,7 +230,11 @@ class PhotoSyncSettingsViewController: UIViewController {
                         newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
                     }
                 case .fromDate:
-                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
+                    if let currentSyncSettings = photoLibraryUploader.settings,
+                       currentSyncSettings
+                       .syncMode == .all ||
+                       (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
+                           .compare(newSyncSettings.fromDate) == .orderedAscending) {
                         newSyncSettings.lastSync = currentSyncSettings.lastSync
                     } else {
                         newSyncSettings.lastSync = newSyncSettings.fromDate
@@ -250,7 +260,8 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     class func instantiate() -> PhotoSyncSettingsViewController {
-        return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
+        return Storyboard.menu
+            .instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
     }
 }
 
@@ -302,7 +313,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     if sender.isOn {
                         Task {
                             let status = await self.requestAuthorization()
@@ -319,9 +330,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                             }
                         }
                     } else {
-                        self.photoSyncEnabled = false
-                        self.updateSections()
-                        self.updateSaveButtonState()
+                        photoSyncEnabled = false
+                        updateSections()
+                        updateSaveButtonState()
                     }
                 }
                 return cell
@@ -436,8 +447,13 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
                 selectDriveViewController.delegate = self
                 navigationController?.pushViewController(selectDriveViewController, animated: true)
             } else if row == .folderSelection {
-                if let driveFileManager = driveFileManager {
-                    let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, disabledDirectoriesSelection: [driveFileManager.getCachedRootFile()], delegate: self)
+                if let driveFileManager {
+                    let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
+                        driveFileManager: driveFileManager,
+                        startDirectory: selectedDirectory,
+                        disabledDirectoriesSelection: [driveFileManager.getCachedRootFile()],
+                        delegate: self
+                    )
                     navigationController?.present(selectFolderNavigationController, animated: true)
                 }
             }
@@ -446,14 +462,22 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
             let row = settingsRows[indexPath.row]
             switch row {
             case .syncMode:
-                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue, KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
+                let alert = AlertChoiceViewController(
+                    title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate,
+                    choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2,
+                              KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue,
+                              KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2],
+                    selected: newSyncSettings.syncMode.rawValue,
+                    action: KDriveResourcesStrings.Localizable.buttonValid
+                ) { selectedIndex in
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                 }
                 present(alert, animated: true)
             case .photoFormat:
-                let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: newSyncSettings.photoFormat)
+                let selectPhotoFormatViewController = SelectPhotoFormatViewController
+                    .instantiate(selectedFormat: newSyncSettings.photoFormat)
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
             default:

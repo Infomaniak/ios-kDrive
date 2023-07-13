@@ -34,7 +34,7 @@ public class DriveInfosManager {
 
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
-            guard let newObject = newObject, let objectId = oldObject?["objectId"] as? String else { return }
+            guard let newObject, let objectId = oldObject?["objectId"] as? String else { return }
             if !ids.contains(objectId) {
                 migration.delete(newObject)
             }
@@ -62,10 +62,26 @@ public class DriveInfosManager {
                             }
                         }
                         // Remove dangling objects
-                        DriveInfosManager.removeDanglingObjects(ofType: DrivePackFunctionality.self, migration: migration, ids: driveIds)
-                        DriveInfosManager.removeDanglingObjects(ofType: DrivePreferences.self, migration: migration, ids: driveIds)
-                        DriveInfosManager.removeDanglingObjects(ofType: DriveUsersCategories.self, migration: migration, ids: driveIds)
-                        DriveInfosManager.removeDanglingObjects(ofType: DriveTeamsCategories.self, migration: migration, ids: driveIds)
+                        DriveInfosManager.removeDanglingObjects(
+                            ofType: DrivePackFunctionality.self,
+                            migration: migration,
+                            ids: driveIds
+                        )
+                        DriveInfosManager.removeDanglingObjects(
+                            ofType: DrivePreferences.self,
+                            migration: migration,
+                            ids: driveIds
+                        )
+                        DriveInfosManager.removeDanglingObjects(
+                            ofType: DriveUsersCategories.self,
+                            migration: migration,
+                            ids: driveIds
+                        )
+                        DriveInfosManager.removeDanglingObjects(
+                            ofType: DriveTeamsCategories.self,
+                            migration: migration,
+                            ids: driveIds
+                        )
                         DriveInfosManager.removeDanglingObjects(ofType: Category.self, migration: migration, ids: driveIds)
                         // Delete team details & category rights for migration
                         migration.deleteData(forType: TeamDetail.className())
@@ -73,7 +89,19 @@ public class DriveInfosManager {
                     }
                 }
             },
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
+            objectTypes: [
+                Drive.self,
+                DrivePackFunctionality.self,
+                DrivePreferences.self,
+                DriveUsersCategories.self,
+                DriveTeamsCategories.self,
+                DriveUser.self,
+                Team.self,
+                TeamDetail.self,
+                Category.self,
+                CategoryRights.self
+            ]
+        )
     }
 
     public func getRealm() -> Realm {
@@ -94,7 +122,10 @@ public class DriveInfosManager {
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
             do {
-                let fileURLs = try FileManager.default.contentsOfDirectory(at: NSFileProviderManager.default.documentStorageURL, includingPropertiesForKeys: nil)
+                let fileURLs = try FileManager.default.contentsOfDirectory(
+                    at: NSFileProviderManager.default.documentStorageURL,
+                    includingPropertiesForKeys: nil
+                )
                 for url in fileURLs {
                     try FileManager.default.removeItem(at: url)
                 }
@@ -104,7 +135,13 @@ public class DriveInfosManager {
             }
         }
 
-        let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.objectId)") }
+        let updatedDomains = drives.map {
+            NSFileProviderDomain(
+                identifier: NSFileProviderDomainIdentifier($0.objectId),
+                displayName: "\($0.name) (\(user.email))",
+                pathRelativeToDocumentStorage: "\($0.objectId)"
+            )
+        }
         Task {
             do {
                 let allDomains = try await NSFileProviderManager.domains()
@@ -112,7 +149,8 @@ public class DriveInfosManager {
                 await withThrowingTaskGroup(of: Void.self) { group in
                     for newDomain in updatedDomains {
                         // Check if domain already added
-                        if let existingDomainIndex = domainsForCurrentUser.firstIndex(where: { $0.identifier == newDomain.identifier }) {
+                        if let existingDomainIndex = domainsForCurrentUser
+                            .firstIndex(where: { $0.identifier == newDomain.identifier }) {
                             let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
                             // Domain exists but its name could have changed
                             if existingDomain.displayName != newDomain.displayName {
@@ -146,14 +184,14 @@ public class DriveInfosManager {
 
     func deleteFileProviderDomains(for userId: Int) {
         NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
-            if let error = error {
+            if let error {
                 DDLogError("Error while getting domains: \(error)")
             }
 
             let domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
             for domain in domainsForCurrentUser {
                 NSFileProviderManager.remove(domain) { error in
-                    if let error = error {
+                    if let error {
                         DDLogError("Error while removing domain \(domain.displayName): \(error)")
                     }
                 }
@@ -163,7 +201,7 @@ public class DriveInfosManager {
 
     public func deleteAllFileProviderDomains() {
         NSFileProviderManager.removeAllDomains { error in
-            if let error = error {
+            if let error {
                 DDLogError("Error while removing domains: \(error)")
             }
         }
@@ -171,7 +209,7 @@ public class DriveInfosManager {
 
     func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
         NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
-            if let error = error {
+            if let error {
                 DDLogError("Error while getting domains: \(error)")
                 completion(nil)
             } else {
@@ -191,7 +229,7 @@ public class DriveInfosManager {
 
     public func getFileProviderManager(for driveId: String, completion: @escaping (NSFileProviderManager) -> Void) {
         getFileProviderDomain(for: driveId) { domain in
-            if let domain = domain {
+            if let domain {
                 completion(NSFileProviderManager(for: domain) ?? .default)
             } else {
                 completion(.default)
@@ -215,7 +253,8 @@ public class DriveInfosManager {
         initFileProviderDomains(drives: driveResponse.drives.main, user: user)
 
         let realm = getRealm()
-        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm).filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
+        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
+            .filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
         let driveRemovedIds = driveRemoved.map(\.objectId)
         try? realm.write {
             realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
@@ -235,9 +274,9 @@ public class DriveInfosManager {
         var realmDriveList = realm.objects(Drive.self)
             .sorted(byKeyPath: "name", ascending: true)
             .sorted(byKeyPath: "sharedWithMe", ascending: true)
-        if let userId = userId {
+        if let userId {
             let filterPredicate: NSPredicate
-            if let sharedWithMe = sharedWithMe {
+            if let sharedWithMe {
                 filterPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
             } else {
                 filterPredicate = NSPredicate(format: "userId = %d", userId)
@@ -263,7 +302,7 @@ public class DriveInfosManager {
         let realm = realm ?? getRealm()
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive = drive {
+        if let drive {
             return realmUserList.filter { drive.users.account.contains($0.id) }
         }
         return []
@@ -281,7 +320,7 @@ public class DriveInfosManager {
         let realm = realm ?? getRealm()
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive = drive {
+        if let drive {
             return realmTeamList.filter { drive.teams.account.contains($0.id) }
         }
         return []

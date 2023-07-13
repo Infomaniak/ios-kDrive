@@ -21,7 +21,8 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
+    UICollectionViewDelegateFlowLayout {
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var titleLabel: IKLabel!
@@ -62,7 +63,12 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         tableView.reloadData()
     }
 
-    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
+    override func initWithPositionAndShadow(
+        isFirst: Bool = false,
+        isLast: Bool = false,
+        elevation: Double = 0,
+        radius: CGFloat = 6
+    ) {
         contentInsetView.cornerRadius = radius
     }
 
@@ -96,15 +102,18 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         let isDirectory = activity?.file?.isDirectory ?? false
         switch recentActivity.action {
         case .fileCreate:
-            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings.Localizable.fileActivityFileCreate(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable
+                .fileActivityFolderCreate(count) : KDriveResourcesStrings.Localizable.fileActivityFileCreate(count)
         case .fileTrash:
-            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderTrash(count) : KDriveResourcesStrings.Localizable.fileActivityFileTrash(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable
+                .fileActivityFolderTrash(count) : KDriveResourcesStrings.Localizable.fileActivityFileTrash(count)
         case .fileUpdate:
             detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityFileUpdate(count)
         case .commentCreate:
             detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityCommentCreate(count)
         case .fileRestore:
-            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderRestore(count) : KDriveResourcesStrings.Localizable.fileActivityFileRestore(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable
+                .fileActivityFolderRestore(count) : KDriveResourcesStrings.Localizable.fileActivityFileRestore(count)
         default:
             detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityUnknown(count)
         }
@@ -170,10 +179,15 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         delegate?.didSelectActivity(index: indexPath.row, activities: activities)
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         let height = collectionView.frame.height
         let itemQuantity = CGFloat(isLoading ? 3 : min(activities.count, 3))
-        let width = (collectionView.frame.width - collectionViewFlowLayout.minimumInteritemSpacing * (itemQuantity - 1)) / itemQuantity
+        let width = (collectionView.frame.width - collectionViewFlowLayout.minimumInteritemSpacing * (itemQuantity - 1)) /
+            itemQuantity
         return CGSize(width: width, height: height)
     }
 }

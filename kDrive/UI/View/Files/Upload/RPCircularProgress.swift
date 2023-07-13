@@ -138,7 +138,7 @@ open class RPCircularProgress: UIView {
     // MARK: - Custom Base Layer
 
     fileprivate var progressLayer: ProgressLayer! {
-        return (layer as! ProgressLayer)
+        return layer as! ProgressLayer
     }
 
     override open class var layerClass: AnyClass {
@@ -167,7 +167,7 @@ open class RPCircularProgress: UIView {
     override open func didMoveToWindow() {
         super.didMoveToWindow()
 
-        if let window = window {
+        if let window {
             progressLayer.contentsScale = window.screen.scale
             progressLayer.setNeedsDisplay()
         }
@@ -209,12 +209,18 @@ open class RPCircularProgress: UIView {
      - parameter duration:     Sets the overall duration that the animation should complete within
      - parameter completion:   An optional closure to execute after the animation completes
      */
-    open func updateProgress(_ progress: CGFloat, animated: Bool = true, initialDelay: CFTimeInterval = 0, duration: CFTimeInterval? = nil, completion: CompletionBlock? = nil) {
+    open func updateProgress(
+        _ progress: CGFloat,
+        animated: Bool = true,
+        initialDelay: CFTimeInterval = 0,
+        duration: CFTimeInterval? = nil,
+        completion: CompletionBlock? = nil
+    ) {
         let pinnedProgress = pin(progress)
         if animated {
             // Get duration
             let animationDuration: CFTimeInterval
-            if let duration = duration, duration != 0 {
+            if let duration, duration != 0 {
                 animationDuration = duration
             } else {
                 // Same duration as UIProgressView animation
@@ -231,7 +237,13 @@ open class RPCircularProgress: UIView {
             progressLayer.progress = currentProgress
 
             progressLayer.removeAnimation(forKey: AnimationKeys.progress)
-            animate(progress, currentProgress: currentProgress, initialDelay: initialDelay, duration: animationDuration, completion: completion)
+            animate(
+                progress,
+                currentProgress: currentProgress,
+                initialDelay: initialDelay,
+                duration: animationDuration,
+                completion: completion
+            )
         } else {
             progressLayer.removeAnimation(forKey: AnimationKeys.progress)
 
@@ -267,7 +279,13 @@ private extension RPCircularProgress {
         return min(max(value, minValue), maxValue)
     }
 
-    func animate(_ pinnedProgress: CGFloat, currentProgress: CGFloat, initialDelay: CFTimeInterval, duration: CFTimeInterval, completion: CompletionBlock?) {
+    func animate(
+        _ pinnedProgress: CGFloat,
+        currentProgress: CGFloat,
+        initialDelay: CFTimeInterval,
+        duration: CFTimeInterval,
+        completion: CompletionBlock?
+    ) {
         let animation = CABasicAnimation(keyPath: AnimationKeys.progress)
         animation.duration = duration
         animation.timingFunction = timingFunction
@@ -277,7 +295,7 @@ private extension RPCircularProgress {
         animation.toValue = pinnedProgress
         animation.beginTime = CACurrentMediaTime() + initialDelay
         animation.delegate = self
-        if let completion = completion {
+        if let completion {
             let completionObject = CompletionBlockObject(action: completion)
             animation.setValue(completionObject, forKey: AnimationKeys.completionBlock)
         }
@@ -295,7 +313,7 @@ private extension RPCircularProgress {
         animation.repeatCount = Float.infinity
         animation.isRemovedOnCompletion = false
         progressLayer.progress = indeterminateProgress
-        if let completion = completion {
+        if let completion {
             let completionObject = CompletionBlockObject(action: completion)
             animation.setValue(completionObject, forKey: AnimationKeys.completionBlock)
         }
@@ -336,7 +354,7 @@ private extension RPCircularProgress {
             let centerPoint = CGPoint(x: rect.size.width / 2, y: rect.size.height / 2)
             let radius = min(rect.size.height, rect.size.width) / 2
 
-            let progress: CGFloat = min(self.progress, CGFloat(1 - Float.ulpOfOne))
+            let progress: CGFloat = min(progress, CGFloat(1 - Float.ulpOfOne))
             var radians: CGFloat = 0
             if clockwiseProgress {
                 radians = CGFloat((Double(progress) * 2 * Double.pi) - (Double.pi / 2))
@@ -348,7 +366,13 @@ private extension RPCircularProgress {
                 ctx.setFillColor(trackTintColor.cgColor)
                 let trackPath = CGMutablePath()
                 trackPath.move(to: centerPoint)
-                trackPath.addArc(center: centerPoint, radius: radius, startAngle: CGFloat(2 * Double.pi), endAngle: 0, clockwise: true)
+                trackPath.addArc(
+                    center: centerPoint,
+                    radius: radius,
+                    startAngle: CGFloat(2 * Double.pi),
+                    endAngle: 0,
+                    clockwise: true
+                )
                 trackPath.closeSubpath()
                 ctx.addPath(trackPath)
                 ctx.fillPath()
@@ -363,7 +387,13 @@ private extension RPCircularProgress {
                     ctx.setFillColor(progressTintColor.cgColor)
                     let progressPath = CGMutablePath()
                     progressPath.move(to: centerPoint)
-                    progressPath.addArc(center: centerPoint, radius: radius, startAngle: CGFloat(3 * (Double.pi / 2)), endAngle: radians, clockwise: !clockwiseProgress)
+                    progressPath.addArc(
+                        center: centerPoint,
+                        radius: radius,
+                        startAngle: CGFloat(3 * (Double.pi / 2)),
+                        endAngle: radians,
+                        clockwise: !clockwiseProgress
+                    )
                     progressPath.closeSubpath()
                     ctx.addPath(progressPath)
                     ctx.fillPath()
@@ -383,7 +413,12 @@ private extension RPCircularProgress {
                     ctx.addEllipse(in: startEllipseRect)
                     ctx.fillPath()
 
-                    let endEllipseRect = CGRect(x: endpoint.x - pathWidth / 2, y: endpoint.y - pathWidth / 2, width: pathWidth, height: pathWidth)
+                    let endEllipseRect = CGRect(
+                        x: endpoint.x - pathWidth / 2,
+                        y: endpoint.y - pathWidth / 2,
+                        width: pathWidth,
+                        height: pathWidth
+                    )
                     ctx.addEllipse(in: endEllipseRect)
                     ctx.fillPath()
                 }
@@ -395,12 +430,17 @@ private extension RPCircularProgress {
             func notchCenterCircle() {
                 ctx.setBlendMode(.clear)
                 let innerRadius = radius * (1 - thicknessRatio)
-                let clearRect = CGRect(x: centerPoint.x - innerRadius, y: centerPoint.y - innerRadius, width: innerRadius * 2, height: innerRadius * 2)
+                let clearRect = CGRect(
+                    x: centerPoint.x - innerRadius,
+                    y: centerPoint.y - innerRadius,
+                    width: innerRadius * 2,
+                    height: innerRadius * 2
+                )
                 ctx.addEllipse(in: clearRect)
                 ctx.fillPath()
 
                 func fillInnerTintIfNecessary() {
-                    if let innerTintColor = innerTintColor {
+                    if let innerTintColor {
                         ctx.setBlendMode(.normal)
                         ctx.setFillColor(innerTintColor.cgColor)
                         ctx.addEllipse(in: clearRect)

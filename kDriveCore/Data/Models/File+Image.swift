@@ -16,15 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import Kingfisher
+import UIKit
 
 public extension File {
     @discardableResult
     func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
         if hasThumbnail, let currentDriveFileManager = accountManager.currentDriveFileManager {
             return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
-                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher
+                                                                  .authenticatedKF)]) { result in
                 if let image = try? result.get().image {
                     completion(image, true)
                 } else {
@@ -42,7 +43,11 @@ public extension File {
     func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
         if let currentDriveFileManager = accountManager.currentDriveFileManager {
             return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
-                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
+                                                          options: [
+                                                              .requestModifier(currentDriveFileManager.apiFetcher
+                                                                  .authenticatedKF),
+                                                              .preloadAllAnimationData
+                                                          ]) { result in
                 if let image = try? result.get().image {
                     completion(image)
                 } else {

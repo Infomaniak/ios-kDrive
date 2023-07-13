@@ -32,7 +32,11 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.register(cellView: FolderTypeTableViewCell.self)
         tableView.separatorColor = .clear
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .stop,
+            target: self,
+            action: #selector(closeButtonPressed)
+        )
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
@@ -51,11 +55,14 @@ class NewFolderTypeTableViewController: UITableViewController {
             content.append(.folder)
         }
         // We can create a common folder if we have a pro or team drive and the create team folder right
-        if driveFileManager.drive.canCreateTeamFolder && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory.visibility != .isInTeamSpaceFolder {
+        if driveFileManager.drive.canCreateTeamFolder && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory
+            .visibility != .isInTeamSpaceFolder {
             content.append(.commonFolder)
         }
         // We can create a dropbox if we are not in a team space and not in a shared with me or the drive supports dropboxes
-        if currentDirectory.visibility != .isTeamSpace && (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.packFunctionality?.dropbox == true) {
+        if currentDirectory
+            .visibility != .isTeamSpace &&
+            (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.packFunctionality?.dropbox == true) {
             content.append(.dropbox)
         }
         tableView.reloadData()
@@ -84,7 +91,10 @@ class NewFolderTypeTableViewController: UITableViewController {
         case .commonFolder:
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.commonFolderTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderCommonDocuments.image
-            cell.descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.commonFolderDescription(driveFileManager.drive.name), boldText: driveFileManager.drive.name)
+            cell.descriptionLabel.attributedText = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.commonFolderDescription(driveFileManager.drive.name),
+                boldText: driveFileManager.drive.name
+            )
         case .dropbox:
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
@@ -96,12 +106,13 @@ class NewFolderTypeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox && driveFileManager.drive.packFunctionality?.dropbox == false {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DropBoxFloatingPanelViewController
+            let floatingPanelViewController = driveFloatingPanelController
+                .contentViewController as? DropBoxFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { _ in
                 driveFloatingPanelController.dismiss(animated: true) { [weak self] in
-                    guard let self = self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    guard let self else { return }
+                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
                 }
             }
             present(driveFloatingPanelController, animated: true)
@@ -119,7 +130,8 @@ class NewFolderTypeTableViewController: UITableViewController {
         newFolderViewController.folderType = content[row]
     }
 
-    class func instantiateInNavigationController(parentDirectory: File, driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
+    class func instantiateInNavigationController(parentDirectory: File,
+                                                 driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
         let newFolderViewController = instantiate()
         newFolderViewController.driveFileManager = driveFileManager
         newFolderViewController.currentDirectory = parentDirectory
@@ -129,6 +141,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     private class func instantiate() -> NewFolderTypeTableViewController {
-        return Storyboard.newFolder.instantiateViewController(withIdentifier: "NewFolderTypeTableViewController") as! NewFolderTypeTableViewController
+        return Storyboard.newFolder
+            .instantiateViewController(withIdentifier: "NewFolderTypeTableViewController") as! NewFolderTypeTableViewController
     }
 }

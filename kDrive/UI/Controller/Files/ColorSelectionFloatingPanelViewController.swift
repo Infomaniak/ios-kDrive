@@ -140,7 +140,11 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     func setSelectedColor() {
         if files.count == 1 {
             let selectedColorIndex = folderColors.firstIndex { $0.hex == files.first?.color } ?? 0
-            collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
+            collectionView.selectItem(
+                at: IndexPath(row: selectedColorIndex, section: 1),
+                animated: true,
+                scrollPosition: .init(rawValue: 0)
+            )
         }
     }
 
@@ -162,7 +166,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch Self.sections[indexPath.section] {
         case .header:
-            let wrapperCell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let wrapperCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "WrapperCollectionViewCell",
+                for: indexPath
+            ) as! WrapperCollectionViewCell
             let cell = wrapperCell.reuse(withCellType: FloatingPanelSortOptionTableViewCell.self)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.buttonChangeFolderColor
             cell.isHeader = true

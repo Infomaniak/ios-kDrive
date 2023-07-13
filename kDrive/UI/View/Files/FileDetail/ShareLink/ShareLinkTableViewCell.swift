@@ -55,10 +55,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         if selectionStyle != .none {
             if animated {
                 UIView.animate(withDuration: 0.1) {
-                    self.contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                    self.contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor
+                        .color : self.contentBackgroundColor
                 }
             } else {
-                contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+                contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor
+                    .color : contentBackgroundColor
             }
         } else {
             contentInsetView.backgroundColor = contentBackgroundColor
@@ -70,10 +72,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         if selectionStyle != .none {
             if animated {
                 UIView.animate(withDuration: 0.1) {
-                    self.contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                    self.contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor
+                        .color : self.contentBackgroundColor
                 }
             } else {
-                contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+                contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor
+                    .color : contentBackgroundColor
             }
         } else {
             contentInsetView.backgroundColor = contentBackgroundColor
@@ -94,11 +98,22 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let shareLink = file.sharelink {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
-            let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle).lowercased()
-            let documentType = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkTypeFolder : file.isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkTypeDocument : KDriveResourcesStrings.Localizable.shareLinkTypeFile
-            let password = shareLink.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionPassword : ""
-            let date = shareLink.validUntil != nil ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionDate(Constants.formatDate(shareLink.validUntil!)) : ""
-            shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.shareLinkPublicRightDescription(rightPermission, documentType, password, date)
+            let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable
+                .shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle)
+                .lowercased()
+            let documentType = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkTypeFolder : file
+                .isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkTypeDocument : KDriveResourcesStrings.Localizable
+                .shareLinkTypeFile
+            let password = shareLink.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable
+                .shareLinkPublicRightDescriptionPassword : ""
+            let date = shareLink.validUntil != nil ? KDriveResourcesStrings.Localizable
+                .shareLinkPublicRightDescriptionDate(Constants.formatDate(shareLink.validUntil!)) : ""
+            shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.shareLinkPublicRightDescription(
+                rightPermission,
+                documentType,
+                password,
+                date
+            )
             shareLinkStackView.isHidden = false
             url = shareLink.url
             shareIconImageView.image = KDriveResourcesAsset.unlock.image
@@ -110,7 +125,10 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
         } else {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
-            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }

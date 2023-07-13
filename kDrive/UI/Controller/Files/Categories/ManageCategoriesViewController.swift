@@ -128,7 +128,7 @@ class ManageCategoriesViewController: UITableViewController {
         guard driveFileManager != nil else { return }
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
         // Select categories
-        if let files = files {
+        if let files {
             var commonCategories = Set<kDriveCore.Category>(categories)
             for file in files {
                 var fileCategories = Set<kDriveCore.Category>()
@@ -157,7 +157,8 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = files != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.addCategoriesTitle
+        title = files != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable
+            .addCategoriesTitle
     }
 
     private func updateNavigationItem() {
@@ -167,7 +168,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func setUpObserver() {
-        guard let files = files else { return }
+        guard let files else { return }
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         // Observe files changes
         for file in files {
@@ -199,15 +200,17 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     static func instantiate(files: [File]? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
-        if let files = files {
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
+        if let files {
             viewController.files = files
         }
         viewController.driveFileManager = driveFileManager
         return viewController
     }
 
-    static func instantiateInNavigationController(files: [File]? = nil, driveFileManager: DriveFileManager) -> UINavigationController {
+    static func instantiateInNavigationController(files: [File]? = nil,
+                                                  driveFileManager: DriveFileManager) -> UINavigationController {
         let viewController = instantiate(files: files, driveFileManager: driveFileManager)
         return UINavigationController(rootViewController: viewController)
     }
@@ -218,7 +221,7 @@ class ManageCategoriesViewController: UITableViewController {
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        if let files = files {
+        if let files {
             coder.encode(files.map(\.id), forKey: "FilesId")
         }
     }
@@ -265,7 +268,12 @@ class ManageCategoriesViewController: UITableViewController {
         if category == dummyCategory {
             cell.configureCreateCell(name: searchText ?? "")
         } else {
-            cell.configure(with: category, showMoreButton: canEdit && (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory))
+            cell.configure(
+                with: category,
+                showMoreButton: canEdit &&
+                    (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights
+                        .canDeleteCategory)
+            )
         }
         cell.delegate = self
 
@@ -284,7 +292,7 @@ class ManageCategoriesViewController: UITableViewController {
         if category == dummyCategory {
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
             editCategoryViewController.filesToAdd = files
-            if let searchText = searchText {
+            if let searchText {
                 editCategoryViewController.name = searchText
             }
             navigationController?.pushViewController(editCategoryViewController, animated: true)
@@ -292,7 +300,7 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         category.isSelected = true
-        if let files = files {
+        if let files {
             Task { [proxyFiles = files.map { $0.proxify() }] in
                 do {
                     try await driveFileManager.add(category: category, to: proxyFiles)
@@ -315,7 +323,7 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         category.isSelected = false
-        if let files = files {
+        if let files {
             Task { [proxyFiles = files.map { $0.proxify() }] in
                 do {
                     try await driveFileManager.remove(category: category, from: proxyFiles)
@@ -336,7 +344,7 @@ class ManageCategoriesViewController: UITableViewController {
             let viewController = segue.destination as? EditCategoryViewController
             viewController?.driveFileManager = driveFileManager
             viewController?.filesToAdd = files
-            if let searchText = searchText {
+            if let searchText {
                 viewController?.name = searchText
             }
         }
@@ -347,10 +355,14 @@ class ManageCategoriesViewController: UITableViewController {
 
 extension ManageCategoriesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchText {
-            filteredCategories = categories.filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
+        if let searchText {
+            filteredCategories = categories.filter { $0.localizedName.range(
+                of: searchText,
+                options: [.caseInsensitive, .diacriticInsensitive]
+            ) != nil }
             // Append dummy category to show creation cell if the category doesn't exist yet
-            if userCanCreateAndEditCategories && !categories.contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {
+            if userCanCreateAndEditCategories && !categories
+                .contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {
                 filteredCategories.append(dummyCategory)
             }
             tableView.reloadData()

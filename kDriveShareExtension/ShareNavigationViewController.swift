@@ -46,7 +46,7 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-        guard let extensionContext = extensionContext else {
+        guard let extensionContext else {
             return
         }
         extensionContext.completeRequest(returningItems: nil, completionHandler: nil)

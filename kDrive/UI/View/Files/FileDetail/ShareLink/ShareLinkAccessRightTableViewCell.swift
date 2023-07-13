@@ -63,7 +63,12 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
         overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
         overlayButton.sizeToFit()
         overlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonTogglePassword
-        let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
+        let rightView = UIView(frame: CGRect(
+            x: 0,
+            y: 0,
+            width: overlayButton.frame.width + 10,
+            height: overlayButton.frame.height
+        ))
         rightView.addSubview(overlayButton)
 
         textField.rightView = rightView

@@ -32,10 +32,26 @@ struct MultipleSelectionAction: Equatable {
         return lhs.id == rhs.id
     }
 
-    static let move = MultipleSelectionAction(id: 0, name: KDriveResourcesStrings.Localizable.buttonMove, icon: KDriveResourcesAsset.folderSelect)
-    static let delete = MultipleSelectionAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonDelete, icon: KDriveResourcesAsset.delete)
-    static let more = MultipleSelectionAction(id: 2, name: KDriveResourcesStrings.Localizable.buttonMenu, icon: KDriveResourcesAsset.menu)
-    static let deletePermanently = MultipleSelectionAction(id: 3, name: KDriveResourcesStrings.Localizable.buttonDelete, icon: KDriveResourcesAsset.delete)
+    static let move = MultipleSelectionAction(
+        id: 0,
+        name: KDriveResourcesStrings.Localizable.buttonMove,
+        icon: KDriveResourcesAsset.folderSelect
+    )
+    static let delete = MultipleSelectionAction(
+        id: 1,
+        name: KDriveResourcesStrings.Localizable.buttonDelete,
+        icon: KDriveResourcesAsset.delete
+    )
+    static let more = MultipleSelectionAction(
+        id: 2,
+        name: KDriveResourcesStrings.Localizable.buttonMenu,
+        icon: KDriveResourcesAsset.menu
+    )
+    static let deletePermanently = MultipleSelectionAction(
+        id: 3,
+        name: KDriveResourcesStrings.Localizable.buttonDelete,
+        icon: KDriveResourcesAsset.delete
+    )
 }
 
 @MainActor
@@ -129,9 +145,13 @@ class MultipleSelectionFileListViewModel {
             var message: NSMutableAttributedString
             if selectedCount == 1,
                let firstItem = selectedItems.first {
-                message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(selectedItems.first!.name), boldText: firstItem.name)
+                message = NSMutableAttributedString(
+                    string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(selectedItems.first!.name),
+                    boldText: firstItem.name
+                )
             } else {
-                message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(selectedCount))
+                message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable
+                    .modalMoveTrashDescriptionPlural(selectedCount))
             }
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
                                                 message: message,
@@ -240,7 +260,9 @@ class MultipleSelectionFileListViewModel {
                     try await group.waitForAll()
                 }
 
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveTrashConfirmationSnackbar(proxySelectedItems.count))
+                UIConstants
+                    .showSnackBar(message: KDriveResourcesStrings.Localizable
+                        .fileListMoveTrashConfirmationSnackbar(proxySelectedItems.count))
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }

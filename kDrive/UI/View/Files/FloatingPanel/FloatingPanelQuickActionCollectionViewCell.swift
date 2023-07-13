@@ -34,7 +34,8 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
     override var isHighlighted: Bool {
         didSet {
             UIView.animate(withDuration: 0.1) {
-                self.buttonView.backgroundColor = self.isHighlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : KDriveResourcesAsset.backgroundColor.color
+                self.buttonView.backgroundColor = self.isHighlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor
+                    .color : KDriveResourcesAsset.backgroundColor.color
             }
         }
     }
@@ -57,7 +58,13 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     #if !ISEXTENSION
     func configure(with action: FloatingPanelAction, file: File) {
-        configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: action.isLoading)
+        configure(
+            name: action.name,
+            icon: action.image,
+            tintColor: action.tintColor,
+            isEnabled: action.isEnabled,
+            isLoading: action.isLoading
+        )
         // Configuration
         if action == .shareLink {
             if file.isDropbox {

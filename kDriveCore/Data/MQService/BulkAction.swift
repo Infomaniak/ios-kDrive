@@ -26,14 +26,32 @@ public struct BulkAction: Encodable {
     let destinationDirectoryId: Int?
 
     public init(action: BulkActionType, parentId: Int, exceptFileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
-        self.init(action: action, parentId: parentId, fileIds: nil, exceptFileIds: exceptFileIds, destinationDirectoryId: destinationDirectoryId)
+        self.init(
+            action: action,
+            parentId: parentId,
+            fileIds: nil,
+            exceptFileIds: exceptFileIds,
+            destinationDirectoryId: destinationDirectoryId
+        )
     }
 
     public init(action: BulkActionType, fileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
-        self.init(action: action, parentId: nil, fileIds: fileIds, exceptFileIds: nil, destinationDirectoryId: destinationDirectoryId)
+        self.init(
+            action: action,
+            parentId: nil,
+            fileIds: fileIds,
+            exceptFileIds: nil,
+            destinationDirectoryId: destinationDirectoryId
+        )
     }
 
-    private init(action: BulkActionType, parentId: Int? = nil, fileIds: [Int]? = nil, exceptFileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
+    private init(
+        action: BulkActionType,
+        parentId: Int? = nil,
+        fileIds: [Int]? = nil,
+        exceptFileIds: [Int]? = nil,
+        destinationDirectoryId: Int? = nil
+    ) {
         self.action = action
         self.exceptFileIds = exceptFileIds
         self.fileIds = fileIds

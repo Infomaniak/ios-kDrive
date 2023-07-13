@@ -27,7 +27,7 @@ class LocationTableViewCell: InsetTableViewCell {
     func configure(with drive: Drive?) {
         logoImage.image = KDriveResourcesAsset.drive.image
 
-        if let drive = drive {
+        if let drive {
             titleLabel.text = drive.name
             logoImage.tintColor = UIColor(hex: drive.preferences.color)
         } else {
@@ -37,7 +37,7 @@ class LocationTableViewCell: InsetTableViewCell {
     }
 
     func configure(with folder: File?, drive: Drive) {
-        if let folder = folder {
+        if let folder {
             if folder.isRoot {
                 configure(with: drive)
                 titleLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)

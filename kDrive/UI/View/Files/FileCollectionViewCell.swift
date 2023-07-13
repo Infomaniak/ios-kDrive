@@ -27,7 +27,23 @@ protocol FileCellDelegate: AnyObject {
 }
 
 @MainActor class FileViewModel {
-    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail", "color", "externalImport.status"]
+    static let observedProperties = [
+        "name",
+        "rawType",
+        "_capabilities",
+        "dropbox",
+        "rawVisibility",
+        "extensionType",
+        "isFavorite",
+        "deletedAt",
+        "lastModifiedAt",
+        "isAvailableOffline",
+        "categories",
+        "size",
+        "hasThumbnail",
+        "color",
+        "externalImport.status"
+    ]
     var file: File
     var selectionMode: Bool
     private var downloadProgressObserver: ObservationToken?
@@ -80,23 +96,25 @@ protocol FileCellDelegate: AnyObject {
 
     func setUpDownloadObserver(_ handler: @escaping (Bool, Bool, Double) -> Void) {
         downloadProgressObserver?.cancel()
-        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                handler(!self.file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
+        downloadProgressObserver = DownloadQueue.instance
+            .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    handler(!file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
+                }
             }
-        }
         downloadObserver?.cancel()
         downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                handler(!self.isAvailableOffline, true, 1)
+                guard let self else { return }
+                handler(!isAvailableOffline, true, 1)
             }
         }
     }
 
     func setThumbnail(on imageView: UIImageView) {
-        guard !file.isInvalidated, (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
+        guard !file.isInvalidated,
+              (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
         // Configure placeholder
         imageView.image = nil
         imageView.contentMode = .scaleAspectFill
@@ -105,12 +123,12 @@ protocol FileCellDelegate: AnyObject {
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
         // Fetch thumbnail
         thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
-            guard let self = self,
+            guard let self,
                   !self.file.isInvalidated else {
                 return
             }
 
-            if self.file.id == requestFileId {
+            if file.id == requestFileId {
                 imageView.image = image
                 imageView.backgroundColor = nil
             }
@@ -220,13 +238,19 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func initStyle(isFirst: Bool, isLast: Bool) {
         if isLast && isFirst {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: 10
+            )
         } else if isFirst {
             contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
         } else if isLast {
             contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: 10)
         } else {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 0)
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: 0
+            )
         }
         contentInsetView.clipsToBounds = true
     }
@@ -354,7 +378,11 @@ extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewData
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         return CGSize(width: 16, height: 16)
     }
 }

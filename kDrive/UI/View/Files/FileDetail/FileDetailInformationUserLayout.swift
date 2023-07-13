@@ -19,22 +19,21 @@
 import UIKit
 
 class FileDetailInformationUserLayout: UICollectionViewFlowLayout {
-
     var overlap: CGFloat = 10
 
     override init() {
         super.init()
-        self.sharedInit()
+        sharedInit()
     }
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.sharedInit()
+        sharedInit()
     }
 
     func sharedInit() {
-        self.scrollDirection = .horizontal
-        self.minimumInteritemSpacing = 0
+        scrollDirection = .horizontal
+        minimumInteritemSpacing = 0
     }
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {

@@ -101,7 +101,11 @@ class RightsSelectionViewController: UIViewController {
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelButtonPressed))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .stop,
+            target: self,
+            action: #selector(cancelButtonPressed)
+        )
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.largeTitleDisplayMode = .always
 
@@ -136,8 +140,18 @@ class RightsSelectionViewController: UIViewController {
                     return KDriveResourcesStrings.Localizable.userPermissionRemove
                 }
             }
-            let userPermissions = UserPermission.allCases.filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
-            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, fileDescription: getUserRightDescription($0), folderDescription: getUserRightDescription($0), documentDescription: getUserRightDescription($0)) }
+            let userPermissions = UserPermission.allCases
+                .filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
+            rights = userPermissions.map {
+                Right(
+                    key: $0.rawValue,
+                    title: $0.title,
+                    icon: $0.icon,
+                    fileDescription: getUserRightDescription($0),
+                    folderDescription: getUserRightDescription($0),
+                    documentDescription: getUserRightDescription($0)
+                )
+            }
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
@@ -163,14 +177,19 @@ class RightsSelectionViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    class func instantiateInNavigationController(file: File, driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate(file: file, driveFileManager: driveFileManager))
+    class func instantiateInNavigationController(file: File,
+                                                 driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate(
+            file: file,
+            driveFileManager: driveFileManager
+        ))
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
     class func instantiate(file: File, driveFileManager: DriveFileManager) -> RightsSelectionViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
         viewController.file = file
         viewController.driveFileManager = driveFileManager
         return viewController
@@ -210,8 +229,16 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let right = rights[indexPath.row]
         if right.key == UserPermission.delete.rawValue {
             let deleteUser = fileAccessElement?.name ?? ""
-            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true) {
+            let attrString = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser),
+                boldText: deleteUser
+            )
+            let alert = AlertTextViewController(
+                title: KDriveResourcesStrings.Localizable.buttonDelete,
+                message: attrString,
+                action: KDriveResourcesStrings.Localizable.buttonDelete,
+                destructive: true
+            ) {
                 self.delegate?.didDeleteUserRight()
                 self.presentingViewController?.dismiss(animated: true)
             }

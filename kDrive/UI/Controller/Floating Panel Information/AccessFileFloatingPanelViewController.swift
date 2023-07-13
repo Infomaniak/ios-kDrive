@@ -38,7 +38,10 @@ class AccessFileFloatingPanelViewController: InformationFloatingPanelViewControl
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, AccessFileFloatingPanelViewController.self)
         return contentViewController
     }

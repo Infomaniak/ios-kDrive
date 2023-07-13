@@ -119,7 +119,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 self.success = isSuccess
             }
         case .download:
-            if !allItemsSelected && (files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1) {
+            if !allItemsSelected &&
+                (files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1) {
                 for file in files {
                     if file.isDownloaded {
                         FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
@@ -128,25 +129,31 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
                         group.enter()
-                        DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
-                            if error == nil {
-                                DispatchQueue.main.async {
-                                    FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                        DownloadQueue.instance
+                            .observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
+                                if error == nil {
+                                    DispatchQueue.main.async {
+                                        FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                                    }
+                                } else {
+                                    success = false
                                 }
-                            } else {
-                                success = false
+                                group.leave()
                             }
-                            group.leave()
-                        }
                         DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
                     }
                 }
             } else {
                 if downloadInProgress,
-                   let currentArchiveId = currentArchiveId,
+                   let currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
                     group.enter()
-                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
+                    let alert = AlertTextViewController(
+                        title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
+                        message: KDriveResourcesStrings.Localizable.cancelDownloadDescription,
+                        action: KDriveResourcesStrings.Localizable.buttonYes,
+                        destructive: true
+                    ) {
                         operation.cancel()
                         self.downloadError = .taskCancelled
                         self.success = false
@@ -183,7 +190,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .duplicate:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
+                driveFileManager: driveFileManager,
+                disabledDirectoriesSelection: files.compactMap(\.parent)
+            ) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
                     do {
                         try await self.copy(files: files, to: selectedDirectory)
@@ -206,30 +216,44 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 case .offline:
                     let filesUpdatedNumber = self.files.filter { !$0.isDirectory }.count
                     if self.addAction {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(filesUpdatedNumber))
+                        UIConstants
+                            .showSnackBar(message: KDriveResourcesStrings.Localizable
+                                .fileListAddOfflineConfirmationSnackbar(filesUpdatedNumber))
                     } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveOfflineConfirmationSnackbar(filesUpdatedNumber))
+                        UIConstants
+                            .showSnackBar(message: KDriveResourcesStrings.Localizable
+                                .fileListRemoveOfflineConfirmationSnackbar(filesUpdatedNumber))
                     }
                 case .favorite:
                     if self.addAction {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(self.files.count))
+                        UIConstants
+                            .showSnackBar(message: KDriveResourcesStrings.Localizable
+                                .fileListAddFavoritesConfirmationSnackbar(self.files.count))
                     } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveFavoritesConfirmationSnackbar(self.files.count))
+                        UIConstants
+                            .showSnackBar(message: KDriveResourcesStrings.Localizable
+                                .fileListRemoveFavoritesConfirmationSnackbar(self.files.count))
                     }
                 case .folderColor:
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.canBeColored).count))
+                    UIConstants
+                        .showSnackBar(message: KDriveResourcesStrings.Localizable
+                            .fileListColorFolderConfirmationSnackbar(self.files.filter(\.canBeColored).count))
                 case .duplicate:
                     guard self.addAction else { break }
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
+                    UIConstants
+                        .showSnackBar(message: KDriveResourcesStrings.Localizable
+                            .fileListDuplicationConfirmationSnackbar(self.files.count))
                 case .download:
-                    guard !self.files.isEmpty && self.files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
+                    guard !self.files.isEmpty && self.files
+                        .allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
                     if self.files.count <= 1, let file = self.files.first {
                         let message = file.convertedType == .image
                             ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation
                             : KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation
                         UIConstants.showSnackBar(message: message)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarImageVideoSaved(self.files.count))
+                        UIConstants
+                            .showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarImageVideoSaved(self.files.count))
                     }
                 default:
                     break
@@ -247,7 +271,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         ? self
                         : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
                     guard viewController as? UIDocumentPickerViewController == nil else { return }
-                    let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
+                    let documentExportViewController = UIDocumentPickerViewController(
+                        url: downloadedArchiveUrl,
+                        in: .exportToService
+                    )
                     viewController?.present(documentExportViewController, animated: true)
                 }
             } else {
@@ -266,13 +293,19 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
             if allItemsSelected {
-                action = BulkAction(action: .copy, parentId: currentDirectory.id, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
+                action = BulkAction(
+                    action: .copy,
+                    parentId: currentDirectory.id,
+                    exceptFileIds: exceptFileIds,
+                    destinationDirectoryId: selectedDirectory.id
+                )
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }
             let tabBarController = presentingViewController as? MainTabViewController
             let navigationController = tabBarController?.selectedViewController as? UINavigationController
-            await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.performAndObserve(bulkAction: action)
+            await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?
+                .performAndObserve(bulkAction: action)
         } else {
             // MainActor should ensure that this call is safe as file was created on the main thread ?
             let proxyFiles = files.map { $0.proxify() }
@@ -297,16 +330,20 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
-                let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
+                let response = try await driveFileManager.apiFetcher.buildArchive(
+                    drive: driveFileManager.drive,
+                    body: archiveBody
+                )
                 currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }
-                DownloadQueue.instance.observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
-                    if let archiveUrl = archiveUrl {
-                        completion(.success(archiveUrl))
-                    } else {
-                        completion(.failure(error ?? .unknownError))
+                DownloadQueue.instance
+                    .observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
+                        if let archiveUrl {
+                            completion(.success(archiveUrl))
+                        } else {
+                            completion(.failure(error ?? .unknownError))
+                        }
                     }
-                }
                 DownloadQueue.instance.addToQueue(archiveId: response.uuid,
                                                   driveId: self.driveFileManager.drive.id,
                                                   userId: accountManager.currentUserId)

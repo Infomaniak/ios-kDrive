@@ -45,7 +45,8 @@ class SearchFilterCollectionViewCell: UICollectionViewCell {
     func configure(with filter: Filterable) {
         self.filter = filter
         iconImageView.image = filter.icon
-        iconImageView.tintColor = filter is ConvertedType ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.secondaryTextColor.color
+        iconImageView.tintColor = filter is ConvertedType ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset
+            .secondaryTextColor.color
         titleLabel.text = filter.localizedName
         titleLabel.sizeToFit()
     }

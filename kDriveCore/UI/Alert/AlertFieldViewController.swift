@@ -47,8 +47,25 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
-    public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) async -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
+    public convenience init(
+        title: String,
+        placeholder: String?,
+        text: String? = nil,
+        action: String,
+        loading: Bool = false,
+        handler: ((String) async -> Void)?,
+        cancelHandler: (() -> Void)? = nil
+    ) {
+        self.init(
+            title: title,
+            label: placeholder,
+            placeholder: placeholder,
+            text: text,
+            action: action,
+            loading: loading,
+            handler: handler,
+            cancelHandler: cancelHandler
+        )
     }
 
     /**
@@ -62,8 +79,17 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
-    public init(title: String, label: String?, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) async -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        self.labelText = label
+    public init(
+        title: String,
+        label: String?,
+        placeholder: String?,
+        text: String? = nil,
+        action: String,
+        loading: Bool = false,
+        handler: ((String) async -> Void)?,
+        cancelHandler: (() -> Void)? = nil
+    ) {
+        labelText = label
         self.placeholder = placeholder
         self.text = text
         self.handler = handler
@@ -85,8 +111,18 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         super.viewDidLoad()
 
         // Observe keyboard
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
 
         // Text field
         textField = MaterialOutlinedTextField()

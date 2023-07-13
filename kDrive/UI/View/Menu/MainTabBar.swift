@@ -125,7 +125,10 @@ class MainTabBar: UITabBar {
         let height = 120.0
         let inset = (superview?.frame.height ?? 0) - frame.height - frame.minY
         gradient.frame = CGRect(x: 0, y: bounds.height + inset - height, width: bounds.width, height: height)
-        gradient.colors = [KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor, KDriveResourcesAsset.backgroundColor.color.cgColor]
+        gradient.colors = [
+            KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor,
+            KDriveResourcesAsset.backgroundColor.color.cgColor
+        ]
         if let oldBackgroundLayer = backgroundLayer {
             layer.replaceSublayer(oldBackgroundLayer, with: gradient)
         } else {
@@ -140,7 +143,12 @@ class MainTabBar: UITabBar {
         if centerButton?.superview != nil {
             centerButton.removeFromSuperview()
         }
-        centerButton = IKRoundButton(frame: CGRect(x: (bounds.width / 2) - (tabBarHeight / 2), y: originY, width: tabBarHeight, height: tabBarHeight))
+        centerButton = IKRoundButton(frame: CGRect(
+            x: (bounds.width / 2) - (tabBarHeight / 2),
+            y: originY,
+            width: tabBarHeight,
+            height: tabBarHeight
+        ))
         centerButton.setTitle("", for: .normal)
         centerButton.setImage(KDriveResourcesAsset.plus.image, for: .normal)
         centerButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)

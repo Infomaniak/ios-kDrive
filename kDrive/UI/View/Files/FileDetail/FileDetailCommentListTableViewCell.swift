@@ -19,7 +19,5 @@
 import UIKit
 
 class FileDetailCommentListTableViewCell: UITableViewCell {
-
     @IBOutlet weak var userLabel: UILabel!
-
 }

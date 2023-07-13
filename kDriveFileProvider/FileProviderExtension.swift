@@ -44,7 +44,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var accountManager: AccountManageable
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
-        if let domain = domain {
+        if let domain {
             return NSFileProviderManager(for: domain) ?? .default
         }
         return .default
@@ -234,7 +234,11 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    private func downloadFreshRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) async throws {
+    private func downloadFreshRemoteFile(
+        _ file: File,
+        for item: FileProviderItem,
+        completion: @escaping (Error?) -> Void
+    ) async throws {
         // Prevent observing file multiple times
         guard !DownloadQueue.instance.hasOperation(for: file) else {
             completion(nil)
@@ -352,7 +356,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 domain: domain
             )
         }
-        let item = try self.item(for: containerItemIdentifier)
+        let item = try item(for: containerItemIdentifier)
         return FileProviderEnumerator(containerItem: item, driveFileManager: driveFileManager, domain: domain)
     }
 

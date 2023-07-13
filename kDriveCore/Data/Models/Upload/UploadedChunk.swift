@@ -29,11 +29,11 @@ public final class UploadedChunk: Object, Decodable {
     public required convenience init(from decoder: Decoder) throws {
         self.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.number = try container.decode(Int64.self, forKey: .number)
-        self.status = try container.decode(String.self, forKey: .status)
-        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
-        self.size = try container.decode(Int64.self, forKey: .size)
-        self.chunkHash = try container.decode(String.self, forKey: .chunkHash)
+        number = try container.decode(Int64.self, forKey: .number)
+        status = try container.decode(String.self, forKey: .status)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        size = try container.decode(Int64.self, forKey: .size)
+        chunkHash = try container.decode(String.self, forKey: .chunkHash)
     }
 
     enum CodingKeys: String, CodingKey {

@@ -68,8 +68,8 @@ class SavePhotoViewController: SaveFileViewController {
 
     override func didClickOnButton() {
         guard let filename = items.first?.name,
-              let selectedDriveFileManager = selectedDriveFileManager,
-              let selectedDirectory = selectedDirectory else {
+              let selectedDriveFileManager,
+              let selectedDirectory else {
             return
         }
 

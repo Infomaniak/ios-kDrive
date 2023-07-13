@@ -43,7 +43,13 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         var pdfUrl: URL?
         var error: Error?
 
-        internal init(fileId: Int, pdfGenerationProgress: Progress? = nil, downloadTask: URLSessionDownloadTask? = nil, pdfUrl: URL? = nil, error: Error? = nil) {
+        internal init(
+            fileId: Int,
+            pdfGenerationProgress: Progress? = nil,
+            downloadTask: URLSessionDownloadTask? = nil,
+            pdfUrl: URL? = nil,
+            error: Error? = nil
+        ) {
             self.fileId = fileId
             self.pdfGenerationProgress = pdfGenerationProgress
             self.downloadTask = downloadTask
@@ -209,7 +215,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             if self?.currentFile.id == file.id {
                 self?.currentFile = file
                 DispatchQueue.main.async {
-                    guard let self = self else { return }
+                    guard let self else { return }
                     self.collectionView.endEditing(true)
                     self.collectionView.reloadItems(at: [self.currentIndex])
                 }
@@ -420,11 +426,17 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         UIView.animate(withDuration: 0.2) {
             self.setNeedsStatusBarAppearanceUpdate()
-            let hideStatusBar = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -self.statusBarView.frame.height : 0)
+            let hideStatusBar = CGAffineTransform(
+                translationX: 0,
+                y: self.fullScreenPreview ? -self.statusBarView.frame.height : 0
+            )
             self.statusBarView.transform = hideStatusBar
         }
         UIView.animate(withDuration: 0.4) {
-            let hideButton = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -(self.backButton.frame.height + self.heightToHide) : 0)
+            let hideButton = CGAffineTransform(
+                translationX: 0,
+                y: self.fullScreenPreview ? -(self.backButton.frame.height + self.heightToHide) : 0
+            )
             self.backButton.transform = hideButton
             self.pdfPageLabel.transform = hideButton
             self.editButton.transform = hideButton
@@ -462,7 +474,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                     }
                 } completion: { url, error in
                     previewError.removeDownloadTask()
-                    if let url = url {
+                    if let url {
                         previewError.pdfUrl = url
                     } else {
                         previewError.error = error
@@ -484,8 +496,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
-                guard let self = self else { return }
-                FileActionsHelper.instance.openWith(file: self.currentFile, from: frame, in: self.view, delegate: self)
+                guard let self else { return }
+                FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
             }
         }
     }
@@ -494,7 +506,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         guard let currentCell = collectionView.cellForItem(at: currentIndex) as? NoPreviewCollectionViewCell else { return }
 
         DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
-            guard let self = self else { return }
+            guard let self else { return }
             DispatchQueue.main.async {
                 if error == nil {
                     completion()
@@ -530,13 +542,14 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                     DispatchQueue.main.async { [weak self] in
                         self?.currentDownloadOperation = nil
                         if self?.view.window != nil {
-                            if let error = error {
+                            if let error {
                                 if error != .taskCancelled {
                                     self?.previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, error: error)
                                     self?.collectionView.reloadItems(at: [indexPath])
                                 }
                             } else {
-                                (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
+                                (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
+                                    .previewDownloadTask?.cancel()
                                 self?.collectionView.endEditing(true)
                                 self?.collectionView.reloadItems(at: [indexPath])
                                 self?.updateNavigationBar()
@@ -548,8 +561,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
-    class func instantiate(files: [File], index: Int, driveFileManager: DriveFileManager, normalFolderHierarchy: Bool, fromActivities: Bool) -> PreviewViewController {
-        let previewPageViewController = Storyboard.files.instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
+    class func instantiate(
+        files: [File],
+        index: Int,
+        driveFileManager: DriveFileManager,
+        normalFolderHierarchy: Bool,
+        fromActivities: Bool
+    ) -> PreviewViewController {
+        let previewPageViewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
         previewPageViewController.previewFiles = files
         previewPageViewController.driveFileManager = driveFileManager
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
@@ -618,7 +638,11 @@ extension PreviewViewController: UICollectionViewDataSource {
         return previewFiles.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
             cell.progressiveLoadingForFile(file)
@@ -630,7 +654,8 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
+        if previewErrors[file.id] == nil &&
+            (!file.isLocalVersionOlderThanRemote || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -726,11 +751,18 @@ extension PreviewViewController: UICollectionViewDataSource {
 // MARK: - Collection view delegate flow layout
 
 extension PreviewViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         return collectionView.bounds.size
     }
 
-    func collectionView(_ collectionView: UICollectionView, targetContentOffsetForProposedContentOffset proposedContentOffset: CGPoint) -> CGPoint {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        targetContentOffsetForProposedContentOffset proposedContentOffset: CGPoint
+    ) -> CGPoint {
         guard let oldCenter = centerIndexPathBeforeRotate else {
             return proposedContentOffset
         }
@@ -758,7 +790,10 @@ extension PreviewViewController: FloatingPanelControllerDelegate {
 // MARK: - Document interaction controller delegate
 
 extension PreviewViewController: UIDocumentInteractionControllerDelegate {
-    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
+    func documentInteractionController(
+        _ controller: UIDocumentInteractionController,
+        willBeginSendingToApplication application: String?
+    ) {
         // Dismiss interaction controller when the user taps an app
         controller.dismissMenu(animated: true)
     }

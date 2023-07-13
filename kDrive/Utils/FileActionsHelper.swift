@@ -79,24 +79,26 @@ public class FileActionsHelper {
         completion: ((Bool) -> Void)? = nil
     ) {
         guard destinationDirectory.id != file.parentId else { return }
-        Task { [proxyFile = file.proxify(),
-                proxyParent = file.parent?.proxify(),
-                proxyDestination = destinationDirectory.proxify(),
-                destinationName = destinationDirectory.name] in
-                do {
-                    let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
-                    UIConstants.showCancelableSnackBar(
-                        message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
-                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
-                        cancelableResponse: cancelResponse,
-                        parentFile: proxyParent,
-                        driveFileManager: driveFileManager
-                    )
-                    completion?(true)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                    completion?(false)
-                }
+        Task { [
+            proxyFile = file.proxify(),
+            proxyParent = file.parent?.proxify(),
+            proxyDestination = destinationDirectory.proxify(),
+            destinationName = destinationDirectory.name
+        ] in
+            do {
+                let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
+                UIConstants.showCancelableSnackBar(
+                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
+                    cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                    cancelableResponse: cancelResponse,
+                    parentFile: proxyParent,
+                    driveFileManager: driveFileManager
+                )
+                completion?(true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+                completion?(false)
+            }
         }
     }
 
@@ -132,7 +134,7 @@ public class FileActionsHelper {
         Task {
             do {
                 try await PhotoLibrarySaver.instance.save(url: url, type: type)
-                if let successMessage = successMessage {
+                if let successMessage {
                     UIConstants.showSnackBar(message: successMessage)
                 }
             } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {

@@ -73,9 +73,11 @@ class UploadTableViewCell: InsetTableViewCell {
 
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
-            cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
+            cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
+                .errorUpload + " (\(error.localizedDescription))"
         } else {
-            cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
+            cardContentView.retryButton?
+                .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
@@ -106,7 +108,7 @@ class UploadTableViewCell: InsetTableViewCell {
         }
 
         // Set initial progress value
-        if let progress = progress {
+        if let progress {
             updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
         }
 
@@ -123,8 +125,8 @@ class UploadTableViewCell: InsetTableViewCell {
                     return
                 }
 
-                self.updateProgress(fileId: newFile.id, progress: progress, animated: false)
-            case .error(_), .deleted:
+                updateProgress(fileId: newFile.id, progress: progress, animated: false)
+            case .error, .deleted:
                 break
             }
         }
@@ -154,8 +156,8 @@ class UploadTableViewCell: InsetTableViewCell {
                 return
             }
 
-            self.cardContentView.retryButton?.isHidden = true
-            self.uploadQueue.retry(uploadFile.id)
+            cardContentView.retryButton?.isHidden = true
+            uploadQueue.retry(uploadFile.id)
         }
     }
 
@@ -175,7 +177,7 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     func updateProgress(fileId: String, progress: CGFloat, animated: Bool = true) {
-        if let currentFileId = currentFileId, fileId == currentFileId {
+        if let currentFileId, fileId == currentFileId {
             cardContentView.iconView.isHidden = true
             cardContentView.progressView.isHidden = false
             cardContentView.progressView.updateProgress(progress, animated: animated)

@@ -29,8 +29,11 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         animationView.animation = Animation.named("illu_photos")
         animationViewHeightConstraint.constant = 258
         titleLabel.text = KDriveResourcesStrings.Localizable.syncConfigureTitle
-        if let drive = drive {
-            descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.syncConfigureDescription(drive.name), boldText: drive.name)
+        if let drive {
+            descriptionLabel.attributedText = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.syncConfigureDescription(drive.name),
+                boldText: drive.name
+            )
         } else {
             descriptionLabel.text = nil
         }
@@ -41,7 +44,10 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, SavePhotosFloatingPanelViewController.self)
         return contentViewController
     }

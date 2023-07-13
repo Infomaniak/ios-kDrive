@@ -29,6 +29,7 @@ public class IKRoundButton: IKLargeButton {
     }
 
     override func setBackgroundColor() {
-        backgroundColor = isEnabled ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.infomaniakColor.color.withAlphaComponent(0.38)
+        backgroundColor = isEnabled ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.infomaniakColor.color
+            .withAlphaComponent(0.38)
     }
 }

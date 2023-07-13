@@ -52,7 +52,8 @@ class SecurityTableViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.appSecurityTitle
-            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
+            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveResourcesStrings.Localizable
+                .allActivated : KDriveResourcesStrings.Localizable.allDisabled
             return cell
         case .fileProviderExtension:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)

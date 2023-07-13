@@ -78,52 +78,52 @@ public func ABLog(_ message: @autoclosure () -> Any,
     let messageString = message() as! String
 
     #if DEBUG
-        if #available(iOS 14.0, *), !category.isEmpty {
-            let factoryParameters = [categoryKey: category]
-            @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
+    if #available(iOS 14.0, *), !category.isEmpty {
+        let factoryParameters = [categoryKey: category]
+        @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
 
-            switch level {
-            case .warning, .alert:
-                logger.warning("\(messageString, privacy: .public)")
-            case .emergency, .critical:
-                logger.critical("\(messageString, privacy: .public)")
-            case .error:
-                logger.error("\(messageString, privacy: .public)")
-            case .notice:
-                logger.notice("\(messageString, privacy: .public)")
-            case .info:
-                logger.info("\(messageString, privacy: .public)")
-            case .debug:
-                logger.debug("\(messageString, privacy: .public)")
-            case .fault:
-                logger.fault("\(messageString, privacy: .public)")
-            }
-        } else {
-            os_log("[%@] %@", log: .default, type: level.logType, category, messageString)
+        switch level {
+        case .warning, .alert:
+            logger.warning("\(messageString, privacy: .public)")
+        case .emergency, .critical:
+            logger.critical("\(messageString, privacy: .public)")
+        case .error:
+            logger.error("\(messageString, privacy: .public)")
+        case .notice:
+            logger.notice("\(messageString, privacy: .public)")
+        case .info:
+            logger.info("\(messageString, privacy: .public)")
+        case .debug:
+            logger.debug("\(messageString, privacy: .public)")
+        case .fault:
+            logger.fault("\(messageString, privacy: .public)")
         }
+    } else {
+        os_log("[%@] %@", log: .default, type: level.logType, category, messageString)
+    }
 
     #else
-        // Forward to cocoaLumberjack
-        let buffer = "[\(category)] " + messageString
-        switch level {
-        case .error:
-            DDLogError(buffer,
-                       context: context,
-                       file: file,
-                       function: function,
-                       line: line,
-                       tag: tag,
-                       asynchronous: async,
-                       ddlog: .sharedInstance)
-        default:
-            DDLogInfo(buffer,
-                      context: context,
-                      file: file,
-                      function: function,
-                      line: line,
-                      tag: tag,
-                      asynchronous: async,
-                      ddlog: .sharedInstance)
-        }
+    // Forward to cocoaLumberjack
+    let buffer = "[\(category)] " + messageString
+    switch level {
+    case .error:
+        DDLogError(buffer,
+                   context: context,
+                   file: file,
+                   function: function,
+                   line: line,
+                   tag: tag,
+                   asynchronous: async,
+                   ddlog: .sharedInstance)
+    default:
+        DDLogInfo(buffer,
+                  context: context,
+                  file: file,
+                  function: function,
+                  line: line,
+                  tag: tag,
+                  asynchronous: async,
+                  ddlog: .sharedInstance)
+    }
     #endif
 }

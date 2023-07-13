@@ -19,11 +19,11 @@
 import UIKit
 
 class NewFolderSectionHeaderView: UIView {
-
     @IBOutlet weak var titleLabel: UILabel!
 
     class func instantiate(title: String = "") -> NewFolderSectionHeaderView {
-        let view = Bundle.main.loadNibNamed("NewFolderSectionHeaderView", owner: nil, options: nil)![0] as! NewFolderSectionHeaderView
+        let view = Bundle.main
+            .loadNibNamed("NewFolderSectionHeaderView", owner: nil, options: nil)![0] as! NewFolderSectionHeaderView
         view.titleLabel.text = title
         return view
     }

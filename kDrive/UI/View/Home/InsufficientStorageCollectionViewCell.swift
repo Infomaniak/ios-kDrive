@@ -40,7 +40,9 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
     func configureCell(with drive: Drive) {
         progressView.updateProgress(CGFloat(drive.usedSize) / CGFloat(drive.size))
 
-        storageLabel.text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
+        storageLabel
+            .text =
+            "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
 
         if drive.accountAdmin {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription1

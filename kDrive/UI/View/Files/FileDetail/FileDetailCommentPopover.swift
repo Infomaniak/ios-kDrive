@@ -19,7 +19,6 @@
 import UIKit
 
 class FileDetailCommentPopover: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
 
     var users: [String] = []
@@ -33,7 +32,6 @@ class FileDetailCommentPopover: UIViewController {
         tableView.register(cellView: FileDetailCommentListTableViewCell.self)
 
         tableView.separatorColor = .clear
-
     }
 
     class func instantiate() -> FileDetailCommentPopover {
@@ -42,6 +40,7 @@ class FileDetailCommentPopover: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
+
 extension FileDetailCommentPopover: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return users.count
@@ -53,5 +52,4 @@ extension FileDetailCommentPopover: UITableViewDelegate, UITableViewDataSource {
         cell.selectionStyle = .none
         return cell
     }
-
 }

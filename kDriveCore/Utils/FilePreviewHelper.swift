@@ -24,14 +24,16 @@ public class FilePreviewHelper {
     public static let instance = FilePreviewHelper()
 
     @discardableResult
-    public func getThumbnail(url: URL, thumbnailSize: CGSize, completion: @escaping (UIImage) -> Void) -> QLThumbnailGenerator.Request {
+    public func getThumbnail(url: URL, thumbnailSize: CGSize, completion: @escaping (UIImage) -> Void) -> QLThumbnailGenerator
+        .Request {
         let request = QLThumbnailGenerator.Request(
             fileAt: url,
             size: thumbnailSize,
             scale: UIScreen.main.scale,
-            representationTypes: [.lowQualityThumbnail, .thumbnail])
+            representationTypes: [.lowQualityThumbnail, .thumbnail]
+        )
         QLThumbnailGenerator.shared.generateRepresentations(for: request) { image, _, _ in
-            if let image = image {
+            if let image {
                 completion(image.uiImage)
             }
         }

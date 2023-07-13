@@ -19,7 +19,6 @@
 import UIKit
 
 class EmptyTableViewCell: UITableViewCell {
-
     @IBOutlet weak var contentHoldingView: UIStackView!
     var emptyView: EmptyTableView!
 

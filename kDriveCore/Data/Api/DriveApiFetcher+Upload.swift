@@ -242,7 +242,7 @@ public extension DriveApiFetcher {
     }
 }
 
-extension Dictionary where Key == APIUploadParameter, Value == Any? {
+extension [APIUploadParameter: Any?] {
     func toParameters() -> Parameters {
         var parameters = Parameters()
         for rawParameter in self {

@@ -20,7 +20,6 @@ import kDriveCore
 import UIKit
 
 class PhotoAccessDeniedTableViewCell: UITableViewCell {
-
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
         Constants.openSettings()
     }

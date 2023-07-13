@@ -27,7 +27,7 @@ final class ITRangeProviderGuts: XCTestCase {
 
     func testReadFileByteSize() {
         // GIVEN
-        let expectedFileBytes = UInt64(4865229)
+        let expectedFileBytes = UInt64(4_865_229)
         let bundle = Bundle(for: type(of: self))
         let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
         let guts = RangeProviderGuts(fileURL: pathURL)

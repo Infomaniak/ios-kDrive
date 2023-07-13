@@ -191,7 +191,10 @@ extension StoreObserver: SKPaymentTransactionObserver {
 
         if !hasRestorablePurchases {
             DispatchQueue.main.async {
-                self.delegate?.storeObserverDidReceiveMessage("There are no restorable purchases.\nOnly previously bought non-consumable products and auto-renewable subscriptions can be restored.")
+                self.delegate?
+                    .storeObserverDidReceiveMessage(
+                        "There are no restorable purchases.\nOnly previously bought non-consumable products and auto-renewable subscriptions can be restored."
+                    )
             }
         }
     }

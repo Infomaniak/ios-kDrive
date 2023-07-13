@@ -45,7 +45,8 @@ class ShareLinkSettingsViewController: UIViewController {
         var fileDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveResourcesStrings.Localizable.shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFile)
+                return KDriveResourcesStrings.Localizable
+                    .shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFile)
             case .optionDownload:
                 return KDriveResourcesStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
@@ -56,7 +57,8 @@ class ShareLinkSettingsViewController: UIViewController {
         var folderDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveResourcesStrings.Localizable.shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFolder)
+                return KDriveResourcesStrings.Localizable
+                    .shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFolder)
             case .optionDownload:
                 return KDriveResourcesStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
@@ -80,7 +82,7 @@ class ShareLinkSettingsViewController: UIViewController {
     private var settingsValue = [OptionsRow: Any?]()
     var accessRightValue: String!
     var editRights = Right.onlyOfficeRights
-    var editRightValue: String = ""
+    var editRightValue = ""
     var optionsRows: [OptionsRow] = [.optionPassword, .optionDownload, .optionDate]
     var password: String?
     private var newPassword = false
@@ -110,8 +112,18 @@ class ShareLinkSettingsViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         initOptions()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
 
     deinit {
@@ -140,7 +152,8 @@ class ShareLinkSettingsViewController: UIViewController {
         var activateButton = true
         for (option, enabled) in settings {
             // Disable the button if the option is enabled but has no value, except in case of password
-            if enabled && (option != .optionDownload && getValue(for: option) == nil) && (option != .optionPassword || !newPassword) {
+            if enabled && (option != .optionDownload && getValue(for: option) == nil) &&
+                (option != .optionPassword || !newPassword) {
                 activateButton = false
             }
         }
@@ -203,7 +216,8 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     class func instantiate() -> ShareLinkSettingsViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
+        return Storyboard.files
+            .instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
     }
 
     // MARK: - State restoration
@@ -258,20 +272,29 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         cell.delegate = self
         let option = (file.isOfficeFile || file.isDirectory) ? optionsRows[indexPath.row - 1] : optionsRows[indexPath.row]
         let index = (file.isOfficeFile || file.isDirectory) ? indexPath.row - 1 : indexPath.row
-        cell.configureWith(index: index, option: option, switchValue: getSetting(for: option), settingValue: getValue(for: option), drive: driveFileManager.drive, actionButtonVisible: option == .optionPassword && newPassword, isFolder: file.isDirectory)
+        cell.configureWith(
+            index: index,
+            option: option,
+            switchValue: getSetting(for: option),
+            settingValue: getValue(for: option),
+            drive: driveFileManager.drive,
+            actionButtonVisible: option == .optionPassword && newPassword,
+            isFolder: file.isDirectory
+        )
 
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 let driveFloatingPanelController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SecureLinkFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? SecureLinkFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) {
                         StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                     }
                 }
-                self.present(driveFloatingPanelController, animated: true)
+                present(driveFloatingPanelController, animated: true)
             }
         }
 
@@ -298,7 +321,10 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
-            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(
+                file: file,
+                driveFileManager: driveFileManager
+            )
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.selectedRight = editRightValue
@@ -316,7 +342,10 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index]
         settings[option] = isOn
-        tableView.reloadRows(at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)], with: .automatic)
+        tableView.reloadRows(
+            at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)],
+            with: .automatic
+        )
         updateButton()
     }
 
@@ -331,7 +360,10 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
         if option == .optionPassword {
             newPassword.toggle()
         }
-        tableView.reloadRows(at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)], with: .automatic)
+        tableView.reloadRows(
+            at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)],
+            with: .automatic
+        )
         updateButton()
     }
 }

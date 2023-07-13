@@ -66,7 +66,10 @@ class FilesHeaderView: UICollectionReusableView {
         }
         uploadCardView.iconView.isHidden = true
         uploadCardView.progressView.setInfomaniakStyle()
-        uploadCardView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
+        uploadCardView.roundCorners(
+            corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+            radius: 10
+        )
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
     }

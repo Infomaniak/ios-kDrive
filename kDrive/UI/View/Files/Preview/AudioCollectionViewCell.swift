@@ -55,7 +55,15 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     private var rateObserver: NSKeyValueObservation!
     private var statusObserver: NSObjectProtocol!
 
-    private let registeredCommands: [NowPlayableCommand] = [.togglePausePlay, .play, .pause, .skipBackward, .skipForward, .changePlaybackPosition, .changePlaybackRate]
+    private let registeredCommands: [NowPlayableCommand] = [
+        .togglePausePlay,
+        .play,
+        .pause,
+        .skipBackward,
+        .skipForward,
+        .changePlaybackPosition,
+        .changePlaybackRate
+    ]
 
     enum PlayerState {
         case stopped
@@ -78,7 +86,12 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         positionSlider.setThumbImage(circleImage, for: .normal)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(rotated),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
     }
 
     override func prepareForReuse() {
@@ -94,7 +107,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token = token {
+                if let token {
                     let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
@@ -126,7 +139,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
                                                                       queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 10), queue: DispatchQueue.main) { [weak self] time in
+        timeObserver = player?.addPeriodicTimeObserver(
+            forInterval: CMTime(seconds: 0.5, preferredTimescale: 10),
+            queue: DispatchQueue.main
+        ) { [weak self] time in
             guard let strongSelf = self else { return }
             strongSelf.elapsedTimeLabel.text = time.formattedText
             if let duration = strongSelf.player?.currentItem?.duration {
@@ -143,7 +159,12 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             self?.setNowPlayingPlaybackInfo()
         }
         if let currentItem = player?.currentItem {
-            NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying), name: .AVPlayerItemDidPlayToEndTime, object: currentItem)
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(playerDidFinishPlaying),
+                name: .AVPlayerItemDidPlayToEndTime,
+                object: currentItem
+            )
         }
         setUpRemoteControlEvents()
     }
@@ -175,28 +196,28 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             command.removeHandler()
 
             command.addHandler { [weak self] command, event in
-                guard let self = self else {
+                guard let self else {
                     return .commandFailed
                 }
                 switch command {
                 case .togglePausePlay:
-                    self.togglePlayPause()
+                    togglePlayPause()
                 case .play:
-                    self.play()
+                    play()
                 case .pause:
-                    self.pause()
+                    pause()
                 case .skipBackward:
                     guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    self.skipBackward(by: event.interval)
+                    skipBackward(by: event.interval)
                 case .skipForward:
                     guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    self.skipForward(by: event.interval)
+                    skipForward(by: event.interval)
                 case .changePlaybackPosition:
                     guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-                    self.seek(to: event.positionTime)
+                    seek(to: event.positionTime)
                 case .changePlaybackRate:
                     guard let event = event as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
-                    self.setPlaybackRate(event.playbackRate)
+                    setPlaybackRate(event.playbackRate)
                 default:
                     return .commandFailed
                 }
@@ -275,11 +296,11 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     private func optOut() {
-        if let interruptionObserver = interruptionObserver {
+        if let interruptionObserver {
             NotificationCenter.default.removeObserver(interruptionObserver)
         }
         interruptionObserver = nil
-        if let timeObserver = timeObserver {
+        if let timeObserver {
             player?.removeTimeObserver(timeObserver)
         }
         timeObserver = nil
@@ -329,12 +350,12 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func skipForward(by interval: TimeInterval) {
-        guard let player = player else { return }
+        guard let player else { return }
         seek(to: player.currentTime() + CMTime(seconds: interval, preferredTimescale: 1))
     }
 
     func skipBackward(by interval: TimeInterval) {
-        guard let player = player else { return }
+        guard let player else { return }
         seek(to: player.currentTime() - CMTime(seconds: interval, preferredTimescale: 1))
     }
 
@@ -351,7 +372,7 @@ extension AVPlayer {
     }
 
     var progressPercentage: Double {
-        guard let currentItem = currentItem else { return 0 }
+        guard let currentItem else { return 0 }
         return (currentItem.currentTime().seconds * 100) / currentItem.duration.seconds
     }
 }
@@ -360,8 +381,8 @@ extension CMTime {
     var formattedText: String {
         let totalSeconds = seconds
         guard totalSeconds.isFinite else { return "--:--" }
-        let hours = Int(totalSeconds.truncatingRemainder(dividingBy: 86_400) / 3_600)
-        let minutes = Int(totalSeconds.truncatingRemainder(dividingBy: 3_600) / 60)
+        let hours = Int(totalSeconds.truncatingRemainder(dividingBy: 86400) / 3600)
+        let minutes = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
         let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
 
         if hours > 0 {

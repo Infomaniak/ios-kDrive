@@ -50,7 +50,16 @@ class HomeRecentFilesController {
 
     private var files = [File]()
 
-    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, listCellType: UICollectionViewCell.Type, gridCellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, selectorTitle: String, listStyleEnabled: Bool) {
+    init(
+        driveFileManager: DriveFileManager,
+        homeViewController: HomeViewController,
+        listCellType: UICollectionViewCell.Type,
+        gridCellType: UICollectionViewCell.Type,
+        emptyCellType: EmptyTableView.EmptyTableViewType,
+        title: String,
+        selectorTitle: String,
+        listStyleEnabled: Bool
+    ) {
         self.title = title
         self.selectorTitle = selectorTitle
         self.listCellType = listCellType
@@ -147,7 +156,11 @@ class HomeRecentFilesController {
 
     func getHeaderLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(55))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        let header = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
         return header
     }
@@ -171,7 +184,10 @@ class HomeRecentFilesController {
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalWidth(1 / Double(columns) * gridCellRatio))
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .fractionalWidth(1 / Double(columns) * gridCellRatio)
+            )
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
             group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24 - 8, bottom: 0, trailing: 24 - 8)
             section = NSCollectionLayoutSection(group: group)

@@ -74,7 +74,7 @@ public final class ExpiringActivity: ExpiringActivityable {
             }
 
             if shouldTerminate {
-                self.delegate?.backgroundActivityExpiring()
+                delegate?.backgroundActivityExpiring()
             }
 
             group.enter()

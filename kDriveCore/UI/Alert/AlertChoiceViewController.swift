@@ -55,9 +55,17 @@ public class AlertChoiceViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    public init(title: String, choices: [String], selected: Int = 0, action: String, loading: Bool = false, handler: ((Int) -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(
+        title: String,
+        choices: [String],
+        selected: Int = 0,
+        action: String,
+        loading: Bool = false,
+        handler: ((Int) -> Void)?,
+        cancelHandler: (() -> Void)? = nil
+    ) {
         self.choices = choices
-        self.selectedIndex = selected
+        selectedIndex = selected
         self.handler = handler
         super.init(title: title, action: action, loading: loading, handler: nil, cancelHandler: cancelHandler)
     }

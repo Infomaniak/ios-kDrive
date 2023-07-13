@@ -38,13 +38,19 @@ class RecentSearchCollectionViewCell: UICollectionViewCell {
 
     func initStyle(isFirst: Bool, isLast: Bool) {
         if isLast && isFirst {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: 10
+            )
         } else if isFirst {
             contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
         } else if isLast {
             contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: 10)
         } else {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 0)
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: 0
+            )
         }
         contentInsetView.clipsToBounds = true
     }

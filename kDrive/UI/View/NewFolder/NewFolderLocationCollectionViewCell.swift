@@ -19,7 +19,6 @@
 import UIKit
 
 class NewFolderLocationCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var accessoryImage: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var chevronImage: UIImageView!
@@ -28,5 +27,4 @@ class NewFolderLocationCollectionViewCell: UICollectionViewCell {
         super.awakeFromNib()
         // Initialization code
     }
-
 }

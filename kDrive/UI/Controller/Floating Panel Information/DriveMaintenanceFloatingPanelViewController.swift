@@ -35,7 +35,10 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
         if let drive, !drive.isInTechnicalMaintenance {
             titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitle(drive.name)
             imageView.image = KDriveResourcesAsset.driveBlocked.image
-            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(drive.updatedAt, style: .date))
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(
+                drive.updatedAt,
+                style: .date
+            ))
             #if !ISEXTENSION
             if drive.isUserAdmin {
                 leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)
@@ -61,7 +64,10 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, DriveMaintenanceFloatingPanelViewController.self)
         return contentViewController
     }

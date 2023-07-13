@@ -25,12 +25,17 @@ public class PdfPreviewCache {
 
     private init() {
         pdfCacheDirectory = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("PdfPreviews", isDirectory: true)
-        try? FileManager.default.createDirectory(atPath: pdfCacheDirectory.path, withIntermediateDirectories: true, attributes: nil)
+        try? FileManager.default.createDirectory(
+            atPath: pdfCacheDirectory.path,
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
     }
 
     private func isLocalVersionOlderThanRemote(for file: File) -> Bool {
         do {
-            if let modifiedDate = try FileManager.default.attributesOfItem(atPath: pdfPreviewUrl(for: file).path)[.modificationDate] as? Date {
+            if let modifiedDate = try FileManager.default
+                .attributesOfItem(atPath: pdfPreviewUrl(for: file).path)[.modificationDate] as? Date {
                 if modifiedDate >= file.lastModifiedAt {
                     return false
                 }
@@ -42,7 +47,8 @@ public class PdfPreviewCache {
     }
 
     private func pdfPreviewUrl(for file: File) -> URL {
-        return pdfCacheDirectory.appendingPathComponent("\(file.driveId)").appendingPathComponent("\(file.id)").appendingPathExtension("pdf")
+        return pdfCacheDirectory.appendingPathComponent("\(file.driveId)").appendingPathComponent("\(file.id)")
+            .appendingPathExtension("pdf")
     }
 
     public func retrievePdf(for file: File, driveFileManager: DriveFileManager,
@@ -55,15 +61,21 @@ public class PdfPreviewCache {
                 return
             }
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token = token {
+                if let token {
                     var urlRequest = URLRequest(url: Endpoint.download(file: file, as: "pdf").url)
                     urlRequest.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     let task = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
-                        if let url = url {
+                        if let url {
                             do {
-                                let driveCacheDirectory = self.pdfCacheDirectory.appendingPathComponent("\(file.driveId)", isDirectory: true)
+                                let driveCacheDirectory = self.pdfCacheDirectory.appendingPathComponent(
+                                    "\(file.driveId)",
+                                    isDirectory: true
+                                )
                                 if !FileManager.default.fileExists(atPath: driveCacheDirectory.path) {
-                                    try FileManager.default.createDirectory(at: driveCacheDirectory, withIntermediateDirectories: true)
+                                    try FileManager.default.createDirectory(
+                                        at: driveCacheDirectory,
+                                        withIntermediateDirectories: true
+                                    )
                                 }
                                 try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: pdfUrl)
                                 completion(pdfUrl, nil)

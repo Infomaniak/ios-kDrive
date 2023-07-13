@@ -23,15 +23,17 @@ import kDriveResources
 import UIKit
 
 class HomeRecentActivitiesController: HomeRecentFilesController {
-    private let mergeFileCreateDelay = 43_200.0 // 12h
+    private let mergeFileCreateDelay = 43200.0 // 12h
 
     private var mergedActivities = [FileActivity]()
 
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
-                  listCellType: RecentActivityCollectionViewCell.self, gridCellType: RecentActivityCollectionViewCell.self, emptyCellType: .noActivities,
-                  title: KDriveResourcesStrings.Localizable.lastEditsTitle, selectorTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
+                  listCellType: RecentActivityCollectionViewCell.self, gridCellType: RecentActivityCollectionViewCell.self,
+                  emptyCellType: .noActivities,
+                  title: KDriveResourcesStrings.Localizable.lastEditsTitle,
+                  selectorTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
                   listStyleEnabled: false)
     }
 
@@ -97,12 +99,14 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         var ignoredActivityIds = [Int]()
 
         for (index, activity) in activities.enumerated() {
-            let ignoreActivity = !resultActivities.isEmpty && resultActivities.last?.userId == activity.userId && resultActivities.last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
+            let ignoreActivity = !resultActivities.isEmpty && resultActivities.last?.userId == activity.userId && resultActivities
+                .last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
             if !ignoredActivityIds.contains(activity.id) && !ignoreActivity {
                 var i = index + 1
                 var mergedFilesTemp = [activity.fileId: activity.file]
                 while i < activities.count && activities[i].createdAt.distance(to: activity.createdAt) <= mergeFileCreateDelay {
-                    if activity.userId == activities[i].userId && activity.action == activities[i].action && activity.file?.type == activities[i].file?.type {
+                    if activity.userId == activities[i].userId && activity.action == activities[i].action && activity.file?
+                        .type == activities[i].file?.type {
                         ignoredActivityIds.append(activities[i].id)
                         if mergedFilesTemp[activities[i].fileId] == nil {
                             activity.mergedFileActivities.append(activities[i])

@@ -72,6 +72,7 @@ class AppLockSettingsViewController: UIViewController {
     }
 
     class func instantiate() -> AppLockSettingsViewController {
-        return Storyboard.menu.instantiateViewController(withIdentifier: "AppLockSettingsViewController") as! AppLockSettingsViewController
+        return Storyboard.menu
+            .instantiateViewController(withIdentifier: "AppLockSettingsViewController") as! AppLockSettingsViewController
     }
 }

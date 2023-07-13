@@ -76,7 +76,8 @@ class SearchFiltersViewController: UITableViewController {
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> SearchFiltersViewController {
-        let viewController = Storyboard.search.instantiateViewController(withIdentifier: "SearchFiltersViewController") as! SearchFiltersViewController
+        let viewController = Storyboard.search
+            .instantiateViewController(withIdentifier: "SearchFiltersViewController") as! SearchFiltersViewController
         viewController.driveFileManager = driveFileManager
         return viewController
     }
@@ -92,7 +93,7 @@ class SearchFiltersViewController: UITableViewController {
         if let index = filterTypes.firstIndex(of: filterType) {
             let selectedIndexPath = tableView.indexPathForSelectedRow
             tableView.reloadSections([index], with: .none)
-            if let selectedIndexPath = selectedIndexPath {
+            if let selectedIndexPath {
                 tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
             }
         }
@@ -182,20 +183,31 @@ class SearchFiltersViewController: UITableViewController {
                 customDateOption = .custom(DateInterval(start: Date(), duration: 0))
             }
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
-            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: filterType.title, delegate: self)
+            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(
+                options: allCases,
+                selectedOption: filters.date,
+                headerTitle: filterType.title,
+                delegate: self
+            )
             present(floatingPanelController, animated: true)
             return nil
         case .type:
             MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
-            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
+            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(
+                options: fileTypes,
+                selectedOption: filters.fileType,
+                headerTitle: filterType.title,
+                delegate: self
+            )
             present(floatingPanelController, animated: true)
             return nil
         case .categories:
             if indexPath.row == 0 {
                 MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
-                let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
+                let manageCategoriesViewController = ManageCategoriesViewController
+                    .instantiate(driveFileManager: driveFileManager)
                 manageCategoriesViewController.canEdit = false
                 manageCategoriesViewController.selectedCategories = Array(filters.categories)
                 manageCategoriesViewController.delegate = self
@@ -228,10 +240,11 @@ extension SearchFiltersViewController: SelectDelegate {
             if case .custom = dateOption {
                 let startDate = Calendar.current.date(from: DateComponents(year: 2000, month: 01, day: 01))!
                 let endDate = Date()
-                let floatingPanelController = DateRangePickerViewController.instantiatePanel(visibleDateRange: startDate ... endDate) { [weak self] dateInterval in
-                    self?.filters.date = .custom(dateInterval)
-                    self?.reloadSection(.date)
-                }
+                let floatingPanelController = DateRangePickerViewController
+                    .instantiatePanel(visibleDateRange: startDate ... endDate) { [weak self] dateInterval in
+                        self?.filters.date = .custom(dateInterval)
+                        self?.reloadSection(.date)
+                    }
                 present(floatingPanelController, animated: true)
             } else {
                 filters.date = dateOption
@@ -265,7 +278,7 @@ extension SearchFiltersViewController: FiltersFooterDelegate {
         filters.clearFilters()
         let selectedIndexPath = tableView.indexPathForSelectedRow
         tableView.reloadData()
-        if let selectedIndexPath = selectedIndexPath {
+        if let selectedIndexPath {
             tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
         }
         delegate?.didUpdateFilters(filters)

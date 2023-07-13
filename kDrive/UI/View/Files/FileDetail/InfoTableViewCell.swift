@@ -19,7 +19,6 @@
 import UIKit
 
 class InfoTableViewCell: UITableViewCell {
-
     var actionHandler: ((UIButton) -> Void)?
 
     override func awakeFromNib() {

@@ -40,7 +40,7 @@ class UploadCardViewModel {
     init(uploadDirectory: File?, driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
         self.uploadDirectory = uploadDirectory ?? driveFileManager.getCachedRootFile()
-        self.uploadCount = 0
+        uploadCount = 0
         initObservation()
     }
 

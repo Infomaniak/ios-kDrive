@@ -30,14 +30,20 @@ class DropBoxFloatingPanelViewController: InformationFloatingPanelViewController
         animationViewHeightConstraint.constant = 130
         titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability, highlightedText: Constants.kDriveTeams)
+        additionalInformationLabel.attributedText = NSMutableAttributedString(
+            string: KDriveResourcesStrings.Localizable.allPackAvailability,
+            highlightedText: Constants.kDriveTeams
+        )
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, DropBoxFloatingPanelViewController.self)
         return contentViewController
     }

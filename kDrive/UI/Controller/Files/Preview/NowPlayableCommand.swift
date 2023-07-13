@@ -20,7 +20,6 @@ import Foundation
 import MediaPlayer
 
 enum NowPlayableCommand: CaseIterable {
-
     case pause, play, stop, togglePausePlay
     case nextTrack, previousTrack, changeRepeatMode, changeShuffleMode
     case changePlaybackRate, seekBackward, seekForward, skipBackward, skipForward, changePlaybackPosition
@@ -101,5 +100,4 @@ enum NowPlayableCommand: CaseIterable {
     func setDisabled(_ isDisabled: Bool) {
         remoteCommand.isEnabled = !isDisabled
     }
-
 }

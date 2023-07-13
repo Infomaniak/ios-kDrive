@@ -78,7 +78,10 @@ public final class UploadingChunkTask: EmbeddedObject {
     public static let notDoneUploadingPredicate = NSPredicate(format: "chunk = nil AND _error = nil")
 
     /// A precondition to start uploading, but not all of the checks can be added to the predicate.
-    public static let canStartUploadingPreconditionPredicate = NSPredicate(format: "chunk = nil AND _error = nil AND sessionIdentifier = nil AND taskIdentifier = nil AND requestUrl = nil")
+    public static let canStartUploadingPreconditionPredicate =
+        NSPredicate(
+            format: "chunk = nil AND _error = nil AND sessionIdentifier = nil AND taskIdentifier = nil AND requestUrl = nil"
+        )
 
     // MARK: - Computed Properties
 

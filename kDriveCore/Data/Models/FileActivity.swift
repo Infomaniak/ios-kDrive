@@ -58,13 +58,38 @@ public enum FileActivityType: String, Codable, CaseIterable {
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
 
-    public static let fileActivities: [FileActivityType] = [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete]
+    public static let fileActivities: [FileActivityType] = [
+        .fileCreate,
+        .fileRename,
+        .fileMoveIn,
+        .fileMoveOut,
+        .fileTrash,
+        .fileRestore,
+        .fileDelete,
+        .fileUpdate,
+        .fileCategorize,
+        .fileUncategorize,
+        .fileFavoriteCreate,
+        .fileFavoriteRemove,
+        .fileShareCreate,
+        .fileShareUpdate,
+        .fileShareDelete,
+        .shareLinkCreate,
+        .shareLinkUpdate,
+        .shareLinkDelete,
+        .shareLinkShow,
+        .collaborativeFolderCreate,
+        .collaborativeFolderUpdate,
+        .collaborativeFolderDelete,
+        .fileColorUpdate,
+        .fileColorDelete
+    ]
 
     public static let displayedFileActivities: [FileActivityType] = FileActivityType.allCases
 }
 
 public class FileActivity: Object, Decodable {
-    @Persisted(primaryKey: true) public var id: Int = 0
+    @Persisted(primaryKey: true) public var id = 0
     /// Date Activity File was created at
     @Persisted public var createdAt: Date
     /// Use `action` instead

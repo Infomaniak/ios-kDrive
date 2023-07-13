@@ -608,17 +608,17 @@ public final class DriveFileManager {
                               sortType: SortType = .nameAZ) -> Results<File> {
         let realm = getRealm()
         var searchResults = realm.objects(File.self).filter("id > 0")
-        if let query = query, !query.isBlank {
+        if let query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
         }
-        if let date = date {
+        if let date {
             searchResults = searchResults.filter(NSPredicate(
                 format: "lastModifiedAt >= %d && lastModifiedAt <= %d",
                 Int(date.start.timeIntervalSince1970),
                 Int(date.end.timeIntervalSince1970)
             ))
         }
-        if let fileType = fileType {
+        if let fileType {
             if fileType == .folder {
                 searchResults = searchResults.filter(NSPredicate(format: "rawType == \"dir\""))
             } else {
@@ -842,7 +842,7 @@ public final class DriveFileManager {
         return (pagedActivities, responseAt)
     }
 
-    // swiftlint:disable cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity
     private func apply(activities: [FileActivity],
                        to file: File,
                        pagedActions: inout [Int: FileActivityType],
@@ -938,7 +938,7 @@ public final class DriveFileManager {
         let (result, responseAt) = try await apiFetcher
             .filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
         // Update last sync date
-        if let responseAt = responseAt {
+        if let responseAt {
             UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
         }
         return result
@@ -1055,11 +1055,11 @@ public final class DriveFileManager {
         let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
         // Add category to drive
         let realm = DriveInfosManager.instance.getRealm()
-        let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+        let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realm)
         try? realm.write {
             drive?.categories.append(category)
         }
-        if let drive = drive {
+        if let drive {
             self.drive = drive.freeze()
         }
         return category.freeze()
@@ -1128,7 +1128,7 @@ public final class DriveFileManager {
             removeFileInDatabase(fileId: file.id, cascade: true, withTransaction: true, using: localRealm)
             if let file = savedFile {
                 savedFile?.signalChanges(userId: drive.userId)
-                self.notifyObserversWith(file: file)
+                notifyObserversWith(file: file)
             }
             deleteOrphanFiles(
                 root: DriveFileManager.homeRootFile,
@@ -1153,7 +1153,7 @@ public final class DriveFileManager {
             oldParent?.children.remove(file)
             newParent.children.insert(file)
         }
-        if let oldParent = oldParent {
+        if let oldParent {
             oldParent.signalChanges(userId: drive.userId)
             notifyObserversWith(file: oldParent)
         }
@@ -1405,7 +1405,7 @@ public final class DriveFileManager {
         realm.refresh()
 
         // rename file if it was renamed in the drive
-        if let oldFile = oldFile {
+        if let oldFile {
             try renameCachedFile(updatedFile: updatedFile, oldFile: oldFile)
         }
 

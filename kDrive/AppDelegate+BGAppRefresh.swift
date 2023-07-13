@@ -71,7 +71,10 @@ extension AppDelegate {
     /// Register BackgroundTasks in scheduler for later
     func registerBackgroundTasks() {
         Log.bgTaskScheduling("registerBackgroundTasks")
-        var registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
+        var registered = backgroundTaskScheduler.register(
+            forTaskWithIdentifier: Constants.backgroundRefreshIdentifier,
+            using: nil
+        ) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {
@@ -88,7 +91,10 @@ extension AppDelegate {
         }
         Log.bgTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
 
-        registered = backgroundTaskScheduler.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
+        registered = backgroundTaskScheduler.register(
+            forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier,
+            using: nil
+        ) { task in
             self.scheduleBackgroundRefresh()
             @InjectService var uploadQueue: UploadQueue
             task.expirationHandler = {

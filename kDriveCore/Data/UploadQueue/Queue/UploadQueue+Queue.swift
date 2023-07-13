@@ -77,7 +77,7 @@ extension UploadQueue: UploadQueueable {
 
     public func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("getOperation ufid:\(uploadFileId)")
-        let operation = self.operation(uploadFileId: uploadFileId)
+        let operation = operation(uploadFileId: uploadFileId)
         return operation
     }
 
@@ -279,7 +279,7 @@ extension UploadQueue: UploadQueueable {
                             return false
                         }
 
-                        return (error.type != .serverError)
+                        return error.type != .serverError
                     }
                 Log.uploadQueue("will clean errors for uploads:\(failedUploadFiles.count)")
 
@@ -419,7 +419,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ufid:\(uploadFile.id)")
-        guard let _ = operation(uploadFileId: uploadFile.id) else {
+        guard operation(uploadFileId: uploadFile.id) != nil else {
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ADD ufid:\(uploadFile.id)")
             addToQueue(uploadFile: uploadFile, itemIdentifier: nil, using: realm)
             return
@@ -450,16 +450,16 @@ extension UploadQueue: UploadQueueable {
         operation.queuePriority = priority
         operation.completionBlock = { [unowned self] in
             Log.uploadQueue("operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
-            self.keyedUploadOperations.removeObject(forKey: uploadFileId)
+            keyedUploadOperations.removeObject(forKey: uploadFileId)
             if let error = operation.result.uploadFile?.error,
                error == .taskRescheduled || error == .taskCancelled {
                 Log.uploadQueue("skipping task")
                 return
             }
 
-            self.publishFileUploaded(result: operation.result)
-            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
-            OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.keyedUploadOperations.isEmpty)
+            publishFileUploaded(result: operation.result)
+            publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+            OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: keyedUploadOperations.isEmpty)
         }
 
         Log.uploadQueue("add operation :\(operation) ufid:\(uploadFileId)")

@@ -34,7 +34,9 @@ public class BackgroundRealm {
         }
 
         static func == (lhs: WriteOperation, rhs: WriteOperation) -> Bool {
-            return lhs.parent?.id == rhs.parent?.id && lhs.file.id == rhs.file.id && lhs.file.lastModifiedAt == rhs.file.lastModifiedAt
+            return lhs.parent?.id == rhs.parent?.id
+                && lhs.file.id == rhs.file.id
+                && lhs.file.lastModifiedAt == rhs.file.lastModifiedAt
         }
     }
 

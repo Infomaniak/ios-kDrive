@@ -36,7 +36,13 @@ public class FileCategory: EmbeddedObject, Codable, ContentEquatable {
         return categoryId == source.categoryId
     }
 
-    convenience init(categoryId: Int, isGeneratedByAI: Bool = false, userValidation: String = "CORRECT", userId: Int?, addedAt: Date = Date()) {
+    convenience init(
+        categoryId: Int,
+        isGeneratedByAI: Bool = false,
+        userValidation: String = "CORRECT",
+        userId: Int?,
+        addedAt: Date = Date()
+    ) {
         self.init()
         self.categoryId = categoryId
         self.isGeneratedByAI = isGeneratedByAI

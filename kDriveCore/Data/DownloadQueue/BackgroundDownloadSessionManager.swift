@@ -41,12 +41,14 @@ protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
 }
 
 public protocol FileDownloadSession: Identifiable {
-    func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
+    func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void)
+        -> URLSessionDownloadTask
 }
 
 extension URLSession: FileDownloadSession {}
 
-public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate, FileDownloadSession {
+public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate,
+    FileDownloadSession {
     @LazyInjectService var accountManager: AccountManageable
 
     public var identifier: String {
@@ -68,7 +70,8 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     override public init() {
         super.init()
-        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
+        let backgroundUrlSessionConfiguration = URLSessionConfiguration
+            .background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
@@ -81,8 +84,12 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?.fileId {
-                    self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
+                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?
+                   .fileId {
+                    self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
+                        \.fractionCompleted,
+                        options: .new
+                    ) { [fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
@@ -100,7 +107,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             syncLock.enter()
             task?.cancel { data in
                 let rescheduledTask: URLSessionDownloadTask
-                if let data = data {
+                if let data {
                     DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "") with resume data")
                     rescheduledTask = self.backgroundSession.downloadTask(withResumeData: data)
                 } else {
@@ -152,7 +159,10 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-                  let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
+                  let driveFileManager = accountManager.getDriveFileManager(
+                      for: downloadTask.driveId,
+                      userId: downloadTask.userId
+                  ),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
