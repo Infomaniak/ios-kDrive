@@ -412,7 +412,7 @@ public extension Endpoint {
 
     static func download(file: AbstractFile, as asType: String? = nil) -> Endpoint {
         let queryItems: [URLQueryItem]?
-        if let asType = asType {
+        if let asType {
             queryItems = [URLQueryItem(name: "as", value: asType)]
         } else {
             queryItems = nil
@@ -537,10 +537,10 @@ public extension Endpoint {
     ) -> Endpoint {
         // Query items
         var queryItems = [FileWith.fileMinimal.toQueryItem()]
-        if let query = query, !query.isBlank {
+        if let query, !query.isBlank {
             queryItems.append(URLQueryItem(name: "query", value: query))
         }
-        if let date = date {
+        if let date {
             queryItems += [
                 URLQueryItem(name: "modified_at", value: "custom"),
                 URLQueryItem(name: "from", value: "\(Int(date.start.timeIntervalSince1970))"),

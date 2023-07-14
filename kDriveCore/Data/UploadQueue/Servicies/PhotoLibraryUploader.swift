@@ -142,7 +142,7 @@ public class PhotoLibraryUploader {
             var burstCount = 0
             realm.beginWrite()
             assets.enumerateObjects { [self] asset, idx, stop in
-                guard let settings = settings else {
+                guard let settings else {
                     Log.photoLibraryUploader("no settings")
                     realm.cancelWrite()
                     stop.pointee = true
@@ -247,7 +247,7 @@ public class PhotoLibraryUploader {
     public func getPicturesToRemove() -> PicturesAssets? {
         Log.photoLibraryUploader("getPicturesToRemove")
         // Check that we have photo sync enabled with the delete option
-        guard let settings = settings, settings.deleteAssetsAfterImport else {
+        guard let settings, settings.deleteAssetsAfterImport else {
             Log.photoLibraryUploader("no settings")
             return nil
         }
@@ -258,7 +258,7 @@ public class PhotoLibraryUploader {
             toRemoveFileIDs = uploadQueue
                 .getUploadedFiles(using: realm)
                 .filter("rawType = %@", UploadFileType.phAsset.rawValue)
-                .map { $0.id }
+                .map(\.id)
             toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFileIDs, options: nil)
         }
 

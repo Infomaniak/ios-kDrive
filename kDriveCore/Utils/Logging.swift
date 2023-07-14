@@ -49,9 +49,11 @@ public enum Logging {
             ], key: "Realm")
         }
         #if DEBUG
-            copyDebugInformations()
-            DDLogError("Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch")
-            _ = try? Realm.deleteFiles(for: realmConfiguration)
+        copyDebugInformations()
+        DDLogError(
+            "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
+        )
+        _ = try? Realm.deleteFiles(for: realmConfiguration)
         #endif
         fatalError("Failed creating realm \(error.localizedDescription)")
     }
@@ -63,7 +65,11 @@ public enum Logging {
     private static func initLogger() {
         DDOSLogger.sharedInstance.logFormatter = LogFormatter()
         DDLog.add(DDOSLogger.sharedInstance)
-        let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true).path)
+        let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL
+            .appendingPathComponent(
+                "logs",
+                isDirectory: true
+            ).path)
         let fileLogger = DDFileLogger(logFileManager: logFileManager)
         fileLogger.rollingFrequency = 60 * 60 * 24 // 24 hours
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
@@ -72,9 +78,9 @@ public enum Logging {
 
     private static func initNetworkLogging() {
         #if DEBUG
-            if !Bundle.main.isExtension {
+        if !Bundle.main.isExtension {
 //                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
-            }
+        }
         #endif
     }
 
@@ -88,9 +94,9 @@ public enum Logging {
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]
                 #if DEBUG
-                    return nil
+                return nil
                 #else
-                    return event
+                return event
                 #endif
             }
         }
@@ -98,31 +104,34 @@ public enum Logging {
 
     private static func copyDebugInformations() {
         #if DEBUG
-            guard !Bundle.main.isExtension else { return }
-            let fileManager = FileManager.default
-            let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("debug", isDirectory: true))!
+        guard !Bundle.main.isExtension else { return }
+        let fileManager = FileManager.default
+        let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(
+            "debug",
+            isDirectory: true
+        ))!
 
-            if !fileManager.fileExists(atPath: debugDirectory.path) {
-                try? fileManager.createDirectory(atPath: debugDirectory.path, withIntermediateDirectories: true, attributes: nil)
+        if !fileManager.fileExists(atPath: debugDirectory.path) {
+            try? fileManager.createDirectory(atPath: debugDirectory.path, withIntermediateDirectories: true, attributes: nil)
+        }
+
+        do {
+            let documentDrivesPath = debugDirectory.appendingPathComponent("drive", isDirectory: true).path
+            let documentLogsPath = debugDirectory.appendingPathComponent("logs", isDirectory: true).path
+
+            try? fileManager.removeItem(atPath: documentDrivesPath)
+            try? fileManager.removeItem(atPath: documentLogsPath)
+
+            if fileManager.fileExists(atPath: DriveFileManager.constants.rootDocumentsURL.path) {
+                try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
             }
-
-            do {
-                let documentDrivesPath = debugDirectory.appendingPathComponent("drive", isDirectory: true).path
-                let documentLogsPath = debugDirectory.appendingPathComponent("logs", isDirectory: true).path
-
-                try? fileManager.removeItem(atPath: documentDrivesPath)
-                try? fileManager.removeItem(atPath: documentLogsPath)
-
-                if fileManager.fileExists(atPath: DriveFileManager.constants.rootDocumentsURL.path) {
-                    try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
-                }
-                let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
-                if fileManager.fileExists(atPath: cachedLogsUrl.path) {
-                    try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
-                }
-            } catch {
-                DDLogError("Failed to copy debug informations \(error)")
+            let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
+            if fileManager.fileExists(atPath: cachedLogsUrl.path) {
+                try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
             }
+        } catch {
+            DDLogError("Failed to copy debug informations \(error)")
+        }
         #endif
     }
 }

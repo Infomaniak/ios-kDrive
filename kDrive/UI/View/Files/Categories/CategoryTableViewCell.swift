@@ -72,7 +72,10 @@ class CategoryTableViewCell: InsetTableViewCell {
     func configureCreateCell(name: String) {
         circleImageView.image = KDriveResourcesAsset.add.image
         label.style = .body1
-        label.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.manageCategoriesCreateTitle(name), boldText: name)
+        label.attributedText = NSMutableAttributedString(
+            string: KDriveResourcesStrings.Localizable.manageCategoriesCreateTitle(name),
+            boldText: name
+        )
         moreButton.isHidden = true
         selectionStyle = .default
         borderView.isHidden = false

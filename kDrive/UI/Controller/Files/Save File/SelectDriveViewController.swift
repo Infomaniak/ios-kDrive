@@ -94,7 +94,7 @@ class SelectDriveViewController: UIViewController {
 
         dropDown.customCellConfiguration = { [unowned self] (index: Index, _: String, cell: DropDownCell) in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            let account = self.accounts[index]
+            let account = accounts[index]
             cell.configureWith(account: account)
         }
         dropDown.selectionAction = { [unowned self] (index: Int, _: String) in
@@ -105,7 +105,8 @@ class SelectDriveViewController: UIViewController {
     }
 
     class func instantiate() -> SelectDriveViewController {
-        return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectDriveViewController") as! SelectDriveViewController
+        return Storyboard.saveFile
+            .instantiateViewController(withIdentifier: "SelectDriveViewController") as! SelectDriveViewController
     }
 }
 
@@ -168,7 +169,7 @@ extension SelectDriveViewController: UITableViewDelegate {
         case .selectDrive:
             let drive = driveList[indexPath.row]
             delegate?.didSelectDrive(drive)
-            if let navigationController = navigationController {
+            if let navigationController {
                 navigationController.popViewController(animated: true)
             } else {
                 dismiss(animated: true)

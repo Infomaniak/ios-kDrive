@@ -20,8 +20,6 @@ import Foundation
 
 /// When upload APIV2 returns back with success
 public struct UploadedFile: Decodable {
-
     var token: String
     var file: File
-
 }

@@ -31,7 +31,7 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
 
     var rights = true
     var fileAccessElements = [FileAccessElement]()
-    var plusUser: Int = 0
+    var plusUser = 0
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -74,7 +74,7 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
 
     func configureParentsRights(folderName: String, fileAccess: FileAccess?) {
         rights = true
-        if let fileAccess = fileAccess {
+        if let fileAccess {
             fileAccessElements = fileAccess.teams + fileAccess.users
         } else {
             fileAccessElements = []
@@ -141,7 +141,11 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
 // MARK: - UICollectionViewDelegateFlowLayout
 
 extension NewFolderShareRuleTableViewCell: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         return CGSize(width: 30, height: 30)
     }
 }

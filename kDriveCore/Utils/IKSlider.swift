@@ -49,7 +49,11 @@ import UIKit
             KDriveResourcesAsset.infomaniakColor.color.setFill()
             KDriveResourcesAsset.backgroundCardViewColor.color.setStroke()
             ctx.cgContext.setLineWidth(2)
-            ctx.cgContext.setShadow(offset: CGSize(width: 0, height: 2), blur: 4, color: UIColor(red: 0, green: 0, blue: 0, alpha: 0.12).cgColor)
+            ctx.cgContext.setShadow(
+                offset: CGSize(width: 0, height: 2),
+                blur: 4,
+                color: UIColor(red: 0, green: 0, blue: 0, alpha: 0.12).cgColor
+            )
             let rect = CGRect(x: 3, y: 3, width: 20, height: 20)
             ctx.cgContext.addEllipse(in: rect)
             ctx.cgContext.drawPath(using: .fillStroke)

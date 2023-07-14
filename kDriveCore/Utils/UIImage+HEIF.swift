@@ -34,7 +34,7 @@ extension UIImage {
     public func heicData(compressionQuality: CGFloat) -> Data? {
         let data = NSMutableData()
         guard let imageDestination = CGImageDestinationCreateWithData(data, AVFileType.heic as CFString, 1, nil),
-              let cgImage = cgImage else {
+              let cgImage else {
             return nil
         }
         let options: NSDictionary = [

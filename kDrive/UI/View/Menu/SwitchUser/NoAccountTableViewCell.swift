@@ -19,7 +19,6 @@
 import UIKit
 
 class NoAccountTableViewCell: UITableViewCell {
-
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -30,5 +29,4 @@ class NoAccountTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-
 }

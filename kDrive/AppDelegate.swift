@@ -471,7 +471,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func setRootViewController(_ vc: UIViewController,
                                animated: Bool = true) {
-        guard animated, let window = window else {
+        guard animated, let window else {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
             return
@@ -605,7 +605,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:
                     // Notification tapped: open parent folder
-                    if let parentId = parentId,
+                    if let parentId,
                        let driveFileManager = accountManager.currentDriveFileManager,
                        let folder = driveFileManager.getCachedFile(id: parentId) {
                         present(file: folder, driveFileManager: driveFileManager)

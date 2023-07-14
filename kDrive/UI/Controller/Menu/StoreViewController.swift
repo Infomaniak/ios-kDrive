@@ -101,7 +101,12 @@ class StoreViewController: UICollectionViewController {
         }
 
         if #available(iOS 14.0, *) {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonRedeemPromoCode, style: .plain, target: self, action: #selector(redeemButtonPressed))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: KDriveResourcesStrings.Localizable.buttonRedeemPromoCode,
+                style: .plain,
+                target: self,
+                action: #selector(redeemButtonPressed)
+            )
         }
 
         checkDriveFileManager()
@@ -128,9 +133,17 @@ class StoreViewController: UICollectionViewController {
 
     private func createLayout() -> UICollectionViewLayout {
         let headerFooterSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        let header = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerFooterSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
         header.pinToVisibleBounds = true
-        let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
+        let footer = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerFooterSize,
+            elementKind: UICollectionView.elementKindSectionFooter,
+            alignment: .bottom
+        )
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 24
         config.boundarySupplementaryItems = [header, footer]
@@ -201,9 +214,16 @@ class StoreViewController: UICollectionViewController {
     }
 
     private func showBlockingMessage(existingIAP: Bool) {
-        let title = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPTitle : KDriveResourcesStrings.Localizable.storeAccessDeniedTitle
-        let message = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPDescription : KDriveResourcesStrings.Localizable.storeAccessDeniedDescription
-        let alert = AlertTextViewController(title: title, message: message, action: KDriveResourcesStrings.Localizable.buttonClose, hasCancelButton: false) {
+        let title = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPTitle : KDriveResourcesStrings.Localizable
+            .storeAccessDeniedTitle
+        let message = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPDescription : KDriveResourcesStrings
+            .Localizable.storeAccessDeniedDescription
+        let alert = AlertTextViewController(
+            title: title,
+            message: message,
+            action: KDriveResourcesStrings.Localizable.buttonClose,
+            hasCancelButton: false
+        ) {
             let viewControllersCount = self.navigationController?.viewControllers.count ?? 0
             if self.presentingViewController != nil && viewControllersCount < 2 {
                 self.dismiss(animated: true)
@@ -245,7 +265,10 @@ class StoreViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch sections[indexPath.section] {
         case .warning:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "WrapperCollectionViewCell",
+                for: indexPath
+            ) as! WrapperCollectionViewCell
             let tableCell = cell.reuse(withCellType: AlertTableViewCell.self)
             tableCell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
             return cell
@@ -257,7 +280,10 @@ class StoreViewController: UICollectionViewController {
             return cell
         case .storage:
             // Will need to convert this to collection view cell when we actually use it
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "WrapperCollectionViewCell",
+                for: indexPath
+            ) as! WrapperCollectionViewCell
             let tableCell = cell.reuse(withCellType: StoreStorageTableViewCell.self)
             tableCell.delegate = self
             return cell
@@ -268,9 +294,17 @@ class StoreViewController: UICollectionViewController {
         }
     }
 
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreControlCollectionReusableView.self, for: indexPath)
+            let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: StoreControlCollectionReusableView.self,
+                for: indexPath
+            )
             let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
             headerView.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
             headerView.onChange = { [weak self] index in
@@ -280,14 +314,19 @@ class StoreViewController: UICollectionViewController {
             }
             return headerView
         } else {
-            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreHelpFooter.self, for: indexPath)
+            let footerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: StoreHelpFooter.self,
+                for: indexPath
+            )
             footerView.delegate = self
             return footerView
         }
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> StoreViewController {
-        let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "StoreViewController") as! StoreViewController
+        let viewController = Storyboard.menu
+            .instantiateViewController(withIdentifier: "StoreViewController") as! StoreViewController
         viewController.driveFileManager = driveFileManager
         return viewController
     }
@@ -365,7 +404,11 @@ extension StoreViewController: StoreManagerDelegate {
         // Scroll to current pack
         if let sectionIndex = sections.firstIndex(of: .offers),
            let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
-            collectionView.scrollToItem(at: IndexPath(item: index, section: sectionIndex), at: .centeredVertically, animated: false)
+            collectionView.scrollToItem(
+                at: IndexPath(item: index, section: sectionIndex),
+                at: .centeredVertically,
+                animated: false
+            )
         }
     }
 

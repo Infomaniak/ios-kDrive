@@ -36,23 +36,28 @@ class ShareFloatingPanelViewController: InformationFloatingPanelViewController {
 
     override func rightButtonPressed(_ sender: UIButton) {
         floatingPanelViewController.dismiss(animated: true)
-        if let newFolderViewController = (presentingViewController as? UINavigationController)?.viewControllers.last as? NewFolderViewController {
+        if let newFolderViewController = (presentingViewController as? UINavigationController)?.viewControllers
+            .last as? NewFolderViewController {
             newFolderViewController.dismissAndRefreshDataSource()
         } else {
             #if !ISEXTENSION
-                if let viewController = ((presentingViewController as? UITabBarController)?.selectedViewController as? UINavigationController)?.viewControllers.last as? ManageDropBoxViewController {
-                    viewController.dismissAndRefreshDataSource()
-                } else {
-                    presentingViewController?.dismiss(animated: true)
-                }
-            #else
+            if let viewController = ((presentingViewController as? UITabBarController)?
+                .selectedViewController as? UINavigationController)?.viewControllers.last as? ManageDropBoxViewController {
+                viewController.dismissAndRefreshDataSource()
+            } else {
                 presentingViewController?.dismiss(animated: true)
+            }
+            #else
+            presentingViewController?.dismiss(animated: true)
             #endif
         }
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, ShareFloatingPanelViewController.self)
         return contentViewController
     }

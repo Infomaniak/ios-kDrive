@@ -41,7 +41,7 @@ class CategoryBadgeCollectionViewCell: UICollectionViewCell {
     func configure(with category: kDriveCore.Category, more: Int? = nil) {
         backgroundColor = category.color
         isAccessibilityElement = true
-        if let more = more {
+        if let more {
             moreLabel.text = "+\(more)"
             moreLabel.isHidden = false
             accessibilityLabel = "\(category.localizedName) + \(more)"

@@ -62,7 +62,7 @@ class InformationFloatingPanelViewController: UIViewController {
     }
 
     @IBAction func leftButtonPressed(_ sender: UIButton) {
-        if let cancelHandler = cancelHandler {
+        if let cancelHandler {
             cancelHandler(sender)
         } else {
             floatingPanelViewController.dismiss(animated: true)
@@ -74,7 +74,10 @@ class InformationFloatingPanelViewController: UIViewController {
     }
 
     class func instantiate() -> InformationFloatingPanelViewController {
-        return Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        return Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
     }
 
     class func instantiatePanel(drive: Drive? = nil) -> DriveFloatingPanelController {

@@ -97,7 +97,7 @@ public final class BackgroundUploadSessionManager: NSObject,
         Log.bgSessionManager("init")
         super.init()
 
-        self.backgroundSession = getSessionOrCreate(for: UploadQueue.backgroundIdentifier)
+        backgroundSession = getSessionOrCreate(for: UploadQueue.backgroundIdentifier)
     }
 
     public func getSessionOrCreate(for identifier: String) -> URLSession {
@@ -111,14 +111,16 @@ public final class BackgroundUploadSessionManager: NSObject,
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.allowsCellularAccess = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
-        backgroundUrlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
+        backgroundUrlSessionConfiguration
+            .httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         backgroundUrlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
-        backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 11 // 11h before giving up (chunk upload session not valid after)
+        backgroundUrlSessionConfiguration
+            .timeoutIntervalForResource = 60 * 60 * 11 // 11h before giving up (chunk upload session not valid after)
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [unowned self] in
             Log.bgSessionManager("store session:\(session) from identifier:\(identifier)")
-            self.managedSessions[identifier] = session
+            managedSessions[identifier] = session
         }
 
         Log.bgSessionManager("generated session:\(session) from identifier:\(identifier)")
@@ -126,7 +128,8 @@ public final class BackgroundUploadSessionManager: NSObject,
     }
 
     /// Entry point for app delegate
-    public func handleEventsForBackgroundURLSession(identifier: String, completionHandler: @escaping BackgroundCompletionHandler) {
+    public func handleEventsForBackgroundURLSession(identifier: String,
+                                                    completionHandler: @escaping BackgroundCompletionHandler) {
         Log.bgSessionManager("handleEventsForBackgroundURLSession identifier:\(identifier)")
     }
 
@@ -150,11 +153,11 @@ public final class BackgroundUploadSessionManager: NSObject,
                            didReceive data: Data) {
         let taskIdentifier = session.identifier(for: dataTask)
         syncQueue.async(flags: .barrier) { [unowned self] in
-            if var taskData = self.tasksData[taskIdentifier] {
+            if var taskData = tasksData[taskIdentifier] {
                 taskData.append(data)
-                self.tasksData[taskIdentifier] = taskData
+                tasksData[taskIdentifier] = taskData
             } else {
-                self.tasksData[taskIdentifier] = data
+                tasksData[taskIdentifier] = data
             }
         }
     }
@@ -171,7 +174,7 @@ public final class BackgroundUploadSessionManager: NSObject,
 
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
         Log.bgSessionManager("Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")",
-                                    level: .error)
+                             level: .error)
     }
 
     // MARK: - BackgroundUploadSessionCompletionable

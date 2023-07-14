@@ -17,11 +17,11 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
 import UIKit
-import InfomaniakDI
 
 class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var rightsStackView: UIStackView!
@@ -58,7 +58,8 @@ class UsersAccessTableViewCell: InsetTableViewCell {
 
         if let user = element as? UserFileAccess {
             let blocked = accountManager.currentUserId == user.id
-            rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
+            rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor
+                .color
             detailLabel.text = user.email
             notAcceptedView.isHidden = true
             externalUserView.isHidden = user.role != .external

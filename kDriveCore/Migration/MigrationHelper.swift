@@ -27,8 +27,10 @@ public enum MigrationHelper {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.Crypto-Cloud"
     private static let accessGroup = appIdentifierPrefix + group
-    private static let nextcloudGroup: String = "group." + group
-    private static let nextcloudRealmUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup)?.appendingPathComponent("Library/Application Support/Nextcloud/nextcloud.realm")
+    private static let nextcloudGroup = "group." + group
+    private static let nextcloudRealmUrl = FileManager.default
+        .containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup)?
+        .appendingPathComponent("Library/Application Support/Nextcloud/nextcloud.realm")
     private static let databaseSchemaVersion: UInt64 = 153
 
     public enum MigrationError: Error {
@@ -113,7 +115,8 @@ public enum MigrationHelper {
         do {
             let config = Realm.Configuration(
                 fileURL: MigrationHelper.nextcloudRealmUrl,
-                schemaVersion: MigrationHelper.databaseSchemaVersion)
+                schemaVersion: MigrationHelper.databaseSchemaVersion
+            )
             let realm = try Realm(configuration: config)
             let accounts = realm.objects(tableAccount.self)
 

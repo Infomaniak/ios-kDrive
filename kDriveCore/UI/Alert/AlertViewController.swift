@@ -46,7 +46,7 @@ open class AlertViewController: UIViewController {
                 loading: Bool = false,
                 handler: (() async -> Void)?,
                 cancelHandler: (() -> Void)? = nil) {
-        self.actionString = action
+        actionString = action
         self.hasCancelButton = hasCancelButton
         self.destructive = destructive
         self.loading = loading
@@ -54,8 +54,8 @@ open class AlertViewController: UIViewController {
         self.cancelHandler = cancelHandler
         super.init(nibName: nil, bundle: nil)
         self.title = title
-        self.modalPresentationStyle = .overFullScreen
-        self.modalTransitionStyle = .crossDissolve
+        modalPresentationStyle = .overFullScreen
+        modalTransitionStyle = .crossDissolve
     }
 
     @available(*, unavailable)

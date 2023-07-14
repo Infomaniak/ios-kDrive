@@ -59,7 +59,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
 
-        if let file = file {
+        if let file {
             if action == .favorite && file.isFavorite {
                 titleLabel.text = action.reverseName
                 iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
@@ -92,7 +92,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             let filesAreDirectory = files.allSatisfy(\.isDirectory)
             setEnabled(!filesAreDirectory)
         case .download:
-            if let archiveId = archiveId {
+            if let archiveId {
                 observeProgress(showProgress, archiveId: archiveId)
             } else {
                 setProgress(showProgress ? -1 : nil)

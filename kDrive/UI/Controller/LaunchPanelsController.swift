@@ -34,7 +34,12 @@ struct LaunchPanel: Comparable {
         return lhs.priority == rhs.priority
     }
 
-    init(makePanelController: @escaping () -> DriveFloatingPanelController, displayCondition: @autoclosure @escaping () -> Bool, onDisplay: (() -> Void)? = nil, priority: Int) {
+    init(
+        makePanelController: @escaping () -> DriveFloatingPanelController,
+        displayCondition: @autoclosure @escaping () -> Bool,
+        onDisplay: (() -> Void)? = nil,
+        priority: Int
+    ) {
         self.makePanelController = makePanelController
         self.displayCondition = displayCondition
         self.onDisplay = onDisplay
@@ -48,7 +53,8 @@ class LaunchPanelsController {
         LaunchPanel(
             makePanelController: {
                 let driveFloatingPanelController = UpdateFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UpdateFloatingPanelViewController
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? UpdateFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     // If app was downloaded in TestFlight, open TestFlight. Else, open App Store
                     let url: URLConstants = Bundle.main.isRunningInTestFlight ? .testFlight : .appStore
@@ -67,8 +73,10 @@ class LaunchPanelsController {
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     fatalError("Tried to display save photos floating panel with nil currentDriveFileManager")
                 }
-                let driveFloatingPanelController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SavePhotosFloatingPanelViewController
+                let driveFloatingPanelController = SavePhotosFloatingPanelViewController
+                    .instantiatePanel(drive: currentDriveFileManager.drive)
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? SavePhotosFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     let mainTabVC = UIApplication.shared.delegate?.window??.rootViewController as? MainTabViewController
@@ -81,14 +89,16 @@ class LaunchPanelsController {
                 }
                 return driveFloatingPanelController
             },
-            displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled,
+            displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults
+                .shared.numberOfConnections == 1 && !InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled,
             priority: 3
         ),
         // Beta invitation
         LaunchPanel(
             makePanelController: {
                 let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? BetaInviteFloatingPanelViewController
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? BetaInviteFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     UIApplication.shared.open(URLConstants.testFlight.url)
                     driveFloatingPanelController.dismiss(animated: true)

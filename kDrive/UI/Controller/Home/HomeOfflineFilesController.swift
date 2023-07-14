@@ -24,8 +24,10 @@ class HomeOfflineFilesController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
-                  listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline,
-                  title: KDriveResourcesStrings.Localizable.offlineFileTitle, selectorTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                  listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self,
+                  emptyCellType: .noOffline,
+                  title: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                  selectorTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
                   listStyleEnabled: true)
     }
 

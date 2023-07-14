@@ -260,17 +260,17 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         guard driveFileManager != nil else { return }
 
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
 
-            guard let cell = self.getUploadsInProgressTableViewCell(),
-                  self.uploadCountManager.uploadCount > 0 else {
+            guard let cell = getUploadsInProgressTableViewCell(),
+                  uploadCountManager.uploadCount > 0 else {
                 // Delete / Add cell
-                self.reloadTopRows()
+                reloadTopRows()
                 return
             }
 
             // Update cell
-            cell.setUploadCount(self.uploadCountManager.uploadCount)
+            cell.setUploadCount(uploadCountManager.uploadCount)
         }
     }
 
@@ -335,10 +335,10 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private func reload(newViewModel: HomeViewModel) {
         reloadQueue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             var newViewModel = newViewModel
             let newChangeset = newViewModel.changeSet
-            let oldChangeset = self.viewModel.changeSet
+            let oldChangeset = viewModel.changeSet
             let changeset = StagedChangeset(source: oldChangeset, target: newChangeset)
             DispatchQueue.main.sync {
                 self.collectionView.reload(using: changeset) { data in
@@ -422,12 +422,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private func createLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { [weak self] section, layoutEnvironment in
-            guard let self = self else { return nil }
+            guard let self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:
-                return self.generateTopSectionLayout()
+                return generateTopSectionLayout()
             case .recentFiles:
-                if let recentFilesController = self.currentRecentFilesController {
+                if let recentFilesController = currentRecentFilesController {
                     if recentFilesController.empty {
                         return recentFilesController.getEmptyLayout()
                     } else {
@@ -539,17 +539,17 @@ extension HomeViewController {
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    guard let self else { return }
+                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    self.showInsufficientStorage = false
-                    let newViewModel = HomeViewModel(topRows: self.getTopRows(),
-                                                     recentFiles: self.viewModel.recentFiles,
-                                                     recentFilesEmpty: self.viewModel.recentFilesEmpty,
-                                                     isLoading: self.viewModel.isLoading)
-                    self.reload(newViewModel: newViewModel)
+                    guard let self else { return }
+                    showInsufficientStorage = false
+                    let newViewModel = HomeViewModel(topRows: getTopRows(),
+                                                     recentFiles: viewModel.recentFiles,
+                                                     recentFilesEmpty: viewModel.recentFilesEmpty,
+                                                     isLoading: viewModel.isLoading)
+                    reload(newViewModel: newViewModel)
                 }
                 return cell
             case .uploadsInProgress:
@@ -572,10 +572,10 @@ extension HomeViewController {
                 cell.setRecentFilesControllerTitles(controllers.map(\.selectorTitle))
                 cell.selector.selectedSegmentIndex = UserDefaults.shared.selectedHomeIndex
                 cell.valueChangeHandler = { [weak self] selector in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     MatomoUtils.track(eventWithCategory: .home,
                                       name: "switchView\(["Activity", "Offline", "Images"][selector.selectedSegmentIndex])")
-                    self.setSelectedHomeIndex(selector.selectedSegmentIndex)
+                    setSelectedHomeIndex(selector.selectedSegmentIndex)
                 }
                 return cell
             }
@@ -652,15 +652,15 @@ extension HomeViewController {
                     driveHeaderView.titleButton.layoutIfNeeded()
                 }
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    let drives = self.accountManager.drives
+                    guard let self else { return }
+                    let drives = accountManager.drives
                     let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
                         options: drives,
-                        selectedOption: self.driveFileManager.drive,
+                        selectedOption: driveFileManager.drive,
                         headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
                         delegate: self
                     )
-                    self.present(floatingPanelViewController, animated: true)
+                    present(floatingPanelViewController, animated: true)
                 }
                 return driveHeaderView
             case .recentFiles:
@@ -777,7 +777,7 @@ extension HomeViewController: FileCellDelegate {
             floatingPanelViewController?.track(scrollView: fileInformationsViewController.collectionView)
         }
         fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
-        if let floatingPanelViewController = floatingPanelViewController {
+        if let floatingPanelViewController {
             present(floatingPanelViewController, animated: true)
         }
     }

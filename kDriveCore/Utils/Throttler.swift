@@ -75,16 +75,16 @@ public final class Throttler<T> {
                     let scheduleDelay = lastExecutionTime + timeInterval - currentTime
 
                     queue.asyncAfter(deadline: .now() + scheduleDelay) { [weak self] in
-                        guard let self = self else { return }
+                        guard let self else { return }
                         // Delayed execution
-                        let p = self.mutex.locked { [weak self] () -> T? in
+                        let p = mutex.locked { [weak self] () -> T? in
                             let params = self?.scheduledExecutionParameters!
                             self?.scheduledExecutionParameters = nil
                             return params
                         }
-                        guard let p = p else { return }
-                        self.lastExecutionTime = Date().timeIntervalSinceReferenceDate
-                        self.handler?(p)
+                        guard let p else { return }
+                        lastExecutionTime = Date().timeIntervalSinceReferenceDate
+                        handler?(p)
                     }
                 }
             }

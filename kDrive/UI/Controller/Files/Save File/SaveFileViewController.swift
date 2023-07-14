@@ -202,7 +202,7 @@ class SaveFileViewController: UIViewController {
     }
 
     private func setItemProviders() {
-        guard let itemProviders = itemProviders else { return }
+        guard let itemProviders else { return }
         sections = [.importing]
         importProgress = fileImportHelper
             .importItems(itemProviders,
@@ -265,7 +265,7 @@ class SaveFileViewController: UIViewController {
     class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
                                                  file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
-        if let file = file {
+        if let file {
             saveViewController.items = [file]
         }
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
@@ -316,7 +316,7 @@ extension SaveFileViewController: UITableViewDataSource {
                 cell.textField.text = item.name
                 cell.textDidChange = { [unowned self] text in
                     item.name = text ?? KDriveResourcesStrings.Localizable.allUntitledFileName
-                    if let text = text, !text.isEmpty {
+                    if let text, !text.isEmpty {
                         updateButton()
                     } else {
                         enableButton = false
@@ -478,8 +478,8 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
 
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
-        guard let selectedDriveFileManager = selectedDriveFileManager,
-              let selectedDirectory = selectedDirectory else {
+        guard let selectedDriveFileManager,
+              let selectedDirectory else {
             return
         }
 

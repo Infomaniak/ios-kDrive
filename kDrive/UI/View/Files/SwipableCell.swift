@@ -32,7 +32,14 @@ class SwipeCellAction: Equatable {
         case destructive
     }
 
-    init(identifier: String, title: String, backgroundColor: UIColor, tintColor: UIColor = .white, icon: UIImage, style: SwipeActionStyle = .normal) {
+    init(
+        identifier: String,
+        title: String,
+        backgroundColor: UIColor,
+        tintColor: UIColor = .white,
+        icon: UIImage,
+        style: SwipeActionStyle = .normal
+    ) {
         self.identifier = identifier
         self.title = title
         self.backgroundColor = backgroundColor

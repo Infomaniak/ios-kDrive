@@ -63,7 +63,8 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
 
     func configureCell(right: Right, type: RightsSelectionType, disable: Bool, file: File) {
         rightsTitleLabel.text = right.title
-        rightsDetailLabel.text = file.isDirectory ? right.folderDescription : file.isOfficeFile ? right.documentDescription : right.fileDescription
+        rightsDetailLabel.text = file.isDirectory ? right.folderDescription : file.isOfficeFile ? right
+            .documentDescription : right.fileDescription
         rightsIconImageView.image = right.icon
 
         if disable {

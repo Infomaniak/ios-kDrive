@@ -46,7 +46,7 @@ public final class ChunkProvider: ChunkProvidable {
         self.ranges = ranges
 
         do {
-            self.fileHandle = try FileHandle(forReadingFrom: fileURL)
+            fileHandle = try FileHandle(forReadingFrom: fileURL)
         } catch {
             return nil
         }
@@ -55,7 +55,7 @@ public final class ChunkProvider: ChunkProvidable {
     /// Internal testing method
     init(mockedHandlable: FileHandlable, ranges: [DataRange]) {
         self.ranges = ranges
-        self.fileHandle = mockedHandlable
+        fileHandle = mockedHandlable
     }
 
     /// Will provide chunks one by one, using the IteratorProtocol
@@ -94,7 +94,7 @@ extension FileHandle {
 
         let offsetString: String
         do {
-            let offset = try self.offset()
+            let offset = try offset()
             offsetString = "\(offset)"
         } catch {
             offsetString = "\(error)"

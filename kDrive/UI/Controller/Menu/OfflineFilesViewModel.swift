@@ -30,7 +30,12 @@ class OfflineFilesViewModel: FileListViewModel {
                                           emptyViewType: .noOffline,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "Offline"])
         // We don't really need a current directory for offline files
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.offlineRoot)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isAvailableOffline = true")))
+        super.init(
+            configuration: configuration,
+            driveFileManager: driveFileManager,
+            currentDirectory: DriveFileManager.offlineRoot
+        )
+        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
+            .filter(NSPredicate(format: "isAvailableOffline = true")))
     }
 }

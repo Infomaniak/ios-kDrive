@@ -81,12 +81,12 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
 }
 
 public class DrivePackFunctionality: EmbeddedObject, Codable {
-    @Persisted public var versionsNumber: Int = 0
+    @Persisted public var versionsNumber = 0
     @Persisted public var dropbox = false
     @Persisted public var versioning = false
     @Persisted public var manageRight = false
     @Persisted public var hasTeamSpace = false
-    @Persisted public var versionsKeptForDays: Int = 0
+    @Persisted public var versionsKeptForDays = 0
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -109,16 +109,16 @@ public class DrivePreferences: EmbeddedObject, Codable {
 }
 
 public class Drive: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted(primaryKey: true) public var objectId = ""
     /*
      User data
      */
     @Persisted public var canAddUser = false
     @Persisted public var canCreateTeamFolder = false
     @Persisted public var hasTechnicalRight = false
-    @Persisted public var name: String = ""
+    @Persisted public var name = ""
     @Persisted private var _preferences: DrivePreferences?
-    @Persisted public var role: String = ""
+    @Persisted public var role = ""
 
     /*
      Drive data
@@ -126,7 +126,7 @@ public class Drive: Object, Codable {
     /// Account id of the drive CREATOR
     @Persisted public var accountId: Int = -1
     @Persisted public var id: Int = -1
-    @Persisted public var pack: String = ""
+    @Persisted public var pack = ""
     @Persisted public var packFunctionality: DrivePackFunctionality?
     @Persisted public var sharedWithMe = false
     @Persisted public var size: Int64 = 0
@@ -142,9 +142,9 @@ public class Drive: Object, Codable {
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
     @Persisted public var productIsInApp = false
-    @Persisted public var userId: Int = 0 {
+    @Persisted public var userId = 0 {
         didSet {
-            self.objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
+            objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
         }
     }
 
@@ -220,7 +220,7 @@ public class Drive: Object, Codable {
         case accountId = "account_id"
         case id
         case name
-        case pack = "pack"
+        case pack
         case role
         case _preferences = "preferences"
         case size

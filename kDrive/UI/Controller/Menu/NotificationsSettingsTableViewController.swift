@@ -42,7 +42,12 @@ class NotificationsSettingsTableViewController: UITableViewController {
         navigationController?.navigationBar.sizeToFit()
 
         updateTableViewContent()
-        NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateTableViewContent),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
 
         navigationItem.hideBackButtonText()
     }
@@ -157,12 +162,14 @@ class NotificationsSettingsTableViewController: UITableViewController {
     }
 
     private func updateSwitchViews() {
-        if !UserDefaults.shared.importNotificationsEnabled && !UserDefaults.shared.sharingNotificationsEnabled && !UserDefaults.shared.newCommentNotificationsEnabled && !UserDefaults.shared.generalNotificationEnabled {
+        if !UserDefaults.shared.importNotificationsEnabled && !UserDefaults.shared.sharingNotificationsEnabled && !UserDefaults
+            .shared.newCommentNotificationsEnabled && !UserDefaults.shared.generalNotificationEnabled {
             UserDefaults.shared.isNotificationEnabled = false
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }
-        if UserDefaults.shared.importNotificationsEnabled || UserDefaults.shared.sharingNotificationsEnabled || UserDefaults.shared.newCommentNotificationsEnabled || UserDefaults.shared.generalNotificationEnabled {
+        if UserDefaults.shared.importNotificationsEnabled || UserDefaults.shared.sharingNotificationsEnabled || UserDefaults
+            .shared.newCommentNotificationsEnabled || UserDefaults.shared.generalNotificationEnabled {
             UserDefaults.shared.isNotificationEnabled = true
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return

@@ -33,7 +33,8 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
                                           isMultipleSelectionEnabled: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
                                           emptyViewType: .emptyFolderSelectFolder,
-                                          leftBarButtons: currentDirectory.id == DriveFileManager.constants.rootID ? [.cancel] : nil,
+                                          leftBarButtons: currentDirectory.id == DriveFileManager.constants
+                                              .rootID ? [.cancel] : nil,
                                           rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
                                           matomoViewPath: [MatomoUtils.Views.save.displayName, "SelectFolder"])
 
@@ -61,17 +62,23 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id) && (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
+        selectFolderButton.isEnabled = !disabledDirectoriesSelection
+            .contains(viewModel.currentDirectory.id) &&
+            (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
                                                   startDirectory: File? = nil, fileToMove: Int? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
+                                                  selectHandler: ((File) -> Void)? = nil)
+        -> TitleSizeAdjustingNavigationController {
         var viewControllers = [SelectFolderViewController]()
         if startDirectory == nil || startDirectory?.isRoot == true {
-            let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+            let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(
+                driveFileManager: driveFileManager,
+                currentDirectory: nil
+            ))
             selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesIdsSelection
             selectFolderViewController.fileToMove = fileToMove
             selectFolderViewController.delegate = delegate
@@ -81,7 +88,10 @@ class SelectFolderViewController: FileListViewController {
         } else {
             var directory = startDirectory
             while directory != nil {
-                let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: directory))
+                let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(
+                    driveFileManager: driveFileManager,
+                    currentDirectory: directory
+                ))
                 selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesIdsSelection
                 selectFolderViewController.fileToMove = fileToMove
                 selectFolderViewController.delegate = delegate
@@ -101,9 +111,17 @@ class SelectFolderViewController: FileListViewController {
                                                   startDirectory: File? = nil, fileToMove: Int? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
+                                                  selectHandler: ((File) -> Void)? = nil)
+        -> TitleSizeAdjustingNavigationController {
         let disabledDirectoriesIdsSelection = disabledDirectoriesSelection.map(\.id)
-        return instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: startDirectory, fileToMove: fileToMove, disabledDirectoriesIdsSelection: disabledDirectoriesIdsSelection, delegate: delegate, selectHandler: selectHandler)
+        return instantiateInNavigationController(
+            driveFileManager: driveFileManager,
+            startDirectory: startDirectory,
+            fileToMove: fileToMove,
+            disabledDirectoriesIdsSelection: disabledDirectoriesIdsSelection,
+            delegate: delegate,
+            selectHandler: selectHandler
+        )
     }
 
     // MARK: - Actions
@@ -113,7 +131,10 @@ class SelectFolderViewController: FileListViewController {
             dismiss(animated: true)
         } else if sender.type == .addFolder {
             MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
-            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: viewModel.currentDirectory, driveFileManager: viewModel.driveFileManager)
+            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
+                parentDirectory: viewModel.currentDirectory,
+                driveFileManager: viewModel.driveFileManager
+            )
             navigationController?.present(newFolderViewController, animated: true)
         } else {
             super.barButtonPressed(sender)
@@ -148,7 +169,10 @@ class SelectFolderViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = viewModel.getFile(at: indexPath)!
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(driveFileManager: viewModel.driveFileManager, currentDirectory: selectedFile))
+            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(
+                driveFileManager: viewModel.driveFileManager,
+                currentDirectory: selectedFile
+            ))
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
             nextVC.fileToMove = fileToMove
             nextVC.delegate = delegate

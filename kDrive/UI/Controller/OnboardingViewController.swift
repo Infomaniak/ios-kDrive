@@ -230,7 +230,11 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
         if let cell = cell as? SlideCollectionViewCell {
             cell.illustrationAnimationView.currentProgress = 0
             cell.illustrationAnimationView.play()
@@ -274,7 +278,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 MatomoUtils.connectUser()
                 goToMainScreen()
             } catch {
-                if let previousAccount = previousAccount {
+                if let previousAccount {
                     accountManager.switchAccount(newAccount: previousAccount)
                 }
                 signInButton.setLoading(false)
@@ -283,7 +287,8 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     let driveErrorVC = DriveErrorViewController.instantiate()
                     driveErrorVC.driveErrorViewType = .noDrive
                     present(driveErrorVC, animated: true)
-                } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance || driveError == .blocked {
+                } else if let driveError = error as? DriveError,
+                          driveError == .noDrive || driveError == .maintenance || driveError == .blocked {
                     let driveErrorVC = DriveErrorViewController.instantiate()
                     let errorViewType: DriveErrorViewController.DriveErrorViewType
                     switch driveError {
@@ -302,7 +307,10 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                             "Underlying Error": error.asAFError?.underlyingError.debugDescription ?? "Not an AFError"
                         ], key: "Error")
                     }
-                    okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
+                    okAlert(
+                        title: KDriveResourcesStrings.Localizable.errorTitle,
+                        message: KDriveResourcesStrings.Localizable.errorConnection
+                    )
                 }
             }
             endBackgroundTask()

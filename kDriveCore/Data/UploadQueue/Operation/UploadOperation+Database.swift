@@ -29,7 +29,8 @@ extension UploadOperation {
             let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
             uploadsRealm.refresh()
 
-            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId), !file.isInvalidated else {
+            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
+                  !file.isInvalidated else {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
 

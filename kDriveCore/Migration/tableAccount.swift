@@ -20,7 +20,6 @@ import Foundation
 import RealmSwift
 
 class tableAccount: Object {
-
     @objc dynamic var account = ""
     @objc dynamic var active = false
     @objc dynamic var address = ""
@@ -38,7 +37,7 @@ class tableAccount: Object {
     @objc dynamic var backend = ""
     @objc dynamic var backendCapabilitiesSetDisplayName = false
     @objc dynamic var backendCapabilitiesSetPassword = false
-    @objc dynamic var businessSize: String = ""
+    @objc dynamic var businessSize = ""
     @objc dynamic var businessType = ""
     @objc dynamic var city = ""
     @objc dynamic var company = ""
@@ -90,5 +89,4 @@ class tableAccount: Object {
     override static func primaryKey() -> String {
         return "account"
     }
-
 }

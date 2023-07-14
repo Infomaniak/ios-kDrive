@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import XCTest
 import kDriveCore
+import XCTest
 
 class AppUITest: XCTestCase {
     var app: XCUIApplication!
@@ -25,15 +25,19 @@ class AppUITest: XCTestCase {
     var tabBar: XCUIElementQuery {
         return app.tabBars
     }
+
     var navigationBars: XCUIElementQuery {
         return app.navigationBars
     }
+
     var tablesQuery: XCUIElementQuery {
         return app.tables
     }
+
     var collectionViewsQuery: XCUIElementQuery {
         return app.collectionViews
     }
+
     var buttons: XCUIElementQuery {
         return app.buttons
     }
@@ -47,7 +51,8 @@ class AppUITest: XCTestCase {
         // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
 
-        // UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test method.
+        // UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test
+        // method.
         app = XCUIApplication()
         app.launchArguments = ["testing"]
         app.launchArguments += ["-AppleLanguages", "(fr)"]
@@ -326,8 +331,14 @@ class AppUITest: XCTestCase {
         let shareButton = collectionViewsQuery.cells.staticTexts["Partage et droits"]
         XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button sould be displayed")
         shareButton.tap()
-        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.waitForExistence(timeout: 5), "John Appleseed should have access to file")
-        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists, "Invited user should have access to file")
+        XCTAssertTrue(
+            tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.waitForExistence(timeout: 5),
+            "John Appleseed should have access to file"
+        )
+        XCTAssertTrue(
+            tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists,
+            "Invited user should have access to file"
+        )
         app.buttons["Fermer"].tap()
 
         tearDownTest(directoryName: root)

@@ -21,12 +21,12 @@ import UIKit
 
 @IBDesignable public class IKLargeButton: UIButton {
     /// Toggle shadow elevation.
-    @IBInspectable public var elevated: Bool = false {
+    @IBInspectable public var elevated = false {
         didSet { setElevation() }
     }
 
     /// Set elevation value.
-    @IBInspectable public var elevation: Int = 1 {
+    @IBInspectable public var elevation = 1 {
         didSet { setElevation() }
     }
 
@@ -52,9 +52,24 @@ import UIKit
         var titleColor: UIColor
         var backgroundColor: UIColor
 
-        public static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveResourcesAsset.infomaniakColor.color, rawValue: "primaryButton")
-        public static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveResourcesAsset.titleColor.color, backgroundColor: KDriveResourcesAsset.backgroundColor.color, rawValue: "secondaryButton")
-        public static let whiteButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveResourcesAsset.titleColor.color, backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color, rawValue: "whiteButton")
+        public static let primaryButton = Style(
+            titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
+            titleColor: .white,
+            backgroundColor: KDriveResourcesAsset.infomaniakColor.color,
+            rawValue: "primaryButton"
+        )
+        public static let secondaryButton = Style(
+            titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
+            titleColor: KDriveResourcesAsset.titleColor.color,
+            backgroundColor: KDriveResourcesAsset.backgroundColor.color,
+            rawValue: "secondaryButton"
+        )
+        public static let whiteButton = Style(
+            titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
+            titleColor: KDriveResourcesAsset.titleColor.color,
+            backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color,
+            rawValue: "whiteButton"
+        )
 
         static let allValues = [primaryButton, secondaryButton, whiteButton]
 

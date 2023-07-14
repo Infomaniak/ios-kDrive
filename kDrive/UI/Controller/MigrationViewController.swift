@@ -73,7 +73,11 @@ class MigrationViewController: UIViewController {
                 buttonView.isHidden = false
                 retryButton.isHidden = success
                 migrationFailedLabel.isHidden = success
-                migrationDoneButton.setTitle(success ? KDriveResourcesStrings.Localizable.buttonMigrationDone : KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
+                migrationDoneButton.setTitle(
+                    success ? KDriveResourcesStrings.Localizable.buttonMigrationDone : KDriveResourcesStrings.Localizable
+                        .buttonLogin,
+                    for: .normal
+                )
 
                 UIView.animate(withDuration: 0.5) {
                     self.buttonView.alpha = 1
@@ -97,14 +101,15 @@ class MigrationViewController: UIViewController {
     }
 
     @IBAction func migrationDoneButtonPressed(_ sender: Any) {
-        if let photoSyncEnabled = photoSyncEnabled {
+        if let photoSyncEnabled {
             UserDefaults.shared.isFirstLaunch = false
             UserDefaults.shared.numberOfConnections = 1
             let mainTabBarViewController = MainTabViewController.instantiate()
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
             if photoSyncEnabled && accountManager.currentDriveFileManager != nil {
                 let driveFloatingPanelController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     guard let currentVC = mainTabBarViewController.selectedViewController as? UINavigationController else {
@@ -118,7 +123,10 @@ class MigrationViewController: UIViewController {
             }
             MigrationHelper.cleanup()
         } else {
-            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(OnboardingViewController.instantiate(), animated: true)
+            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(
+                OnboardingViewController.instantiate(),
+                animated: true
+            )
         }
     }
 
@@ -148,7 +156,11 @@ extension MigrationViewController: UICollectionViewDelegate, UICollectionViewDat
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
         if let cell = cell as? SlideCollectionViewCell {
             cell.illustrationAnimationView.currentProgress = 0
             cell.illustrationAnimationView.play()

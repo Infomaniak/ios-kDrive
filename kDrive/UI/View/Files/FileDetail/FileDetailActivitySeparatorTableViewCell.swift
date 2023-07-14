@@ -19,7 +19,6 @@
 import UIKit
 
 class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
-
     @IBOutlet weak var topSeparator: UIView!
     @IBOutlet weak var topSeparatorHeight: NSLayoutConstraint!
     @IBOutlet weak var textView: UIView!
@@ -43,5 +42,4 @@ class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
         bottomSeparator.isHidden = false
         topSeparatorHeight.constant = 30
     }
-
 }

@@ -17,8 +17,8 @@
  */
 
 import CocoaLumberjackSwift
-import InfomaniakDI
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -73,7 +73,7 @@ class UploadQueueViewController: UIViewController {
                                                           userId: accountManager.currentUserId,
                                                           driveId: currentDirectory.driveId,
                                                           using: realm)
-        .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
                     self?.uploadingFiles = AnyRealmCollection(results)
@@ -101,7 +101,7 @@ class UploadQueueViewController: UIViewController {
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
                 }
-        }
+            }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -117,7 +117,8 @@ class UploadQueueViewController: UIViewController {
     }
 
     class func instantiate() -> UploadQueueViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
+        return Storyboard.files
+            .instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
     }
 
     // MARK: - State restoration
@@ -155,7 +156,10 @@ extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
-                                       isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                                       isLast: indexPath.row == self.tableView(
+                                           tableView,
+                                           numberOfRowsInSection: indexPath.section
+                                       ) - 1)
 
         /// Make sure the file is valid
         let file = uploadingFiles[indexPath.row]

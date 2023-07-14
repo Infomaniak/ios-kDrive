@@ -33,7 +33,7 @@ class NewFolderViewController: UIViewController {
     var folderType = FolderType.folder
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
-    var newFolderName: String = ""
+    var newFolderName = ""
     var folderCreated = false
     var dropBoxUrl: String?
     var folderName: String?
@@ -101,8 +101,18 @@ class NewFolderViewController: UIViewController {
             self.setupTableViewRows()
         }
         setupTableViewRows()
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
 
     deinit {
@@ -113,7 +123,7 @@ class NewFolderViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if folderCreated {
-            if let url = dropBoxUrl, let folderName = folderName {
+            if let url = dropBoxUrl, let folderName {
                 showDropBoxLink(url: url, fileName: folderName)
             } else {
                 dismissAndRefreshDataSource()
@@ -129,7 +139,7 @@ class NewFolderViewController: UIViewController {
             if permissionSelection {
                 sections.append(.permissions)
                 permissionsRows = [.meOnly]
-                if let fileAccess = fileAccess {
+                if let fileAccess {
                     permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
                 }
             }
@@ -139,7 +149,7 @@ class NewFolderViewController: UIViewController {
         case .dropbox:
             sections = [.header, .permissions, .options]
             permissionsRows = [.meOnly]
-            if let fileAccess = fileAccess {
+            if let fileAccess {
                 permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
             }
         }
@@ -340,7 +350,11 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
                 let cell = tableView.dequeueReusableCell(type: NewFolderSettingsTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: false, isLast: indexPath.row == optionsRows.count - 1)
                 cell.delegate = self
-                cell.configureFor(index: indexPath.row - 1, switchValue: getSetting(for: option), settingValue: getValue(for: option))
+                cell.configureFor(
+                    index: indexPath.row - 1,
+                    switchValue: getSetting(for: option),
+                    settingValue: getValue(for: option)
+                )
                 return cell
             }
         }
@@ -396,9 +410,16 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
             Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDirectory(in: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe)
+                    let directory = try await driveFileManager.createDirectory(
+                        in: proxyCurrentDirectory,
+                        name: newFolderName,
+                        onlyForMe: onlyForMe
+                    )
                     if toShare {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
+                        let shareVC = ShareAndRightsViewController.instantiate(
+                            driveFileManager: self.driveFileManager,
+                            file: directory
+                        )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
@@ -416,7 +437,10 @@ extension NewFolderViewController: FooterButtonDelegate {
                 do {
                     let directory = try await driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser)
                     if !forAllUser {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
+                        let shareVC = ShareAndRightsViewController.instantiate(
+                            driveFileManager: self.driveFileManager,
+                            file: directory
+                        )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
@@ -438,13 +462,27 @@ extension NewFolderViewController: FooterButtonDelegate {
             } else {
                 limitFileSize = nil
             }
-            let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
+            let settings = DropBoxSettings(
+                alias: nil,
+                emailWhenFinished: getSetting(for: .optionMail),
+                limitFileSize: limitFileSize,
+                password: password,
+                validUntil: validUntil
+            )
             MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
             Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDropBox(parentDirectory: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
+                    let directory = try await driveFileManager.createDropBox(
+                        parentDirectory: proxyCurrentDirectory,
+                        name: newFolderName,
+                        onlyForMe: onlyForMe,
+                        settings: settings
+                    )
                     if !onlyForMe {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
+                        let shareVC = ShareAndRightsViewController.instantiate(
+                            driveFileManager: self.driveFileManager,
+                            file: directory
+                        )
                         self.folderCreated = true
                         self.dropBoxUrl = directory.dropbox?.url ?? ""
                         self.folderName = directory.name

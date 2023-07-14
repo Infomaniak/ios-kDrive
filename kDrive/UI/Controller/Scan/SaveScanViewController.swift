@@ -67,8 +67,8 @@ class SaveScanViewController: SaveFileViewController {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView
         footer.footerButton.setLoading(true)
         guard let filename = items.first?.name,
-              let selectedDriveFileManager = selectedDriveFileManager,
-              let selectedDirectory = selectedDirectory else {
+              let selectedDriveFileManager,
+              let selectedDirectory else {
             footer.footerButton.setLoading(false)
             return
         }
@@ -101,7 +101,8 @@ class SaveScanViewController: SaveFileViewController {
     }
 
     override class func instantiate(driveFileManager: DriveFileManager?) -> SaveScanViewController {
-        let viewController = Storyboard.scan.instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
+        let viewController = Storyboard.scan
+            .instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }
@@ -129,7 +130,7 @@ class SaveScanViewController: SaveFileViewController {
         let recognizedStrings: [String] = observations.compactMap { observation in
             // Return the string of the top VNRecognizedText instance
             let topCandidate = observation.topCandidates(1).first
-            if let topCandidate = topCandidate, topCandidate.confidence >= minConfidence {
+            if let topCandidate, topCandidate.confidence >= minConfidence {
                 return topCandidate.string
             } else {
                 return nil

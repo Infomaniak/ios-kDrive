@@ -247,7 +247,12 @@ class StorageTableViewController: UITableViewController {
             file = files[indexPath.row]
             message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(file.name)
         }
-        let alertViewController = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonClear, destructive: true) { [weak self] in
+        let alertViewController = AlertTextViewController(
+            title: KDriveResourcesStrings.Localizable.modalClearCacheTitle,
+            message: message,
+            action: KDriveResourcesStrings.Localizable.buttonClear,
+            destructive: true
+        ) { [weak self] in
             DispatchQueue.global(qos: .utility).async {
                 self?.delete(file: file)
             }

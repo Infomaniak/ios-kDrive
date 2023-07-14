@@ -88,7 +88,8 @@ public class DownloadArchiveOperation: Operation {
         if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
-                // We don't support task rescheduling for archive download but still need to pass error to differentiate from user cancel
+                // We don't support task rescheduling for archive download but still need to pass error to differentiate from user
+                // cancel
                 self.error = .taskRescheduled
                 self.task?.cancel()
                 self.end(sessionUrl: self.task?.originalRequest?.url)
@@ -107,7 +108,7 @@ public class DownloadArchiveOperation: Operation {
 
         if let userToken = accountManager.getTokenForUserId(driveFileManager.drive.userId) {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
-                if let token = token {
+                if let token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
@@ -119,7 +120,7 @@ public class DownloadArchiveOperation: Operation {
                     }
                     task?.resume()
                 } else {
-                    self.error = .localError // Other error?
+                    error = .localError // Other error?
                     end(sessionUrl: url)
                 }
             }
@@ -132,7 +133,7 @@ public class DownloadArchiveOperation: Operation {
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
-        if let error = error {
+        if let error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(archiveId): \(error)")
             if self.error == .taskRescheduled {
@@ -144,16 +145,20 @@ public class DownloadArchiveOperation: Operation {
             } else {
                 self.error = .networkError
             }
-        } else if let url = url {
+        } else if let url {
             // Success
             DDLogInfo("[DownloadOperation] Download of \(archiveId) successful")
             do {
-                let temporaryUrl = FileManager.default.temporaryDirectory.appendingPathComponent(archiveId, isDirectory: false).appendingPathExtension("zip")
+                let temporaryUrl = FileManager.default.temporaryDirectory.appendingPathComponent(archiveId, isDirectory: false)
+                    .appendingPathExtension("zip")
 
                 if FileManager.default.fileExists(atPath: temporaryUrl.path) {
                     try? FileManager.default.removeItem(at: temporaryUrl)
                 }
-                try FileManager.default.createDirectory(at: temporaryUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try FileManager.default.createDirectory(
+                    at: temporaryUrl.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
                 try FileManager.default.moveItem(at: url, to: temporaryUrl)
                 archiveUrl = temporaryUrl
             } catch {

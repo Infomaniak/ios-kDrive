@@ -66,7 +66,8 @@ public struct ShareLinkSettings: Encodable {
     public var canSeeStats: Bool?
     /// The password if the permission password is set.
     public var password: String?
-    /// Permission of the shared link: no restriction (public), access by authenticate and authorized user (inherit) or public but protected by a password (password).
+    /// Permission of the shared link: no restriction (public), access by authenticate and authorized user (inherit) or public but
+    /// protected by a password (password).
     public var right: ShareLinkPermission?
     /// Validity of the link.
     public var validUntil: Date?
@@ -76,7 +77,17 @@ public struct ShareLinkSettings: Encodable {
         case canComment, canDownload, canEdit, canSeeInfo, canSeeStats, password, right, validUntil
     }
 
-    public init(canComment: Bool? = nil, canDownload: Bool? = nil, canEdit: Bool? = nil, canSeeInfo: Bool? = nil, canSeeStats: Bool? = nil, password: String? = nil, right: ShareLinkPermission?, validUntil: Date? = nil, isFreeDrive: Bool) {
+    public init(
+        canComment: Bool? = nil,
+        canDownload: Bool? = nil,
+        canEdit: Bool? = nil,
+        canSeeInfo: Bool? = nil,
+        canSeeStats: Bool? = nil,
+        password: String? = nil,
+        right: ShareLinkPermission?,
+        validUntil: Date? = nil,
+        isFreeDrive: Bool
+    ) {
         self.canComment = canComment
         self.canDownload = canDownload
         self.canEdit = canEdit
@@ -90,25 +101,25 @@ public struct ShareLinkSettings: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        if let canComment = canComment {
+        if let canComment {
             try container.encode(canComment, forKey: .canComment)
         }
-        if let canDownload = canDownload {
+        if let canDownload {
             try container.encode(canDownload, forKey: .canDownload)
         }
-        if let canEdit = canEdit {
+        if let canEdit {
             try container.encode(canEdit, forKey: .canEdit)
         }
-        if let canSeeInfo = canSeeInfo {
+        if let canSeeInfo {
             try container.encode(canSeeInfo, forKey: .canSeeInfo)
         }
-        if let canSeeStats = canSeeStats {
+        if let canSeeStats {
             try container.encode(canSeeStats, forKey: .canSeeStats)
         }
-        if let password = password {
+        if let password {
             try container.encode(password, forKey: .password)
         }
-        if let right = right {
+        if let right {
             try container.encode(right, forKey: .right)
         }
         if !isFreeDrive {

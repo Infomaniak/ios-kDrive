@@ -78,7 +78,8 @@ class ShareAndRightsViewController: UIViewController {
 
     private func setTitle() {
         guard file != nil else { return }
-        title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveResourcesStrings.Localizable.fileShareDetailsFileTitle(file.name)
+        title = file.isDirectory ? KDriveResourcesStrings.Localizable
+            .fileShareDetailsFolderTitle(file.name) : KDriveResourcesStrings.Localizable.fileShareDetailsFileTitle(file.name)
     }
 
     private func updateShareList() {
@@ -108,7 +109,8 @@ class ShareAndRightsViewController: UIViewController {
                 rightsSelectionVC.selectedRight = element.right.rawValue
                 rightsSelectionVC.fileAccessElement = element
             } else {
-                rightsSelectionVC.selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
+                rightsSelectionVC
+                    .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
@@ -135,7 +137,8 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     class func instantiate(driveFileManager: DriveFileManager, file: File) -> ShareAndRightsViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
         viewController.driveFileManager = driveFileManager
         viewController.file = file
         return viewController
@@ -214,7 +217,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1, radius: 6)
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1,
+                radius: 6
+            )
             cell.configure(with: fileAccessElements[indexPath.row], drive: driveFileManager.drive)
             return cell
         }
@@ -247,7 +254,8 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite, .link:
             return nil
         case .access:
-            return NewFolderSectionHeaderView.instantiate(title: KDriveResourcesStrings.Localizable.fileShareDetailsUsersAccesTitle)
+            return NewFolderSectionHeaderView
+                .instantiate(title: KDriveResourcesStrings.Localizable.fileShareDetailsUsersAccesTitle)
         }
     }
 }
@@ -274,7 +282,11 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                     if let user = selectedElement as? UserFileAccess {
                         response = try await driveFileManager.apiFetcher.updateUserAccess(to: proxyFile, user: user, right: right)
                     } else if let invitation = selectedElement as? ExternInvitationFileAccess {
-                        response = try await driveFileManager.apiFetcher.updateInvitationAccess(drive: driveFileManager.drive, invitation: invitation, right: right)
+                        response = try await driveFileManager.apiFetcher.updateInvitationAccess(
+                            drive: driveFileManager.drive,
+                            invitation: invitation,
+                            right: right
+                        )
                     } else if let team = selectedElement as? TeamFileAccess {
                         response = try await driveFileManager.apiFetcher.updateTeamAccess(to: proxyFile, team: team, right: right)
                     }
@@ -298,7 +310,10 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                 if let user = selectedElement as? UserFileAccess {
                     response = try await driveFileManager.apiFetcher.removeUserAccess(to: proxyFile, user: user)
                 } else if let invitation = selectedElement as? ExternInvitationFileAccess {
-                    response = try await driveFileManager.apiFetcher.deleteInvitation(drive: driveFileManager.drive, invitation: invitation)
+                    response = try await driveFileManager.apiFetcher.deleteInvitation(
+                        drive: driveFileManager.drive,
+                        invitation: invitation
+                    )
                 } else if let team = selectedElement as? TeamFileAccess {
                     response = try await driveFileManager.apiFetcher.removeTeamAccess(to: proxyFile, team: team)
                 }

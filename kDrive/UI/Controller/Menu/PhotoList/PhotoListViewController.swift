@@ -121,7 +121,10 @@ class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.layoutMargins.right = 16
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         let largeTitleStyle = TextStyle.header1
-        let largeTitleTextAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+        let largeTitleTextAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: largeTitleStyle.color,
+            .font: largeTitleStyle.font
+        ]
         let titleStyle = TextStyle.header3
         let titleTextAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white, .font: titleStyle.font]
         let navbarAppearance = UINavigationBarAppearance()
@@ -148,7 +151,8 @@ class PhotoListViewController: FileListViewController {
     }
 
     override static func instantiate(viewModel: FileListViewModel) -> Self {
-        let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
+        let viewController = Storyboard.menu
+            .instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
         viewController.viewModel = viewModel
         return viewController as! Self
     }
@@ -185,7 +189,8 @@ class PhotoListViewController: FileListViewController {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = photoListViewModel else { return }
-        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
+            (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         photoHeaderView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
@@ -199,7 +204,10 @@ class PhotoListViewController: FileListViewController {
         }
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false {
             // Disable this behavior in selection mode because we reuse the view
-            if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY), from: headerTitleLabel)) {
+            if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(
+                CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY),
+                from: headerTitleLabel
+            )) {
                 headerTitleLabel.text = viewModel.sections[indexPath.section].model.formattedDate
             } else if !viewModel.sections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
                 headerTitleLabel.text = viewModel.sections[0].model.formattedDate
@@ -233,11 +241,19 @@ class PhotoListViewController: FileListViewController {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
-        cell.configureWith(file: viewModel.getFile(at: indexPath)!, roundedCorners: false, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+        cell.configureWith(
+            file: viewModel.getFile(at: indexPath)!,
+            roundedCorners: false,
+            selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
+        )
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForFooterInSection section: Int
+    ) -> CGSize {
         if section == numberOfSections(in: collectionView) - 1 && viewModel.isLoading {
             return CGSize(width: collectionView.frame.width, height: 80)
         } else {
@@ -245,7 +261,11 @@ class PhotoListViewController: FileListViewController {
         }
     }
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         if section == 0 {
             return .zero
         } else {
@@ -253,9 +273,17 @@ class PhotoListViewController: FileListViewController {
         }
     }
 
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
-            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
+            let footerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: footerIdentifier,
+                for: indexPath
+            )
             let indicator = UIActivityIndicatorView(style: .medium)
             indicator.hidesWhenStopped = true
             indicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
@@ -272,7 +300,11 @@ class PhotoListViewController: FileListViewController {
             ])
             return footerView
         } else {
-            let photoSectionHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
+            let photoSectionHeaderView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: headerIdentifier,
+                for: indexPath
+            ) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
                 let yearMonth = photoListViewModel.sections[indexPath.section].model
                 photoSectionHeaderView.titleLabel.text = yearMonth.formattedDate
@@ -283,7 +315,11 @@ class PhotoListViewController: FileListViewController {
 
     // MARK: - UICollectionViewDelegateFlowLayout
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         guard let collectionViewLayout = collectionViewLayout as? UICollectionViewFlowLayout else {
             return .zero
         }
@@ -292,15 +328,27 @@ class PhotoListViewController: FileListViewController {
         return CGSize(width: cellWidth, height: cellWidth)
     }
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
         return 4
     }
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
         return 4
     }
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
         return .zero
     }
 }

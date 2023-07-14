@@ -19,22 +19,21 @@
 import UIKit
 
 class NewFolderShareRuleUserLayout: UICollectionViewFlowLayout {
-
     var overlap = 10.0
 
     override init() {
         super.init()
-        self.sharedInit()
+        sharedInit()
     }
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.sharedInit()
+        sharedInit()
     }
 
     func sharedInit() {
-        self.scrollDirection = .vertical
-        self.minimumInteritemSpacing = 0
+        scrollDirection = .vertical
+        minimumInteritemSpacing = 0
     }
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {

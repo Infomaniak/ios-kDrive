@@ -40,7 +40,8 @@ extension ScanNavigationViewController: VNDocumentCameraViewControllerDelegate {
             controller.dismiss(animated: true)
             return
         }
-        let saveScanNavigationViewController = SaveScanViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager)
+        let saveScanNavigationViewController = SaveScanViewController
+            .instantiateInNavigationController(driveFileManager: currentDriveFileManager)
         saveScanNavigationViewController.modalPresentationStyle = .fullScreen
         if let saveScanVC = saveScanNavigationViewController.viewControllers.first as? SaveScanViewController {
             saveScanVC.items = [.init(name: FileImportHelper.getDefaultFileName(), path: URL(string: "/")!, uti: .data)]

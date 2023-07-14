@@ -437,7 +437,7 @@ public class File: Object, Codable {
     }
 
     public var creator: DriveUser? {
-        if let createdBy = createdBy {
+        if let createdBy {
             return DriveInfosManager.instance.getUser(id: createdBy)
         }
         return nil
@@ -535,7 +535,7 @@ public class File: Object, Codable {
     }
 
     public var tintColor: UIColor? {
-        if let color = color {
+        if let color {
             return UIColor(hex: color)
         } else if visibility == .isTeamSpaceFolder {
             return KDriveResourcesAsset.blueFolderColor.color
@@ -630,7 +630,7 @@ public class File: Object, Codable {
 
     public func getFileSize(withVersion: Bool = false) -> String? {
         let value = withVersion ? version?.totalSize : size
-        if let value = value {
+        if let value {
             return Constants.formatFileSize(Int64(value))
         }
         return nil
@@ -654,7 +654,7 @@ public class File: Object, Codable {
                 urlStr = content["URL"]
             }
 
-            if let urlStr = urlStr {
+            if let urlStr {
                 return URL(string: urlStr)
             } else {
                 return nil

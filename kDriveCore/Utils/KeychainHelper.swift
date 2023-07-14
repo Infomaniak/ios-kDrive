@@ -76,7 +76,9 @@ public enum KeychainHelper {
             kSecValueData as String: KeychainHelper.lockedValue
         ]
         let resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
-        DDLogInfo("[Keychain] Successfully init KeychainHelper ? \(resultCode == noErr || resultCode == errSecDuplicateItem), \(resultCode)")
+        DDLogInfo(
+            "[Keychain] Successfully init KeychainHelper ? \(resultCode == noErr || resultCode == errSecDuplicateItem), \(resultCode)"
+        )
     }
 
     public static func deleteAllTokens() {
@@ -104,7 +106,7 @@ public enum KeychainHelper {
 
     public static func storeToken(_ token: ApiToken) {
         var resultCode: OSStatus = noErr
-        // swiftlint:disable force_try
+        // swiftlint:disable:next force_try
         let tokenData = try! JSONEncoder().encode(token)
 
         if let savedToken = getSavedToken(for: token.userId) {
@@ -141,7 +143,11 @@ public enum KeychainHelper {
             }
         }
         if resultCode != noErr {
-            SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .error, message: "Failed saving token", keychainError: resultCode))
+            SentrySDK.addBreadcrumb(token.generateBreadcrumb(
+                level: .error,
+                message: "Failed saving token",
+                keychainError: resultCode
+            ))
         }
     }
 

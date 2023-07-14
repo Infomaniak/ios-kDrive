@@ -103,7 +103,8 @@ public struct DriveError: Error, Equatable {
     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
     public static let photoLibraryWriteAccessDenied = DriveError(type: .localError,
                                                                  code: "photoLibraryWriteAccessDenied",
-                                                                 localizedString: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited)
+                                                                 localizedString: KDriveResourcesStrings.Localizable
+                                                                     .errorPhotoLibraryAccessLimited)
     public static let downloadFailed = DriveError(type: .localError,
                                                   code: "errorDownload",
                                                   localizedString: KDriveResourcesStrings.Localizable.errorDownload)
@@ -131,7 +132,8 @@ public struct DriveError: Error, Equatable {
                                                         localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
     public static let destinationAlreadyExists = DriveError(type: .serverError,
                                                             code: "destination_already_exists",
-                                                            localizedString: KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists)
+                                                            localizedString: KDriveResourcesStrings.Localizable
+                                                                .errorDestinationAlreadyExists)
     public static let forbidden = DriveError(type: .serverError,
                                              code: "forbidden_error",
                                              localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
@@ -152,7 +154,8 @@ public struct DriveError: Error, Equatable {
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError,
                                                          code: "category_already_exist_error",
-                                                         localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
+                                                         localizedString: KDriveResourcesStrings.Localizable
+                                                             .errorCategoryAlreadyExists)
     public static let stillUploadingError = DriveError(type: .serverError,
                                                        code: "still_uploading_error",
                                                        localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
@@ -163,7 +166,10 @@ public struct DriveError: Error, Equatable {
 
     public static let uploadDestinationNotFoundError = DriveError(type: .serverError, code: "upload_destination_not_found_error")
 
-    public static let uploadDestinationNotWritableError = DriveError(type: .serverError, code: "upload_destination_not_writable_error")
+    public static let uploadDestinationNotWritableError = DriveError(
+        type: .serverError,
+        code: "upload_destination_not_writable_error"
+    )
 
     public static let uploadNotTerminatedError = DriveError(type: .serverError, code: "upload_not_terminated_error")
 
@@ -290,7 +296,8 @@ extension DriveError: Codable {
         code = try values.decode(String.self, forKey: .code)
         userInfo = try values.decodeIfPresent([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
         localizedDescription = DriveError.unknownError.localizedDescription
-        if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?.localizedDescription {
+        if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?
+            .localizedDescription {
             localizedDescription = errorDescription
         }
     }

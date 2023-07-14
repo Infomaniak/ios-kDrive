@@ -44,9 +44,9 @@ extension UploadQueue: UploadPublishable {
                             userId: Int,
                             driveId: Int) {
         Log.uploadQueue("publishUploadCount")
-        self.serialQueue.async { [unowned self] in
-            self.publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
-            self.publishUploadCountInDrive(userId: userId, driveId: driveId)
+        serialQueue.async { [unowned self] in
+            publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
+            publishUploadCountInDrive(userId: userId, driveId: driveId)
         }
     }
 
@@ -54,9 +54,10 @@ extension UploadQueue: UploadPublishable {
                                     userId: Int,
                                     driveId: Int) {
         Log.uploadQueue("publishUploadCountInParent")
-        self.serialQueue.async { [unowned self] in
-            try? self.transactionWithUploadRealm { realm in
-                let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
+        serialQueue.async { [unowned self] in
+            try? transactionWithUploadRealm { realm in
+                let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm)
+                    .count
                 self.observations.didChangeUploadCountInParent.values.forEach { closure in
                     DispatchQueue.main.async {
                         closure(parentId, uploadCount)
@@ -69,8 +70,8 @@ extension UploadQueue: UploadPublishable {
     func publishUploadCountInDrive(userId: Int,
                                    driveId: Int) {
         Log.uploadQueue("publishUploadCountInDrive")
-        self.serialQueue.async { [unowned self] in
-            try? self.transactionWithUploadRealm { realm in
+        serialQueue.async { [unowned self] in
+            try? transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
                 self.observations.didChangeUploadCountInDrive.values.forEach { closure in
                     DispatchQueue.main.async {
@@ -83,9 +84,9 @@ extension UploadQueue: UploadPublishable {
 
     func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
-        self.sendFileUploadedNotificationIfNeeded(with: result)
-        self.serialQueue.async { [unowned self] in
-            self.observations.didUploadFile.values.forEach { closure in
+        sendFileUploadedNotificationIfNeeded(with: result)
+        serialQueue.async { [unowned self] in
+            observations.didUploadFile.values.forEach { closure in
                 guard let uploadFile = result.uploadFile, !uploadFile.isInvalidated else {
                     return
                 }

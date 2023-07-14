@@ -24,7 +24,7 @@ import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
-    // swiftlint:disable weak_delegate
+    // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
     @LazyInjectService var accountManager: AccountManageable
@@ -43,12 +43,19 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             self.driveFileManager = currentDriveFileManager
         }
 
-        if let driveFileManager = driveFileManager {
-            configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
-            configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+        if let driveFileManager {
+            configureRootViewController(
+                at: 1,
+                with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
+            )
+            configureRootViewController(
+                at: 3,
+                with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
+            )
 
             for viewController in viewControllers ?? [] {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?
+                    .driveFileManager = driveFileManager
             }
         } else {
             viewControllers?.removeAll()
@@ -71,7 +78,10 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         super.viewDidLayoutSubviews()
 
         if view.safeAreaInsets.bottom == 0 {
-            let newFrame = CGRect(origin: CGPoint(x: 0, y: view.frame.size.height - tabBar.frame.height - 16), size: tabBar.frame.size)
+            let newFrame = CGRect(
+                origin: CGPoint(x: 0, y: view.frame.size.height - tabBar.frame.height - 16),
+                size: tabBar.frame.size
+            )
             tabBar.frame = newFrame
         }
     }
@@ -98,7 +108,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         if view.frame.width < 375 {
             spacing = 0
             itemWidth = 28
-            inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+            inset = .zero
         } else {
             spacing = 35
             itemWidth = 35
@@ -133,7 +143,11 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
         tabBar.items![4].selectedImage = image
             .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
-            .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 2, borderColor: KDriveResourcesAsset.infomaniakColor.color)
+            .maskImageWithRoundedRect(
+                cornerRadius: CGFloat((iconSize + 2) / 2),
+                borderWidth: 2,
+                borderColor: KDriveResourcesAsset.infomaniakColor.color
+            )
             .withRenderingMode(.alwaysOriginal)
 
         tabBar.items![4].image = image
@@ -145,7 +159,8 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-        let fromFileList = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController != nil
+        let fromFileList = (selectedViewController as? UINavigationController)?
+            .topViewController as? FileListViewController != nil
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
@@ -160,9 +175,10 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func getCurrentDirectory() -> (DriveFileManager, File) {
-        if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
-           let driveFileManager = filesViewController.driveFileManager,
-           filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+        if let filesViewController = (selectedViewController as? UINavigationController)?
+            .topViewController as? FileListViewController,
+            let driveFileManager = filesViewController.driveFileManager,
+            filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
             return (driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
             let file = driveFileManager.getCachedRootFile()
@@ -179,16 +195,18 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     private func setDriveFileManager(_ driveFileManager: DriveFileManager?, completion: (DriveFileManager) -> Void) {
-        if let driveFileManager = driveFileManager {
+        if let driveFileManager {
             completion(driveFileManager)
         } else {
             if accountManager.drives.isEmpty {
                 let driveErrorVC = DriveErrorViewController.instantiate()
                 driveErrorVC.driveErrorViewType = .noDrive
-                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(UINavigationController(rootViewController: driveErrorVC))
+                (UIApplication.shared.delegate as? AppDelegate)?
+                    .setRootViewController(UINavigationController(rootViewController: driveErrorVC))
             } else {
                 // Invalid token or unknown error
-                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+                (UIApplication.shared.delegate as? AppDelegate)?
+                    .setRootViewController(SwitchUserViewController.instantiateInNavigationController())
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDisconnected)
             }
         }
@@ -207,7 +225,8 @@ extension MainTabViewController: UITabBarControllerDelegate {
             homeViewController.presentedFromTabBar()
         }
 
-        if tabBarController.selectedViewController == viewController, let viewController = (viewController as? UINavigationController)?.topViewController as? TopScrollable {
+        if tabBarController.selectedViewController == viewController,
+           let viewController = (viewController as? UINavigationController)?.topViewController as? TopScrollable {
             viewController.scrollToTop()
         }
 
@@ -226,14 +245,16 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didUpdateCurrentAccountInformations(currentAccount)
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
+                .didUpdateCurrentAccountInformations(currentAccount)
         }
     }
 
     func didSwitchCurrentAccount(_ newAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
+                .didSwitchCurrentAccount(newAccount)
         }
         setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
             self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
@@ -248,7 +269,8 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
             manager.signalEnumerator(for: .rootContainer) { _ in }
         }
         for viewController in viewControllers ?? [] {
-            guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers.first as? UIViewController & SwitchDriveDelegate else { continue }
+            guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers
+                .first as? UIViewController & SwitchDriveDelegate else { continue }
             if switchDriveDelegate.isViewLoaded {
                 switchDriveDelegate.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
             } else {

@@ -94,7 +94,7 @@ class SearchFilesViewModel: FileListViewModel {
         _isDisplayingSearchResults = displayingSearchResults
         return displayingSearchResults
     }
-    
+
     /// Detect flip/flop of displayed content type
     var _isDisplayingSearchResults = true {
         willSet {
@@ -323,39 +323,39 @@ class SearchViewController: FileListViewController {
 
     private func bindSearchViewModel() {
         recentSearchesViewModel.onReloadWithChangeset = { [unowned self] stagedChangeset, setData in
-            if self.searchViewModel.isDisplayingSearchResults {
+            if searchViewModel.isDisplayingSearchResults {
                 // We don't reload the collection view but we still need to set the data
                 if let data = stagedChangeset.last?.data {
                     setData(data)
                 }
             } else {
-                self.collectionView.reload(using: stagedChangeset, setData: setData)
-                self.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
-                                                   deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
-                                                  count: self.recentSearchesViewModel.recentSearches.count)
+                collectionView.reload(using: stagedChangeset, setData: setData)
+                collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
+                                             deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
+                                             count: recentSearchesViewModel.recentSearches.count)
             }
         }
 
         // Clear collection view on content type changed without animation
         searchViewModel.onContentTypeChanged = { [unowned self] in
-            self.collectionView.reloadData()
+            collectionView.reloadData()
         }
 
         searchViewModel.onFiltersChanged = { [unowned self] in
-            guard self.isViewLoaded else { return }
+            guard isViewLoaded else { return }
             // Update UI
-            self.collectionView.refreshControl = self.searchViewModel.isDisplayingSearchResults ? self.refreshControl : nil
-            self.collectionViewLayout?.sectionHeadersPinToVisibleBounds = self.searchViewModel.isDisplayingSearchResults
-            self.collectionView.backgroundView = nil
-            if let headerView = self.headerView {
-                self.updateFilters(headerView: headerView)
+            collectionView.refreshControl = searchViewModel.isDisplayingSearchResults ? refreshControl : nil
+            collectionViewLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
+            collectionView.backgroundView = nil
+            if let headerView {
+                updateFilters(headerView: headerView)
             }
-            self.collectionView.performBatchUpdates(nil)
+            collectionView.performBatchUpdates(nil)
         }
 
         searchViewModel.onSearchCompleted = { [unowned self] searchTerm in
-            guard let searchTerm = searchTerm else { return }
-            self.recentSearchesViewModel.add(searchTerm: searchTerm)
+            guard let searchTerm else { return }
+            recentSearchesViewModel.add(searchTerm: searchTerm)
         }
     }
 

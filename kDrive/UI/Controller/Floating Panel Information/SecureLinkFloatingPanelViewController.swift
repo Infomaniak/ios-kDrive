@@ -30,7 +30,10 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
         animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareDescription
-        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability, highlightedText: Constants.kDriveTeams)
+        additionalInformationLabel.attributedText = NSMutableAttributedString(
+            string: KDriveResourcesStrings.Localizable.allPackAvailability,
+            highlightedText: Constants.kDriveTeams
+        )
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)
@@ -39,7 +42,10 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, SecureLinkFloatingPanelViewController.self)
         return contentViewController
     }

@@ -31,7 +31,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_0ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(0)
 
@@ -75,7 +75,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_0Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(0)
         let chunksSize = UInt64(10 * 1024 * 1024)
 
@@ -100,7 +100,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_1ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1)
 
@@ -170,7 +170,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_1Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(1 * 1024 * 1024)
         let expectedChunks = 2 // One plus remainer
@@ -193,7 +193,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testBuildRanges_1ChunkBiggerThanFile() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(10 * 1024 * 1024)
 
@@ -219,7 +219,7 @@ final class UTRangeProviderGuts: XCTestCase {
     func testBuildRanges_ChunkBiggerThanFile() {
         // GIVEN
         // Asking for 4 chunks of 10Mi is larger than the file, should exit
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(10 * 1024 * 1024)
 
@@ -266,7 +266,7 @@ final class UTRangeProviderGuts: XCTestCase {
     func testBuildRanges_ChunksWithRemainder() {
         // GIVEN
         // Asking for 4 chunks of 1Mi + some extra chunk with the remainder
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1 * 1024 * 1024)
 
@@ -381,7 +381,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testPreferredChunkSize_100KTimes() {
         // GIVEN
-        let fileBytes = UInt64(100000 * RangeProvider.APIConstants.chunkMaxSizeClient)
+        let fileBytes = UInt64(100_000 * RangeProvider.APIConstants.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
 
@@ -395,7 +395,7 @@ final class UTRangeProviderGuts: XCTestCase {
 
     func testPreferredChunkSize_100MTimes() {
         // GIVEN
-        let fileBytes = UInt64(100000000 * RangeProvider.APIConstants.chunkMaxSizeClient)
+        let fileBytes = UInt64(100_000_000 * RangeProvider.APIConstants.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
 
@@ -440,7 +440,7 @@ final class UTRangeProviderGuts: XCTestCase {
             // THEN
             XCTFail("Unexpected")
         } catch {
-            guard let _ = error as? UTRangeProviderGuts.DomainError else {
+            guard error as? UTRangeProviderGuts.DomainError != nil else {
                 XCTFail("Unexpected")
                 return
             }

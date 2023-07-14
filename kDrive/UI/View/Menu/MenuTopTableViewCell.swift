@@ -66,7 +66,8 @@ class MenuTopTableViewCell: UITableViewCell {
             progressView.isHidden = false
             progressLabel.isHidden = false
             progressView.progress = Float(drive.usedSize) / Float(drive.size)
-            progressLabel.text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1)) / \(Constants.formatFileSize(drive.size))"
+            progressLabel
+                .text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1)) / \(Constants.formatFileSize(drive.size))"
         }
     }
 }

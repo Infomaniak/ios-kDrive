@@ -106,7 +106,7 @@ public class UploadFile: Object, UploadFilable {
     }
 
     public var size: Int64 {
-        if let pathURL = pathURL {
+        if let pathURL {
             return (try? FileManager.default.attributesOfItem(atPath: pathURL.path)[.size] as? Int64) ?? 0
         } else {
             return 0
@@ -238,7 +238,7 @@ public class UploadFile: Object, UploadFilable {
             option.resizeMode = .fast
             let requestID = PHImageManager.default()
                 .requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
-                    if let image = image {
+                    if let image {
                         completion(image)
                     }
                 }
@@ -286,7 +286,7 @@ public extension UploadFile {
     }
 }
 
-public extension Array where Element == UploadFile {
+public extension [UploadFile] {
     func firstContaining(chunkUrl: String) -> UploadFile? {
         // keep only the files with a valid uploading session
         let files = filter {

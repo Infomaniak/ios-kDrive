@@ -30,7 +30,12 @@ class DraggableFileListViewModel {
         self.driveFileManager = driveFileManager
     }
 
-    func dragItems(for draggedFile: File, in collectionView: UICollectionView, at indexPath: IndexPath, with session: UIDragSession) -> [UIDragItem] {
+    func dragItems(
+        for draggedFile: File,
+        in collectionView: UICollectionView,
+        at indexPath: IndexPath,
+        with session: UIDragSession
+    ) -> [UIDragItem] {
         guard draggedFile.capabilities.canMove && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
@@ -92,27 +97,36 @@ class DroppableFileListViewModel {
     func handleLocalDrop(localItemProviders: [NSItemProvider], destinationDirectory: File) {
         let frozenDestinationDirectory = destinationDirectory.freezeIfNeeded()
         for localFile in localItemProviders {
-            localFile.loadObject(ofClass: DragAndDropFile.self) { [destinationDriveFileManager = driveFileManager] itemProvider, _ in
-                if let itemProvider = itemProvider as? DragAndDropFile,
-                   let file = itemProvider.file {
-                    if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
-                        FileActionsHelper.instance.move(file: file, to: frozenDestinationDirectory, driveFileManager: destinationDriveFileManager)
+            localFile
+                .loadObject(ofClass: DragAndDropFile.self) { [destinationDriveFileManager = driveFileManager] itemProvider, _ in
+                    if let itemProvider = itemProvider as? DragAndDropFile,
+                       let file = itemProvider.file {
+                        if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider
+                            .userId == destinationDriveFileManager.drive.userId {
+                            FileActionsHelper.instance.move(
+                                file: file,
+                                to: frozenDestinationDirectory,
+                                driveFileManager: destinationDriveFileManager
+                            )
+                        } else {
+                            // TODO: enable copy from different driveFileManager
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
+                        }
                     } else {
-                        // TODO: enable copy from different driveFileManager
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
+                        UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                     }
-                } else {
-                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }
-            }
         }
     }
 
     func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
         if !externalFiles.isEmpty {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
-            _ = fileImportHelper.importItems(externalFiles) { [weak self, frozenDestination = destinationDirectory.freeze()] importedFiles, errorCount in
-                guard let self = self else { return }
+            _ = fileImportHelper.importItems(externalFiles) { [
+                weak self,
+                frozenDestination = destinationDirectory.freeze()
+            ] importedFiles, errorCount in
+                guard let self else { return }
                 if errorCount > 0 {
                     Task {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
@@ -122,7 +136,7 @@ class DroppableFileListViewModel {
                     return
                 }
                 do {
-                    try self.fileImportHelper.upload(files: importedFiles, in: frozenDestination, drive: self.driveFileManager.drive)
+                    try fileImportHelper.upload(files: importedFiles, in: frozenDestination, drive: driveFileManager.drive)
                 } catch {
                     Task {
                         UIConstants.showSnackBarIfNeeded(error: error)
@@ -137,7 +151,7 @@ class DroppableFileListViewModel {
                            with destinationIndexPath: IndexPath?,
                            destinationFile: File?) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
-           let destinationFile = destinationFile,
+           let destinationFile,
            destinationFile.isDirectory {
             if let draggedFile = session.localDragSession?.localContext as? File,
                draggedFile.id == destinationFile.id {

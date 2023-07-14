@@ -38,14 +38,27 @@ class OnlyOfficeViewController: UIViewController {
 
         if let newExtension = file.conversion?.onylofficeExtension {
             let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiatePanel()
-            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.notSupportedExtensionDescription(file.name), boldText: file.name, color: KDriveResourcesAsset.titleColor.color)
-            guard let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UnsupportedExtensionFloatingPanelViewController else { return }
-            floatingPanelViewController.titleLabel.text = KDriveResourcesStrings.Localizable.notSupportedExtensionTitle(file.extension)
+            let attrString = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.notSupportedExtensionDescription(file.name),
+                boldText: file.name,
+                color: KDriveResourcesAsset.titleColor.color
+            )
+            guard let floatingPanelViewController = driveFloatingPanelController
+                .contentViewController as? UnsupportedExtensionFloatingPanelViewController else { return }
+            floatingPanelViewController.titleLabel.text = KDriveResourcesStrings.Localizable
+                .notSupportedExtensionTitle(file.extension)
             floatingPanelViewController.descriptionLabel.attributedText = attrString
-            floatingPanelViewController.rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension), for: .normal)
+            floatingPanelViewController.rightButton.setTitle(
+                KDriveResourcesStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension),
+                for: .normal
+            )
             floatingPanelViewController.cancelHandler = { _ in
                 viewController.dismiss(animated: true)
-                let onlyOfficeViewController = OnlyOfficeViewController.instantiate(driveFileManager: driveFileManager, file: file, previewParent: viewController as? PreviewViewController)
+                let onlyOfficeViewController = OnlyOfficeViewController.instantiate(
+                    driveFileManager: driveFileManager,
+                    file: file,
+                    previewParent: viewController as? PreviewViewController
+                )
                 viewController.present(onlyOfficeViewController, animated: true)
             }
             floatingPanelViewController.actionHandler = { sender in
@@ -66,12 +79,17 @@ class OnlyOfficeViewController: UIViewController {
             }
             viewController.present(driveFloatingPanelController, animated: true)
         } else {
-            let onlyOfficeViewController = OnlyOfficeViewController.instantiate(driveFileManager: driveFileManager, file: file, previewParent: viewController as? PreviewViewController)
+            let onlyOfficeViewController = OnlyOfficeViewController.instantiate(
+                driveFileManager: driveFileManager,
+                file: file,
+                previewParent: viewController as? PreviewViewController
+            )
             viewController.present(onlyOfficeViewController, animated: true)
         }
     }
 
-    class func instantiate(driveFileManager: DriveFileManager, file: File, previewParent: PreviewViewController?) -> OnlyOfficeViewController {
+    class func instantiate(driveFileManager: DriveFileManager, file: File,
+                           previewParent: PreviewViewController?) -> OnlyOfficeViewController {
         let onlyOfficeViewController = OnlyOfficeViewController()
         onlyOfficeViewController.driveFileManager = driveFileManager
         onlyOfficeViewController.file = file
@@ -87,7 +105,11 @@ class OnlyOfficeViewController: UIViewController {
          https://developer.apple.com/forums/thread/718757?answerId=734292022#734292022
          */
         let webConfiguration = WKWebViewConfiguration()
-        let dropSharedWorkersScript = WKUserScript(source: "delete window.SharedWorker;", injectionTime: WKUserScriptInjectionTime.atDocumentStart, forMainFrameOnly: false)
+        let dropSharedWorkersScript = WKUserScript(
+            source: "delete window.SharedWorker;",
+            injectionTime: WKUserScriptInjectionTime.atDocumentStart,
+            forMainFrameOnly: false
+        )
         webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
         // Force mobile mode for better usage on iPadOS
         webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
@@ -121,7 +143,7 @@ class OnlyOfficeViewController: UIViewController {
         if let officeUrl = file.officeUrl, let url = ApiRoutes.mobileLogin(url: officeUrl.absoluteString) {
             if let token = driveFileManager.apiFetcher.currentToken {
                 driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                    if let token = token {
+                    if let token {
                         var request = URLRequest(url: url)
                         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                         DispatchQueue.main.async {
@@ -203,25 +225,25 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
         }
 
         // If destination is an href open in default browser
-            if navigationAction.navigationType == .linkActivated {
-                UIApplication.shared.open(url)
-                decisionHandler(.cancel)
-                return
-            }
+        if navigationAction.navigationType == .linkActivated {
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
 
         // If destination is a file download or print. This is a hack because `shouldPerformDownload` doesn't work
         if url.host == ApiEnvironment.current.onlyOfficeDocumentServerHost,
            url.path.contains("/output.") {
-                    if UIPrintInteractionController.canPrint(url) {
-                        let printController = UIPrintInteractionController()
-                        printController.printingItem = url
-                        printController.present(animated: true)
-                    } else {
-                        // Download
-                        UIApplication.shared.open(url)
-                    }
-                    decisionHandler(.cancel)
-                    return
+            if UIPrintInteractionController.canPrint(url) {
+                let printController = UIPrintInteractionController()
+                printController.printingItem = url
+                printController.present(animated: true)
+            } else {
+                // Download
+                UIApplication.shared.open(url)
+            }
+            decisionHandler(.cancel)
+            return
         }
 
         // If destination is inside OnlyOffice or login route
@@ -229,16 +251,20 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
             || url.absoluteString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
             // Validate all requests that will be displayed in an iframe
             || navigationAction.targetFrame?.isMainFrame == false {
-                    decisionHandler(.allow)
-                    return
-                }
+            decisionHandler(.allow)
+            return
+        }
 
         // If destination is outside OnlyOffice close ViewController
         decisionHandler(.cancel)
         dismiss()
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationResponse: WKNavigationResponse,
+        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
+    ) {
         guard let statusCode = (navigationResponse.response as? HTTPURLResponse)?.statusCode else {
             decisionHandler(.allow)
             return

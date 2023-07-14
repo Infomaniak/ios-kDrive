@@ -23,7 +23,8 @@ protocol SwipeActionCollectionViewDelegate: AnyObject {
 }
 
 protocol SwipeActionCollectionViewDataSource: AnyObject {
-    func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]?
+    func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath)
+        -> [SwipeCellAction]?
 }
 
 class SwipableCollectionView: UICollectionView {
@@ -72,7 +73,7 @@ class SwipableCollectionView: UICollectionView {
 
         switch recognizer.state {
         case .began:
-            if let swipedIndexPath = swipedIndexPath,
+            if let swipedIndexPath,
                let swipedCell = cellForItem(at: swipedIndexPath) as? SwipableCell,
                let actions = swipeDataSource?.collectionView(self, actionsFor: swipedCell, at: swipedIndexPath) {
                 if currentlySwipedCellPath != swipedIndexPath {
@@ -112,8 +113,21 @@ class SwipableCollectionView: UICollectionView {
     private func addActionsForCell(_ actions: [SwipeCellAction], cell: SwipableCell) {
         let swipeActionsView = cell.swipeActionsView!
         for (index, action) in actions.enumerated() {
-            let actionButton = UIButton(frame: CGRect(x: 0, y: 0, width: swipeActionsView.frame.width, height: swipeActionsView.frame.width))
-            let constraint = NSLayoutConstraint(item: actionButton, attribute: .width, relatedBy: .equal, toItem: actionButton, attribute: .height, multiplier: 1, constant: 0)
+            let actionButton = UIButton(frame: CGRect(
+                x: 0,
+                y: 0,
+                width: swipeActionsView.frame.width,
+                height: swipeActionsView.frame.width
+            ))
+            let constraint = NSLayoutConstraint(
+                item: actionButton,
+                attribute: .width,
+                relatedBy: .equal,
+                toItem: actionButton,
+                attribute: .height,
+                multiplier: 1,
+                constant: 0
+            )
             actionButton.addConstraint(constraint)
             actionButton.backgroundColor = action.backgroundColor
             actionButton.tintColor = action.tintColor

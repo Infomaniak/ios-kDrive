@@ -115,12 +115,16 @@ extension RegisterViewController: WKNavigationDelegate {
                        })
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
         if let host = navigationAction.request.url?.host {
             if host == "drive.infomaniak.com" {
                 decisionHandler(.cancel)
-                if let delegate = delegate,
-                   let navigationController = navigationController {
+                if let delegate,
+                   let navigationController {
                     infomaniakLogin.webviewLoginFrom(viewController: navigationController,
                                                      hideCreateAccountButton: true,
                                                      delegate: delegate)

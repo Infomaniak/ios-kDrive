@@ -76,7 +76,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
         dropDown.customCellConfiguration = { [unowned self] index, _, cell in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            if let email = self.email {
+            if let email {
                 if index == 0 {
                     cell.configure(with: email)
                 } else {
@@ -109,11 +109,15 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             // Filter the users based on the text
             results = shareables.filter { shareable in
-                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.displayName.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
+                !ignoredShareables
+                    .contains { $0.id == shareable.id } &&
+                    (shareable.displayName.lowercased().contains(text) || (shareable as? DriveUser)?.email
+                        .contains(text) ?? false)
             }
         }
         dropDown.dataSource.removeAll()
-        if isValidEmail(text) && !ignoredEmails.contains(text) && !shareables.contains(where: { ($0 as? DriveUser)?.email == text }) {
+        if isValidEmail(text) && !ignoredEmails.contains(text) && !shareables
+            .contains(where: { ($0 as? DriveUser)?.email == text }) {
             email = text
             dropDown.dataSource.append(text)
         } else {
@@ -129,7 +133,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     private func selectItem(at index: Int) {
         textField.text = ""
-        if let email = email {
+        if let email {
             if index == 0 {
                 delegate?.didSelect(email: email)
             } else {

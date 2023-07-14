@@ -44,7 +44,11 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
     }
 
     private func resetSegmentedControl() {
-        segmentedControl.setSegments([KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle, KDriveResourcesStrings.Localizable.fileDetailsCommentsTitle])
+        segmentedControl.setSegments([
+            KDriveResourcesStrings.Localizable.fileDetailsInfosTitle,
+            KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
+            KDriveResourcesStrings.Localizable.fileDetailsCommentsTitle
+        ])
     }
 
     @IBAction func segmentedControlUpdated(_ sender: UISegmentedControl) {

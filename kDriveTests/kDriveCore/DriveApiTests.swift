@@ -19,10 +19,9 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakLogin
+@testable import kDrive
 import kDriveCore
 import XCTest
-
-@testable import kDrive
 
 class FakeTokenDelegate: RefreshTokenDelegate {
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
@@ -84,7 +83,8 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Helping methods
 
     func getRootDirectory() async throws -> ProxyFile {
-        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data.proxify()
+        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data
+            .proxify()
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
@@ -122,13 +122,20 @@ final class DriveApiTests: XCTestCase {
     }
 
     func createCommonDirectory(testName: String) async throws -> File {
-        try await currentApiFetcher.createCommonDirectory(drive: proxyDrive, name: "UnitTest-\(testName)-\(Date())", forAllUser: false)
+        try await currentApiFetcher.createCommonDirectory(
+            drive: proxyDrive,
+            name: "UnitTest-\(testName)-\(Date())",
+            forAllUser: false
+        )
     }
 
     // MARK: - Test methods
 
     func testGetRootFile() async throws {
-        let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID))
+        let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(
+            driveId: Env.driveId,
+            id: DriveFileManager.constants.rootID
+        ))
         _ = try await currentApiFetcher.files(in: file.proxify())
     }
 
@@ -159,7 +166,11 @@ final class DriveApiTests: XCTestCase {
     }
 
     func testCreateCommonDirectory() async throws {
-        let testDirectory = try await currentApiFetcher.createCommonDirectory(drive: proxyDrive, name: "Create common directory-\(Date())", forAllUser: true)
+        let testDirectory = try await currentApiFetcher.createCommonDirectory(
+            drive: proxyDrive,
+            name: "Create common directory-\(Date())",
+            forAllUser: true
+        )
         tearDownTest(directory: testDirectory.proxify())
     }
 
@@ -172,7 +183,13 @@ final class DriveApiTests: XCTestCase {
     // MARK: Dropbox
 
     func testCreateDropBox() async throws {
-        let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: nil, password: "password", validUntil: nil)
+        let settings = DropBoxSettings(
+            alias: nil,
+            emailWhenFinished: false,
+            limitFileSize: nil,
+            password: "password",
+            validUntil: nil
+        )
         let testDirectory = try await setUpTest(testName: "Create dropbox")
         let dir = try await createTestDirectory(name: "Create dropbox", parentDirectory: testDirectory)
         let dropBox = try await currentApiFetcher.createDropBox(directory: dir, settings: settings)
@@ -280,7 +297,12 @@ final class DriveApiTests: XCTestCase {
 
     func testAddAccess() async throws {
         let testDirectory = try await setUpTest(testName: "Add access")
-        let settings = FileAccessSettings(message: "Test access", right: .write, emails: [Env.inviteMail], userIds: [Env.inviteUserId])
+        let settings = FileAccessSettings(
+            message: "Test access",
+            right: .write,
+            emails: [Env.inviteMail],
+            userIds: [Env.inviteUserId]
+        )
         _ = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let fileAccess = try await currentApiFetcher.access(for: testDirectory)
         let userAdded = fileAccess.users.first { $0.id == Env.inviteUserId }
@@ -299,7 +321,7 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let user = response.users.first { $0.id == Env.inviteUserId }?.access
         XCTAssertNotNil(user, TestsMessages.notNil("user"))
-        if let user = user {
+        if let user {
             let response = try await currentApiFetcher.updateUserAccess(to: testDirectory, user: user, right: .write)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
@@ -316,7 +338,7 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let user = response.users.first { $0.id == Env.inviteUserId }?.access
         XCTAssertNotNil(user, TestsMessages.notNil("user"))
-        if let user = user {
+        if let user {
             let response = try await currentApiFetcher.removeUserAccess(to: testDirectory, user: user)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
@@ -332,8 +354,12 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let invitation = response.emails.first { $0.id == Env.inviteMail }?.access
         XCTAssertNotNil(invitation, TestsMessages.notNil("invitation"))
-        if let invitation = invitation {
-            let response = try await currentApiFetcher.updateInvitationAccess(drive: proxyDrive, invitation: invitation, right: .write)
+        if let invitation {
+            let response = try await currentApiFetcher.updateInvitationAccess(
+                drive: proxyDrive,
+                invitation: invitation,
+                right: .write
+            )
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedInvitation = fileAccess.invitations.first { $0.email == Env.inviteMail }
@@ -349,7 +375,7 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let invitation = response.emails.first { $0.id == Env.inviteMail }?.access
         XCTAssertNotNil(invitation, TestsMessages.notNil("invitation"))
-        if let invitation = invitation {
+        if let invitation {
             let response = try await currentApiFetcher.deleteInvitation(drive: proxyDrive, invitation: invitation)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
@@ -365,7 +391,7 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
         XCTAssertNotNil(team, TestsMessages.notNil("team"))
-        if let team = team {
+        if let team {
             let response = try await currentApiFetcher.updateTeamAccess(to: testDirectory, team: team, right: .write)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
@@ -382,7 +408,7 @@ final class DriveApiTests: XCTestCase {
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
         XCTAssertNotNil(team, TestsMessages.notNil("invitation"))
-        if let team = team {
+        if let team {
             let response = try await currentApiFetcher.removeTeamAccess(to: testDirectory, team: team)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
@@ -591,8 +617,16 @@ final class DriveApiTests: XCTestCase {
 
     func testGetFilesActivities() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
-        let secondFile = try await currentApiFetcher.createFile(in: testDirectory, name: "Get files activities-\(Date())", type: "docx").proxify()
-        let (activities, _) = try await currentApiFetcher.filesActivities(drive: proxyDrive, files: [file, secondFile], from: Date(timeIntervalSince1970: 0))
+        let secondFile = try await currentApiFetcher.createFile(
+            in: testDirectory,
+            name: "Get files activities-\(Date())",
+            type: "docx"
+        ).proxify()
+        let (activities, _) = try await currentApiFetcher.filesActivities(
+            drive: proxyDrive,
+            files: [file, secondFile],
+            from: Date(timeIntervalSince1970: 0)
+        )
         XCTAssertEqual(activities.count, 2, "Array should contain two activities")
         for activity in activities {
             XCTAssertTrue(activity.result, TestsMessages.shouldReturnTrue)
@@ -635,7 +669,12 @@ final class DriveApiTests: XCTestCase {
 
     func testSearchFiles() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Search files")
-        let files = try await currentApiFetcher.searchFiles(drive: proxyDrive, query: "officeFile", categories: [], belongToAllCategories: true)
+        let files = try await currentApiFetcher.searchFiles(
+            drive: proxyDrive,
+            query: "officeFile",
+            categories: [],
+            belongToAllCategories: true
+        )
         let fileFound = files.contains { $0.id == file.id }
         XCTAssertTrue(fileFound, "File created should be in response")
         tearDownTest(directory: testDirectory)
@@ -672,7 +711,11 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, files) = try await initSeveralFiles(testName: "Categories", count: 3)
 
         // 1. Create category
-        let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "CategoryOne-\(Date())", color: "#1abc9c")
+        let category = try await currentApiFetcher.createCategory(
+            drive: proxyDrive,
+            name: "CategoryOne-\(Date())",
+            color: "#1abc9c"
+        )
 
         // 2. Add category to a single file
         let responseAddOne = try await currentApiFetcher.add(category: category, to: files[0])
@@ -683,7 +726,11 @@ final class DriveApiTests: XCTestCase {
         XCTAssertTrue(responseAddSeveral.allSatisfy(\CategoryResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 4. Remove category from several files
-        let responseRemoveSeveral = try await currentApiFetcher.remove(drive: proxyDrive, category: category, from: [files[0], files[1]])
+        let responseRemoveSeveral = try await currentApiFetcher.remove(
+            drive: proxyDrive,
+            category: category,
+            from: [files[0], files[1]]
+        )
         XCTAssertTrue(responseRemoveSeveral.allSatisfy(\CategoryResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 5. Remove category from a single file

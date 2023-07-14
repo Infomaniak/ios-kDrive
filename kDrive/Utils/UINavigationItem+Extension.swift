@@ -23,7 +23,7 @@ extension UINavigationItem {
         if #available(iOS 14.0, *) {
             self.backButtonDisplayMode = .minimal
         } else {
-            self.backButtonTitle = ""
+            backButtonTitle = ""
         }
     }
 }

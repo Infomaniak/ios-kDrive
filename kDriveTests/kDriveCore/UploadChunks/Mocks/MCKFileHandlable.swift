@@ -28,7 +28,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - seek(toOffset:)
 
     var seekToOffsetCalled: Bool { seekToOffsetCallCount > 0 }
-    var seekToOffsetCallCount: Int = 0
+    var seekToOffsetCallCount = 0
     var seekToOffsetClosure: ((UInt64) -> Void)?
     var seekToOffsetError: Error?
     func seek(toOffset offset: UInt64) throws {
@@ -43,7 +43,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - truncate(atOffset:)
 
     var truncateCalled: Bool { truncateCallCount > 0 }
-    var truncateCallCount: Int = 0
+    var truncateCallCount = 0
     var truncateClosure: ((UInt64) -> Void)?
     func truncate(atOffset offset: UInt64) throws {
         truncateCallCount += 1
@@ -55,7 +55,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - synchronize
 
     var synchronizeCalled: Bool { synchronizeCallCount > 0 }
-    var synchronizeCallCount: Int = 0
+    var synchronizeCallCount = 0
     var synchronizeClosure: (() -> Void)?
     func synchronize() throws {
         synchronizeCallCount += 1
@@ -67,7 +67,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - close
 
     var closeCalled: Bool { closeCallCount > 0 }
-    var closeCallCount: Int = 0
+    var closeCallCount = 0
     var closeClosure: (() -> Void)?
     func close() throws {
         closeCallCount += 1
@@ -79,7 +79,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - readToEnd
 
     var readToEndCalled: Bool { readToEndCallCount > 0 }
-    var readToEndCallCount: Int = 0
+    var readToEndCallCount = 0
     var readToEndClosure: (() -> Data)?
     func readToEnd() -> Data? {
         readToEndCallCount += 1
@@ -93,7 +93,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - read(upToCount:)
 
     var readUpToCountCalled: Bool { readUpToCountCallCount > 0 }
-    var readUpToCountCallCount: Int = 0
+    var readUpToCountCallCount = 0
     var readUpToCountClosure: ((Int) -> Data)?
     var readUpToCountError: Error?
     func read(upToCount count: Int) throws -> Data? {
@@ -110,7 +110,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - offset
 
     var offsetCalled: Bool { offsetCallCount > 0 }
-    var offsetCallCount: Int = 0
+    var offsetCallCount = 0
     var offsetClosure: (() -> UInt64)?
     func offset() -> UInt64 {
         offsetCallCount += 1
@@ -124,7 +124,7 @@ final class MCKFileHandlable: NSObject, FileHandlable {
     // MARK: - seekToEnd
 
     var seekToEndCalled: Bool { seekToEndCallCount > 0 }
-    var seekToEndCallCount: Int = 0
+    var seekToEndCallCount = 0
     var seekToEndClosure: (() -> UInt64)?
     func seekToEnd() -> UInt64 {
         seekToEndCallCount += 1

@@ -36,6 +36,7 @@ class StoreSuccessViewController: UIViewController {
     }
 
     static func instantiate() -> StoreSuccessViewController {
-        return Storyboard.menu.instantiateViewController(withIdentifier: "StoreSuccessViewController") as! StoreSuccessViewController
+        return Storyboard.menu
+            .instantiateViewController(withIdentifier: "StoreSuccessViewController") as! StoreSuccessViewController
     }
 }

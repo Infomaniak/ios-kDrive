@@ -74,7 +74,7 @@ public struct RangeProvider: RangeProvidable {
     var guts: RangeProviderGutsable
 
     public init(fileURL: URL) {
-        self.guts = RangeProviderGuts(fileURL: fileURL)
+        guts = RangeProviderGuts(fileURL: fileURL)
     }
 
     public var fileSize: UInt64 {

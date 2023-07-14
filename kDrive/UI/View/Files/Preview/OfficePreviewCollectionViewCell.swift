@@ -47,7 +47,12 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
             // Load data for plain text to have correct encoding
             do {
                 let data = try Data(contentsOf: file.localUrl)
-                documentPreview.load(data, mimeType: file.uti.preferredMIMEType ?? "text/plain", characterEncodingName: "UTF8", baseURL: file.localUrl)
+                documentPreview.load(
+                    data,
+                    mimeType: file.uti.preferredMIMEType ?? "text/plain",
+                    characterEncodingName: "UTF8",
+                    baseURL: file.localUrl
+                )
             } catch {
                 // Fallback on file loading
                 documentPreview.loadFileURL(file.localUrl, allowingReadAccessTo: file.localUrl)
@@ -59,7 +64,10 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
 }
 
 extension OfficePreviewCollectionViewCell: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
         return true
     }
 }
@@ -84,12 +92,12 @@ extension OfficePreviewCollectionViewCell: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        guard let fileId = fileId else { return }
+        guard let fileId else { return }
         previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        guard let fileId = fileId else { return }
+        guard let fileId else { return }
         previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
     }
 }

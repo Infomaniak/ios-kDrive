@@ -36,11 +36,17 @@ public struct FileAccessSettings: Encodable {
 
     private let allowedLanguageCodes = ["fr", "de", "it", "en", "es"]
 
-    public init(message: String? = nil, right: UserPermission, emails: [String]? = nil, teamIds: [Int]? = nil, userIds: [Int]? = nil) {
+    public init(
+        message: String? = nil,
+        right: UserPermission,
+        emails: [String]? = nil,
+        teamIds: [Int]? = nil,
+        userIds: [Int]? = nil
+    ) {
         if let languageCode = Locale.current.languageCode, allowedLanguageCodes.contains(languageCode) {
-            self.lang = languageCode
+            lang = languageCode
         } else {
-            self.lang = "en"
+            lang = "en"
         }
         self.message = message
         self.right = right
@@ -91,7 +97,7 @@ public class UserFileAccess: FileAccessElement {
 
     public var icon: UIImage {
         get async {
-            if let user = user {
+            if let user {
                 return await withCheckedContinuation { continuation in
                     user.getAvatar { image in
                         continuation.resume(returning: image)
@@ -105,7 +111,8 @@ public class UserFileAccess: FileAccessElement {
 }
 
 public enum UserFileAccessStatus: String, Codable {
-    case active, deletedKept = "deleted_kept", deletedRemoved = "deleted_removed", deletedTransferred = "deleted_transferred", locked, pending
+    case active, deletedKept = "deleted_kept", deletedRemoved = "deleted_removed", deletedTransferred = "deleted_transferred",
+         locked, pending
 }
 
 public class TeamFileAccess: FileAccessElement {
@@ -171,7 +178,7 @@ public class ExternInvitationFileAccess: FileAccessElement {
 
     public var icon: UIImage {
         get async {
-            if let user = user {
+            if let user {
                 return await withCheckedContinuation { continuation in
                     user.getAvatar { image in
                         continuation.resume(returning: image)

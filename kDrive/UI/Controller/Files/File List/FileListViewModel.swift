@@ -153,37 +153,44 @@ class FileListViewModel: SelectDelegate {
         self.configuration = configuration
         self.driveFileManager = driveFileManager
         self.currentDirectory = currentDirectory
-        self.sortType = FileListOptions.instance.currentSortType
-        self.listStyle = FileListOptions.instance.currentStyle
-        self.isRefreshing = false
-        self.isLoading = false
-        self.currentLeftBarButtons = configuration.leftBarButtons
-        self.currentRightBarButtons = configuration.rightBarButtons
+        sortType = FileListOptions.instance.currentSortType
+        listStyle = FileListOptions.instance.currentStyle
+        isRefreshing = false
+        isLoading = false
+        currentLeftBarButtons = configuration.leftBarButtons
+        currentRightBarButtons = configuration.rightBarButtons
 
         if self.currentDirectory.isRoot {
             if let rootTitle = configuration.rootTitle {
-                self.title = rootTitle
+                title = rootTitle
             } else {
-                self.title = driveFileManager.drive.name
+                title = driveFileManager.drive.name
             }
         } else {
-            self.title = self.currentDirectory.name
+            title = self.currentDirectory.name
         }
 
         if configuration.showUploadingFiles {
-            self.uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
+            uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
         }
 
         if configuration.isMultipleSelectionEnabled {
-            self.multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+            multipleSelectionViewModel = MultipleSelectionFileListViewModel(
+                configuration: configuration,
+                driveFileManager: driveFileManager,
+                currentDirectory: self.currentDirectory
+            )
         }
 
         if configuration.supportDrag {
-            self.draggableFileListViewModel = DraggableFileListViewModel(driveFileManager: driveFileManager)
+            draggableFileListViewModel = DraggableFileListViewModel(driveFileManager: driveFileManager)
         }
 
         if configuration.supportsDrop {
-            self.droppableFileListViewModel = DroppableFileListViewModel(driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+            droppableFileListViewModel = DroppableFileListViewModel(
+                driveFileManager: driveFileManager,
+                currentDirectory: self.currentDirectory
+            )
         }
     }
 
@@ -191,14 +198,21 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self = self, !self.currentDirectory.isInvalidated else { return }
+                guard let self, !self.currentDirectory.isInvalidated else { return }
                 switch change {
                 case .initial(let results):
-                    self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?([], [], [], [], self.currentDirectory.fullyDownloaded && results.isEmpty, true)
+                    files = AnyRealmCollection(results)
+                    onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?(deletions, insertions, modifications, [], self.currentDirectory.fullyDownloaded && results.isEmpty, false)
+                    files = AnyRealmCollection(results)
+                    onFileListUpdated?(
+                        deletions,
+                        insertions,
+                        modifications,
+                        [],
+                        currentDirectory.fullyDownloaded && results.isEmpty,
+                        false
+                    )
                 case .error(let error):
                     DDLogError("[Realm Observation] Error \(error)")
                 }
@@ -241,7 +255,10 @@ class FileListViewModel: SelectDelegate {
 
     func listStyleButtonPressed() {
         FileListOptions.instance.currentStyle = listStyle == .grid ? .list : .grid
-        MatomoUtils.track(eventWithCategory: .displayList, name: FileListOptions.instance.currentStyle == .grid ? "viewGrid" : "viewList")
+        MatomoUtils.track(
+            eventWithCategory: .displayList,
+            name: FileListOptions.instance.currentStyle == .grid ? "viewGrid" : "viewList"
+        )
     }
 
     func sortButtonPressed() {
@@ -262,9 +279,9 @@ class FileListViewModel: SelectDelegate {
     func showLoadingIndicatorIfNeeded() {
         // Show refresh control if loading is slow
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            if self.isLoading && !self.isRefreshing {
-                self.isRefreshing = true
+            guard let self else { return }
+            if isLoading && !isRefreshing {
+                isRefreshing = true
             }
         }
     }
@@ -322,7 +339,8 @@ class FileListViewModel: SelectDelegate {
                             cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                             cancelableResponse: cancelResponse,
                             parentFile: proxyParent,
-                            driveFileManager: driveFileManager)
+                            driveFileManager: driveFileManager
+                        )
                     } catch {
                         UIConstants.showSnackBarIfNeeded(error: error)
                     }
@@ -387,7 +405,8 @@ class FileListViewModel: SelectDelegate {
 }
 
 extension Publisher where Self.Failure == Never {
-    func assignNoRetain<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable where Root: AnyObject {
+    func assignNoRetain<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable
+        where Root: AnyObject {
         sink { [weak object] value in
             object?[keyPath: keyPath] = value
         }

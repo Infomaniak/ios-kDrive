@@ -69,9 +69,9 @@ public class PhotoSyncSettings: Object {
         self.lastSync = lastSync
         self.syncMode = syncMode
         self.fromDate = fromDate
-        self.syncPicturesEnabled = syncPictures
-        self.syncVideosEnabled = syncVideos
-        self.syncScreenshotsEnabled = syncScreenshots
+        syncPicturesEnabled = syncPictures
+        syncVideosEnabled = syncVideos
+        syncScreenshotsEnabled = syncScreenshots
         self.createDatedSubFolders = createDatedSubFolders
         self.deleteAssetsAfterImport = deleteAssetsAfterImport
         self.photoFormat = photoFormat

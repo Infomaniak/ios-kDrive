@@ -43,7 +43,7 @@ final class UTChunkProvider: XCTestCase {
     func testNext_hasOneRange() throws {
         // GIVEN
         let ranges: [DataRange] = [
-            0...1024
+            0 ... 1024
         ]
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
@@ -62,9 +62,9 @@ final class UTChunkProvider: XCTestCase {
     func testNext_hasRanges() throws {
         // GIVEN
         let ranges: [DataRange] = [
-            0...1,
-            1...2,
-            2...4
+            0 ... 1,
+            1 ... 2,
+            2 ... 4
         ]
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
@@ -83,9 +83,9 @@ final class UTChunkProvider: XCTestCase {
     func testNext_enumarateAll() throws {
         // GIVEN
         let ranges: [DataRange] = [
-            0...1,
-            1...2,
-            2...4
+            0 ... 1,
+            1 ... 2,
+            2 ... 4
         ]
 
         let expectedRangesCount = ranges.count
@@ -110,7 +110,7 @@ final class UTChunkProvider: XCTestCase {
 
     func testReadChunk_validChunk() throws {
         // GIVEN
-        let range: DataRange = 0...1
+        let range: DataRange = 0 ... 1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
         mckFileHandle.seekToOffsetClosure = { index in
@@ -135,7 +135,7 @@ final class UTChunkProvider: XCTestCase {
 
     func testReadChunk_throwErrorOnSeek() throws {
         // GIVEN
-        let range: DataRange = 0...1
+        let range: DataRange = 0 ... 1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
         mckFileHandle.seekToOffsetError = NSError(domain: "k", code: 1337)
@@ -162,7 +162,7 @@ final class UTChunkProvider: XCTestCase {
 
     func testReadChunk_throwErrorOnRead() throws {
         // GIVEN
-        let range: DataRange = 0...1
+        let range: DataRange = 0 ... 1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
         mckFileHandle.readUpToCountError = NSError(domain: "k", code: 1337)

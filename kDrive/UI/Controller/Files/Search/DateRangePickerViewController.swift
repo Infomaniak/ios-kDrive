@@ -146,7 +146,8 @@ class DateRangePickerViewController: UIViewController {
         }
     }
 
-    static func instantiatePanel(visibleDateRange: ClosedRange<Date>, didSelectRange: DateRangeHandler?) -> DriveFloatingPanelController {
+    static func instantiatePanel(visibleDateRange: ClosedRange<Date>,
+                                 didSelectRange: DateRangeHandler?) -> DriveFloatingPanelController {
         let dateRangePickerViewController = DateRangePickerViewController(visibleDateRange: visibleDateRange)
         dateRangePickerViewController.didSelectRange = didSelectRange
         let floatingPanelController = DriveFloatingPanelController()
@@ -240,13 +241,13 @@ class DateRangePickerViewController: UIViewController {
         .verticalDayMargin(8)
         .horizontalDayMargin(8)
         .dayItemProvider { [unowned self] day in
-            self.configureDay(day)
+            configureDay(day)
         }
         .monthHeaderItemProvider { [unowned self] month in
-            self.configureMonthHeader(month)
+            configureMonthHeader(month)
         }
         .dayRangeItemProvider(for: dateRanges) { [unowned self] dayRangeLayoutContext in
-            self.configureDayRange(dayRangeLayoutContext)
+            configureDayRange(dayRangeLayoutContext)
         }
     }
 
@@ -271,11 +272,20 @@ class DateRangePickerViewController: UIViewController {
             invariantViewProperties.textColor = TextStyle.body2.color
         }
 
-        let date = calendar.date(from: DateComponents(era: day.month.era, year: day.month.year, month: day.month.month, day: day.day))!
+        let date = calendar.date(from: DateComponents(
+            era: day.month.era,
+            year: day.month.year,
+            month: day.month.month,
+            day: day.day
+        ))!
 
         return CalendarItemModel<DayView>(
             invariantViewProperties: invariantViewProperties,
-            viewModel: .init(dayText: "\(day.day)", accessibilityLabel: dayDateFormatter.string(from: date), accessibilityHint: nil)
+            viewModel: .init(
+                dayText: "\(day.day)",
+                accessibilityLabel: dayDateFormatter.string(from: date),
+                accessibilityHint: nil
+            )
         )
     }
 

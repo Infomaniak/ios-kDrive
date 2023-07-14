@@ -22,6 +22,6 @@ import UIKit
 
 class PhotoFormatTableViewCell: InsetTableViewCell {
     func configure(with photoFileFormat: PhotoFileFormat) {
-        self.titleLabel.text = photoFileFormat.title
+        titleLabel.text = photoFileFormat.title
     }
 }

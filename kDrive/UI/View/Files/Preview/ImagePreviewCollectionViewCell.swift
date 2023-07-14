@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
-
     @IBOutlet weak var imageHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageWidthConstraint: NSLayoutConstraint!
     @IBOutlet weak var zoomScrollView: UIScrollView!
@@ -41,9 +40,9 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
 
             let scrollSize = imagePreview.frame.size
             let size = CGSize(width: scrollSize.width / 3,
-                height: scrollSize.height / 3)
+                              height: scrollSize.height / 3)
             let origin = CGPoint(x: point.x - size.width / 2,
-                y: point.y - size.height / 2)
+                                 y: point.y - size.height / 2)
             zoomScrollView.zoom(to: CGRect(origin: origin, size: size), animated: true)
         } else {
             zoomScrollView.zoom(to: imagePreview.frame, animated: true)
@@ -57,11 +56,13 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         previewDelegate?.setFullscreen(true)
     }
-
 }
 
 extension ImagePreviewCollectionViewCell: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
         // Don't recognize a single tap until a double-tap fails.
         if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == tapToZoomRecognizer {
             return true

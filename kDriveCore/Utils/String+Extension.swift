@@ -20,10 +20,10 @@ import UIKit
 
 public extension String {
     var isBlank: Bool {
-        return self.trimmingCharacters(in: .whitespaces).isEmpty
+        return trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     func addingExtension(_ ext: String) -> String {
-        return self.hasSuffix(".\(ext)") ? self : "\(self).\(ext)"
+        return hasSuffix(".\(ext)") ? self : "\(self).\(ext)"
     }
 }

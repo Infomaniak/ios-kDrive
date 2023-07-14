@@ -34,24 +34,24 @@ public protocol UploadNotifiable {
 extension UploadQueue: UploadNotifiable {
     public func sendNotEnoughSpaceForUpload(filename: String) {
         Log.uploadQueue("sendNotEnoughSpaceForUpload")
-        self.serialQueue.async { [unowned self] in
-            self.notificationHelper.sendNotEnoughSpaceForUpload(filename: filename)
+        serialQueue.async { [unowned self] in
+            notificationHelper.sendNotEnoughSpaceForUpload(filename: filename)
         }
     }
 
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
-        self.serialQueue.async { [unowned self] in
-            if !self.pausedNotificationSent {
-                self.notificationHelper.sendPausedUploadQueueNotification()
-                self.pausedNotificationSent = true
+        serialQueue.async { [unowned self] in
+            if !pausedNotificationSent {
+                notificationHelper.sendPausedUploadQueueNotification()
+                pausedNotificationSent = true
             }
         }
     }
 
     public func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
         Log.uploadQueue("sendFileUploadedNotificationIfNeeded")
-        self.serialQueue.async { [unowned self] in
+        serialQueue.async { [unowned self] in
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
                   uploadFile.error != .taskCancelled,
@@ -59,26 +59,27 @@ extension UploadQueue: UploadNotifiable {
                 return
             }
 
-            self.fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
+            fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
             if let error = uploadFile.error {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                self.notificationHelper.sendUploadError(filename: uploadedFileName,
-                                                        parentId: uploadFile.parentDirectoryId,
-                                                        error: error)
-                if self.operationQueue.operationCount == 0 {
-                    self.fileUploadedCount = 0
+                notificationHelper.sendUploadError(filename: uploadedFileName,
+                                                   parentId: uploadFile.parentDirectoryId,
+                                                   error: error)
+                if operationQueue.operationCount == 0 {
+                    fileUploadedCount = 0
                 }
-            } else if self.operationQueue.operationCount == 0 {
-                // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
-                if self.fileUploadedCount == 1 && uploadFile.error == nil {
+            } else if operationQueue.operationCount == 0 {
+                // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file
+                // *successfully* uploaded
+                if fileUploadedCount == 1 && uploadFile.error == nil {
                     let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                    self.notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
-                                                                       parentId: uploadFile.parentDirectoryId)
-                } else if self.fileUploadedCount > 0 {
-                    self.notificationHelper.sendUploadDoneNotification(uploadCount: self.fileUploadedCount,
-                                                                       parentId: uploadFile.parentDirectoryId)
+                    notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
+                                                                  parentId: uploadFile.parentDirectoryId)
+                } else if fileUploadedCount > 0 {
+                    notificationHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount,
+                                                                  parentId: uploadFile.parentDirectoryId)
                 }
-                self.fileUploadedCount = 0
+                fileUploadedCount = 0
             }
         }
     }

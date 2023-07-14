@@ -59,7 +59,8 @@ class UploadQueueFoldersViewController: UITableViewController {
     private func setUpObserver() {
         guard driveFileManager != nil else { return }
         // Get the drives (current + shared with me)
-        let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
+        let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true)
+            .map(\.id)
         // Observe uploading files
         notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
@@ -70,14 +71,14 @@ class UploadQueueFoldersViewController: UITableViewController {
 
                 switch change {
                 case .initial(let results):
-                    self.updateFolders(from: results)
-                    self.tableView.reloadData()
+                    updateFolders(from: results)
+                    tableView.reloadData()
                     if results.isEmpty {
-                        self.navigationController?.popViewController(animated: true)
+                        navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     guard !results.isEmpty else {
-                        self.navigationController?.popViewController(animated: true)
+                        navigationController?.popViewController(animated: true)
                         return
                     }
 
@@ -86,7 +87,7 @@ class UploadQueueFoldersViewController: UITableViewController {
                         return
                     }
 
-                    self.tableView.performBatchUpdates {
+                    tableView.performBatchUpdates {
                         self.updateFolders(from: results)
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
@@ -102,7 +103,8 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        folders = files.compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
+        folders = files
+            .compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         // (Pop view controller if nothing to show)
         if folders.isEmpty {
             DispatchQueue.main.async {
@@ -112,7 +114,8 @@ class UploadQueueFoldersViewController: UITableViewController {
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> UploadQueueFoldersViewController {
-        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "UploadQueueFoldersViewController") as! UploadQueueFoldersViewController
+        let viewController = Storyboard.files
+            .instantiateViewController(withIdentifier: "UploadQueueFoldersViewController") as! UploadQueueFoldersViewController
         viewController.driveFileManager = driveFileManager
         return viewController
     }

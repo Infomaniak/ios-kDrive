@@ -38,14 +38,24 @@ public struct TextFieldConfiguration {
     }
 
     public func selectText(in textField: UITextField) {
-        if let selectedRange = selectedRange,
+        if let selectedRange,
            let str = textField.text,
-           let startPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.lowerBound.utf16Offset(in: str)),
-           let endPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.upperBound.utf16Offset(in: str)) {
+           let startPosition = textField.position(
+               from: textField.beginningOfDocument,
+               offset: selectedRange.lowerBound.utf16Offset(in: str)
+           ),
+           let endPosition = textField.position(
+               from: textField.beginningOfDocument,
+               offset: selectedRange.upperBound.utf16Offset(in: str)
+           ) {
             textField.selectedTextRange = textField.textRange(from: startPosition, to: endPosition)
         }
     }
 
     public static let defaultConfiguration = TextFieldConfiguration()
-    public static let fileNameConfiguration = TextFieldConfiguration(autocapitalizationType: .none, autocorrectionType: .no, spellCheckingType: .no)
+    public static let fileNameConfiguration = TextFieldConfiguration(
+        autocapitalizationType: .none,
+        autocorrectionType: .no,
+        spellCheckingType: .no
+    )
 }

@@ -38,7 +38,11 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
                                           fromActivities: true,
                                           rootTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
                                           emptyViewType: .emptyFolder)
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
+        super.init(
+            configuration: configuration,
+            driveFileManager: driveFileManager,
+            currentDirectory: DriveFileManager.homeRootFile
+        )
     }
 
     func encodeRestorableState(with coder: NSCoder) {
@@ -81,15 +85,18 @@ class RecentActivityFilesViewController: FileListViewController {
             var text = user.displayName + " "
             switch activity.action {
             case .fileCreate:
-                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings.Localizable.fileActivityFileCreate(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings
+                    .Localizable.fileActivityFileCreate(count)
             case .fileTrash:
-                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderTrash(count) : KDriveResourcesStrings.Localizable.fileActivityFileTrash(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderTrash(count) : KDriveResourcesStrings
+                    .Localizable.fileActivityFileTrash(count)
             case .fileUpdate:
                 text += KDriveResourcesStrings.Localizable.fileActivityFileUpdate(count)
             case .commentCreate:
                 text += KDriveResourcesStrings.Localizable.fileActivityCommentCreate(count)
             case .fileRestore:
-                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderRestore(count) : KDriveResourcesStrings.Localizable.fileActivityFileRestore(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderRestore(count) : KDriveResourcesStrings
+                    .Localizable.fileActivityFileRestore(count)
             default:
                 text += KDriveResourcesStrings.Localizable.fileActivityUnknown(count)
             }
@@ -123,7 +130,8 @@ class RecentActivityFilesViewController: FileListViewController {
 
     // MARK: - Swipe action collection view data source
 
-    override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
+    override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell,
+                                 at indexPath: IndexPath) -> [SwipeCellAction]? {
         guard !viewModel.getFile(at: indexPath)!.isTrashed else {
             return nil
         }

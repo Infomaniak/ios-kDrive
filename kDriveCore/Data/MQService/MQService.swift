@@ -72,7 +72,7 @@ public class MQService {
                     DDLogError("[MQService] Error while connecting: \(error)")
                 }
             }
-            if let currentToken = currentToken {
+            if let currentToken {
                 actionProgressObservers.removeAll()
                 do {
                     try client.unsubscribe(from: [topic(for: currentToken)]).wait()
@@ -159,7 +159,11 @@ public extension MQService {
     typealias ActionId = String
 
     @discardableResult
-    func observeActionProgress<T: AnyObject>(_ observer: T, actionId: ActionId?, using closure: @escaping (ActionProgressNotification) -> Void)
+    func observeActionProgress<T: AnyObject>(
+        _ observer: T,
+        actionId: ActionId?,
+        using closure: @escaping (ActionProgressNotification) -> Void
+    )
         -> ObservationToken {
         let key = UUID()
         actionProgressObservers[key] = { [weak self, weak observer] action in

@@ -93,7 +93,10 @@ class MatomoUtils {
     static func trackPhotoSync(isEnabled: Bool, with settings: PhotoSyncSettings) {
         track(eventWithCategory: .photoSync, name: isEnabled ? "enabled" : "disabled")
         if isEnabled {
-            MatomoUtils.track(eventWithCategory: .photoSync, name: "sync\(["New", "All", "FromDate"][settings.syncMode.rawValue])")
+            MatomoUtils.track(
+                eventWithCategory: .photoSync,
+                name: "sync\(["New", "All", "FromDate"][settings.syncMode.rawValue])"
+            )
             MatomoUtils.track(eventWithCategory: .photoSync, name: "importDCIM", value: settings.syncPicturesEnabled)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "importVideos", value: settings.syncVideosEnabled)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "importScreenshots", value: settings.syncScreenshotsEnabled)

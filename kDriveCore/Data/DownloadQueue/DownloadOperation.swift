@@ -22,7 +22,6 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
-// import RealmSwift
 
 /// Something that can download a file.
 public protocol DownloadOperationable: Operationable {
@@ -84,7 +83,12 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
     // MARK: - Public methods
 
-    public init(file: File, driveFileManager: DriveFileManager, urlSession: FileDownloadSession, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public init(
+        file: File,
+        driveFileManager: DriveFileManager,
+        urlSession: FileDownloadSession,
+        itemIdentifier: NSFileProviderItemIdentifier? = nil
+    ) {
         self.file = File(value: file)
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
@@ -96,7 +100,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
         self.task = task
-        self.itemIdentifier = nil
+        itemIdentifier = nil
     }
 
     override public func start() {
@@ -120,7 +124,14 @@ public class DownloadOperation: Operation, DownloadOperationable {
                    let sessionUrl = task.originalRequest?.url?.absoluteString {
                     self.error = .taskRescheduled
 
-                    let downloadTask = DownloadTask(fileId: self.file.id, isDirectory: self.file.isDirectory, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: rescheduledSessionId, sessionUrl: sessionUrl)
+                    let downloadTask = DownloadTask(
+                        fileId: self.file.id,
+                        isDirectory: self.file.isDirectory,
+                        driveId: self.file.driveId,
+                        userId: self.driveFileManager.drive.userId,
+                        sessionId: rescheduledSessionId,
+                        sessionUrl: sessionUrl
+                    )
                     BackgroundRealm.uploads.execute { realm in
                         try? realm.safeWrite {
                             realm.add(downloadTask, update: .modified)
@@ -160,7 +171,14 @@ public class DownloadOperation: Operation, DownloadOperationable {
         let url = Endpoint.download(file: file).url
 
         // Add download task to Realm
-        let downloadTask = DownloadTask(fileId: file.id, isDirectory: file.isDirectory, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
+        let downloadTask = DownloadTask(
+            fileId: file.id,
+            isDirectory: file.isDirectory,
+            driveId: file.driveId,
+            userId: driveFileManager.drive.userId,
+            sessionId: urlSession.identifier,
+            sessionUrl: url.absoluteString
+        )
         BackgroundRealm.uploads.execute { realm in
             try? realm.safeWrite {
                 realm.add(downloadTask, update: .modified)
@@ -177,7 +195,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
                 }
                 DownloadQueue.instance.publishProgress(newValue, for: fileId)
             }
-            if let itemIdentifier = itemIdentifier {
+            if let itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
                     manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in }
                 }
@@ -200,7 +218,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
     public func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
-        if let error = error {
+        if let error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(file.id): \(error)")
             if self.error == .taskRescheduled {
@@ -211,7 +229,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             } else {
                 self.error = .networkError
             }
-        } else if let url = url {
+        } else if let url {
             // Success
             DDLogInfo("[DownloadOperation] Download of \(file.id) successful")
             do {
@@ -250,9 +268,12 @@ public class DownloadOperation: Operation, DownloadOperationable {
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
         // Delete download task
         if error != .taskRescheduled,
-           let sessionUrl = sessionUrl {
+           let sessionUrl {
             BackgroundRealm.uploads.execute { realm in
-                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl.absoluteString)).first {
+                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(
+                    format: "sessionUrl = %@",
+                    sessionUrl.absoluteString
+                )).first {
                     try? realm.safeWrite {
                         realm.delete(task)
                     }

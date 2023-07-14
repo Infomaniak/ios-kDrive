@@ -30,7 +30,10 @@ class FolderColorFloatingPanelViewController: InformationFloatingPanelViewContro
         animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveResourcesStrings.Localizable.folderColorTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.folderColorDescription
-        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability, highlightedText: Constants.kDriveTeams)
+        additionalInformationLabel.attributedText = NSMutableAttributedString(
+            string: KDriveResourcesStrings.Localizable.allPackAvailability,
+            highlightedText: Constants.kDriveTeams
+        )
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)
@@ -39,7 +42,10 @@ class FolderColorFloatingPanelViewController: InformationFloatingPanelViewContro
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel
+            .instantiateViewController(
+                withIdentifier: "InformationFloatingPanelViewController"
+            ) as! InformationFloatingPanelViewController
         object_setClass(contentViewController, FolderColorFloatingPanelViewController.self)
         return contentViewController
     }

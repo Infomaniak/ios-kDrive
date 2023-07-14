@@ -56,12 +56,13 @@ public enum Constants {
     public static let notificationTopicComments = "commentsTopic"
     public static let notificationTopicGeneral = "generalTopic"
 
-    public static let mailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+    public static let mailRegex =
+        "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
 
     public static let timeout: Double = 30
     public static let bulkActionThreshold = 10
     public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
-    public static let memoryCacheSizeLimit = 10 * 1_024 * 1_024 // 10 Mo
+    public static let memoryCacheSizeLimit = 10 * 1024 * 1024 // 10 Mo
 
     public static let kDriveTeams = "Solo, Team & Pro"
 
@@ -77,7 +78,7 @@ public enum Constants {
     public static func formatDate(_ date: Date, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
         // Relative time
         let timeInterval = Date().timeIntervalSince(date)
-        if relative && style != .date && timeInterval < 3_600 {
+        if relative && style != .date && timeInterval < 3600 {
             let minutes = Int(timeInterval / 60)
             if minutes < 1 {
                 return KDriveResourcesStrings.Localizable.allJustNow
@@ -102,7 +103,7 @@ public enum Constants {
     }
 
     public static func formatFileLastModifiedRelativeDate(_ lastModified: Date) -> String {
-        if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
+        if Date().timeIntervalSince(lastModified) < 3600 * 24 * 7 {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             let timeInterval = lastModified.timeIntervalSinceNow < -1 ? lastModified.timeIntervalSinceNow : -1
             let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
@@ -117,7 +118,7 @@ public enum Constants {
     }
 
     public static func formatFileDeletionRelativeDate(_ deletionDate: Date) -> String {
-        if Date().timeIntervalSince(deletionDate) < 3_600 * 24 * 7 {
+        if Date().timeIntervalSince(deletionDate) < 3600 * 24 * 7 {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             let timeInterval = deletionDate.timeIntervalSinceNow < -1 ? deletionDate.timeIntervalSinceNow : -1
             let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)

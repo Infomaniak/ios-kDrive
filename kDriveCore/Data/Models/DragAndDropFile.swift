@@ -73,7 +73,7 @@ extension DragAndDropFile: NSItemProviderWriting {
     }
 
     public var writableTypeIdentifiersForItemProvider: [String] {
-        if let file = file {
+        if let file {
             return [
                 DragAndDropFile.localDragIdentifier,
                 file.isDirectory ? UTI.zip.identifier : file.uti.identifier,
@@ -96,7 +96,7 @@ extension DragAndDropFile: NSItemProviderWriting {
 
     public func loadData(withTypeIdentifier typeIdentifier: String,
                          forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
-        guard let file = file else {
+        guard let file else {
             completionHandler(nil, nil)
             return nil
         }
@@ -120,17 +120,17 @@ extension DragAndDropFile: NSItemProviderWriting {
                     progress.cancellationHandler = {
                         operation?.cancel()
                     }
-                    if let operation = operation,
+                    if let operation,
                        let downloadProgress = operation.task?.progress {
                         progress.addChild(downloadProgress, withPendingUnitCount: 100)
                     }
                 } completion: { [weak self] error in
-                    guard let self = self else { return }
-                    if let error = error {
+                    guard let self else { return }
+                    if let error {
                         completionHandler(nil, error)
                     } else {
                         let url = file.isDirectory ? file.temporaryUrl : file.localUrl
-                        self.loadLocalData(for: url, completionHandler: completionHandler)
+                        loadLocalData(for: url, completionHandler: completionHandler)
                     }
                 }
                 return progress

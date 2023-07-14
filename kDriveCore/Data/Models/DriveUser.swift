@@ -64,10 +64,10 @@ public enum UserPermission: String, Codable, CaseIterable {
 
 public class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted(primaryKey: true) public var id: Int = -1
-    @Persisted public var email: String = ""
-    @Persisted private var _avatar: String = ""
+    @Persisted public var email = ""
+    @Persisted private var _avatar = ""
     @Persisted private var _avatarUrl: String?
-    @Persisted public var displayName: String = ""
+    @Persisted public var displayName = ""
     public var role: DriveUserRole?
 
     public var avatar: String {
@@ -85,9 +85,9 @@ public class DriveUser: Object, Codable, InfomaniakUser {
 
     public convenience init(user: InfomaniakCore.UserProfile) {
         self.init()
-        self.id = user.id
-        self.email = user.email
-        self._avatar = user.avatar
-        self.displayName = user.displayName
+        id = user.id
+        email = user.email
+        _avatar = user.avatar
+        displayName = user.displayName
     }
 }

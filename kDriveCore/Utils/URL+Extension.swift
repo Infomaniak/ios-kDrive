@@ -33,7 +33,7 @@ public extension URL {
     }
 
     var uti: UTI? {
-        if let typeIdentifier = typeIdentifier {
+        if let typeIdentifier {
             return UTI(typeIdentifier)
         }
         return nil

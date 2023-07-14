@@ -53,7 +53,7 @@ class StoreManager: NSObject {
 
     /// Existing product's title associated with the specified payment transaction.
     func title(matchingPaymentTransaction transaction: SKPaymentTransaction) -> String {
-        let title = self.title(matchingIdentifier: transaction.payment.productIdentifier)
+        let title = title(matchingIdentifier: transaction.payment.productIdentifier)
         return title ?? transaction.payment.productIdentifier
     }
 

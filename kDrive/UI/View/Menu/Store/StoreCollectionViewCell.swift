@@ -76,7 +76,10 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
-            priceLabel.text = KDriveResourcesStrings.Localizable.storePricing(formattedPrice, "\(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)")
+            priceLabel.text = KDriveResourcesStrings.Localizable.storePricing(
+                formattedPrice,
+                "\(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)"
+            )
         } else {
             priceLabel.text = KDriveResourcesStrings.Localizable.storeRetrieving
         }
@@ -89,7 +92,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
 
     @IBAction func selectButtonTapped(_ sender: Any) {
         selectButton.isSelected = true
-        if let item = item {
+        if let item {
             delegate?.selectButtonTapped(item: item)
         }
     }

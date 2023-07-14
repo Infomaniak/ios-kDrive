@@ -70,7 +70,12 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
         overlayButton.sizeToFit()
         overlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonTogglePassword
-        let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
+        let rightView = UIView(frame: CGRect(
+            x: 0,
+            y: 0,
+            width: overlayButton.frame.width + 10,
+            height: overlayButton.frame.height
+        ))
         rightView.addSubview(overlayButton)
         passwordTextField.rightView = rightView
         passwordTextField.rightViewMode = .always
@@ -88,7 +93,15 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         delegate?.didUpdateSettingsValue(index: index, content: compactDatePicker.date)
     }
 
-    func configureWith(index: Int, option: ShareLinkSettingsViewController.OptionsRow, switchValue: Bool, settingValue: Any?, drive: Drive, actionButtonVisible: Bool = false, isFolder: Bool) {
+    func configureWith(
+        index: Int,
+        option: ShareLinkSettingsViewController.OptionsRow,
+        switchValue: Bool,
+        settingValue: Any?,
+        drive: Drive,
+        actionButtonVisible: Bool = false,
+        isFolder: Bool
+    ) {
         self.option = option
         self.index = index
 

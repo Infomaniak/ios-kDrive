@@ -335,7 +335,7 @@ public class DriveApiFetcher: ApiFetcher {
             let group = DispatchGroup()
             group.enter()
             self.tokenable.refreshToken(token: reloadedToken) { newToken, error in
-                if let newToken = newToken {
+                if let newToken {
                     self.accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
                     request(newToken, nil)
                 } else {
@@ -364,7 +364,7 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func restore(file: ProxyFile, in directory: ProxyFile? = nil) async throws -> CancelableResponse {
         let parameters: Parameters?
-        if let directory = directory {
+        if let directory {
             parameters = ["destination_directory_id": directory.id]
         } else {
             parameters = nil
@@ -419,7 +419,7 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func editCategory(drive: AbstractDrive, category: Category, name: String?, color: String) async throws -> Category {
         var body = ["color": color]
-        if let name = name {
+        if let name {
             body["name"] = name
         }
 
@@ -523,7 +523,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             }
             self.tokenable.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
-                if let token = token {
+                if let token {
                     SentrySDK
                         .addBreadcrumb(token
                             .generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
@@ -602,7 +602,7 @@ class NetworkRequestRetrier: RequestInterceptor {
     }
 
     private func removeCachedUrlRequest(url: String?) {
-        guard let url = url else {
+        guard let url else {
             return
         }
 

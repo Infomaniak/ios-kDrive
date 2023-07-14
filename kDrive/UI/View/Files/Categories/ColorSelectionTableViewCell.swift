@@ -81,7 +81,11 @@ class ColorSelectionTableViewCell: UITableViewCell {
 
     func selectColor(_ color: String) {
         let selectedColorIndex = colors.firstIndex { $0.hex == color } ?? 0
-        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
+        collectionView.selectItem(
+            at: IndexPath(row: selectedColorIndex, section: 0),
+            animated: true,
+            scrollPosition: .init(rawValue: 0)
+        )
     }
 
     deinit {

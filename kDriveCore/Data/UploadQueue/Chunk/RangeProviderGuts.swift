@@ -73,10 +73,10 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         let chunkBound = chunkSize - 1
 
         var ranges: [DataRange] = []
-        for index in 0...totalChunksCount - 1 {
+        for index in 0 ... totalChunksCount - 1 {
             let startOffset = index * chunkBound + index
             let endOffset = startOffset + chunkBound
-            let range: DataRange = startOffset...endOffset
+            let range: DataRange = startOffset ... endOffset
 
             ranges.append(range)
         }
@@ -88,7 +88,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
             assert((startOffset + lastChunkSize) == fileSize, "sanity, this should match")
 
             let endOfFileoffset = fileSize - 1
-            let range: DataRange = startOffset...endOfFileoffset
+            let range: DataRange = startOffset ... endOfFileoffset
 
             ranges.append(range)
         }
@@ -111,7 +111,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
             let capChunkSize = min(fileSize, RangeProvider.APIConstants.chunkMinSize)
             return capChunkSize
         }
-        
+
         let potentialChunkSize = fileSize / RangeProvider.APIConstants.optimalChunkCount
 
         let chunkSize: UInt64
@@ -119,7 +119,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         case 0 ..< RangeProvider.APIConstants.chunkMinSize:
             chunkSize = RangeProvider.APIConstants.chunkMinSize
 
-        case RangeProvider.APIConstants.chunkMinSize...RangeProvider.APIConstants.chunkMaxSizeClient:
+        case RangeProvider.APIConstants.chunkMinSize ... RangeProvider.APIConstants.chunkMaxSizeClient:
             chunkSize = potentialChunkSize
 
         /// Strictly higher than `APIConstants.chunkMaxSize`

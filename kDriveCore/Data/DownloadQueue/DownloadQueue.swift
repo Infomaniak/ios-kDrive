@@ -23,11 +23,11 @@ import InfomaniakDI
 import RealmSwift
 
 public class DownloadTask: Object {
-    @Persisted(primaryKey: true) var fileId: Int = 0
+    @Persisted(primaryKey: true) var fileId = 0
     @Persisted var isDirectory = false
-    @Persisted var driveId: Int = 0
-    @Persisted var userId: Int = 0
-    @Persisted var sessionUrl: String = ""
+    @Persisted var driveId = 0
+    @Persisted var userId = 0
+    @Persisted var sessionUrl = ""
     @Persisted var sessionId: String?
 
     convenience init(fileId: Int, isDirectory: Bool, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
@@ -100,7 +100,12 @@ public final class DownloadQueue {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.bestSession, itemIdentifier: itemIdentifier)
+            let operation = DownloadOperation(
+                file: file,
+                driveFileManager: driveFileManager,
+                urlSession: self.bestSession,
+                itemIdentifier: itemIdentifier
+            )
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
@@ -122,7 +127,11 @@ public final class DownloadQueue {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: self.bestSession)
+            let operation = DownloadArchiveOperation(
+                archiveId: archiveId,
+                driveFileManager: driveFileManager,
+                urlSession: self.bestSession
+            )
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
@@ -139,7 +148,11 @@ public final class DownloadQueue {
                                   userId: Int,
                                   onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
                                   completion: @escaping (DriveError?) -> Void) {
-        dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
+        dispatchQueue.async(qos: .userInitiated) { [
+            driveId = file.driveId,
+            fileId = file.id,
+            isManagedByRealm = file.isManagedByRealm
+        ] in
             guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
@@ -295,7 +308,11 @@ public extension DownloadQueue {
     }
 
     @discardableResult
-    func observeArchiveDownloadProgress<T: AnyObject>(_ observer: T, archiveId: String? = nil, using closure: @escaping (DownloadedArchiveId, Double) -> Void)
+    func observeArchiveDownloadProgress<T: AnyObject>(
+        _ observer: T,
+        archiveId: String? = nil,
+        using closure: @escaping (DownloadedArchiveId, Double) -> Void
+    )
         -> ObservationToken {
         let key = UUID()
         observations.didChangeArchiveProgress[key] = { [weak self, weak observer] downloadedArchiveId, progress in

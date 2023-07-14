@@ -164,18 +164,18 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         guard driveFileManager != nil else { return }
 
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
 
-            guard let index = self.sections.firstIndex(where: { $0 == .uploads }),
-                  let cell = self.tableView?.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell,
-                  self.uploadCountManager.uploadCount > 0 else {
+            guard let index = sections.firstIndex(where: { $0 == .uploads }),
+                  let cell = tableView?.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell,
+                  uploadCountManager.uploadCount > 0 else {
                 // Delete / Add cell
-                self.reloadData()
+                reloadData()
                 return
             }
 
             // Update cell
-            cell.setUploadCount(self.uploadCountManager.uploadCount)
+            cell.setUploadCount(uploadCountManager.uploadCount)
         }
     }
 

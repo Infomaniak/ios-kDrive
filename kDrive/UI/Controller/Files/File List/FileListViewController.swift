@@ -312,16 +312,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
 
         viewModel.$currentLeftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
-            guard let self = self else { return }
-            self.navigationItem.leftBarButtonItems = leftBarButtons?
+            guard let self else { return }
+            navigationItem.leftBarButtonItems = leftBarButtons?
                 .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
         navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?
             .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         viewModel.$currentRightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
-            guard let self = self else { return }
-            self.navigationItem.rightBarButtonItems = rightBarButtons?
+            guard let self else { return }
+            navigationItem.rightBarButtonItems = rightBarButtons?
                 .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
@@ -417,7 +417,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private func present(_ viewController: UIViewController, presentationType: ControllerPresentationType, animated: Bool) {
         if presentationType == .push,
-           let navigationController = navigationController {
+           let navigationController {
             navigationController.pushViewController(viewController, animated: animated)
         } else {
             present(viewController, animated: animated)
@@ -542,7 +542,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             multipleSelectionViewModel.isMultipleSelectionEnabled = true
             // Necessary for events to trigger in the right order
             DispatchQueue.main.async { [unowned self] in
-                if let file = self.viewModel.getFile(at: indexPath) {
+                if let file = viewModel.getFile(at: indexPath) {
                     multipleSelectionViewModel.didSelectFile(file, at: indexPath)
                 }
             }
@@ -594,7 +594,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
             DispatchQueue.main.async {
-                guard let self = self else { return }
+                guard let self else { return }
                 self.headerView?.offlineView.isHidden = status != .offline
                 self.collectionView.collectionViewLayout.invalidateLayout()
                 self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
@@ -609,7 +609,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             self?.forceRefresh()
         }
         collectionView.backgroundView = isHidden ? nil : emptyView
-        if let headerView = headerView {
+        if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
         }
     }
@@ -777,7 +777,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         coder.encode(viewModel.driveFileManager.drive.id, forKey: "DriveID")
         coder.encode(viewModel.currentDirectory.id, forKey: "DirectoryID")
-        if let viewModel = viewModel {
+        if let viewModel {
             coder.encode(String(describing: type(of: viewModel)), forKey: "ViewModel")
         }
     }
@@ -807,7 +807,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
 
         if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
-           let viewModelName = viewModelName,
+           let viewModelName,
            let viewModel = getViewModel(
                viewModelName: viewModelName,
                driveFileManager: driveFileManager,

@@ -69,7 +69,13 @@ class FilePresenter {
             Task {
                 do {
                     let parent = try await driveFileManager.file(id: file.parentId)
-                    present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
+                    present(
+                        driveFileManager: driveFileManager,
+                        file: parent,
+                        files: [],
+                        normalFolderHierarchy: true,
+                        animated: animated
+                    )
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
                 }
@@ -100,7 +106,8 @@ class FilePresenter {
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
                     let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
-                    let floatingPanelViewController = accessFileDriveFloatingPanelController.contentViewController as? AccessFileFloatingPanelViewController
+                    let floatingPanelViewController = accessFileDriveFloatingPanelController
+                        .contentViewController as? AccessFileFloatingPanelViewController
                     floatingPanelViewController?.actionHandler = { [unowned self] _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
                         Task { [proxyFile = file.proxify()] in
@@ -133,7 +140,7 @@ class FilePresenter {
                 // Download file
                 DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
                     Task {
-                        if let error = error {
+                        if let error {
                             UIConstants.showSnackBarIfNeeded(error: error)
                             completion?(false)
                         } else {
@@ -146,7 +153,13 @@ class FilePresenter {
             // Show file preview
             let files = files.filter { !$0.isDirectory && !$0.isTrashed }
             if let index = files.firstIndex(where: { $0.id == file.id }) {
-                let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
+                let previewViewController = PreviewViewController.instantiate(
+                    files: files,
+                    index: Int(index),
+                    driveFileManager: driveFileManager,
+                    normalFolderHierarchy: normalFolderHierarchy,
+                    fromActivities: fromActivities
+                )
                 navigationController?.pushViewController(previewViewController, animated: animated)
                 completion?(true)
             }

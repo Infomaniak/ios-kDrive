@@ -27,8 +27,10 @@ class HomePhotoListController: HomeRecentFilesController {
 
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager, homeViewController: homeViewController,
-                  listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages,
-                  title: KDriveResourcesStrings.Localizable.galleryTitle, selectorTitle: KDriveResourcesStrings.Localizable.galleryTitle,
+                  listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self,
+                  emptyCellType: .noImages,
+                  title: KDriveResourcesStrings.Localizable.galleryTitle,
+                  selectorTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                   listStyleEnabled: false)
     }
 
@@ -45,7 +47,10 @@ class HomePhotoListController: HomeRecentFilesController {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalWidth(1 / Double(columns)))
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .fractionalWidth(1 / Double(columns))
+        )
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
         group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
         let section = NSCollectionLayoutSection(group: group)

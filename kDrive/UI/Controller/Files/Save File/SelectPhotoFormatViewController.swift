@@ -37,7 +37,8 @@ class SelectPhotoFormatViewController: UIViewController {
     }
 
     static func instantiate(selectedFormat: PhotoFileFormat) -> SelectPhotoFormatViewController {
-        let viewController = Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
+        let viewController = Storyboard.saveFile
+            .instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
         viewController.selectedFormat = selectedFormat
         return viewController
     }

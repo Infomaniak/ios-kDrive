@@ -374,7 +374,7 @@ public final class FileImportHelper {
             }
             data = photo.pngData()
         }
-        guard let data = data else {
+        guard let data else {
             throw ImportError.emptyImageData
         }
         try upload(data: data, name: name, uti: format.uti, drive: drive, directory: directory)
@@ -421,7 +421,7 @@ public final class FileImportHelper {
             let image = scan.imageOfPage(at: 0)
             data = image.jpegData(compressionQuality: imageCompression)
         }
-        guard let data = data else {
+        guard let data else {
             throw ImportError.emptyImageData
         }
         try upload(data: data, name: name, uti: scanType.uti, drive: drive, directory: directory)
@@ -464,7 +464,7 @@ public final class FileImportHelper {
                                                  userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
         if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider
             .hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
-            if let userPreferredPhotoFormat = userPreferredPhotoFormat,
+            if let userPreferredPhotoFormat,
                itemProvider.hasItemConformingToTypeIdentifier(userPreferredPhotoFormat.uti.identifier) {
                 return userPreferredPhotoFormat.uti.identifier
             }
@@ -477,9 +477,9 @@ public final class FileImportHelper {
     private func getURL(from itemProvider: NSItemProvider, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadObject(ofClass: URL.self) { url, error in
-            if let error = error {
+            if let error {
                 completion(.failure(error))
-            } else if let url = url {
+            } else if let url {
                 // Save the URL as a webloc file (plist)
                 let content = ["URL": url.absoluteString]
                 let targetURL = self.generateImportURL(for: nil).appendingPathExtension("webloc")
@@ -507,7 +507,7 @@ public final class FileImportHelper {
     ) -> Progress {
         let progress = Progress(totalUnitCount: 1)
         itemProvider.loadItem(forTypeIdentifier: typeIdentifier) { coding, error in
-            if let error = error {
+            if let error {
                 completion(.failure(error))
             } else if let text = coding as? String {
                 let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
@@ -540,9 +540,9 @@ public final class FileImportHelper {
     ) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
-            if let error = error {
+            if let error {
                 completion(.failure(error))
-            } else if let url = url {
+            } else if let url {
                 let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: targetURL)
@@ -563,7 +563,7 @@ public final class FileImportHelper {
         let progress = Progress(totalUnitCount: 1)
         itemProvider.loadItem(forTypeIdentifier: UTI.image.identifier) { coding, error in
             autoreleasepool {
-                if let error = error {
+                if let error {
                     completion(.failure(error))
                 } else {
                     let targetURL = self.generateImportURL(for: UTI.png)

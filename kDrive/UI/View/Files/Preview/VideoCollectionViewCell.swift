@@ -71,7 +71,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
             player = AVPlayer(url: file.localUrl)
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token = token {
+                if let token {
                     let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
@@ -94,7 +94,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
-        guard let player = player else { return }
+        guard let player else { return }
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
 

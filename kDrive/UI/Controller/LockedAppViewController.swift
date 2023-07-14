@@ -41,7 +41,10 @@ class LockedAppViewController: UIViewController {
                     DispatchQueue.main.async {
                         if success {
                             self.dismiss(animated: true)
-                            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
+                            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(
+                                MainTabViewController.instantiate(),
+                                animated: true
+                            )
                         }
                     }
                 }

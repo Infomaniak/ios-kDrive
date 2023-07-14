@@ -99,8 +99,18 @@ public struct NotificationsHelper: NotificationsHelpable {
     }
 
     public func registerCategories() {
-        let uploadCategory = UNNotificationCategory(identifier: CategoryIdentifier.upload, actions: [], intentIdentifiers: [], options: [])
-        let migrateCategory = UNNotificationCategory(identifier: CategoryIdentifier.general, actions: [], intentIdentifiers: [], options: [])
+        let uploadCategory = UNNotificationCategory(
+            identifier: CategoryIdentifier.upload,
+            actions: [],
+            intentIdentifiers: [],
+            options: []
+        )
+        let migrateCategory = UNNotificationCategory(
+            identifier: CategoryIdentifier.general,
+            actions: [],
+            intentIdentifiers: [],
+            options: []
+        )
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
@@ -111,7 +121,10 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
         content.title = KDriveResourcesStrings.Localizable.errorDeviceStorage
-        content.body = KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, KDriveResourcesStrings.Localizable.errorDeviceStorage)
+        content.body = KDriveResourcesStrings.Localizable.allUploadErrorDescription(
+            filename,
+            KDriveResourcesStrings.Localizable.errorDeviceStorage
+        )
 
         sendImmediately(notification: content, id: UUID().uuidString)
     }
@@ -210,7 +223,7 @@ public struct NotificationsHelper: NotificationsHelpable {
                 UNUserNotificationCenter.current().add(request)
             } else {
                 let snackbar = IKSnackBar.make(message: notification.body, duration: .lengthLong)
-                if let action = action {
+                if let action {
                     snackbar?.setAction(action).show()
                 } else {
                     snackbar?.show()

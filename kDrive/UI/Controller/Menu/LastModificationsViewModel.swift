@@ -29,8 +29,13 @@ class LastModificationsViewModel: FileListViewModel {
                                           emptyViewType: .noActivitiesSolo,
                                           sortingOptions: [],
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "LastModifications"])
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.lastModificationsRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "rawType != \"dir\"")))
+        super.init(
+            configuration: configuration,
+            driveFileManager: driveFileManager,
+            currentDirectory: DriveFileManager.lastModificationsRootFile
+        )
+        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
+            .filter(NSPredicate(format: "rawType != \"dir\"")))
     }
 
     override func startObservation() {

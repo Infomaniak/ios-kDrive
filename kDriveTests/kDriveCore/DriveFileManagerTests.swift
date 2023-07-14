@@ -20,11 +20,10 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+@testable import kDrive
 import kDriveCore
 import RealmSwift
 import XCTest
-
-@testable import kDrive
 
 final class DriveFileManagerTests: XCTestCase {
     static let defaultTimeout = 10.0
@@ -78,7 +77,11 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
-        try await DriveFileManagerTests.driveFileManager.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true).proxify()
+        try await DriveFileManagerTests.driveFileManager.createDirectory(
+            in: parentDirectory,
+            name: "\(name) - \(Date())",
+            onlyForMe: true
+        ).proxify()
     }
 
     func initOfficeFile(testName: String) async throws -> (ProxyFile, ProxyFile) {
@@ -88,7 +91,11 @@ final class DriveFileManagerTests: XCTestCase {
 
     func initOfficeFileCached(testName: String) async throws -> (ProxyFile, File) {
         let testDirectory = try await setUpTest(testName: testName)
-        let file = try await DriveFileManagerTests.driveFileManager.createFile(in: testDirectory, name: "officeFile-\(Date())", type: "docx")
+        let file = try await DriveFileManagerTests.driveFileManager.createFile(
+            in: testDirectory,
+            name: "officeFile-\(Date())",
+            type: "docx"
+        )
         return (testDirectory, file)
     }
 
@@ -146,7 +153,13 @@ final class DriveFileManagerTests: XCTestCase {
     func testSearchFile() async throws {
         let (testDirectory, file) = try await initOfficeFileCached(testName: "Search file")
         let fileProxy = file.proxify()
-        _ = try await DriveFileManagerTests.driveFileManager.searchFile(query: file.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ)
+        _ = try await DriveFileManagerTests.driveFileManager.searchFile(
+            query: file.name,
+            categories: [],
+            belongToAllCategories: true,
+            page: 1,
+            sortType: .nameAZ
+        )
         let children = DriveFileManagerTests.driveFileManager.getCachedFile(id: DriveFileManager.searchFilesRootFile.id)?.children
         let searchedFile = children?.contains { $0.id == fileProxy.id } ?? false
         XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
@@ -187,7 +200,11 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testUndoAction() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Undo action")
-        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "directory", onlyForMe: true).proxify()
+        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(
+            in: testDirectory,
+            name: "directory",
+            onlyForMe: true
+        ).proxify()
         let (moveResponse, _) = try await DriveFileManagerTests.driveFileManager.move(file: file, to: directory)
         try await DriveFileManagerTests.driveFileManager.undoAction(cancelId: moveResponse.id)
         checkIfFileIsInDestination(file: file, destination: testDirectory)
@@ -228,7 +245,10 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testDuplicateFile() async throws {
         let (testDirectory, officeFile) = try await initOfficeFile(testName: "Duplicate file")
-        let duplicateFile = try await DriveFileManagerTests.driveFileManager.duplicate(file: officeFile, duplicateName: "Duplicated file")
+        let duplicateFile = try await DriveFileManagerTests.driveFileManager.duplicate(
+            file: officeFile,
+            duplicateName: "Duplicated file"
+        )
 
         let cachedRoot = DriveFileManagerTests.driveFileManager.getCachedFile(id: testDirectory.id)
         XCTAssertEqual(cachedRoot!.children.count, 2, "Cached root should have 2 children")
@@ -240,16 +260,27 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testCreateDirectory() async throws {
         let testDirectory = try await setUpTest(testName: "Create directory")
-        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "Test directory", onlyForMe: true)
+        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(
+            in: testDirectory,
+            name: "Test directory",
+            onlyForMe: true
+        )
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
         tearDownTest(directory: testDirectory)
     }
 
     func testCategory() async throws {
-        let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227").freeze()
+        let category = try await DriveFileManagerTests.driveFileManager.createCategory(
+            name: "Category-\(Date())",
+            color: "#001227"
+        ).freeze()
         let categoryId = category.id
-        let editedCategory = try await DriveFileManagerTests.driveFileManager.edit(category: category, name: category.name, color: "#314159")
+        let editedCategory = try await DriveFileManagerTests.driveFileManager.edit(
+            category: category,
+            name: category.name,
+            color: "#314159"
+        )
         XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
@@ -257,7 +288,10 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testCategoriesAndFiles() async throws {
         let (testDirectory, officeFile) = try await initOfficeFile(testName: "Categories and files")
-        let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227").freeze()
+        let category = try await DriveFileManagerTests.driveFileManager.createCategory(
+            name: "testCategory-\(Date())",
+            color: "#001227"
+        ).freeze()
 
         // Single file
         try await DriveFileManagerTests.driveFileManager.add(category: category, to: officeFile)
@@ -277,7 +311,10 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func testCreateCommonDirectory() async throws {
-        let directory = try await DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "Create common directory - \(Date())", forAllUser: false).proxify()
+        let directory = try await DriveFileManagerTests.driveFileManager.createCommonDirectory(
+            name: "Create common directory - \(Date())",
+            forAllUser: false
+        ).proxify()
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
         tearDownTest(directory: directory)
@@ -285,7 +322,18 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testCreateDropBox() async throws {
         let testDirectory = try await setUpTest(testName: "Create dropbox")
-        let directory = try await DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: testDirectory, name: "Test dropbox", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil))
+        let directory = try await DriveFileManagerTests.driveFileManager.createDropBox(
+            parentDirectory: testDirectory,
+            name: "Test dropbox",
+            onlyForMe: true,
+            settings: DropBoxSettings(
+                alias: nil,
+                emailWhenFinished: true,
+                limitFileSize: nil,
+                password: "mot de passe",
+                validUntil: nil
+            )
+        )
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached dropbox"))
         XCTAssertNotNil(cached?.dropbox, "Cached dropbox link should be set")

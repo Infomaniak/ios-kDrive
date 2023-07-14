@@ -36,8 +36,14 @@ class AlertDocViewController: AlertFieldViewController {
         self.fileType = fileType
         self.directory = directory
         self.driveFileManager = driveFileManager
-        super.init(title: KDriveResourcesStrings.Localizable.modalCreateFileTitle, label: KDriveResourcesStrings.Localizable.hintInputFileName, placeholder: nil, action: KDriveResourcesStrings.Localizable.buttonCreate, handler: nil)
-        self.textFieldConfiguration = .fileNameConfiguration
+        super.init(
+            title: KDriveResourcesStrings.Localizable.modalCreateFileTitle,
+            label: KDriveResourcesStrings.Localizable.hintInputFileName,
+            placeholder: nil,
+            action: KDriveResourcesStrings.Localizable.buttonCreate,
+            handler: nil
+        )
+        textFieldConfiguration = .fileNameConfiguration
     }
 
     @available(*, unavailable)
@@ -95,7 +101,11 @@ class AlertDocViewController: AlertFieldViewController {
         Task { [proxyDirectory = directory.proxify()] in
             var file: File?
             do {
-                file = try await driveFileManager.createFile(in: proxyDirectory, name: name.addingExtension(fileType), type: fileType)
+                file = try await driveFileManager.createFile(
+                    in: proxyDirectory,
+                    name: name.addingExtension(fileType),
+                    type: fileType
+                )
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation)
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: error)
@@ -103,9 +113,13 @@ class AlertDocViewController: AlertFieldViewController {
             self.setLoading(false)
             let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
-                if let file = file,
+                if let file,
                    let mainTabViewController = currentRootViewController as? MainTabViewController {
-                    OnlyOfficeViewController.open(driveFileManager: self.driveFileManager, file: file, viewController: mainTabViewController)
+                    OnlyOfficeViewController.open(
+                        driveFileManager: self.driveFileManager,
+                        file: file,
+                        viewController: mainTabViewController
+                    )
                 }
             }
         }

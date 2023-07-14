@@ -28,8 +28,18 @@ public extension MaterialOutlinedTextField {
         let editingColor = KDriveResourcesAsset.infomaniakColor.color
         let disabledAlpha = 0.6
 
-        let normalColorModel = ColorModel(textColor: textColor, floatingLabelColor: normalLabelColor, normalLabelColor: normalLabelColor, outlineColor: normalBorderColor)
-        let editingColorModel = ColorModel(textColor: textColor, floatingLabelColor: editingColor, normalLabelColor: editingColor, outlineColor: editingColor)
+        let normalColorModel = ColorModel(
+            textColor: textColor,
+            floatingLabelColor: normalLabelColor,
+            normalLabelColor: normalLabelColor,
+            outlineColor: normalBorderColor
+        )
+        let editingColorModel = ColorModel(
+            textColor: textColor,
+            floatingLabelColor: editingColor,
+            normalLabelColor: editingColor,
+            outlineColor: editingColor
+        )
         let disabledColorModel = ColorModel(textColor: textColor.withAlphaComponent(disabledAlpha),
                                             floatingLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
                                             normalLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
@@ -57,7 +67,7 @@ public extension MaterialOutlinedTextField {
     }
 
     @objc private func didTouchClearButton() {
-        guard let text = text else { return }
+        guard let text else { return }
         let startIndex = text.lastIndex(of: ".") ?? text.endIndex
         self.text = String(text[startIndex...])
         becomeFirstResponder()

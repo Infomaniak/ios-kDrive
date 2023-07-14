@@ -75,11 +75,11 @@ enum FileWith: String, CaseIterable {
                                           .sortedName]
 }
 
-extension Array where Element == FileWith {
+extension [FileWith] {
     func toQueryItem() -> URLQueryItem {
         URLQueryItem(
             name: "with",
-            value: map { $0.rawValue }.joined(separator: ",")
+            value: map(\.rawValue).joined(separator: ",")
         )
     }
 }
