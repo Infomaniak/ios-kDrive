@@ -48,6 +48,7 @@ public final class DriveFileManager {
         public let importDirectoryURL: URL
         public let groupDirectoryURL: URL
         public var cacheDirectoryURL: URL
+        public var tmpDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
         public let currentUploadDbVersion: UInt64 = 14
@@ -131,6 +132,7 @@ public final class DriveFileManager {
             groupDirectoryURL = pathProvider.groupDirectoryURL
             rootDocumentsURL = pathProvider.realmRootURL
             importDirectoryURL = pathProvider.importDirectoryURL
+            tmpDirectoryURL = pathProvider.tmpDirectoryURL
             cacheDirectoryURL = pathProvider.cacheDirectoryURL
             openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
 
