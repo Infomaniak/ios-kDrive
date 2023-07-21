@@ -223,21 +223,12 @@ public final class ItemProviderFile2: NSObject, ProgressResultable {
 
         super.init()
 
-        // Check if requested an image conversion
-        let fileIdentifierToUse: String
-        if let preferredImageFileFormat = preferredImageFileFormat {
-            guard itemProvider.hasItemConformingToAnyOfTypeIdentifiers([UTI.heic.identifier, UTI.jpeg.identifier]),
-                  itemProvider.hasItemConformingToTypeIdentifier(preferredImageFileFormat.rawValue as String) else {
-                // No conversion if not possible
-                fileIdentifierToUse = typeIdentifier
-                return
-            }
-
-            fileIdentifierToUse = preferredImageFileFormat.rawValue as String
-        } else {
-            // No conversion
-            fileIdentifierToUse = typeIdentifier
-        }
+        // Check if requested an image conversion, and if conversion is available.
+        let fileIdentifierToUse = self.preferredImageFileFormat(
+            itemProvider: itemProvider,
+            typeIdentifier: typeIdentifier,
+            preferredImageFileFormat: preferredImageFileFormat
+        )
 
         // Set progress and hook completion closure to a combine pipe
         progress = itemProvider.loadFileRepresentation(forTypeIdentifier: fileIdentifierToUse) { [self] fileProviderURL, error in
@@ -273,6 +264,34 @@ public final class ItemProviderFile2: NSObject, ProgressResultable {
             await flowToAsync.result
         }
     }
+
+    // MARK: Private
+
+    /// Check if a File conversion is possible for the provided `itemProvider` and `typeIdentifier`,
+    /// returns `typeIdentifier` if no conversion is possible.
+    ///
+    /// - Parameters:
+    ///   - itemProvider: The ItemProvider we work with
+    ///   - typeIdentifier: top typeIdentifier for ItemProvider
+    ///   - preferredImageFileFormat: The image format the user is requesting
+    private func preferredImageFileFormat(itemProvider: NSItemProvider,
+                                          typeIdentifier: String,
+                                          preferredImageFileFormat: UTI?) -> String {
+        if let preferredImageFileFormat = preferredImageFileFormat {
+            // Check that itemProvider supports the image types we ask of it
+            if itemProvider.hasItemConformingToAnyOfTypeIdentifiers([UTI.heic.identifier, UTI.jpeg.identifier]),
+               itemProvider.hasItemConformingToTypeIdentifier(preferredImageFileFormat.rawValue as String) {
+                return preferredImageFileFormat.rawValue as String
+            }
+            // No conversion if not possible
+            else {
+                return typeIdentifier
+            }
+        } else {
+            // No conversion
+            return typeIdentifier
+        }
+    }
 }
 
 // TODO: Move to core
@@ -299,7 +318,7 @@ extension URL {
             return self
         }
 
-        return appendingPathExtension(newExtension)
+        return deletingPathExtension().appendingPathExtension(newExtension)
     }
 }
 
