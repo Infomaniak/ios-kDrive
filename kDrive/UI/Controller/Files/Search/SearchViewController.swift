@@ -353,9 +353,9 @@ class SearchViewController: FileListViewController {
             collectionView.performBatchUpdates(nil)
         }
 
-        searchViewModel.onSearchCompleted = { [unowned self] searchTerm in
+        searchViewModel.onSearchCompleted = { [weak self] searchTerm in
             guard let searchTerm else { return }
-            recentSearchesViewModel.add(searchTerm: searchTerm)
+            self?.recentSearchesViewModel.add(searchTerm: searchTerm)
         }
     }
 
