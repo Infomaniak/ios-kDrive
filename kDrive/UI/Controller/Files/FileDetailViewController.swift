@@ -165,6 +165,12 @@ class FileDetailViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard let file else {
+            DispatchQueue.main.async { [weak self] in
+                self?.navigationController?.popViewController(animated: true)
+            }
+            return
+        }
 
         commentButton.isHidden = currentTab != .comments
         tableView.contentInset.bottom = currentTab == .comments ? 120 : 0
@@ -198,8 +204,6 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
-
-        guard file != nil else { return }
 
         // Set initial rows
         fileInformationRows = FileInformationRow.getRows(for: file,
