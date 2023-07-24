@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build and Test project
-    runs-on: self-hosted
+    runs-on: [ self-hosted, iOS ]
 
     steps:
       - name: Cancel Previous Runs
