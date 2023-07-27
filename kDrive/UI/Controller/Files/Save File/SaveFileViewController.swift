@@ -484,16 +484,14 @@ extension SaveFileViewController: FooterButtonDelegate {
         }
 
         let items = items
+        guard !items.isEmpty else {
+            navigationController?.dismiss(animated: true)
+            return
+        }
+
         Task {
             let message: String
             do {
-                guard !items.isEmpty else {
-                    Task { @MainActor in
-                        self.navigationController?.dismiss(animated: true)
-                    }
-                    return
-                }
-
                 try await fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
 
                 message = items.count > 1 ? KDriveResourcesStrings.Localizable

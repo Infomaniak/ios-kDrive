@@ -46,11 +46,14 @@ public final class FileImportHelper {
     internal let imageCompression = 0.8
 
     let parallelTaskMapper = ParallelTaskMapper()
-    
+
     /// Domain specific errors
     public enum ErrorDomain: Error {
         /// Not able to find the UTI of a file
         case UTINotFound
+
+        /// Not able to get an URL for a resource
+        case URLNotFound
 
         /// Not able to find an itemProvider to process
         case itemProviderNotFound
@@ -65,41 +68,62 @@ public final class FileImportHelper {
         /// Public Service initializer
     }
 
-    @MainActor
     public func importAssets(
         _ assetIdentifiers: [String],
         userPreferredPhotoFormat: PhotoFileFormat? = nil,
         completion: @escaping ([ImportedFile], Int) -> Void
     ) -> Progress {
-        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
-        let progress = Progress(totalUnitCount: Int64(assets.count))
+        let progress = Progress(totalUnitCount: Int64(assetIdentifiers.count))
 
-        let dispatchGroup = DispatchGroup()
-        var items = [ImportedFile]()
-        var errorCount = 0
+        Task {
+            do {
+                let results: [Result<ImportedFile, Error>?] = try await self.parallelTaskMapper
+                    .map(collection: assetIdentifiers) { assetIdentifier in
+                        defer {
+                            progress.completedUnitCount += 1
+                        }
 
-        assets.enumerateObjects { asset, _, _ in
-            dispatchGroup.enter()
-            Task {
-                if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) {
-                    let uti = UTI(filenameExtension: url.pathExtension)
-                    var name = url.lastPathComponent
-                    if let uti, let originalName = asset.getFilename(uti: uti) {
-                        name = originalName
+                        guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil).firstObject
+                        else {
+                            return .failure(ErrorDomain.itemProviderNotFound)
+                        }
+
+                        guard let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) else {
+                            return .failure(ErrorDomain.URLNotFound)
+                        }
+                        
+                        let uti = UTI(filenameExtension: url.pathExtension)
+                        var name = url.lastPathComponent
+                        if let uti, let originalName = asset.getFilename(uti: uti) {
+                            name = originalName
+                        }
+
+                        let importedFile = ImportedFile(name: name, path: url, uti: uti ?? .data)
+                        return .success(importedFile)
                     }
 
-                    items.append(ImportedFile(name: name, path: url, uti: uti ?? .data))
-                } else {
-                    errorCount += 1
+                // Count errors
+                let errorCount = results.reduce(0) { partialResult, taskResult in
+                    guard case .failure = taskResult else {
+                        return partialResult
+                    }
+                    return partialResult + 1
                 }
 
-                progress.completedUnitCount += 1
-                dispatchGroup.leave()
-            }
-        }
+                // Build a collection of `ImportedFile`
+                let processedFiles: [ImportedFile] = results.compactMap { taskResult in
+                    guard case .success(let file) = taskResult else {
+                        return nil
+                    }
 
-        dispatchGroup.notify(queue: .main) {
-            completion(items, errorCount)
+                    return file
+                }
+
+                // Dispatch results
+                Task { @MainActor in
+                    completion(processedFiles, errorCount)
+                }
+            }
         }
 
         return progress
