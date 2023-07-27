@@ -56,7 +56,7 @@ class DraggableFileListViewModel {
 }
 
 @MainActor
-class DroppableFileListViewModel {
+final class DroppableFileListViewModel {
     @LazyInjectService var fileImportHelper: FileImportHelper
 
     var driveFileManager: DriveFileManager
@@ -135,10 +135,16 @@ class DroppableFileListViewModel {
                 guard !importedFiles.isEmpty else {
                     return
                 }
-                do {
-                    try fileImportHelper.upload(files: importedFiles, in: frozenDestination, drive: driveFileManager.drive)
-                } catch {
-                    Task {
+
+                let drive = driveFileManager.drive
+                Task {
+                    do {
+                        try await self.fileImportHelper.upload(
+                            files: importedFiles,
+                            in: frozenDestination,
+                            drive: drive
+                        )
+                    } catch {
                         UIConstants.showSnackBarIfNeeded(error: error)
                     }
                 }

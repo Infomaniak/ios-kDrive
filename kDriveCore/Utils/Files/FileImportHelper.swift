@@ -40,13 +40,13 @@ public enum ImportError: LocalizedError {
 }
 
 public final class FileImportHelper {
-    private let parallelTaskMapper = ParallelTaskMapper()
-
     @LazyInjectService internal var pathProvider: AppGroupPathProvidable
     @LazyInjectService internal var uploadQueue: UploadQueue
 
     internal let imageCompression = 0.8
 
+    let parallelTaskMapper = ParallelTaskMapper()
+    
     /// Domain specific errors
     public enum ErrorDomain: Error {
         /// Not able to find the UTI of a file

@@ -25,20 +25,24 @@ import RealmSwift
 import VisionKit
 
 public extension FileImportHelper {
-    func upload(files: [ImportedFile], in directory: File, drive: Drive) throws {
+    func upload(files: [ImportedFile], in directory: File, drive: Drive) async throws {
         guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
 
-        for file in files {
+        let parentDirectoryId = directory.id
+        let userId = drive.userId
+        let driveId = drive.id
+
+        _ = try await parallelTaskMapper.map(collection: files) { file in
             let uploadFile = UploadFile(
-                parentDirectoryId: directory.id,
-                userId: drive.userId,
-                driveId: drive.id,
+                parentDirectoryId: parentDirectoryId,
+                userId: userId,
+                driveId: driveId,
                 url: file.path,
                 name: file.name
             )
-            uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile)
+            self.uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile)
         }
     }
 
