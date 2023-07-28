@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -26,12 +28,20 @@ class SecurityTableViewController: UITableViewController {
         case fileProviderExtension
     }
 
-    private let tableContent = SecurityOption.allCases
+    @LazyInjectService private var lockHelper: AppLockHelper
+
+    private var tableContent = [SecurityOption]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
+
+        if lockHelper.isAvailable {
+            tableContent = SecurityOption.allCases
+        } else {
+            tableContent = [.fileProviderExtension]
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -57,7 +67,7 @@ class SecurityTableViewController: UITableViewController {
             return cell
         case .fileProviderExtension:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isLast: true)
+            cell.initWithPositionAndShadow(isFirst: tableContent.count == 1, isLast: true)
             cell.valueSwitch.isOn = UserDefaults.shared.isFileProviderExtensionEnabled
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionTitle
             cell.detailsLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionDescription
