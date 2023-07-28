@@ -146,7 +146,7 @@ public final class FileImportHelper {
                         let underlyingType = itemProvider.underlyingType
                         switch underlyingType {
                         case .isURL:
-                            let getPlist = try ItemProviderWeblocRepresentation(from: itemProvider)
+                            let getPlist = try ItemProviderURLRepresentation(from: itemProvider)
                             progress.addChild(getPlist.progress, withPendingUnitCount: perItemUnitCount)
                             return await getPlist.result
 

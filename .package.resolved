@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SCENEE/FloatingPanel",
       "state" : {
-        "revision" : "0cb5307a6134a381e948d05fe0eaf4dacb349f1f",
-        "version" : "2.6.4"
+        "revision" : "b34f1093defc43027a99834c2135a4381f5c7592",
+        "version" : "2.6.5"
       }
     },
     {
@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "6a6650c135da6d2d911df88008702e34ca8c2669",
-        "version" : "4.1.10"
+        "revision" : "f0442baed7595fbd59119e5ae2ddcd82fee3832b",
+        "version" : "4.1.11"
       }
     },
     {
