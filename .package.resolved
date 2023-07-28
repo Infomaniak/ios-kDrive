@@ -21,7 +21,7 @@
     {
       "identity" : "cocoalumberjack",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+      "location" : "https://github.com/CocoaLumberjack/CocoaLumberjack",
       "state" : {
         "revision" : "0188d31089b5881a269e01777be74c7316924346",
         "version" : "3.8.0"
@@ -84,7 +84,7 @@
     {
       "identity" : "ios-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/ios-core.git",
+      "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
         "revision" : "f0442baed7595fbd59119e5ae2ddcd82fee3832b",
         "version" : "4.1.11"
@@ -93,7 +93,7 @@
     {
       "identity" : "ios-core-ui",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/ios-core-ui.git",
+      "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
         "revision" : "e9a466563a94d92cde8e8c3e48cf94879212de63",
         "version" : "2.5.2"
@@ -111,7 +111,7 @@
     {
       "identity" : "ios-login",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/ios-login.git",
+      "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
         "revision" : "35190f66b67eb8a79cbacdbf54ee9a03ab61d7f7",
         "version" : "4.0.0"
@@ -147,7 +147,7 @@
     {
       "identity" : "lottie-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-ios.git",
+      "location" : "https://github.com/airbnb/lottie-ios",
       "state" : {
         "revision" : "54aa8747da6998a94c1e901dd70013b70e804333",
         "version" : "3.4.4"
@@ -156,7 +156,7 @@
     {
       "identity" : "markdownkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/bmoliveira/MarkdownKit.git",
+      "location" : "https://github.com/bmoliveira/MarkdownKit",
       "state" : {
         "revision" : "5056f3305d3499f44d8815530d560b87082e0cf5",
         "version" : "1.7.1"
@@ -174,7 +174,7 @@
     {
       "identity" : "matomo-sdk-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/matomo-org/matomo-sdk-ios.git",
+      "location" : "https://github.com/matomo-org/matomo-sdk-ios",
       "state" : {
         "revision" : "15a645e11eaa8053f93749d73ced03da1e56fd01",
         "version" : "7.5.2"
@@ -291,7 +291,7 @@
     {
       "identity" : "swiftregex",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/flowbe/SwiftRegex.git",
+      "location" : "https://github.com/flowbe/SwiftRegex",
       "state" : {
         "revision" : "d8c4846dfbbe04aa8196ae5a5a3cdc6cd7f9f6bc",
         "version" : "1.0.0"
