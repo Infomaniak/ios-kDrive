@@ -91,7 +91,7 @@ public final class FileImportHelper {
                         guard let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) else {
                             return .failure(ErrorDomain.URLNotFound)
                         }
-                        
+
                         let uti = UTI(filenameExtension: url.pathExtension)
                         var name = url.lastPathComponent
                         if let uti, let originalName = asset.getFilename(uti: uti) {

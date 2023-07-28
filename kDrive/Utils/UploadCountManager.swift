@@ -46,6 +46,13 @@ final class UploadCountManager {
     init(driveFileManager: DriveFileManager, didUploadCountChange: @escaping () -> Void) {
         self.driveFileManager = driveFileManager
         self.didUploadCountChange = didUploadCountChange
+        uploadCountObserver = uploadCountSubject
+            .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
+            .sink { newUploadCount in
+                self.uploadCount = newUploadCount
+                self.didUploadCountChange()
+            }
+
         updateUploadCount()
         observeUploads()
     }
@@ -63,13 +70,6 @@ final class UploadCountManager {
 
     private func observeUploads() {
         guard uploadsObserver == nil else { return }
-
-        uploadCountObserver = uploadCountSubject
-            .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
-            .sink { newUploadCount in
-                self.uploadCount = newUploadCount
-                self.didUploadCountChange()
-            }
 
         uploadsObserver = uploadQueue
             .getUploadingFiles(userId: userId, driveIds: driveIds)
