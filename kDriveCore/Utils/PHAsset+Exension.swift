@@ -35,45 +35,81 @@ public extension PHAsset {
         return containsHEICPhotos
     }
 
+    // MARK: - Filename
+
+    /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
     func getFilename(uti: UTI) -> String? {
         guard let resource = bestResource() else { return nil }
 
-        let lastPathComponent = resource.originalFilename.split(separator: ".")
+        let originalFilename = resource.originalFilename
+        let lastPathComponent = originalFilename.split(separator: ".")
         let filename = lastPathComponent[0]
         let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
 
-        // Edited pictures on Photo.app have the same name, using modification date instead
+        // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.
         guard filename != "FullSizeRender" else {
+            // Differentiate the file with edit date
             let editDate = modificationDate ?? Date()
-            return "\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
+            guard let originalFileName = originalResourceName()?.split(separator: ".").first else {
+                return "\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
+            }
+            return "\(originalFileName)-\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
         }
-
         return "\(filename).\(preferredFilenameExtension)"
     }
 
-    func bestResource() -> PHAssetResource? {
+    /// Returns the first Resource matching a list of types.
+    /// - Parameter types: The list of types we want to look for
+    /// - Returns: The first match if any.
+    private func firstResourceMatchingAnyType(of types: [PHAssetResourceType]) -> PHAssetResource? {
         let resources = PHAssetResource.assetResources(for: self)
 
-        if mediaType == .video {
-            if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizeVideo }) {
-                return modifiedVideoResource
+        for type in types {
+            guard let resource = resources.first(where: { $0.type == type }) else {
+                continue
             }
-            if let originalVideoResource = resources.first(where: { $0.type == .video }) {
-                return originalVideoResource
-            }
-            return resources.first
-        }
-        if mediaType == .image {
-            if let modifiedImageResource = resources.first(where: { $0.type == .fullSizePhoto }) {
-                return modifiedImageResource
-            }
-            if let originalImageResource = resources.first(where: { $0.type == .photo }) {
-                return originalImageResource
-            }
-            return resources.first
+            return resource
         }
         return nil
     }
+
+    /// Fetches the original name of an Asset, before edition
+    /// - Returns: The original name if any
+    private func originalResourceName() -> String? {
+        switch mediaType {
+        case .video:
+            return firstResourceMatchingAnyType(of: [.video])?.originalFilename
+        case .image:
+            return firstResourceMatchingAnyType(of: [.photo])?.originalFilename
+        default:
+            return nil
+        }
+    }
+
+    // MARK: - Resource
+
+    func bestResource() -> PHAssetResource? {
+        let typesToFetch: [PHAssetResourceType]
+
+        switch mediaType {
+        case .video:
+            typesToFetch = [.fullSizeVideo, .video]
+        case .image:
+            typesToFetch = [.fullSizePhoto, .photo]
+        default:
+            // Not supported by kDrive
+            return nil
+        }
+
+        // fetch the first matching type
+        guard let firstMatchingResource = firstResourceMatchingAnyType(of: typesToFetch) else {
+            let resources = PHAssetResource.assetResources(for: self)
+            return resources.first
+        }
+        return firstMatchingResource
+    }
+
+    // MARK: - Url
 
     func getUrl(preferJPEGFormat: Bool) async -> URL? {
         guard let resource = bestResource() else { return nil }
@@ -109,6 +145,8 @@ public extension PHAsset {
         }
         return nil
     }
+
+    // MARK: - Data
 
     private func writeJpegData(to url: URL, resource: PHAssetResource,
                                options: PHAssetResourceRequestOptions) async throws -> Bool {
