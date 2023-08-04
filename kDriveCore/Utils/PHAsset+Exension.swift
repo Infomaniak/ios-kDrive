@@ -39,7 +39,16 @@ public extension PHAsset {
         guard let resource = bestResource() else { return nil }
 
         let lastPathComponent = resource.originalFilename.split(separator: ".")
-        return "\(lastPathComponent[0]).\(uti.preferredFilenameExtension ?? "")"
+        let filename = lastPathComponent[0]
+        let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
+
+        // Edited pictures on Photo.app have the same name, using modification date instead
+        guard filename != "FullSizeRender" else {
+            let editDate = modificationDate ?? Date()
+            return "\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
+        }
+
+        return "\(filename).\(preferredFilenameExtension)"
     }
 
     func bestResource() -> PHAssetResource? {
