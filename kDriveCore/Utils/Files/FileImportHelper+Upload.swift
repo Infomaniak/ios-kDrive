@@ -145,13 +145,7 @@ public extension FileImportHelper {
         return url
     }
 
-    private static let fileNameDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmssSS"
-        return formatter
-    }()
-
-    static func getDefaultFileName() -> String {
-        return Self.fileNameDateFormatter.string(from: Date())
+    static func getDefaultFileName(date: Date = Date()) -> String {
+        return URL.defaultFileName(date: date)
     }
 }

@@ -38,24 +38,36 @@ public extension PHAsset {
     // MARK: - Filename
 
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
-    func getFilename(uti: UTI) -> String? {
+    func getFilename(fileExtension: String, burstCount: Int? = nil) -> String? {
         guard let resource = bestResource() else { return nil }
+
+        let burstString: String
+        if let burstCount, burstCount > 0 {
+            burstString = "_\(burstCount)"
+        } else {
+            burstString = ""
+        }
 
         let originalFilename = resource.originalFilename
         let lastPathComponent = originalFilename.split(separator: ".")
         let filename = lastPathComponent[0]
-        let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
 
         // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.
         guard filename != "FullSizeRender" else {
             // Differentiate the file with edit date
             let editDate = modificationDate ?? Date()
             guard let originalFileName = originalResourceName()?.split(separator: ".").first else {
-                return "\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
+                return "\(URL.defaultFileName(date: editDate))\(burstString).\(fileExtension)"
             }
-            return "\(originalFileName)-\(URL.defaultFileName(date: editDate)).\(preferredFilenameExtension)"
+            return "\(originalFileName)-\(URL.defaultFileName(date: editDate))\(burstString).\(fileExtension)"
         }
-        return "\(filename).\(preferredFilenameExtension)"
+        return "\(filename)\(burstString).\(fileExtension)"
+    }
+
+    /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
+    func getFilename(uti: UTI) -> String? {
+        let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
+        return getFilename(fileExtension: preferredFilenameExtension)
     }
 
     /// Returns the first Resource matching a list of types.

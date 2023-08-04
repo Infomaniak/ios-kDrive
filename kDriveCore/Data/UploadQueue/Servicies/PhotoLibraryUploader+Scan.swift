@@ -195,22 +195,20 @@ public extension PhotoLibraryUploader {
             fileExtension = ""
         }
 
-        // build correctName
-        if let creationDate = asset.creationDate {
-            // Add a number to differentiate burst photos
-            if burstIdentifier != nil && burstIdentifier == asset.burstIdentifier {
-                burstCount += 1
-                correctName = dateFormatter.string(from: creationDate) + "_\(burstCount)"
-            } else {
-                burstCount = 0
-                correctName = dateFormatter.string(from: creationDate)
-            }
-            burstIdentifier = asset.burstIdentifier
+        // Compute index of burst photos
+        if burstIdentifier != nil && burstIdentifier == asset.burstIdentifier {
+            burstCount += 1
         } else {
-            correctName = "No-name-\(Date().timeIntervalSince1970)"
+            burstCount = 0
         }
+        burstIdentifier = asset.burstIdentifier
 
-        return correctName + "." + fileExtension.lowercased()
+        // Build the same name as importing manually a file
+        correctName = asset
+            .getFilename(fileExtension: fileExtension.lowercased(), burstCount: burstCount)
+            ?? "No-name-\(URL.defaultFileName())"
+
+        return correctName
     }
 
     private func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
