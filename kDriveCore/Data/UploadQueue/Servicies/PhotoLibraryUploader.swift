@@ -33,12 +33,6 @@ public final class PhotoLibraryUploader {
     /// Predicate to quickly narrow down on uploaded assets
     static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
 
-    lazy var dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
-        return dateFormatter
-    }()
-
     var _settings: PhotoSyncSettings?
     public var settings: PhotoSyncSettings? {
         _settings
