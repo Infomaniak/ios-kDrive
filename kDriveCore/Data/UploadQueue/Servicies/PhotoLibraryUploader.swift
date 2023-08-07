@@ -24,7 +24,7 @@ import Photos
 import RealmSwift
 import Sentry
 
-public class PhotoLibraryUploader {
+public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
 
     /// Threshold value to trigger cleaning of photo roll if enabled
@@ -148,7 +148,9 @@ public class PhotoLibraryUploader {
                     stop.pointee = true
                     return
                 }
-                if let assetCollectionIdentifier = PhotoLibrarySaver.instance.assetCollection?.localIdentifier {
+
+                @InjectService var photoLibrarySaver: PhotoLibrarySavable
+                if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
                     let options = PHFetchOptions()
                     options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
                     let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(
