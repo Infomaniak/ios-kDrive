@@ -37,7 +37,8 @@ public extension PhotoLibraryUploader {
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
             let typesPredicates = getAssetPredicates(forSettings: settings)
-            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+            let lastSyncDate = settings.lastSync as NSDate
+            let datePredicate = NSPredicate(format: "creationDate > %@ OR modificationDate > %@", lastSyncDate, lastSyncDate)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
