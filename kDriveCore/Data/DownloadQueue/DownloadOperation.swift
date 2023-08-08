@@ -37,6 +37,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
 
+    private let fileManager = FileManager.default
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
@@ -251,17 +252,19 @@ public class DownloadOperation: Operation, DownloadOperationable {
     }
 
     private func moveFileToCache(downloadPath: URL) throws {
-        try FileManager.default.removeItemIfExists(at: file.localContainerUrl)
-        try FileManager.default.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-        try FileManager.default.moveItem(at: downloadPath, to: file.localUrl)
+        DDLogInfo("[DownloadOperation] moveFileToCache")
+        try fileManager.removeItemIfExists(at: file.localContainerUrl)
+        try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+        try fileManager.moveItem(at: downloadPath, to: file.localUrl)
         file.applyLastModifiedDateToLocalFile()
         file.excludeFileFromSystemBackup()
     }
 
     private func moveFileToTemporaryDirectory(downloadPath: URL) throws {
-        try FileManager.default.removeItemIfExists(at: file.temporaryContainerUrl)
-        try FileManager.default.createDirectory(at: file.temporaryContainerUrl, withIntermediateDirectories: true)
-        try FileManager.default.moveItem(at: downloadPath, to: file.temporaryUrl)
+        DDLogInfo("[DownloadOperation] moveFileToTemporaryDirectory")
+        try fileManager.removeItemIfExists(at: file.temporaryContainerUrl)
+        try fileManager.createDirectory(at: file.temporaryContainerUrl, withIntermediateDirectories: true)
+        try fileManager.moveItem(at: downloadPath, to: file.temporaryUrl)
     }
 
     private func end(sessionUrl: URL?) {

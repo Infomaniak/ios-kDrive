@@ -19,14 +19,20 @@
 import Photos
 import UIKit
 
-public class PhotoLibrarySaver: NSObject {
+/// Something that can save a PHAsset
+public protocol PhotoLibrarySavable {
+    var assetCollection: PHAssetCollection? { get }
+
+    func save(url: URL, type: PHAssetMediaType) async throws
+}
+
+public final class PhotoLibrarySaver: PhotoLibrarySavable {
     private let albumName = "kDrive"
-    public static let instance = PhotoLibrarySaver()
 
     public private(set) var assetCollection: PHAssetCollection?
 
-    override private init() {
-        super.init()
+    init() {
+        // META: keep SonarCloud happy
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {

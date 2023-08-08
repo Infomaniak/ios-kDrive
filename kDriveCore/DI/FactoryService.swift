@@ -130,6 +130,9 @@ enum FactoryService {
                     fatalError("unable to initialise AppGroupPathProvider securely")
                 }
                 return provider
+            },
+            Factory(type: PhotoLibrarySavable.self) { _, _ in
+                PhotoLibrarySaver()
             }
         ]
         return services
