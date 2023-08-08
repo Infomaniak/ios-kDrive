@@ -47,7 +47,7 @@ final class UploadCountManager {
         self.driveFileManager = driveFileManager
         self.didUploadCountChange = didUploadCountChange
         uploadCountObserver = uploadCountSubject
-            .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
+           .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
             .sink { newUploadCount in
                 self.uploadCount = newUploadCount
                 self.didUploadCountChange()
