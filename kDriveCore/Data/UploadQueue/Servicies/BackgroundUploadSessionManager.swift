@@ -118,7 +118,8 @@ public final class BackgroundUploadSessionManager: NSObject,
             .timeoutIntervalForResource = 60 * 60 * 11 // 11h before giving up (chunk upload session not valid after)
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
-        syncQueue.async(flags: .barrier) { [unowned self] in
+        syncQueue.async(flags: .barrier) { [weak self] in
+            guard let self else { return }
             Log.bgSessionManager("store session:\(session) from identifier:\(identifier)")
             managedSessions[identifier] = session
         }
@@ -152,7 +153,8 @@ public final class BackgroundUploadSessionManager: NSObject,
                            dataTask: URLSessionDataTask,
                            didReceive data: Data) {
         let taskIdentifier = session.identifier(for: dataTask)
-        syncQueue.async(flags: .barrier) { [unowned self] in
+        syncQueue.async(flags: .barrier) { [weak self] in
+            guard let self else { return }
             if var taskData = tasksData[taskIdentifier] {
                 taskData.append(data)
                 tasksData[taskIdentifier] = taskData

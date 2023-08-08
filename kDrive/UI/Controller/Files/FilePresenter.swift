@@ -108,7 +108,8 @@ class FilePresenter {
                     let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = accessFileDriveFloatingPanelController
                         .contentViewController as? AccessFileFloatingPanelViewController
-                    floatingPanelViewController?.actionHandler = { [unowned self] _ in
+                    floatingPanelViewController?.actionHandler = { [weak self] _ in
+                        guard let self else { return }
                         floatingPanelViewController?.rightButton.setLoading(true)
                         Task { [proxyFile = file.proxify()] in
                             do {

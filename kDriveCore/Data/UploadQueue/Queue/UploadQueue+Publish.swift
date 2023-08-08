@@ -44,7 +44,8 @@ extension UploadQueue: UploadPublishable {
                             userId: Int,
                             driveId: Int) {
         Log.uploadQueue("publishUploadCount")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
             publishUploadCountInDrive(userId: userId, driveId: driveId)
         }
@@ -54,7 +55,8 @@ extension UploadQueue: UploadPublishable {
                                     userId: Int,
                                     driveId: Int) {
         Log.uploadQueue("publishUploadCountInParent")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             try? transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                     .count
@@ -70,7 +72,8 @@ extension UploadQueue: UploadPublishable {
     func publishUploadCountInDrive(userId: Int,
                                    driveId: Int) {
         Log.uploadQueue("publishUploadCountInDrive")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             try? transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
                 self.observations.didChangeUploadCountInDrive.values.forEach { closure in
@@ -85,7 +88,8 @@ extension UploadQueue: UploadPublishable {
     func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
         sendFileUploadedNotificationIfNeeded(with: result)
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             observations.didUploadFile.values.forEach { closure in
                 guard let uploadFile = result.uploadFile, !uploadFile.isInvalidated else {
                     return

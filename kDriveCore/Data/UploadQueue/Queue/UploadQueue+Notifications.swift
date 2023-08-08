@@ -34,14 +34,16 @@ public protocol UploadNotifiable {
 extension UploadQueue: UploadNotifiable {
     public func sendNotEnoughSpaceForUpload(filename: String) {
         Log.uploadQueue("sendNotEnoughSpaceForUpload")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             notificationHelper.sendNotEnoughSpaceForUpload(filename: filename)
         }
     }
 
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             if !pausedNotificationSent {
                 notificationHelper.sendPausedUploadQueueNotification()
                 pausedNotificationSent = true
@@ -51,7 +53,8 @@ extension UploadQueue: UploadNotifiable {
 
     public func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
         Log.uploadQueue("sendFileUploadedNotificationIfNeeded")
-        serialQueue.async { [unowned self] in
+        serialQueue.async { [weak self] in
+            guard let self else { return }
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
                   uploadFile.error != .taskCancelled,

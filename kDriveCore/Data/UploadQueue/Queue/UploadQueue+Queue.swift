@@ -448,7 +448,8 @@ extension UploadQueue: UploadQueueable {
 
         let operation = UploadOperation(uploadFileId: uploadFileId, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = priority
-        operation.completionBlock = { [unowned self] in
+        operation.completionBlock = { [weak self] in
+            guard let self else { return }
             Log.uploadQueue("operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
             keyedUploadOperations.removeObject(forKey: uploadFileId)
             if let error = operation.result.uploadFile?.error,

@@ -251,7 +251,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     func observeFileUpdated() {
         guard driveFileManager != nil else { return }
         filesObserver?.cancel()
-        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [weak self] file in
+            guard let self else { return }
             currentRecentFilesController?.refreshIfNeeded(with: file)
         }
     }

@@ -130,7 +130,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         collectionView.reloadItems(at: [indexPath])
                         group.enter()
                         DownloadQueue.instance
-                            .observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
+                            .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
+                                guard let self else { return }
                                 if error == nil {
                                     DispatchQueue.main.async {
                                         FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
