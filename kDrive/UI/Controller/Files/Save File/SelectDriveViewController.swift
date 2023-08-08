@@ -92,12 +92,14 @@ class SelectDriveViewController: UIViewController {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { [unowned self] (index: Index, _: String, cell: DropDownCell) in
+        dropDown.customCellConfiguration = { [weak self] (index: Index, _: String, cell: DropDownCell) in
+            guard let self else { return }
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             let account = accounts[index]
             cell.configureWith(account: account)
         }
-        dropDown.selectionAction = { [unowned self] (index: Int, _: String) in
+        dropDown.selectionAction = { [weak self] (index: Int, _: String) in
+            guard let self else { return }
             let account = accounts[index]
             initForCurrentAccount(account)
             tableView.reloadSections([0, 1], with: .fade)

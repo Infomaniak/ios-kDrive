@@ -314,7 +314,8 @@ extension SaveFileViewController: UITableViewDataSource {
             } else {
                 let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
                 cell.textField.text = item.name
-                cell.textDidChange = { [unowned self] text in
+                cell.textDidChange = { [weak self] text in
+                    guard let self else { return }
                     item.name = text ?? KDriveResourcesStrings.Localizable.allUntitledFileName
                     if let text, !text.isEmpty {
                         updateButton()

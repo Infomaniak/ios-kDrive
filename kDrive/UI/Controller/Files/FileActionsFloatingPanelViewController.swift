@@ -601,7 +601,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 startDirectory: file.parent?.freeze(),
                 fileToMove: file.id,
                 disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]
-            ) { [unowned self] selectedFolder in
+            ) { [weak self] selectedFolder in
+                guard let self else { return }
                 FileActionsHelper.instance.move(file: file, to: selectedFolder, driveFileManager: driveFileManager) { success in
                     // Close preview
                     if success,

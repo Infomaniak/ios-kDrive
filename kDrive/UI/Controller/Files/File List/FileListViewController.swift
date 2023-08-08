@@ -541,7 +541,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let indexPath = collectionView.indexPathForItem(at: pos) {
             multipleSelectionViewModel.isMultipleSelectionEnabled = true
             // Necessary for events to trigger in the right order
-            DispatchQueue.main.async { [unowned self] in
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
                 if let file = viewModel.getFile(at: indexPath) {
                     multipleSelectionViewModel.didSelectFile(file, at: indexPath)
                 }

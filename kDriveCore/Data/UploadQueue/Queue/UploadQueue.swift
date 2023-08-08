@@ -105,7 +105,8 @@ public final class UploadQueue {
         }
 
         // Observe network state change
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            guard let self else { return }
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
             operationQueue.isSuspended = isSuspended

@@ -506,18 +506,16 @@ class FileDetailViewController: UIViewController {
             async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
             async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
-            self.fileInformationRows = try await FileInformationRow.getRows(for: self.file,
+            fileInformationRows = try await FileInformationRow.getRows(for: file,
                                                                             fileAccess: currentFileAccess,
                                                                             contentCount: folderContentCount,
-                                                                            categoryRights: self.driveFileManager.drive
+                                                                            categoryRights: driveFileManager.drive
                                                                                 .categoryRights)
-            self.fileAccess = try await currentFileAccess
-            self.contentCount = try await folderContentCount
+            fileAccess = try await currentFileAccess
+            contentCount = try await folderContentCount
 
-            if self.currentTab == .informations {
-                DispatchQueue.main.async {
-                    self.reloadTableView()
-                }
+            if tableView.window != nil && currentTab == .informations {
+                reloadTableView()
             }
         }
     }
