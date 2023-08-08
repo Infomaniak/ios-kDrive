@@ -74,7 +74,8 @@ class InviteUserTableViewCell: InsetTableViewCell {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { [unowned self] index, _, cell in
+        dropDown.customCellConfiguration = { [weak self] index, _, cell in
+            guard let self else { return }
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             if let email {
                 if index == 0 {
@@ -86,7 +87,8 @@ class InviteUserTableViewCell: InsetTableViewCell {
                 cell.configure(with: results[index], drive: drive)
             }
         }
-        dropDown.selectionAction = { [unowned self] index, _ in
+        dropDown.selectionAction = { [weak self] index, _ in
+            guard let self else { return }
             selectItem(at: index)
         }
 

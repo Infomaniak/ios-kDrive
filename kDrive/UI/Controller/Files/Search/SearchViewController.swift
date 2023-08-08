@@ -322,7 +322,8 @@ class SearchViewController: FileListViewController {
     // MARK: - Private methods
 
     private func bindSearchViewModel() {
-        recentSearchesViewModel.onReloadWithChangeset = { [unowned self] stagedChangeset, setData in
+        recentSearchesViewModel.onReloadWithChangeset = { [weak self] stagedChangeset, setData in
+            guard let self else { return }
             if searchViewModel.isDisplayingSearchResults {
                 // We don't reload the collection view but we still need to set the data
                 if let data = stagedChangeset.last?.data {
@@ -337,11 +338,13 @@ class SearchViewController: FileListViewController {
         }
 
         // Clear collection view on content type changed without animation
-        searchViewModel.onContentTypeChanged = { [unowned self] in
+        searchViewModel.onContentTypeChanged = { [weak self] in
+            guard let self else { return }
             collectionView.reloadData()
         }
 
-        searchViewModel.onFiltersChanged = { [unowned self] in
+        searchViewModel.onFiltersChanged = { [weak self] in
+            guard let self else { return }
             guard isViewLoaded else { return }
             // Update UI
             collectionView.refreshControl = searchViewModel.isDisplayingSearchResults ? refreshControl : nil

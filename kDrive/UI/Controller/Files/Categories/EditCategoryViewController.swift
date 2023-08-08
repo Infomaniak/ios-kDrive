@@ -149,7 +149,8 @@ class EditCategoryViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
             cell.textField.setHint(KDriveResourcesStrings.Localizable.categoryNameField)
             cell.textField.text = category?.name ?? name
-            cell.textDidChange = { [unowned self] text in
+            cell.textDidChange = { [weak self] text in
+                guard let self else { return }
                 if let text {
                     if create {
                         name = text

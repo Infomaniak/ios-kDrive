@@ -68,9 +68,11 @@ extension UploadQueue: UploadQueueObservable {
                                                   fileId: String? = nil,
                                                   using closure: @escaping (UploadFile, File?) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [unowned self] in
+        serialQueue.sync { [weak self] in
+            guard let self else { return }
             let key = UUID()
-            observations.didUploadFile[key] = { [unowned self, weak observer] uploadFile, driveFile in
+            observations.didUploadFile[key] = { [weak self, weak observer] uploadFile, driveFile in
+                guard let self else { return }
                 // If the observer has been deallocated, we can
                 // automatically remove the observation closure.
                 guard observer != nil else {
@@ -85,7 +87,8 @@ extension UploadQueue: UploadQueueObservable {
                 }
             }
 
-            token = ObservationToken { [unowned self] in
+            token = ObservationToken { [weak self] in
+                guard let self else { return }
                 observations.didUploadFile.removeValue(forKey: key)
             }
         }
@@ -97,9 +100,11 @@ extension UploadQueue: UploadQueueObservable {
                                                  parentId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [unowned self] in
+        serialQueue.sync { [weak self] in
+            guard let self else { return }
             let key = UUID()
-            observations.didChangeUploadCountInParent[key] = { [unowned self, weak observer] updatedParentId, count in
+            observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
+                guard let self else { return }
                 guard observer != nil else {
                     observations.didChangeUploadCountInParent.removeValue(forKey: key)
                     return
@@ -112,7 +117,8 @@ extension UploadQueue: UploadQueueObservable {
                 }
             }
 
-            token = ObservationToken { [unowned self] in
+            token = ObservationToken { [weak self] in
+                guard let self else { return }
                 observations.didChangeUploadCountInParent.removeValue(forKey: key)
             }
         }
@@ -124,9 +130,11 @@ extension UploadQueue: UploadQueueObservable {
                                                  driveId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [unowned self] in
+        serialQueue.sync { [weak self] in
+            guard let self else { return }
             let key = UUID()
-            observations.didChangeUploadCountInDrive[key] = { [unowned self, weak observer] updatedDriveId, count in
+            observations.didChangeUploadCountInDrive[key] = { [weak self, weak observer] updatedDriveId, count in
+                guard let self else { return }
                 guard observer != nil else {
                     observations.didChangeUploadCountInDrive.removeValue(forKey: key)
                     return
@@ -139,7 +147,8 @@ extension UploadQueue: UploadQueueObservable {
                 }
             }
 
-            token = ObservationToken { [unowned self] in
+            token = ObservationToken { [weak self] in
+                guard let self else { return }
                 observations.didChangeUploadCountInDrive.removeValue(forKey: key)
             }
         }
