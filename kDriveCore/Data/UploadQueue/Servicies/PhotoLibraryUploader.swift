@@ -214,7 +214,9 @@ public extension PhotoLibraryUploader {
                     stop.pointee = true
                     return
                 }
-                if let assetCollectionIdentifier = PhotoLibrarySaver.instance.assetCollection?.localIdentifier {
+
+                @InjectService var photoLibrarySaver: PhotoLibrarySavable
+                if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
                     let options = PHFetchOptions()
                     options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
                     let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(

@@ -26,10 +26,10 @@ import Photos
 import UIKit
 
 @MainActor
-public class FileActionsHelper {
-    public static let instance = FileActionsHelper()
-
+public final class FileActionsHelper {
     private var interactionController: UIDocumentInteractionController!
+
+    public static let instance = FileActionsHelper()
 
     // MARK: - Single file
 
@@ -108,18 +108,14 @@ public class FileActionsHelper {
             ? viewController
             : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
         guard presenterViewController as? UIDocumentPickerViewController == nil else { return }
-        switch file.convertedType {
-        case .image:
+
+        let convertedType = file.convertedType
+        switch convertedType {
+        case .image, .video:
             saveMedia(
                 url: file.localUrl,
-                type: .image,
+                type: convertedType.assetMediaType,
                 successMessage: showSuccessSnackBar ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation : nil
-            )
-        case .video:
-            saveMedia(
-                url: file.localUrl,
-                type: .video,
-                successMessage: showSuccessSnackBar ? KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation : nil
             )
         case .folder:
             let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
@@ -131,22 +127,26 @@ public class FileActionsHelper {
     }
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String?) {
-        Task {
+        Task.detached {
             do {
-                try await PhotoLibrarySaver.instance.save(url: url, type: type)
+                @InjectService var photoLibrarySaver: PhotoLibrarySavable
+                try await photoLibrarySaver.save(url: url, type: type)
                 if let successMessage {
-                    UIConstants.showSnackBar(message: successMessage)
+                    await UIConstants.showSnackBar(message: successMessage)
                 }
             } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {
-                UIConstants.showSnackBar(message: error.localizedDescription,
-                                         action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
-                                             guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
-                                                   UIApplication.shared.canOpenURL(settingsURL) else { return }
-                                             UIApplication.shared.open(settingsURL)
-                                         })
+                await UIConstants
+                    .showSnackBar(message: error.localizedDescription,
+                                  action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
+                                      Task { @MainActor in
+                                          guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                                                UIApplication.shared.canOpenURL(settingsURL) else { return }
+                                          UIApplication.shared.open(settingsURL)
+                                      }
+                                  })
             } catch {
                 DDLogError("Cannot save media: \(error)")
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
             }
         }
     }

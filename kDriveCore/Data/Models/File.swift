@@ -23,6 +23,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
+import Photos
 import QuickLook
 import RealmSwift
 
@@ -130,6 +131,20 @@ public enum ConvertedType: String, CaseIterable {
             return .internetShortcut
         case .video:
             return .movie
+        }
+    }
+
+    /// Bridge to PHAssetMediaType
+    public var assetMediaType: PHAssetMediaType {
+        switch self {
+        case .video:
+            return .video
+        case .image:
+            return .image
+        case .audio:
+            return .audio
+        default:
+            return .unknown
         }
     }
 
@@ -323,6 +338,8 @@ public class FileVersion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
+    private let fileManager = FileManager.default
+    
     @LazyInjectService var accountManager: AccountManageable
 
     @Persisted(primaryKey: true) public var id = 0
@@ -465,7 +482,7 @@ public class File: Object, Codable {
     }
 
     public var temporaryContainerUrl: URL {
-        return FileManager.default.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true)
+        return fileManager.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true)
             .appendingPathComponent("\(id)", isDirectory: true)
     }
 
@@ -491,7 +508,19 @@ public class File: Object, Codable {
     }
 
     public var isDownloaded: Bool {
-        return FileManager.default.fileExists(atPath: localUrl.path)
+        // Check that size on disk matches, if available
+        do {
+            let attributes = try fileManager.attributesOfItem(atPath: localUrl.path)
+            if let remoteSize = size,
+               let metadataSize = attributes[FileAttributeKey.size] as? NSNumber,
+               metadataSize.intValue != remoteSize {
+                return false
+            }
+        } catch {
+            DDLogError("[File] unable to read metadata on disk: \(error)")
+        }
+
+        return fileManager.fileExists(atPath: localUrl.path)
     }
 
     public var isMostRecentDownloaded: Bool {
@@ -545,7 +574,7 @@ public class File: Object, Codable {
     }
 
     public var isLocalVersionOlderThanRemote: Bool {
-        if let modificationDate = try? FileManager.default.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date,
+        if let modificationDate = try? fileManager.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date,
            modificationDate >= lastModifiedAt {
             return false
         }
@@ -618,7 +647,7 @@ public class File: Object, Codable {
     }
 
     public func applyLastModifiedDateToLocalFile() {
-        try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
+        try? fileManager.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
     }
 
     public func excludeFileFromSystemBackup() {

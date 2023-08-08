@@ -22,7 +22,7 @@ import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
 
-public class DownloadTask: Object {
+public final class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId = 0
     @Persisted var isDirectory = false
     @Persisted var driveId = 0
