@@ -484,21 +484,29 @@ extension SaveFileViewController: FooterButtonDelegate {
             return
         }
 
-        let message: String
-        do {
-            try fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
-            guard !items.isEmpty else {
-                navigationController?.dismiss(animated: true)
-                return
-            }
-            message = items.count > 1 ? KDriveResourcesStrings.Localizable
-                .allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable.allUploadInProgress(items[0].name)
-        } catch {
-            message = error.localizedDescription
+        let items = items
+        guard !items.isEmpty else {
+            navigationController?.dismiss(animated: true)
+            return
         }
 
-        navigationController?.dismiss(animated: true) {
-            UIConstants.showSnackBar(message: message)
+        Task {
+            let message: String
+            do {
+                try await fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+
+                message = items.count > 1 ? KDriveResourcesStrings.Localizable
+                    .allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable
+                    .allUploadInProgress(items[0].name)
+            } catch {
+                message = error.localizedDescription
+            }
+
+            Task { @MainActor in
+                self.navigationController?.dismiss(animated: true) {
+                    UIConstants.showSnackBar(message: message)
+                }
+            }
         }
     }
 }

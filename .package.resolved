@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "f0442baed7595fbd59119e5ae2ddcd82fee3832b",
-        "version" : "4.1.11"
+        "revision" : "4a3f3dec751c23e4b00d063496a8fda10e63bd0a",
+        "version" : "4.1.13"
       }
     },
     {

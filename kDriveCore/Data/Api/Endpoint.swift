@@ -63,10 +63,7 @@ public extension Endpoint {
             URLQueryItem(name: "per_page", value: "\(Endpoint.itemsPerPage)")
         ]
 
-        return Endpoint(hostKeypath: hostKeypath,
-                        path: path,
-                        queryItems: (queryItems ?? []) + paginationQueryItems,
-                        apiEnvironment: apiEnvironment)
+        return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + paginationQueryItems)
     }
 
     func sorted(by sortTypes: [SortType] = [.type, .nameAZ]) -> Endpoint {
@@ -76,10 +73,7 @@ public extension Endpoint {
         sortQueryItems
             .append(contentsOf: sortTypes.map { URLQueryItem(name: "order_for[\($0.value.apiValue)]", value: $0.value.order) })
 
-        return Endpoint(hostKeypath: hostKeypath,
-                        path: path,
-                        queryItems: (queryItems ?? []) + sortQueryItems,
-                        apiEnvironment: apiEnvironment)
+        return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + sortQueryItems)
     }
 }
 

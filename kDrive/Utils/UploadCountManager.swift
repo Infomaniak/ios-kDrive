@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Combine
 import Foundation
 import InfomaniakDI
 import kDriveCore
@@ -26,7 +27,11 @@ final class UploadCountManager {
 
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
-    private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
+
+    /// Something to debounce upload count events
+    private let uploadCountSubject = PassthroughSubject<Int, Never>()
+    private var uploadCountObserver: AnyCancellable?
+
     private let observeQueue = DispatchQueue(label: "com.infomaniak.drive.uploadThrottler",
                                              qos: .utility, autoreleaseFrequency: .workItem)
 
@@ -41,11 +46,19 @@ final class UploadCountManager {
     init(driveFileManager: DriveFileManager, didUploadCountChange: @escaping () -> Void) {
         self.driveFileManager = driveFileManager
         self.didUploadCountChange = didUploadCountChange
+        uploadCountObserver = uploadCountSubject
+           .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
+            .sink { newUploadCount in
+                self.uploadCount = newUploadCount
+                self.didUploadCountChange()
+            }
+
         updateUploadCount()
         observeUploads()
     }
 
     deinit {
+        uploadCountObserver?.cancel()
         uploadsObserver?.invalidate()
     }
 
@@ -58,19 +71,16 @@ final class UploadCountManager {
     private func observeUploads() {
         guard uploadsObserver == nil else { return }
 
-        uploadCountThrottler.handler = { [weak self] newUploadCount in
-            self?.uploadCount = newUploadCount
-            self?.didUploadCountChange()
-        }
-
         uploadsObserver = uploadQueue
             .getUploadingFiles(userId: userId, driveIds: driveIds)
             .observe(on: observeQueue) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
                 switch change {
-                case .initial(let results):
-                    self?.uploadCountThrottler.call(results.count)
-                case .update(let results, deletions: _, insertions: _, modifications: _):
-                    self?.uploadCountThrottler.call(results.count)
+                case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
+                    self.uploadCountSubject.send(results.count)
                 case .error(let error):
                     print(error)
                 }
