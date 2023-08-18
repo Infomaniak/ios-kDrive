@@ -48,9 +48,9 @@ final class UploadCountManager {
         self.didUploadCountChange = didUploadCountChange
         uploadCountObserver = uploadCountSubject
            .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
-            .sink { newUploadCount in
-                self.uploadCount = newUploadCount
-                self.didUploadCountChange()
+            .sink { [weak self] newUploadCount in
+                self?.uploadCount = newUploadCount
+                self?.didUploadCountChange()
             }
 
         updateUploadCount()
