@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import Sentry
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -132,6 +133,9 @@ extension UploadOperation {
             return false
         }
 
+        // We capture only remote errors on sentry
+        SentrySDK.capture(error: error)
+        
         var errorHandled = false
         try? transactionWithFile { file in
             defer {
