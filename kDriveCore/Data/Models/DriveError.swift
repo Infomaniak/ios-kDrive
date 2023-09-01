@@ -140,9 +140,14 @@ public struct DriveError: Error, Equatable {
     public static let conflict = DriveError(type: .serverError,
                                             code: "conflict_error",
                                             localizedString: KDriveResourcesStrings.Localizable.errorConflict)
-    public static let maintenance = DriveError(type: .serverError,
-                                               code: "product_maintenance",
-                                               localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
+    public static let productMaintenance = DriveError(type: .serverError,
+                                                      code: "product_maintenance",
+                                                      localizedString: KDriveResourcesStrings.Localizable
+                                                          .driveMaintenanceDescription)
+    public static let driveMaintenance = DriveError(type: .serverError,
+                                                    code: "drive_is_in_maintenance_error",
+                                                    localizedString: KDriveResourcesStrings.Localizable
+                                                        .driveMaintenanceDescription)
     public static let blocked = DriveError(type: .serverError,
                                            code: "product_blocked",
                                            localizedString: KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural)
@@ -209,7 +214,8 @@ public struct DriveError: Error, Equatable {
                                                   forbidden,
                                                   noDrive,
                                                   conflict,
-                                                  maintenance,
+                                                  productMaintenance,
+                                                  driveMaintenance,
                                                   lock,
                                                   donwloadPermission,
                                                   categoryAlreadyExists,

@@ -144,13 +144,13 @@ extension UploadOperation {
                 file.maxRetryCount = 0
                 file.progress = nil
 
-            case .lock:
-                // simple retry
-                break
+            case .lock, .notAuthorized:
+                self.cleanUploadFileSession(file: file)
+                file.progress = nil
 
-            case .notAuthorized, .maintenance:
-                // simple retry
-                break
+            case .productMaintenance, .driveMaintenance:
+                // We stop and hope the maintenance is finished at next execution
+                self.uploadQueue.suspendAllOperations()
 
             case .quotaExceeded:
                 file.error = DriveError.quotaExceeded
