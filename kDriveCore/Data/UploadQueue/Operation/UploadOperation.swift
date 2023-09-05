@@ -423,45 +423,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return fileUrl
     }
 
-    public func cleanUploadFileSession(file: UploadFile? = nil, remotely: Bool = true) {
+    public func cleanUploadFileSession(file: UploadFile? = nil) {
         Log.uploadOperation("Clean uploading session for \(uploadFileId)")
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
-            let sessionTokenToCancel: String? = file.uploadingSession?.token
-
             file.uploadingSession = nil
             file.progress = nil
-
-            guard let sessionTokenToCancel else {
-                return
+            
+            // Free local resources
+            for (key, value) in self.uploadTasks {
+                Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(self.uploadFileId)")
+                value.cancel()
             }
-
-            guard remotely else {
-                return
-            }
-
-            // Clean the remote session, and current tasks, to free resources.
-            let driveId = file.driveId
-            let userId = file.userId
-            self.enqueue {
-                guard let driveFileManager = try? self.getDriveFileManager(for: driveId, userId: userId) else {
-                    return
-                }
-
-                let abstractToken = AbstractTokenWrapper(token: sessionTokenToCancel)
-                let apiFetcher = driveFileManager.apiFetcher
-                let drive = driveFileManager.drive
-
-                // We try to cancel the upload session, we do not watch results
-                let cancelledSession = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
-                Log.uploadOperation("remove cancelledSession:\(cancelledSession) for \(self.uploadFileId)")
-
-                for (key, value) in self.uploadTasks {
-                    Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(self.uploadFileId)")
-                    value.cancel()
-                }
-                self.uploadTasks.removeAll()
-            }
+            self.uploadTasks.removeAll()
         }
 
         // If no file provided, wrap the transaction

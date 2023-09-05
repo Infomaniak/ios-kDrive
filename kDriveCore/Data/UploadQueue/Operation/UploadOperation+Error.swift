@@ -100,13 +100,12 @@ extension UploadOperation {
                      .fileIdentityHasChanged,
                      .parseError,
                      .missingChunkHash:
-                    self.cleanUploadFileSession(file: file, remotely: true)
+                    self.cleanUploadFileSession(file: file)
                     file.error = DriveError.localError.wrapping(error)
 
                 case .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
-                    // We do not clean remotely, as we expect the session to not exist remotely anymore
-                    self.cleanUploadFileSession(file: file, remotely: false)
+                    self.cleanUploadFileSession(file: file)
                     file.error = DriveError.localError.wrapping(error)
 
                 case .operationFinished, .operationCanceled:
