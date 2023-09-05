@@ -212,7 +212,8 @@ extension UploadOperation {
         SentrySDK.capture(error: error) { scope in
             do {
                 try self.transactionWithFile { file in
-                    var metadata: [String: Any] = ["uploadFileId": self.uploadFileId,
+                    var metadata: [String: Any] = ["version": 1,
+                                                   "uploadFileId": self.uploadFileId,
                                                    "uploadDate": file.uploadDate ?? "nil",
                                                    "creationDate": file.creationDate ?? "nil",
                                                    "modificationDate": file.modificationDate ?? "nil",

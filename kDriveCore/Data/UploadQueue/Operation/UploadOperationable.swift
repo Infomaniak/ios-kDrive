@@ -59,9 +59,6 @@ public protocol UploadOperationable: Operationable {
          urlSession: URLSession,
          itemIdentifier: NSFileProviderItemIdentifier?)
 
-    /// We can restore a running session task to an operation
-    func restore(task: URLSessionUploadTask, session: URLSession)
-
     /// Network completion handler
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
 

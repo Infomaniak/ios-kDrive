@@ -121,15 +121,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         super.init()
     }
 
-    public func restore(task: URLSessionUploadTask, session: URLSession) {
-        Log.uploadOperation("restore")
-        enqueue {
-            let identifier = session.identifier(for: task)
-            Log.uploadOperation("restore identifier:\(identifier)")
-            self.uploadTasks[identifier] = task
-        }
-    }
-
     override public func execute() async {
         Log.uploadOperation("execute \(uploadFileId)")
 
@@ -429,7 +420,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         let cleanFileClosure: (UploadFile) -> Void = { file in
             file.uploadingSession = nil
             file.progress = nil
-            
+
             // Free local resources
             for (key, value) in self.uploadTasks {
                 Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(self.uploadFileId)")
