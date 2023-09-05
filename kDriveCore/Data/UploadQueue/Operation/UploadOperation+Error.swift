@@ -38,7 +38,11 @@ extension UploadOperation {
                 end()
             }
 
+            // error tracking
             Log.uploadOperation("catching error:\(error) ufid:\(uploadFileId)", level: .error)
+            sentryTrackingError(error)
+
+            // error handling
             if !handleLocalErrors(error: error) {
                 handleRemoteErrors(error: error)
             }
@@ -133,9 +137,6 @@ extension UploadOperation {
             return false
         }
 
-        // We capture only remote errors on sentry
-        SentrySDK.capture(error: error)
-        
         var errorHandled = false
         try? transactionWithFile { file in
             defer {
@@ -203,5 +204,58 @@ extension UploadOperation {
         }
 
         return errorHandled
+    }
+
+    // MARK: - Private
+
+    private func sentryTrackingError(_ error: Error) {
+        // We capture the error with a detailed state of the upload task for debugging purposes.
+        SentrySDK.capture(error: error) { scope in
+            do {
+                try self.transactionWithFile { file in
+                    var metadata: [String: Any] = ["uploadFileId": uploadFileId,
+                                                   "uploadDate": file.uploadDate,
+                                                   "creationDate": file.creationDate,
+                                                   "modificationDate": file.modificationDate,
+                                                   "taskCreationDate": file.taskCreationDate,
+                                                   "progress": file.progress,
+                                                   "initiatedFromFileManager": file.initiatedFromFileManager,
+                                                   "maxRetryCount": file.maxRetryCount,
+                                                   "rawPersistedError": file._error]
+                    // Unwrap uploadingSession
+                    guard let session = file.uploadingSession else {
+                        metadata["uploadingSession"] = "nil"
+                        scope.setExtras(metadata)
+                        return
+                    }
+
+                    // Log chunkTasks status
+                    let chunkTasks = session.chunkTasks
+                    let chunkTaskCount = chunkTasks.count
+                    metadata["chunkTasks.count"] = chunkTaskCount
+                    for (index, object) in chunkTasks.enumerated() {
+                        metadata["chunkTask-\(index)-error"] = object.error
+                        metadata["chunkTask-\(index)-chunk"] = object.chunk
+                        metadata["chunkTask-\(index)-chunkNumber"] = object.chunkNumber
+                    }
+
+                    // Log uploadSession status
+                    guard let uploadSession = session.uploadSession else {
+                        metadata["file.uploadingSession.uploadSession"] = "nil"
+                        scope.setExtras(metadata)
+                        return
+                    }
+
+                    // Log uploadingSession.uploadSession state
+                    metadata["file.uploadingSession.uploadSession"] =
+                        "result:\(uploadSession.result) - token:\(uploadSession.token)"
+
+                    scope.setExtras(metadata)
+                }
+            } catch {
+                let metadata = ["ErrorFetchingUploadFile": error]
+                scope.setExtras(metadata)
+            }
+        }
     }
 }

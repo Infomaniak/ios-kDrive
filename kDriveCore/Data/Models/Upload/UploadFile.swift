@@ -74,7 +74,7 @@ public class UploadFile: Object, UploadFilable {
     @Persisted var initiatedFromFileManager = false
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
     @Persisted private var rawPriority = 0
-    @Persisted private var _error: Data?
+    @Persisted internal var _error: Data?
     @Persisted var conflictOption: ConflictOption
     @Persisted var uploadingSession: UploadingSessionTask?
 
