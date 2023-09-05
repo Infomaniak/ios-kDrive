@@ -212,15 +212,15 @@ extension UploadOperation {
         SentrySDK.capture(error: error) { scope in
             do {
                 try self.transactionWithFile { file in
-                    var metadata: [String: Any] = ["uploadFileId": uploadFileId,
-                                                   "uploadDate": file.uploadDate,
-                                                   "creationDate": file.creationDate,
-                                                   "modificationDate": file.modificationDate,
-                                                   "taskCreationDate": file.taskCreationDate,
-                                                   "progress": file.progress,
+                    var metadata: [String: Any] = ["uploadFileId": self.uploadFileId,
+                                                   "uploadDate": file.uploadDate ?? "nil",
+                                                   "creationDate": file.creationDate ?? "nil",
+                                                   "modificationDate": file.modificationDate ?? "nil",
+                                                   "taskCreationDate": file.taskCreationDate ?? "nil",
+                                                   "progress": file.progress ?? 0,
                                                    "initiatedFromFileManager": file.initiatedFromFileManager,
                                                    "maxRetryCount": file.maxRetryCount,
-                                                   "rawPersistedError": file._error]
+                                                   "rawPersistedError": file._error ?? "nil"]
                     // Unwrap uploadingSession
                     guard let session = file.uploadingSession else {
                         metadata["uploadingSession"] = "nil"
