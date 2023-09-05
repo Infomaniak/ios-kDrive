@@ -1047,27 +1047,24 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     public func backgroundActivityExpiring() {
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
-        enqueueCatching(asap: true) {
-            try self.transactionWithFile { file in
-                file.error = .taskRescheduled
-                Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
+        try? transactionWithFile { file in
+            file.error = .taskRescheduled
+            Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
 
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(file.name)"
-                breadcrumb.data = ["File id": self.uploadFileId,
-                                   "File name": file.name,
-                                   "File size": file.size,
-                                   "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(breadcrumb)
-            }
-
-            self.uploadNotifiable.sendPausedNotificationIfNeeded()
-
-            // each and all operations should be given the chance to call backgroundActivityExpiring
-            self.end()
-
-            Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
+            let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+            breadcrumb.message = "Rescheduling file \(file.name)"
+            breadcrumb.data = ["File id": self.uploadFileId,
+                               "File name": file.name,
+                               "File size": file.size,
+                               "File type": file.type.rawValue]
+            SentrySDK.addBreadcrumb(breadcrumb)
         }
+
+        uploadNotifiable.sendPausedNotificationIfNeeded()
+
+        // each and all operations should be given the chance to call backgroundActivityExpiring
+        end()
+
         Log.uploadOperation("exit reschedule ufid:\(uploadFileId)")
     }
 }
