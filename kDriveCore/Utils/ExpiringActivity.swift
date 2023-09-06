@@ -21,8 +21,6 @@ import Foundation
 /// Delegation mechanism to notify the end of an `ExpiringActivity`
 public protocol ExpiringActivityDelegate: AnyObject {
     /// Called when the system is requiring us to terminate an expiring activity
-    ///
-    /// Please make sure to return from this function once the final work is done.
     func backgroundActivityExpiring()
 }
 
