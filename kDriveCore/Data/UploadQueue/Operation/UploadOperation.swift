@@ -203,9 +203,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         try checkCancelation()
         try freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
-        defer {
-            updateUploadProgress()
-        }
+        // Set progress to zero if needed
+        updateUploadProgress()
 
         Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
 
