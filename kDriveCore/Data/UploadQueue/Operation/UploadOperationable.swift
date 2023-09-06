@@ -59,16 +59,12 @@ public protocol UploadOperationable: Operationable {
          urlSession: URLSession,
          itemIdentifier: NSFileProviderItemIdentifier?)
 
-    /// We can restore a running session task to an operation
-    func restore(task: URLSessionUploadTask, session: URLSession)
-
     /// Network completion handler
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
 
-    /// Clean the local session and send an API call to free the session
+    /// Clean the local session and cancel running upload chunk operations.
     /// - Parameter file: An UploadFile within a transaction
-    /// - Parameter remotely: try to delete remote session object if true
-    func cleanUploadFileSession(file: UploadFile?, remotely: Bool)
+    func cleanUploadFileSession(file: UploadFile?)
 
     /// Process errors and terminate the operation
     func end()

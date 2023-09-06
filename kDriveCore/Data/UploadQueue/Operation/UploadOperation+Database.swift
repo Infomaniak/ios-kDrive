@@ -25,6 +25,11 @@ extension UploadOperation {
     ///   - function: The name of the function performing the transaction
     ///   - task: A closure to mutate the current `UploadFile`
     func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
+        /// A cancelled operation can access database for cleanup, _not_ a finished one.
+        guard !isFinished else {
+            throw ErrorDomain.operationFinished
+        }
+
         try autoreleasepool {
             let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
             uploadsRealm.refresh()

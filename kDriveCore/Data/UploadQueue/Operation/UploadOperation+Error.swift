@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import Sentry
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -37,7 +38,11 @@ extension UploadOperation {
                 end()
             }
 
+            // error tracking
             Log.uploadOperation("catching error:\(error) ufid:\(uploadFileId)", level: .error)
+            sentryTrackingError(error)
+
+            // error handling
             if !handleLocalErrors(error: error) {
                 handleRemoteErrors(error: error)
             }
@@ -95,13 +100,12 @@ extension UploadOperation {
                      .fileIdentityHasChanged,
                      .parseError,
                      .missingChunkHash:
-                    self.cleanUploadFileSession(file: file, remotely: true)
+                    self.cleanUploadFileSession(file: file)
                     file.error = DriveError.localError.wrapping(error)
 
                 case .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
-                    // We do not clean remotely, as we expect the session to not exist remotely anymore
-                    self.cleanUploadFileSession(file: file, remotely: false)
+                    self.cleanUploadFileSession(file: file)
                     file.error = DriveError.localError.wrapping(error)
 
                 case .operationFinished, .operationCanceled:
@@ -144,13 +148,13 @@ extension UploadOperation {
                 file.maxRetryCount = 0
                 file.progress = nil
 
-            case .lock:
+            case .lock, .notAuthorized:
                 // simple retry
                 break
 
-            case .notAuthorized, .maintenance:
-                // simple retry
-                break
+            case .productMaintenance, .driveMaintenance:
+                // We stop and hope the maintenance is finished at next execution
+                self.uploadQueue.suspendAllOperations()
 
             case .quotaExceeded:
                 file.error = DriveError.quotaExceeded
@@ -199,5 +203,65 @@ extension UploadOperation {
         }
 
         return errorHandled
+    }
+
+    // MARK: - Private
+
+    /// Some easy to follow unique sentry issue name
+    static let sentryCaptureErrorName = "UploadErrorHandling"
+
+    /// Tracking upload error with detailed state of the upload operation
+    private func sentryTrackingError(_ error: Error) {
+        // We capture all upload errors with a common name for ease of use.
+        // with a detailed state of the upload task for debugging purposes.
+        SentrySDK.capture(message: Self.sentryCaptureErrorName) { scope in
+            do {
+                try self.transactionWithFile { file in
+                    var metadata: [String: Any] = ["version": 1,
+                                                   "uploadFileId": self.uploadFileId,
+                                                   "catched Error": error,
+                                                   "uploadDate": file.uploadDate ?? "nil",
+                                                   "creationDate": file.creationDate ?? "nil",
+                                                   "modificationDate": file.modificationDate ?? "nil",
+                                                   "taskCreationDate": file.taskCreationDate ?? "nil",
+                                                   "progress": file.progress ?? 0,
+                                                   "initiatedFromFileManager": file.initiatedFromFileManager,
+                                                   "maxRetryCount": file.maxRetryCount,
+                                                   "rawPersistedError": file._error ?? "nil"]
+                    // Unwrap uploadingSession
+                    guard let session = file.uploadingSession else {
+                        metadata["uploadingSession"] = "nil"
+                        scope.setExtras(metadata)
+                        return
+                    }
+
+                    // Log chunkTasks status
+                    let chunkTasks = session.chunkTasks
+                    let chunkTaskCount = chunkTasks.count
+                    metadata["chunkTasks.count"] = chunkTaskCount
+                    for (index, object) in chunkTasks.enumerated() {
+                        metadata["chunkTask-\(index)-error"] = object.error
+                        metadata["chunkTask-\(index)-chunk"] = object.chunk
+                        metadata["chunkTask-\(index)-chunkNumber"] = object.chunkNumber
+                    }
+
+                    // Log uploadSession status
+                    guard let uploadSession = session.uploadSession else {
+                        metadata["file.uploadingSession.uploadSession"] = "nil"
+                        scope.setExtras(metadata)
+                        return
+                    }
+
+                    // Log uploadingSession.uploadSession state
+                    metadata["file.uploadingSession.uploadSession"] =
+                        "result:\(uploadSession.result) - token:\(uploadSession.token)"
+
+                    scope.setExtras(metadata)
+                }
+            } catch {
+                let metadata = ["ErrorFetchingUploadFile": error]
+                scope.setExtras(metadata)
+            }
+        }
     }
 }
