@@ -149,8 +149,8 @@ extension UploadOperation {
                 file.progress = nil
 
             case .lock, .notAuthorized:
-                self.cleanUploadFileSession(file: file)
-                file.progress = nil
+                // simple retry
+                break
 
             case .productMaintenance, .driveMaintenance:
                 // We stop and hope the maintenance is finished at next execution
