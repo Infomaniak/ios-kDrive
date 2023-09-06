@@ -207,13 +207,19 @@ extension UploadOperation {
 
     // MARK: - Private
 
+    /// Some easy to follow unique sentry issue name
+    static let sentryCaptureErrorName = "UploadErrorHandling"
+
+    /// Tracking upload error with detailed state of the upload operation
     private func sentryTrackingError(_ error: Error) {
-        // We capture the error with a detailed state of the upload task for debugging purposes.
-        SentrySDK.capture(error: error) { scope in
+        // We capture all upload errors with a common name for ease of use.
+        // with a detailed state of the upload task for debugging purposes.
+        SentrySDK.capture(message: Self.sentryCaptureErrorName) { scope in
             do {
                 try self.transactionWithFile { file in
                     var metadata: [String: Any] = ["version": 1,
                                                    "uploadFileId": self.uploadFileId,
+                                                   "catched Error": error,
                                                    "uploadDate": file.uploadDate ?? "nil",
                                                    "creationDate": file.creationDate ?? "nil",
                                                    "modificationDate": file.modificationDate ?? "nil",
