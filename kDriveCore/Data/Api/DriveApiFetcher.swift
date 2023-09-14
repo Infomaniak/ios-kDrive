@@ -243,7 +243,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
-        try await perform(request: authenticatedRequest(.fileInfo(file), method: .delete)).data
+        try await perform(request: authenticatedRequest(.fileInfoV2(file), method: .delete)).data
     }
 
     public func emptyTrash(drive: AbstractDrive) async throws -> Bool {
@@ -388,7 +388,7 @@ public class DriveApiFetcher: ApiFetcher {
             fileTypes: fileTypes,
             categories: categories,
             belongToAllCategories: belongToAllCategories
-        ).paginated(page: page).sorted(by: [.type, sortType]))).data
+        ).paginated(page: page).sorted(by: [sortType]))).data
     }
 
     public func add(category: Category, to file: ProxyFile) async throws -> CategoryResponse {
