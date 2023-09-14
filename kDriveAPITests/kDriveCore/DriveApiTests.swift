@@ -87,8 +87,8 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Helping methods
 
     func getRootDirectory() async throws -> ProxyFile {
-        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data
-            .proxify()
+        let fileInfo = try await currentApiFetcher.rootFiles(drive: proxyDrive).data
+        return fileInfo.first { $0.visibility == .root }!.proxify()
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
