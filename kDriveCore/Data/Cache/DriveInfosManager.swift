@@ -63,11 +63,6 @@ public class DriveInfosManager {
                         }
                         // Remove dangling objects
                         DriveInfosManager.removeDanglingObjects(
-                            ofType: DrivePackFunctionality.self,
-                            migration: migration,
-                            ids: driveIds
-                        )
-                        DriveInfosManager.removeDanglingObjects(
                             ofType: DrivePreferences.self,
                             migration: migration,
                             ids: driveIds
@@ -84,20 +79,21 @@ public class DriveInfosManager {
                         )
                         DriveInfosManager.removeDanglingObjects(ofType: Category.self, migration: migration, ids: driveIds)
                         // Delete team details & category rights for migration
-                        migration.deleteData(forType: TeamDetail.className())
                         migration.deleteData(forType: CategoryRights.className())
                     }
                 }
             },
             objectTypes: [
                 Drive.self,
-                DrivePackFunctionality.self,
                 DrivePreferences.self,
                 DriveUsersCategories.self,
                 DriveTeamsCategories.self,
                 DriveUser.self,
+                DrivePack.self,
+                DriveCapabilities.self,
+                DrivePackCapabilities.self,
+                DriveRights.self,
                 Team.self,
-                TeamDetail.self,
                 Category.self,
                 CategoryRights.self
             ]
@@ -240,17 +236,12 @@ public class DriveInfosManager {
     @discardableResult
     func storeDriveResponse(user: InfomaniakCore.UserProfile, driveResponse: DriveResponse) -> [Drive] {
         var driveList = [Drive]()
-        for drive in driveResponse.drives.main {
-            initDriveForRealm(drive: drive, userId: user.id, sharedWithMe: false)
+        for drive in driveResponse.drives where drive.role != "none" {
+            initDriveForRealm(drive: drive, userId: user.id, sharedWithMe: drive.role == "external")
             driveList.append(drive)
         }
 
-        for drive in driveResponse.drives.sharedWithMe {
-            initDriveForRealm(drive: drive, userId: user.id, sharedWithMe: true)
-            driveList.append(drive)
-        }
-
-        initFileProviderDomains(drives: driveResponse.drives.main, user: user)
+        initFileProviderDomains(drives: driveList.filter { !$0.sharedWithMe }, user: user)
 
         let realm = getRealm()
         let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
@@ -259,7 +250,7 @@ public class DriveInfosManager {
         try? realm.write {
             realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
             realm.add(driveList, update: .modified)
-            realm.add(driveResponse.users.values, update: .modified)
+            realm.add(driveResponse.users, update: .modified)
             realm.add(driveResponse.teams, update: .modified)
         }
         return driveRemoved
@@ -303,7 +294,7 @@ public class DriveInfosManager {
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
         if let drive {
-            return realmUserList.filter { drive.users.account.contains($0.id) }
+            return realmUserList.filter { drive.users.drive.contains($0.id) }
         }
         return []
     }

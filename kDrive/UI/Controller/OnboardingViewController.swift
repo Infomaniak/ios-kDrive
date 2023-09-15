@@ -24,6 +24,7 @@ import kDriveResources
 import Lottie
 import Sentry
 import UIKit
+import CocoaLumberjackSwift
 
 class OnboardingViewController: UIViewController {
     @IBOutlet weak var navigationBar: UINavigationBar!
@@ -278,6 +279,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 MatomoUtils.connectUser()
                 goToMainScreen()
             } catch {
+                DDLogError(error)
                 if let previousAccount {
                     accountManager.switchAccount(newAccount: previousAccount)
                 }

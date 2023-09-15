@@ -364,13 +364,11 @@ public final class DriveFileManager {
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [
                 Drive.self,
-                DrivePackFunctionality.self,
                 DrivePreferences.self,
                 DriveUsersCategories.self,
                 DriveTeamsCategories.self,
                 DriveUser.self,
                 Team.self,
-                TeamDetail.self,
                 Category.self,
                 CategoryRights.self
             ]

@@ -21,26 +21,16 @@ import InfomaniakCore
 import RealmSwift
 
 public class DriveResponse: Codable {
-    public let drives: DriveList
-    public let users: [Int: DriveUser]
+    public let drives: [Drive]
+    public let users: [DriveUser]
     public let teams: [Team]
-    public let ipsToken: IPSToken
+    public let ips: IPSToken
 
     enum CodingKeys: String, CodingKey {
         case drives
         case users
         case teams
-        case ipsToken = "ips_token"
-    }
-}
-
-public class DriveList: Codable {
-    public let main: [Drive]
-    public let sharedWithMe: [Drive]
-
-    enum CodingKeys: String, CodingKey {
-        case main
-        case sharedWithMe = "shared_with_me"
+        case ips
     }
 }
 
@@ -63,16 +53,6 @@ public class DriveTeamsCategories: EmbeddedObject, Codable {
     @Persisted public var drive: List<Int>
 }
 
-public enum DrivePack: String, Codable {
-    case solo
-    case pro
-    case team
-    case free
-    case kSuiteStandard = "ksuite_standard"
-    case kSuitePro = "ksuite_pro"
-    case kSuiteEntreprise = "ksuite_entreprise"
-}
-
 public enum MaintenanceReason: String, PersistableEnum, Codable {
     case notRenew = "not_renew"
     case demoEnd = "demo_end"
@@ -80,32 +60,9 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     case technical
 }
 
-public class DrivePackFunctionality: EmbeddedObject, Codable {
-    @Persisted public var versionsNumber = 0
-    @Persisted public var dropbox = false
-    @Persisted public var versioning = false
-    @Persisted public var manageRight = false
-    @Persisted public var hasTeamSpace = false
-    @Persisted public var versionsKeptForDays = 0
-
-    enum CodingKeys: String, CodingKey {
-        case dropbox
-        case versioning
-        case manageRight = "manage_right"
-        case hasTeamSpace = "has_team_space"
-        case versionsNumber = "number_of_versions"
-        case versionsKeptForDays = "versions_kept_for_days"
-    }
-}
-
 public class DrivePreferences: EmbeddedObject, Codable {
-    @Persisted public var color: String
-    @Persisted public var hide: Bool
-
-    override public init() {
-        color = "#0098FF"
-        hide = false
-    }
+    @Persisted public var color = "#0098FF"
+    @Persisted public var hide = false
 }
 
 public class Drive: Object, Codable {
@@ -113,21 +70,18 @@ public class Drive: Object, Codable {
     /*
      User data
      */
-    @Persisted public var canAddUser = false
-    @Persisted public var canCreateTeamFolder = false
-    @Persisted public var hasTechnicalRight = false
+    @Persisted public var rights: DriveRights?
     @Persisted public var name = ""
     @Persisted private var _preferences: DrivePreferences?
     @Persisted public var role = ""
-
+    @Persisted public var _capabilities: DriveCapabilities?
     /*
      Drive data
      */
     /// Account id of the drive CREATOR
     @Persisted public var accountId: Int = -1
     @Persisted public var id: Int = -1
-    @Persisted public var pack = ""
-    @Persisted public var packFunctionality: DrivePackFunctionality?
+    @Persisted public var _pack: DrivePack?
     @Persisted public var sharedWithMe = false
     @Persisted public var size: Int64 = 0
     @Persisted public var usedSize: Int64 = 0
@@ -135,13 +89,13 @@ public class Drive: Object, Codable {
     @Persisted private var _teams: DriveTeamsCategories?
     @Persisted public var categories: List<Category>
     @Persisted private var _categoryRights: CategoryRights?
-    @Persisted public var maintenance = false
+    @Persisted public var inMaintenance = false
     @Persisted public var maintenanceReason: MaintenanceReason?
     @Persisted public var updatedAt: Date
     /// Is manager admin.
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
-    @Persisted public var productIsInApp = false
+    @Persisted public var isInAppSubscription = false
     @Persisted public var userId = 0 {
         didSet {
             objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
@@ -164,16 +118,28 @@ public class Drive: Object, Codable {
         return _categoryRights ?? CategoryRights()
     }
 
+    public var capabilities: DriveCapabilities {
+        return _capabilities ?? DriveCapabilities()
+    }
+
+    public var pack: DrivePack {
+        return _pack ?? DrivePack()
+    }
+
     public var isUserAdmin: Bool {
         return role == "admin"
     }
 
+    public var isDriveUser: Bool {
+        return role != "none" && role != "external"
+    }
+
     public var isFreePack: Bool {
-        return pack == DrivePack.free.rawValue
+        return false
     }
 
     public var isInTechnicalMaintenance: Bool {
-        return maintenance && maintenanceReason == .technical
+        return inMaintenance && maintenanceReason == .technical
     }
 
     public required init(from decoder: Decoder) throws {
@@ -181,7 +147,7 @@ public class Drive: Object, Codable {
         accountId = try values.decode(Int.self, forKey: .accountId)
         id = try values.decode(Int.self, forKey: .id)
         name = try values.decode(String.self, forKey: .name)
-        pack = try values.decode(String.self, forKey: .pack)
+        _pack = try values.decode(DrivePack.self, forKey: ._pack)
         role = try values.decode(String.self, forKey: .role)
         _preferences = try values.decode(DrivePreferences.self, forKey: ._preferences)
         _users = try values.decode(DriveUsersCategories.self, forKey: ._users)
@@ -190,15 +156,12 @@ public class Drive: Object, Codable {
         _categoryRights = try values.decode(CategoryRights.self, forKey: ._categoryRights)
         size = try values.decode(Int64.self, forKey: .size)
         usedSize = try values.decode(Int64.self, forKey: .usedSize)
-        canAddUser = try values.decode(Bool.self, forKey: .canAddUser)
-        packFunctionality = try values.decode(DrivePackFunctionality.self, forKey: .packFunctionality)
-        hasTechnicalRight = try values.decode(Bool.self, forKey: .hasTechnicalRight)
-        canCreateTeamFolder = try values.decode(Bool.self, forKey: .canCreateTeamFolder)
-        maintenance = try values.decode(Bool.self, forKey: .maintenance)
+        _capabilities = try values.decode(DriveCapabilities.self, forKey: ._capabilities)
+        rights = try values.decode(DriveRights.self, forKey: .rights)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
-        productIsInApp = try values.decode(Bool.self, forKey: .productIsInApp)
+        isInAppSubscription = try values.decode(Bool.self, forKey: .isInAppSubscription)
     }
 
     override public init() {}
@@ -220,7 +183,7 @@ public class Drive: Object, Codable {
         case accountId = "account_id"
         case id
         case name
-        case pack
+        case _pack = "pack"
         case role
         case _preferences = "preferences"
         case size
@@ -228,16 +191,14 @@ public class Drive: Object, Codable {
         case _users = "users"
         case _teams = "teams"
         case categories
-        case _categoryRights = "category_rights"
-        case canAddUser = "can_add_user"
-        case packFunctionality = "pack_functionality"
-        case hasTechnicalRight = "has_technical_right"
-        case canCreateTeamFolder = "can_create_team_folder"
-        case maintenance
+        case _categoryRights = "categories_permissions"
+        case rights
+        case _capabilities = "capabilities"
+        case inMaintenance = "in_maintenance"
         case maintenanceReason = "maintenance_reason"
         case updatedAt = "updated_at"
         case accountAdmin = "account_admin"
-        case productIsInApp = "product_is_in_app"
+        case isInAppSubscription = "is_in_app_subscription"
     }
 
     public static func == (lhs: Drive, rhs: Drive) -> Bool {

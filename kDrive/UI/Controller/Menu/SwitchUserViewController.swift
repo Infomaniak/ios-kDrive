@@ -107,7 +107,7 @@ extension SwitchUserViewController: UITableViewDelegate {
         }
 
         let drives = DriveInfosManager.instance.getDrives(for: account.userId)
-        if drives.count == 1 && drives[0].maintenance {
+        if drives.count == 1 && drives[0].inMaintenance {
             let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
             let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
             driveErrorViewController?.driveErrorViewType = drives[0].isInTechnicalMaintenance ? .maintenance : .blocked

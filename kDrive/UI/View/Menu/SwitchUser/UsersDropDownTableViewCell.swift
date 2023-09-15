@@ -68,7 +68,11 @@ class UsersDropDownTableViewCell: DropDownCell {
     func configureWith(team: Team, drive: Drive) {
         usernameLabel.text = team.displayName
         avatarImage.image = team.icon
-        detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(team.usersCount(in: drive))
+        if let usersCount = team.usersCount {
+            detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(usersCount)
+        } else {
+            detailLabel.text = nil
+        }
     }
 
     func configureWith(account: Account) {

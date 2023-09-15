@@ -65,7 +65,7 @@ class ManageCategoriesViewController: UITableViewController {
     }()
 
     private var userCanCreateAndEditCategories: Bool {
-        return driveFileManager?.drive.categoryRights.canCreateCategory == true && canEdit
+        return driveFileManager?.drive.categoryRights.canCreate == true && canEdit
     }
 
     private let searchController = UISearchController(searchResultsController: nil)
@@ -271,8 +271,7 @@ class ManageCategoriesViewController: UITableViewController {
             cell.configure(
                 with: category,
                 showMoreButton: canEdit &&
-                    (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights
-                        .canDeleteCategory)
+                    (driveFileManager.drive.categoryRights.canEdit || driveFileManager.drive.categoryRights.canDelete)
             )
         }
         cell.delegate = self

@@ -144,14 +144,8 @@ public extension Endpoint {
         return Endpoint(path: "/invoicing/inapp/apple/link_receipt")
     }
 
-    // MARK: V1
-
-    private static var driveV1: Endpoint {
-        return Endpoint(hostKeypath: \.apiDriveHost, path: "/1/drive")
-    }
-
     static var initData: Endpoint {
-        return .driveV1.appending(path: "/init", queryItems: [URLQueryItem(name: "with", value: "drives,users,teams,categories")])
+        return .drive.appending(path: "/init", queryItems: [DriveInitWith.allCases.toQueryItem()])
     }
 
     // MARK: Action

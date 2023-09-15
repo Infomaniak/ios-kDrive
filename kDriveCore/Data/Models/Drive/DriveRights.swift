@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,18 +19,6 @@
 import Foundation
 import RealmSwift
 
-public class CategoryRights: EmbeddedObject, Codable {
-    @Persisted public var canCreate: Bool
-    @Persisted public var canEdit: Bool
-    @Persisted public var canDelete: Bool
-    @Persisted public var canReadOnFile: Bool
-    @Persisted public var canPutOnFile: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case canCreate = "can_create"
-        case canEdit = "can_edit"
-        case canDelete = "can_delete"
-        case canReadOnFile = "can_read_on_file"
-        case canPutOnFile = "can_put_on_file"
-    }
+public class DriveRights: EmbeddedObject, Codable {
+    @Persisted public var technical: Bool
 }

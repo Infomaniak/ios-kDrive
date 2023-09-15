@@ -25,10 +25,9 @@ public class Team: Object, Codable {
     public static let allUsersId = 0
 
     @Persisted(primaryKey: true) public var id: Int
-    @Persisted public var details: List<TeamDetail>
-    @Persisted public var users: List<Int>
     @Persisted public var name: String
-    @Persisted public var color: Int
+    @Persisted public var usersCount: Int?
+    @Persisted public var colorId: Int
 
     public var isAllUsers: Bool {
         return id == Team.allUsersId
@@ -55,7 +54,7 @@ public class Team: Object, Codable {
             "#9E9E9E",
             "#795548"
         ]
-        return color < colors.count ? colors[color] : "#E91E63"
+        return colorId < colors.count ? colors[colorId] : "#E91E63"
     }
 
     public var icon: UIImage {
@@ -73,34 +72,16 @@ public class Team: Object, Codable {
 
     override public init() {}
 
-    public required init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        super.init()
-        id = try values.decode(Int.self, forKey: .id)
-        details = try values.decodeIfPresent(List<TeamDetail>.self, forKey: .details) ?? List<TeamDetail>()
-        users = try values.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
-        name = try values.decode(String.self, forKey: .name)
-        color = try values.decode(Int.self, forKey: .color)
-    }
-
-    public func usersCount(in drive: Drive) -> Int {
-        let detail = details.first { $0.driveId == drive.id }
-        return detail?.usersCount ?? users.filter { drive.users.internalUsers.contains($0) }.count
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case usersCount = "users_count"
+        case colorId = "color_id"
     }
 }
 
 extension Team: Comparable {
     public static func < (lhs: Team, rhs: Team) -> Bool {
         return lhs.isAllUsers || lhs.name.lowercased() < rhs.name.lowercased()
-    }
-}
-
-public class TeamDetail: EmbeddedObject, Codable {
-    @Persisted public var driveId: Int
-    @Persisted public var usersCount: Int
-
-    enum CodingKeys: String, CodingKey {
-        case driveId = "drive_id"
-        case usersCount = "users_count"
     }
 }
