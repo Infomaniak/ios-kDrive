@@ -164,7 +164,9 @@ public class Drive: Object, Codable {
         isInAppSubscription = try values.decode(Bool.self, forKey: .isInAppSubscription)
     }
 
-    override public init() {}
+    override public init() {
+        // Required by Realm
+    }
 
     public func categories(for file: File) -> [Category] {
         let fileCategoriesIds: [Int]
@@ -174,9 +176,9 @@ public class Drive: Object, Codable {
             // File is not managed by Realm: cannot use the `.sorted(by:)` method :(
             fileCategoriesIds = file.categories.sorted { $0.addedAt.compare($1.addedAt) == .orderedAscending }.map(\.categoryId)
         }
-        let categories = categories.filter(NSPredicate(format: "id IN %@", fileCategoriesIds))
+        let filteredCategories = categories.filter(NSPredicate(format: "id IN %@", fileCategoriesIds))
         // Sort the categories
-        return fileCategoriesIds.compactMap { id in categories.first { $0.id == id } }
+        return fileCategoriesIds.compactMap { id in filteredCategories.first { $0.id == id } }
     }
 
     enum CodingKeys: String, CodingKey {
