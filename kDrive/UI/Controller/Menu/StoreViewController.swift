@@ -27,17 +27,17 @@ class StoreViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
 
     struct Item {
-        let packId: Int
+        let packId: DrivePackId
         let identifier: String
         let period: PeriodTab
         var product: SKProduct?
 
         static let allItems = [
-            Item(packId: 1, identifier: "com.infomaniak.drive.iap.solo.monthly", period: .monthly),
-            Item(packId: 2, identifier: "com.infomaniak.drive.iap.team.monthly", period: .monthly),
+            Item(packId: .solo, identifier: "com.infomaniak.drive.iap.solo.monthly", period: .monthly),
+            Item(packId: .team, identifier: "com.infomaniak.drive.iap.team.monthly", period: .monthly),
             // Item(packId: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
-            Item(packId: 1, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
-            Item(packId: 2, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly)
+            Item(packId: .solo, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
+            Item(packId: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly)
             // Item(packId: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
         ]
     }
@@ -65,7 +65,7 @@ class StoreViewController: UICollectionViewController {
 
     private var purchaseEnabled = true
     private var items = Item.allItems
-    private lazy var selectedPackId = driveFileManager.drive.pack.id
+    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.id)
     private var selectedStorage = 1
     private var selectedPeriod = PeriodTab.yearly {
         didSet { updateOffers() }

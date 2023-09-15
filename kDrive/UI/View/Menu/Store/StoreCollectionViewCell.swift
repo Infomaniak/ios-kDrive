@@ -47,18 +47,18 @@ class StoreCollectionViewCell: UICollectionViewCell {
         tableView.register(cellView: StoreFeatureTableViewCell.self)
     }
 
-    func configure(with item: StoreViewController.Item, currentPackId: Int, enabled: Bool) {
+    func configure(with item: StoreViewController.Item, currentPackId: DrivePackId?, enabled: Bool) {
         self.item = item
 
         switch item.packId {
-        case 1:
+        case .solo:
             imageView.image = KDriveResourcesAsset.circleSolo.image
             titleLabel.text = "Solo"
             descriptionLabel.text = KDriveResourcesStrings.Localizable.storeOfferSoloDescription
             features = [KDriveResourcesStrings.Localizable.storeOfferSoloFeature1,
                         KDriveResourcesStrings.Localizable.storeOfferSoloFeature2,
                         KDriveResourcesStrings.Localizable.storeOfferSoloFeature3]
-        case 2:
+        case .team:
             imageView.image = KDriveResourcesAsset.circleTeam.image
             titleLabel.text = "Team"
             descriptionLabel.text = KDriveResourcesStrings.Localizable.storeOfferTeamDescription
@@ -66,7 +66,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
                         KDriveResourcesStrings.Localizable.storeOfferTeamFeature2,
                         KDriveResourcesStrings.Localizable.storeOfferTeamFeature3,
                         KDriveResourcesStrings.Localizable.storeOfferTeamFeature4]
-        case 3:
+        case .pro:
             imageView.image = KDriveResourcesAsset.circlePro.image
             titleLabel.text = "Pro"
             descriptionLabel.text = ""

@@ -19,6 +19,16 @@
 import Foundation
 import RealmSwift
 
+public enum DrivePackId: Int {
+    case solo = 1
+    case team = 2
+    case pro = 3
+    case free = 6
+    case kSuiteStandard = 8
+    case kSuitePro = 11
+    case kSuiteEntreprise = 14
+}
+
 public class DrivePack: EmbeddedObject, Codable {
     @Persisted public var id = 0
     @Persisted public var name = ""
