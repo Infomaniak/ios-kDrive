@@ -38,15 +38,9 @@ class MainTabViewController: UITabBarController, Restorable {
         self.driveFileManager = driveFileManager
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
-        rootViewControllers.append(Self.initRootViewController(with: ConcreteFileListViewModel(
-            driveFileManager: driveFileManager,
-            currentDirectory: nil
-        )))
+        rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
         rootViewControllers.append(UIViewController())
-        rootViewControllers.append(Self.initRootViewController(with: FavoritesViewModel(
-            driveFileManager: driveFileManager,
-            currentDirectory: nil
-        )))
+        rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager)))
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
@@ -107,6 +101,16 @@ class MainTabViewController: UITabBarController, Restorable {
         return navigationViewController
     }
 
+    private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
+        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.folder.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.folderFilledTab.image
+        return navigationViewController
+    }
+
     private static func initMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
         let menuViewController = MenuViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: menuViewController)
@@ -117,9 +121,9 @@ class MainTabViewController: UITabBarController, Restorable {
         return navigationViewController
     }
 
-    private static func initRootViewController(with viewModel: FileListViewModel) -> UIViewController {
-        let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
-        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: fileListViewController)
+    private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
+        let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
         navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
