@@ -208,7 +208,7 @@ public extension PhotoLibraryUploader {
 
         // Build the same name as importing manually a file
         correctName = asset
-            .getFilename(fileExtension: fileExtension.lowercased(), burstCount: burstCount)
+            .getFilename(fileExtension: fileExtension.lowercased(), creationDate: asset.creationDate, burstCount: burstCount)
             ?? "No-name-\(URL.defaultFileName())"
 
         return correctName
