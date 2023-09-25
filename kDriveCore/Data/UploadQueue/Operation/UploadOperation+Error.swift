@@ -272,8 +272,6 @@ extension UploadOperation {
                 // Log uploadingSession.uploadSession state
                 metadata["file.uploadingSession.uploadSession"] =
                     "result:\(uploadSession.result) - token:\(uploadSession.token)"
-
-                return
             }
             return metadata
         } catch {
