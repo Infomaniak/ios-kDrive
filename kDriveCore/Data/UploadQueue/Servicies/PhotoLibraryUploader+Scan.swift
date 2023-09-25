@@ -207,9 +207,10 @@ public extension PhotoLibraryUploader {
         burstIdentifier = asset.burstIdentifier
 
         // Build the same name as importing manually a file
-        correctName = asset
-            .getFilename(fileExtension: fileExtension.lowercased(), creationDate: asset.creationDate, burstCount: burstCount)
-            ?? "No-name-\(URL.defaultFileName())"
+        correctName = asset.getFilename(fileExtension: fileExtension,
+                                        creationDate: asset.creationDate,
+                                        burstCount: burstCount,
+                                        burstIdentifier: burstIdentifier)
 
         return correctName
     }

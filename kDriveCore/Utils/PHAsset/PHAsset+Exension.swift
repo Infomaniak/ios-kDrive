@@ -37,52 +37,19 @@ public extension PHAsset {
 
     // MARK: - Filename
 
-    /// The date formatter specific to kDrive and file name format
-    private static let fileNameDateFormatter: DateFormatter = {
-        var dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
-        return dateFormatter
-    }()
-
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
-    func getFilename(fileExtension: String, creationDate: Date? = nil, burstCount: Int? = nil) -> String? {
-        guard let resource = bestResource() else { return nil }
-
-        let burstString: String
-        if let burstCount, burstCount > 0 {
-            burstString = "_\(burstCount)"
-        } else {
-            burstString = ""
-        }
-
-        let originalFilename = resource.originalFilename
-        let lastPathComponent = originalFilename.split(separator: ".")
-        let filename = lastPathComponent[0]
-
-        // Edited pictures will have a "FullSizeRender" name
-        guard filename != "FullSizeRender" else {
-            // Differentiate the file with edit date
-            let editDate = modificationDate ?? Date()
-
-            // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.
-            guard let creationDate else {
-                return "No-name-\(Self.fileNameDateFormatter.string(from: editDate))\(burstString).\(fileExtension)"
-            }
-            return "\(Self.fileNameDateFormatter.string(from: creationDate))-\(Self.fileNameDateFormatter.string(from: editDate))\(burstString).\(fileExtension)"
-        }
-
-        // Standard kDrive date formating
-        guard let creationDate else {
-            return nil
-        }
-
-        var correctName = Self.fileNameDateFormatter.string(from: creationDate)
-        if burstIdentifier != nil {
-            correctName += "_" + burstString
-        }
-        correctName += "." + fileExtension
-
-        return correctName
+    func getFilename(fileExtension: String,
+                     creationDate: Date? = nil,
+                     modificationDate: Date? = nil,
+                     burstCount: Int? = nil,
+                     burstIdentifier: String? = nil) -> String {
+        let nameProvider = PHAssetNameProvider()
+        return nameProvider.getFilename(fileExtension: fileExtension,
+                                        originalFilename: bestResource()?.originalFilename,
+                                        creationDate: creationDate,
+                                        modificationDate: modificationDate,
+                                        burstCount: burstCount,
+                                        burstIdentifier: burstIdentifier)
     }
 
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
