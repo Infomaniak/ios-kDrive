@@ -235,7 +235,7 @@ public struct DriveError: Error, Equatable {
     private static let decoder = JSONDecoder()
 
     /// A specific, not user facing, not localized error
-    private var underlyingError: Error?
+    internal var underlyingError: Error?
 
     public init(apiErrorCode: String, httpStatus: Int = 400) {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
