@@ -73,19 +73,6 @@ public extension PHAsset {
         return nil
     }
 
-    /// Fetches the original name of an Asset, before edition
-    /// - Returns: The original name if any
-    private func originalResourceName() -> String? {
-        switch mediaType {
-        case .video:
-            return firstResourceMatchingAnyType(of: [.video])?.originalFilename
-        case .image:
-            return firstResourceMatchingAnyType(of: [.photo])?.originalFilename
-        default:
-            return nil
-        }
-    }
-
     // MARK: - Resource
 
     func bestResource() -> PHAssetResource? {
