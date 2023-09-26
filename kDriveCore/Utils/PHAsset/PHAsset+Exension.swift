@@ -38,36 +38,24 @@ public extension PHAsset {
     // MARK: - Filename
 
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
-    func getFilename(fileExtension: String, burstCount: Int? = nil) -> String? {
-        guard let resource = bestResource() else { return nil }
-
-        let burstString: String
-        if let burstCount, burstCount > 0 {
-            burstString = "_\(burstCount)"
-        } else {
-            burstString = ""
-        }
-
-        let originalFilename = resource.originalFilename
-        let lastPathComponent = originalFilename.split(separator: ".")
-        let filename = lastPathComponent[0]
-
-        // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.
-        guard filename != "FullSizeRender" else {
-            // Differentiate the file with edit date
-            let editDate = modificationDate ?? Date()
-            guard let originalFileName = originalResourceName()?.split(separator: ".").first else {
-                return "\(URL.defaultFileName(date: editDate))\(burstString).\(fileExtension)"
-            }
-            return "\(originalFileName)-\(URL.defaultFileName(date: editDate))\(burstString).\(fileExtension)"
-        }
-        return "\(filename)\(burstString).\(fileExtension)"
+    func getFilename(fileExtension: String,
+                     creationDate: Date? = nil,
+                     modificationDate: Date? = nil,
+                     burstCount: Int? = nil,
+                     burstIdentifier: String? = nil) -> String {
+        let nameProvider = PHAssetNameProvider()
+        return nameProvider.getFilename(fileExtension: fileExtension,
+                                        originalFilename: bestResource()?.originalFilename,
+                                        creationDate: creationDate,
+                                        modificationDate: modificationDate,
+                                        burstCount: burstCount,
+                                        burstIdentifier: burstIdentifier)
     }
 
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
     func getFilename(uti: UTI) -> String? {
         let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
-        return getFilename(fileExtension: preferredFilenameExtension)
+        return getFilename(fileExtension: preferredFilenameExtension, creationDate: creationDate)
     }
 
     /// Returns the first Resource matching a list of types.
@@ -83,19 +71,6 @@ public extension PHAsset {
             return resource
         }
         return nil
-    }
-
-    /// Fetches the original name of an Asset, before edition
-    /// - Returns: The original name if any
-    private func originalResourceName() -> String? {
-        switch mediaType {
-        case .video:
-            return firstResourceMatchingAnyType(of: [.video])?.originalFilename
-        case .image:
-            return firstResourceMatchingAnyType(of: [.photo])?.originalFilename
-        default:
-            return nil
-        }
     }
 
     // MARK: - Resource

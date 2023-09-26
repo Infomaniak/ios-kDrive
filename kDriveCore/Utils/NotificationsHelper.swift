@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
 import kDriveResources
+import Sentry
 import UserNotifications
 
 public protocol NotificationsHelpable {
@@ -129,6 +130,9 @@ public struct NotificationsHelper: NotificationsHelpable {
         sendImmediately(notification: content, id: UUID().uuidString)
     }
 
+    /// Some easy to follow unique sentry issue name
+    static let sentryCaptureErrorName = "UploadErrorUserNotification"
+
     public func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
@@ -139,6 +143,24 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.userInfo[UserInfoKey.parentId] = parentId
 
         sendImmediately(notification: content, id: UUID().uuidString)
+
+        // Error metadata
+        let metadata: [String: Any] = ["error.type": error.type,
+                                       "error.code": error.code,
+                                       "error.localizedDescription": error.localizedDescription,
+                                       "error.userInfo": error.userInfo ?? "nil",
+                                       "error.underlyingError": error.underlyingError ?? "nil"]
+
+        // We capture all upload errors presented to the user, with underlyingError if any
+        SentrySDK.capture(message: Self.sentryCaptureErrorName) { scope in
+            scope.setExtras(metadata)
+        }
+
+        // Add a breadcrumb
+        let breadcrumb = Breadcrumb(level: .error, category: Self.sentryCaptureErrorName)
+        breadcrumb.message = Self.sentryCaptureErrorName
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
     }
 
     public func sendUploadDoneNotification(filename: String, parentId: Int) {

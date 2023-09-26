@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 /// Delegation mechanism to notify the end of an `ExpiringActivity`
 public protocol ExpiringActivityDelegate: AnyObject {
@@ -36,7 +37,7 @@ public protocol ExpiringActivityable {
 
 public final class ExpiringActivity: ExpiringActivityable {
     /// Keep track of the locks on blocks
-    private var locks = [DispatchGroup]()
+    private var locks = [TolerantDispatchGroup]()
 
     /// For thread safety
     private let queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync")
@@ -61,7 +62,7 @@ public final class ExpiringActivity: ExpiringActivityable {
     }
 
     public func start() {
-        let group = DispatchGroup()
+        let group = TolerantDispatchGroup()
 
         queue.sync {
             self.locks.append(group)
