@@ -43,7 +43,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         var pdfUrl: URL?
         var error: Error?
 
-        internal init(
+        init(
             fileId: Int,
             pdfGenerationProgress: Progress? = nil,
             downloadTask: URLSessionDownloadTask? = nil,

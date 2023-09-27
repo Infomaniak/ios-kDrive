@@ -353,7 +353,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    internal func setupContent() {
+    func setupContent() {
         let offline = ReachabilityListener.instance.currentStatus == .offline
 
         quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
@@ -428,7 +428,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    internal func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         switch action {
         case .informations:
             let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)

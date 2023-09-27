@@ -507,10 +507,10 @@ class FileDetailViewController: UIViewController {
             async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
             fileInformationRows = try await FileInformationRow.getRows(for: file,
-                                                                            fileAccess: currentFileAccess,
-                                                                            contentCount: folderContentCount,
-                                                                            categoryRights: driveFileManager.drive
-                                                                                .categoryRights)
+                                                                       fileAccess: currentFileAccess,
+                                                                       contentCount: folderContentCount,
+                                                                       categoryRights: driveFileManager.drive
+                                                                           .categoryRights)
             fileAccess = try await currentFileAccess
             contentCount = try await folderContentCount
 

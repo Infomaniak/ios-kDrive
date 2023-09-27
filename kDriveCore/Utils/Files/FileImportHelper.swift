@@ -40,10 +40,10 @@ public enum ImportError: LocalizedError {
 }
 
 public final class FileImportHelper {
-    @LazyInjectService internal var pathProvider: AppGroupPathProvidable
-    @LazyInjectService internal var uploadQueue: UploadQueue
+    @LazyInjectService var pathProvider: AppGroupPathProvidable
+    @LazyInjectService var uploadQueue: UploadQueue
 
-    internal let imageCompression = 0.8
+    let imageCompression = 0.8
 
     let parallelTaskMapper = ParallelTaskMapper()
 

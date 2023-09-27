@@ -130,12 +130,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }()
     }
 
-    internal enum HomeSection: Differentiable, CaseIterable {
+    enum HomeSection: Differentiable, CaseIterable {
         case top
         case recentFiles
     }
 
-    internal enum HomeTopRow: Differentiable {
+    enum HomeTopRow: Differentiable {
         case offline
         case search
         case insufficientStorage
@@ -143,7 +143,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         case recentFilesSelector
     }
 
-    internal enum RecentFileRow: Differentiable {
+    enum RecentFileRow: Differentiable {
         case file
         case loading
         case empty

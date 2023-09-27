@@ -75,7 +75,7 @@ import UIKit
 
         public var rawValue: String
 
-        internal init(titleFont: UIFont, titleColor: UIColor, backgroundColor: UIColor, rawValue: RawValue) {
+        init(titleFont: UIFont, titleColor: UIColor, backgroundColor: UIColor, rawValue: RawValue) {
             self.titleFont = titleFont
             self.titleColor = titleColor
             self.backgroundColor = backgroundColor

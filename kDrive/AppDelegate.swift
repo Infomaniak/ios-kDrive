@@ -32,7 +32,7 @@ import StoreKit
 import UIKit
 import UserNotifications
 
-@UIApplicationMain
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     var window: UIWindow?
 
