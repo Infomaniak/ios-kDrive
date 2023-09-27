@@ -77,7 +77,7 @@ class AppUITest: XCTestCase {
     // MARK: - Helping methods
 
     func createDirectory(name: String) -> String {
-        open(tab: .add)
+        openTab(.add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
@@ -99,11 +99,11 @@ class AppUITest: XCTestCase {
     func createDirectoryWithPhoto(name: String) -> String {
         let directory = createDirectory(name: name)
 
-        open(tab: .files)
+        openTab(.files)
         enterInDirectory(named: directory)
 
         // Import photo from photo library
-        open(tab: .add)
+        openTab(.add)
         tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
         let imageToImport = app.scrollViews.images.element(boundBy: 0)
         XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
@@ -153,7 +153,7 @@ class AppUITest: XCTestCase {
         shareButton.tap()
     }
 
-    func open(tab element: TabBarElement) {
+    func openTab(_ element: TabBarElement) {
         tabBar.buttons[element.rawValue].tap()
     }
 
@@ -172,7 +172,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Rename file"
 
         let root = setUpTest(testName: testName)
-        open(tab: .files)
+        openTab(.files)
 
         // Open sheet with file details
         openFileMenu(named: root, fullSize: true)
@@ -200,7 +200,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Duplicate file"
 
         let root = setUpTest(testName: testName)
-        open(tab: .files)
+        openTab(.files)
 
         openFileMenu(named: root, fullSize: true)
 
@@ -224,7 +224,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Share file"
 
         let root = setUpTest(testName: testName)
-        open(tab: .files)
+        openTab(.files)
 
         openFileMenu(named: root)
         let shareAndRights = collectionViewsQuery.cells.staticTexts["Partage et droits"]
@@ -309,8 +309,8 @@ class AppUITest: XCTestCase {
 
         // Create shared directory
         let root = "\(testName)-\(Date())"
-        open(tab: .files)
-        open(tab: .add)
+        openTab(.files)
+        openTab(.add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
@@ -350,11 +350,11 @@ class AppUITest: XCTestCase {
         let root = setUpTest(testName: testName)
 
         // Enter in root directory
-        open(tab: .files)
+        openTab(.files)
         enterInDirectory(named: root)
 
         // Create office file
-        open(tab: .add)
+        openTab(.add)
         tablesQuery.staticTexts["Document"].tap()
         app.typeText("UITest - Office file")
         app.buttons["Créer"].tap()
@@ -365,7 +365,7 @@ class AppUITest: XCTestCase {
         sleep(6)
         officeBackButton.tap()
 
-        open(tab: .files)
+        openTab(.files)
         tearDownTest(directoryName: root)
     }
 
@@ -373,7 +373,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Offline files"
 
         // Get number of offline files
-        open(tab: .home)
+        openTab(.home)
         collectionViewsQuery.buttons["Hors ligne"].tap()
 
         let root = createDirectoryWithPhoto(name: testName)
@@ -387,7 +387,7 @@ class AppUITest: XCTestCase {
         closeFileMenu()
 
         // Go to offline files
-        open(tab: .home)
+        openTab(.home)
         collectionViewsQuery.buttons["Hors ligne"].tap()
 
         // Refresh table
@@ -397,8 +397,8 @@ class AppUITest: XCTestCase {
         start.press(forDuration: 0, thenDragTo: finish)
         XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 10), "Image should be available offline")
 
-        open(tab: .files)
-        open(tab: .files)
+        openTab(.files)
+        openTab(.files)
         tearDownTest(directoryName: root)
     }
 
@@ -415,7 +415,7 @@ class AppUITest: XCTestCase {
         app.buttons["Annuler"].tap()
         XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 3), "Photo should be back in directory")
 
-        open(tab: .files)
+        openTab(.files)
         tearDownTest(directoryName: root)
     }
 
@@ -423,7 +423,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Add file to favorites"
 
         let root = setUpTest(testName: testName)
-        open(tab: .files)
+        openTab(.files)
 
         // Add directory to favorites
         collectionViewsQuery.cells.containing(.staticText, identifier: root).element.press(forDuration: 1)
@@ -433,10 +433,10 @@ class AppUITest: XCTestCase {
         favoriteButton.tap()
 
         // Check file in favorites page
-        open(tab: .favorites)
+        openTab(.favorites)
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Directory should be in favorites")
 
-        open(tab: .files)
+        openTab(.files)
         tearDownTest(directoryName: root)
     }
 
@@ -445,7 +445,7 @@ class AppUITest: XCTestCase {
 
         let root = setUpTest(testName: testName)
 
-        open(tab: .home)
+        openTab(.home)
         collectionViewsQuery.staticTexts["Rechercher un fichier…"].tap()
         app.searchFields["Rechercher un fichier…"].tap()
         app.typeText(testName)
@@ -454,7 +454,7 @@ class AppUITest: XCTestCase {
 
         navigationBars["Rechercher"].buttons["Fermer"].tap()
 
-        open(tab: .files)
+        openTab(.files)
         tearDownTest(directoryName: root)
     }
 
@@ -462,7 +462,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Add categories"
 
         let root = setUpTest(testName: testName)
-        open(tab: .files)
+        openTab(.files)
 
         // Add category
         openFileMenu(named: root, fullSize: true)
