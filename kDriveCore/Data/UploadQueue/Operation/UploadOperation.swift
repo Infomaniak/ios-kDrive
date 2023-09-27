@@ -77,7 +77,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         <\(type(of: self)):\(super.debugDescription)
         uploading file id:'\(uploadFileId)'
         parallelism :\(Self.parallelism)
-        expiringActivity:'\(expiringActivity)'>
+        expiringActivity:'\(String(describing: expiringActivity))'>
         """
     }
 
@@ -225,6 +225,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         else {
             try await generateNewSessionAndStore()
         }
+
+        // Update progress once the session was created
+        updateUploadProgress()
     }
 
     /// Generate some chunks into a temporary folder from a file
@@ -603,7 +606,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             return noProgress
         }
 
-        let progress = Double(chunkTasksUploadedCount) / Double(chunkTasksTotalCount)
+        // We have a valid session and chunks to upload, so progress in non 0 for consistent UI.
+        let progress = max(Double(chunkTasksUploadedCount) / Double(chunkTasksTotalCount), 0.01)
         try? transactionWithFile { file in
             file.progress = progress
         }
