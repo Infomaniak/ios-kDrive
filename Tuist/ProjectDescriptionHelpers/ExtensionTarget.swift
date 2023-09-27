@@ -19,7 +19,13 @@
 import ProjectDescription
 
 public extension Target {
-    static func extensionTarget(name: String, bundleId: String, entitlements: Path, additionalResources: [ResourceFileElement] = [], settings: Settings) -> Target {
+    static func extensionTarget(
+        name: String,
+        bundleId: String,
+        entitlements: Path,
+        additionalResources: [ResourceFileElement] = [],
+        settings: Settings
+    ) -> Target {
         var resources: [ResourceFileElement] = [
             "\(name)/**/*.storyboard",
             "kDrive/UI/Controller/Files/**/*.storyboard",

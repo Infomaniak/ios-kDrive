@@ -29,7 +29,7 @@ struct PHAssetNameProvider {
     }()
 
     static let noName = "No-name"
-    
+
     /// Default file name
     func defaultFileName(_ burstString: String, _ fileExtension: String, _ now: Date) -> String {
         "\(Self.noName)-\(URL.defaultFileName(date: now))\(burstString).\(fileExtension)"
@@ -46,9 +46,9 @@ struct PHAssetNameProvider {
         let fileExtension = fileExtension.lowercased()
         let burstString: String
         if let burstCount,
-            burstCount > 0,
-            let burstIdentifier,
-            !burstIdentifier.isEmpty {
+           burstCount > 0,
+           let burstIdentifier,
+           !burstIdentifier.isEmpty {
             burstString = "_\(burstCount)"
         } else {
             burstString = ""

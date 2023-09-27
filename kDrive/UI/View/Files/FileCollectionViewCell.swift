@@ -143,8 +143,8 @@ protocol FileCellDelegate: AnyObject {
 }
 
 class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
-    internal var swipeStartPoint: CGPoint = .zero
-    internal var initialTrailingConstraintValue: CGFloat = 0
+    var swipeStartPoint: CGPoint = .zero
+    var initialTrailingConstraintValue: CGFloat = 0
 
     @IBOutlet weak var disabledView: UIView!
     @IBOutlet weak var contentInsetView: UIView!

@@ -47,7 +47,7 @@ final class UploadCountManager {
         self.driveFileManager = driveFileManager
         self.didUploadCountChange = didUploadCountChange
         uploadCountObserver = uploadCountSubject
-           .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
+            .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
             .sink { [weak self] newUploadCount in
                 self?.uploadCount = newUploadCount
                 self?.didUploadCountChange()
@@ -80,7 +80,7 @@ final class UploadCountManager {
 
                 switch change {
                 case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
-                    self.uploadCountSubject.send(results.count)
+                    uploadCountSubject.send(results.count)
                 case .error(let error):
                     print(error)
                 }

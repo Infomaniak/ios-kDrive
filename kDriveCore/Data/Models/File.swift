@@ -339,7 +339,7 @@ public class FileVersion: EmbeddedObject, Codable {
 
 public class File: Object, Codable {
     private let fileManager = FileManager.default
-    
+
     @LazyInjectService var accountManager: AccountManageable
 
     @Persisted(primaryKey: true) public var id = 0
