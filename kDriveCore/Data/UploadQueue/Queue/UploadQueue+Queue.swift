@@ -192,7 +192,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancel(uploadFile: UploadFile) {
         Log.uploadQueue("cancel UploadFile ufid:\(uploadFile.id)")
-        SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFileId])
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFile.id])
         let uploadFileId = uploadFile.id
         let userId = uploadFile.userId
         let parentId = uploadFile.parentDirectoryId

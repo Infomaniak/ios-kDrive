@@ -111,7 +111,7 @@ public enum SentryDebug {
     static func uploadQueueBreadcrumb(caller: String = #function, isError: Bool = false, metadata: [String: Any]? = nil) {
         let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: Category.uploadQueue)
         breadcrumb.message = caller
-        if metadata {
+        if let metadata {
             breadcrumb.data = metadata
         }
         SentrySDK.addBreadcrumb(breadcrumb)
