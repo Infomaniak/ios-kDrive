@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import Sentry
 
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
@@ -83,6 +82,7 @@ extension UploadQueue: UploadQueueable {
 
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
+        SentryDebug.uploadQueueBreadcrumb()
         concurrentQueue.sync {
             var uploadingFileIds = [String]()
             try? self.transactionWithUploadRealm { realm in
@@ -118,6 +118,8 @@ extension UploadQueue: UploadQueueable {
     public func saveToRealmAndAddToQueue(uploadFile: UploadFile,
                                          itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
         Log.uploadQueue("saveToRealmAndAddToQueue ufid:\(uploadFile.id)")
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFile.id])
+        
         assert(!uploadFile.isManagedByRealm, "we expect the file to be outside of realm at the moment")
 
         // Save drive and directory
@@ -151,17 +153,20 @@ extension UploadQueue: UploadQueueable {
 
     public func suspendAllOperations() {
         Log.uploadQueue("suspendAllOperations")
+        SentryDebug.uploadQueueBreadcrumb()
         forceSuspendQueue = true
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
         Log.uploadQueue("resumeAllOperations")
+        SentryDebug.uploadQueueBreadcrumb()
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
     }
 
     public func cancelRunningOperations() {
+        SentryDebug.uploadQueueBreadcrumb()
         Log.uploadQueue("cancelRunningOperations")
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
@@ -169,6 +174,7 @@ extension UploadQueue: UploadQueueable {
     @discardableResult
     public func cancel(uploadFileId: String) -> Bool {
         Log.uploadQueue("cancel uploadFileId:\(uploadFileId)")
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFileId])
         var found = false
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
@@ -186,6 +192,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancel(uploadFile: UploadFile) {
         Log.uploadQueue("cancel UploadFile ufid:\(uploadFile.id)")
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFileId])
         let uploadFileId = uploadFile.id
         let userId = uploadFile.userId
         let parentId = uploadFile.parentDirectoryId
@@ -220,6 +227,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["parentId": parentId])
         concurrentQueue.async {
             Log.uploadQueue("suspend queue")
             self.suspendAllOperations()
@@ -269,6 +277,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cleanNetworkAndLocalErrorsForAllOperations() {
         Log.uploadQueue("cleanErrorsForAllOperations")
+        SentryDebug.uploadQueueBreadcrumb()
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
                 // UploadFile with an error, Or no more retry, Or is initiatedFromFileManager
@@ -295,6 +304,7 @@ extension UploadQueue: UploadQueueable {
 
     public func retry(_ uploadFileId: String) {
         Log.uploadQueue("retry ufid:\(uploadFileId)")
+        SentryDebug.uploadQueueBreadcrumb()
         concurrentQueue.async {
             try? self.transactionWithUploadRealm { realm in
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
@@ -330,7 +340,7 @@ extension UploadQueue: UploadQueueable {
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("retryAllOperations parentId:\(parentId)")
-
+        SentryDebug.uploadQueueBreadcrumb(metadata: ["parentId": parentId])
         concurrentQueue.async {
             let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
             let batches = failedFileIds.chunked(into: 100)

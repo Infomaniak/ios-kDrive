@@ -21,6 +21,8 @@ import RealmSwift
 
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
+    ///
+    /// Lock access to file if upload operation `isFinished`, by throwing a `ErrorDomain.operationFinished`
     /// - Parameters:
     ///   - function: The name of the function performing the transaction
     ///   - task: A closure to mutate the current `UploadFile`
@@ -46,6 +48,21 @@ extension UploadOperation {
                 try task(file)
                 uploadsRealm.add(file, update: .modified)
             }
+        }
+    }
+
+    /// Provides a read only `UploadFile` for debug purposes, regardless of the state of the operation
+    func debugWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
+        try autoreleasepool {
+            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+            uploadsRealm.refresh()
+
+            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
+                  !file.isInvalidated else {
+                throw ErrorDomain.databaseUploadFileNotFound
+            }
+
+            try task(file.detached())
         }
     }
 }

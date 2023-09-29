@@ -123,6 +123,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     override public func execute() async {
         Log.uploadOperation("execute \(uploadFileId)")
+        SentryDebug.uploadOperationBeginBreadcrumb(uploadFileId)
 
         await catching {
             try self.checkCancelation()
@@ -418,6 +419,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     public func cleanUploadFileSession(file: UploadFile? = nil) {
         Log.uploadOperation("Clean uploading session for \(uploadFileId)")
+        SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
             file.uploadingSession = nil
@@ -486,6 +488,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// Close session if needed.
     func closeSessionAndEnd() async {
         Log.uploadOperation("closeSession ufid:\(uploadFileId)")
+        SentryDebug.uploadOperationCloseSessionAndEndBreadcrumb(uploadFileId)
 
         defer {
             end()
@@ -542,10 +545,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             self.expiringActivity?.end()
 
             finish()
+
+            SentryDebug.uploadOperationFinishedBreadcrumb(uploadFileId)
+        }
+
+        try? debugWithFile { file in
+            SentryDebug.uploadOperationEndBreadcrumb(self.uploadFileId, file.error)
         }
 
         var shouldCleanUploadFile = false
         try? transactionWithFile { file in
+
             if let error = file.error {
                 Log.uploadOperation("end file ufid:\(self.uploadFileId) errorCode: \(error.code) error:\(error)", level: .error)
             } else {
@@ -1050,6 +1060,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     public func backgroundActivityExpiring() {
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
+        SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
+
         enqueueCatching(asap: true) {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
