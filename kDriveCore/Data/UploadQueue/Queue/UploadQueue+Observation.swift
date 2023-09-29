@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import Sentry
 
 public typealias UploadedFileId = String
 public typealias UploadProgress = Double

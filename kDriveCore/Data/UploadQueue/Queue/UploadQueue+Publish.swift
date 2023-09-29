@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import Sentry
 
 protocol UploadPublishable {
     func publishUploadCount(withParent parentId: Int,

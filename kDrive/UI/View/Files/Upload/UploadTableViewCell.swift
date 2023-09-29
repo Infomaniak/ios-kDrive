@@ -107,9 +107,13 @@ class UploadTableViewCell: InsetTableViewCell {
             return
         }
 
+        // set `uploadFileId` asap so the configuration is applied correctly
+        let uploadFileId = uploadFile.id
+        currentFileId = uploadFileId
+
         // Set initial progress value
         if let progress {
-            updateProgress(fileId: uploadFile.id, progress: progress, animated: true)
+            updateProgress(fileId: uploadFileId, progress: progress, animated: true)
         }
 
         // observe the progres
@@ -132,7 +136,6 @@ class UploadTableViewCell: InsetTableViewCell {
         }
         progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
 
-        currentFileId = uploadFile.id
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
 
@@ -147,7 +150,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
 
             let realm = DriveFileManager.constants.uploadsRealm
-            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id), !file.isInvalidated {
+            if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated {
                 self.uploadQueue.cancel(uploadFile: file)
             }
         }
@@ -157,7 +160,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
 
             cardContentView.retryButton?.isHidden = true
-            uploadQueue.retry(uploadFile.id)
+            uploadQueue.retry(uploadFileId)
         }
     }
 

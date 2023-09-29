@@ -17,7 +17,6 @@
  */
 
 import Foundation
-import Sentry
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -59,6 +58,12 @@ extension UploadOperation {
         try? transactionWithFile { file in
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain {
+                // System/user cancelled requests silently handled
+                guard nsError.code == NSURLErrorCancelled else {
+                    errorHandled = true
+                    return
+                }
+
                 Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
                 file.error = .networkError
                 errorHandled = true
@@ -207,38 +212,20 @@ extension UploadOperation {
 
     // MARK: - Private
 
-    /// Some easy to follow unique sentry issue name
-    static let sentryCaptureErrorName = "UploadErrorHandling"
-
     /// Tracking upload error with detailed state of the upload operation
     private func sentryTrackingError(_ error: Error) {
         let metadata = errorMetadata(error)
-
-        // Add a breadcrumb
-        let breadcrumb = Breadcrumb(level: .error, category: Self.sentryCaptureErrorName)
-        breadcrumb.message = Self.sentryCaptureErrorName
-        breadcrumb.data = metadata
-        SentrySDK.addBreadcrumb(breadcrumb)
-
-        // Skip operationFinished
-        // And we capture upload errors with a detailed state of the upload task.
-        if let error = error as? UploadOperation.ErrorDomain,
-           error == .operationFinished {
-            return
-        }
-
-        SentrySDK.capture(message: Self.sentryCaptureErrorName) { scope in
-            scope.setExtras(metadata)
-        }
+        SentryDebug.uploadOperationErrorHandling(error, metadata)
     }
 
+    /// Get a debug representation of the upload operation
     private func errorMetadata(_ error: Error) -> [String: Any] {
         do {
             var metadata = [String: Any]()
-            try transactionWithFile { file in
-                metadata = ["version": 1,
+            try debugWithFile { file in
+                metadata = ["version": 2,
                             "uploadFileId": self.uploadFileId,
-                            "catched Error": error,
+                            "RootError": error,
                             "uploadDate": file.uploadDate ?? "nil",
                             "creationDate": file.creationDate ?? "nil",
                             "modificationDate": file.modificationDate ?? "nil",
@@ -248,34 +235,38 @@ extension UploadOperation {
                             "maxRetryCount": file.maxRetryCount,
                             "rawPersistedError": file._error ?? "nil"]
                 // Unwrap uploadingSession
-                guard let session = file.uploadingSession else {
+                guard let sessionTask = file.uploadingSession else {
                     metadata["uploadingSession"] = "nil"
                     return
                 }
 
                 // Log chunkTasks status
-                let chunkTasks = session.chunkTasks
+                let chunkTasks = sessionTask.chunkTasks
                 let chunkTaskCount = chunkTasks.count
-                metadata["chunkTasks.count"] = chunkTaskCount
+                metadata["file.uploadingSession.chunkTasks.count"] = chunkTaskCount
                 for (index, object) in chunkTasks.enumerated() {
                     metadata["chunkTask-\(index)-error"] = object.error
                     metadata["chunkTask-\(index)-chunk"] = object.chunk
                     metadata["chunkTask-\(index)-chunkNumber"] = object.chunkNumber
                 }
 
+                metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired
+                metadata["file.uploadingSession.sessionExpiration"] = sessionTask.sessionExpiration
+                metadata["file.uploadingSession.fileIdentityHasNotChanged"] = sessionTask.fileIdentityHasNotChanged
+
                 // Log uploadSession status
-                guard let uploadSession = session.uploadSession else {
+                guard let uploadSession = sessionTask.uploadSession else {
                     metadata["file.uploadingSession.uploadSession"] = "nil"
                     return
                 }
 
                 // Log uploadingSession.uploadSession state
-                metadata["file.uploadingSession.uploadSession"] =
-                    "result:\(uploadSession.result) - token:\(uploadSession.token)"
+                metadata["file.uploadingSession.uploadSession.result"] = uploadSession.result
+                metadata["file.uploadingSession.uploadSession.token"] = uploadSession.token
             }
             return metadata
-        } catch {
-            return ["ErrorFetchingUploadFile": error]
+        } catch (let dbError) {
+            return ["RootError": error, "ErrorFetchingUploadFile": dbError]
         }
     }
 }

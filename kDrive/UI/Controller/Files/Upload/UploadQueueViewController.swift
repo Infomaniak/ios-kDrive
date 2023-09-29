@@ -24,7 +24,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class UploadQueueViewController: UIViewController {
+final class UploadQueueViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
