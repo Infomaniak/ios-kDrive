@@ -225,9 +225,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
-        // Prevent NSInternalInconsistencyException
-        collectionView.reloadData()
-
         #if !ISEXTENSION
         let plusButtonDirectory: File
         if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
