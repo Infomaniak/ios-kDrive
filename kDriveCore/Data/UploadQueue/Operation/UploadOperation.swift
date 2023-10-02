@@ -436,7 +436,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Clean the remote session, if valid. Invalid ones are already gone server side.
             let driveId = file.driveId
             let userId = file.userId
-            let uploadingSession = file.uploadingSession
+            let uploadingSession = file.uploadingSession?.detached()
             self.enqueue {
                 guard let session = uploadingSession,
                       !session.isExpired else {
