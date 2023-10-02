@@ -439,7 +439,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let uploadingSession = file.uploadingSession
             self.enqueue {
                 guard let session = uploadingSession,
-                      session.isExpired == false else {
+                      !session.isExpired else {
                     return
                 }
 
