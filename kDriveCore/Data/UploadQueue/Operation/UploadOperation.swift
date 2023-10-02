@@ -209,16 +209,27 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
 
-        var hasUploadingSession = false
+        var uploadingSession: UploadingSessionTask?
         try transactionWithFile { file in
             // Decrease retry count
             file.maxRetryCount -= 1
 
-            hasUploadingSession = (file.uploadingSession != nil)
+            uploadingSession = file.uploadingSession?.detached()
         }
 
         // fetch stored session
-        if hasUploadingSession {
+        if let uploadingSession {
+            guard uploadingSession.fileIdentityHasNotChanged else {
+                throw ErrorDomain.fileIdentityHasChanged
+            }
+
+            // Session is expired, regenerate it from scratch
+            guard !uploadingSession.isExpired else {
+                cleanUploadFileSession()
+                try await generateNewSessionAndStore()
+                return
+            }
+
             try await fetchAndCleanStoredSession()
         }
 
@@ -656,9 +667,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("fetchAndCleanStoredSession ufid:\(uploadFileId)")
         try transactionWithFile { file in
             guard let uploadingSession = file.uploadingSession,
-                  !uploadingSession.isExpired,
-                  uploadingSession.fileIdentityHasNotChanged else {
+                  !uploadingSession.isExpired else {
                 throw ErrorDomain.uploadSessionInvalid
+            }
+
+            guard uploadingSession.fileIdentityHasNotChanged else {
+                throw ErrorDomain.fileIdentityHasChanged
             }
 
             // Cleanup the uploading chunks and session state for re-use
