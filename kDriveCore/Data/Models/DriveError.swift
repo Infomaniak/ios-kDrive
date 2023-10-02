@@ -275,7 +275,9 @@ public struct DriveError: Error, Equatable {
         return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
     }
 
-    /// Wraps a specific detailed error into a user facing localized DriveError
+    /// Wraps a specific detailed error into a user facing localized DriveError.
+    ///
+    /// Produced object has a new identity but equatable is still true
     public func wrapping(_ underlyingError: Error) -> Self {
         let error = DriveError(type: type,
                                code: code,
@@ -284,6 +286,7 @@ public struct DriveError: Error, Equatable {
         return error
     }
 
+    /// two `DriveError`s are identical if their `code` matches
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {
         return lhs.code == rhs.code
     }
