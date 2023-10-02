@@ -119,7 +119,7 @@ extension UploadQueue: UploadQueueable {
                                          itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
         Log.uploadQueue("saveToRealmAndAddToQueue ufid:\(uploadFile.id)")
         SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFile.id])
-        
+
         assert(!uploadFile.isManagedByRealm, "we expect the file to be outside of realm at the moment")
 
         // Save drive and directory

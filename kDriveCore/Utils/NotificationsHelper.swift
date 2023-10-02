@@ -149,7 +149,7 @@ public struct NotificationsHelper: NotificationsHelpable {
 
         // We capture all upload errors presented to the user, with underlyingError if any
         SentryDebug.uploadNotificationError(metadata)
-        
+
         // Add a breadcrumb
         SentryDebug.uploadNotificationBreadcrumb(metadata)
     }

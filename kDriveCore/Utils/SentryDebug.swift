@@ -60,6 +60,12 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
+    static func uploadOperationCleanSessionRemotelyBreadcrumb(_ uploadFileId: String, _ success: Bool) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "Clean uploading session remotely for \(uploadFileId), success:\(success)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     static func uploadOperationCleanSessionBreadcrumb(_ uploadFileId: String) {
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
         breadcrumb.message = "Clean uploading session for \(uploadFileId)"

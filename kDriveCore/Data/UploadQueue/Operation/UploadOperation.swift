@@ -422,6 +422,30 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
+            // Clean the remote session, if valid. Invalid ones are already gone server side.
+            let driveId = file.driveId
+            let userId = file.userId
+            let uploadingSession = file.uploadingSession
+            self.enqueue {
+                guard let session = uploadingSession,
+                      session.isExpired == false else {
+                    return
+                }
+
+                guard let driveFileManager = try? self.getDriveFileManager(for: driveId, userId: userId) else {
+                    return
+                }
+
+                let abstractToken = AbstractTokenWrapper(token: session.token)
+                let apiFetcher = driveFileManager.apiFetcher
+                let drive = driveFileManager.drive
+
+                // We try to cancel the upload session, we discard results
+                let cancelResult = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
+                Log.uploadOperation("cancelSession remotely:\(String(describing: cancelResult)) for \(self.uploadFileId)")
+                SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(self.uploadFileId, cancelResult ?? false)
+            }
+
             file.uploadingSession = nil
             file.progress = nil
 
