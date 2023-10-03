@@ -1117,13 +1117,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 file.error = .taskRescheduled
                 Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
 
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(file.name)"
-                breadcrumb.data = ["File id": self.uploadFileId,
-                                   "File name": file.name,
-                                   "File size": file.size,
-                                   "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(breadcrumb)
+                let metadata = ["File id": self.uploadFileId,
+                                "File name": file.name,
+                                "File size": file.size,
+                                "File type": file.type.rawValue]
+                SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)
             }
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
