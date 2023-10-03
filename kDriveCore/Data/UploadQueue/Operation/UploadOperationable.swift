@@ -50,14 +50,11 @@ extension Operation: Operationable {}
 
 /// Something that can upload a file.
 public protocol UploadOperationable: Operationable {
-    /// init an UploadOperationable
+    /// Central init method for `UploadOperation`
     /// - Parameters:
-    ///   - uploadFileId: the identifier of the UploadFile in base
-    ///   - urlSession: the url session to use
-    ///   - itemIdentifier: the itemIdentifier
-    init(uploadFileId: String,
-         urlSession: URLSession,
-         itemIdentifier: NSFileProviderItemIdentifier?)
+    ///   - uploadFileId: The uniq identifier of the `UploadFile` entity in database. Must be unique and not shared with other `UploadOperation`
+    ///   - urlSession: The URL session used to perform authenticated requests
+    init(uploadFileId: String, urlSession: URLSession)
 
     /// Network completion handler
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)

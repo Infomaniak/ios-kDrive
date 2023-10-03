@@ -60,6 +60,8 @@ public class UploadFile: Object, UploadFilable {
     @Persisted(primaryKey: true) public var id = ""
     @Persisted public var name = ""
     @Persisted var relativePath = ""
+    @Persisted var fileProviderItemIdentifier: String?  // NSFileProviderItemIdentifier if any
+    @Persisted var assetLocalIdentifier: String?  // PHAsset source identifier if any
     @Persisted private var url: String?
     @Persisted private var rawType = "file"
     @Persisted public var parentDirectoryId = 1
@@ -152,10 +154,10 @@ public class UploadFile: Object, UploadFilable {
     }
 
     public init(
-        id: String = UUID().uuidString,
         parentDirectoryId: Int,
         userId: Int,
         driveId: Int,
+        fileProviderItemIdentifier: String? = nil,
         url: URL,
         name: String? = nil,
         conflictOption: ConflictOption = .rename,
@@ -163,12 +165,13 @@ public class UploadFile: Object, UploadFilable {
         initiatedFromFileManager: Bool = false,
         priority: Operation.QueuePriority = .normal
     ) {
+        self.id = UUID().uuidString // We need a strictly unique id for each UploadOperation
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
+        self.fileProviderItemIdentifier = fileProviderItemIdentifier
         self.url = url.path
         self.name = name ?? url.lastPathComponent
-        self.id = id
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.initiatedFromFileManager = initiatedFromFileManager
         rawType = UploadFileType.file.rawValue
@@ -189,11 +192,13 @@ public class UploadFile: Object, UploadFilable {
         shouldRemoveAfterUpload: Bool = true,
         priority: Operation.QueuePriority = .normal
     ) {
+        self.id = UUID().uuidString // We need a strictly unique id for each UploadOperation
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
         self.name = name
-        id = asset.localIdentifier
+        self.assetLocalIdentifier = asset.localIdentifier
+        
         localAsset = asset
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         rawType = UploadFileType.phAsset.rawValue

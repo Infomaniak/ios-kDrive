@@ -104,20 +104,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     var uploadTasks = [String: URLSessionUploadTask]()
 
     private let urlSession: URLSession
-    private let itemIdentifier: NSFileProviderItemIdentifier?
     private var expiringActivity: ExpiringActivityable?
 
     public var result: UploadCompletionResult
 
     // MARK: - Public methods -
 
-    public required init(uploadFileId: String,
-                         urlSession: URLSession = URLSession.shared,
-                         itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public required init(uploadFileId: String, urlSession: URLSession = URLSession.shared) {
         Log.uploadOperation("init ufid:\(uploadFileId)")
         self.uploadFileId = uploadFileId
         self.urlSession = urlSession
-        self.itemIdentifier = itemIdentifier
         result = UploadCompletionResult()
 
         super.init()
@@ -211,7 +207,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
 
-        let uploadId = self.uploadFileId
+        let uploadId = uploadFileId
         var uploadingSession: UploadingSessionTask?
         var error: ErrorDomain?
         try transactionWithFile { file in

@@ -302,14 +302,14 @@ final class FileProviderExtension: NSFileProviderExtension {
     }
 
     func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
-        let uploadFileId = item.itemIdentifier.rawValue
-        Log.fileProvider("backgroundUploadItem uploadFileId:\(uploadFileId)")
+        let fileProviderItemIdentifier = item.itemIdentifier.rawValue
+        Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(fileProviderItemIdentifier)")
         enqueue {
             let uploadFile = UploadFile(
-                id: uploadFileId,
                 parentDirectoryId: item.parentItemIdentifier.toFileId()!,
                 userId: self.driveFileManager.drive.userId,
                 driveId: self.driveFileManager.drive.id,
+                fileProviderItemIdentifier: fileProviderItemIdentifier,
                 url: item.storageUrl,
                 name: item.filename,
                 conflictOption: .version,
@@ -318,7 +318,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             )
 
             var observationToken: ObservationToken?
-            observationToken = self.uploadQueueObservable.observeFileUploaded(self, fileId: uploadFileId) { uploadedFile, _ in
+            observationToken = self.uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
                 observationToken?.cancel()
                 defer {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
