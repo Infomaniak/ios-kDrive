@@ -128,10 +128,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Gracefully suspend upload/download queue before exiting.
         // Running operations will go on, but at least no more operations will start
         DownloadQueue.instance.suspendAllOperations()
+        DownloadQueue.instance.cancelAllOperations()
+
         @InjectService var uploadQueue: UploadQueueable
         uploadQueue.suspendAllOperations()
+        uploadQueue.rescheduleRunningOperations()
 
-        // TODO: Cancel + await completion. Watch out for background scheduling.
+        // Await on upload queue to terminate gracefully, if time allows for it.
+        let group = TolerantDispatchGroup()
+        uploadQueue.waitForCompletion {
+            group.leave()
+        }
+        group.enter()
+        group.wait()
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

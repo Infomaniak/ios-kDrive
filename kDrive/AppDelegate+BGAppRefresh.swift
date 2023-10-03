@@ -80,7 +80,7 @@ extension AppDelegate {
             task.expirationHandler = {
                 Log.bgTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) EXPIRED", level: .error)
                 uploadQueue.suspendAllOperations()
-                uploadQueue.cancelRunningOperations()
+                uploadQueue.rescheduleRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 
@@ -100,7 +100,7 @@ extension AppDelegate {
             task.expirationHandler = {
                 Log.bgTaskScheduling("Task \(Constants.longBackgroundRefreshIdentifier) EXPIRED", level: .error)
                 uploadQueue.suspendAllOperations()
-                uploadQueue.cancelRunningOperations()
+                uploadQueue.rescheduleRunningOperations()
                 task.setTaskCompleted(success: false)
             }
 

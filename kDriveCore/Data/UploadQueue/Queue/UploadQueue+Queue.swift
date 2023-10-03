@@ -44,6 +44,11 @@ public protocol UploadQueueable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
+    ///
+    /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
+    func rescheduleRunningOperations()
+
     /// Cancel all running operations, regardless of state
     func cancelRunningOperations()
 
@@ -163,6 +168,19 @@ extension UploadQueue: UploadQueueable {
         SentryDebug.uploadQueueBreadcrumb()
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
+    }
+
+    public func rescheduleRunningOperations() {
+        SentryDebug.uploadQueueBreadcrumb()
+        Log.uploadQueue("rescheduleRunningOperations")
+        operationQueue.operations.filter(\.isExecuting).forEach { operation in
+            guard let uploadOperation = operation as? UploadOperation else {
+                return
+            }
+
+            // Mark the operation as rescheduled
+            uploadOperation.backgroundActivityExpiring()
+        }
     }
 
     public func cancelRunningOperations() {
