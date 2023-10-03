@@ -23,13 +23,29 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: UICollectionViewController {
-    private struct RootMenuItem: Equatable {
+    private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+
+    private enum RootMenuSection {
+        case main
+    }
+
+    private struct RootMenuItem: Equatable, Hashable {
         var id: Int {
             return destinationFile.id
         }
+
         let name: String
         let image: UIImage
         let destinationFile: File
+        var isFirst = false
+        var isLast = false
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(isFirst)
+            hasher.combine(isLast)
+        }
     }
 
     private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
@@ -54,13 +70,23 @@ class RootMenuViewController: UICollectionViewController {
     private let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
     private var rootViewChildren: [File]?
+    private var dataSource: MenuDataSource?
 
-    private var items: [RootMenuItem] {
+    private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.name, image: $0.icon, destinationFile: $0)
         } ?? []
 
-        return userRootFolders + RootMenuViewController.baseItems
+        var menuItems = userRootFolders + RootMenuViewController.baseItems
+        if !menuItems.isEmpty {
+            menuItems[0].isFirst = true
+            menuItems[menuItems.count - 1].isLast = true
+        }
+
+        var snapshot = DataSourceSnapshot()
+        snapshot.appendSections([RootMenuSection.main])
+        snapshot.appendItems(menuItems)
+        return snapshot
     }
 
     init(driveFileManager: DriveFileManager) {
@@ -80,6 +106,20 @@ class RootMenuViewController: UICollectionViewController {
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
 
+        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
+            guard let rootMenuCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: RootMenuCell.identifier,
+                for: indexPath
+            ) as? RootMenuCell else {
+                fatalError("Failed to dequeue cell")
+            }
+
+            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+            return rootMenuCell
+        }
+        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+
         let rootChildren = driveFileManager.getRealm()
             .object(ofType: File.self, forPrimaryKey: DriveFileManager.constants.rootID)?.children
         rootChildrenObservationToken = rootChildren?.observe { [weak self] changes in
@@ -87,16 +127,16 @@ class RootMenuViewController: UICollectionViewController {
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(children)
-                collectionView.reloadData()
-            case .update(let children, _, _,_):
+                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+            case .update(let children, _, _, _):
                 rootViewChildren = Array(children)
-                // TODO: Maybe use insert/remove instead of reload
-                collectionView.reloadData()
+                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
             case .error:
                 break
             }
         }
     }
+
     static func createListLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
@@ -113,31 +153,8 @@ class RootMenuViewController: UICollectionViewController {
         return layout
     }
 
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
-    }
-
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-
-    override func collectionView(_ collectionView: UICollectionView,
-                                 cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let rootMenuCell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: RootMenuCell.identifier,
-            for: indexPath
-        ) as? RootMenuCell else {
-            fatalError("Failed to dequeue cell")
-        }
-
-        let menuItem = items[indexPath.row]
-        rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-        rootMenuCell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == items.count - 1)
-        return rootMenuCell
-    }
-
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedRootFile = items[indexPath.row].destinationFile
+        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
         switch selectedRootFile.id {
