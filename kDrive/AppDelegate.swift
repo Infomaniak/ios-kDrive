@@ -121,8 +121,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         Log.appDelegate("applicationWillTerminate")
+
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
+
+        // Gracefully suspend upload/download queue before exiting.
+        // Running operations will go on, but at least no more operations will start
+        DownloadQueue.instance.suspendAllOperations()
+        @InjectService var uploadQueue: UploadQueueable
+        uploadQueue.suspendAllOperations()
+
+        // TODO: Cancel + await completion. Watch out for background scheduling.
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -131,6 +140,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         Log.appDelegate("applicationDidEnterBackground")
+
         scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
@@ -141,6 +151,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication,
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         Log.appDelegate("application performFetchWithCompletionHandler")
+
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the
         // background.
         if MigrationHelper.canMigrate() {
@@ -159,6 +170,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
+
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
             Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
@@ -187,6 +199,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         Log.appDelegate("applicationWillEnterForeground")
+
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
@@ -270,6 +283,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
         Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
+
         @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
@@ -354,6 +368,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     private func uploadEditedFiles() {
         Log.appDelegate("uploadEditedFiles")
+
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
@@ -437,6 +452,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
         Log.appDelegate("updateAvailableOfflineFiles")
+
         guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
@@ -545,6 +561,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         Log.appDelegate("application shouldSaveApplicationState")
+
         coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
         return true
     }

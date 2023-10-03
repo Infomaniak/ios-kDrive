@@ -58,6 +58,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         case operationCanceled
         /// The operation is finished
         case operationFinished
+        /// Cannot decrease further retry count, already zero
+        case retryCountIsZero
     }
 
     // MARK: - Attributes
@@ -209,12 +211,26 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
 
+        let uploadId = self.uploadFileId
         var uploadingSession: UploadingSessionTask?
+        var error: ErrorDomain?
         try transactionWithFile { file in
+            SentryDebug.uploadOperationRetryCountDecreaseBreadcrumb(uploadId, file.maxRetryCount)
+
+            /// If cannot retry, throw
+            guard file.maxRetryCount > 0 else {
+                error = ErrorDomain.retryCountIsZero
+                return
+            }
+
             // Decrease retry count
             file.maxRetryCount -= 1
 
             uploadingSession = file.uploadingSession?.detached()
+        }
+
+        if let error {
+            throw error
         }
 
         // fetch stored session
@@ -604,7 +620,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             // retry from scratch next time
-            if file.maxRetryCount == 0 {
+            if file.maxRetryCount <= 0 {
                 self.cleanUploadFileSession(file: file)
             }
 

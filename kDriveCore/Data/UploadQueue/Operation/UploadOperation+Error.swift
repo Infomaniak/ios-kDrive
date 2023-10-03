@@ -105,12 +105,11 @@ extension UploadOperation {
                      .chunkError,
                      .fileIdentityHasChanged,
                      .parseError,
-                     .missingChunkHash:
-                    self.cleanUploadFileSession(file: file)
-                    file.error = .localError.wrapping(error)
-
-                case .uploadSessionTaskMissing,
+                     .missingChunkHash,
+                     .retryCountIsZero,
+                     .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
+                    // Clean session, present error, user action required to restart.
                     self.cleanUploadFileSession(file: file)
                     file.error = .localError.wrapping(error)
 
@@ -231,7 +230,7 @@ extension UploadOperation {
         do {
             var metadata = [String: Any]()
             try debugWithFile { file in
-                metadata = ["version": 2,
+                metadata = ["version": 3,
                             "uploadFileId": self.uploadFileId,
                             "RootError": error,
                             "uploadDate": file.uploadDate ?? "nil",
@@ -253,9 +252,8 @@ extension UploadOperation {
                 let chunkTaskCount = chunkTasks.count
                 metadata["file.uploadingSession.chunkTasks.count"] = chunkTaskCount
                 for (index, object) in chunkTasks.enumerated() {
-                    metadata["chunkTask-\(index)-error"] = object.error
-                    metadata["chunkTask-\(index)-chunk"] = object.chunk
-                    metadata["chunkTask-\(index)-chunkNumber"] = object.chunkNumber
+                    metadata["chunkTask-\(index)"] =
+                        "chunkNumber:\(object.chunkNumber) uploaded:\(String(describing: object.chunk)) error:\(String(describing: object.error))"
                 }
 
                 metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired

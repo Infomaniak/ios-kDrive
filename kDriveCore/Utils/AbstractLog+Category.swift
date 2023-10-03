@@ -32,6 +32,9 @@ public enum Log {
                                     line: UInt = #line,
                                     tag: Any? = nil) {
         let category = "FileProvider"
+
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+
         ABLog(message(),
               category: category,
               level: level,
@@ -54,6 +57,9 @@ public enum Log {
                                    line: UInt = #line,
                                    tag: Any? = nil) {
         let category = "AppDelegate"
+
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+
         ABLog(message(),
               category: category,
               level: level,
@@ -76,6 +82,7 @@ public enum Log {
                                             line: UInt = #line,
                                             tag: Any? = nil) {
         let category = "PhotoLibraryUploader"
+
         ABLog(message(),
               category: category,
               level: level,
@@ -98,6 +105,9 @@ public enum Log {
                                         line: UInt = #line,
                                         tag: Any? = nil) {
         let category = "BGTaskScheduling"
+
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+
         ABLog(message(),
               category: category,
               level: level,
@@ -120,6 +130,9 @@ public enum Log {
                                         line: UInt = #line,
                                         tag: Any? = nil) {
         let category = "BackgroundSessionManager"
+
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+
         ABLog(message(),
               category: category,
               level: level,

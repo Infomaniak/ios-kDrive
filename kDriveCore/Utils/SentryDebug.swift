@@ -18,6 +18,7 @@
 
 import Foundation
 import Sentry
+import UIKit
 
 /// Something to track errors
 public enum SentryDebug {
@@ -78,6 +79,12 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
+    static func uploadOperationRetryCountDecreaseBreadcrumb(_ uploadFileId: String, _ retryCount: Int) {
+        let breadcrumb = Breadcrumb(level: .info, category: Category.uploadOperation)
+        breadcrumb.message = "Background task for \(uploadFileId) try decrement retryCount:\(retryCount)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     static func uploadOperationErrorHandling(_ error: Error, _ metadata: [String: Any]) {
         // Add a breadcrumb for any error
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
@@ -121,5 +128,18 @@ public enum SentryDebug {
             breadcrumb.data = metadata
         }
         SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    // MARK: - Logger
+
+    public static func loggerBreadcrumb(caller: String, category: String) {
+        Task { @MainActor in
+            let message = "\(caller) foreground:\(UIApplication.shared.applicationState != .background)"
+            Task {
+                let breadcrumb = Breadcrumb(level: .info, category: category)
+                breadcrumb.message = message
+                SentrySDK.addBreadcrumb(breadcrumb)
+            }
+        }
     }
 }
