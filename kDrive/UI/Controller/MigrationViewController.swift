@@ -68,7 +68,7 @@ class MigrationViewController: UIViewController {
             } catch {
                 success = false
             }
-            DispatchQueue.main.async { [self] in
+            Task { @MainActor [self] in
                 buttonView.alpha = 0
                 buttonView.isHidden = false
                 retryButton.isHidden = success

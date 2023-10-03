@@ -61,7 +61,7 @@ extension FileProviderExtension {
                     // Call the per thumbnail completion handler for each thumbnail requested.
                     perThumbnailCompletionHandler(identifier, mappedDataOrNil, myErrorOrNil)
 
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         if progress.isFinished {
                             // Call this completion handler once all thumbnails are complete
                             completionHandler(nil)

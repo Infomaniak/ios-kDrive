@@ -98,14 +98,14 @@ protocol FileCellDelegate: AnyObject {
         downloadProgressObserver?.cancel()
         downloadProgressObserver = DownloadQueue.instance
             .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
                     handler(!file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
                 }
             }
         downloadObserver?.cancel()
         downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 handler(!isAvailableOffline, true, 1)
             }

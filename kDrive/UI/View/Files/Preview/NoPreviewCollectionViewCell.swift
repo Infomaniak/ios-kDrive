@@ -78,7 +78,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         progressView.progress = 0
         if showProgress {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     self?.progressView.progress = Float(progress)
                 }
             }

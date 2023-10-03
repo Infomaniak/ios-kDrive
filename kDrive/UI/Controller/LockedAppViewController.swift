@@ -38,7 +38,7 @@ class LockedAppViewController: UIViewController {
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
                 context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         if success {
                             self.dismiss(animated: true)
                             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(

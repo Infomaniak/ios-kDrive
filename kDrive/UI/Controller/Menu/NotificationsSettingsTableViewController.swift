@@ -70,7 +70,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
                 self.rows = [.receiveNotification, .general, .importFile, .sharedWithMe, .newComments]
                 self.disableSwitch = false
             }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.tableView.reloadData()
             }
         }

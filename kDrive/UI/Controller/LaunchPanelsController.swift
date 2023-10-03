@@ -125,7 +125,7 @@ class LaunchPanelsController {
     func pickAndDisplayPanel(viewController: UIViewController) {
         DispatchQueue.global().async {
             if let panel = self.pickPanelToDisplay() {
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     viewController.present(panel.makePanelController(), animated: true, completion: panel.onDisplay)
                 }
             }

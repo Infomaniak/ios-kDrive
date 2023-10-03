@@ -273,7 +273,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                         // Proceed with removal
                         self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
                     }
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         self.window?.rootViewController?.present(alert, animated: true)
                     }
                 }
@@ -289,7 +289,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
         if preload {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 // if isSwitching {
                 rootViewController?.didSwitchCurrentAccount(currentAccount)
                 /* } else {
@@ -546,7 +546,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     @objc func reloadDrive(_ notification: Notification) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.refreshCacheData(preload: false, isSwitching: false)
         }
     }

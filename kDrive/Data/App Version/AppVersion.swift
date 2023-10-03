@@ -38,7 +38,7 @@ struct AppVersion: Codable {
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let data {
                 if let decodedResponse = try? JSONDecoder().decode(Response.self, from: data) {
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         handler(decodedResponse.results[0])
                     }
                     return

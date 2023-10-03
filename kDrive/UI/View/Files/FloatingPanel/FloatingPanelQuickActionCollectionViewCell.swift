@@ -123,7 +123,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
         } else {
             loadingIndicator.stopAnimating()
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     guard self?.observationToken != nil else { return }
                     self?.setProgress(progress)
                     if progress >= 1 {

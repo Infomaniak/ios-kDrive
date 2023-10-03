@@ -51,7 +51,7 @@ final class UploadQueueViewController: UIViewController {
         setUpObserver()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self?.tableView.reloadData()
             }
         }

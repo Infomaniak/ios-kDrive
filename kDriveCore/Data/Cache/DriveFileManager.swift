@@ -677,7 +677,7 @@ public final class DriveFileManager {
                         }
                     }
                     self.notifyObserversWith(file: safeFile)
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         completion(error)
                     }
                 }

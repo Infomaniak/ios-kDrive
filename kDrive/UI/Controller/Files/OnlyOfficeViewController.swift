@@ -146,11 +146,11 @@ class OnlyOfficeViewController: UIViewController {
                     if let token {
                         var request = URLRequest(url: url)
                         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                        DispatchQueue.main.async {
+                        Task { @MainActor in
                             self.webView.load(request)
                         }
                     } else {
-                        DispatchQueue.main.async {
+                        Task { @MainActor in
                             self.showErrorMessage()
                         }
                     }

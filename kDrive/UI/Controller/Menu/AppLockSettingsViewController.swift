@@ -57,7 +57,7 @@ class AppLockSettingsViewController: UIViewController {
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
                 context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         if success {
                             UserDefaults.shared.isAppLockEnabled = sender.isOn
                         } else {

@@ -195,7 +195,7 @@ class SaveFileViewController: UIViewController {
         ) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self?.updateTableViewAfterImport()
             }
         }
@@ -209,7 +209,7 @@ class SaveFileViewController: UIViewController {
                          userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
                 self?.items = importedFiles
                 self?.errorCount = errorCount
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self?.updateTableViewAfterImport()
                 }
             }

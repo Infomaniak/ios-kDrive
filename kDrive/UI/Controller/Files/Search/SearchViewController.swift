@@ -292,7 +292,7 @@ class SearchViewController: FileListViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.searchController.searchBar.becomeFirstResponder()
         }
     }

@@ -166,7 +166,7 @@ class FileDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let file else {
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.navigationController?.popViewController(animated: true)
             }
             return
@@ -216,7 +216,7 @@ class FileDetailViewController: UIViewController {
 
         // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.file = newFile
                 self?.reloadTableView()
             }

@@ -102,7 +102,7 @@ extension StoreManager: SKProductsRequestDelegate {
         }
 
         if !storeResponse.isEmpty {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.delegate?.storeManagerDidReceiveResponse(self.storeResponse)
             }
         }
@@ -113,7 +113,7 @@ extension StoreManager: SKProductsRequestDelegate {
 
 extension StoreManager: SKRequestDelegate {
     func request(_ request: SKRequest, didFailWithError error: Error) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.delegate?.storeManagerDidReceiveMessage(error.localizedDescription)
         }
     }

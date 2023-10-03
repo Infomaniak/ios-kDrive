@@ -214,7 +214,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
             if self?.currentFile.id == file.id {
                 self?.currentFile = file
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     guard let self else { return }
                     self.collectionView.endEditing(true)
                     self.collectionView.reloadItems(at: [self.currentIndex])
@@ -469,7 +469,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 previewError.pdfGenerationProgress = Progress(totalUnitCount: 10)
                 PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
                     previewError.addDownloadTask(downloadTask)
-                    DispatchQueue.main.async { [weak self] in
+                    Task { @MainActor [weak self] in
                         self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
                     }
                 } completion: { url, error in
@@ -479,7 +479,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                     } else {
                         previewError.error = error
                     }
-                    DispatchQueue.main.async { [weak self] in
+                    Task { @MainActor [weak self] in
                         self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
                     }
                 }
@@ -507,7 +507,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
         DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
             guard let self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 if error == nil {
                     completion()
                     currentCell.observeProgress(false, file: self.currentFile)
@@ -530,7 +530,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 file: currentFile,
                 userId: accountManager.currentUserId,
                 onOperationCreated: { operation in
-                    DispatchQueue.main.async { [weak self] in
+                    Task { @MainActor [weak self] in
                         self?.currentDownloadOperation = operation
                         if let progress = self?.currentDownloadOperation?.task?.progress,
                            let cell = self?.collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
@@ -539,7 +539,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                     }
                 },
                 completion: { error in
-                    DispatchQueue.main.async { [weak self] in
+                    Task { @MainActor [weak self] in
                         self?.currentDownloadOperation = nil
                         if self?.view.window != nil {
                             if let error {
@@ -620,7 +620,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         currentIndex = IndexPath(row: decodedIndex, section: 0)
 
         // Update UI
-        DispatchQueue.main.async { [self] in
+        Task { @MainActor [self] in
             collectionView.reloadData()
             updateFileForCurrentIndex()
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)

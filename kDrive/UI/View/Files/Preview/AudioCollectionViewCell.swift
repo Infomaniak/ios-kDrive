@@ -111,7 +111,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
                     let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
