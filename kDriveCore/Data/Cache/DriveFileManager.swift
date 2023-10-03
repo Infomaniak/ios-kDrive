@@ -51,7 +51,7 @@ public final class DriveFileManager {
         public var tmpDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 14
+        public let currentUploadDbVersion: UInt64 = 15
         public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
@@ -84,6 +84,35 @@ public final class DriveFileManager {
                 // Migration for Upload With Chunks
                 if oldSchemaVersion < 14 {
                     migration.deleteData(forType: UploadFile.className())
+                }
+
+                // Migration for UploadFile With dedicated fileProviderItemIdentifier and assetLocalIdentifier fields
+                if oldSchemaVersion < 15 {
+                    migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
+                        guard let newObject else {
+                            return
+                        }
+
+                        // Try to migrate the assetLocalIdentifier if possible
+                        let type: String? = oldObject?["rawType"] as? String ?? nil
+
+                        switch type {
+                        case UploadFileType.phAsset.rawValue:
+                            // The object was from a phAsset source, the id has to be the `LocalIdentifier`
+                            let oldAssetIdentifier: String? = oldObject?["id"] as? String ?? nil
+
+                            newObject["assetLocalIdentifier"] = oldAssetIdentifier
+                            newObject["fileProviderItemIdentifier"] = nil
+
+                            // Making sure the ID is unique, and not a PHAsset identifier
+                            newObject["id"] = UUID().uuidString
+
+                        default:
+                            // We cannot infer anything, all to nil
+                            newObject["assetLocalIdentifier"] = nil
+                            newObject["fileProviderItemIdentifier"] = nil
+                        }
+                    }
                 }
             }
         }
