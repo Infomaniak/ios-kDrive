@@ -103,7 +103,7 @@ class StoreObserver: NSObject {
         DDLogInfo("Deliver content for \(transaction.payment.productIdentifier)")
 
         if let receiptString = getReceipt() {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.delegate?.storeObserverPurchaseDidSucceed(transaction: transaction, receiptString: receiptString)
             }
         }
@@ -121,12 +121,13 @@ class StoreObserver: NSObject {
 
         // Do not send any notifications when the user cancels the purchase
         if (transaction.error as? SKError)?.code == .paymentCancelled {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.delegate?.storeObserverPaymentCancelled()
             }
         } else {
-            DispatchQueue.main.async {
-                self.delegate?.storeObserverDidReceiveMessage(message)
+            let messageCopy = message
+            Task { @MainActor in
+                self.delegate?.storeObserverDidReceiveMessage(messageCopy)
             }
         }
         // Finish the failed transaction
@@ -138,7 +139,7 @@ class StoreObserver: NSObject {
         restored.append(transaction)
         DDLogInfo("[StoreObserver] Restore content for \(transaction.payment.productIdentifier)")
 
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.delegate?.storeObserverRestoreDidSucceed()
         }
         // Finishes the restored transaction
@@ -179,7 +180,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         // Called when an error occur while restoring purchases
         if let error = error as? SKError, error.code != .paymentCancelled {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.delegate?.storeObserverDidReceiveMessage(error.localizedDescription)
             }
         }
@@ -190,7 +191,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
         DDLogInfo("[StoreObserver] All restorable transactions have been processed by the payment queue.")
 
         if !hasRestorablePurchases {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.delegate?
                     .storeObserverDidReceiveMessage(
                         "There are no restorable purchases.\nOnly previously bought non-consumable products and auto-renewable subscriptions can be restored."

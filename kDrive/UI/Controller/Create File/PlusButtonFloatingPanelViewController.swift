@@ -247,13 +247,13 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                         var configuration = PHPickerConfiguration(photoLibrary: .shared())
                         configuration.selectionLimit = 0
 
-                        DispatchQueue.main.async {
+                        Task { @MainActor in
                             let picker = PHPickerViewController(configuration: configuration)
                             picker.delegate = mainTabViewController.photoPickerDelegate
                             mainTabViewController.present(picker, animated: true)
                         }
                     } else {
-                        DispatchQueue.main.async {
+                        Task { @MainActor in
                             let alert = AlertTextViewController(
                                 title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
                                 message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,

@@ -166,7 +166,7 @@ class StorageTableViewController: UITableViewController {
 
         // Reload data
         reload()
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.tableView.reloadData()
         }
     }

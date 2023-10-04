@@ -149,7 +149,7 @@ public struct NotificationsHelper: NotificationsHelpable {
 
         // We capture all upload errors presented to the user, with underlyingError if any
         SentryDebug.uploadNotificationError(metadata)
-        
+
         // Add a breadcrumb
         SentryDebug.uploadNotificationBreadcrumb(metadata)
     }
@@ -223,7 +223,7 @@ public struct NotificationsHelper: NotificationsHelpable {
     // MARK: - Private
 
     private func sendImmediately(notification: UNMutableNotificationContent, id: String, action: IKSnackBar.Action? = nil) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             if notification.categoryIdentifier == CategoryIdentifier.upload && !NotificationsHelper.importNotificationsEnabled {
                 return
             }

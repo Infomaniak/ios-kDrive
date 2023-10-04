@@ -24,7 +24,7 @@ enum OperationQueueHelper {
         Log.uploadQueue("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled) hasOperationsInQueue:\(hasOperationsInQueue)")
 
         #if !ISEXTENSION
-        DispatchQueue.main.async {
+        Task { @MainActor in
             if shouldBeDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
             } else if !hasOperationsInQueue {

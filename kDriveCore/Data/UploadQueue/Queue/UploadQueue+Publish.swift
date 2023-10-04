@@ -60,7 +60,7 @@ extension UploadQueue: UploadPublishable {
                 let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm)
                     .count
                 self.observations.didChangeUploadCountInParent.values.forEach { closure in
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         closure(parentId, uploadCount)
                     }
                 }
@@ -76,7 +76,7 @@ extension UploadQueue: UploadPublishable {
             try? transactionWithUploadRealm { realm in
                 let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
                 self.observations.didChangeUploadCountInDrive.values.forEach { closure in
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         closure(driveId, uploadCount)
                     }
                 }
@@ -94,7 +94,7 @@ extension UploadQueue: UploadPublishable {
                     return
                 }
 
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     closure(uploadFile, result.driveFile)
                 }
             }

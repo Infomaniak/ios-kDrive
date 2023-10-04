@@ -44,6 +44,11 @@ public protocol UploadQueueable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
+    ///
+    /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
+    func rescheduleRunningOperations()
+
     /// Cancel all running operations, regardless of state
     func cancelRunningOperations()
 
@@ -119,7 +124,7 @@ extension UploadQueue: UploadQueueable {
                                          itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
         Log.uploadQueue("saveToRealmAndAddToQueue ufid:\(uploadFile.id)")
         SentryDebug.uploadQueueBreadcrumb(metadata: ["uploadFile.id": uploadFile.id])
-        
+
         assert(!uploadFile.isManagedByRealm, "we expect the file to be outside of realm at the moment")
 
         // Save drive and directory
@@ -163,6 +168,19 @@ extension UploadQueue: UploadQueueable {
         SentryDebug.uploadQueueBreadcrumb()
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
+    }
+
+    public func rescheduleRunningOperations() {
+        SentryDebug.uploadQueueBreadcrumb()
+        Log.uploadQueue("rescheduleRunningOperations")
+        operationQueue.operations.filter(\.isExecuting).forEach { operation in
+            guard let uploadOperation = operation as? UploadOperation else {
+                return
+            }
+
+            // Mark the operation as rescheduled
+            uploadOperation.backgroundActivityExpiring()
+        }
     }
 
     public func cancelRunningOperations() {
@@ -456,7 +474,7 @@ extension UploadQueue: UploadQueueable {
         let priority = uploadFile.priority
         OperationQueueHelper.disableIdleTimer(true)
 
-        let operation = UploadOperation(uploadFileId: uploadFileId, urlSession: bestSession, itemIdentifier: itemIdentifier)
+        let operation = UploadOperation(uploadFileId: uploadFileId, urlSession: bestSession)
         operation.queuePriority = priority
         operation.completionBlock = { [weak self] in
             guard let self else { return }

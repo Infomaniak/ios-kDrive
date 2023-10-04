@@ -58,6 +58,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         case operationCanceled
         /// The operation is finished
         case operationFinished
+        /// Cannot decrease further retry count, already zero
+        case retryCountIsZero
     }
 
     // MARK: - Attributes
@@ -102,20 +104,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     var uploadTasks = [String: URLSessionUploadTask]()
 
     private let urlSession: URLSession
-    private let itemIdentifier: NSFileProviderItemIdentifier?
     private var expiringActivity: ExpiringActivityable?
 
     public var result: UploadCompletionResult
 
     // MARK: - Public methods -
 
-    public required init(uploadFileId: String,
-                         urlSession: URLSession = URLSession.shared,
-                         itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public required init(uploadFileId: String, urlSession: URLSession = URLSession.shared) {
         Log.uploadOperation("init ufid:\(uploadFileId)")
         self.uploadFileId = uploadFileId
         self.urlSession = urlSession
-        self.itemIdentifier = itemIdentifier
         result = UploadCompletionResult()
 
         super.init()
@@ -209,16 +207,41 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
 
-        var hasUploadingSession = false
+        let uploadId = uploadFileId
+        var uploadingSession: UploadingSessionTask?
+        var error: ErrorDomain?
         try transactionWithFile { file in
+            SentryDebug.uploadOperationRetryCountDecreaseBreadcrumb(uploadId, file.maxRetryCount)
+
+            /// If cannot retry, throw
+            guard file.maxRetryCount > 0 else {
+                error = ErrorDomain.retryCountIsZero
+                return
+            }
+
             // Decrease retry count
             file.maxRetryCount -= 1
 
-            hasUploadingSession = (file.uploadingSession != nil)
+            uploadingSession = file.uploadingSession?.detached()
+        }
+
+        if let error {
+            throw error
         }
 
         // fetch stored session
-        if hasUploadingSession {
+        if let uploadingSession {
+            guard uploadingSession.fileIdentityHasNotChanged else {
+                throw ErrorDomain.fileIdentityHasChanged
+            }
+
+            // Session is expired, regenerate it from scratch
+            guard !uploadingSession.isExpired else {
+                cleanUploadFileSession()
+                try await generateNewSessionAndStore()
+                return
+            }
+
             try await fetchAndCleanStoredSession()
         }
 
@@ -422,6 +445,30 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
+            // Clean the remote session, if valid. Invalid ones are already gone server side.
+            let driveId = file.driveId
+            let userId = file.userId
+            let uploadingSession = file.uploadingSession?.detached()
+            self.enqueue {
+                guard let session = uploadingSession,
+                      !session.isExpired else {
+                    return
+                }
+
+                guard let driveFileManager = try? self.getDriveFileManager(for: driveId, userId: userId) else {
+                    return
+                }
+
+                let abstractToken = AbstractTokenWrapper(token: session.token)
+                let apiFetcher = driveFileManager.apiFetcher
+                let drive = driveFileManager.drive
+
+                // We try to cancel the upload session, we discard results
+                let cancelResult = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
+                Log.uploadOperation("cancelSession remotely:\(String(describing: cancelResult)) for \(self.uploadFileId)")
+                SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(self.uploadFileId, cancelResult ?? false)
+            }
+
             file.uploadingSession = nil
             file.progress = nil
 
@@ -569,7 +616,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             // retry from scratch next time
-            if file.maxRetryCount == 0 {
+            if file.maxRetryCount <= 0 {
                 self.cleanUploadFileSession(file: file)
             }
 
@@ -632,9 +679,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("fetchAndCleanStoredSession ufid:\(uploadFileId)")
         try transactionWithFile { file in
             guard let uploadingSession = file.uploadingSession,
-                  !uploadingSession.isExpired,
-                  uploadingSession.fileIdentityHasNotChanged else {
+                  !uploadingSession.isExpired else {
                 throw ErrorDomain.uploadSessionInvalid
+            }
+
+            guard uploadingSession.fileIdentityHasNotChanged else {
+                throw ErrorDomain.fileIdentityHasChanged
             }
 
             // Cleanup the uploading chunks and session state for re-use
@@ -1067,13 +1117,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 file.error = .taskRescheduled
                 Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
 
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(file.name)"
-                breadcrumb.data = ["File id": self.uploadFileId,
-                                   "File name": file.name,
-                                   "File size": file.size,
-                                   "File type": file.type.rawValue]
-                SentrySDK.addBreadcrumb(breadcrumb)
+                let metadata = ["File id": self.uploadFileId,
+                                "File name": file.name,
+                                "File size": file.size,
+                                "File type": file.type.rawValue]
+                SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)
             }
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()

@@ -276,7 +276,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         collectionView.dragDelegate = self
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 guard self?.file != nil else { return }
                 self?.file.realm?.refresh()
                 if self?.file.isInvalidated == true {
@@ -307,7 +307,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             file = newFile
             fileObserver?.cancel()
             fileObserver = driveFileManager.observeFileUpdated(self, fileId: file.id) { [weak self] _ in
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self?.file.realm?.refresh()
                     if self?.file.isInvalidated == true {
                         // File has been removed
@@ -746,7 +746,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.collectionView.reloadItems(at: [indexPath])
         }
     }
@@ -767,7 +767,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
                 self?.downloadAction = nil
                 self?.setLoading(true, action: action, at: indexPath)
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     if error == nil {
                         completion()
                     } else {

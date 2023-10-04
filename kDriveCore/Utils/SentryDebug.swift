@@ -18,6 +18,7 @@
 
 import Foundation
 import Sentry
+import UIKit
 
 /// Something to track errors
 public enum SentryDebug {
@@ -60,6 +61,12 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
+    static func uploadOperationCleanSessionRemotelyBreadcrumb(_ uploadFileId: String, _ success: Bool) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "Clean uploading session remotely for \(uploadFileId), success:\(success)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     static func uploadOperationCleanSessionBreadcrumb(_ uploadFileId: String) {
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
         breadcrumb.message = "Clean uploading session for \(uploadFileId)"
@@ -69,6 +76,19 @@ public enum SentryDebug {
     static func uploadOperationBackgroundExpiringBreadcrumb(_ uploadFileId: String) {
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
         breadcrumb.message = "Background task expiring for \(uploadFileId)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    static func uploadOperationRetryCountDecreaseBreadcrumb(_ uploadFileId: String, _ retryCount: Int) {
+        let breadcrumb = Breadcrumb(level: .info, category: Category.uploadOperation)
+        breadcrumb.message = "Try decrement retryCount:\(retryCount) for \(uploadFileId)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+    
+    static func uploadOperationRescheduledBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
+        let breadcrumb = Breadcrumb(level: .info, category: Category.uploadOperation)
+        breadcrumb.message = "UploadOperation for \(uploadFileId) rescheduled"
+        breadcrumb.data = metadata
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
@@ -115,5 +135,18 @@ public enum SentryDebug {
             breadcrumb.data = metadata
         }
         SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    // MARK: - Logger
+
+    public static func loggerBreadcrumb(caller: String, category: String) {
+        Task { @MainActor in
+            let message = "\(caller) foreground:\(UIApplication.shared.applicationState != .background)"
+            Task {
+                let breadcrumb = Breadcrumb(level: .info, category: category)
+                breadcrumb.message = message
+                SentrySDK.addBreadcrumb(breadcrumb)
+            }
+        }
     }
 }

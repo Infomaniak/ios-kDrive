@@ -58,20 +58,21 @@ extension UploadOperation {
         try? transactionWithFile { file in
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain {
-                // System/user cancelled requests silently handled
+                // System/user cancelled requests silently handled, some chunk upload in error for eg.
                 guard nsError.code == NSURLErrorCancelled else {
                     errorHandled = true
+                    // _not_ overriding file.error
                     return
                 }
 
                 Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
-                file.error = .networkError
+                file.error = .networkError.wrapping(error)
                 errorHandled = true
             }
 
             // Do nothing on taskRescheduled
             else if let error = error as? DriveError, error == .taskRescheduled {
-                file.error = .taskRescheduled
+                file.error = .taskRescheduled.wrapping(error)
                 errorHandled = true
             }
 
@@ -79,7 +80,7 @@ extension UploadOperation {
             else if let error = error as? DriveError, error == .fileNotFound {
                 file.maxRetryCount = 0
                 file.progress = nil
-                file.error = DriveError.taskCancelled // cascade deletion
+                file.error = .taskCancelled.wrapping(error) // cascade deletion
                 errorHandled = true
             }
 
@@ -89,7 +90,7 @@ extension UploadOperation {
                 self.uploadQueue.suspendAllOperations()
                 file.maxRetryCount = 0
                 file.progress = nil
-                file.error = DriveError.errorDeviceStorage.wrapping(error)
+                file.error = .errorDeviceStorage.wrapping(error)
                 errorHandled = true
             }
 
@@ -97,35 +98,37 @@ extension UploadOperation {
             else if let error = error as? UploadOperation.ErrorDomain {
                 switch error {
                 case .unableToBuildRequest:
-                    file.error = DriveError.localError.wrapping(error)
+                    file.error = .localError.wrapping(error)
 
                 case .unableToMatchUploadChunk,
                      .splitError,
                      .chunkError,
                      .fileIdentityHasChanged,
                      .parseError,
-                     .missingChunkHash:
-                    self.cleanUploadFileSession(file: file)
-                    file.error = DriveError.localError.wrapping(error)
-
-                case .uploadSessionTaskMissing,
+                     .missingChunkHash,
+                     .retryCountIsZero,
+                     .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
+                    // Clean session, present error, user action required to restart.
                     self.cleanUploadFileSession(file: file)
-                    file.error = DriveError.localError.wrapping(error)
+                    file.error = .localError.wrapping(error)
 
                 case .operationFinished, .operationCanceled:
                     Log.uploadOperation("catching operation is terminating")
                     // the operation is terminating, silent handling
+                    // _not_ overriding file.error
 
                 case .databaseUploadFileNotFound:
                     // Silently stop if an UploadFile is no longer in base
+                    // _not_ overriding file.error
                     self.cancel()
                 }
 
                 errorHandled = true
-            } else {
-                // Other DriveError
-                file.error = error as? DriveError
+            }
+
+            // other DriveError
+            else {
                 errorHandled = false
             }
         }
@@ -145,24 +148,25 @@ extension UploadOperation {
         try? transactionWithFile { file in
             defer {
                 Log.uploadOperation("catching remote error:\(error) ufid:\(self.uploadFileId)", level: .error)
-                file.error = error
             }
 
             switch error {
             case .fileAlreadyExistsError:
                 file.maxRetryCount = 0
                 file.progress = nil
+                file.error = error
 
             case .lock, .notAuthorized:
                 // simple retry
-                break
+                file.error = error
 
             case .productMaintenance, .driveMaintenance:
                 // We stop and hope the maintenance is finished at next execution
+                file.error = error
                 self.uploadQueue.suspendAllOperations()
 
             case .quotaExceeded:
-                file.error = DriveError.quotaExceeded
+                file.error = .quotaExceeded.wrapping(error)
                 file.maxRetryCount = 0
                 file.progress = nil
                 self.uploadQueue.suspendAllOperations()
@@ -175,15 +179,18 @@ extension UploadOperation {
                  .uploadTokenIsNotValid:
                 self.cleanUploadFileSession(file: file)
                 file.progress = nil
+                file.error = error
 
             case .uploadTokenCanceled:
                 // We cancelled the upload session, running chunks requests are failing
                 file.progress = nil
+                // _not_ overriding file.error
 
             case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
                 file.progress = nil
+                file.error = error
                 self.cleanUploadFileSession(file: file)
                 self.uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId,
                                                      userId: file.userId,
@@ -196,12 +203,12 @@ extension UploadOperation {
                 }
 
             case .networkError:
+                // simple retry
                 file.error = error
-                self.cancel()
 
             default:
                 // simple retry
-                break
+                file.error = error
             }
 
             errorHandled = true
@@ -223,7 +230,7 @@ extension UploadOperation {
         do {
             var metadata = [String: Any]()
             try debugWithFile { file in
-                metadata = ["version": 2,
+                metadata = ["version": 3,
                             "uploadFileId": self.uploadFileId,
                             "RootError": error,
                             "uploadDate": file.uploadDate ?? "nil",
@@ -245,9 +252,8 @@ extension UploadOperation {
                 let chunkTaskCount = chunkTasks.count
                 metadata["file.uploadingSession.chunkTasks.count"] = chunkTaskCount
                 for (index, object) in chunkTasks.enumerated() {
-                    metadata["chunkTask-\(index)-error"] = object.error
-                    metadata["chunkTask-\(index)-chunk"] = object.chunk
-                    metadata["chunkTask-\(index)-chunkNumber"] = object.chunkNumber
+                    metadata["chunkTask-\(index)"] =
+                        "chunkNumber:\(object.chunkNumber) uploaded:\(String(describing: object.chunk)) error:\(String(describing: object.error))"
                 }
 
                 metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired

@@ -541,7 +541,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let indexPath = collectionView.indexPathForItem(at: pos) {
             multipleSelectionViewModel.isMultipleSelectionEnabled = true
             // Necessary for events to trigger in the right order
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 if let file = viewModel.getFile(at: indexPath) {
                     multipleSelectionViewModel.didSelectFile(file, at: indexPath)
@@ -594,7 +594,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private func observeNetwork() {
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 guard let self else { return }
                 self.headerView?.offlineView.isHidden = status != .offline
                 self.collectionView.collectionViewLayout.invalidateLayout()

@@ -131,7 +131,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         setProgress(showProgress ? -1 : nil)
         if showProgress {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     self?.setProgress(progress)
                 }
             }
@@ -143,7 +143,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         setProgress(showProgress ? -1 : nil)
         if showProgress {
             observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     self?.setProgress(progress)
                 }
             }

@@ -173,7 +173,7 @@ class ManageCategoriesViewController: UITableViewController {
         // Observe files changes
         for file in files {
             driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     guard !newFile.isInvalidated else {
                         if self?.presentingViewController != nil && viewControllersCount < 2 {
                             self?.closeButtonPressed()

@@ -80,7 +80,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         didSet {
             newSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
             if oldValue == nil || selectedDirectory == nil {
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self.updateSections()
                 }
             }
@@ -317,7 +317,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                     if sender.isOn {
                         Task {
                             let status = await self.requestAuthorization()
-                            DispatchQueue.main.async {
+                            Task { @MainActor in
                                 self.driveFileManager = self.accountManager.currentDriveFileManager
                                 if status == .authorized {
                                     self.photoSyncEnabled = true
@@ -526,7 +526,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
 
         DispatchQueue.global(qos: .userInitiated).async {
             self.saveSettings()
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.navigationController?.popViewController(animated: true)
             }
 

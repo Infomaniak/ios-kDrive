@@ -80,7 +80,7 @@ extension UploadQueue: UploadQueueObservable {
                 }
 
                 if fileId == nil || uploadFile.id == fileId {
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         closure(uploadFile, driveFile)
                     }
                 }
@@ -110,7 +110,7 @@ extension UploadQueue: UploadQueueObservable {
                 }
 
                 if parentId == updatedParentId {
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         closure(updatedParentId, count)
                     }
                 }
@@ -140,7 +140,7 @@ extension UploadQueue: UploadQueueObservable {
                 }
 
                 if driveId == updatedDriveId {
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         closure(updatedDriveId, count)
                     }
                 }

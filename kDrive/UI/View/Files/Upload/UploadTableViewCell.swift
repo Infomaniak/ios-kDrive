@@ -78,6 +78,7 @@ class UploadTableViewCell: InsetTableViewCell {
         } else {
             cardContentView.retryButton?
                 .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
+
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
@@ -93,7 +94,7 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     private func addThumbnail(image: UIImage) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
             self.cardContentView.iconView.contentMode = .scaleAspectFill
             self.cardContentView.iconView.layer.masksToBounds = true
@@ -111,7 +112,11 @@ class UploadTableViewCell: InsetTableViewCell {
         let uploadFileId = uploadFile.id
         currentFileId = uploadFileId
 
-        // Set initial progress value
+        // Set initial text
+        cardContentView.titleLabel.text = uploadFile.name
+        setStatusFor(uploadFile: uploadFile)
+
+        // Set initial progress value if any
         if let progress {
             updateProgress(fileId: uploadFileId, progress: progress, animated: true)
         }
@@ -135,9 +140,6 @@ class UploadTableViewCell: InsetTableViewCell {
             }
         }
         progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
-
-        cardContentView.titleLabel.text = uploadFile.name
-        setStatusFor(uploadFile: uploadFile)
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in

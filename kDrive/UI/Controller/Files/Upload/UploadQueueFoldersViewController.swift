@@ -107,7 +107,7 @@ class UploadQueueFoldersViewController: UITableViewController {
             .compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         // (Pop view controller if nothing to show)
         if folders.isEmpty {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.navigationController?.popViewController(animated: true)
             }
         }

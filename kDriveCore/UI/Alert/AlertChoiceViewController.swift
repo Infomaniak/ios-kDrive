@@ -149,7 +149,7 @@ public class AlertChoiceViewController: AlertViewController {
             setLoading(true)
             DispatchQueue.global(qos: .userInitiated).async {
                 self.handler?(self.selectedIndex)
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self.setLoading(false)
                     self.dismiss(animated: true)
                 }
