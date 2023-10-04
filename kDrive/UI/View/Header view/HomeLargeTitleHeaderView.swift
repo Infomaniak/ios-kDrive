@@ -24,6 +24,18 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
     @IBOutlet weak var titleButton: IKButton!
     var titleButtonPressedHandler: ((UIButton) -> Void)?
 
+    var text: String? {
+        get {
+            titleButton.titleLabel?.text
+        }
+        set {
+            UIView.performWithoutAnimation {
+                titleButton.setTitle(newValue, for: .normal)
+                titleButton.layoutIfNeeded()
+            }
+        }
+    }
+
     var isEnabled = true {
         didSet {
             chevronButton.isHidden = !isEnabled
