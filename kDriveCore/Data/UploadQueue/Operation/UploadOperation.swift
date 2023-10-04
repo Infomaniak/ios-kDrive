@@ -472,12 +472,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             file.uploadingSession = nil
             file.progress = nil
 
-            // Free local resources
-            for (key, value) in self.uploadTasks {
-                Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(self.uploadFileId)")
-                value.cancel()
-            }
-            self.uploadTasks.removeAll()
+            // Cancel all network requests
+            self.cancelAllUploadRequests()
         }
 
         // If no file provided, wrap the transaction
@@ -488,6 +484,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 cleanFileClosure(file)
             }
         }
+    }
+
+    /// Cancel all tracked URLSessionUploadTasks
+    private func cancelAllUploadRequests() {
+        // Free local resources
+        for (key, value) in uploadTasks {
+            Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(uploadFileId)")
+            value.cancel()
+        }
+        uploadTasks.removeAll()
     }
 
     /// Throws if the file was modified
@@ -1126,6 +1132,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
 
+            // Cancel all network requests
+            self.cancelAllUploadRequests()
+            
             // each and all operations should be given the chance to call backgroundActivityExpiring
             self.end()
 
