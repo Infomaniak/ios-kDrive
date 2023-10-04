@@ -31,7 +31,7 @@ public protocol NotificationsHelpable {
     /// Send a notification that we cannot perform an operation, as we do not have enough space
     func sendNotEnoughSpaceForUpload(filename: String)
 
-    func sendUploadError(filename: String, parentId: Int, error: DriveError)
+    func sendUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String)
 
     func sendUploadDoneNotification(filename: String, parentId: Int)
 
@@ -129,7 +129,7 @@ public struct NotificationsHelper: NotificationsHelpable {
         sendImmediately(notification: content, id: UUID().uuidString)
     }
 
-    public func sendUploadError(filename: String, parentId: Int, error: DriveError) {
+    public func sendUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
@@ -141,7 +141,8 @@ public struct NotificationsHelper: NotificationsHelpable {
         sendImmediately(notification: content, id: UUID().uuidString)
 
         // Error metadata
-        let metadata: [String: Any] = ["error.type": error.type,
+        let metadata: [String: Any] = ["uploadFileId": uploadFileId,
+                                       "error.type": error.type,
                                        "error.code": error.code,
                                        "error.localizedDescription": error.localizedDescription,
                                        "error.userInfo": error.userInfo ?? "nil",
