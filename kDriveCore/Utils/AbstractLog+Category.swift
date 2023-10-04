@@ -171,7 +171,14 @@ public enum Log {
                                        line: UInt = #line,
                                        tag: Any? = nil) {
         let category = "UploadOperation"
-        ABLog(message(),
+        let messageString = message()
+
+        if level == .error {
+            // Add a breadcrumb only for .errors only
+            SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, metadata: ["message": messageString])
+        }
+
+        ABLog(messageString,
               category: category,
               level: level,
               context: context,
