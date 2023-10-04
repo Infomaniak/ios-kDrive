@@ -17,12 +17,13 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
 import UIKit
 
-class RootMenuViewController: UICollectionViewController {
+class RootMenuViewController: CustomLargeTitleCollectionViewController {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
@@ -67,10 +68,13 @@ class RootMenuViewController: UICollectionViewController {
                                                                  image: KDriveResourcesAsset.delete.image,
                                                                  destinationFile: DriveFileManager.trashRootFile)]
 
-    private let driveFileManager: DriveFileManager
+    @LazyInjectService private var accountManager: AccountManageable
+
+    let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
     private var rootViewChildren: [File]?
     private var dataSource: MenuDataSource?
+    private let refreshControl = UIRefreshControl()
 
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
@@ -102,23 +106,15 @@ class RootMenuViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = driveFileManager.drive.name
-        navigationController?.navigationBar.prefersLargeTitles = true
+
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.refreshControl = refreshControl
+
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
+        collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
 
-        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
-            guard let rootMenuCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: RootMenuCell.identifier,
-                for: indexPath
-            ) as? RootMenuCell else {
-                fatalError("Failed to dequeue cell")
-            }
-
-            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-            return rootMenuCell
-        }
-        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+        configureDataSource()
 
         let rootChildren = driveFileManager.getRealm()
             .object(ofType: File.self, forPrimaryKey: DriveFileManager.constants.rootID)?.children
@@ -137,6 +133,48 @@ class RootMenuViewController: UICollectionViewController {
         }
     }
 
+    func configureDataSource() {
+        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
+            guard let rootMenuCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: RootMenuCell.identifier,
+                for: indexPath
+            ) as? RootMenuCell else {
+                fatalError("Failed to dequeue cell")
+            }
+
+            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+            return rootMenuCell
+        }
+
+        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard let self else { return UICollectionReusableView() }
+
+            let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: HomeLargeTitleHeaderView.self,
+                for: indexPath
+            )
+            homeLargeTitleHeaderView.isEnabled = accountManager.drives.count > 1
+            homeLargeTitleHeaderView.text = driveFileManager.drive.name
+            homeLargeTitleHeaderView.titleButtonPressedHandler = { [weak self] _ in
+                guard let self else { return }
+                let drives = accountManager.drives
+                let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
+                    options: drives,
+                    selectedOption: driveFileManager.drive,
+                    headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
+                    delegate: nil
+                )
+                present(floatingPanelViewController, animated: true)
+            }
+            headerViewHeight = homeLargeTitleHeaderView.frame.height
+            return homeLargeTitleHeaderView
+        }
+
+        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+    }
+
     static func createListLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
@@ -147,7 +185,16 @@ class RootMenuViewController: UICollectionViewController {
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
                                                        subitems: [item])
 
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                heightDimension: .estimated(40))
+        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
+        )
+        sectionHeader.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+
         let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [sectionHeader]
 
         let layout = UICollectionViewCompositionalLayout(section: section)
         return layout
