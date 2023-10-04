@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class HomeViewController: UICollectionViewController, UpdateAccountDelegate, TopScrollable,
+class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccountDelegate, TopScrollable,
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
@@ -157,10 +157,6 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
         }
     }
 
-    private var navbarHeight: CGFloat {
-        return navigationController?.navigationBar.frame.height ?? 0
-    }
-
     private var floatingPanelViewController: DriveFloatingPanelController?
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     private lazy var filePresenter = FilePresenter(viewController: self)
@@ -183,7 +179,7 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
     private var showInsufficientStorage = true
     private var filesObserver: ObservationToken?
 
-    private var refreshControl = UIRefreshControl()
+    private let refreshControl = UIRefreshControl()
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
@@ -197,8 +193,8 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = driveFileManager.drive.name
 
-        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
@@ -232,32 +228,9 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationItem.largeTitleDisplayMode = .never
-        navigationController?.navigationBar.isTranslucent = true
-        navigationController?.navigationBar.shadowImage = UIImage()
-        navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
-        navigationController?.navigationBar.barTintColor = KDriveResourcesAsset.backgroundColor.color
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: KDriveResourcesAsset.titleColor.color]
-        updateNavbarAppearance()
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateNavbarAppearance()
         MatomoUtils.track(view: ["Home"])
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.navigationBar.shadowImage = nil
-        navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
-        navigationController?.navigationBar.barTintColor = nil
-        navigationController?.navigationBar.titleTextAttributes = nil
-        navigationController?.navigationBar.alpha = 1
-        navigationController?.navigationBar.isUserInteractionEnabled = true
-        navigationController?.navigationBar.layoutIfNeeded()
     }
 
     func observeFileUpdated() {
@@ -413,24 +386,6 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
                                                isLoading: false))
             currentRecentFilesController.restoreCachedPages()
         }
-    }
-
-    private func updateNavbarAppearance() {
-        let scrollOffset = collectionView.contentOffset.y
-        guard let navigationBar = navigationController?.navigationBar else {
-            return
-        }
-
-        if view.window?.windowScene?.interfaceOrientation.isPortrait ?? true {
-            navigationItem.title = driveFileManager?.drive.name ?? ""
-            navigationBar.alpha = min(1, max(0, (scrollOffset + collectionView.contentInset.top) / navbarHeight))
-            navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5
-        } else {
-            navigationBar.isUserInteractionEnabled = false
-            navigationItem.title = ""
-            navigationBar.alpha = 0
-        }
-        navigationBar.layoutIfNeeded()
     }
 
     private func createLayout() -> UICollectionViewLayout {
@@ -636,10 +591,7 @@ extension HomeViewController {
                     for: indexPath
                 )
                 driveHeaderView.isEnabled = accountManager.drives.count > 1
-                UIView.performWithoutAnimation {
-                    driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
-                    driveHeaderView.titleButton.layoutIfNeeded()
-                }
+                driveHeaderView.text = driveFileManager.drive.name
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     guard let self else { return }
                     let drives = accountManager.drives
@@ -651,6 +603,7 @@ extension HomeViewController {
                     )
                     present(floatingPanelViewController, animated: true)
                 }
+                headerViewHeight = driveHeaderView.frame.height
                 return driveHeaderView
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
@@ -689,9 +642,6 @@ extension HomeViewController {
 // MARK: - UICollectionViewDelegate
 
 extension HomeViewController {
-    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        updateNavbarAppearance()
-    }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeSection.allCases[indexPath.section] {
