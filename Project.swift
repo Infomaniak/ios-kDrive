@@ -23,7 +23,7 @@ import ProjectDescriptionHelpers
 let project = Project(name: "kDrive",
                       packages: [
                           .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
-                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "4.1.16")),
+                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "4.1.18")),
                           .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "2.5.2")),
                           .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "4.0.0")),
                           .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "1.1.9")),
