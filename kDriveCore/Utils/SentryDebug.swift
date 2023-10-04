@@ -84,7 +84,7 @@ public enum SentryDebug {
         breadcrumb.message = "Try decrement retryCount:\(retryCount) for \(uploadFileId)"
         SentrySDK.addBreadcrumb(breadcrumb)
     }
-    
+
     static func uploadOperationRescheduledBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
         let breadcrumb = Breadcrumb(level: .info, category: Category.uploadOperation)
         breadcrumb.message = "UploadOperation for \(uploadFileId) rescheduled"
