@@ -163,7 +163,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         try transactionWithFile { file in
             let fileUrl = try self.getFileUrlIfReadable(file: file)
             guard let size = self.fileMetadata.fileSize(url: fileUrl) else {
-                Log.uploadOperation("Unable to read file size for ufid:\(self.uploadFileId)", level: .error)
+                Log.uploadOperation("Unable to read file size for ufid:\(self.uploadFileId) url:\(fileUrl)", level: .error)
                 throw DriveError.fileNotFound
             }
 
@@ -752,7 +752,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
 
         guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
-            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId)", level: .error)
+            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
             throw DriveError.fileNotFound
         }
 
