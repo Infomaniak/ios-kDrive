@@ -84,17 +84,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// The number of requests we try to keep running in one UploadOperation
-    private static let parallelism: Int = {
-        // In extension to reduce memory footprint, we reduce parallelism in Extension
-        let parallelism: Int
-        if Bundle.main.isExtension {
-            parallelism = 2 // With a chuck of 1MiB max, we allocate 2MiB max in this Operation
-        } else {
-            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
-        }
-
-        return parallelism
-    }()
+    private static let parallelism: Int = 2
 
     public let uploadFileId: String
     private var fileObservationToken: NotificationToken?
