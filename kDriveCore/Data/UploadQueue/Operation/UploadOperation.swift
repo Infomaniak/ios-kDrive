@@ -633,6 +633,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             if file.error == DriveError.taskCancelled {
                 shouldCleanUploadFile = true
             }
+
             // otherwise only reset success
             else {
                 file.progress = nil
@@ -904,8 +905,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             guard file.type == .phAsset else {
                 return
             }
+
             guard let asset = file.getPHAsset() else {
-                Log.uploadOperation("unable to fetch PHAsset ufid:\(self.uploadFileId)", level: .error)
+                Log.uploadOperation(
+                    "Unable to fetch PHAsset ufid:\(self.uploadFileId) assetLocalIdentifier:\(file.assetLocalIdentifier) ",
+                    level: .error
+                )
                 return
             }
             assetToLoad = asset

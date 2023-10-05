@@ -261,7 +261,12 @@ public class UploadFile: Object, UploadFilable {
         if localAsset != nil {
             return localAsset
         }
-        localAsset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject
+
+        guard let assetLocalIdentifier else {
+            return nil
+        }
+
+        localAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetLocalIdentifier], options: nil).firstObject
         return localAsset
     }
 
