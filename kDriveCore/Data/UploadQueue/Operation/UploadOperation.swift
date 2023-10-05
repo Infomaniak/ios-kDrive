@@ -84,7 +84,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// The number of requests we try to keep running in one UploadOperation
-    private static let parallelism: Int = 2
+    private static let parallelism = 2
 
     public let uploadFileId: String
     private var fileObservationToken: NotificationToken?
@@ -590,6 +590,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Make sure we stop the expiring activity
             self.expiringActivity?.end()
 
+            // Make sure we stop all the network requests (if any)
+            self.cancelAllUploadRequests()
+
             finish()
 
             SentryDebug.uploadOperationFinishedBreadcrumb(uploadFileId)
@@ -905,12 +908,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
             assetToLoad = asset
         }
-        
+
         // This UploadFile is not a PHAsset, return silently
         guard let assetToLoad else {
             return
         }
-        
+
         // Async load the url of the asset
         guard let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
             Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
