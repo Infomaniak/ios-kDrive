@@ -374,7 +374,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
 
-            // TODO: Remove once we use session identifier
+            // Access Token must be added for non AF requests
             let accessToken = self.accountManager.getTokenForUserId(file.userId)?.accessToken
             guard let accessToken else {
                 Log.uploadOperation("no access token found", level: .error)
@@ -471,6 +471,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             file.uploadingSession = nil
             file.progress = nil
+
+            // reset errors
+            file.error = nil
 
             // Cancel all network requests
             self.cancelAllUploadRequests()
@@ -697,8 +700,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
             chunkTasksToClean.forEach {
                 // clean in order to re-schedule
-
-                // TODO: remove sessionIdentifier once API is ready
                 $0.sessionIdentifier = nil
                 $0.taskIdentifier = nil
                 $0.requestUrl = nil
@@ -832,7 +833,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                               sessionToken: String,
                               driveId: Int,
                               accessToken: String) throws -> URLRequest {
-        // TODO: Remove accessToken when API updated
+        // Access Token must be added for non AF requests
         let headerParameters = ["Authorization": "Bearer \(accessToken)"]
         let headers = HTTPHeaders(headerParameters)
         let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: driveId),
@@ -1134,7 +1135,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Cancel all network requests
             self.cancelAllUploadRequests()
-            
+
             // each and all operations should be given the chance to call backgroundActivityExpiring
             self.end()
 
