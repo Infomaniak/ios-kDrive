@@ -915,15 +915,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
             assetToLoad = asset
         }
-
+        
+        // This UploadFile is not a PHAsset, return silently
+        guard let assetToLoad else {
+            return
+        }
+        
         // Async load the url of the asset
-        guard let assetToLoad,
-              let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
-            Log.uploadOperation("Failed to get photo asset ufid:\(uploadFileId)", level: .error)
+        guard let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
+            Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
             return
         }
 
-        // save
+        // Save asset file URL to DB
         Log.uploadOperation("Got photo asset, writing URL:\(url) ufid:\(uploadFileId)")
         try transactionWithFile { file in
             file.pathURL = url
