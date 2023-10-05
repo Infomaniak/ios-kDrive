@@ -33,7 +33,7 @@ public enum Log {
                                     tag: Any? = nil) {
         let category = "FileProvider"
 
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, isError: level == .error)
 
         ABLog(message(),
               category: category,
@@ -58,7 +58,7 @@ public enum Log {
                                    tag: Any? = nil) {
         let category = "AppDelegate"
 
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, isError: level == .error)
 
         ABLog(message(),
               category: category,
@@ -106,7 +106,7 @@ public enum Log {
                                         tag: Any? = nil) {
         let category = "BGTaskScheduling"
 
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, isError: level == .error)
 
         ABLog(message(),
               category: category,
@@ -131,7 +131,7 @@ public enum Log {
                                         tag: Any? = nil) {
         let category = "BackgroundSessionManager"
 
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, isError: level == .error)
 
         ABLog(message(),
               category: category,
@@ -152,6 +152,9 @@ public enum Log {
                                    line: UInt = #line,
                                    tag: Any? = nil) {
         let category = "UploadQueue"
+
+        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, isError: level == .error)
+
         ABLog(message(),
               category: category,
               level: level,
