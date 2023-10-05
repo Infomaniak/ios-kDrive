@@ -84,17 +84,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// The number of requests we try to keep running in one UploadOperation
-    private static let parallelism: Int = {
-        // In extension to reduce memory footprint, we reduce parallelism in Extension
-        let parallelism: Int
-        if Bundle.main.isExtension {
-            parallelism = 2 // With a chuck of 1MiB max, we allocate 2MiB max in this Operation
-        } else {
-            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
-        }
-
-        return parallelism
-    }()
+    private static let parallelism = 2
 
     public let uploadFileId: String
     private var fileObservationToken: NotificationToken?
@@ -374,7 +364,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
 
-            // TODO: Remove once we use session identifier
+            // Access Token must be added for non AF requests
             let accessToken = self.accountManager.getTokenForUserId(file.userId)?.accessToken
             guard let accessToken else {
                 Log.uploadOperation("no access token found", level: .error)
@@ -472,12 +462,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             file.uploadingSession = nil
             file.progress = nil
 
-            // Free local resources
-            for (key, value) in self.uploadTasks {
-                Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(self.uploadFileId)")
-                value.cancel()
-            }
-            self.uploadTasks.removeAll()
+            // reset errors
+            file.error = nil
+
+            // Cancel all network requests
+            self.cancelAllUploadRequests()
         }
 
         // If no file provided, wrap the transaction
@@ -488,6 +477,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 cleanFileClosure(file)
             }
         }
+    }
+
+    /// Cancel all tracked URLSessionUploadTasks
+    private func cancelAllUploadRequests() {
+        // Free local resources
+        for (key, value) in uploadTasks {
+            Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(uploadFileId)")
+            value.cancel()
+        }
+        uploadTasks.removeAll()
     }
 
     /// Throws if the file was modified
@@ -591,6 +590,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Make sure we stop the expiring activity
             self.expiringActivity?.end()
 
+            // Make sure we stop all the network requests (if any)
+            self.cancelAllUploadRequests()
+
             finish()
 
             SentryDebug.uploadOperationFinishedBreadcrumb(uploadFileId)
@@ -624,6 +626,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             if file.error == DriveError.taskCancelled {
                 shouldCleanUploadFile = true
             }
+
             // otherwise only reset success
             else {
                 file.progress = nil
@@ -691,8 +694,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
             chunkTasksToClean.forEach {
                 // clean in order to re-schedule
-
-                // TODO: remove sessionIdentifier once API is ready
                 $0.sessionIdentifier = nil
                 $0.taskIdentifier = nil
                 $0.requestUrl = nil
@@ -826,7 +827,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                               sessionToken: String,
                               driveId: Int,
                               accessToken: String) throws -> URLRequest {
-        // TODO: Remove accessToken when API updated
+        // Access Token must be added for non AF requests
         let headerParameters = ["Authorization": "Bearer \(accessToken)"]
         let headers = HTTPHeaders(headerParameters)
         let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: driveId),
@@ -897,21 +898,29 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             guard file.type == .phAsset else {
                 return
             }
+
             guard let asset = file.getPHAsset() else {
-                Log.uploadOperation("unable to fetch PHAsset ufid:\(self.uploadFileId)", level: .error)
+                Log.uploadOperation(
+                    "Unable to fetch PHAsset ufid:\(self.uploadFileId) assetLocalIdentifier:\(file.assetLocalIdentifier) ",
+                    level: .error
+                )
                 return
             }
             assetToLoad = asset
         }
 
-        // Async load the url of the asset
-        guard let assetToLoad,
-              let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
-            Log.uploadOperation("Failed to get photo asset ufid:\(uploadFileId)", level: .error)
+        // This UploadFile is not a PHAsset, return silently
+        guard let assetToLoad else {
             return
         }
 
-        // save
+        // Async load the url of the asset
+        guard let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
+            Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
+            return
+        }
+
+        // Save asset file URL to DB
         Log.uploadOperation("Got photo asset, writing URL:\(url) ufid:\(uploadFileId)")
         try transactionWithFile { file in
             file.pathURL = url
@@ -923,7 +932,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     // also called on app restoration
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
-        enqueue(asap: true) {
+        enqueue {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
             // Success
@@ -1112,7 +1121,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
-        enqueueCatching(asap: true) {
+        enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
                 Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
@@ -1125,6 +1134,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
+
+            // Cancel all network requests
+            self.cancelAllUploadRequests()
 
             // each and all operations should be given the chance to call backgroundActivityExpiring
             self.end()

@@ -32,17 +32,14 @@ public enum Log {
                                     line: UInt = #line,
                                     tag: Any? = nil) {
         let category = "FileProvider"
-
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
-
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "AppDelegate" category
@@ -57,17 +54,14 @@ public enum Log {
                                    line: UInt = #line,
                                    tag: Any? = nil) {
         let category = "AppDelegate"
-
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
-
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "PhotoLibraryUploader" category
@@ -82,15 +76,14 @@ public enum Log {
                                             line: UInt = #line,
                                             tag: Any? = nil) {
         let category = "PhotoLibraryUploader"
-
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "BGTaskScheduling" category
@@ -105,17 +98,14 @@ public enum Log {
                                         line: UInt = #line,
                                         tag: Any? = nil) {
         let category = "BGTaskScheduling"
-
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
-
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "BackgroundSessionManager" category
@@ -130,17 +120,14 @@ public enum Log {
                                         line: UInt = #line,
                                         tag: Any? = nil) {
         let category = "BackgroundSessionManager"
-
-        SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category)
-
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "UploadQueue" category
@@ -152,14 +139,14 @@ public enum Log {
                                    line: UInt = #line,
                                    tag: Any? = nil) {
         let category = "UploadQueue"
-        ABLog(message(),
-              category: category,
-              level: level,
-              context: context,
-              file: file,
-              function: function,
-              line: line,
-              tag: tag)
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
     }
 
     /// shorthand for ABLog, with "UploadOperation" category
@@ -177,6 +164,33 @@ public enum Log {
             // Add a breadcrumb only for .errors only
             SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, metadata: ["message": messageString])
         }
+
+        ABLog(messageString,
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
+
+    private static func defaultLogHandler(_ message: @autoclosure () -> Any,
+                                          category: String,
+                                          level: AbstractLogLevel,
+                                          context: Int,
+                                          file: StaticString,
+                                          function: StaticString,
+                                          line: UInt,
+                                          tag: Any?) {
+        let messageString = message()
+
+        SentryDebug.loggerBreadcrumb(
+            caller: "\(function)",
+            category: category,
+            metadata: ["message": messageString],
+            isError: level == .error
+        )
 
         ABLog(messageString,
               category: category,

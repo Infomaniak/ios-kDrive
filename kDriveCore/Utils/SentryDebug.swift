@@ -84,7 +84,7 @@ public enum SentryDebug {
         breadcrumb.message = "Try decrement retryCount:\(retryCount) for \(uploadFileId)"
         SentrySDK.addBreadcrumb(breadcrumb)
     }
-    
+
     static func uploadOperationRescheduledBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
         let breadcrumb = Breadcrumb(level: .info, category: Category.uploadOperation)
         breadcrumb.message = "UploadOperation for \(uploadFileId) rescheduled"
@@ -126,24 +126,13 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
-    // MARK: - UploadQueue
-
-    static func uploadQueueBreadcrumb(caller: String = #function, isError: Bool = false, metadata: [String: Any]? = nil) {
-        let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: Category.uploadQueue)
-        breadcrumb.message = caller
-        if let metadata {
-            breadcrumb.data = metadata
-        }
-        SentrySDK.addBreadcrumb(breadcrumb)
-    }
-
     // MARK: - Logger
 
-    public static func loggerBreadcrumb(caller: String, category: String, metadata: [String: Any]? = nil) {
+    public static func loggerBreadcrumb(caller: String, category: String, metadata: [String: Any]? = nil, isError: Bool = false) {
         Task { @MainActor in
             let message = "\(caller) foreground:\(UIApplication.shared.applicationState != .background)"
             Task {
-                let breadcrumb = Breadcrumb(level: .info, category: category)
+                let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: category)
                 breadcrumb.message = message
                 breadcrumb.data = metadata
                 SentrySDK.addBreadcrumb(breadcrumb)

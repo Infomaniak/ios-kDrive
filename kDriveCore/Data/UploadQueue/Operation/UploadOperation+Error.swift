@@ -20,8 +20,8 @@ import Foundation
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
-    func enqueueCatching(asap: Bool = false, _ task: @escaping () async throws -> Void) {
-        enqueue(asap: asap) {
+    func enqueueCatching(_ task: @escaping () async throws -> Void) {
+        enqueue {
             await self.catching {
                 try await task()
             }
