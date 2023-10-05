@@ -935,7 +935,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     // also called on app restoration
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
-        enqueue(asap: true) {
+        enqueue {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
             // Success
@@ -1124,7 +1124,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
-        enqueueCatching(asap: true) {
+        enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
                 Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
