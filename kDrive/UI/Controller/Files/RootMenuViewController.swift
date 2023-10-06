@@ -106,6 +106,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = driveFileManager.drive.name
+        navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
@@ -131,6 +132,12 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
                 break
             }
         }
+    }
+
+    @objc func presentSearch() {
+        let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+        let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+        present(searchViewController, animated: true)
     }
 
     func configureDataSource() {
