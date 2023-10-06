@@ -33,6 +33,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .never
+        navigationItem.hideBackButtonText()
     }
 
     private func updateNavigationBarAppearance() {
