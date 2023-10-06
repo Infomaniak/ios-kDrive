@@ -598,9 +598,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             SentryDebug.uploadOperationFinishedBreadcrumb(uploadFileId)
         }
 
-        try? debugWithFile { file in
-            SentryDebug.uploadOperationEndBreadcrumb(self.uploadFileId, file.error)
-        }
+        let readOnlyFile = try? readOnlyFile()
+        SentryDebug.uploadOperationEndBreadcrumb(uploadFileId, readOnlyFile?.error)
 
         var shouldCleanUploadFile = false
         try? transactionWithFile { file in
@@ -691,15 +690,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             // Cleanup the uploading chunks and session state for re-use
-            let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.notDoneUploadingPredicate)
-            chunkTasksToClean.forEach {
-                // clean in order to re-schedule
-                $0.sessionIdentifier = nil
-                $0.taskIdentifier = nil
-                $0.requestUrl = nil
-                $0.path = nil
-                $0.sha256 = nil
-                $0.error = nil
+            let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.toRetryPredicate)
+            chunkTasksToClean.forEach { uploadingChunkTask in
+                uploadingChunkTask.sessionIdentifier = nil
+                uploadingChunkTask.taskIdentifier = nil
+                uploadingChunkTask.requestUrl = nil
+                uploadingChunkTask.path = nil
+                uploadingChunkTask.sha256 = nil
+                uploadingChunkTask.error = nil
             }
         }
 
@@ -1021,8 +1019,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         updateUploadProgress()
 
         // Close session and terminate task as the last chunk was uploaded
-        let toUploadCount = try chunkTasksToUploadCount()
-        if toUploadCount == 0 {
+        let chunksToUploadCount = try chunkTasksToUploadCount()
+        let chunksInErrorCount = try chunkTasksInErrorCount()
+
+        if chunksToUploadCount == 0, chunksInErrorCount == 0 {
             enqueue {
                 Log.uploadOperation("No more chunks to be uploaded \(self.uploadFileId)")
                 if !self.isCancelled {
@@ -1031,9 +1031,51 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
         }
 
+        // We should retry some chunks in failed state
+        else if chunksToUploadCount == 0 && chunksInErrorCount != 0 {
+            // fetch specific chunk errors
+            var errors: [Error] = []
+            var maxOperationRetryCount = 0
+            try transactionWithFile { file in
+                maxOperationRetryCount = file.maxRetryCount
+                if let chunkTasksInError = file.uploadingSession?.chunkTasks.filter(UploadingChunkTask.inErrorPredicate) {
+                    errors = chunkTasksInError.compactMap { $0.error }
+                }
+
+                // Decrease retry count
+                if file.maxRetryCount > 0 {
+                    file.maxRetryCount -= 1
+                }
+            }
+
+            SentryDebug.uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(
+                uploadFileId,
+                [
+                    "chunksTasksPending": uploadTasks.count,
+                    "chunksInErrorCount": chunksInErrorCount,
+                    "maxOperationRetryCount": maxOperationRetryCount,
+                    "errors": errors
+                ]
+            )
+
+            // If cannot retry, throw error
+            guard maxOperationRetryCount > 0 else {
+                throw ErrorDomain.retryCountIsZero
+            }
+
+            // Sanity stop all remaining network requests
+            cancelAllUploadRequests()
+
+            // We can retry, so clean the chunks linked to a session and retry upload
+            try await fetchAndCleanStoredSession()
+            try await generateChunksAndFanOutIfNeeded()
+            return
+        }
+
         // Follow up with chunking again
         else {
             enqueueCatching {
+                // continue with next chunks
                 let slots = self.freeRequestSlots()
                 if slots > 0 {
                     try await self.generateChunksAndFanOutIfNeeded()
@@ -1124,7 +1166,30 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
-                Log.uploadOperation("Rescheduling didReschedule .taskRescheduled ufid:\(self.uploadFileId)")
+                Log
+                    .uploadOperation(
+                        "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
+                    )
+
+                // Cancel all chunk network requests and mark chunks in .taskRescheduled error
+                for (taskIdentifier, uploadTask) in self.uploadTasks {
+                    // Match chunk in base and set error to .taskRescheduled
+                    let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
+                        format: "taskIdentifier = %@",
+                        taskIdentifier
+                    )).first
+
+                    if let chunkTasksToClean {
+                        chunkTasksToClean.error = .taskRescheduled
+                    } else {
+                        Log.uploadOperation(
+                            "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
+                            level: .error
+                        )
+                    }
+
+                    uploadTask.cancel()
+                }
 
                 let metadata = ["File id": self.uploadFileId,
                                 "File name": file.name,
@@ -1134,9 +1199,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             }
 
             self.uploadNotifiable.sendPausedNotificationIfNeeded()
-
-            // Cancel all network requests
-            self.cancelAllUploadRequests()
 
             // each and all operations should be given the chance to call backgroundActivityExpiring
             self.end()

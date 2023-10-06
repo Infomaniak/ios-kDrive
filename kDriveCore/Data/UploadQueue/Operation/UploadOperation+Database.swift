@@ -51,9 +51,12 @@ extension UploadOperation {
         }
     }
 
-    /// Provides a read only `UploadFile` for debug purposes, regardless of the state of the operation
-    func debugWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-        try autoreleasepool {
+    /// Provides a read only and detached  `UploadFile`, regardless of the state of the operation.
+    ///
+    /// Throws if any DB access issues
+    /// Does not check upload.finished state of the upload operation
+    func readOnlyFile() throws -> UploadFile {
+        return try autoreleasepool {
             let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
             uploadsRealm.refresh()
 
@@ -62,7 +65,7 @@ extension UploadOperation {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
 
-            try task(file.detached())
+            return file.detached()
         }
     }
 }

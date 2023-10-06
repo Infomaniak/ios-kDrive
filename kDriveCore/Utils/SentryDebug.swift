@@ -112,6 +112,13 @@ public enum SentryDebug {
         }
     }
 
+    static func uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "Cannot close session for \(uploadFileId)"
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     // MARK: - Upload notifications
 
     static func uploadNotificationError(_ metadata: [String: Any]) {

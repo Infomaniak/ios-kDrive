@@ -46,7 +46,8 @@ public protocol UploadFilable {
 }
 
 public class UploadFile: Object, UploadFilable {
-    public static let defaultMaxRetryCount = 3
+    /// As a number of chunks can fail in one UploadRequest, the retryCount is slightly higher now
+    public static let defaultMaxRetryCount = 5
 
     public static let observedProperties = ["name",
                                             "url",

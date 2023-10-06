@@ -37,6 +37,38 @@ extension UploadOperation {
         return count
     }
 
+    /// Count of the chunks in error or without a success chunk, that should be retried.
+    func chunkTasksToRetryCount() throws -> Int {
+        var count: Int!
+        try transactionWithFile { file in
+            // Get the current uploading session
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.toRetryPredicate)
+            count = filteredTasks.count
+        }
+
+        return count
+    }
+
+    /// Count of the chunks in error or without a success chunk that should be retried.
+    func chunkTasksInErrorCount() throws -> Int {
+        var count: Int!
+        try transactionWithFile { file in
+            // Get the current uploading session
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.inErrorPredicate)
+            count = filteredTasks.count
+        }
+
+        return count
+    }
+
     /// Count of the uploaded chunks to upload, independent of chunk produced on local storage
     func chunkTasksUploadedCount() throws -> Int {
         var count: Int!
