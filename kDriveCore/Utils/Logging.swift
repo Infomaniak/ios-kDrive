@@ -34,6 +34,8 @@ public enum Logging {
         initNetworkLogging()
         initSentry()
         copyDebugInformations()
+        
+        Log.appDelegate("initLogging done")
     }
 
     class LogFormatter: NSObject, DDLogFormatter {
