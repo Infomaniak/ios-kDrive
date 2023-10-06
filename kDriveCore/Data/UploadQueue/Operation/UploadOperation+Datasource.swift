@@ -54,7 +54,7 @@ extension UploadOperation {
     }
 
     /// Count of the chunks in error or without a success chunk that should be retried.
-    func chunkTasksInErrorCount() throws -> Int {
+    func chunkTasksInErrorCount(filterReschedule: Bool = false) throws -> Int {
         var count: Int!
         try transactionWithFile { file in
             // Get the current uploading session
@@ -63,7 +63,15 @@ extension UploadOperation {
             }
 
             let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.inErrorPredicate)
-            count = filteredTasks.count
+            if filterReschedule {
+                let filtered = Array(filteredTasks).filter { uploadingChunkTask in
+                    uploadingChunkTask.error != .taskRescheduled
+                }
+
+                count = filtered.count
+            } else {
+                count = filteredTasks.count
+            }
         }
 
         return count
@@ -92,6 +100,20 @@ extension UploadOperation {
             }
 
             let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.scheduledPredicate)
+            count = filteredTasks.count
+        }
+        return count
+    }
+
+    /// How many chunk requests the server has answered with a success
+    func chunkTasksDoneUploadingSuccessCount() throws -> Int {
+        var count: Int!
+        try transactionWithFile { file in
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.doneUploadingSuccessPredicate)
             count = filteredTasks.count
         }
         return count

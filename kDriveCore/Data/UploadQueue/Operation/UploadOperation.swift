@@ -194,8 +194,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         // Set progress to zero if needed
         updateUploadProgress()
+        defer {
+            // Update progress once the session was created
+            updateUploadProgress()
+        }
 
-        Log.uploadOperation("Asking for an upload Session \(uploadFileId)")
+        Log.uploadOperation("Asking for an upload Session ufid:\(uploadFileId)")
 
         let uploadId = uploadFileId
         var uploadingSession: UploadingSessionTask?
@@ -211,6 +215,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Decrease retry count
             file.maxRetryCount -= 1
+            Log.uploadOperation("retry count is now:\(file.maxRetryCount) ufid:\(self.uploadFileId)")
 
             uploadingSession = file.uploadingSession?.detached()
         }
@@ -225,8 +230,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 throw ErrorDomain.fileIdentityHasChanged
             }
 
+            let localStateIsValid = try await validateSessionStateWithServer()
+            Log.uploadOperation("localStateIsValid :\(localStateIsValid) ufid:\(uploadFileId)")
+
             // Session is expired, regenerate it from scratch
-            guard !uploadingSession.isExpired else {
+            guard !uploadingSession.isExpired, localStateIsValid else {
                 cleanUploadFileSession()
                 try await generateNewSessionAndStore()
                 return
@@ -239,9 +247,46 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         else {
             try await generateNewSessionAndStore()
         }
+    }
 
-        // Update progress once the session was created
-        updateUploadProgress()
+    private func validateSessionStateWithServer() async throws -> Bool {
+        let file = try readOnlyFile()
+        guard let uploadingSessionTask = file.uploadingSession else {
+            throw ErrorDomain.uploadSessionTaskMissing
+        }
+        let sessionToken = AbstractTokenWrapper(token: uploadingSessionTask.token)
+        let driveFileManager = try getDriveFileManager(for: file.driveId, userId: file.userId)
+        let drive = driveFileManager.drive
+        let liveSession = try await driveFileManager.apiFetcher.getSession(
+            drive: drive,
+            sessionToken: sessionToken
+        )
+
+        Log.uploadOperation("validate liveSession:\(liveSession) ufid:\(uploadFileId)")
+
+        // compare local state
+        let chunkTasksTotalCount = try chunkTasksTotalCount()
+        let chunkTasksDoneUploadingSuccessCount = try chunkTasksDoneUploadingSuccessCount()
+        let chunkTasksInErrorCount = try chunkTasksInErrorCount(filterReschedule: true)
+
+        guard liveSession.expectedChunks == chunkTasksTotalCount,
+              liveSession.receivedChunks == chunkTasksDoneUploadingSuccessCount,
+              liveSession.uploadingChunks == 0,
+              liveSession.failedChunks == chunkTasksInErrorCount else {
+            Log.uploadOperation("""
+                                Session missmatch with server
+                                expectedChunks:📡\(liveSession.expectedChunks):📲\(chunkTasksTotalCount)
+                                receivedChunks:📡\(liveSession.receivedChunks):📲\(chunkTasksDoneUploadingSuccessCount)
+                                uploadingChunks:📡\(liveSession.uploadingChunks):📲\(0)
+                                failedChunks:📡\(liveSession.failedChunks):📲\(chunkTasksInErrorCount)
+                                ufid:\(uploadFileId)
+                                """,
+                                level: .error)
+
+            return false
+        }
+
+        return true
     }
 
     /// Generate some chunks into a temporary folder from a file
@@ -481,7 +526,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     /// Cancel all tracked URLSessionUploadTasks
     private func cancelAllUploadRequests() {
-        // Free local resources
         for (key, value) in uploadTasks {
             Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(uploadFileId)")
             value.cancel()
@@ -963,7 +1007,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             Log.uploadOperation("parsing error:\(error) ufid:\(uploadFileId)", level: .error)
             throw ErrorDomain.parseError
         }
-        Log.uploadOperation("chunk:\(uploadedChunk.number)  ufid:\(uploadFileId)")
+        Log.uploadOperation("completion chunk:\(uploadedChunk.number)  ufid:\(uploadFileId)")
 
         try transactionWithFile { file in
             // update current UploadFile with chunk

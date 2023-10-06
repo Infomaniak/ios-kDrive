@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -274,4 +275,9 @@ extension UploadOperation {
             return ["RootError": error, "ErrorFetchingUploadFile": dbError]
         }
     }
+}
+
+/// Provide a useable debug output of `ApiError`
+extension ApiError: CustomDebugStringConvertible {
+    public var debugDescription: String { "<ApiError: code:\(code) description:\(description)>" }
 }
