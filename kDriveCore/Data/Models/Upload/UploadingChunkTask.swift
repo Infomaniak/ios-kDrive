@@ -45,7 +45,6 @@ public final class UploadingChunkTask: EmbeddedObject {
     @Persisted public var chunkSize: Int64
     @Persisted public var sha256: String?
 
-    // TODO: Remove once APIV2 is updated
     /// Current upload session token
     @Persisted public var sessionToken: String?
 
@@ -76,6 +75,15 @@ public final class UploadingChunkTask: EmbeddedObject {
 
     /// A predicate that will allow you to filter only the elements that are not done uploading. (regardless of error state)
     public static let notDoneUploadingPredicate = NSPredicate(format: "chunk = nil AND _error = nil")
+
+    /// A predicate that will allow you to filter only the elements that should be retried
+    public static let toRetryPredicate = NSPredicate(format: "chunk = nil AND (_error != nil OR taskIdentifier != nil)")
+
+    /// A predicate that will allow you to filter only the elements that have an error
+    public static let inErrorPredicate = NSPredicate(format: "_error != nil")
+
+    /// A predicate to get all chunks in success
+    public static let doneUploadingSuccessPredicate = NSPredicate(format: "chunk != nil")
 
     /// A precondition to start uploading, but not all of the checks can be added to the predicate.
     public static let canStartUploadingPreconditionPredicate =

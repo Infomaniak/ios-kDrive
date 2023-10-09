@@ -25,6 +25,7 @@ public enum SentryDebug {
     enum Category {
         static let uploadOperation = "UploadOperation"
         static let uploadQueue = "UploadQueue"
+        static let apiError = "APIError"
     }
 
     enum ErrorNames {
@@ -111,6 +112,13 @@ public enum SentryDebug {
         }
     }
 
+    static func uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "Cannot close session for \(uploadFileId)"
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     // MARK: - Upload notifications
 
     static func uploadNotificationError(_ metadata: [String: Any]) {
@@ -122,6 +130,15 @@ public enum SentryDebug {
     static func uploadNotificationBreadcrumb(_ metadata: [String: Any]) {
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
         breadcrumb.message = ErrorNames.uploadErrorUserNotification
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    // MARK: - Error
+
+    static func apiErrorBreadcrumb(_ message: String, _ metadata: [String: Any]) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.apiError)
+        breadcrumb.message = message
         breadcrumb.data = metadata
         SentrySDK.addBreadcrumb(breadcrumb)
     }

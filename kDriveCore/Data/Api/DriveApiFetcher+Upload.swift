@@ -122,8 +122,8 @@ public extension DriveApiFetcher {
         return result
     }
 
-    func getSession(drive: AbstractDrive) async throws -> UploadLiveSession {
-        let route: Endpoint = .uploadSession(drive: drive)
+    func getSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadLiveSession {
+        let route: Endpoint = .getUploadSession(drive: drive, sessionToken: sessionToken)
         let request = Request(method: .GET,
                               route: route,
                               GETParameters: nil,

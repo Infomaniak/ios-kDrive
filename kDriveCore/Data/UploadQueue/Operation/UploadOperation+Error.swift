@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -228,51 +229,55 @@ extension UploadOperation {
     /// Get a debug representation of the upload operation
     private func errorMetadata(_ error: Error) -> [String: Any] {
         do {
-            var metadata = [String: Any]()
-            try debugWithFile { file in
-                metadata = ["version": 3,
-                            "uploadFileId": self.uploadFileId,
-                            "RootError": error,
-                            "uploadDate": file.uploadDate ?? "nil",
-                            "creationDate": file.creationDate ?? "nil",
-                            "modificationDate": file.modificationDate ?? "nil",
-                            "taskCreationDate": file.taskCreationDate ?? "nil",
-                            "progress": file.progress ?? 0,
-                            "initiatedFromFileManager": file.initiatedFromFileManager,
-                            "maxRetryCount": file.maxRetryCount,
-                            "rawPersistedError": file._error ?? "nil"]
-                // Unwrap uploadingSession
-                guard let sessionTask = file.uploadingSession else {
-                    metadata["uploadingSession"] = "nil"
-                    return
-                }
-
-                // Log chunkTasks status
-                let chunkTasks = sessionTask.chunkTasks
-                let chunkTaskCount = chunkTasks.count
-                metadata["file.uploadingSession.chunkTasks.count"] = chunkTaskCount
-                for (index, object) in chunkTasks.enumerated() {
-                    metadata["chunkTask-\(index)"] =
-                        "chunkNumber:\(object.chunkNumber) uploaded:\(String(describing: object.chunk)) error:\(String(describing: object.error))"
-                }
-
-                metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired
-                metadata["file.uploadingSession.sessionExpiration"] = sessionTask.sessionExpiration
-                metadata["file.uploadingSession.fileIdentityHasNotChanged"] = sessionTask.fileIdentityHasNotChanged
-
-                // Log uploadSession status
-                guard let uploadSession = sessionTask.uploadSession else {
-                    metadata["file.uploadingSession.uploadSession"] = "nil"
-                    return
-                }
-
-                // Log uploadingSession.uploadSession state
-                metadata["file.uploadingSession.uploadSession.result"] = uploadSession.result
-                metadata["file.uploadingSession.uploadSession.token"] = uploadSession.token
+            let file = try readOnlyFile()
+            var metadata: [String: Any] = ["version": 3,
+                                           "uploadFileId": uploadFileId,
+                                           "RootError": error,
+                                           "uploadDate": file.uploadDate ?? "nil",
+                                           "creationDate": file.creationDate ?? "nil",
+                                           "modificationDate": file.modificationDate ?? "nil",
+                                           "taskCreationDate": file.taskCreationDate ?? "nil",
+                                           "progress": file.progress ?? 0,
+                                           "initiatedFromFileManager": file.initiatedFromFileManager,
+                                           "maxRetryCount": file.maxRetryCount,
+                                           "rawPersistedError": file._error ?? "nil"]
+            // Unwrap uploadingSession
+            guard let sessionTask = file.uploadingSession else {
+                metadata["uploadingSession"] = "nil"
+                return metadata
             }
+
+            // Log chunkTasks status
+            let chunkTasks = sessionTask.chunkTasks
+            let chunkTaskCount = chunkTasks.count
+            metadata["file.uploadingSession.chunkTasks.count"] = chunkTaskCount
+            for (index, object) in chunkTasks.enumerated() {
+                metadata["chunkTask-\(index)"] =
+                    "chunkNumber:\(object.chunkNumber) uploaded:\(String(describing: object.chunk)) error:\(String(describing: object.error))"
+            }
+
+            metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired
+            metadata["file.uploadingSession.sessionExpiration"] = sessionTask.sessionExpiration
+            metadata["file.uploadingSession.fileIdentityHasNotChanged"] = sessionTask.fileIdentityHasNotChanged
+
+            // Log uploadSession status
+            guard let uploadSession = sessionTask.uploadSession else {
+                metadata["file.uploadingSession.uploadSession"] = "nil"
+                return metadata
+            }
+
+            // Log uploadingSession.uploadSession state
+            metadata["file.uploadingSession.uploadSession.result"] = uploadSession.result
+            metadata["file.uploadingSession.uploadSession.token"] = uploadSession.token
+
             return metadata
         } catch (let dbError) {
             return ["RootError": error, "ErrorFetchingUploadFile": dbError]
         }
     }
+}
+
+/// Provide a useable debug output of `ApiError`
+extension ApiError: CustomDebugStringConvertible {
+    public var debugDescription: String { "<ApiError: code:\(code) description:\(description)>" }
 }
