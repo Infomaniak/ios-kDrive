@@ -1113,7 +1113,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // We can retry, so clean the chunks linked to a session and retry upload
             try await fetchAndCleanStoredSession()
             try await generateChunksAndFanOutIfNeeded()
-            return
         }
 
         // Follow up with chunking again
