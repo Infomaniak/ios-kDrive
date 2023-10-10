@@ -148,21 +148,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     func handleEmptyFileIfNeeded() async throws -> Bool {
-        var fileSize: UInt64?
-        var uploadFile: UploadFile?
-        try transactionWithFile { file in
-            let fileUrl = try self.getFileUrlIfReadable(file: file)
-            guard let size = self.fileMetadata.fileSize(url: fileUrl) else {
-                Log.uploadOperation("Unable to read file size for ufid:\(self.uploadFileId) url:\(fileUrl)", level: .error)
-                throw DriveError.fileNotFound
-            }
+        try checkCancelation()
 
-            fileSize = size
-            uploadFile = file.detached()
+        let uploadFile = try readOnlyFile()
+        let fileUrl = try getFileUrlIfReadable(file: uploadFile)
+        guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
+            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
+            throw DriveError.fileNotFound
         }
 
-        guard let uploadFile,
-              fileSize == 0 else {
+        guard fileSize == 0 else {
             return false // Continue with standard upload operation
         }
 
@@ -246,6 +241,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     private func validateSessionStateWithServer() async throws -> Bool {
+        try checkCancelation()
+
         let file = try readOnlyFile()
         guard let uploadingSessionTask = file.uploadingSession else {
             throw ErrorDomain.uploadSessionTaskMissing
@@ -300,7 +297,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             filePath = uploadingSessionTask.filePath
             let sessionToken = uploadingSessionTask.token
-//            try self.checkFileIdentity(filePath: filePath, file: file)
 
             // Look for the next chunk to generate
             let chunksToGenerate = uploadingSessionTask.chunkTasks
@@ -758,35 +754,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// generate a new session
     private func generateNewSessionAndStore() async throws {
         Log.uploadOperation("generateNewSession ufid:\(uploadFileId)")
-        var fileName: String?
-        var conflictOption: ConflictOption?
-        var parentDirectoryId: Int?
-        var fileUrl: URL?
-        var modificationDate: Date?
-        var creationDate: Date?
-        var relativePath: String?
-        var userId: Int?
-        var driveId: Int?
-        try transactionWithFile { file in
-            fileName = file.name
-            conflictOption = file.conflictOption
-            parentDirectoryId = file.parentDirectoryId
+        try checkCancelation()
 
-            // Check file is readable
-            fileUrl = try self.getFileUrlIfReadable(file: file)
+        let file = try readOnlyFile()
 
-            // Dates and path override, for PHAssets.
-            modificationDate = file.modificationDate
-            creationDate = file.creationDate
-            relativePath = file.relativePath
-
-            userId = file.userId
-            driveId = file.driveId
-        }
-
-        guard let fileName, let conflictOption, let parentDirectoryId, let fileUrl, let userId, let driveId else {
-            throw ErrorDomain.unableToBuildRequest
-        }
+        // Check file is readable
+        let fileUrl = try getFileUrlIfReadable(file: file)
 
         guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
             Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
@@ -808,19 +781,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("got ranges:\(ranges.count) ufid:\(uploadFileId)")
 
         // Get a valid APIV2 UploadSession
-        let driveFileManager = try getDriveFileManager(for: driveId, userId: userId)
+        let driveFileManager = try getDriveFileManager(for: file.driveId, userId: file.userId)
         let apiFetcher = driveFileManager.apiFetcher
         let drive = driveFileManager.drive
 
         let session = try await apiFetcher.startSession(drive: drive,
                                                         totalSize: fileSize,
-                                                        fileName: fileName,
+                                                        fileName: file.name,
                                                         totalChunks: ranges.count,
-                                                        conflictResolution: conflictOption,
-                                                        lastModifiedAt: modificationDate,
-                                                        createdAt: creationDate,
-                                                        directoryId: parentDirectoryId,
-                                                        directoryPath: relativePath)
+                                                        conflictResolution: file.conflictOption,
+                                                        lastModifiedAt: file.modificationDate, // Date override for PHAssets
+                                                        createdAt: file.creationDate,
+                                                        directoryId: file.parentDirectoryId,
+                                                        directoryPath: file.relativePath)
         Log.uploadOperation("New session token:\(session.token) ufid:\(uploadFileId)")
         try transactionWithFile { file in
             // Create an uploading session
@@ -928,30 +901,25 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     private func getPhAssetIfNeeded() async throws {
         Log.uploadOperation("getPhAssetIfNeeded ufid:\(uploadFileId)")
-        var assetToLoad: PHAsset?
-        try transactionWithFile { file in
-            Log.uploadOperation("getPhAssetIfNeeded type:\(file.type) ufid:\(self.uploadFileId)")
-            guard file.type == .phAsset else {
-                return
-            }
+        try checkCancelation()
+        let file = try readOnlyFile()
 
-            guard let asset = file.getPHAsset() else {
-                Log.uploadOperation(
-                    "Unable to fetch PHAsset ufid:\(self.uploadFileId) assetLocalIdentifier:\(file.assetLocalIdentifier) ",
-                    level: .error
-                )
-                return
-            }
-            assetToLoad = asset
+        guard file.type == .phAsset else {
+            // This UploadFile is not a PHAsset, return silently
+            return
         }
 
-        // This UploadFile is not a PHAsset, return silently
-        guard let assetToLoad else {
+        guard let asset = file.getPHAsset() else {
+            Log.uploadOperation(
+                "Unable to fetch PHAsset ufid:\(uploadFileId) assetLocalIdentifier:\(String(describing: file.assetLocalIdentifier)) ",
+                level: .error
+            )
+            // This UploadFile is not a PHAsset, return silently
             return
         }
 
         // Async load the url of the asset
-        guard let url = await photoLibraryUploader.getUrl(for: assetToLoad) else {
+        guard let url = await photoLibraryUploader.getUrl(for: asset) else {
             Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
             return
         }

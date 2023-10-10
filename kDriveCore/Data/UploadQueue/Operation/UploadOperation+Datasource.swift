@@ -121,16 +121,12 @@ extension UploadOperation {
 
     /// Count of the chunks to upload, independent of chunk produced on local storage
     func chunkTasksTotalCount() throws -> Int {
-        var count: Int!
-        try transactionWithFile { file in
-            // Get the current uploading session
-            guard let uploadingSessionTask = file.uploadingSession else {
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
-
-            count = uploadingSessionTask.chunkTasks.count
+        let file = try readOnlyFile()
+        guard let uploadingSessionTask = file.uploadingSession else {
+            throw ErrorDomain.uploadSessionTaskMissing
         }
-        return count
+
+        return uploadingSessionTask.chunkTasks.count
     }
 
     // MARK: Misc
