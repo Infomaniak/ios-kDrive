@@ -83,7 +83,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         """
     }
 
-    /// The number of requests we try to keep running in one UploadOperation
+    /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
 
     public let uploadFileId: String
@@ -470,6 +470,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         let cleanFileClosure: (UploadFile) -> Void = { file in
+            assert(file.realm != nil, "expecting a live object with a realm")
+            assert(file.isInvalidated == false, "file should not be invalidated")
+
             // Clean the remote session, if valid. Invalid ones are already gone server side.
             let driveId = file.driveId
             let userId = file.userId
@@ -734,20 +737,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 uploadingChunkTask.sha256 = nil
                 uploadingChunkTask.error = nil
             }
+
+            // Cleanup upload error as we restart
+            file.error = nil
         }
 
         // if we have no more chunks to upload, try to close session
-        await catching {
-            guard let chunkTasksToUploadCount = try? self.chunkTasksToUploadCount() else {
-                return
-            }
-
-            // All chunks are uploaded, try to close the session
-            if chunkTasksToUploadCount == 0 {
-                Log.uploadOperation("No remaining chunks to upload at restart, closing session ufid:\(self.uploadFileId)")
-                try await self.closeSessionAndEnd()
-            }
-        }
+        try await completeUploadSessionOrRetryIfPossible()
 
         // We have a valid upload session
     }
@@ -937,23 +933,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     // also called on app restoration
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
-        enqueue {
+        enqueueCatching {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
             // Success
             if let data,
                error == nil,
                statusCode >= 200, statusCode < 300 {
-                await self.catching {
-                    try await self.uploadCompletionSuccess(data: data, response: response, error: error)
-                }
+                try await self.uploadCompletionSuccess(data: data, response: response, error: error)
             }
 
             // Client-side error
             else if let error {
-                await self.catching {
-                    try self.uploadCompletionLocalFailure(data: data, response: response, error: error)
-                }
+                try self.uploadCompletionLocalFailure(data: data, response: response, error: error)
             }
 
             // Server-side error
@@ -965,7 +957,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     private func uploadCompletionSuccess(data: Data, response: URLResponse?, error: Error?) async throws {
         Log.uploadOperation("completion successful \(uploadFileId)")
-
         guard let uploadedChunk = try? ApiFetcher.decoder.decode(ApiResponse<UploadedChunk>.self, from: data).data else {
             Log.uploadOperation("parsing error:\(error) ufid:\(uploadFileId)", level: .error)
             throw ErrorDomain.parseError
@@ -1025,17 +1016,29 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         // Update UI progress state
         updateUploadProgress()
 
+        // Decide if we should send the complete call or retry the upload
+        try await completeUploadSessionOrRetryIfPossible()
+
+        // Follow up with chunking again
+        if freeRequestSlots() > 0 {
+            try await generateChunksAndFanOutIfNeeded()
+        }
+    }
+
+    /// Complete the upload if needed, or retry if `maxRetryCount` has not reached zero
+    private func completeUploadSessionOrRetryIfPossible() async throws {
+        try checkCancelation()
+
         // Close session and terminate task as the last chunk was uploaded
         let chunksToUploadCount = try chunkTasksToUploadCount()
         let chunksInErrorCount = try chunkTasksInErrorCount()
+        Log.uploadOperation(
+            "completion upload state: chunksToUploadCount:\(chunksToUploadCount) chunksInErrorCount:\(chunksInErrorCount) fid:\(uploadFileId)"
+        )
 
         if chunksToUploadCount == 0, chunksInErrorCount == 0 {
-            enqueue {
-                Log.uploadOperation("No more chunks to be uploaded \(self.uploadFileId)")
-                if !self.isCancelled {
-                    try await self.closeSessionAndEnd()
-                }
-            }
+            Log.uploadOperation("No more chunks to be uploaded \(uploadFileId)")
+            try await closeSessionAndEnd()
         }
 
         // We should retry some chunks in failed state
@@ -1076,17 +1079,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // We can retry, so clean the chunks linked to a session and retry upload
             try await fetchAndCleanStoredSession()
             try await generateChunksAndFanOutIfNeeded()
-        }
-
-        // Follow up with chunking again
-        else {
-            enqueueCatching {
-                // continue with next chunks
-                let slots = self.freeRequestSlots()
-                if slots > 0 {
-                    try await self.generateChunksAndFanOutIfNeeded()
-                }
-            }
         }
     }
 
