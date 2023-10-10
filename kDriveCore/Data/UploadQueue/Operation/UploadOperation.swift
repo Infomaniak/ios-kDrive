@@ -226,15 +226,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         // fetch stored session
         if let uploadingSession {
-            guard uploadingSession.fileIdentityHasNotChanged else {
-                throw ErrorDomain.fileIdentityHasChanged
-            }
-
             let localStateIsValid = try await validateSessionStateWithServer()
             Log.uploadOperation("localStateIsValid :\(localStateIsValid) ufid:\(uploadFileId)")
 
-            // Session is expired, regenerate it from scratch
-            guard !uploadingSession.isExpired, localStateIsValid else {
+            // Something prevents reuse of session, we restart
+            guard !uploadingSession.isExpired, localStateIsValid, uploadingSession.fileIdentityHasNotChanged else {
                 cleanUploadFileSession()
                 try await generateNewSessionAndStore()
                 return
@@ -304,7 +300,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             filePath = uploadingSessionTask.filePath
             let sessionToken = uploadingSessionTask.token
-            try self.checkFileIdentity(filePath: filePath, file: file)
+//            try self.checkFileIdentity(filePath: filePath, file: file)
 
             // Look for the next chunk to generate
             let chunksToGenerate = uploadingSessionTask.chunkTasks
@@ -330,7 +326,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 "Storing Chunk count:\(chunkNumber) of \(chunksToGenerateCount) to write, ufid:\(self.uploadFileId)"
             )
             do {
-                try self.checkFileIdentity(filePath: filePath, file: file)
                 try self.checkCancelation()
 
                 let chunkSHA256 = chunk.SHA256DigestString
@@ -362,7 +357,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// Prepare chunk upload requests, and start them.
     private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
         do {
-            try checkFileIdentity(filePath: filePath)
             try checkCancelation()
 
             // Fan-out the chunk we just made
@@ -534,33 +528,30 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// Throws if the file was modified
-    func checkFileIdentity(filePath: String, file: UploadFile? = nil) throws {
+    func checkFileIdentity() throws {
+        let file = try readOnlyFile()
+
+        guard let uploadingSessionTask = file.uploadingSession else {
+            throw ErrorDomain.uploadSessionTaskMissing
+        }
+
+        let filePath = uploadingSessionTask.filePath
         guard fileManager.isReadableFile(atPath: filePath) else {
             Log.uploadOperation("File has not a valid readable URL:'\(filePath)' for \(uploadFileId)",
                                 level: .error)
             throw DriveError.fileNotFound
         }
 
-        let task: (_ file: UploadFile) throws -> Void = { file in
-            guard let uploadingSession = file.uploadingSession else {
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
-
-            guard uploadingSession.fileIdentityHasNotChanged else {
-                Log.uploadOperation(
-                    "File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) ufid:\(self.uploadFileId)",
-                    level: .error
-                )
-                throw ErrorDomain.fileIdentityHasChanged
-            }
+        guard let uploadingSession = file.uploadingSession else {
+            throw ErrorDomain.uploadSessionTaskMissing
         }
 
-        if let file {
-            try task(file)
-        } else {
-            try transactionWithFile { file in
-                try task(file)
-            }
+        guard uploadingSession.fileIdentityHasNotChanged else {
+            Log.uploadOperation(
+                "File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) ufid:\(uploadFileId)",
+                level: .error
+            )
+            throw ErrorDomain.fileIdentityHasChanged
         }
     }
 
@@ -576,9 +567,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// Close session if needed.
-    func closeSessionAndEnd() async {
+    func closeSessionAndEnd() async throws {
         Log.uploadOperation("closeSession ufid:\(uploadFileId)")
         SentryDebug.uploadOperationCloseSessionAndEndBreadcrumb(uploadFileId)
+
+        // Check file was not modified during the upload before we close the session, and thus validate the file on the server.
+        try checkFileIdentity()
 
         defer {
             end()
@@ -754,7 +748,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // All chunks are uploaded, try to close the session
             if chunkTasksToUploadCount == 0 {
                 Log.uploadOperation("No remaining chunks to upload at restart, closing session ufid:\(self.uploadFileId)")
-                await self.closeSessionAndEnd()
+                try await self.closeSessionAndEnd()
             }
         }
 
@@ -1070,7 +1064,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             enqueue {
                 Log.uploadOperation("No more chunks to be uploaded \(self.uploadFileId)")
                 if !self.isCancelled {
-                    await self.closeSessionAndEnd()
+                    try await self.closeSessionAndEnd()
                 }
             }
         }

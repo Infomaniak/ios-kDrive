@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CryptoKit
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
@@ -68,21 +69,16 @@ public final class UploadingSessionTask: EmbeddedObject {
         // Make sure we can track the file has not changed across time, while we run the upload session
         @InjectService var fileMetadata: FileMetadatable
         let fileCreationString: String
-        let fileModificationString: String
-
         if let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl) {
             fileCreationString = "\(fileCreationDate)"
         } else {
             fileCreationString = "nil"
         }
 
-        if let fileModificationDate = fileMetadata.fileModificationDate(url: fileUrl) {
-            fileModificationString = "\(fileModificationDate)"
-        } else {
-            fileModificationString = "nil"
-        }
+        // Modification date is unsafe, use a hash instead
+        let fileHash = getFileIdentity(forFile: fileUrl)
 
-        let fileUniqIdentity = "\(fileCreationString)_\(fileModificationString)"
+        let fileUniqIdentity = "\(fileCreationString)_SHA256:\(fileHash)"
         return fileUniqIdentity
     }
 
@@ -90,5 +86,26 @@ public final class UploadingSessionTask: EmbeddedObject {
     public var currentFileIdentity: String {
         let fileUrl = URL(fileURLWithPath: filePath, isDirectory: false)
         return UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
+    }
+
+    // MARK: Private
+
+    /// Provides a stable hash of a file in a memory efficient manner
+    private static func getFileIdentity(forFile url: URL) -> String {
+        guard let handle = try? FileHandle(forReadingFrom: url) else {
+            // Unable to create a file handle, return a UUID
+            return UUID().uuidString
+        }
+
+        var hasher = SHA256()
+        while autoreleasepool(invoking: {
+            let nextChunk = handle.readData(ofLength: SHA256.blockByteCount)
+            guard !nextChunk.isEmpty else { return false }
+            hasher.update(data: nextChunk)
+            return true
+        }) {}
+        let digest = hasher.finalize()
+        let digestString = digest.map { String(format: "%02hhx", $0) }.joined()
+        return digestString
     }
 }
