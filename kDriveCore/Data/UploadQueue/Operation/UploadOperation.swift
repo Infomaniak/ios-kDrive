@@ -91,7 +91,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     /// Local tracking of running network tasks
     /// The key used is the and absolute identifier of the task.
-    var uploadTasks = [String: URLSessionUploadTask]()
+    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
 
     private let urlSession: URLSession
     private var expiringActivity: ExpiringActivityable?
@@ -516,7 +516,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     /// Cancel all tracked URLSessionUploadTasks
     private func cancelAllUploadRequests() {
-        for (key, value) in uploadTasks {
+        var iterator = uploadTasks.makeIterator()
+        while let (key, value) = iterator.next() {
             Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(uploadFileId)")
             value.cancel()
         }
@@ -1168,6 +1169,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
+        // Cancel all chunk network requests ASAP, without synchronisation
+        var iterator = uploadTasks.makeIterator()
+        while let (_, sessionUploadTask) = iterator.next() {
+            sessionUploadTask.cancel()
+        }
+
         enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
@@ -1176,8 +1183,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                         "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
                     )
 
-                // Cancel all chunk network requests and mark chunks in .taskRescheduled error
-                for (taskIdentifier, uploadTask) in self.uploadTasks {
+                // Mark all chunks in base with a .taskRescheduled error
+                var iterator = self.uploadTasks.makeIterator()
+                while let (taskIdentifier, _) = iterator.next() {
                     // Match chunk in base and set error to .taskRescheduled
                     let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
                         format: "taskIdentifier = %@",
@@ -1192,8 +1200,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                             level: .error
                         )
                     }
-
-                    uploadTask.cancel()
                 }
 
                 let metadata = ["File id": self.uploadFileId,
