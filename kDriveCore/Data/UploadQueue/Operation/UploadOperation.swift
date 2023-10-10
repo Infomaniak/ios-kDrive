@@ -226,7 +226,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Something prevents reuse of session, we restart
             guard !uploadingSession.isExpired, localStateIsValid, uploadingSession.fileIdentityHasNotChanged else {
-                cleanUploadFileSession()
+                await cleanUploadFileSession()
                 try await generateNewSessionAndStore()
                 return
             }
@@ -465,56 +465,50 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return fileUrl
     }
 
-    public func cleanUploadFileSession(file: UploadFile? = nil) {
-        Log.uploadOperation("Clean uploading session for \(uploadFileId)")
+    public func cleanUploadFileSession() async {
+        Log.uploadOperation("Clean remote session for \(uploadFileId)")
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
-        let cleanFileClosure: (UploadFile) -> Void = { file in
-            assert(file.realm != nil, "expecting a live object with a realm")
-            assert(file.isInvalidated == false, "file should not be invalidated")
+        // First remote, then locally
+        await cleanUploadFileSessionRemotely()
+        cleanUploadFileSessionLocally()
 
-            // Clean the remote session, if valid. Invalid ones are already gone server side.
-            let driveId = file.driveId
-            let userId = file.userId
-            let uploadingSession = file.uploadingSession?.detached()
-            self.enqueue {
-                guard let session = uploadingSession,
-                      !session.isExpired else {
-                    return
-                }
+        // Cancel all network requests
+        cancelAllUploadRequests()
+    }
 
-                guard let driveFileManager = try? self.getDriveFileManager(for: driveId, userId: userId) else {
-                    return
-                }
+    private func cleanUploadFileSessionRemotely() async {
+        // Clean the remote session, if any. Invalid ones are already gone server side.
+        if let readOnlyFile = try? readOnlyFile(),
+           let token = readOnlyFile.uploadingSession?.token {
+            let driveId = readOnlyFile.driveId
+            let userId = readOnlyFile.userId
+            await cleanRemoteSession(AbstractTokenWrapper(token: token), driveId: driveId, userId: userId)
+        }
+    }
 
-                let abstractToken = AbstractTokenWrapper(token: session.token)
-                let apiFetcher = driveFileManager.apiFetcher
-                let drive = driveFileManager.drive
-
-                // We try to cancel the upload session, we discard results
-                let cancelResult = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
-                Log.uploadOperation("cancelSession remotely:\(String(describing: cancelResult)) for \(self.uploadFileId)")
-                SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(self.uploadFileId, cancelResult ?? false)
-            }
-
+    private func cleanUploadFileSessionLocally(_ file: UploadFile? = nil) {
+        // Clean the local uploading session, as well as error
+        try? transactionWithFile { file in
             file.uploadingSession = nil
             file.progress = nil
-
-            // reset errors
             file.error = nil
+        }
+    }
 
-            // Cancel all network requests
-            self.cancelAllUploadRequests()
+    // Delete a remote session for a specific token
+    private func cleanRemoteSession(_ abstractToken: AbstractToken, driveId: Int, userId: Int) async {
+        guard let driveFileManager = try? getDriveFileManager(for: driveId, userId: userId) else {
+            return
         }
 
-        // If no file provided, wrap the transaction
-        if let file {
-            cleanFileClosure(file)
-        } else {
-            try? transactionWithFile { file in
-                cleanFileClosure(file)
-            }
-        }
+        let apiFetcher = driveFileManager.apiFetcher
+        let drive = driveFileManager.drive
+
+        // We try to cancel the upload session, we discard results
+        let cancelResult = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
+        Log.uploadOperation("cancelSession remotely:\(String(describing: cancelResult)) for \(uploadFileId)")
+        SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(uploadFileId, cancelResult ?? false)
     }
 
     /// Cancel all tracked URLSessionUploadTasks
@@ -652,11 +646,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                file.shouldRemoveAfterUpload && file.uploadDate != nil {
                 Log.uploadOperation("Remove local file at path:\(path) ufid:\(self.uploadFileId)")
                 try? self.fileManager.removeItem(at: path)
-            }
-
-            // retry from scratch next time
-            if file.maxRetryCount <= 0 {
-                self.cleanUploadFileSession(file: file)
             }
 
             // If task is cancelled, remove it from list
@@ -1008,7 +997,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId], key: "Chunk Infos")
                 }
 
-                self.cleanUploadFileSession(file: file)
                 throw ErrorDomain.unableToMatchUploadChunk
             }
         }
