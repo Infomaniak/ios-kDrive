@@ -39,9 +39,15 @@ public struct UploadLiveSession: Decodable {
     }
 }
 
+enum UploadedLiveChunkState: String, Decodable{
+    case error
+    case ok
+    case uploading
+}
+
 public struct UploadedLiveChunk: Decodable {
     var number: Int64
-    var status: String
+    var status: UploadedLiveChunkState
     var createdAt: Date
     var size: Int64
     var chunkHash: String
@@ -55,13 +61,13 @@ public struct UploadedLiveChunk: Decodable {
     }
 
     public var isValidUpload: Bool {
-        return status == "ok"
+        return status == .ok
     }
 
     public func toRealmObject() -> UploadedChunk {
         var chunk = UploadedChunk()
         chunk.number = number
-        chunk.status = status
+        chunk.status = status.rawValue
         chunk.createdAt = createdAt
         chunk.size = size
         chunk.chunkHash = chunkHash

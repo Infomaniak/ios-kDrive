@@ -119,8 +119,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             self.beginExpiringActivity()
 
             // Clean existing error if any
-            try cleanUploadFileError()
-            
+            try self.cleanUploadFileError()
+
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()
 
@@ -182,7 +182,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         end()
         return true
     }
-    
+
     /// Make sure we start form a clean slate
     func cleanUploadFileError() throws {
         try transactionWithFile { file in
@@ -513,12 +513,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
     private func cleanUploadFileSessionRemotely() async {
         // Clean the remote session, if any. Invalid ones are already gone server side.
-        if let readOnlyFile = try? readOnlyFile(),
-           let token = readOnlyFile.uploadingSession?.token {
-            let driveId = readOnlyFile.driveId
-            let userId = readOnlyFile.userId
-            await cleanRemoteSession(AbstractTokenWrapper(token: token), driveId: driveId, userId: userId)
+        guard let readOnlyFile = try? readOnlyFile(),
+              let token = readOnlyFile.uploadingSession?.token else {
+            return
         }
+
+        let driveId = readOnlyFile.driveId
+        let userId = readOnlyFile.userId
+        await cleanRemoteSession(AbstractTokenWrapper(token: token), driveId: driveId, userId: userId)
     }
 
     private func cleanUploadFileSessionLocally(_ file: UploadFile? = nil) {
