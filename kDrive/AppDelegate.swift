@@ -116,6 +116,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
 
+        let state = UIApplication.shared.applicationState
+        if state == .active {
+            // Remove all notifications on App Opening
+            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        }
+
         return true
     }
 

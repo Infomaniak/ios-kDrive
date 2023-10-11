@@ -104,14 +104,15 @@ extension UploadOperation {
                 case .unableToMatchUploadChunk,
                      .splitError,
                      .chunkError,
-                     .fileIdentityHasChanged,
                      .parseError,
                      .missingChunkHash,
                      .retryCountIsZero,
                      .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
                     // Clean session, present error, user action required to restart.
-                    self.cleanUploadFileSession(file: file)
+                    Task {
+                        await self.cleanUploadFileSession()
+                    }
                     file.error = .localError.wrapping(error)
 
                 case .operationFinished, .operationCanceled:
@@ -178,7 +179,9 @@ extension UploadOperation {
                  .uploadError,
                  .uploadFailedError,
                  .uploadTokenIsNotValid:
-                self.cleanUploadFileSession(file: file)
+                Task {
+                    await self.cleanUploadFileSession()
+                }
                 file.progress = nil
                 file.error = error
 
@@ -192,7 +195,9 @@ extension UploadOperation {
                 file.maxRetryCount = 0
                 file.progress = nil
                 file.error = error
-                self.cleanUploadFileSession(file: file)
+                Task {
+                    await self.cleanUploadFileSession()
+                }
                 self.uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId,
                                                      userId: file.userId,
                                                      driveId: file.driveId)
@@ -230,7 +235,7 @@ extension UploadOperation {
     private func errorMetadata(_ error: Error) -> [String: Any] {
         do {
             let file = try readOnlyFile()
-            var metadata: [String: Any] = ["version": 3,
+            var metadata: [String: Any] = ["version": 4,
                                            "uploadFileId": uploadFileId,
                                            "RootError": error,
                                            "uploadDate": file.uploadDate ?? "nil",
@@ -258,7 +263,6 @@ extension UploadOperation {
 
             metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired
             metadata["file.uploadingSession.sessionExpiration"] = sessionTask.sessionExpiration
-            metadata["file.uploadingSession.fileIdentityHasNotChanged"] = sessionTask.fileIdentityHasNotChanged
 
             // Log uploadSession status
             guard let uploadSession = sessionTask.uploadSession else {

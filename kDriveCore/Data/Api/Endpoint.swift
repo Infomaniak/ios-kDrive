@@ -621,7 +621,10 @@ public extension Endpoint {
     }
 
     static func getUploadSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/upload/session/\(sessionToken.token)")
+        return .driveInfo(drive: drive).appending(
+            path: "/upload/session/\(sessionToken.token)",
+            queryItems: [URLQueryItem(name: "with", value: "chunks")]
+        )
     }
 
     static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {

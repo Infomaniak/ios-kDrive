@@ -43,4 +43,8 @@ public final class UploadedChunk: Object, Decodable {
         case size
         case chunkHash = "hash"
     }
+
+    public var isValidUpload: Bool {
+        return status == "ok"
+    }
 }

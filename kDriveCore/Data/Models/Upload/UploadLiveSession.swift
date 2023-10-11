@@ -26,6 +26,7 @@ public struct UploadLiveSession: Decodable {
     var failedChunks: UInt64
     var expectedSize: UInt64
     var uploadedSize: UInt64
+    var chunks: [UploadedLiveChunk]
 
     private enum CodingKeys: String, CodingKey {
         case expectedChunks = "expected_chunks"
@@ -34,5 +35,42 @@ public struct UploadLiveSession: Decodable {
         case failedChunks = "failed_chunks"
         case expectedSize = "expected_size"
         case uploadedSize = "uploaded_size"
+        case chunks
+    }
+}
+
+enum UploadedLiveChunkState: String, Decodable{
+    case error
+    case ok
+    case uploading
+}
+
+public struct UploadedLiveChunk: Decodable {
+    var number: Int64
+    var status: UploadedLiveChunkState
+    var createdAt: Date
+    var size: Int64
+    var chunkHash: String
+
+    enum CodingKeys: String, CodingKey {
+        case number
+        case status
+        case createdAt = "created_at"
+        case size
+        case chunkHash = "hash"
+    }
+
+    public var isValidUpload: Bool {
+        return status == .ok
+    }
+
+    public func toRealmObject() -> UploadedChunk {
+        var chunk = UploadedChunk()
+        chunk.number = number
+        chunk.status = status.rawValue
+        chunk.createdAt = createdAt
+        chunk.size = size
+        chunk.chunkHash = chunkHash
+        return chunk
     }
 }
