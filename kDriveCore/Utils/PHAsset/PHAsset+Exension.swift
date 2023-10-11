@@ -111,6 +111,7 @@ public extension PHAsset {
             shouldTransformIntoJPEG = true
         }
 
+        // Asset are copied when we start the Upload, thus guarantees the stability of the file
         @InjectService var fileImportHelper: FileImportHelper
         let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {

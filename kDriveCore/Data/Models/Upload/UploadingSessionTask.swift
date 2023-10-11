@@ -31,9 +31,6 @@ public final class UploadingSessionTask: EmbeddedObject {
     @Persisted public var sessionExpiration: Date
     @Persisted public var chunkTasks: List<UploadingChunkTask>
 
-    /// Allows us to make sure the file was not edited while the upload session runs
-    @Persisted public var fileIdentity: String
-
     /// The source file path
     @Persisted public var filePath: String
 
@@ -44,14 +41,12 @@ public final class UploadingSessionTask: EmbeddedObject {
     public convenience init(uploadSession: UploadSession,
                             sessionExpiration: Date,
                             chunkTasks: List<UploadingChunkTask>,
-                            fileIdentity: String,
                             filePath: String) {
         self.init()
 
         self.uploadSession = uploadSession
         self.sessionExpiration = sessionExpiration
         self.chunkTasks = chunkTasks
-        self.fileIdentity = fileIdentity
         self.filePath = filePath
     }
 
@@ -59,53 +54,5 @@ public final class UploadingSessionTask: EmbeddedObject {
 
     public var isExpired: Bool {
         return Date() > sessionExpiration
-    }
-
-    public var fileIdentityHasNotChanged: Bool {
-        currentFileIdentity == fileIdentity
-    }
-
-    static func fileIdentity(fileUrl: URL) -> String {
-        // Make sure we can track the file has not changed across time, while we run the upload session
-        @InjectService var fileMetadata: FileMetadatable
-        let fileCreationString: String
-        if let fileCreationDate = fileMetadata.fileCreationDate(url: fileUrl) {
-            fileCreationString = "\(fileCreationDate)"
-        } else {
-            fileCreationString = "nil"
-        }
-
-        // Modification date is unsafe, use a hash instead
-        let fileHash = getFileIdentity(forFile: fileUrl)
-
-        let fileUniqIdentity = "\(fileCreationString)_SHA256:\(fileHash)"
-        return fileUniqIdentity
-    }
-
-    /// Return a string that is expected to change if the file change, without needing to read the whole file
-    public var currentFileIdentity: String {
-        let fileUrl = URL(fileURLWithPath: filePath, isDirectory: false)
-        return UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
-    }
-
-    // MARK: Private
-
-    /// Provides a stable hash of a file in a memory efficient manner
-    private static func getFileIdentity(forFile url: URL) -> String {
-        guard let handle = try? FileHandle(forReadingFrom: url) else {
-            // Unable to create a file handle, return a UUID
-            return UUID().uuidString
-        }
-
-        var hasher = SHA256()
-        while autoreleasepool(invoking: {
-            let nextChunk = handle.readData(ofLength: SHA256.blockByteCount)
-            guard !nextChunk.isEmpty else { return false }
-            hasher.update(data: nextChunk)
-            return true
-        }) {}
-        let digest = hasher.finalize()
-        let digestString = digest.map { String(format: "%02hhx", $0) }.joined()
-        return digestString
     }
 }

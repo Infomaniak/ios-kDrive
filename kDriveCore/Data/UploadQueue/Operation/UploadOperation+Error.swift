@@ -104,7 +104,6 @@ extension UploadOperation {
                 case .unableToMatchUploadChunk,
                      .splitError,
                      .chunkError,
-                     .fileIdentityHasChanged,
                      .parseError,
                      .missingChunkHash,
                      .retryCountIsZero,
@@ -236,7 +235,7 @@ extension UploadOperation {
     private func errorMetadata(_ error: Error) -> [String: Any] {
         do {
             let file = try readOnlyFile()
-            var metadata: [String: Any] = ["version": 3,
+            var metadata: [String: Any] = ["version": 4,
                                            "uploadFileId": uploadFileId,
                                            "RootError": error,
                                            "uploadDate": file.uploadDate ?? "nil",
@@ -264,7 +263,6 @@ extension UploadOperation {
 
             metadata["file.uploadingSession.isExpired"] = sessionTask.isExpired
             metadata["file.uploadingSession.sessionExpiration"] = sessionTask.sessionExpiration
-            metadata["file.uploadingSession.fileIdentityHasNotChanged"] = sessionTask.fileIdentityHasNotChanged
 
             // Log uploadSession status
             guard let uploadSession = sessionTask.uploadSession else {

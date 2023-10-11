@@ -48,8 +48,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         case chunkError
         /// SHA of the file is unavailable at the moment
         case missingChunkHash
-        /// The file was modified during the upload task
-        case fileIdentityHasChanged
         /// Unable to parse some data
         case parseError
         /// UploadFile is probably deleted in another thread
@@ -225,7 +223,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             Log.uploadOperation("localStateIsValid :\(localStateIsValid) ufid:\(uploadFileId)")
 
             // Something prevents reuse of session, we restart
-            guard !uploadingSession.isExpired, localStateIsValid, uploadingSession.fileIdentityHasNotChanged else {
+            guard !uploadingSession.isExpired, localStateIsValid else {
                 await cleanUploadFileSession()
                 try await generateNewSessionAndStore()
                 return
@@ -539,14 +537,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         guard let uploadingSession = file.uploadingSession else {
             throw ErrorDomain.uploadSessionTaskMissing
         }
-
-        guard uploadingSession.fileIdentityHasNotChanged else {
-            Log.uploadOperation(
-                "File has changed \(uploadingSession.fileIdentity)≠\(uploadingSession.currentFileIdentity) ufid:\(uploadFileId)",
-                level: .error
-            )
-            throw ErrorDomain.fileIdentityHasChanged
-        }
     }
 
     /// Throws if UploadOperation is canceled
@@ -712,10 +702,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 throw ErrorDomain.uploadSessionInvalid
             }
 
-            guard uploadingSession.fileIdentityHasNotChanged else {
-                throw ErrorDomain.fileIdentityHasChanged
-            }
-
             // Cleanup the uploading chunks and session state for re-use
             let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.toRetryPredicate)
             chunkTasksToClean.forEach { uploadingChunkTask in
@@ -793,10 +779,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Store the session
             uploadingSessionTask.uploadSession = session
-
-            // Make sure we can track the the file has not changed across time, while we run the upload session
-            let fileIdentity = UploadingSessionTask.fileIdentity(fileUrl: fileUrl)
-            uploadingSessionTask.fileIdentity = fileIdentity
 
             // Session expiration date
             let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
