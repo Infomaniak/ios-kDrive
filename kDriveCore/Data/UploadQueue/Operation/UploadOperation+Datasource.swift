@@ -113,7 +113,9 @@ extension UploadOperation {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
 
-            let filteredTasks = uploadingSessionTask.chunkTasks.filter(UploadingChunkTask.doneUploadingSuccessPredicate)
+            let filteredTasks = uploadingSessionTask.chunkTasks
+                .filter(UploadingChunkTask.doneUploadingPredicate)
+                .filter { $0.chunk?.isValidUpload ?? false }
             count = filteredTasks.count
         }
         return count

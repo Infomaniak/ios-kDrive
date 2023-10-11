@@ -239,8 +239,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     private func validateSessionStateWithServer() async throws -> Bool {
-        try checkCancelation()
+        Log.uploadOperation("validate liveSession ufid:\(uploadFileId)")
 
+        try checkCancelation()
         let file = try readOnlyFile()
         guard let uploadingSessionTask = file.uploadingSession else {
             throw ErrorDomain.uploadSessionTaskMissing
@@ -253,19 +254,44 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             sessionToken: sessionToken
         )
 
-        Log.uploadOperation("validate liveSession:\(liveSession) ufid:\(uploadFileId)")
+        // Try to recover if we failed to fetch a success callback on a chunk request
+        if let localChunkSuccessCount = try? chunkTasksDoneUploadingSuccessCount(),
+           liveSession.receivedChunks != localChunkSuccessCount {
+            Log.uploadOperation("mismatch 📡\(liveSession.receivedChunks) != 📲\(localChunkSuccessCount)")
+            let distantChunksInSuccess = liveSession.chunks.filter { $0.isValidUpload }
+
+            // Try to insert the chunks in success into the session
+            try? transactionWithFile { file in
+                guard let uploadingSessionTask = file.uploadingSession else {
+                    return
+                }
+
+                file.error = nil
+
+                for distantChunk in distantChunksInSuccess {
+                    let distantNumber = distantChunk.number
+                    guard let chunkTask = uploadingSessionTask.chunkTasks.filter({ $0.chunkNumber == distantNumber }).first else {
+                        Log.uploadOperation("mismatch unable to resolve :\(distantNumber)", level: .error)
+                        return
+                    }
+
+                    chunkTask.chunk = distantChunk.toRealmObject()
+                    chunkTask.taskIdentifier = nil
+                    chunkTask.error = nil
+                }
+            }
+        }
 
         // compare local state
         let chunkTasksTotalCount = try chunkTasksTotalCount()
         let chunkTasksDoneUploadingSuccessCount = try chunkTasksDoneUploadingSuccessCount()
-        let chunkTasksInErrorCount = try chunkTasksInErrorCount(filterReschedule: true)
+        let chunkTasksInErrorCount = try chunkTasksInErrorCount()
 
         guard liveSession.expectedChunks == chunkTasksTotalCount,
               liveSession.receivedChunks == chunkTasksDoneUploadingSuccessCount,
-              liveSession.uploadingChunks == 0,
-              liveSession.failedChunks == chunkTasksInErrorCount else {
+              liveSession.uploadingChunks == 0 else {
             Log.uploadOperation("""
-                                Session missmatch with server
+                                Session mismatch with server after a merging remote state
                                 expectedChunks:📡\(liveSession.expectedChunks):📲\(chunkTasksTotalCount)
                                 receivedChunks:📡\(liveSession.receivedChunks):📲\(chunkTasksDoneUploadingSuccessCount)
                                 uploadingChunks:📡\(liveSession.uploadingChunks):📲\(0)
@@ -1048,7 +1074,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // We can retry, so clean the chunks linked to a session and retry upload
             try await fetchAndCleanStoredSession()
-            try await generateChunksAndFanOutIfNeeded()
         }
     }
 
