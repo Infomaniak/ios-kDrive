@@ -490,7 +490,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     public func cleanUploadFileSession() async {
-        Log.uploadOperation("Clean remote session for \(uploadFileId)")
+        Log.uploadOperation("Clean session for \(uploadFileId)")
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         // First remote, then locally
@@ -545,26 +545,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         uploadTasks.removeAll()
     }
 
-    /// Throws if the file was modified
-    func checkFileIdentity() throws {
-        let file = try readOnlyFile()
-
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-
-        let filePath = uploadingSessionTask.filePath
-        guard fileManager.isReadableFile(atPath: filePath) else {
-            Log.uploadOperation("File has not a valid readable URL:'\(filePath)' for \(uploadFileId)",
-                                level: .error)
-            throw DriveError.fileNotFound
-        }
-
-        guard let uploadingSession = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-    }
-
     /// Throws if UploadOperation is canceled
     func checkCancelation() throws {
         if isCancelled {
@@ -580,9 +560,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     func closeSessionAndEnd() async throws {
         Log.uploadOperation("closeSession ufid:\(uploadFileId)")
         SentryDebug.uploadOperationCloseSessionAndEndBreadcrumb(uploadFileId)
-
-        // Check file was not modified during the upload before we close the session, and thus validate the file on the server.
-        try checkFileIdentity()
 
         defer {
             end()
