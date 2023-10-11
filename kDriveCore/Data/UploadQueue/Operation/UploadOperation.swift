@@ -118,6 +118,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Fetch a background task identifier
             self.beginExpiringActivity()
 
+            // Clean existing error if any
+            try cleanUploadFileError()
+            
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()
 
@@ -178,6 +181,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("Empty file uploaded finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
         end()
         return true
+    }
+    
+    /// Make sure we start form a clean slate
+    func cleanUploadFileError() throws {
+        try transactionWithFile { file in
+            file.error = nil
+        }
     }
 
     /// Fetch or create something that represents the state of the upload, and store it to the current UploadFile
