@@ -1145,12 +1145,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
-        // Cancel all chunk network requests ASAP, without synchronisation
-        var iterator = uploadTasks.makeIterator()
-        while let (_, sessionUploadTask) = iterator.next() {
-            sessionUploadTask.cancel()
-        }
+        // Take a snapshot of the running tasks
+        var rescheduleIterator = uploadTasks.makeIterator()
+        var cancelIterator = uploadTasks.makeIterator()
 
+        // Schedule a db transaction to set .taskRescheduled error on chunks
         enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
@@ -1160,8 +1159,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     )
 
                 // Mark all chunks in base with a .taskRescheduled error
-                var iterator = self.uploadTasks.makeIterator()
-                while let (taskIdentifier, _) = iterator.next() {
+                while let (taskIdentifier, _) = rescheduleIterator.next() {
                     // Match chunk in base and set error to .taskRescheduled
                     let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
                         format: "taskIdentifier = %@",
@@ -1192,6 +1190,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
         }
+
+        // Cancel all chunk network requests ASAP
+        while let (_, sessionUploadTask) = cancelIterator.next() {
+            sessionUploadTask.cancel()
+        }
+
         Log.uploadOperation("exit reschedule ufid:\(uploadFileId)")
     }
 }
