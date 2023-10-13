@@ -1095,18 +1095,23 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         if let data {
             Log.uploadOperation(
-                "uploadCompletionRemoteFailure dataString:\(String(decoding: data, as: UTF8.self)) ufid:\(uploadFileId)"
+                "uploadCompletionRemoteFailure dataString:\(String(decoding: data, as: UTF8.self)) ufid:\(uploadFileId)",
+                level: .error
             )
         }
 
-        var error = DriveError.serverError
+        var driveError = DriveError.serverError
         if let data,
            let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
-            error = DriveError(apiError: apiError)
+            driveError = DriveError(apiError: apiError)
         }
 
-        Log.uploadOperation("completion  Server-side error:\(error) ufid:\(uploadFileId) ", level: .error)
-        handleRemoteErrors(error: error)
+        if let error {
+            driveError = driveError.wrapping(error)
+        }
+
+        Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)
+        handleRemoteErrors(error: driveError)
     }
 
     /// Propagate the newly uploaded DriveFile into the specialized Realm
