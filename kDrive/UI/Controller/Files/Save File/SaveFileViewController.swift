@@ -478,12 +478,16 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
 // MARK: - FooterButtonDelegate
 
 extension SaveFileViewController: FooterButtonDelegate {
-    @objc func didClickOnButton() {
+    @objc func didClickOnButton(_ sender: AnyObject) {
         guard let selectedDriveFileManager,
               let selectedDirectory else {
             return
         }
 
+        // Making sure the user cannot spam the button on tasks that may take a while
+        let button = sender as? IKLargeButton
+        button?.setLoading(true)
+        
         let items = items
         guard !items.isEmpty else {
             navigationController?.dismiss(animated: true)

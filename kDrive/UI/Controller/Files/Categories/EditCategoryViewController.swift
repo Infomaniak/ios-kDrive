@@ -203,7 +203,7 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 // MARK: - Footer button delegate
 
 extension EditCategoryViewController: FooterButtonDelegate {
-    @objc func didClickOnButton() {
+    @objc func didClickOnButton(_ sender: AnyObject) {
         MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
         Task { [proxyFilesToAdd = filesToAdd?.map { $0.proxify() }] in
             do {

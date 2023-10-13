@@ -1083,24 +1083,35 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
+        // Silent handling if error if cancel error
+        guard let nsError = error as? NSError,
+              nsError.code == NSURLErrorCancelled else {
+            return
+        }
+
         defer {
             self.end()
         }
 
         if let data {
             Log.uploadOperation(
-                "uploadCompletionRemoteFailure dataString:\(String(decoding: data, as: UTF8.self)) ufid:\(uploadFileId)"
+                "uploadCompletionRemoteFailure dataString:\(String(decoding: data, as: UTF8.self)) ufid:\(uploadFileId)",
+                level: .error
             )
         }
 
-        var error = DriveError.serverError
+        var driveError = DriveError.serverError
         if let data,
            let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
-            error = DriveError(apiError: apiError)
+            driveError = DriveError(apiError: apiError)
         }
 
-        Log.uploadOperation("completion  Server-side error:\(error) ufid:\(uploadFileId) ", level: .error)
-        handleRemoteErrors(error: error)
+        if let error {
+            driveError = driveError.wrapping(error)
+        }
+
+        Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)
+        handleRemoteErrors(error: driveError)
     }
 
     /// Propagate the newly uploaded DriveFile into the specialized Realm
@@ -1145,12 +1156,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
-        // Cancel all chunk network requests ASAP, without synchronisation
-        var iterator = uploadTasks.makeIterator()
-        while let (_, sessionUploadTask) = iterator.next() {
-            sessionUploadTask.cancel()
-        }
+        // Take a snapshot of the running tasks
+        var rescheduleIterator = uploadTasks.makeIterator()
+        var cancelIterator = uploadTasks.makeIterator()
 
+        // Schedule a db transaction to set .taskRescheduled error on chunks
         enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
@@ -1160,8 +1170,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                     )
 
                 // Mark all chunks in base with a .taskRescheduled error
-                var iterator = self.uploadTasks.makeIterator()
-                while let (taskIdentifier, _) = iterator.next() {
+                while let (taskIdentifier, _) = rescheduleIterator.next() {
                     // Match chunk in base and set error to .taskRescheduled
                     let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
                         format: "taskIdentifier = %@",
@@ -1192,6 +1201,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
         }
+
+        // Cancel all chunk network requests ASAP
+        while let (_, sessionUploadTask) = cancelIterator.next() {
+            sessionUploadTask.cancel()
+        }
+
         Log.uploadOperation("exit reschedule ufid:\(uploadFileId)")
     }
 }

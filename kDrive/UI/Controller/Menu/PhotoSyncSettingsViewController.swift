@@ -521,7 +521,7 @@ extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
 // MARK: - Footer button delegate
 
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
-    func didClickOnButton() {
+    func didClickOnButton(_ sender: AnyObject) {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
         DispatchQueue.global(qos: .userInitiated).async {

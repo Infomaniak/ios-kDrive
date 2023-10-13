@@ -66,7 +66,7 @@ class SavePhotoViewController: SaveFileViewController {
         }
     }
 
-    override func didClickOnButton() {
+    override func didClickOnButton(_ sender: AnyObject) {
         guard let filename = items.first?.name,
               let selectedDriveFileManager,
               let selectedDirectory else {

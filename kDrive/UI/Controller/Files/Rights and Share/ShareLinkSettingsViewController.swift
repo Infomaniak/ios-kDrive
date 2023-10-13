@@ -380,7 +380,7 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 // MARK: - FooterButtonDelegate
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
-    func didClickOnButton() {
+    func didClickOnButton(_ sender: AnyObject) {
         let right: ShareLinkPermission?
         // If we set a new password, set the right to "password"
         if getSetting(for: .optionPassword) && !newPassword {

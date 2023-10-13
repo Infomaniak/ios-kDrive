@@ -369,7 +369,7 @@ extension InviteUserViewController: RightsSelectionDelegate {
 }
 
 extension InviteUserViewController: FooterButtonDelegate {
-    func didClickOnButton() {
+    func didClickOnButton(_ sender: AnyObject) {
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         let settings = FileAccessSettings(
             message: message,
