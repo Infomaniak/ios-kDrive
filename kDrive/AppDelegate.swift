@@ -117,7 +117,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         application.registerForRemoteNotifications()
 
         let state = UIApplication.shared.applicationState
-        if state == .active {
+        if state != .background {
             // Remove all notifications on App Opening
             UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         }
@@ -218,6 +218,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
         launchSetup()
+
+        // Remove all notifications on App Opening
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
     private func launchSetup() {
