@@ -17,12 +17,15 @@
  */
 
 import Foundation
+import Sentry
+
+// MARK: - Session management -
 
 extension UploadOperation {
-    // MARK: Session management
+    // MARK: Session Validation
 
-    /// Fetch or create something that represents the state of the upload, and store it to the current UploadFile
-    func getUploadSessionOrCreate() async throws {
+    /// Refresh or create something that represents the state of the upload, and store it to the current UploadFile
+    func refreshUploadSessionOrCreate() async throws {
         try checkCancelation()
         try freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
@@ -58,25 +61,53 @@ extension UploadOperation {
             throw error
         }
 
-        // fetch stored session
-        if let uploadingSession {
+        // Local session check
+        guard let uploadingSession, !uploadingSession.isExpired else {
+            try await wipeSessionAndRegenerate()
+            return
+        }
+
+        // Try to reuse session by negotiation with server
+        do {
+            // Check session state with server
             let localStateIsValid = try await validateSessionStateWithServer()
             Log.uploadOperation("localStateIsValid :\(localStateIsValid) ufid:\(uploadFileId)")
 
             // Something prevents reuse of session, we restart
-            guard !uploadingSession.isExpired, localStateIsValid else {
-                await cleanUploadFileSession()
-                try await generateNewSessionAndStore()
-                return
+            guard localStateIsValid else {
+                throw ErrorDomain.uploadSessionInvalid
             }
 
-            try await fetchAndCleanStoredSession()
+            // All good, clean the previous state before we restart
+            try await fetchAndCleanStoredSessionForReuse()
         }
+        // Local error handling if issue with fetching remote session
+        catch {
+            // Log all session negotiation in one place
+            sentryTrackingSessionError(error)
 
-        // generate a new session
-        else {
-            try await generateNewSessionAndStore()
+            // Server does not know of the session
+            if let driveError = error as? DriveError,
+               driveError == DriveError.invalidUploadTokenError {
+                try await wipeSessionAndRegenerate()
+            }
+
+            // Client failed to validate the session with the server
+            else if let domainError = error as? ErrorDomain,
+                    domainError == ErrorDomain.uploadSessionInvalid {
+                try await wipeSessionAndRegenerate()
+            }
+
+            // Unable to recover, generic error handling
+            else {
+                throw error
+            }
         }
+    }
+
+    private func wipeSessionAndRegenerate() async throws {
+        await cleanUploadFileSession()
+        try await generateNewSessionAndStore()
     }
 
     private func validateSessionStateWithServer() async throws -> Bool {
@@ -199,7 +230,7 @@ extension UploadOperation {
             cancelAllUploadRequests()
 
             // We can retry, so clean the chunks linked to a session and retry upload
-            try await fetchAndCleanStoredSession()
+            try await fetchAndCleanStoredSessionForReuse()
         }
     }
 
@@ -287,10 +318,8 @@ extension UploadOperation {
         SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(uploadFileId, cancelResult ?? false)
     }
 
-    // MARK: Private
-
-    /// fetch stored session
-    private func fetchAndCleanStoredSession() async throws {
+    /// fetch and clean stored session
+    private func fetchAndCleanStoredSessionForReuse() async throws {
         Log.uploadOperation("fetchAndCleanStoredSession ufid:\(uploadFileId)")
         try transactionWithFile { file in
             guard let uploadingSession = file.uploadingSession,

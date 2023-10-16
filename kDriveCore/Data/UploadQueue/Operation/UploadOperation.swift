@@ -138,7 +138,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
 
             // Re-Load or Setup an UploadingSessionTask within the UploadingFile
-            try await self.getUploadSessionOrCreate()
+            try await self.refreshUploadSessionOrCreate()
 
             // Start chunking
             try await self.generateChunksAndFanOutIfNeeded()
