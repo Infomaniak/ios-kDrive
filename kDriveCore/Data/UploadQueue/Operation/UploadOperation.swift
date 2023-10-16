@@ -31,7 +31,7 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public final class UploadOperation: AsynchronousOperation, UploadOperationable, ExpiringActivityDelegate {
+public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -84,16 +84,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
 
+    /// The id of the entity in base representing the upload task
     public let uploadFileId: String
-    private var fileObservationToken: NotificationToken?
 
     /// Local tracking of running network tasks
     /// The key used is the and absolute identifier of the task.
     let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
 
-    private let urlSession: URLSession
+    /// An Activity to prevent the system from interrupting it without been notified beforehand
     private var expiringActivity: ExpiringActivityable?
 
+    /// The url session used to upload chunks
+    let urlSession: URLSession
+
+    /// Object used to pass a completion state beyond to the OperationQueue
     public var result: UploadCompletionResult
 
     // MARK: - Public methods -
@@ -107,6 +111,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         super.init()
     }
 
+    /// The main steps of the operation are expressed here.
     override public func execute() async {
         Log.uploadOperation("execute \(uploadFileId)")
         SentryDebug.uploadOperationBeginBreadcrumb(uploadFileId)
@@ -140,7 +145,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    // MARK: - Split operations
+    // MARK: - Process steps
 
     func beginExpiringActivity() {
         let activity = ExpiringActivity(id: uploadFileId, delegate: self)
@@ -190,305 +195,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    /// Fetch or create something that represents the state of the upload, and store it to the current UploadFile
-    func getUploadSessionOrCreate() async throws {
-        try checkCancelation()
-        try freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
-
-        // Set progress to zero if needed
-        updateUploadProgress()
-        defer {
-            // Update progress once the session was created
-            updateUploadProgress()
-        }
-
-        Log.uploadOperation("Asking for an upload Session ufid:\(uploadFileId)")
-
-        let uploadId = uploadFileId
-        var uploadingSession: UploadingSessionTask?
-        var error: ErrorDomain?
-        try transactionWithFile { file in
-            SentryDebug.uploadOperationRetryCountDecreaseBreadcrumb(uploadId, file.maxRetryCount)
-
-            /// If cannot retry, throw
-            guard file.maxRetryCount > 0 else {
-                error = ErrorDomain.retryCountIsZero
-                return
-            }
-
-            // Decrease retry count
-            file.maxRetryCount -= 1
-            Log.uploadOperation("retry count is now:\(file.maxRetryCount) ufid:\(self.uploadFileId)")
-
-            uploadingSession = file.uploadingSession?.detached()
-        }
-
-        if let error {
-            throw error
-        }
-
-        // fetch stored session
-        if let uploadingSession {
-            let localStateIsValid = try await validateSessionStateWithServer()
-            Log.uploadOperation("localStateIsValid :\(localStateIsValid) ufid:\(uploadFileId)")
-
-            // Something prevents reuse of session, we restart
-            guard !uploadingSession.isExpired, localStateIsValid else {
-                await cleanUploadFileSession()
-                try await generateNewSessionAndStore()
-                return
-            }
-
-            try await fetchAndCleanStoredSession()
-        }
-
-        // generate a new session
-        else {
-            try await generateNewSessionAndStore()
-        }
-    }
-
-    private func validateSessionStateWithServer() async throws -> Bool {
-        Log.uploadOperation("validate liveSession ufid:\(uploadFileId)")
-
-        try checkCancelation()
-        let file = try readOnlyFile()
-        guard let uploadingSessionTask = file.uploadingSession else {
-            throw ErrorDomain.uploadSessionTaskMissing
-        }
-        let sessionToken = AbstractTokenWrapper(token: uploadingSessionTask.token)
-        let driveFileManager = try getDriveFileManager(for: file.driveId, userId: file.userId)
-        let drive = driveFileManager.drive
-        let liveSession = try await driveFileManager.apiFetcher.getSession(
-            drive: drive,
-            sessionToken: sessionToken
-        )
-
-        // Try to recover if we failed to fetch a success callback on a chunk request
-        if let localChunkSuccessCount = try? chunkTasksDoneUploadingSuccessCount(),
-           liveSession.receivedChunks != localChunkSuccessCount {
-            Log.uploadOperation("mismatch 📡\(liveSession.receivedChunks) != 📲\(localChunkSuccessCount)")
-            let distantChunksInSuccess = liveSession.chunks.filter { $0.isValidUpload }
-
-            // Try to insert the chunks in success into the session
-            try? transactionWithFile { file in
-                guard let uploadingSessionTask = file.uploadingSession else {
-                    return
-                }
-
-                file.error = nil
-
-                for distantChunk in distantChunksInSuccess {
-                    let distantNumber = distantChunk.number
-                    guard let chunkTask = uploadingSessionTask.chunkTasks.filter({ $0.chunkNumber == distantNumber }).first else {
-                        Log.uploadOperation("mismatch unable to resolve :\(distantNumber)", level: .error)
-                        return
-                    }
-
-                    chunkTask.chunk = distantChunk.toRealmObject()
-                    chunkTask.taskIdentifier = nil
-                    chunkTask.error = nil
-                }
-            }
-        }
-
-        // compare local state
-        let chunkTasksTotalCount = try chunkTasksTotalCount()
-        let chunkTasksDoneUploadingSuccessCount = try chunkTasksDoneUploadingSuccessCount()
-        let chunkTasksInErrorCount = try chunkTasksInErrorCount()
-
-        guard liveSession.expectedChunks == chunkTasksTotalCount,
-              liveSession.receivedChunks == chunkTasksDoneUploadingSuccessCount,
-              liveSession.uploadingChunks == 0 else {
-            Log.uploadOperation("""
-                                Session mismatch with server after a merging remote state
-                                expectedChunks:📡\(liveSession.expectedChunks):📲\(chunkTasksTotalCount)
-                                receivedChunks:📡\(liveSession.receivedChunks):📲\(chunkTasksDoneUploadingSuccessCount)
-                                uploadingChunks:📡\(liveSession.uploadingChunks):📲\(0)
-                                failedChunks:📡\(liveSession.failedChunks):📲\(chunkTasksInErrorCount)
-                                ufid:\(uploadFileId)
-                                """,
-                                level: .error)
-
-            return false
-        }
-
-        return true
-    }
-
-    /// Generate some chunks into a temporary folder from a file
-    func generateChunksAndFanOutIfNeeded() async throws {
-        Log.uploadOperation("generateChunksAndFanOutIfNeeded ufid:\(uploadFileId)")
-        try checkCancelation()
-
-        var filePath = ""
-        var chunksToGenerateCount = 0
-        try transactionWithFile { file in
-            // Get the current uploading session
-            guard let uploadingSessionTask = file.uploadingSession else {
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
-
-            filePath = uploadingSessionTask.filePath
-            let sessionToken = uploadingSessionTask.token
-
-            // Look for the next chunk to generate
-            let chunksToGenerate = uploadingSessionTask.chunkTasks
-                .filter(UploadingChunkTask.notDoneUploadingPredicate)
-                .filter { $0.hasLocalChunk == false }
-            guard let chunkTask = chunksToGenerate.first else {
-                Log.uploadOperation("generateChunksAndFanOutIfNeeded no remaining chunks to generate ufid:\(self.uploadFileId)")
-                return
-            }
-            Log.uploadOperation("generateChunksAndFanOutIfNeeded working with:\(chunkTask.chunkNumber) ufid:\(self.uploadFileId)")
-
-            chunksToGenerateCount = chunksToGenerate.count
-            let chunkNumber = chunkTask.chunkNumber
-            let range = chunkTask.range
-            let fileUrl = try self.getFileUrlIfReadable(file: file)
-            guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
-                  let chunk = chunkProvider.next() else {
-                Log.uploadOperation("Unable to get a ChunkProvider for \(self.uploadFileId)", level: .error)
-                throw ErrorDomain.chunkError
-            }
-
-            Log.uploadOperation(
-                "Storing Chunk count:\(chunkNumber) of \(chunksToGenerateCount) to write, ufid:\(self.uploadFileId)"
-            )
-            do {
-                try self.checkCancelation()
-
-                let chunkSHA256 = chunk.SHA256DigestString
-                let chunkPath = try self.storeChunk(chunk,
-                                                    number: chunkNumber,
-                                                    uploadFileId: self.uploadFileId,
-                                                    sessionToken: sessionToken,
-                                                    hash: chunkSHA256)
-                Log.uploadOperation("chunk stored count:\(chunkNumber) for:\(self.uploadFileId)")
-
-                // set path + sha
-                chunkTask.path = chunkPath.path
-                chunkTask.sha256 = chunkSHA256
-
-            } catch {
-                Log.uploadOperation(
-                    "Unable to save a chunk to storage. number:\(chunkNumber) error:\(error) for:\(self.uploadFileId)",
-                    level: .error
-                )
-                throw error
-            }
-        }
-
-        // Schedule next step
-        try await scheduleNextChunk(filePath: filePath,
-                                    chunksToGenerateCount: chunksToGenerateCount)
-    }
-
-    /// Prepare chunk upload requests, and start them.
-    private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
-        do {
-            try checkCancelation()
-
-            // Fan-out the chunk we just made
-            enqueueCatching {
-                try await self.fanOutChunks()
-            }
-
-            // Chain the next chunk generation if necessary
-            let slots = freeRequestSlots()
-            if chunksToGenerateCount > 0 && slots > 0 {
-                Log.uploadOperation(
-                    "remaining chunks to generate:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP ufid:\(uploadFileId)"
-                )
-                enqueueCatching {
-                    try await self.generateChunksAndFanOutIfNeeded()
-                }
-            }
-        } catch {
-            Log.uploadOperation("Unable to schedule next chunk. error:\(error) for:\(uploadFileId)", level: .error)
-            throw error
-        }
-    }
-
-    /// Prepare chunk upload requests, and start them.
-    func fanOutChunks() async throws {
-        try checkCancelation()
-
-        let freeSlots = freeRequestSlots()
-        guard freeSlots > 0 else {
-            return
-        }
-
-        try transactionWithFile { file in
-            // Get the current uploading session
-            guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
-                Log.uploadOperation("fanOut no session for:\(self.uploadFileId)", level: .error)
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
-
-            let chunksToUpload = Array(uploadingSessionTask.chunkTasks
-                .filter(UploadingChunkTask.canStartUploadingPreconditionPredicate)
-                .filter { $0.hasLocalChunk == true })
-                .prefix(freeSlots) // Iterate over only the available worker slots
-
-            Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
-
-            // Access Token must be added for non AF requests
-            let accessToken = self.accountManager.getTokenForUserId(file.userId)?.accessToken
-            guard let accessToken else {
-                Log.uploadOperation("no access token found", level: .error)
-                throw ErrorDomain.unableToBuildRequest
-            }
-
-            // Schedule all the chunks to be uploaded
-            for chunkToUpload: UploadingChunkTask in chunksToUpload {
-                try self.checkCancelation()
-
-                do {
-                    guard let chunkPath = chunkToUpload.path,
-                          let sha256 = chunkToUpload.sha256 else {
-                        throw ErrorDomain.missingChunkHash
-                    }
-
-                    let chunkHashHeader = "sha256:\(sha256)"
-                    let chunkUrl = URL(fileURLWithPath: chunkPath, isDirectory: false)
-                    let chunkNumber = chunkToUpload.chunkNumber
-                    let chunkSize = chunkToUpload.chunkSize
-                    let request = try self.buildRequest(chunkNumber: chunkNumber,
-                                                        chunkSize: chunkSize,
-                                                        chunkHash: chunkHashHeader,
-                                                        sessionToken: uploadingSessionTask.token,
-                                                        driveId: file.driveId,
-                                                        accessToken: accessToken)
-                    let uploadTask = self.urlSession.uploadTask(with: request,
-                                                                fromFile: chunkUrl,
-                                                                completionHandler: self.uploadCompletion)
-                    // Extra 512 bytes for request headers
-                    uploadTask.countOfBytesClientExpectsToSend = Int64(chunkSize) + 512
-                    // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-                    uploadTask.countOfBytesClientExpectsToReceive = 1024 * 5
-
-                    chunkToUpload.sessionIdentifier = self.urlSession.identifier
-                    chunkToUpload.taskIdentifier = self.urlSession.identifier(for: uploadTask)
-                    chunkToUpload.requestUrl = request.url?.absoluteString
-
-                    let identifier = self.urlSession.identifier(for: uploadTask)
-                    self.uploadTasks[identifier] = uploadTask
-                    uploadTask.resume()
-
-                    Log.uploadOperation("started task identifier:\(identifier) for:\(self.uploadFileId)")
-
-                } catch {
-                    Log.uploadOperation(
-                        "Unable to create an upload request for chunk \(chunkToUpload) error:\(error) - \(self.uploadFileId)",
-                        level: .error
-                    )
-                    throw error
-                }
-            }
-        }
-    }
-
     func getFileUrlIfReadable(file: UploadFile) throws -> URL {
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
@@ -499,56 +205,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return fileUrl
     }
 
-    public func cleanUploadFileSession() async {
-        Log.uploadOperation("Clean session for \(uploadFileId)")
-        SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
-
-        // First remote, then locally
-        await cleanUploadFileSessionRemotely()
-        cleanUploadFileSessionLocally()
-
-        // Cancel all network requests
-        cancelAllUploadRequests()
-    }
-
-    private func cleanUploadFileSessionRemotely() async {
-        // Clean the remote session, if any. Invalid ones are already gone server side.
-        guard let readOnlyFile = try? readOnlyFile(),
-              let token = readOnlyFile.uploadingSession?.token else {
-            return
-        }
-
-        let driveId = readOnlyFile.driveId
-        let userId = readOnlyFile.userId
-        await cleanRemoteSession(AbstractTokenWrapper(token: token), driveId: driveId, userId: userId)
-    }
-
-    private func cleanUploadFileSessionLocally(_ file: UploadFile? = nil) {
-        // Clean the local uploading session, as well as error
-        try? transactionWithFile { file in
-            file.uploadingSession = nil
-            file.progress = nil
-            file.error = nil
-        }
-    }
-
-    // Delete a remote session for a specific token
-    private func cleanRemoteSession(_ abstractToken: AbstractToken, driveId: Int, userId: Int) async {
-        guard let driveFileManager = try? getDriveFileManager(for: driveId, userId: userId) else {
-            return
-        }
-
-        let apiFetcher = driveFileManager.apiFetcher
-        let drive = driveFileManager.drive
-
-        // We try to cancel the upload session, we discard results
-        let cancelResult = try? await apiFetcher.cancelSession(drive: drive, sessionToken: abstractToken)
-        Log.uploadOperation("cancelSession remotely:\(String(describing: cancelResult)) for \(uploadFileId)")
-        SentryDebug.uploadOperationCleanSessionRemotelyBreadcrumb(uploadFileId, cancelResult ?? false)
-    }
-
     /// Cancel all tracked URLSessionUploadTasks
-    private func cancelAllUploadRequests() {
+    func cancelAllUploadRequests() {
         var iterator = uploadTasks.makeIterator()
         while let (key, value) = iterator.next() {
             Log.uploadOperation("cancelled chunk upload request :\(key) ufid:\(uploadFileId)")
@@ -565,51 +223,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         } else if isFinished {
             Log.uploadOperation("Task is isFinished \(uploadFileId)")
             throw ErrorDomain.operationFinished
-        }
-    }
-
-    /// Close session if needed.
-    func closeSessionAndEnd() async throws {
-        Log.uploadOperation("closeSession ufid:\(uploadFileId)")
-        SentryDebug.uploadOperationCloseSessionAndEndBreadcrumb(uploadFileId)
-
-        defer {
-            end()
-        }
-
-        var uploadSessionToken: String?
-        var userId: Int?
-        var driveId: Int?
-        try? transactionWithFile { file in
-            uploadSessionToken = file.uploadingSession?.token
-            userId = file.userId
-            driveId = file.driveId
-        }
-
-        guard let uploadSessionToken, let userId, let driveId else {
-            Log.uploadOperation("No existing session to close ufid:\(uploadFileId)")
-            return
-        }
-
-        var driveFileManager: DriveFileManager?
-        await catching {
-            driveFileManager = try self.getDriveFileManager(for: driveId, userId: userId)
-        }
-
-        guard let driveFileManager else {
-            Log.uploadOperation("No drivefilemanager to close ufid:\(uploadFileId)")
-            return
-        }
-
-        let apiFetcher = driveFileManager.apiFetcher
-        let drive = driveFileManager.drive
-        let abstractToken = AbstractTokenWrapper(token: uploadSessionToken)
-
-        await catching {
-            let uploadedFile = try await apiFetcher.closeSession(drive: drive, sessionToken: abstractToken)
-            let driveFile = uploadedFile.file
-            Log.uploadOperation("uploadedFile 'File' id:\(uploadedFile.file.id) ufid:\(self.uploadFileId)")
-            try self.handleDriveFilePostUpload(driveFile)
         }
     }
 
@@ -686,7 +299,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     // MARK: Progress
 
     /// Returns  the upload progress. Ranges from 0 to 1.
-    @discardableResult private func updateUploadProgress() -> Double {
+    @discardableResult func updateUploadProgress() -> Double {
         // Get the current uploading session
         guard let chunkTasksUploadedCount = try? chunkTasksUploadedCount(),
               let chunkTasksTotalCount = try? chunkTasksTotalCount() else {
@@ -706,216 +319,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         return progress
     }
 
-    // MARK: UploadSession
-
-    /// fetch stored session
-    private func fetchAndCleanStoredSession() async throws {
-        Log.uploadOperation("fetchAndCleanStoredSession ufid:\(uploadFileId)")
-        try transactionWithFile { file in
-            guard let uploadingSession = file.uploadingSession,
-                  !uploadingSession.isExpired else {
-                throw ErrorDomain.uploadSessionInvalid
-            }
-
-            // Cleanup the uploading chunks and session state for re-use
-            let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.toRetryPredicate)
-            chunkTasksToClean.forEach { uploadingChunkTask in
-                uploadingChunkTask.sessionIdentifier = nil
-                uploadingChunkTask.taskIdentifier = nil
-                uploadingChunkTask.requestUrl = nil
-                uploadingChunkTask.path = nil
-                uploadingChunkTask.sha256 = nil
-                uploadingChunkTask.error = nil
-            }
-
-            // Cleanup upload error as we restart
-            file.error = nil
-        }
-
-        // if we have no more chunks to upload, try to close session
-        try await completeUploadSessionOrRetryIfPossible()
-
-        // We have a valid upload session
-    }
-
-    /// generate a new session
-    private func generateNewSessionAndStore() async throws {
-        Log.uploadOperation("generateNewSession ufid:\(uploadFileId)")
-        try checkCancelation()
-
-        let file = try readOnlyFile()
-
-        // Check file is readable
-        let fileUrl = try getFileUrlIfReadable(file: file)
-
-        guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
-            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
-            throw DriveError.fileNotFound
-        }
-
-        let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
-        Log.uploadOperation("got fileSize:\(mebibytes)MiB ufid:\(uploadFileId)")
-
-        // Compute ranges for a file
-        let rangeProvider = RangeProvider(fileURL: fileUrl)
-        let ranges: [DataRange]
-        do {
-            ranges = try rangeProvider.allRanges
-        } catch {
-            Log.uploadOperation("Unable generate ranges error:\(error) for ufid\(uploadFileId)", level: .error)
-            throw ErrorDomain.splitError
-        }
-        Log.uploadOperation("got ranges:\(ranges.count) ufid:\(uploadFileId)")
-
-        // Get a valid APIV2 UploadSession
-        let driveFileManager = try getDriveFileManager(for: file.driveId, userId: file.userId)
-        let apiFetcher = driveFileManager.apiFetcher
-        let drive = driveFileManager.drive
-
-        let session = try await apiFetcher.startSession(drive: drive,
-                                                        totalSize: fileSize,
-                                                        fileName: file.name,
-                                                        totalChunks: ranges.count,
-                                                        conflictResolution: file.conflictOption,
-                                                        lastModifiedAt: file.modificationDate, // Date override for PHAssets
-                                                        createdAt: file.creationDate,
-                                                        directoryId: file.parentDirectoryId,
-                                                        directoryPath: file.relativePath)
-        Log.uploadOperation("New session token:\(session.token) ufid:\(uploadFileId)")
-        try transactionWithFile { file in
-            // Create an uploading session
-            let uploadingSessionTask = UploadingSessionTask()
-
-            // Store the session token asap as a non null ivar
-            uploadingSessionTask.token = session.token
-
-            // The file at the moment we created the UploadingSessionTask
-            uploadingSessionTask.filePath = fileUrl.path
-
-            // Store the session
-            uploadingSessionTask.uploadSession = session
-
-            // Session expiration date
-            let inElevenHours = Date().addingTimeInterval(11 * 60 * 60) // APIV2 upload session runs for 12h
-            uploadingSessionTask.sessionExpiration = inElevenHours
-
-            // Represent the chunks to be uploaded in DB
-            for (index, object) in ranges.enumerated() {
-                let chunkNumber = Int64(index + 1) // API start at 1
-                let chunkTask = UploadingChunkTask(chunkNumber: chunkNumber, range: object)
-                uploadingSessionTask.chunkTasks.append(chunkTask)
-            }
-
-            // All prepared, now we store the upload session in DB before moving on
-            file.uploadingSession = uploadingSessionTask
-        }
-    }
-
-    // MARK: Build request
-
-    private func buildRequest(chunkNumber: Int64,
-                              chunkSize: Int64,
-                              chunkHash: String,
-                              sessionToken: String,
-                              driveId: Int,
-                              accessToken: String) throws -> URLRequest {
-        // Access Token must be added for non AF requests
-        let headerParameters = ["Authorization": "Bearer \(accessToken)"]
-        let headers = HTTPHeaders(headerParameters)
-        let route: Endpoint = .appendChunk(drive: AbstractDriveWrapper(id: driveId),
-                                           sessionToken: AbstractTokenWrapper(token: sessionToken))
-
-        guard var urlComponents = URLComponents(url: route.url, resolvingAgainstBaseURL: false) else {
-            throw ErrorDomain.unableToBuildRequest
-        }
-
-        let getParameters = [
-            URLQueryItem(name: APIUploadParameter.chunkNumber.rawValue, value: "\(chunkNumber)"),
-            URLQueryItem(name: APIUploadParameter.chunkSize.rawValue, value: "\(chunkSize)"),
-            URLQueryItem(name: APIUploadParameter.chunkHash.rawValue, value: chunkHash)
-        ]
-        urlComponents.queryItems = getParameters
-
-        guard let url = urlComponents.url else {
-            throw ErrorDomain.unableToBuildRequest
-        }
-
-        return try URLRequest(url: url, method: .post, headers: headers)
-    }
-
-    // MARK: Chunks
-
-    private func storeChunk(_ buffer: Data, number: Int64, uploadFileId: String, sessionToken: String,
-                            hash: String) throws -> URL {
-        // Create subfolders if needed
-        let tempChunkFolder = buildFolderPath(fileId: uploadFileId, sessionToken: sessionToken)
-        Log.uploadOperation("using chunk folder:'\(tempChunkFolder)' ufid:\(uploadFileId)")
-        if !fileManager.fileExists(atPath: tempChunkFolder.path, isDirectory: nil) {
-            try fileManager.createDirectory(at: tempChunkFolder, withIntermediateDirectories: true, attributes: nil)
-        }
-
-        // Write buffer
-        let chunkName = chunkName(number: number, fileId: uploadFileId, hash: hash)
-        let chunkPath = tempChunkFolder.appendingPathExtension(chunkName)
-        try buffer.write(to: chunkPath, options: [.atomic])
-        Log.uploadOperation("wrote chunk:\(chunkPath) ufid:\(uploadFileId)")
-
-        return chunkPath
-    }
-
-    private func buildFolderPath(fileId: String, sessionToken: String) -> URL {
-        // NSTemporaryDirectory is perfect for this use case.
-        // Cleaned after ≈ 3 days, our session is valid 12h.
-        // https://cocoawithlove.com/2009/07/temporary-files-and-folders-in-cocoa.html
-
-        // fileId and sessionToken can break the URL path, hashing makes sure it works
-        let folderUrlString = NSTemporaryDirectory() + "/\(fileId.SHA256DigestString)_\(sessionToken.SHA256DigestString)"
-        let folderPath = URL(fileURLWithPath: folderUrlString)
-        return folderPath.standardizedFileURL
-    }
-
-    private func chunkName(number: Int64, fileId: String, hash: String) -> String {
-        // Hashing name as it can break path building. Also it keeps it short
-        let fileName = "upload_\(fileId)_\(hash)_\(number)".SHA256DigestString
-        return fileName + ".part"
-    }
-
-    // MARK: PHAssets
-
-    private func getPhAssetIfNeeded() async throws {
-        Log.uploadOperation("getPhAssetIfNeeded ufid:\(uploadFileId)")
-        try checkCancelation()
-        let file = try readOnlyFile()
-
-        guard file.type == .phAsset else {
-            // This UploadFile is not a PHAsset, return silently
-            return
-        }
-
-        guard let asset = file.getPHAsset() else {
-            Log.uploadOperation(
-                "Unable to fetch PHAsset ufid:\(uploadFileId) assetLocalIdentifier:\(String(describing: file.assetLocalIdentifier)) ",
-                level: .error
-            )
-            // This UploadFile is not a PHAsset, return silently
-            return
-        }
-
-        // Async load the url of the asset
-        guard let url = await photoLibraryUploader.getUrl(for: asset) else {
-            Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
-            return
-        }
-
-        // Save asset file URL to DB
-        Log.uploadOperation("Got photo asset, writing URL:\(url) ufid:\(uploadFileId)")
-        try transactionWithFile { file in
-            file.pathURL = url
-            file.uploadingSession?.filePath = url.path
-        }
-    }
-
-    // MARK: Background callback
+    // MARK: Network callback
 
     // also called on app restoration
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
@@ -1010,64 +414,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    /// Complete the upload if needed, or retry if `maxRetryCount` has not reached zero
-    private func completeUploadSessionOrRetryIfPossible() async throws {
-        try checkCancelation()
-
-        // Close session and terminate task as the last chunk was uploaded
-        let chunksToUploadCount = try chunkTasksToUploadCount()
-        let chunksInErrorCount = try chunkTasksInErrorCount()
-        Log.uploadOperation(
-            "completion upload state: chunksToUploadCount:\(chunksToUploadCount) chunksInErrorCount:\(chunksInErrorCount) fid:\(uploadFileId)"
-        )
-
-        if chunksToUploadCount == 0, chunksInErrorCount == 0 {
-            Log.uploadOperation("No more chunks to be uploaded \(uploadFileId)")
-            try await closeSessionAndEnd()
-        }
-
-        // We should retry some chunks in failed state
-        else if chunksToUploadCount == 0 && chunksInErrorCount != 0 {
-            // fetch specific chunk errors
-            var errors: [Error] = []
-            var maxOperationRetryCount = 0
-            try transactionWithFile { file in
-                maxOperationRetryCount = file.maxRetryCount
-                if let chunkTasksInError = file.uploadingSession?.chunkTasks.filter(UploadingChunkTask.inErrorPredicate) {
-                    errors = chunkTasksInError.compactMap { $0.error }
-                }
-
-                // Decrease retry count
-                if file.maxRetryCount > 0 {
-                    file.maxRetryCount -= 1
-                }
-            }
-
-            SentryDebug.uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(
-                uploadFileId,
-                [
-                    "chunksTasksPending": uploadTasks.count,
-                    "chunksInErrorCount": chunksInErrorCount,
-                    "maxOperationRetryCount": maxOperationRetryCount,
-                    "errors": errors
-                ]
-            )
-
-            // If cannot retry, throw error
-            guard maxOperationRetryCount > 0 else {
-                throw ErrorDomain.retryCountIsZero
-            }
-
-            // Sanity stop all remaining network requests
-            cancelAllUploadRequests()
-
-            // We can retry, so clean the chunks linked to a session and retry upload
-            try await fetchAndCleanStoredSession()
-        }
-    }
-
     /// Return the available request slots.
-    private func freeRequestSlots() -> Int {
+    func freeRequestSlots() -> Int {
         let uploadTasksCount = uploadTasks.count
         let free = max(Self.parallelism - uploadTasksCount, 0)
         return free
@@ -1115,7 +463,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     /// Propagate the newly uploaded DriveFile into the specialized Realm
-    private func handleDriveFilePostUpload(_ driveFile: File) throws {
+    func handleDriveFilePostUpload(_ driveFile: File) throws {
         var driveId: Int?
         var userId: Int?
         var relativePath: String?
@@ -1148,65 +496,5 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 self.result.driveFile = File(value: driveFile)
             }
         }
-    }
-
-    // MARK: - ExpiringActivityDelegate -
-
-    public func backgroundActivityExpiring() {
-        Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
-        SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
-
-        // Take a snapshot of the running tasks
-        var rescheduleIterator = uploadTasks.makeIterator()
-        var cancelIterator = uploadTasks.makeIterator()
-
-        // Schedule a db transaction to set .taskRescheduled error on chunks
-        enqueueCatching {
-            try self.transactionWithFile { file in
-                file.error = .taskRescheduled
-                Log
-                    .uploadOperation(
-                        "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
-                    )
-
-                // Mark all chunks in base with a .taskRescheduled error
-                while let (taskIdentifier, _) = rescheduleIterator.next() {
-                    // Match chunk in base and set error to .taskRescheduled
-                    let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
-                        format: "taskIdentifier = %@",
-                        taskIdentifier
-                    )).first
-
-                    if let chunkTasksToClean {
-                        chunkTasksToClean.error = .taskRescheduled
-                    } else {
-                        Log.uploadOperation(
-                            "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
-                            level: .error
-                        )
-                    }
-                }
-
-                let metadata = ["File id": self.uploadFileId,
-                                "File name": file.name,
-                                "File size": file.size,
-                                "File type": file.type.rawValue]
-                SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)
-            }
-
-            self.uploadNotifiable.sendPausedNotificationIfNeeded()
-
-            // each and all operations should be given the chance to call backgroundActivityExpiring
-            self.end()
-
-            Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
-        }
-
-        // Cancel all chunk network requests ASAP
-        while let (_, sessionUploadTask) = cancelIterator.next() {
-            sessionUploadTask.cancel()
-        }
-
-        Log.uploadOperation("exit reschedule ufid:\(uploadFileId)")
     }
 }
