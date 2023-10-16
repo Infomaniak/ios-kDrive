@@ -98,6 +98,12 @@ extension UploadOperation {
                 try await wipeSessionAndRegenerate()
             }
 
+            // The local session was removed
+            else if let domainError = error as? ErrorDomain,
+                    domainError == ErrorDomain.uploadSessionTaskMissing {
+                try await wipeSessionAndRegenerate()
+            }
+
             // Unable to recover, generic error handling
             else {
                 throw error
