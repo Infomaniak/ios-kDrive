@@ -119,7 +119,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let state = UIApplication.shared.applicationState
         if state != .background {
             // Remove all notifications on App Opening
-            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         }
 
         return true
@@ -220,7 +220,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         launchSetup()
 
         // Remove all notifications on App Opening
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
     private func launchSetup() {
