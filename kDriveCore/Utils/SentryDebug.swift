@@ -120,6 +120,18 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
+    public static func updateFileListBreadcrumb(id: String, step: String) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "updateFileList opId: \(id) step: \(step)"
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    public static func filesObservationBreadcrumb(state: String) {
+        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
+        breadcrumb.message = "files modified: \(state) "
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
     // MARK: - Upload notifications
 
     static func uploadNotificationError(_ metadata: [String: Any]) {
