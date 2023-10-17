@@ -383,7 +383,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
         guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else { return }
 
+        let reloadId = UUID().uuidString
+
         collectionView.performBatchUpdates {
+            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates start")
+
             // Always apply updates in the following order: deletions, insertions, then modifications.
             // Handling insertions before deletions may result in unexpected behavior.
             collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
@@ -392,6 +396,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             for (source, target) in moved {
                 collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
             }
+            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates end")
+        } completion: { _ in
+            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates completion")
         }
         // Reload corners (outside of batch to prevent incompatible operations)
         reloadFileCorners(insertions: insertions, deletions: deletions)

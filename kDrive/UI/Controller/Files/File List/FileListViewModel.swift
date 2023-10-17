@@ -202,9 +202,11 @@ class FileListViewModel: SelectDelegate {
                 switch change {
                 case .initial(let results):
                     files = AnyRealmCollection(results)
+                    SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     files = AnyRealmCollection(results)
+                    SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated?(
                         deletions,
                         insertions,
