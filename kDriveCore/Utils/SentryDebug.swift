@@ -30,6 +30,7 @@ public enum SentryDebug {
 
     enum ErrorNames {
         static let uploadErrorHandling = "UploadErrorHandling"
+        static let uploadSessionErrorHandling = "UploadSessionErrorHandling"
         static let uploadErrorUserNotification = "UploadErrorUserNotification"
     }
 
@@ -93,10 +94,10 @@ public enum SentryDebug {
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
-    static func uploadOperationErrorHandling(_ error: Error, _ metadata: [String: Any]) {
+    static func uploadOperationErrorHandling(_ message: String, _ error: Error, _ metadata: [String: Any]) {
         // Add a breadcrumb for any error
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
-        breadcrumb.message = ErrorNames.uploadErrorHandling
+        breadcrumb.message = message
         breadcrumb.data = metadata
         SentrySDK.addBreadcrumb(breadcrumb)
 

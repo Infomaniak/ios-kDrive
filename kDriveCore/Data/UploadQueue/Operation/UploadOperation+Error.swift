@@ -40,7 +40,7 @@ extension UploadOperation {
 
             // error tracking
             Log.uploadOperation("catching error:\(error) ufid:\(uploadFileId)", level: .error)
-            sentryTrackingError(error)
+            sentryTrackingUploadError(error)
 
             // error handling
             if !handleLocalErrors(error: error) {
@@ -225,10 +225,16 @@ extension UploadOperation {
 
     // MARK: - Private
 
-    /// Tracking upload error with detailed state of the upload operation
-    private func sentryTrackingError(_ error: Error) {
+    /// Common tracking upload error with detailed state of the upload operation
+    private func sentryTrackingUploadError(_ error: Error) {
         let metadata = errorMetadata(error)
-        SentryDebug.uploadOperationErrorHandling(error, metadata)
+        SentryDebug.uploadOperationErrorHandling(SentryDebug.ErrorNames.uploadErrorHandling, error, metadata)
+    }
+
+    /// Dedicated session generation error with detailed state of the upload operation
+    func sentryTrackingSessionError(_ error: Error) {
+        let metadata = errorMetadata(error)
+        SentryDebug.uploadOperationErrorHandling(SentryDebug.ErrorNames.uploadSessionErrorHandling, error, metadata)
     }
 
     /// Get a debug representation of the upload operation
