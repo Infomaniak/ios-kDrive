@@ -27,18 +27,18 @@ class StoreViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
 
     struct Item {
-        let pack: DrivePack
+        let packId: DrivePackId
         let identifier: String
         let period: PeriodTab
         var product: SKProduct?
 
         static let allItems = [
-            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo.monthly", period: .monthly),
-            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.monthly", period: .monthly),
-            // Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
-            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
-            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly)
-            // Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
+            Item(packId: .solo, identifier: "com.infomaniak.drive.iap.solo.monthly", period: .monthly),
+            Item(packId: .team, identifier: "com.infomaniak.drive.iap.team.monthly", period: .monthly),
+            // Item(packId: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
+            Item(packId: .solo, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
+            Item(packId: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly)
+            // Item(packId: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
         ]
     }
 
@@ -65,7 +65,7 @@ class StoreViewController: UICollectionViewController {
 
     private var purchaseEnabled = true
     private var items = Item.allItems
-    private lazy var selectedPack = DrivePack(rawValue: driveFileManager.drive.pack) ?? .free
+    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.id)
     private var selectedStorage = 1
     private var selectedPeriod = PeriodTab.yearly {
         didSet { updateOffers() }
@@ -196,11 +196,11 @@ class StoreViewController: UICollectionViewController {
         if !driveFileManager.drive.accountAdmin {
             showBlockingMessage(existingIAP: false)
             purchaseEnabled = false
-        } else if !driveFileManager.drive.productIsInApp && StoreObserver.shared.hasInAppPurchaseReceipts {
+        } else if !driveFileManager.drive.isInAppSubscription && StoreObserver.shared.hasInAppPurchaseReceipts {
             // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
             showBlockingMessage(existingIAP: true)
             purchaseEnabled = false
-        } else if !driveFileManager.drive.productIsInApp && !driveFileManager.drive.isFreePack {
+        } else if !driveFileManager.drive.isInAppSubscription && !driveFileManager.drive.isFreePack {
             // Show a warning message to inform that they have a different subscription method
             sections.insert(.warning, at: 1)
             purchaseEnabled = false
@@ -275,7 +275,7 @@ class StoreViewController: UICollectionViewController {
         case .offers:
             let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
             let item = displayedItems[indexPath.row]
-            cell.configure(with: item, currentPack: selectedPack, enabled: purchaseEnabled)
+            cell.configure(with: item, currentPackId: selectedPackId, enabled: purchaseEnabled)
             cell.delegate = self
             return cell
         case .storage:
@@ -364,11 +364,11 @@ class StoreViewController: UICollectionViewController {
 
 extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate, StoreHelpFooterDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
-        guard selectedPack != item.pack else { return }
+        guard selectedPackId != item.packId else { return }
         if !sections.contains(.nextButton) {
             sections.append(.nextButton)
         }
-        selectedPack = item.pack
+        selectedPackId = item.packId
         collectionView.reloadData()
         collectionView.scrollToItem(at: IndexPath(item: 0, section: sections.count - 1), at: .bottom, animated: true)
     }
@@ -378,7 +378,7 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
     }
 
     func nextButtonTapped(_ button: IKLargeButton) {
-        if let product = displayedItems.first(where: { $0.pack == selectedPack })?.product {
+        if let product = displayedItems.first(where: { $0.packId == selectedPackId })?.product {
             // Attempt to purchase the tapped product
             StoreObserver.shared.buy(product,
                                      userId: accountManager.currentUserId,
@@ -403,7 +403,7 @@ extension StoreViewController: StoreManagerDelegate {
         updateOffers()
         // Scroll to current pack
         if let sectionIndex = sections.firstIndex(of: .offers),
-           let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
+           let index = displayedItems.firstIndex(where: { $0.packId == self.selectedPackId }) {
             collectionView.scrollToItem(
                 at: IndexPath(item: index, section: sectionIndex),
                 at: .centeredVertically,

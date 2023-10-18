@@ -26,7 +26,7 @@ protocol SelectSwitchDriveDelegate: SelectDelegate, UIViewController {}
 extension SelectSwitchDriveDelegate {
     func didSelect(option: Selectable) {
         guard let drive = option as? Drive else { return }
-        if drive.maintenance {
+        if drive.inMaintenance {
             let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             present(driveFloatingPanelController, animated: true)
         } else {

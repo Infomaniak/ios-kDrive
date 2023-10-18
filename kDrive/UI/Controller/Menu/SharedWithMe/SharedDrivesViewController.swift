@@ -84,7 +84,7 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
         guard let drive = drives[indexPath.row] else {
             return
         }
-        if drive.maintenance {
+        if drive.inMaintenance {
             let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveFloatingPanelController, animated: true)

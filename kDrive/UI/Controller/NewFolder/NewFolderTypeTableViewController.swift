@@ -55,14 +55,14 @@ class NewFolderTypeTableViewController: UITableViewController {
             content.append(.folder)
         }
         // We can create a common folder if we have a pro or team drive and the create team folder right
-        if driveFileManager.drive.canCreateTeamFolder && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory
+        if driveFileManager.drive.capabilities.useTeamSpace && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory
             .visibility != .isInTeamSpaceFolder {
             content.append(.commonFolder)
         }
         // We can create a dropbox if we are not in a team space and not in a shared with me or the drive supports dropboxes
         if currentDirectory
             .visibility != .isTeamSpace &&
-            (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.packFunctionality?.dropbox == true) {
+            (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.pack.capabilities.useDropbox) {
             content.append(.dropbox)
         }
         tableView.reloadData()
@@ -104,7 +104,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if content[indexPath.row] == .dropbox && driveFileManager.drive.packFunctionality?.dropbox == false {
+        if content[indexPath.row] == .dropbox && !driveFileManager.drive.pack.capabilities.useDropbox {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController
                 .contentViewController as? DropBoxFloatingPanelViewController

@@ -47,10 +47,10 @@ class StoreCollectionViewCell: UICollectionViewCell {
         tableView.register(cellView: StoreFeatureTableViewCell.self)
     }
 
-    func configure(with item: StoreViewController.Item, currentPack: DrivePack, enabled: Bool) {
+    func configure(with item: StoreViewController.Item, currentPackId: DrivePackId?, enabled: Bool) {
         self.item = item
 
-        switch item.pack {
+        switch item.packId {
         case .solo:
             imageView.image = KDriveResourcesAsset.circleSolo.image
             titleLabel.text = "Solo"
@@ -84,7 +84,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
             priceLabel.text = KDriveResourcesStrings.Localizable.storeRetrieving
         }
 
-        selectButton.isSelected = currentPack == item.pack
+        selectButton.isSelected = currentPackId == item.packId
         selectButton.isEnabled = item.product != nil && enabled
 
         tableView.reloadData()

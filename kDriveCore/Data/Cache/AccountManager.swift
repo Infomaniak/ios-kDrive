@@ -277,7 +277,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile()
 
         let driveResponse = try await apiFetcher.userDrives()
-        guard !driveResponse.drives.main.isEmpty else {
+        guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
             networkLogin.deleteApiToken(token: token) { error in
                 DDLogError("Failed to delete api token: \(error.localizedDescription)")
             }
@@ -290,15 +290,15 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentAccount(account: newAccount)
 
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
-        guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
+        guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
-            throw driveResponse.drives.main.first?.isInTechnicalMaintenance == true ? DriveError.productMaintenance : DriveError
+            throw driveResponse.drives.first?.isInTechnicalMaintenance == true ? DriveError.productMaintenance : DriveError
                 .blocked
         }
 
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
         saveAccounts()
-        mqService.registerForNotifications(with: driveResponse.ipsToken)
+        mqService.registerForNotifications(with: driveResponse.ips)
 
         return newAccount
     }
@@ -315,7 +315,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         account.user = user
 
         let driveResponse = try await apiFetcher.userDrives()
-        guard !driveResponse.drives.main.isEmpty else {
+        guard !driveResponse.drives.isEmpty else {
             removeAccount(toDeleteAccount: account)
             throw DriveError.noDrive
         }
@@ -337,7 +337,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         saveAccounts()
         if registerToken {
-            mqService.registerForNotifications(with: driveResponse.ipsToken)
+            mqService.registerForNotifications(with: driveResponse.ips)
         }
 
         return (account, switchedDrive)

@@ -90,7 +90,7 @@ class FileDetailViewController: UIViewController {
             if file.capabilities.canShare {
                 rows.append(.share)
             }
-            if categoryRights.canReadCategoryOnFile {
+            if categoryRights.canReadOnFile {
                 rows.append(.categories)
             }
             rows.append(.owner)
@@ -120,7 +120,7 @@ class FileDetailViewController: UIViewController {
     private var oldSections = 2
 
     private var canManageCategories: Bool {
-        return driveFileManager.drive.categoryRights.canPutCategoryOnFile && !file.isDisabled
+        return driveFileManager.drive.categoryRights.canPutOnFile && !file.isDisabled
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {

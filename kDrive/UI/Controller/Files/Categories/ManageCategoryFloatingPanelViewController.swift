@@ -108,9 +108,9 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         actions.forEach { action in
             switch action {
             case .edit:
-                action.isEnabled = driveFileManager.drive.categoryRights.canEditCategory
+                action.isEnabled = driveFileManager.drive.categoryRights.canEdit
             case .delete:
-                action.isEnabled = driveFileManager.drive.categoryRights.canDeleteCategory && !category.isPredefined
+                action.isEnabled = driveFileManager.drive.categoryRights.canDelete && !category.isPredefined
             default:
                 break
             }

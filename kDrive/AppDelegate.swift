@@ -51,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private let dependencyInjectionHook = EarlyDIHook()
 
     private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 2
+    private static let currentStateVersion = 3
     private static let appStateVersionKey = "appStateVersionKey"
 
     // MARK: - UIApplicationDelegate
@@ -336,7 +336,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                  } */
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
-                   !drive.maintenance {
+                   !drive.inMaintenance {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
 
@@ -345,9 +345,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     driveId: accountManager.currentDriveId,
                     using: nil
                 ),
-                    currentDrive.maintenance {
+                    currentDrive.inMaintenance {
                     if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId)
-                        .first(where: { !$0.maintenance }),
+                        .first(where: { !$0.inMaintenance }),
                         let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
                         (rootViewController as? SwitchDriveDelegate)?
