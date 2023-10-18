@@ -236,6 +236,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #endif
 
         tryLoadingFilesOrDisplayError()
+
+        // Stopgap: Trying to reduce NSInternalInconsistencyException issues.
+        restartViewModelObservation()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewModel.stopObservation()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -272,7 +280,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if viewModel.configuration.isRefreshControlEnabled {
             collectionView.refreshControl = refreshControl
         }
+    }
 
+    private func restartViewModelObservation() {
+        viewModel.stopObservation()
+        collectionView.reloadData()
         viewModel.startObservation()
     }
 

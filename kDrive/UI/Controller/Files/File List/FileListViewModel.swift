@@ -221,6 +221,16 @@ class FileListViewModel: SelectDelegate {
             }
     }
 
+    func stopObservation() {
+        sortTypeObservation?.cancel()
+        sortTypeObservation = nil
+
+        listStyleObservation?.cancel()
+        listStyleObservation = nil
+
+        bindStore.map { $0.cancel() }
+    }
+
     func startObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
