@@ -201,11 +201,11 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             accountManager.switchAccount(newAccount: nextAccount)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
             driveFileManager = accountManager.currentDriveFileManager
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
         } else {
             SentrySDK.setUser(nil)
             tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
         }
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
         accountManager.saveAccounts()
     }
 
