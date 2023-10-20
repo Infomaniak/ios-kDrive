@@ -41,8 +41,9 @@ class RecentSearchesViewModel {
     }
 
     func add(searchTerm: String) {
-        guard !searchTerm.isEmpty && !recentSearches.contains(searchTerm) else { return }
+        guard !searchTerm.isEmpty else { return }
         var newRecentSearches = recentSearches
+        newRecentSearches.removeAll { $0 == searchTerm }
         newRecentSearches.insert(searchTerm, at: 0)
         if newRecentSearches.count > maxRecentSearch {
             newRecentSearches.removeLast()
@@ -223,9 +224,8 @@ class SearchFilesViewModel: FileListViewModel {
             driveFileManager.removeSearchChildren()
         }
         if isDisplayingSearchResults {
-            currentTask = Task { [currentSearchText] in
+            currentTask = Task {
                 try? await loadFiles(page: 1, forceRefresh: true)
-                onSearchCompleted?(currentSearchText)
             }
         }
     }
@@ -281,6 +281,7 @@ class SearchViewController: FileListViewController {
         searchController.searchBar.showsCancelButton = false
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.searchViewHint
+        searchController.searchBar.delegate = self
 
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -436,6 +437,7 @@ class SearchViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if searchViewModel.isDisplayingSearchResults {
             super.collectionView(collectionView, didSelectItemAt: indexPath)
+            searchViewModel.onSearchCompleted?(searchViewModel.currentSearchText)
         } else {
             let searchTerm = recentSearchesViewModel.recentSearches[indexPath.row]
             searchViewModel.currentSearchText = searchTerm
@@ -495,6 +497,14 @@ class SearchViewController: FileListViewController {
         } else {
             return []
         }
+    }
+}
+
+// MARK: - Search end editing
+
+extension SearchViewController: UISearchBarDelegate {
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchViewModel.onSearchCompleted?(searchViewModel.currentSearchText)
     }
 }
 
