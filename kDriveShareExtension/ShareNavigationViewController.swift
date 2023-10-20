@@ -22,7 +22,7 @@ import InfomaniakLogin
 import kDriveCore
 import UIKit
 
-class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
+final class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
@@ -36,13 +36,14 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
         Logging.initLogging()
 
         let saveViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
-
-        if let attachments = (extensionContext?.inputItems.first as? NSExtensionItem)?.attachments {
-            saveViewController.itemProviders = attachments
-            viewControllers = [saveViewController]
-        } else {
+        let attachments = fetchAttachments()
+        guard !attachments.isEmpty else {
             dismiss(animated: true)
+            return
         }
+
+        saveViewController.itemProviders = attachments
+        viewControllers = [saveViewController]
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
