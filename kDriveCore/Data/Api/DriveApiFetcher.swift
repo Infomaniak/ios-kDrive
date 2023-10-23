@@ -67,7 +67,7 @@ public class DriveApiFetcher: ApiFetcher {
     override public func perform<T: Decodable>(request: DataRequest,
                                                decoder: JSONDecoder = ApiFetcher.decoder) async throws -> (
         data: T,
-        responseAt: Int?
+        response: ApiResponse<T>
     ) {
         do {
             return try await super.perform(request: request)
@@ -121,19 +121,27 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .delete)).data
     }
 
-    public func rootFiles(drive: AbstractDrive, page: Int = 1,
-                          sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.rootFiles(drive: drive).paginated(page: page)
-                .sorted(by: [.type, sortType])))
+    public func rootFiles(drive: AbstractDrive,
+                          cursor: String?,
+                          sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(
+            .rootFiles(drive: drive)
+                .sorted(by: [.type, sortType]),
+            method: .get
+        ))
     }
 
-    public func files(in directory: ProxyFile, page: Int = 1,
-                      sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.files(of: directory).paginated(page: page)
-                .sorted(by: [.type, sortType])))
+    public func files(in directory: ProxyFile,
+                      cursor: String?,
+                      sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(
+            .files(of: directory)
+                .sorted(by: [.type, sortType]),
+            method: .get
+        ))
     }
 
-    public func fileInfo(_ file: ProxyFile) async throws -> (data: File, responseAt: Int?) {
+    public func fileInfo(_ file: ProxyFile) async throws -> (data: File, response: ApiResponse<File>) {
         try await perform(request: authenticatedRequest(.fileInfo(file)))
     }
 
@@ -289,7 +297,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func fileActivities(file: ProxyFile, from date: Date,
-                               page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
+                               page: Int) async throws -> (data: [FileActivity], response: ApiResponse<[FileActivity]>) {
         var queryItems = [
             FileWith.fileActivitiesWithExtra.toQueryItem(),
             URLQueryItem(name: "depth", value: "children"),
@@ -303,7 +311,8 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func filesActivities(drive: AbstractDrive, files: [ProxyFile],
-                                from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
+                                from date: Date) async throws
+        -> (data: [ActivitiesForFile], response: ApiResponse<[ActivitiesForFile]>) {
         try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
     }
 
@@ -358,8 +367,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.trashedInfo(file: file))).data
     }
 
-    public func trashedFiles(of directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: page)
+    public func trashedFiles(of directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: 1)
                 .sorted(by: [sortType]))).data
     }
 

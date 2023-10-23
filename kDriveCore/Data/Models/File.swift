@@ -189,14 +189,14 @@ public enum SortType: String {
         switch self {
         case .nameAZ:
             return SortTypeValue(
-                apiValue: "path",
+                apiValue: "name",
                 order: "asc",
                 translation: KDriveResourcesStrings.Localizable.sortNameAZ,
                 realmKeyPath: \.sortedName
             )
         case .nameZA:
             return SortTypeValue(
-                apiValue: "path",
+                apiValue: "name",
                 order: "desc",
                 translation: KDriveResourcesStrings.Localizable.sortNameZA,
                 realmKeyPath: \.sortedName
