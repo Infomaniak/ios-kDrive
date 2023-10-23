@@ -479,32 +479,36 @@ public final class DriveFileManager {
         _ = try await files(in: root.proxify())
     }
 
-    public func files(in directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ,
-                      forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        let fetchFiles: () async throws -> ([File], Int?)
+    public func files(in directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ,
+                      forceRefresh: Bool = false) async throws -> (files: [File], cursor: String?) {
+        let fetchFiles: () async throws -> ([File], ApiResponse<[File]>)
         if directory.isRoot {
             fetchFiles = {
-                let (children, responseAt) = try await self.apiFetcher
-                    .rootFiles(drive: self.drive, page: page, sortType: sortType)
-                return (children, responseAt)
+                let (children, response) = try await self.apiFetcher
+                    .rootFiles(drive: self.drive, cursor: cursor, sortType: sortType)
+                return (children, response)
             }
         } else {
             fetchFiles = {
-                let (children, responseAt) = try await self.apiFetcher.files(in: directory, page: page, sortType: sortType)
-                return (children, responseAt)
+                let (children, response) = try await self.apiFetcher.files(in: directory, cursor: cursor, sortType: sortType)
+                return (children, response)
             }
         }
-        return try await files(in: directory, fetchFiles: fetchFiles,
-                               page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
+        return try await files(in: directory,
+                               fetchFiles: fetchFiles,
+                               cursor: cursor,
+                               sortType: sortType,
+                               keepProperties: [.standard, .extras],
+                               forceRefresh: forceRefresh)
     }
 
     private func remoteFiles(in directory: ProxyFile,
-                             fetchFiles: () async throws -> ([File], Int?),
-                             page: Int,
+                             fetchFiles: () async throws -> ([File], ApiResponse<[File]>?),
+                             isInitialCursor: Bool,
                              sortType: SortType,
-                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], moreComing: Bool) {
+                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], cursor: String?) {
         // Get children from API
-        let (children, responseAt) = try await fetchFiles()
+        let (children, response) = try await fetchFiles()
         let realm = getRealm()
         // Keep cached properties for children
         for child in children {
@@ -514,7 +518,7 @@ public final class DriveFileManager {
         let managedParent = try directory.resolve(using: realm)
         // Update parent
         try realm.write {
-            managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            managedParent.responseAt = response?.responseAt ?? Int(Date().timeIntervalSince1970)
             if children.count < Endpoint.itemsPerPage {
                 managedParent.versionCode = DriveFileManager.constants.currentVersionCode
                 managedParent.fullyDownloaded = true
@@ -530,26 +534,26 @@ public final class DriveFileManager {
 
         return (
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
-            children.count == Endpoint.itemsPerPage
+            response?.cursor
         )
     }
 
     private func files(in directory: ProxyFile,
-                       fetchFiles: () async throws -> ([File], Int?),
-                       page: Int,
+                       fetchFiles: () async throws -> ([File], ApiResponse<[File]>),
+                       cursor: String?,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
-                       forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
+                       forceRefresh: Bool) async throws -> (files: [File], String?) {
         if let cachedParent = getCachedFile(id: directory.id, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have
            // anyway
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
-            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
+            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), nil)
         } else {
             return try await remoteFiles(
                 in: directory,
                 fetchFiles: fetchFiles,
-                page: page,
+                page: 1,
                 sortType: sortType,
                 keepProperties: keepProperties
             )
@@ -581,28 +585,30 @@ public final class DriveFileManager {
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ,
                           forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
-                        fetchFiles: {
-                            let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
-                            return (favorites, nil)
-                        },
-                        page: page,
-                        sortType: sortType,
-                        keepProperties: [.standard, .extras],
-                        forceRefresh: forceRefresh)
+        fatalError("TODO")
+        /* try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
+         fetchFiles: {
+             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
+             return (favorites, nil)
+         },
+         cursor: "",
+         sortType: sortType,
+         keepProperties: [.standard, .extras],
+         forceRefresh: forceRefresh) */
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ,
                               forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
-                        fetchFiles: {
-                            let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
-                            return (mySharedFiles, nil)
-                        },
-                        page: page,
-                        sortType: sortType,
-                        keepProperties: [.standard, .path, .version],
-                        forceRefresh: forceRefresh)
+        fatalError("TODO")
+        /* try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
+         fetchFiles: {
+             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
+             return (mySharedFiles, nil)
+         },
+         cursor: "",
+         sortType: sortType,
+         keepProperties: [.standard, .path, .version],
+         forceRefresh: forceRefresh) */
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
@@ -876,14 +882,14 @@ public final class DriveFileManager {
         var responseAt = 0
         while moreComing {
             // Get activities page
-            let (activities, pageResponseAt) = try await apiFetcher.fileActivities(
+            let (activities, response) = try await apiFetcher.fileActivities(
                 file: file,
                 from: Date(timeIntervalSince1970: timestamp),
                 page: page
             )
             moreComing = activities.count == Endpoint.itemsPerPage
             page += 1
-            responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
+            responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
             // Get file from Realm
             let realm = getRealm()
             let cachedFile = try file.resolve(using: realm)
@@ -995,10 +1001,10 @@ public final class DriveFileManager {
     }
 
     public func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
-        let (result, responseAt) = try await apiFetcher
+        let (result, response) = try await apiFetcher
             .filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
         // Update last sync date
-        if let responseAt {
+        if let responseAt = response.responseAt {
             UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
         }
         return result

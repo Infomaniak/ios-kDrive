@@ -328,10 +328,10 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    func startRefreshing(page: Int) {
+    func startRefreshing(cursor: String?) {
         isLoading = true
 
-        if page == 1 {
+        if cursor == nil {
             showLoadingIndicatorIfNeeded()
         }
     }
@@ -346,7 +346,7 @@ class FileListViewModel: SelectDelegate {
         // Implemented by subclasses
     }
 
-    func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
+    func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         // Implemented by subclasses
     }
 
@@ -425,7 +425,7 @@ class FileListViewModel: SelectDelegate {
     func forceRefresh() {
         endRefreshing()
         Task {
-            try await loadFiles(page: 1, forceRefresh: true)
+            try await loadFiles(cursor: nil, forceRefresh: true)
         }
     }
 
@@ -434,7 +434,7 @@ class FileListViewModel: SelectDelegate {
             let responseAtDate = Date(timeIntervalSince1970: Double(currentDirectory.responseAt))
             let now = Date()
             if responseAtDate.distance(to: now) > Constants.activitiesReloadTimeOut {
-                try await loadFiles(page: 1, forceRefresh: true)
+                try await loadFiles(cursor: nil, forceRefresh: true)
             } else {
                 try await loadActivities()
             }
