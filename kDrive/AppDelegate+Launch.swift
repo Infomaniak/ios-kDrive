@@ -92,14 +92,20 @@ extension AppDelegate {
             return
         }
 
-        if !(window.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-            KeychainHelper.deleteAllTokens()
-            window.rootViewController = OnboardingViewController.instantiate()
-            window.makeKeyAndVisible()
+        defer {
+            // Clean File Provider domains on first launch in case we had some dangling
+            DriveInfosManager.instance.deleteAllFileProviderDomains()
         }
 
-        // Clean File Provider domains on first launch in case we had some dangling
-        DriveInfosManager.instance.deleteAllFileProviderDomains()
+        // Check if presenting onboarding
+        let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
+        guard isNotPresentingOnboarding else {
+            return
+        }
+
+        KeychainHelper.deleteAllTokens()
+        window.rootViewController = OnboardingViewController.instantiate()
+        window.makeKeyAndVisible()
     }
 
     private func showAppLock() {
