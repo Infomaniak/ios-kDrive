@@ -28,7 +28,9 @@ import UIKit
 public extension ApiFetcher {
     convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
-        setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
+        createAuthenticatedSession(token,
+                                   authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate),
+                                   additionalAdapters: [UserAgentAdapter()])
     }
 }
 
