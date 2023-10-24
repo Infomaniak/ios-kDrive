@@ -52,7 +52,8 @@ extension Operation: Operationable {}
 public protocol UploadOperationable: Operationable {
     /// Central init method for `UploadOperation`
     /// - Parameters:
-    ///   - uploadFileId: The uniq identifier of the `UploadFile` entity in database. Must be unique and not shared with other `UploadOperation`
+    ///   - uploadFileId: The uniq identifier of the `UploadFile` entity in database. Must be unique and not shared with other
+    /// `UploadOperation`
     ///   - urlSession: The URL session used to perform authenticated requests
     init(uploadFileId: String, urlSession: URLSession)
 

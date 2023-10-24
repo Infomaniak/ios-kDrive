@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
@@ -24,7 +25,6 @@ import kDriveResources
 import Lottie
 import Sentry
 import UIKit
-import CocoaLumberjackSwift
 
 class OnboardingViewController: UIViewController {
     @IBOutlet weak var navigationBar: UINavigationBar!
