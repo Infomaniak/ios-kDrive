@@ -106,10 +106,20 @@ public final class UploadQueue {
 
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
-            operationQueue.isSuspended = isSuspended
+
+            // Reschedule operations if network became unavailable
+            if isSuspended {
+                rescheduleRunningOperations()
+                suspendAllOperations()
+            } else {
+                resumeAllOperations()
+            }
         }
 
         Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
