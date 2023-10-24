@@ -202,7 +202,9 @@ public final class DownloadQueue {
 
     // MARK: - Private methods
 
-    private init() {}
+    private init() {
+        // META: keep SonarCloud happy
+    }
 
     private func publishFileDownloaded(fileId: Int, error: DriveError?) {
         observations.didDownloadFile.values.forEach { closure in

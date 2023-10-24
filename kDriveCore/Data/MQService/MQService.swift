@@ -60,7 +60,9 @@ public class MQService {
         return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
     }
 
-    public init() {}
+    public init() {
+        // META: keep SonarCloud happy
+    }
 
     public func registerForNotifications(with token: IPSToken) {
         queue.async { [self] in
