@@ -265,8 +265,12 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
         driveFileManager = newDriveFileManager
         // Tell Files app that the drive changed
         DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-            manager.signalEnumerator(for: .workingSet) { _ in }
-            manager.signalEnumerator(for: .rootContainer) { _ in }
+            manager.signalEnumerator(for: .workingSet) { _ in
+                // META: keep SonarCloud happy
+            }
+            manager.signalEnumerator(for: .rootContainer) { _ in
+                // META: keep SonarCloud happy
+            }
         }
         for viewController in viewControllers ?? [] {
             guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers

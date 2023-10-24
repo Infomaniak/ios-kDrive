@@ -106,8 +106,9 @@ public enum KeychainHelper {
 
     public static func storeToken(_ token: ApiToken) {
         var resultCode: OSStatus = noErr
-        // swiftlint:disable:next force_try
-        let tokenData = try! JSONEncoder().encode(token)
+        guard let tokenData = try? JSONEncoder().encode(token) else {
+            fatalError("Failed to JSON encode token:\(token)")
+        }
 
         if let savedToken = getSavedToken(for: token.userId) {
             keychainQueue.sync {
@@ -201,26 +202,31 @@ public enum KeychainHelper {
             }
             DDLogInfo("Successfully loaded tokens ? \(resultCode == noErr)")
 
-            if resultCode == noErr {
-                let jsonDecoder = JSONDecoder()
-                if let array = result as? [[String: Any]] {
-                    for item in array {
-                        if let value = item[kSecValueData as String] as? Data {
-                            if let token = try? jsonDecoder.decode(ApiToken.self, from: value) {
-                                values.append(token)
-                            }
-                        }
-                    }
-                    if let token = values.first {
-                        SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully loaded token"))
-                    }
-                }
-            } else {
+            guard resultCode == noErr else {
                 let crumb = Breadcrumb(level: .error, category: "Token")
                 crumb.type = "error"
                 crumb.message = "Failed loading tokens"
                 crumb.data = ["Keychain error code": resultCode]
                 SentrySDK.addBreadcrumb(crumb)
+                return
+            }
+
+            let jsonDecoder = JSONDecoder()
+            guard let array = result as? [[String: Any]] else {
+                return
+            }
+
+            for item in array {
+                guard let value = item[kSecValueData as String] as? Data,
+                      let token = try? jsonDecoder.decode(ApiToken.self, from: value) else {
+                    return
+                }
+
+                values.append(token)
+            }
+
+            if let token = values.first {
+                SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully loaded token"))
             }
         }
         return values

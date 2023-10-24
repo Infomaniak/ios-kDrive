@@ -69,7 +69,9 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         iconImageView.backgroundColor = nil
     }
 
-    override func initStyle(isFirst: Bool, isLast: Bool) {}
+    override func initStyle(isFirst: Bool, isLast: Bool) {
+        // META: keep SonarCloud happy
+    }
 
     override func configure(with viewModel: FileViewModel) {
         super.configure(with: viewModel)

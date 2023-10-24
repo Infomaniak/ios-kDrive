@@ -706,8 +706,12 @@ public class File: Object, Codable {
             identifier = .rootContainer
         }
         DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
-            manager.signalEnumerator(for: .workingSet) { _ in }
-            manager.signalEnumerator(for: identifier) { _ in }
+            manager.signalEnumerator(for: .workingSet) { _ in
+                // META: keep SonarCloud happy
+            }
+            manager.signalEnumerator(for: identifier) { _ in
+                // META: keep SonarCloud happy
+            }
         }
     }
 

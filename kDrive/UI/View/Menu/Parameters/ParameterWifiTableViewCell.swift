@@ -28,5 +28,7 @@ class ParameterWifiTableViewCell: InsetTableViewCell {
         switchHandler?(sender)
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {}
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        // META: keep SonarCloud happy
+    }
 }
