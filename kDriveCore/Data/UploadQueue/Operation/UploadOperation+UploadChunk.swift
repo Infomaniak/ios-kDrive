@@ -116,7 +116,7 @@ extension UploadOperation {
             }
 
             // Chain the next chunk generation if necessary
-            let slots = freeRequestSlots()
+            let slots = availableWorkerSlots()
             if chunksToGenerateCount > 0 && slots > 0 {
                 Log.uploadOperation(
                     "remaining chunks to generate:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP ufid:\(uploadFileId)"
@@ -135,7 +135,7 @@ extension UploadOperation {
     func fanOutChunks() async throws {
         try checkCancelation()
 
-        let freeSlots = freeRequestSlots()
+        let freeSlots = availableWorkerSlots()
         guard freeSlots > 0 else {
             return
         }
@@ -225,5 +225,38 @@ extension UploadOperation {
         let folderUrlString = NSTemporaryDirectory() + "/\(fileId.SHA256DigestString)_\(sessionToken.SHA256DigestString)"
         let folderPath = URL(fileURLWithPath: folderUrlString)
         return folderPath.standardizedFileURL
+    }
+
+    /// Make sure all `uploadTasks` canceled or completed are up to date in database.
+    /// - Parameter iterator: A view on `uploadTasks`
+    func cleanUploadSessionUploadTaskNotUploading(iterator: inout Dictionary<String, URLSessionUploadTask>.Iterator) throws {
+        while let (taskIdentifier, sessionTask) = iterator.next() {
+            Log.uploadOperation(
+                "cleanUploadSessionUploadTaskNotUploading taskIdentifier:\(taskIdentifier) sessionTask.state \(sessionTask.state) ufid:\(uploadFileId)"
+            )
+
+            switch sessionTask.state {
+            case URLSessionTask.State.canceling, URLSessionTask.State.completed:
+                try transactionWithChunk(taskIdentifier: taskIdentifier) { chunkTask in
+                    // Only edit if no chunk stored in success
+                    guard chunkTask.chunk == nil else {
+                        return
+                    }
+
+                    chunkTask.error = .taskRescheduled
+                } notFound: {
+                    Log.uploadOperation(
+                        "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
+                        level: .error
+                    )
+                }
+
+                // Remove upload session from tracking
+                uploadTasks.removeValue(forKey: taskIdentifier)
+                return
+            default:
+                return
+            }
+        }
     }
 }

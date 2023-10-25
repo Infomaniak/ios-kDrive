@@ -58,17 +58,23 @@ extension UploadOperation {
         var errorHandled = false
         try? transactionWithFile { file in
             let nsError = error as NSError
+            Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
+
             if nsError.domain == NSURLErrorDomain {
-                // System/user cancelled requests silently handled, some chunk upload in error for eg.
-                guard nsError.code == NSURLErrorCancelled else {
+                switch nsError.code {
+                case NSURLErrorCancelled:
+                    // System/user cancelled requests silently handled, some chunk upload in error for eg.
                     errorHandled = true
                     // _not_ overriding file.error
                     return
+                case NSURLErrorNetworkConnectionLost:
+                    // Connection lost on any call other than chunks sets a network error.
+                    file.error = .networkError.wrapping(error)
+                    errorHandled = true
+                default:
+                    file.error = .networkError.wrapping(error)
+                    errorHandled = true
                 }
-
-                Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
-                file.error = .networkError.wrapping(error)
-                errorHandled = true
             }
 
             // Do nothing on taskRescheduled

@@ -27,7 +27,7 @@ import UIKit
 
 extension PhotoSortMode: Selectable {}
 
-class PhotoListViewController: FileListViewController {
+final class PhotoListViewController: FileListViewController {
     @IBOutlet weak var photoHeaderView: SelectView!
     @IBOutlet weak var headerImageView: UIImageView!
     @IBOutlet weak var headerTitleLabel: IKLabel!

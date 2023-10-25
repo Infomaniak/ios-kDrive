@@ -30,6 +30,7 @@ protocol FileCellDelegate: AnyObject {
     static let observedProperties = [
         "name",
         "rawType",
+        "rawStatus",
         "_capabilities",
         "dropbox",
         "rawVisibility",
