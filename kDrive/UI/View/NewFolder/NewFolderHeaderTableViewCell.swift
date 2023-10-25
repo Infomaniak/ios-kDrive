@@ -48,9 +48,13 @@ class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
         delegate?.textFieldUpdated(content: titleTextField.text ?? "")
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {}
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        // META: keep SonarCloud happy
+    }
 
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {}
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        // META: keep SonarCloud happy
+    }
 
     func configureWith(folderType: FolderType) {
         if folderType == .folder {

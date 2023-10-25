@@ -55,7 +55,8 @@ class NewFolderTypeTableViewController: UITableViewController {
             content.append(.folder)
         }
         // We can create a common folder if we have a pro or team drive and the create team folder right
-        if driveFileManager.drive.capabilities.useTeamSpace && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory
+        if driveFileManager.drive.capabilities.useTeamSpace && currentDirectory
+            .visibility != .isTeamSpaceFolder && currentDirectory
             .visibility != .isInTeamSpaceFolder {
             content.append(.commonFolder)
         }

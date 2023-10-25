@@ -77,7 +77,9 @@ public class PhotoSyncSettings: Object {
         self.photoFormat = photoFormat
     }
 
-    override public init() {}
+    override public init() {
+        // META: keep SonarCloud happy
+    }
 
     override public class func primaryKey() -> String? {
         return "userId"

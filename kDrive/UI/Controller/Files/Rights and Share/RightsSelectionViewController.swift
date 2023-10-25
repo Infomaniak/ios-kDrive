@@ -33,7 +33,9 @@ protocol RightsSelectionDelegate: AnyObject {
 }
 
 extension RightsSelectionDelegate {
-    func didDeleteUserRight() {}
+    func didDeleteUserRight() {
+        // META: keep SonarCloud happy
+    }
 }
 
 struct Right {

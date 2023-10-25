@@ -33,7 +33,14 @@ import UIKit
 import UserNotifications
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
+    /// Making sure the DI is registered at a very early stage of the app launch.
+    private let dependencyInjectionHook = EarlyDIHook()
+
+    private var reachabilityListener: ReachabilityListener!
+    private static let currentStateVersion = 3
+    private static let appStateVersionKey = "appStateVersionKey"
+
     var window: UIWindow?
 
     @LazyInjectService var lockHelper: AppLockHelper
@@ -45,14 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
     /// Use this to simulate a long running background session
-    private static let simulateLongRunningSession = false
-
-    /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
-
-    private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 3
-    private static let appStateVersionKey = "appStateVersionKey"
+    static let simulateLongRunningSession = false
 
     // MARK: - UIApplicationDelegate
 
@@ -113,7 +113,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // For iOS 10 display notification (sent via APNS)
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in
+            // META: keep SonarCloud happy
+        }
         application.registerForRemoteNotifications()
 
         let state = UIApplication.shared.applicationState
@@ -223,82 +225,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
-    private func launchSetup() {
-        // Simulating a "background foreground"
-        if Self.simulateLongRunningSession {
-            window?.rootViewController = UIViewController()
-            window?.makeKeyAndVisible()
-
-            Log.appDelegate("handleBackgroundRefresh begin")
-            DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
-                self.handleBackgroundRefresh { success in
-                    Log.appDelegate("handleBackgroundRefresh success:\(success)")
-                }
-            }
-
-        } else {
-            // Set global tint color
-            window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
-            UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-            // Migration from old UserDefaults
-            if UserDefaults.shared.isFirstLaunch {
-                UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
-            }
-
-            @InjectService var accountManager: AccountManageable
-            if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
-                window?.rootViewController = MigrationViewController.instantiate()
-                window?.makeKeyAndVisible()
-            } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
-                if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-                    KeychainHelper.deleteAllTokens()
-                    window?.rootViewController = OnboardingViewController.instantiate()
-                    window?.makeKeyAndVisible()
-                }
-                // Clean File Provider domains on first launch in case we had some dangling
-                DriveInfosManager.instance.deleteAllFileProviderDomains()
-            } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
-                window?.rootViewController = LockedAppViewController.instantiate()
-                window?.makeKeyAndVisible()
-            } else {
-                UserDefaults.shared.numberOfConnections += 1
-                // Show launch floating panel
-                let launchPanelsController = LaunchPanelsController()
-                if let viewController = window?.rootViewController {
-                    launchPanelsController.pickAndDisplayPanel(viewController: viewController)
-                }
-                // Request App Store review
-                if UserDefaults.shared.numberOfConnections == 10 {
-                    if #available(iOS 14.0, *) {
-                        if let scene = UIApplication.shared.connectedScenes
-                            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                            SKStoreReviewController.requestReview(in: scene)
-                        }
-                    } else {
-                        SKStoreReviewController.requestReview()
-                    }
-                }
-                // Refresh data
-                refreshCacheData(preload: false, isSwitching: false)
-                uploadEditedFiles()
-                // Ask to remove uploaded pictures
-                if let toRemoveItems = photoLibraryUploader.getPicturesToRemove() {
-                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
-                                                        message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
-                                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                                        destructive: true,
-                                                        loading: false) {
-                        // Proceed with removal
-                        self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
-                    }
-                    Task { @MainActor in
-                        self.window?.rootViewController?.present(alert, animated: true)
-                    }
-                }
-            }
-        }
-    }
-
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
         Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
 
@@ -380,90 +306,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 Log.appDelegate("Error while updating user account: \(error)", level: .error)
-            }
-        }
-    }
-
-    private func uploadEditedFiles() {
-        Log.appDelegate("uploadEditedFiles")
-
-        guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
-              FileManager.default.fileExists(atPath: folderURL.path) else {
-            return
-        }
-
-        @InjectService var accountManager: AccountManageable
-        let group = DispatchGroup()
-        var shouldCleanFolder = false
-        let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
-        // Hierarchy inside folderURL should be /driveId/fileId/fileName.extension
-        for driveFolder in driveFolders {
-            // Read drive folder
-            let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
-            guard let driveId = Int(driveFolder),
-                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
-                  let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
-                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
-                continue
-            }
-
-            for fileFolder in fileFolders {
-                // Read file folder
-                let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
-                guard let fileId = Int(fileFolder),
-                      let driveFileManager = accountManager.getDriveFileManager(for: drive),
-                      let file = driveFileManager.getCachedFile(id: fileId) else {
-                    Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
-                    continue
-                }
-
-                let fileURL = fileFolderURL.appendingPathComponent(file.name)
-                if FileManager.default.fileExists(atPath: fileURL.path) {
-                    // Compare modification date
-                    let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
-                    let modificationDate = attributes?[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
-                    if modificationDate > file.lastModifiedAt {
-                        // Copy and upload file
-                        let uploadFile = UploadFile(parentDirectoryId: file.parentId,
-                                                    userId: accountManager.currentUserId,
-                                                    driveId: driveId,
-                                                    url: fileURL,
-                                                    name: file.name,
-                                                    conflictOption: .version,
-                                                    shouldRemoveAfterUpload: false)
-                        group.enter()
-                        shouldCleanFolder = true
-                        @InjectService var uploadQueue: UploadQueue
-                        var observationToken: ObservationToken?
-                        observationToken = uploadQueue.observeFileUploaded(self,
-                                                                           fileId: uploadFile
-                                                                               .id) { [fileId = file.id] uploadFile, _ in
-                            observationToken?.cancel()
-                            if let error = uploadFile.error {
-                                shouldCleanFolder = false
-                                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
-                            } else {
-                                // Update file to get the new modification date
-                                Task {
-                                    let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
-                                    try? FileManager.default.setAttributes([.modificationDate: file.lastModifiedAt],
-                                                                           ofItemAtPath: file.localUrl.path)
-                                    driveFileManager.notifyObserversWith(file: file)
-                                }
-                            }
-                            group.leave()
-                        }
-                        uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: nil)
-                    }
-                }
-            }
-        }
-
-        // Clean folder after completing all uploads
-        group.notify(queue: DispatchQueue.global(qos: .utility)) {
-            if shouldCleanFolder {
-                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
-                try? FileManager.default.removeItem(at: folderURL)
             }
         }
     }

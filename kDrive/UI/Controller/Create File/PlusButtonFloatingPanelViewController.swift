@@ -17,6 +17,7 @@
  */
 
 import AVFoundation
+import CocoaLumberjackSwift
 import FloatingPanel
 import InfomaniakCore
 import kDriveCore
@@ -202,101 +203,29 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             return
         }
         dismiss(animated: true)
-        guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else { return }
+
+        guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else {
+            return
+        }
+
         let action = content[indexPath.section][indexPath.row]
         // Folder creation is already tracked through its creation page
         if action != .folderAction {
             let suffix = presentedFromPlusButton ? "FromFAB" : "FromFolder"
             MatomoUtils.track(eventWithCategory: .newElement, name: "\(action.matomoName)\(suffix)")
         }
+
         switch action {
         case .importAction:
-            let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
-            documentPicker.importDrive = driveFileManager.drive
-            documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
-            documentPicker.delegate = mainTabViewController
-            mainTabViewController.present(documentPicker, animated: true)
+            importAction(mainTabViewController)
         case .folderAction:
-            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
-                parentDirectory: currentDirectory,
-                driveFileManager: driveFileManager
-            )
-            mainTabViewController.present(newFolderViewController, animated: true)
+            folderAction(mainTabViewController)
         case .scanAction:
-            if VNDocumentCameraViewController.isSupported {
-                let scanDoc = VNDocumentCameraViewController()
-                let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
-                navigationViewController.modalPresentationStyle = .fullScreen
-                navigationViewController.currentDriveFileManager = driveFileManager
-                if presentedAboveFileList {
-                    navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
-                }
-                scanDoc.delegate = navigationViewController
-                mainTabViewController.present(navigationViewController, animated: true)
-            } else {
-                print("VNDocumentCameraViewController is not supported on this device")
-            }
+            scanAction(mainTabViewController)
         case .takePictureAction, .importMediaAction:
-            mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-            mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
-
-            if #available(iOS 14, *), action == .importMediaAction {
-                // Check permission
-                PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
-                    if authorizationStatus == .authorized {
-                        var configuration = PHPickerConfiguration(photoLibrary: .shared())
-                        configuration.selectionLimit = 0
-
-                        Task { @MainActor in
-                            let picker = PHPickerViewController(configuration: configuration)
-                            picker.delegate = mainTabViewController.photoPickerDelegate
-                            mainTabViewController.present(picker, animated: true)
-                        }
-                    } else {
-                        Task { @MainActor in
-                            let alert = AlertTextViewController(
-                                title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
-                                message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
-                                action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                            ) {
-                                Constants.openSettings()
-                            }
-                            mainTabViewController.present(alert, animated: true)
-                        }
-                    }
-                }
-            } else {
-                // Present camera or old photo picker
-                let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
-
-                guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
-                    let alert = AlertTextViewController(
-                        title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle,
-                        message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription,
-                        action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                    ) {
-                        Constants.openSettings()
-                    }
-                    mainTabViewController.present(alert, animated: true)
-                    return
-                }
-
-                if UIImagePickerController.isSourceTypeAvailable(sourceType) {
-                    let picker = UIImagePickerController()
-                    picker.sourceType = sourceType
-                    picker.delegate = mainTabViewController.photoPickerDelegate
-                    picker.mediaTypes = UIImagePickerController
-                        .availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
-                    mainTabViewController.present(picker, animated: true)
-                } else {
-                    print("Source type \(sourceType) is not available on this device")
-                }
-            }
+            mediaAction(mainTabViewController, action: action)
         case .docsAction, .gridsAction, .pointsAction, .formAction, .noteAction:
-            let alertViewController = AlertDocViewController(fileType: action.docType,
-                                                             directory: currentDirectory.freezeIfNeeded(),
-                                                             driveFileManager: driveFileManager)
-            mainTabViewController.present(alertViewController, animated: true)
+            documentAction(mainTabViewController, action: action)
         default:
             break
         }
@@ -310,5 +239,106 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
         // Remove the panel when it's pushed one third down
         return location.y > fpc.backdropView.frame.height * 1 / 3
+    }
+
+    // MARK: Actions
+
+    private func importAction(_ mainTabViewController: MainTabViewController) {
+        let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
+        documentPicker.importDrive = driveFileManager.drive
+        documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
+        documentPicker.delegate = mainTabViewController
+        mainTabViewController.present(documentPicker, animated: true)
+    }
+
+    private func folderAction(_ mainTabViewController: MainTabViewController) {
+        let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
+            parentDirectory: currentDirectory,
+            driveFileManager: driveFileManager
+        )
+        mainTabViewController.present(newFolderViewController, animated: true)
+    }
+
+    private func scanAction(_ mainTabViewController: MainTabViewController) {
+        guard VNDocumentCameraViewController.isSupported else {
+            DDLogError("VNDocumentCameraViewController is not supported on this device")
+            return
+        }
+
+        let scanDoc = VNDocumentCameraViewController()
+        let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
+        navigationViewController.modalPresentationStyle = .fullScreen
+        navigationViewController.currentDriveFileManager = driveFileManager
+        if presentedAboveFileList {
+            navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
+        }
+        scanDoc.delegate = navigationViewController
+        mainTabViewController.present(navigationViewController, animated: true)
+    }
+
+    private func mediaAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
+        mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
+        mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
+
+        if #available(iOS 14, *), action == .importMediaAction {
+            // Check permission
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
+                if authorizationStatus == .authorized {
+                    var configuration = PHPickerConfiguration(photoLibrary: .shared())
+                    configuration.selectionLimit = 0
+
+                    Task { @MainActor in
+                        let picker = PHPickerViewController(configuration: configuration)
+                        picker.delegate = mainTabViewController.photoPickerDelegate
+                        mainTabViewController.present(picker, animated: true)
+                    }
+                } else {
+                    Task { @MainActor in
+                        let alert = AlertTextViewController(
+                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
+                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
+                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                        ) {
+                            Constants.openSettings()
+                        }
+                        mainTabViewController.present(alert, animated: true)
+                    }
+                }
+            }
+        } else {
+            // Present camera or old photo picker
+            let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
+
+            guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
+                let alert = AlertTextViewController(
+                    title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle,
+                    message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription,
+                    action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                ) {
+                    Constants.openSettings()
+                }
+                mainTabViewController.present(alert, animated: true)
+                return
+            }
+
+            guard UIImagePickerController.isSourceTypeAvailable(sourceType) else {
+                DDLogError("Source type \(sourceType) is not available on this device")
+                return
+            }
+
+            let picker = UIImagePickerController()
+            picker.sourceType = sourceType
+            picker.delegate = mainTabViewController.photoPickerDelegate
+            picker.mediaTypes = UIImagePickerController
+                .availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
+            mainTabViewController.present(picker, animated: true)
+        }
+    }
+
+    private func documentAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
+        let alertViewController = AlertDocViewController(fileType: action.docType,
+                                                         directory: currentDirectory.freezeIfNeeded(),
+                                                         driveFileManager: driveFileManager)
+        mainTabViewController.present(alertViewController, animated: true)
     }
 }

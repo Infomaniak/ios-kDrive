@@ -27,7 +27,7 @@ protocol ManageCategoriesDelegate: AnyObject {
     func didDeselect(category: kDriveCore.Category)
 }
 
-class ManageCategoriesViewController: UITableViewController {
+final class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
@@ -125,34 +125,49 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     func reloadCategories() {
-        guard driveFileManager != nil else { return }
+        guard driveFileManager != nil else {
+            return
+        }
+
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
+
         // Select categories
         if let files {
-            var commonCategories = Set<kDriveCore.Category>(categories)
-            for file in files {
-                var fileCategories = Set<kDriveCore.Category>()
-                for category in file.categories {
-                    if let category = categories.first(where: { $0.id == category.categoryId }) {
-                        fileCategories.insert(category)
-                    }
-                }
-                commonCategories.formIntersection(fileCategories)
-            }
-            for category in commonCategories {
-                category.isSelected = true
-            }
+            selectCategories(files: files)
         } else {
-            for category in selectedCategories {
-                if let category = categories.first(where: { $0.id == category.id }) {
-                    category.isSelected = true
-                }
-            }
+            selectCategoriesNoFiles()
         }
+
         if searchController.isActive {
             updateSearchResults(for: searchController)
         } else {
             tableView.reloadData()
+        }
+    }
+
+    private func selectCategories(files: [File]) {
+        var commonCategories = Set<kDriveCore.Category>(categories)
+
+        for file in files {
+            var fileCategories = Set<kDriveCore.Category>()
+            for category in file.categories {
+                if let category = categories.first(where: { $0.id == category.categoryId }) {
+                    fileCategories.insert(category)
+                }
+            }
+            commonCategories.formIntersection(fileCategories)
+        }
+
+        for category in commonCategories {
+            category.isSelected = true
+        }
+    }
+
+    private func selectCategoriesNoFiles() {
+        for category in selectedCategories {
+            if let category = categories.first(where: { $0.id == category.id }) {
+                category.isSelected = true
+            }
         }
     }
 

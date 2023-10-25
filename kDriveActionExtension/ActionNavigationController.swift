@@ -35,7 +35,7 @@ final class ActionNavigationController: TitleSizeAdjustingNavigationController {
         Logging.initLogging()
 
         let saveFileViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
-        let itemProviders = self.fetchAttachments()
+        let itemProviders = fetchAttachments()
         guard !itemProviders.isEmpty else {
             // No items found
             dismiss(animated: true)

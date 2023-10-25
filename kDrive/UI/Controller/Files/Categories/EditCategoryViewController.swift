@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class EditCategoryViewController: UITableViewController {
+final class EditCategoryViewController: UITableViewController {
     @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!
@@ -142,37 +142,11 @@ class EditCategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch rows[indexPath.row] {
         case .editInfo:
-            let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .info, message: KDriveResourcesStrings.Localizable.editCategoryInfoDescription)
-            return cell
+            return editInfoCell(tableView, indexPath: indexPath)
         case .name:
-            let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
-            cell.textField.setHint(KDriveResourcesStrings.Localizable.categoryNameField)
-            cell.textField.text = category?.name ?? name
-            cell.textDidChange = { [weak self] text in
-                guard let self else { return }
-                if let text {
-                    if create {
-                        name = text
-                    } else {
-                        category?.name = text
-                    }
-                    // Update save button
-                    guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView
-                    else {
-                        return
-                    }
-                    footer.footerButton.isEnabled = saveButtonEnabled
-                }
-            }
-            cell.textField.becomeFirstResponder()
-            return cell
+            return nameCell(tableView, indexPath: indexPath)
         case .color:
-            let cell = tableView.dequeueReusableCell(type: ColorSelectionTableViewCell.self, for: indexPath)
-            cell.delegate = self
-            cell.selectColor(category?.colorHex ?? color)
-            cell.layoutIfNeeded()
-            return cell
+            return colorCell(tableView, indexPath: indexPath)
         }
     }
 
@@ -228,5 +202,47 @@ extension EditCategoryViewController: FooterButtonDelegate {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
+    }
+}
+
+// MARK: - Cell configuration
+
+extension EditCategoryViewController {
+    private func editInfoCell(_ tableView: UITableView, indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
+        cell.configure(with: .info, message: KDriveResourcesStrings.Localizable.editCategoryInfoDescription)
+        return cell
+    }
+
+    private func nameCell(_ tableView: UITableView, indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
+        cell.textField.setHint(KDriveResourcesStrings.Localizable.categoryNameField)
+        cell.textField.text = category?.name ?? name
+        cell.textDidChange = { [weak self] text in
+            guard let self else { return }
+            if let text {
+                if create {
+                    name = text
+                } else {
+                    category?.name = text
+                }
+                // Update save button
+                guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView
+                else {
+                    return
+                }
+                footer.footerButton.isEnabled = saveButtonEnabled
+            }
+        }
+        cell.textField.becomeFirstResponder()
+        return cell
+    }
+
+    private func colorCell(_ tableView: UITableView, indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: ColorSelectionTableViewCell.self, for: indexPath)
+        cell.delegate = self
+        cell.selectColor(category?.colorHex ?? color)
+        cell.layoutIfNeeded()
+        return cell
     }
 }

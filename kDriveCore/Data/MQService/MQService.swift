@@ -60,7 +60,9 @@ public class MQService {
         return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
     }
 
-    public init() {}
+    public init() {
+        // META: keep SonarCloud happy
+    }
 
     public func registerForNotifications(with token: IPSToken) {
         queue.async { [self] in
@@ -72,6 +74,7 @@ public class MQService {
                     DDLogError("[MQService] Error while connecting: \(error)")
                 }
             }
+            
             if let currentToken {
                 actionProgressObservers.removeAll()
                 do {
@@ -80,6 +83,7 @@ public class MQService {
                     DDLogError("[MQService] Error while unsubscribing: \(error)")
                 }
             }
+            
             currentToken = token
             do {
                 _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .atMostOnce)]).wait()
@@ -87,16 +91,18 @@ public class MQService {
                     switch result {
                     case .success(let message):
                         var buffer = message.payload
-                        if let data = buffer.readData(length: buffer.readableBytes) {
-                            if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
-                                for observer in self.actionProgressObservers.values {
-                                    observer(message)
-                                }
-                            } else if let notification = try? self.decoder.decode(ActionNotification.self, from: data) {
-                                self.handleNotification(notification)
-                            } else if let notification = try? self.decoder.decode(ExternalImportNotification.self, from: data) {
-                                self.handleExternalImportNotification(notification)
+                        guard let data = buffer.readData(length: buffer.readableBytes) else {
+                            return
+                        }
+                        
+                        if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
+                            for observer in self.actionProgressObservers.values {
+                                observer(message)
                             }
+                        } else if let notification = try? self.decoder.decode(ActionNotification.self, from: data) {
+                            self.handleNotification(notification)
+                        } else if let notification = try? self.decoder.decode(ExternalImportNotification.self, from: data) {
+                            self.handleExternalImportNotification(notification)
                         }
                     case .failure(let error):
                         DDLogError("[MQService] Error while listening: \(error)")
