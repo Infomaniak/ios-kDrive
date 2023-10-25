@@ -503,7 +503,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
     }
 
-    func didSwitchCurrentAccount(_ newAccount: Account) {}
+    func didSwitchCurrentAccount(_ newAccount: Account) {
+        // META: keep SonarCloud happy
+    }
 
     // MARK: - Top scrollable
 

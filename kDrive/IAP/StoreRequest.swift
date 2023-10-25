@@ -37,7 +37,9 @@ class StoreRequest {
 
     let jsonDecoder = JSONDecoder()
 
-    private init() {}
+    private init() {
+        // META: keep SonarCloud happy
+    }
 
     func sendReceipt(body: ReceiptInfo) {
         AF.request(Endpoint.inAppReceipt.url, method: .post, parameters: body, encoder: JSONParameterEncoder.convertToSnakeCase)

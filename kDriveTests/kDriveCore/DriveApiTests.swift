@@ -24,9 +24,13 @@ import kDriveCore
 import XCTest
 
 class FakeTokenDelegate: RefreshTokenDelegate {
-    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
+    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+        // META: keep SonarCloud happy
+    }
 
-    func didFailRefreshToken(_ token: ApiToken) {}
+    func didFailRefreshToken(_ token: ApiToken) {
+        // META: keep SonarCloud happy
+    }
 }
 
 final class DriveApiTests: XCTestCase {

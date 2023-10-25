@@ -70,7 +70,9 @@ public class Team: Object, Codable {
         }
     }
 
-    override public init() {}
+    override public init() {
+        // META: keep SonarCloud happy
+    }
 
     enum CodingKeys: String, CodingKey {
         case id

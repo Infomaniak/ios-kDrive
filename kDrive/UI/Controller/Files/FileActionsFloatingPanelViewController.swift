@@ -227,7 +227,7 @@ public class FloatingPanelAction: Equatable {
     }
 }
 
-class FileActionsFloatingPanelViewController: UICollectionViewController {
+final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -353,70 +353,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func setupContent() {
-        let offline = ReachabilityListener.instance.currentStatus == .offline
-
-        quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
-        quickActions.forEach { action in
-            switch action {
-            case .shareAndRights:
-                if !file.capabilities.canShare || offline {
-                    action.isEnabled = false
-                }
-            case .shareLink:
-                if (!file.capabilities.canBecomeSharelink || offline) && !file.hasSharelink && !file.isDropbox {
-                    action.isEnabled = false
-                }
-            case .add:
-                if !file.capabilities.canCreateFile || !file.capabilities.canCreateDirectory {
-                    action.isEnabled = false
-                }
-            default:
-                break
-            }
-        }
-
-        actions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action in
-            switch action {
-            case .openWith:
-                return file.capabilities.canWrite
-            case .edit:
-                return file.isOfficeFile && file.capabilities.canWrite
-            case .manageCategories:
-                return driveFileManager.drive.categoryRights.canPutOnFile && !file.isDisabled
-            case .favorite:
-                return file.capabilities.canUseFavorite
-            case .convertToDropbox:
-                return file.capabilities.canBecomeDropbox
-            case .manageDropbox:
-                return file.isDropbox
-            case .folderColor:
-                return file.canBeColored
-            case .seeFolder:
-                return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
-            case .offline:
-                return !sharedWithMe
-            case .download:
-                return file.capabilities.canRead
-            case .move:
-                return file.capabilities.canMove && !sharedWithMe
-            case .duplicate:
-                return !sharedWithMe && file.capabilities.canRead && file.visibility != .isSharedSpace && file
-                    .visibility != .isTeamSpace
-            case .rename:
-                return file.capabilities.canRename && !sharedWithMe && !file.isImporting
-            case .delete:
-                return file.capabilities.canDelete && !file.isImporting
-            case .leaveShare:
-                return file.capabilities.canLeave
-            case .cancelImport:
-                return file.isImporting
-            default:
-                return true
-            }
-        }
-    }
-
     private func reload(animated: Bool) {
         setupContent()
         if animated {
@@ -428,337 +364,21 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
-        switch action {
-        case .informations:
-            let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
-            fileDetailViewController.file = file
-            presentingParent?.navigationController?.pushViewController(fileDetailViewController, animated: true)
-            dismiss(animated: true)
-        case .add:
-            let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-            let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
-                                                                                       folder: file,
-                                                                                       presentedFromPlusButton: false)
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.delegate = fileInformationsViewController
-
-            floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-            floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
-            dismiss(animated: true) {
-                self.presentingParent?.present(floatingPanelViewController, animated: true)
-            }
-        case .sendCopy:
-            if file.isMostRecentDownloaded {
-                presentShareSheet(from: indexPath)
-            } else {
-                downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    self?.presentShareSheet(from: indexPath)
-                }
-            }
-        case .shareAndRights:
-            let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
-            presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
-            dismiss(animated: true)
-        case .shareLink:
-            if let link = file.dropbox?.url {
-                // Copy share link
-                copyShareLinkToPasteboard(from: indexPath, link: link)
-            } else if let link = file.sharelink?.url {
-                // Copy share link
-                copyShareLinkToPasteboard(from: indexPath, link: link)
-            } else {
-                // Create share link
-                setLoading(true, action: action, at: indexPath)
-                Task { [proxyFile = file.proxify()] in
-                    do {
-                        let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
-                        setLoading(false, action: action, at: indexPath)
-                        copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
-                    } catch {
-                        if let error = error as? DriveError, error == .shareLinkAlreadyExists {
-                            // This should never happen
-                            let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: proxyFile)
-                            setLoading(false, action: action, at: indexPath)
-                            if let shareLink {
-                                driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
-                                copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
-                            }
-                        } else {
-                            setLoading(false, action: action, at: indexPath)
-                            UIConstants.showSnackBarIfNeeded(error: error)
-                        }
-                    }
-                }
-            }
-        case .openWith:
-            let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
-            if file.isMostRecentDownloaded {
-                FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
-            } else {
-                downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    guard let self else { return }
-                    FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
-                }
-            }
-        case .edit:
-            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
-        case .manageCategories:
-            FileActionsHelper.manageCategories(
-                files: [file],
-                driveFileManager: driveFileManager,
-                from: self,
-                presentingParent: presentingViewController
-            )
-        case .favorite:
-            Task {
-                do {
-                    let isFavored = try await FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager)
-                    if isFavored {
-                        UIConstants
-                            .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(1))
-                    } else {
-                        UIConstants
-                            .showSnackBar(message: KDriveResourcesStrings.Localizable
-                                .fileListRemoveFavoritesConfirmationSnackbar(1))
-                    }
-                } catch {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddFavorite)
-                }
-            }
-        case .convertToDropbox:
-            if !file.capabilities.canBecomeDropbox {
-                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController
-                    .contentViewController as? DropBoxFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-                floatingPanelViewController?.actionHandler = { [weak self] _ in
-                    driveFloatingPanelController.dismiss(animated: true) {
-                        guard let self else { return }
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
-                }
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                let viewController = ManageDropBoxViewController.instantiate(
-                    driveFileManager: driveFileManager,
-                    convertingFolder: true,
-                    folder: file
-                )
-                presentingParent?.navigationController?.pushViewController(viewController, animated: true)
-                dismiss(animated: true)
-            }
-        case .manageDropbox:
-            let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
-            presentingParent?.navigationController?.pushViewController(viewController, animated: true)
-            dismiss(animated: true)
-        case .folderColor:
-            FileActionsHelper.folderColor(
-                files: [file],
-                driveFileManager: driveFileManager,
-                from: self,
-                presentingParent: presentingParent
-            ) { isSuccess in
-                if isSuccess {
-                    UIConstants
-                        .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
-                }
-            }
-        case .seeFolder:
-            guard let viewController = presentingParent else { return }
-            FilePresenter.presentParent(of: file, driveFileManager: driveFileManager, viewController: viewController)
-            dismiss(animated: true)
-        case .offline:
-            FileActionsHelper.offline(files: [file], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
-                if let error {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                }
-            }
-            collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
-        case .download:
-            if file.isMostRecentDownloaded {
-                FileActionsHelper.save(file: file, from: self)
-            } else if let operation = DownloadQueue.instance.operation(for: file) {
-                // Download is already scheduled, ask to cancel
-                let alert = AlertTextViewController(
-                    title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
-                    message: KDriveResourcesStrings.Localizable.cancelDownloadDescription,
-                    action: KDriveResourcesStrings.Localizable.buttonYes,
-                    destructive: true
-                ) {
-                    operation.cancel()
-                }
-                present(alert, animated: true)
-            } else {
-                downloadFile(action: action, indexPath: indexPath) { [weak self, file] in
-                    guard let file else { return }
-                    FileActionsHelper.save(file: file, from: self)
-                }
-            }
-        case .move:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
-                driveFileManager: driveFileManager,
-                startDirectory: file.parent?.freeze(),
-                fileToMove: file.id,
-                disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]
-            ) { [weak self] selectedFolder in
-                guard let self else { return }
-                FileActionsHelper.instance.move(file: file, to: selectedFolder, driveFileManager: driveFileManager) { success in
-                    // Close preview
-                    if success,
-                       self.presentingParent is PreviewViewController {
-                        self.presentingParent?.navigationController?.popViewController(animated: true)
-                    }
-                }
-            }
-            present(selectFolderNavigationController, animated: true)
-        case .duplicate:
-            guard file.isManagedByRealm else {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                return
-            }
-            let fileName = file.name
-            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate,
-                                                 placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile,
-                                                 text: fileName,
-                                                 action: KDriveResourcesStrings.Localizable.buttonCopy,
-                                                 loading: true) { [proxyFile = file.proxify()] duplicateName in
-                do {
-                    _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
-                    UIConstants
-                        .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                }
-            }
-            alert.textFieldConfiguration = .fileNameConfiguration
-            if !file.isDirectory {
-                alert.textFieldConfiguration.selectedRange = fileName
-                    .startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
-            }
-            present(alert, animated: true)
-        case .rename:
-            guard file.isManagedByRealm else {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                return
-            }
-            let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings
-                .Localizable.hintInputFileName
-            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename,
-                                                 placeholder: placeholder, text: file.name,
-                                                 action: KDriveResourcesStrings.Localizable.buttonSave,
-                                                 loading: true) { [proxyFile = file.proxify(), filename = file.name] newName in
-                guard newName != filename else { return }
-                do {
-                    _ = try await self.driveFileManager.rename(file: proxyFile, newName: newName)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                }
-            }
-            alert.textFieldConfiguration = .fileNameConfiguration
-            if !file.isDirectory {
-                alert.textFieldConfiguration.selectedRange = file.name
-                    .startIndex ..< (file.name.lastIndex(where: { $0 == "." }) ?? file.name.endIndex)
-            }
-            present(alert, animated: true)
-        case .delete:
-            guard file.isManagedByRealm else {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                return
-            }
-            let attrString = NSMutableAttributedString(
-                string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name),
-                boldText: file.name
-            )
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
-                                                message: attrString,
-                                                action: KDriveResourcesStrings.Localizable.buttonMove,
-                                                destructive: true,
-                                                loading: true) { [
-                proxyFile = file.proxify(),
-                filename = file.name,
-                proxyParent = file.parent?.proxify()
-            ] in
-                do {
-                    let response = try await self.driveFileManager.delete(file: proxyFile)
-                    if let presentingParent = self.presentingParent {
-                        // Update file list
-                        try await (presentingParent as? FileListViewController)?.viewModel.loadActivities()
-                        // Close preview
-                        if presentingParent is PreviewViewController {
-                            presentingParent.navigationController?.popViewController(animated: true)
-                        }
-                        // Dismiss panel
-                        self.dismiss(animated: true)
-                        presentingParent.dismiss(animated: true)
-                    }
-                    // Show snackbar
-                    UIConstants.showCancelableSnackBar(
-                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
-                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
-                        cancelableResponse: response,
-                        parentFile: proxyParent,
-                        driveFileManager: self.driveFileManager
-                    )
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                }
-            }
-            present(alert, animated: true)
-        case .leaveShare:
-            guard file.isManagedByRealm else {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                return
-            }
-            let attrString = NSMutableAttributedString(
-                string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name),
-                boldText: file.name
-            )
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle,
-                                                message: attrString,
-                                                action: KDriveResourcesStrings.Localizable.buttonLeaveShare,
-                                                loading: true) { [proxyFile = file.proxify()] in
-                do {
-                    _ = try await self.driveFileManager.delete(file: proxyFile)
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
-                    self.presentingParent?.navigationController?.popViewController(animated: true)
-                    self.dismiss(animated: true)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: error)
-                }
-            }
-            present(alert, animated: true)
-        case .cancelImport:
-            guard let importId = file.externalImport?.id else { return }
-            Task {
-                do {
-                    _ = try await driveFileManager.apiFetcher.cancelImport(drive: driveFileManager.drive, id: importId)
-                    // Dismiss panel
-                    self.dismiss(animated: true)
-                } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
-                }
-            }
-        default:
-            break
-        }
-    }
-
-    private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
+    func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         Task { @MainActor [weak self] in
             self?.collectionView.reloadItems(at: [indexPath])
         }
     }
 
-    private func presentShareSheet(from indexPath: IndexPath) {
+    func presentShareSheet(from indexPath: IndexPath) {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = collectionView
             .cellForItem(at: indexPath) ?? collectionView
         present(activityViewController, animated: true)
     }
 
-    private func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
+    func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
         guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
@@ -778,7 +398,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
     }
 
-    private func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
+    func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
         UIConstants.presentLinkPreviewForFile(
             file,
             link: link,

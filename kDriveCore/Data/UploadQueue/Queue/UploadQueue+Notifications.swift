@@ -67,7 +67,7 @@ extension UploadQueue: UploadNotifiable {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
                 notificationHelper.sendUploadError(filename: uploadedFileName,
                                                    parentId: uploadFile.parentDirectoryId,
-                                                   error: error, 
+                                                   error: error,
                                                    uploadFileId: uploadFile.id)
                 if operationQueue.operationCount == 0 {
                     fileUploadedCount = 0

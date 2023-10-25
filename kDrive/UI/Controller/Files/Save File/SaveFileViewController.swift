@@ -487,7 +487,7 @@ extension SaveFileViewController: FooterButtonDelegate {
         // Making sure the user cannot spam the button on tasks that may take a while
         let button = sender as? IKLargeButton
         button?.setLoading(true)
-        
+
         let items = items
         guard !items.isEmpty else {
             navigationController?.dismiss(animated: true)

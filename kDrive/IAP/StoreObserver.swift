@@ -96,7 +96,9 @@ class StoreObserver: NSObject {
 
     // MARK: - Private methods
 
-    override private init() {}
+    override private init() {
+        // META: keep SonarCloud happy
+    }
 
     private func handlePurchased(_ transaction: SKPaymentTransaction) {
         purchased.append(transaction)

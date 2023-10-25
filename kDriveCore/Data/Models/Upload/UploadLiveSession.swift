@@ -39,7 +39,7 @@ public struct UploadLiveSession: Decodable {
     }
 }
 
-enum UploadedLiveChunkState: String, Decodable{
+enum UploadedLiveChunkState: String, Decodable {
     case error
     case ok
     case uploading

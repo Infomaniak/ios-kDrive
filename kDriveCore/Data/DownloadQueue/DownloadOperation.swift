@@ -198,7 +198,9 @@ public class DownloadOperation: Operation, DownloadOperationable {
             }
             if let itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-                    manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in }
+                    manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
+                        // META: keep SonarCloud happy
+                    }
                 }
             }
             task?.resume()

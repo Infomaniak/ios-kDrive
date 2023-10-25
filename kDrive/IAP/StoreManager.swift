@@ -59,7 +59,9 @@ class StoreManager: NSObject {
 
     // MARK: - Private methods
 
-    override private init() {}
+    override private init() {
+        // META: keep SonarCloud happy
+    }
 
     /// Fetches information about your products from the App Store.
     private func fetchProducts(matchingIdentifiers identifiers: [String]) {
