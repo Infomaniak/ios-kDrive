@@ -24,29 +24,29 @@ import Photos
 import RealmSwift
 import UIKit
 
-class PhotoSyncSettingsViewController: UIViewController {
+final class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
-    private enum PhotoSyncSection {
+    enum PhotoSyncSection {
         case syncSwitch
         case syncLocation
         case syncSettings
         case syncDenied
     }
 
-    private enum PhotoSyncSwitchRows: CaseIterable {
+    enum PhotoSyncSwitchRows: CaseIterable {
         case syncSwitch
     }
 
-    private enum PhotoSyncLocationRows: CaseIterable {
+    enum PhotoSyncLocationRows: CaseIterable {
         case driveSelection
         case folderSelection
     }
 
-    private enum PhotoSyncSettingsRows: CaseIterable {
+    enum PhotoSyncSettingsRows: CaseIterable {
         case syncMode
         case importPicturesSwitch
         case importVideosSwitch
@@ -56,17 +56,17 @@ class PhotoSyncSettingsViewController: UIViewController {
         case photoFormat
     }
 
-    private enum PhotoSyncDeniedRows: CaseIterable {
+    enum PhotoSyncDeniedRows: CaseIterable {
         case deniedExplanation
     }
 
-    private var sections: [PhotoSyncSection] = [.syncSwitch]
-    private let switchSyncRows: [PhotoSyncSwitchRows] = PhotoSyncSwitchRows.allCases
-    private let locationRows: [PhotoSyncLocationRows] = PhotoSyncLocationRows.allCases
-    private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
-    private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
+    var sections: [PhotoSyncSection] = [.syncSwitch]
+    let switchSyncRows: [PhotoSyncSwitchRows] = PhotoSyncSwitchRows.allCases
+    let locationRows: [PhotoSyncLocationRows] = PhotoSyncLocationRows.allCases
+    let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
+    let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
-    private var newSyncSettings: PhotoSyncSettings = {
+    var newSyncSettings: PhotoSyncSettings = {
         @InjectService var photoUploader: PhotoLibraryUploader
         if photoUploader.settings != nil {
             return PhotoSyncSettings(value: photoUploader.settings as Any)
@@ -75,8 +75,8 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }()
 
-    private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
-    private var selectedDirectory: File? {
+    var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
+    var selectedDirectory: File? {
         didSet {
             newSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
             if oldValue == nil || selectedDirectory == nil {
@@ -87,7 +87,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    private var driveFileManager: DriveFileManager? {
+    var driveFileManager: DriveFileManager? {
         didSet {
             newSyncSettings.userId = driveFileManager?.drive.userId ?? -1
             newSyncSettings.driveId = driveFileManager?.drive.id ?? -1
@@ -247,7 +247,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    private func requestAuthorization() async -> PHAuthorizationStatus {
+    func requestAuthorization() async -> PHAuthorizationStatus {
         if #available(iOS 14, *) {
             return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
         } else {
@@ -262,174 +262,6 @@ class PhotoSyncSettingsViewController: UIViewController {
     class func instantiate() -> PhotoSyncSettingsViewController {
         return Storyboard.menu
             .instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
-    }
-}
-
-// MARK: - Table view data source
-
-extension PhotoSyncSettingsViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        switch sections[section] {
-        case .syncSwitch:
-            let saveDetailsHeaderText = KDriveResourcesStrings.Localizable.syncSettingsDescription
-            // We recycle the header view, it's easier to add \n than setting dynamic constraints
-            let headerView = HomeTitleView.instantiate(title: "\n" + saveDetailsHeaderText + "\n")
-            headerView.titleLabel.font = .systemFont(ofSize: 14)
-            headerView.titleLabel.numberOfLines = 0
-            return headerView
-        case .syncLocation:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.syncSettingsSaveOn)
-        case .syncSettings:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.settingsTitle)
-        case .syncDenied:
-            return nil
-        }
-    }
-
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
-    }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch sections[section] {
-        case .syncSwitch:
-            return switchSyncRows.count
-        case .syncLocation:
-            return locationRows.count
-        case .syncSettings:
-            return settingsRows.count
-        case .syncDenied:
-            return deniedRows.count
-        }
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch sections[indexPath.section] {
-        case .syncSwitch:
-            switch switchSyncRows[indexPath.row] {
-            case .syncSwitch:
-                let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
-                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync
-                cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    guard let self else { return }
-                    if sender.isOn {
-                        Task {
-                            let status = await self.requestAuthorization()
-                            Task { @MainActor in
-                                self.driveFileManager = self.accountManager.currentDriveFileManager
-                                if status == .authorized {
-                                    self.photoSyncEnabled = true
-                                } else {
-                                    sender.setOn(false, animated: true)
-                                    self.photoSyncEnabled = false
-                                }
-                                self.updateSections()
-                                self.updateSaveButtonState()
-                            }
-                        }
-                    } else {
-                        photoSyncEnabled = false
-                        updateSections()
-                        updateSaveButtonState()
-                    }
-                }
-                return cell
-            }
-        case .syncLocation:
-            switch locationRows[indexPath.row] {
-            case .driveSelection:
-                let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
-                cell.configure(with: driveFileManager?.drive)
-                return cell
-            case .folderSelection:
-                let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
-                cell.configure(with: selectedDirectory, drive: driveFileManager!.drive)
-
-                return cell
-            }
-        case .syncSettings:
-            switch settingsRows[indexPath.row] {
-            case .importPicturesSwitch:
-                let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncPicture
-                cell.valueSwitch.setOn(newSyncSettings.syncPicturesEnabled, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncPicturesEnabled = sender.isOn
-                    self?.updateSaveButtonState()
-                }
-                return cell
-            case .importVideosSwitch:
-                let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncVideo
-                cell.valueSwitch.setOn(newSyncSettings.syncVideosEnabled, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncVideosEnabled = sender.isOn
-                    self?.updateSaveButtonState()
-                }
-                return cell
-            case .importScreenshotsSwitch:
-                let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncScreenshot
-                cell.valueSwitch.setOn(newSyncSettings.syncScreenshotsEnabled, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncScreenshotsEnabled = sender.isOn
-                    self?.updateSaveButtonState()
-                }
-                return cell
-            case .createDatedSubFolders:
-                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle
-                cell.detailsLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription
-                cell.valueSwitch.setOn(newSyncSettings.createDatedSubFolders, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.createDatedSubFolders = sender.isOn
-                    self?.updateSaveButtonState()
-                }
-                return cell
-            case .deleteAssetsAfterImport:
-                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveResourcesStrings.Localizable.deletePicturesTitle
-                cell.detailsLabel.text = KDriveResourcesStrings.Localizable.deletePicturesDescription
-                cell.valueSwitch.setOn(newSyncSettings.deleteAssetsAfterImport, animated: true)
-                cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.deleteAssetsAfterImport = sender.isOn
-                    self?.updateSaveButtonState()
-                }
-                return cell
-            case .syncMode:
-                let cell = tableView.dequeueReusableCell(type: PhotoSyncSettingsTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
-                cell.valueLabel.text = newSyncSettings.syncMode.title.lowercased()
-                cell.delegate = self
-                if newSyncSettings.syncMode == .fromDate {
-                    cell.datePicker.isHidden = false
-                    cell.datePicker.date = newSyncSettings.fromDate
-                } else {
-                    cell.datePicker.isHidden = true
-                }
-                return cell
-            case .photoFormat:
-                let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.configure(with: newSyncSettings.photoFormat)
-                return cell
-            }
-        case .syncDenied:
-            switch deniedRows[indexPath.row] {
-            case .deniedExplanation:
-                return tableView.dequeueReusableCell(type: PhotoAccessDeniedTableViewCell.self, for: indexPath)
-            }
-        }
     }
 }
 
