@@ -215,18 +215,27 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self, !self.currentDirectory.isInvalidated else { return }
+                guard let self, !self.currentDirectory.isInvalidated else {
+                    return
+                }
+
+                guard let onFileListUpdated else {
+                    // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
+                    realmObservationToken?.invalidate()
+                    return
+                }
+
                 switch change {
                 case .initial(let results):
                     // update observed realm objects directly
                     _files = AnyRealmCollection(results)
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
-                    onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
+                    onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     // update observed realm objects directly
                     _files = AnyRealmCollection(results)
                     SentryDebug.filesObservationBreadcrumb(state: "update")
-                    onFileListUpdated?(
+                    onFileListUpdated(
                         deletions,
                         insertions,
                         modifications,
@@ -372,7 +381,11 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        return files[safe: indexPath.item]
+        guard let file = files[safe: indexPath.item], !file.isInvalidated else {
+            return nil
+        }
+
+        return file.freezeIfNeeded()
     }
 
     func getAllFiles() -> [File] {

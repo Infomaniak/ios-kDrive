@@ -67,37 +67,44 @@ final class UploadQueueViewController: UIViewController {
     }
 
     func setUpObserver() {
-        guard currentDirectory != nil else { return }
+        guard let currentDirectory, !currentDirectory.isInvalidated else {
+            return
+        }
 
+        notificationToken?.invalidate()
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,
                                                           driveId: currentDirectory.driveId,
                                                           using: realm)
             .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
                 switch change {
                 case .initial(let results):
-                    self?.uploadingFiles = AnyRealmCollection(results)
-                    self?.tableView.reloadData()
+                    self.uploadingFiles = AnyRealmCollection(results)
+                    self.tableView.reloadData()
                     if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    self?.uploadingFiles = AnyRealmCollection(results)
+                    self.uploadingFiles = AnyRealmCollection(results)
 
                     guard !results.isEmpty else {
-                        self?.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewController(animated: true)
                         return
                     }
 
-                    self?.tableView.performBatchUpdates {
+                    self.tableView.performBatchUpdates {
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
-                        self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     }
                     // Update cell corners
-                    self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
+                    self.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
                 }
