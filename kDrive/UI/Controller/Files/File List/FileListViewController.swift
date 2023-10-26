@@ -47,7 +47,7 @@ extension SortType: Selectable {
     }
 }
 
-class FileListBarButton: UIBarButtonItem {
+final class FileListBarButton: UIBarButtonItem {
     private(set) var type: FileListBarButtonType = .cancel
 
     convenience init(type: FileListBarButtonType, target: Any?, action: Selector?) {

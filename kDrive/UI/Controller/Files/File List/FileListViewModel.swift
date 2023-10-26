@@ -104,7 +104,24 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    var files = AnyRealmCollection(List<File>())
+    /// Internal realm collection of Files observed
+    var _files = AnyRealmCollection(List<File>())
+
+    /// Public facing collection of observed files
+    ///
+    /// A set will restart internal observation for consistency
+    var files: AnyRealmCollection<File> {
+        get {
+            _files
+        }
+        set {
+            // On change of observed files, we force to restart the realm observation to prevent a loss of sync
+            realmObservationToken?.invalidate()
+            realmObservationToken = nil
+            _files = newValue
+            updateRealmObservation()
+        }
+    }
 
     var isLoading: Bool
 
@@ -201,11 +218,13 @@ class FileListViewModel: SelectDelegate {
                 guard let self, !self.currentDirectory.isInvalidated else { return }
                 switch change {
                 case .initial(let results):
-                    files = AnyRealmCollection(results)
+                    // update observed realm objects directly
+                    _files = AnyRealmCollection(results)
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    files = AnyRealmCollection(results)
+                    // update observed realm objects directly
+                    _files = AnyRealmCollection(results)
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated?(
                         deletions,
@@ -275,7 +294,6 @@ class FileListViewModel: SelectDelegate {
     /// Called when sortType is updated
     func sortingChanged() {
         files = AnyRealmCollection(files.filesSorted(by: sortType))
-        updateRealmObservation()
     }
 
     func showLoadingIndicatorIfNeeded() {
@@ -354,7 +372,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < files.count ? files[indexPath.item] : nil
+        return files[safe: indexPath.item]
     }
 
     func getAllFiles() -> [File] {

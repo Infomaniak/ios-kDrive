@@ -101,13 +101,13 @@ class PhotoListViewModel: FileListViewModel {
             switch change {
             case .initial(let results):
                 let results = AnyRealmCollection(results)
-                files = results
+                _files = results
                 let changeset = insertAndSort(pictures: results.freeze())
                 onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
                 }
             case .update(let results, deletions: _, insertions: _, modifications: _):
-                files = AnyRealmCollection(results)
+                _files = AnyRealmCollection(results)
                 let changeset = insertAndSort(pictures: results.freeze())
                 onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
