@@ -159,6 +159,16 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 self?.updateSaveButtonState()
             }
             return cell
+        case .importLocalAlbums:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
+            cell.valueLabel.text = "Upload local Albums"
+            cell.valueSwitch.setOn(newSyncSettings.syncLocalAlbumsEnabled, animated: true)
+            cell.switchHandler = { [weak self] sender in
+                self?.newSyncSettings.syncLocalAlbumsEnabled = sender.isOn
+                self?.updateSaveButtonState()
+            }
+            return cell
         case .createDatedSubFolders:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)

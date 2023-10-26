@@ -37,7 +37,7 @@ public enum PhotoSyncMode: Int, PersistableEnum {
     }
 }
 
-public class PhotoSyncSettings: Object {
+final public class PhotoSyncSettings: Object {
     @Persisted public var userId: Int = -1
     @Persisted public var driveId: Int = -1
     @Persisted public var parentDirectoryId: Int = -1
@@ -47,6 +47,7 @@ public class PhotoSyncSettings: Object {
     @Persisted public var syncPicturesEnabled = true
     @Persisted public var syncVideosEnabled = true
     @Persisted public var syncScreenshotsEnabled = true
+    @Persisted public var syncLocalAlbumsEnabled = false
     @Persisted public var createDatedSubFolders = false
     @Persisted public var deleteAssetsAfterImport = false
     @Persisted public var photoFormat: PhotoFileFormat = .jpg
@@ -60,6 +61,7 @@ public class PhotoSyncSettings: Object {
                 syncPictures: Bool,
                 syncVideos: Bool,
                 syncScreenshots: Bool,
+                syncLocalAlbums: Bool,
                 createDatedSubFolders: Bool,
                 deleteAssetsAfterImport: Bool,
                 photoFormat: PhotoFileFormat) {
@@ -72,6 +74,7 @@ public class PhotoSyncSettings: Object {
         syncPicturesEnabled = syncPictures
         syncVideosEnabled = syncVideos
         syncScreenshotsEnabled = syncScreenshots
+        syncLocalAlbumsEnabled = syncLocalAlbums
         self.createDatedSubFolders = createDatedSubFolders
         self.deleteAssetsAfterImport = deleteAssetsAfterImport
         self.photoFormat = photoFormat
@@ -92,6 +95,7 @@ public class PhotoSyncSettings: Object {
             syncPicturesEnabled == settings.syncPicturesEnabled &&
             syncVideosEnabled == settings.syncVideosEnabled &&
             syncScreenshotsEnabled == settings.syncScreenshotsEnabled &&
+            syncLocalAlbumsEnabled == settings.syncLocalAlbumsEnabled &&
             createDatedSubFolders == settings.createDatedSubFolders &&
             deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
             syncMode == settings.syncMode &&

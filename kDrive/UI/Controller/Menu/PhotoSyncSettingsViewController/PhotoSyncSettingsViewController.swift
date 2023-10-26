@@ -51,6 +51,7 @@ final class PhotoSyncSettingsViewController: UIViewController {
         case importPicturesSwitch
         case importVideosSwitch
         case importScreenshotsSwitch
+        case importLocalAlbums
         case createDatedSubFolders
         case deleteAssetsAfterImport
         case photoFormat
