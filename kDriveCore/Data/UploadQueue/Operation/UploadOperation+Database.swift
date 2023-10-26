@@ -23,6 +23,8 @@ extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
     ///
     /// Lock access to file if upload operation `isFinished`, by throwing a `ErrorDomain.operationFinished`
+    ///
+    ///  This method can be called recursively, as database commits are performed with a `safeWrite` 
     /// - Parameters:
     ///   - function: The name of the function performing the transaction
     ///   - task: A closure to mutate the current `UploadFile`
@@ -41,7 +43,7 @@ extension UploadOperation {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
 
-            try uploadsRealm.write {
+            try uploadsRealm.safeWrite {
                 guard !file.isInvalidated else {
                     throw ErrorDomain.databaseUploadFileNotFound
                 }
