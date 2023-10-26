@@ -67,11 +67,9 @@ extension UploadOperation {
                     errorHandled = true
                     // _not_ overriding file.error
                     return
-                case NSURLErrorNetworkConnectionLost:
-                    // Connection lost on any call other than chunks sets a network error.
-                    file.error = .networkError.wrapping(error)
-                    errorHandled = true
                 default:
+                    // Any other networking error, including NSURLErrorNetworkConnectionLost,
+                    // on any call other than chunks gets a user facing network error.
                     file.error = .networkError.wrapping(error)
                     errorHandled = true
                 }
