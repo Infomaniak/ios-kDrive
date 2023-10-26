@@ -51,6 +51,66 @@ extension UploadOperation {
         }
     }
 
+    /// The standard way to interact with a `UploadingChunkTask` within an UploadOperation
+    ///
+    /// Lock access to UploadingChunkTask if upload operation `isFinished`, by throwing a `ErrorDomain.operationFinished`
+    /// - Parameters:
+    ///   - taskIdentifier: The task identifier used to upload a chunk
+    ///   - matched: A closure to mutate the current `UploadingChunkTask`
+    ///   - notFound: A closure called when the chunk was not found
+    func transactionWithChunk(taskIdentifier: String,
+                              matched: @escaping (_ chunkTask: inout UploadingChunkTask) throws -> Void,
+                              notFound: @escaping () throws -> Void) throws {
+        try transactionWithFile { file in
+            // update current UploadFile with chunk
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            // Match chunk task with Session identifier
+            let taskIdentifierPredicate = NSPredicate(format: "taskIdentifier = %@", taskIdentifier)
+
+            // Silence warning as I'm using a Realm request.
+            // swiftlint:disable:next first_where
+            guard var chunkTask = uploadingSessionTask.chunkTasks.filter(taskIdentifierPredicate).first else {
+                try notFound()
+                return
+            }
+
+            try matched(&chunkTask)
+        }
+    }
+
+    /// The standard way to interact with a `UploadingChunkTask` within an UploadOperation
+    ///
+    /// Lock access to UploadingChunkTask if upload operation `isFinished`, by throwing a `ErrorDomain.operationFinished`
+    /// - Parameters:
+    ///   - number: The uniq ID of a UploadingChunkTask
+    ///   - matched: A closure to mutate the current `UploadingChunkTask`
+    ///   - notFound: A closure called when the chunk was not found
+    func transactionWithChunk(number chunkNumber: Int64,
+                              matched: @escaping (_ chunkTask: inout UploadingChunkTask) throws -> Void,
+                              notFound: @escaping () throws -> Void) throws {
+        try transactionWithFile { file in
+            // update current UploadFile with chunk
+            guard let uploadingSessionTask = file.uploadingSession else {
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            // Match chunk task with chunk number (id)
+            let chunkNumberPredicate = NSPredicate(format: "chunkNumber = %lld", chunkNumber)
+
+            // Silence warning as I'm using a Realm request.
+            // swiftlint:disable:next first_where
+            guard var chunkTask = uploadingSessionTask.chunkTasks.filter(chunkNumberPredicate).first else {
+                try notFound()
+                return
+            }
+
+            try matched(&chunkTask)
+        }
+    }
+
     /// Provides a read only and detached  `UploadFile`, regardless of the state of the operation.
     ///
     /// Throws if any DB access issues

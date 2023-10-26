@@ -337,7 +337,7 @@ public class FileVersion: EmbeddedObject, Codable {
     }
 }
 
-public class File: Object, Codable {
+public final class File: Object, Codable {
     private let fileManager = FileManager.default
 
     @LazyInjectService var accountManager: AccountManageable

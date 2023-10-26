@@ -37,6 +37,9 @@ extension UploadOperation: ExpiringActivityDelegate {
                     )
 
                 // Mark all chunks in base with a .taskRescheduled error
+                var iterator = self.uploadTasks.makeIterator()
+                try self.cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
+
                 while let (taskIdentifier, _) = rescheduleIterator.next() {
                     // Match chunk in base and set error to .taskRescheduled
                     let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(

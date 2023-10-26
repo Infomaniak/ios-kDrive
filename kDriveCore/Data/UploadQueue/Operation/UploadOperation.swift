@@ -147,10 +147,18 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: - Process steps
 
+    /// Start to track the app going to background to be notified when the system would like to terminate
     func beginExpiringActivity() {
         let activity = ExpiringActivity(id: uploadFileId, delegate: self)
         activity.start()
         expiringActivity = activity
+    }
+
+    /// Return the available chunking slots.
+    func availableWorkerSlots() -> Int {
+        let uploadTasksCount = uploadTasks.count
+        let free = max(Self.parallelism - uploadTasksCount, 0)
+        return free
     }
 
     func handleEmptyFileIfNeeded() async throws -> Bool {
@@ -198,7 +206,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     func getFileUrlIfReadable(file: UploadFile) throws -> URL {
         guard let fileUrl = file.pathURL,
               fileManager.isReadableFile(atPath: fileUrl.path) else {
-            Log.uploadOperation("File has not a valid readable URL:\(file.pathURL?.path) for \(uploadFileId)",
+            Log.uploadOperation("File has not a valid readable URL:\(String(describing: file.pathURL?.path)) for \(uploadFileId)",
                                 level: .error)
             throw DriveError.fileNotFound
         }
@@ -321,7 +329,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: Network callback
 
-    // also called on app restoration
+    // Chunk upload network callback
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         enqueueCatching {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
@@ -348,86 +356,83 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     private func uploadCompletionSuccess(data: Data, response: URLResponse?, error: Error?) async throws {
         Log.uploadOperation("completion successful \(uploadFileId)")
         guard let uploadedChunk = try? ApiFetcher.decoder.decode(ApiResponse<UploadedChunk>.self, from: data).data else {
-            Log.uploadOperation("parsing error:\(error) ufid:\(uploadFileId)", level: .error)
+            Log.uploadOperation("parsing error:\(String(describing: error)) ufid:\(uploadFileId)", level: .error)
             throw ErrorDomain.parseError
         }
         Log.uploadOperation("completion chunk:\(uploadedChunk.number)  ufid:\(uploadFileId)")
 
-        try transactionWithFile { file in
-            // update current UploadFile with chunk
-            guard let uploadingSessionTask = file.uploadingSession else {
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
+        try transactionWithChunk(number: uploadedChunk.number) { chunkTask in
+            chunkTask.chunk = uploadedChunk
 
-            // Store the chunk object into the correct chunkTask
-            if let chunkTask = uploadingSessionTask.chunkTasks.first(where: { $0.chunkNumber == uploadedChunk.number }) {
-                chunkTask.chunk = uploadedChunk
-
-                // tracking running tasks
-                if let identifier = chunkTask.taskIdentifier {
-                    self.uploadTasks.removeValue(forKey: identifier)
-                    chunkTask.taskIdentifier = nil
-                } else {
-                    Log.uploadOperation(
-                        "No identifier for chunkId:\(uploadedChunk.number) in SUCCESS ufid:\(self.uploadFileId)",
-                        level: .error
-                    )
-                    SentrySDK.capture(message: "Missing chunk identifier") { scope in
-                        scope.setContext(
-                            value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId],
-                            key: "Chunk Infos"
-                        )
-                    }
-
-                    // We may be running both the app and the extension
-                    assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
-                }
-
-                // Some cleanup if we have the chance
-                if let path = chunkTask.path {
-                    let url = URL(fileURLWithPath: path, isDirectory: false)
-                    let chunkNumber = chunkTask.chunkNumber
-                    DispatchQueue.global(qos: .background).async {
-                        Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-                        try? self.fileManager.removeItem(at: url)
-                    }
-                }
+            // tracking running tasks
+            if let identifier = chunkTask.taskIdentifier {
+                self.uploadTasks.removeValue(forKey: identifier)
+                chunkTask.taskIdentifier = nil
             } else {
-                Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
-                SentrySDK.capture(message: "Upload matching chunk failed") { scope in
-                    scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId], key: "Chunk Infos")
+                Log.uploadOperation(
+                    "No identifier for chunkId:\(uploadedChunk.number) in SUCCESS ufid:\(self.uploadFileId)",
+                    level: .error
+                )
+                SentrySDK.capture(message: "Missing chunk identifier") { scope in
+                    scope.setContext(
+                        value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId],
+                        key: "Chunk Infos"
+                    )
                 }
 
-                throw ErrorDomain.unableToMatchUploadChunk
+                // We may be running both the app and the extension
+                assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
             }
+
+            // Some cleanup if we have the chance
+            if let path = chunkTask.path {
+                let url = URL(fileURLWithPath: path, isDirectory: false)
+                let chunkNumber = chunkTask.chunkNumber
+                DispatchQueue.global(qos: .background).async {
+                    Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
+                    try? self.fileManager.removeItem(at: url)
+                }
+            }
+        } notFound: {
+            Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
+            SentrySDK.capture(message: "Upload matching chunk failed") { scope in
+                scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId], key: "Chunk Infos")
+            }
+
+            throw ErrorDomain.unableToMatchUploadChunk
         }
 
         // Update UI progress state
         updateUploadProgress()
 
-        // Decide if we should send the complete call or retry the upload
-        try await completeUploadSessionOrRetryIfPossible()
-
-        // Follow up with chunking again
-        if freeRequestSlots() > 0 {
-            try await generateChunksAndFanOutIfNeeded()
-        }
-    }
-
-    /// Return the available request slots.
-    func freeRequestSlots() -> Int {
-        let uploadTasksCount = uploadTasks.count
-        let free = max(Self.parallelism - uploadTasksCount, 0)
-        return free
+        // Decide if we should send the complete call, do next chunk, or retry the upload
+        enqueueTryFinishOrEnqueueNextChunk()
     }
 
     private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) throws {
         Log.uploadOperation("completion Client-side error:\(error) ufid:\(uploadFileId)", level: .error)
-        defer {
-            self.end()
+        let nsError = error as NSError
+        guard nsError.domain == NSURLErrorDomain else {
+            handleLocalErrors(error: error)
+            end()
+            return
         }
 
-        handleLocalErrors(error: error)
+        switch nsError.code {
+        case NSURLErrorCancelled, NSURLErrorNetworkConnectionLost:
+            /// Here a Chunk request canceled on .taskRescheduled _or_ the network connection was lost
+            /// Either way we catch silently the issue, the operation will seamlessly retry the chunk
+            var iterator = uploadTasks.makeIterator()
+            try cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
+
+            // Decide if we should send the complete call, do next chunk, or retry the upload
+            enqueueTryFinishOrEnqueueNextChunk()
+
+            return
+        default:
+            handleLocalErrors(error: error)
+            end()
+        }
     }
 
     private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
@@ -460,6 +465,21 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)
         handleRemoteErrors(error: driveError)
+    }
+
+    // MARK: Misc
+
+    /// Decide if we should send the complete call, do next chunk, or retry the upload
+    private func enqueueTryFinishOrEnqueueNextChunk() {
+        enqueueCatching {
+            // Decide if we should send the complete call or retry the upload
+            try await self.completeUploadSessionOrRetryIfPossible()
+
+            // Follow up with chunking again
+            if self.availableWorkerSlots() > 0 {
+                try await self.generateChunksAndFanOutIfNeeded()
+            }
+        }
     }
 
     /// Propagate the newly uploaded DriveFile into the specialized Realm
