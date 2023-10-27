@@ -105,20 +105,32 @@ class FileListViewModel: SelectDelegate {
     }
 
     /// Internal realm collection of Files observed
-    var _files = AnyRealmCollection(List<File>())
+    ///
+    /// They should be frozen by convention.
+    #if DEBUG
+    var _frozenFiles = AnyRealmCollection(List<File>()) {
+        willSet {
+            for item in newValue {
+                assert(item.isFrozen, "By convention this should be frozen: \(item)")
+            }
+        }
+    }
+    #else
+    var _frozenFiles = AnyRealmCollection(List<File>())
+    #endif
 
     /// Public facing collection of observed files
     ///
     /// A set will restart internal observation for consistency
     var files: AnyRealmCollection<File> {
         get {
-            _files
+            _frozenFiles
         }
         set {
             // On change of observed files, we force to restart the realm observation to prevent a loss of sync
             realmObservationToken?.invalidate()
             realmObservationToken = nil
-            _files = newValue
+            _frozenFiles = newValue.freezeIfNeeded()
             updateRealmObservation()
         }
     }
@@ -222,18 +234,19 @@ class FileListViewModel: SelectDelegate {
                 guard let onFileListUpdated else {
                     // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
                     realmObservationToken?.invalidate()
+                    SentryDebug.viewModelObservationError()
                     return
                 }
 
                 switch change {
                 case .initial(let results):
                     // update observed realm objects directly
-                    _files = AnyRealmCollection(results)
+                    _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     // update observed realm objects directly
-                    _files = AnyRealmCollection(results)
+                    _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated(
                         deletions,
