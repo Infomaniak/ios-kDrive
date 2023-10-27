@@ -97,19 +97,28 @@ class PhotoListViewModel: FileListViewModel {
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "hasThumbnail"], on: .main) { [weak self] change in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
+            guard let onReloadWithChangeset else {
+                // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
+                realmObservationToken?.invalidate()
+                SentryDebug.viewModelObservationError()
+                return
+            }
+
             switch change {
             case .initial(let results):
-                let results = AnyRealmCollection(results)
-                files = results
+                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                 let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset?(changeset) { newSections in
+                onReloadWithChangeset(changeset) { newSections in
                     self.sections = newSections
                 }
             case .update(let results, deletions: _, insertions: _, modifications: _):
-                files = AnyRealmCollection(results)
+                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                 let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset?(changeset) { newSections in
+                onReloadWithChangeset(changeset) { newSections in
                     self.sections = newSections
                 }
             case .error(let error):

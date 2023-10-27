@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class FileHomeCollectionViewCell: FileGridCollectionViewCell {
+final class FileHomeCollectionViewCell: FileGridCollectionViewCell {
     @IBOutlet weak var timeStackView: UIStackView!
     @IBOutlet weak var timeLabel: IKLabel!
 

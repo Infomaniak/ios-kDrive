@@ -20,7 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class FileGridViewModel: FileViewModel {
+final class FileGridViewModel: FileViewModel {
     var iconImageHidden: Bool { file.isDirectory }
 
     var hasThumbnail: Bool { !file.isDirectory && file.hasThumbnail }

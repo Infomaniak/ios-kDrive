@@ -748,6 +748,10 @@ public final class DriveFileManager {
             let homeRootFile = DriveFileManager.homeRootFile
             var activitiesSafe = [FileActivity]()
             for activity in activities {
+                guard !activity.isInvalidated else {
+                    continue
+                }
+
                 let safeActivity = FileActivity(value: activity)
                 if let file = activity.file {
                     let safeFile = file.detached()

@@ -26,12 +26,14 @@ public enum SentryDebug {
         static let uploadOperation = "UploadOperation"
         static let uploadQueue = "UploadQueue"
         static let apiError = "APIError"
+        static let viewModel = "ViewModel"
     }
 
     enum ErrorNames {
         static let uploadErrorHandling = "UploadErrorHandling"
         static let uploadSessionErrorHandling = "UploadSessionErrorHandling"
         static let uploadErrorUserNotification = "UploadErrorUserNotification"
+        static let viewModelNotConnectedToView = "ViewModelNotConnected"
     }
 
     // MARK: - UploadOperation
@@ -154,6 +156,21 @@ public enum SentryDebug {
         breadcrumb.message = message
         breadcrumb.data = metadata
         SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    // MARK: - View Model Observation
+
+    public static func viewModelObservationError(_ function: String = #function) {
+        let metadata = ["function": function]
+
+        let breadcrumb = Breadcrumb(level: .error, category: Category.viewModel)
+        breadcrumb.message = "The ViewModel is not linked to a view to dispatch changes"
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
+
+        SentrySDK.capture(message: ErrorNames.viewModelNotConnectedToView) { scope in
+            scope.setExtras(metadata)
+        }
     }
 
     // MARK: - Logger

@@ -48,7 +48,6 @@ class LastModificationsViewModel: FileListViewModel {
 
     override func sortingChanged() {
         files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
-        updateRealmObservation()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {

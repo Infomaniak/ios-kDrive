@@ -51,21 +51,38 @@ protocol FileCellDelegate: AnyObject {
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
 
-    var title: String { file.name }
+    var title: String {
+        guard !file.isInvalidated else { return "" }
+        return file.name
+    }
 
-    var icon: UIImage { file.icon }
+    var icon: UIImage {
+        guard !file.isInvalidated else { return UIImage() }
+        return file.icon
+    }
 
-    var iconTintColor: UIColor? { file.tintColor }
+    var iconTintColor: UIColor? {
+        guard !file.isInvalidated else { return nil }
+        return file.tintColor
+    }
 
-    var iconAccessibilityLabel: String { file.convertedType.title }
+    var iconAccessibilityLabel: String {
+        guard !file.isInvalidated else { return "" }
+        return file.convertedType.title
+    }
 
-    var isFavorite: Bool { file.isFavorite }
+    var isFavorite: Bool {
+        guard !file.isInvalidated else { return false }
+        return file.isFavorite
+    }
 
     var moreButtonHidden: Bool { selectionMode }
 
     var categories = [kDriveCore.Category]()
 
     private var formattedDate: String {
+        guard !file.isInvalidated else { return "" }
+        
         if let deletedAt = file.deletedAt {
             return Constants.formatFileDeletionRelativeDate(deletedAt)
         } else {
@@ -76,7 +93,7 @@ protocol FileCellDelegate: AnyObject {
     var subtitle: String {
         if isImporting {
             return KDriveResourcesStrings.Localizable.uploadInProgressTitle + "…"
-        } else if let fileSize = file.getFileSize() {
+        } else if !file.isInvalidated, let fileSize = file.getFileSize() {
             return fileSize + " • " + formattedDate
         } else {
             return formattedDate
@@ -84,10 +101,14 @@ protocol FileCellDelegate: AnyObject {
     }
 
     var isAvailableOffline: Bool {
-        file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path)
+        guard !file.isInvalidated else { return false }
+        return file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path)
     }
 
-    var isImporting: Bool { file.isImporting }
+    var isImporting: Bool {
+        guard !file.isInvalidated else { return false }
+        return file.isImporting
+    }
 
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
         self.file = file
@@ -96,6 +117,8 @@ protocol FileCellDelegate: AnyObject {
     }
 
     func setUpDownloadObserver(_ handler: @escaping (Bool, Bool, Double) -> Void) {
+        guard !file.isInvalidated else { return }
+        
         downloadProgressObserver?.cancel()
         downloadProgressObserver = DownloadQueue.instance
             .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in

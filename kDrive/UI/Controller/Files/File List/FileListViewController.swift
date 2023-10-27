@@ -47,7 +47,7 @@ extension SortType: Selectable {
     }
 }
 
-class FileListBarButton: UIBarButtonItem {
+final class FileListBarButton: UIBarButtonItem {
     private(set) var type: FileListBarButtonType = .cancel
 
     convenience init(type: FileListBarButtonType, target: Any?, action: Selector?) {
@@ -284,12 +284,18 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private func bindFileListViewModel() {
         viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, moved, isEmpty, shouldReload in
-            self?.showEmptyView(!isEmpty)
-            if shouldReload {
-                self?.collectionView.reloadData()
-            } else {
-                self?.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
+            guard let self else {
+                return
             }
+
+            self.showEmptyView(!isEmpty)
+
+            guard !shouldReload else {
+                self.collectionView.reloadData()
+                return
+            }
+
+            self.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
@@ -381,7 +387,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
-        guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else { return }
+        guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else {
+            return
+        }
 
         let reloadId = UUID().uuidString
 
