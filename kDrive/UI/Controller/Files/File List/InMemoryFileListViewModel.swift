@@ -43,7 +43,8 @@ class InMemoryFileListViewModel: FileListViewModel {
         try? realm.write {
             realm.add(currentDirectory)
         }
-        files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        let newFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        self.setFiles(newFiles)
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {

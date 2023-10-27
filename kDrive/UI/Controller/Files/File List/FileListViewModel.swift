@@ -18,11 +18,14 @@
 
 import CocoaLumberjackSwift
 import Combine
+import DifferenceKit
 import Foundation
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import RealmSwift
+
+extension File: Differentiable {}
 
 enum FileListBarButtonType {
     case selectAll
@@ -49,12 +52,13 @@ enum ControllerPresentationType {
 
 @MainActor
 class FileListViewModel: SelectDelegate {
-    /// deletions, insertions, modifications, moved, isEmpty, shouldReload
-    typealias FileListUpdatedCallback = ([Int], [Int], [Int], [(source: Int, target: Int)], Bool, Bool) -> Void
+    typealias FileListUpdatedCallback = ([File]) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
+
     /// presentation type, presented viewcontroller, animated
     typealias PresentViewControllerCallback = (ControllerPresentationType, UIViewController, Bool) -> Void
+
     /// files sent to the panel, panel type
     typealias PresentQuickActionPanelCallback = ([File], FileListQuickActionType) -> Void
 
@@ -104,7 +108,21 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    var files = AnyRealmCollection(List<File>())
+    /// Observed realm files
+    private var files = AnyRealmCollection(List<File>())
+
+    public func setFiles(_ newFiles: AnyRealmCollection<File>) {
+        print("~~ setFiles\(newFiles.count) \(self) \(self.title)")
+        onFileListUpdated?([])
+        files = newFiles
+    }
+
+    /// What the CollectionView displays
+    var displayedFiles = [File]() {
+        didSet {
+            print("~~ didSet displayedFiles:\(displayedFiles.count)")
+        }
+    }
 
     var isLoading: Bool
 
@@ -198,26 +216,54 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self, !self.currentDirectory.isInvalidated else { return }
-                switch change {
-                case .initial(let results):
-                    files = AnyRealmCollection(results)
-                    SentryDebug.filesObservationBreadcrumb(state: "initial")
-                    onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    files = AnyRealmCollection(results)
-                    SentryDebug.filesObservationBreadcrumb(state: "update")
-                    onFileListUpdated?(
-                        deletions,
-                        insertions,
-                        modifications,
-                        [],
-                        currentDirectory.fullyDownloaded && results.isEmpty,
-                        false
-                    )
-                case .error(let error):
-                    DDLogError("[Realm Observation] Error \(error)")
+                guard let self,
+                      !self.currentDirectory.isInvalidated,
+                      let onFileListUpdated = self.onFileListUpdated else {
+                    print("~~  no binding set \(String(describing: self?.onFileListUpdated))")
+                    return
                 }
+
+                let allFiles: [File] = Array(self.files.freezeIfNeeded())
+                onFileListUpdated(allFiles)
+
+                /*
+                                 switch change {
+                                 case .initial(let results):
+                                     let allFiles: [File] = Array(results)
+                                     onFileListUpdated(allFiles)
+
+                 //                    let changeset = StagedChangeset(source: allFiles, target: displayedFiles)
+                 //                    self.collectionView.reload(using: changeset) { displayedFiles in
+                 //                        self.displayedFiles = displayedFiles
+                 //                    }
+
+                                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                                     break
+                                 case .error(_):
+                                     break
+                                 }
+                                  */
+
+//                switch change {
+//                case .initial(let results):
+//                    files = AnyRealmCollection(results)
+//                    SentryDebug.filesObservationBreadcrumb(state: "initial")
+//                    onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
+//                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let
+//                modifications):
+//                    files = AnyRealmCollection(results)
+//                    SentryDebug.filesObservationBreadcrumb(state: "update")
+//                    onFileListUpdated?(
+//                        deletions,
+//                        insertions,
+//                        modifications,
+//                        [],
+//                        currentDirectory.fullyDownloaded && results.isEmpty,
+//                        false
+//                    )
+//                case .error(let error):
+//                    DDLogError("[Realm Observation] Error \(error)")
+//                }
             }
     }
 
@@ -299,7 +345,7 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && files.isEmpty, false)
+//        onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && files.isEmpty, false)
     }
 
     func loadActivities() async throws {
@@ -354,11 +400,13 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < files.count ? files[indexPath.item] : nil
+        displayedFiles[safe: indexPath.item]
+//        return indexPath.item < files.count ? files[indexPath.item] : nil
     }
 
     func getAllFiles() -> [File] {
-        return Array(files.freeze())
+        displayedFiles
+//        return Array(files.freeze())
     }
 
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {

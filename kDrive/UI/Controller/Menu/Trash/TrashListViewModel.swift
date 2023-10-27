@@ -50,7 +50,11 @@ class TrashListViewModel: InMemoryFileListViewModel {
     }
 
     override func sortingChanged() {
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        var list = List<File>()
+        list.append(objectsIn: displayedFiles)
+        let newFiles = AnyRealmCollection(list.sorted(by: [sortType.value.sortDescriptor]))
+        setFiles(newFiles)
+        
         updateRealmObservation()
     }
 
@@ -82,7 +86,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
         endRefreshing()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
+            currentRightBarButtons = displayedFiles.isEmpty ? nil : [.emptyTrash]
         }
         if moreComing {
             try await loadFiles(page: page + 1)

@@ -44,7 +44,8 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
                           .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
-                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1"))
+                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
+                          .package(url: "https://github.com/ra1028/DifferenceKit.git", .upToNextMajor(from: "1.3.0"))
                       ],
                       targets: [
                           Target(name: "kDrive",
@@ -146,7 +147,8 @@ let project = Project(name: "kDrive",
                                      .package(product: "CocoaLumberjackSwift"),
                                      .package(product: "MaterialOutlinedTextField"),
                                      .package(product: "SwiftRegex"),
-                                     .package(product: "Sentry")
+                                     .package(product: "Sentry"),
+                                     .package(product: "DifferenceKit"),
                                  ]),
                           Target(name: "kDriveFileProvider",
                                  platform: .iOS,

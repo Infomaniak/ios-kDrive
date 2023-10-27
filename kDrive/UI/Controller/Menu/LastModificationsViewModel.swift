@@ -34,8 +34,9 @@ class LastModificationsViewModel: FileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
-        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
+        let newFiles = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
             .filter(NSPredicate(format: "rawType != \"dir\"")))
+        setFiles(newFiles)
     }
 
     override func startObservation() {
@@ -47,7 +48,11 @@ class LastModificationsViewModel: FileListViewModel {
     }
 
     override func sortingChanged() {
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        var list = List<File>()
+        list.append(objectsIn: displayedFiles)
+        let newFiles = AnyRealmCollection(list.sorted(by: [sortType.value.sortDescriptor]))
+        setFiles(newFiles)
+        
         updateRealmObservation()
     }
 

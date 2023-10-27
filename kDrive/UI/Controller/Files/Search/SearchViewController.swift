@@ -126,7 +126,8 @@ class SearchFilesViewModel: FileListViewModel {
         filters = Filters()
         let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
-        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
+        let newFiles = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
+        self.setFiles(newFiles)
     }
 
     override func startObservation() {
@@ -179,12 +180,13 @@ class SearchFilesViewModel: FileListViewModel {
     }
 
     private func searchOffline() {
-        files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
-                                                                  date: filters.date?.dateInterval,
-                                                                  fileType: filters.fileType,
-                                                                  categories: Array(filters.categories),
-                                                                  belongToAllCategories: filters.belongToAllCategories,
-                                                                  sortType: sortType))
+        let newFiles = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
+                                                                         date: filters.date?.dateInterval,
+                                                                         fileType: filters.fileType,
+                                                                         categories: Array(filters.categories),
+                                                                         belongToAllCategories: filters.belongToAllCategories,
+                                                                         sortType: sortType))
+        self.setFiles(newFiles)
         startObservation()
     }
 

@@ -71,10 +71,11 @@ class PhotoListViewModel: FileListViewModel {
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
-        files = AnyRealmCollection(driveFileManager.getRealm()
+        let newFiles = AnyRealmCollection(driveFileManager.getRealm()
             .objects(File.self)
             .filter(NSPredicate(format: "extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue]))
             .sorted(by: [SortType.newer.value.sortDescriptor]))
+        self.setFiles(newFiles)
     }
 
     func loadNextPageIfNeeded() async throws {
@@ -95,27 +96,30 @@ class PhotoListViewModel: FileListViewModel {
     }
 
     override func updateRealmObservation() {
-        realmObservationToken?.invalidate()
-        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "hasThumbnail"], on: .main) { [weak self] change in
-            guard let self else { return }
-            switch change {
-            case .initial(let results):
-                let results = AnyRealmCollection(results)
-                files = results
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset?(changeset) { newSections in
-                    self.sections = newSections
-                }
-            case .update(let results, deletions: _, insertions: _, modifications: _):
-                files = AnyRealmCollection(results)
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset?(changeset) { newSections in
-                    self.sections = newSections
-                }
-            case .error(let error):
-                DDLogError("[Realm Observation] Error \(error)")
-            }
-        }
+        
+        // TODO: fixme
+        
+//        realmObservationToken?.invalidate()
+//        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "hasThumbnail"], on: .main) { [weak self] change in
+//            guard let self else { return }
+//            switch change {
+//            case .initial(let results):
+//                let results = AnyRealmCollection(results)
+//                files = results
+//                let changeset = insertAndSort(pictures: results.freeze())
+//                onReloadWithChangeset?(changeset) { newSections in
+//                    self.sections = newSections
+//                }
+//            case .update(let results, deletions: _, insertions: _, modifications: _):
+//                files = AnyRealmCollection(results)
+//                let changeset = insertAndSort(pictures: results.freeze())
+//                onReloadWithChangeset?(changeset) { newSections in
+//                    self.sections = newSections
+//                }
+//            case .error(let error):
+//                DDLogError("[Realm Observation] Error \(error)")
+//            }
+//        }
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {

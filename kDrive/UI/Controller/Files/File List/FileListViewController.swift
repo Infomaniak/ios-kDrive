@@ -94,7 +94,9 @@ class ConcreteFileListViewModel: FileListViewModel {
     override init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile(freeze: false)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        
+        let newFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        self.setFiles(newFiles)
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
@@ -283,13 +285,30 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func bindFileListViewModel() {
-        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, moved, isEmpty, shouldReload in
-            self?.showEmptyView(!isEmpty)
-            if shouldReload {
-                self?.collectionView.reloadData()
-            } else {
-                self?.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
+        viewModel.onFileListUpdated = { [weak self] allFiles in
+            guard let self else {
+                return
             }
+
+            print("~~ bindFileListViewModel do   :\(allFiles.count) \(self)")
+            self.viewModel.displayedFiles = allFiles
+            
+//            print("~~ bindFileListViewModel do   :\(allFiles.count) \(self)")
+//            let changeset = StagedChangeset(source: allFiles, target: viewModel.displayedFiles)
+//            self.collectionView.reload(using: changeset) { displayedFiles in
+//                print("~~ bindFileListViewModel done :\(displayedFiles.count) \(self)")
+//                self.viewModel.displayedFiles = displayedFiles
+//            }
+
+            // refresh with DiffKit
+
+//            self.showEmptyView(!isEmpty)
+
+//            if shouldReload {
+//                self.collectionView.reloadData()
+//            } else {
+//                self.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
+//            }
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
@@ -356,7 +375,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
 
         viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
-            for i in 0 ..< (self?.viewModel.files.count ?? 0) {
+            for i in 0 ..< (self?.viewModel.displayedFiles.count ?? 0) {
                 self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
             }
         }
@@ -507,7 +526,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
-        collectionView.reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.files.count)
+        collectionView.reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.displayedFiles.count)
     }
 
     private func updateEmptyView(_ emptyBackground: EmptyTableView) {
@@ -661,7 +680,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func setSelectedCells() {
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
         if multipleSelectionViewModel.isSelectAllModeEnabled {
-            for i in 0 ..< viewModel.files.count {
+            for i in 0 ..< viewModel.displayedFiles.count {
                 collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
             }
         } else {
@@ -671,7 +690,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                  Scrolling when the view is not visible causes the layout to break
                  */
                 let scrollPosition: UICollectionView.ScrollPosition = viewIfLoaded?.window != nil ? .centeredVertically : []
-                for i in 0 ..< viewModel.files.count
+                for i in 0 ..< viewModel.displayedFiles.count
                     where multipleSelectionViewModel.selectedItems
                     .contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
                     collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: scrollPosition)
@@ -683,7 +702,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Collection view data source
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.files.count
+        return viewModel.displayedFiles.count
     }
 
     func collectionView(
@@ -696,7 +715,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             withReuseIdentifier: headerViewIdentifier,
             for: indexPath
         ) as! FilesHeaderView
-        setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.files.isEmpty)
+        setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.displayedFiles.isEmpty)
 
         headerView = dequeuedHeaderView
         selectView = dequeuedHeaderView.selectView
@@ -714,7 +733,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
         let file = viewModel.getFile(at: indexPath)!
-        cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.files.count - 1)
+        cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.displayedFiles.count - 1)
         cell.configureWith(
             driveFileManager: viewModel.driveFileManager,
             file: file,
@@ -1044,7 +1063,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
             var destinationDirectory = viewModel.currentDirectory
 
             if let indexPath = coordinator.destinationIndexPath,
-               indexPath.item < viewModel.files.count,
+               indexPath.item < viewModel.displayedFiles.count,
                let file = viewModel.getFile(at: indexPath),
                file.isDirectory && file.capabilities.canUpload {
                 destinationDirectory = file
