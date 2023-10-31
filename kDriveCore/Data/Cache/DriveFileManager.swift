@@ -480,7 +480,7 @@ public final class DriveFileManager {
     }
 
     public func files(in directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ,
-                      forceRefresh: Bool = false) async throws -> (files: [File], cursor: String?) {
+                      forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
         let fetchFiles: () async throws -> ([File], ApiResponse<[File]>)
         if directory.isRoot {
             fetchFiles = {
@@ -506,7 +506,7 @@ public final class DriveFileManager {
                              fetchFiles: () async throws -> ([File], ApiResponse<[File]>?),
                              isInitialCursor: Bool,
                              sortType: SortType,
-                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], cursor: String?) {
+                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], nextCursor: String?) {
         // Get children from API
         let (children, response) = try await fetchFiles()
         let realm = getRealm()
@@ -526,7 +526,7 @@ public final class DriveFileManager {
             realm.add(children, update: .modified)
             // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
             // the first page will result in an undefined behavior.
-            if page == 1 {
+            if isInitialCursor {
                 managedParent.children.removeAll()
             }
             managedParent.children.insert(objectsIn: children)
@@ -534,7 +534,7 @@ public final class DriveFileManager {
 
         return (
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
-            response?.cursor
+            response?.hasMore == true ? response?.cursor : nil
         )
     }
 
@@ -543,7 +543,7 @@ public final class DriveFileManager {
                        cursor: String?,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
-                       forceRefresh: Bool) async throws -> (files: [File], String?) {
+                       forceRefresh: Bool) async throws -> (files: [File], nextCursor: String?) {
         if let cachedParent = getCachedFile(id: directory.id, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have
            // anyway
@@ -553,7 +553,7 @@ public final class DriveFileManager {
             return try await remoteFiles(
                 in: directory,
                 fetchFiles: fetchFiles,
-                page: 1,
+                isInitialCursor: cursor == nil,
                 sortType: sortType,
                 keepProperties: keepProperties
             )
