@@ -21,7 +21,7 @@ import Foundation
 import RealmSwift
 import Sentry
 
-public class BackgroundRealm {
+public final class BackgroundRealm {
     private struct WriteOperation: Equatable, Hashable {
         let parent: File?
         let file: File

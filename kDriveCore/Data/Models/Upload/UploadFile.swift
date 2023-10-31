@@ -276,6 +276,11 @@ public class UploadFile: Object, UploadFilable {
         dateFormatter.dateFormat = "yyyy/MM/"
         relativePath = dateFormatter.string(from: creationDate ?? Date())
     }
+    
+    /// Set a relative path to an arbitrary album name
+    func setAlbumRelativePath(name: String) {
+        relativePath = name
+    }
 }
 
 public extension UploadFile {

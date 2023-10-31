@@ -34,55 +34,43 @@ public extension PhotoLibraryUploader {
                 return
             }
 
-            let options = PHFetchOptions()
-            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            let initialUpload = settings.lastSync.timeIntervalSince1970 == 0
 
-            let typesPredicates = getAssetPredicates(forSettings: settings)
-            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
-            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-
-            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assets = PHAsset.fetchAssets(with: options)
+            // Loading main photo assets
+            let mainFetchResult = mainAssetsFetchResult(settings)
             let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-            updateLastSyncDate(syncDate, using: realm)
 
-            newAssetsCount = assets.count
-            Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            defer {
+                updateLastSyncDate(syncDate, using: realm)
+                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            }
+
+            addAssetsToUploadQueue(mainFetchResult, initial: initialUpload, using: realm)
+            newAssetsCount += mainFetchResult.count
+
+            // Check sync state for the local albums
+            guard settings.syncLocalAlbumsEnabled else {
+                return
+            }
+
+            // Load assets form user defined albums
+            let albumsFetchResult = userLibrariesFetchResult(settings)
+            albumsFetchResult.enumerateObjects { collection, index, object in
+                guard let collection = collection as? PHAssetCollection else {
+                    return
+                }
+
+                let albumName = collection.localizedTitle
+                let options = self.assetsQueryOptions(settings)
+                let fetchedAlbumAssets = PHAsset.fetchAssets(in: collection, options: options)
+                self.addAssetsToUploadQueue(fetchedAlbumAssets,
+                                            albumName: albumName,
+                                            initial: initialUpload,
+                                            using: realm)
+                newAssetsCount += fetchedAlbumAssets.count
+            }
         }
         return newAssetsCount
-    }
-
-    // MARK: - Private
-
-    /// Create predicate from settings
-    private func getAssetPredicates(forSettings settings: PhotoSyncSettings) -> [NSPredicate] {
-        var typesPredicates = [NSPredicate]()
-
-        if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
-        } else if settings.syncPicturesEnabled {
-            typesPredicates.append(NSPredicate(
-                format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)",
-                PHAssetMediaType.image.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue
-            ))
-        } else if settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(
-                format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)",
-                PHAssetMediaType.image.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue
-            ))
-        }
-
-        if settings.syncVideosEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
-        }
-
-        return typesPredicates
     }
 
     private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
@@ -100,15 +88,16 @@ public extension PhotoLibraryUploader {
         }
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
-                                             initial: Bool,
-                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+    private func addAssetsToUploadQueue(_ fetchResult: PHFetchResult<PHAsset>,
+                                        albumName: String? = nil,
+                                        initial: Bool,
+                                        using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
-            assets.enumerateObjects { [self] asset, idx, stop in
+            fetchResult.enumerateObjects { [self] asset, idx, stop in
                 guard let settings else {
                     Log.photoLibraryUploader("no settings")
                     realm.cancelWrite()
@@ -116,7 +105,6 @@ public extension PhotoLibraryUploader {
                     return
                 }
 
-                @InjectService var photoLibrarySaver: PhotoLibrarySavable
                 if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
                     let options = PHFetchOptions()
                     options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
@@ -156,12 +144,16 @@ public extension PhotoLibraryUploader {
                     conflictOption: .version,
                     priority: initial ? .low : .high
                 )
-                if settings.createDatedSubFolders {
+
+                if settings.syncLocalAlbumsEnabled, let albumName {
+                    uploadFile.setAlbumRelativePath(name: albumName)
+                } else if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()
                 }
+
                 realm.add(uploadFile, update: .modified)
 
-                if idx < assets.count - 1 && idx % 99 == 0 {
+                if idx < fetchResult.count - 1 && idx % 99 == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()

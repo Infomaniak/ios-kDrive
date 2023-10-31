@@ -26,6 +26,7 @@ import Sentry
 
 public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var photoLibrarySaver: PhotoLibrarySavable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
