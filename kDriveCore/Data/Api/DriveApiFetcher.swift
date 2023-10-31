@@ -136,7 +136,8 @@ public class DriveApiFetcher: ApiFetcher {
                       sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
         try await perform(request: authenticatedRequest(
             .files(of: directory)
-                .sorted(by: [.type, sortType]),
+                .sorted(by: [.type, sortType])
+                .cursored(cursor),
             method: .get
         ))
     }

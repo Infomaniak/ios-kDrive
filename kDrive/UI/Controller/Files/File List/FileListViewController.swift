@@ -108,14 +108,14 @@ class ConcreteFileListViewModel: FileListViewModel {
                 endRefreshing()
             }
 
-            let (_, response) = try await driveFileManager.files(
+            let (_, nextCursor) = try await driveFileManager.files(
                 in: currentDirectory.proxify(),
                 cursor: cursor,
                 sortType: sortType,
                 forceRefresh: forceRefresh
             )
             endRefreshing()
-            if let nextCursor = response.cursor {
+            if let nextCursor {
                 try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
             } else if !forceRefresh {
                 try await loadActivities()

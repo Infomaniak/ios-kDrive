@@ -75,6 +75,12 @@ public extension Endpoint {
 
         return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + sortQueryItems)
     }
+
+    func cursored(_ cursor: String?) -> Endpoint {
+        let perPage = URLQueryItem(name: "limit", value: "\(Endpoint.itemsPerPage)")
+        let cursorQueryItem = cursor != nil ? [URLQueryItem(name: "cursor", value: cursor), perPage] : [perPage]
+        return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + cursorQueryItem)
+    }
 }
 
 // MARK: - Proxies
