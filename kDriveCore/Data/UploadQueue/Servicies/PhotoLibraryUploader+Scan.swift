@@ -61,8 +61,9 @@ public extension PhotoLibraryUploader {
                 }
 
                 let albumName = collection.localizedTitle
-                let options = self.assetsQueryOptions(settings)
+                let options = self.albumsRollQueryOptions(settings)
                 let fetchedAlbumAssets = PHAsset.fetchAssets(in: collection, options: options)
+                Log.photoLibraryUploader("New assets (\(fetchedAlbumAssets.count) in album :\(albumName)")
                 self.addAssetsToUploadQueue(fetchedAlbumAssets,
                                             albumName: albumName,
                                             initial: initialUpload,

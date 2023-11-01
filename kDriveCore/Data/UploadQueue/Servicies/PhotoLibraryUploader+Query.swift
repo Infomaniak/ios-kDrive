@@ -21,7 +21,7 @@ import Photos
 
 extension PhotoLibraryUploader {
     func mainAssetsFetchResult(_ settings: PhotoSyncSettings) -> PHFetchResult<PHAsset> {
-        let options = assetsQueryOptions(settings)
+        let options = photoRollQueryOptions(settings)
         Log
             .photoLibraryUploader(
                 "Fetching new pictures/videos from photo roll with predicate: \(options.predicate?.predicateFormat ?? "")"
@@ -39,7 +39,7 @@ extension PhotoLibraryUploader {
     // MARK: - Private
 
     /// Builds fetch options matching the current user settings and limit to last sync date.
-    func assetsQueryOptions(_ settings: PhotoSyncSettings) -> PHFetchOptions {
+    func photoRollQueryOptions(_ settings: PhotoSyncSettings) -> PHFetchOptions {
         let options = PHFetchOptions()
 
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
@@ -48,6 +48,17 @@ extension PhotoLibraryUploader {
         let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
         let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
         options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+
+        return options
+    }
+    
+    /// Builds fetch options matching the current user settings only
+    func albumsRollQueryOptions(_ settings: PhotoSyncSettings) -> PHFetchOptions {
+        let options = PHFetchOptions()
+
+        let typesPredicates = getAssetPredicates(forSettings: settings)
+        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+        options.predicate = typePredicate
 
         return options
     }
