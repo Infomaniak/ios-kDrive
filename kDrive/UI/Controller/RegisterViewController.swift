@@ -121,7 +121,7 @@ extension RegisterViewController: WKNavigationDelegate {
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
         if let host = navigationAction.request.url?.host {
-            if host == "drive.infomaniak.com" {
+            if host == "kdrive.infomaniak.com" {
                 decisionHandler(.cancel)
                 if let delegate,
                    let navigationController {
