@@ -20,6 +20,15 @@ import Foundation
 import kDriveResources
 import UIKit
 
+/// Represents the algorithm used to generate a diff of the image library
+public enum PhotoLibraryImport: Int {
+    /// The OG algorithm, based on filename comparison
+    case legacyName = 0
+
+    /// The incremental update of the algorithm, since iOS15, based on a hash.
+    case hashBestResource = 1
+}
+
 public struct URLConstants {
     public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
     public static let shop = URLConstants(urlString: "https://shop.infomaniak.com/order/drive")

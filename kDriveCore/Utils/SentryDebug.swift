@@ -173,6 +173,21 @@ public enum SentryDebug {
         }
     }
 
+    // MARK: - Photo Library Uploader
+
+    public static func photoLibraryNameErrorNoModificationDate(_ function: String = #function) {
+        let metadata = ["function": function]
+
+        let breadcrumb = Breadcrumb(level: .error, category: Category.viewModel)
+        breadcrumb.message = "We are trying to generate a file name for a modified file, without a modification date"
+        breadcrumb.data = metadata
+        SentrySDK.addBreadcrumb(breadcrumb)
+
+        SentrySDK.capture(message: ErrorNames.viewModelNotConnectedToView) { scope in
+            scope.setExtras(metadata)
+        }
+    }
+
     // MARK: - Logger
 
     public static func loggerBreadcrumb(caller: String, category: String, metadata: [String: Any]? = nil, isError: Bool = false) {
