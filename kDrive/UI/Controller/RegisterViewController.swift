@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -120,21 +121,24 @@ extension RegisterViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        if let host = navigationAction.request.url?.host {
-            if host == "kdrive.infomaniak.com" {
-                decisionHandler(.cancel)
-                if let delegate,
-                   let navigationController {
-                    infomaniakLogin.webviewLoginFrom(viewController: navigationController,
-                                                     hideCreateAccountButton: true,
-                                                     delegate: delegate)
-                }
-            } else if host == "login.infomaniak.com" {
-                decisionHandler(.cancel)
-                dismiss(animated: true)
-            } else {
-                decisionHandler(.allow)
+        guard let host = navigationAction.request.url?.host,
+              let kDriveHost = URLConstants.kDriveWeb.url.host,
+              let loginHost = URL(string: InfomaniakCore.Constants.LOGIN_URL)?.host else {
+            decisionHandler(.allow)
+            return
+        }
+
+        if host == kDriveHost {
+            decisionHandler(.cancel)
+            if let delegate,
+               let navigationController {
+                infomaniakLogin.webviewLoginFrom(viewController: navigationController,
+                                                 hideCreateAccountButton: true,
+                                                 delegate: delegate)
             }
+        } else if host == loginHost {
+            decisionHandler(.cancel)
+            dismiss(animated: true)
         } else {
             decisionHandler(.allow)
         }
