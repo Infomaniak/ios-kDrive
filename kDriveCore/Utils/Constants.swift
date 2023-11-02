@@ -21,6 +21,7 @@ import kDriveResources
 import UIKit
 
 public struct URLConstants {
+    public static let kDriveWeb = URLConstants(urlString: "https://kdrive.infomaniak.com")
     public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
     public static let shop = URLConstants(urlString: "https://shop.infomaniak.com/order/drive")
     public static let appVersion = URLConstants(urlString: "https://itunes.apple.com/lookup?bundleId=com.infomaniak.drive")
