@@ -404,9 +404,9 @@ public class DriveApiFetcher: ApiFetcher {
         fileTypes: [ConvertedType] = [],
         categories: [Category],
         belongToAllCategories: Bool,
-        page: Int = 1,
+        cursor: String? = nil,
         sortType: SortType = .nameAZ
-    ) async throws -> [File] {
+    ) async throws -> (data: [File], response: ApiResponse<[File]>) {
         try await perform(request: authenticatedRequest(.search(
             drive: drive,
             query: query,
@@ -414,7 +414,9 @@ public class DriveApiFetcher: ApiFetcher {
             fileTypes: fileTypes,
             categories: categories,
             belongToAllCategories: belongToAllCategories
-        ).paginated(page: page).sorted(by: [sortType]))).data
+        )
+        .cursored(cursor)
+        .sorted(by: [sortType])))
     }
 
     public func add(category: Category, to file: ProxyFile) async throws -> CategoryResponse {
