@@ -142,21 +142,21 @@ class SearchFilesViewModel: FileListViewModel {
         sortingChanged()
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         guard isDisplayingSearchResults else { return }
 
-        var moreComing = false
+        var nextCursor: String?
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline()
         } else {
             do {
-                moreComing = try await driveFileManager.searchFile(query: currentSearchText,
-                                                                   date: filters.date?.dateInterval,
-                                                                   fileType: filters.fileType,
-                                                                   categories: Array(filters.categories),
-                                                                   belongToAllCategories: filters.belongToAllCategories,
-                                                                   page: page,
-                                                                   sortType: sortType)
+                (_, nextCursor) = try await driveFileManager.searchFile(query: currentSearchText,
+                                                                        date: filters.date?.dateInterval,
+                                                                        fileType: filters.fileType,
+                                                                        categories: Array(filters.categories),
+                                                                        belongToAllCategories: filters.belongToAllCategories,
+                                                                        cursor: cursor,
+                                                                        sortType: sortType)
             } catch {
                 if let error = error as? DriveError,
                    error == .networkError {
@@ -173,8 +173,8 @@ class SearchFilesViewModel: FileListViewModel {
         }
 
         endRefreshing()
-        if moreComing {
-            try await loadFiles(page: page + 1)
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
@@ -225,7 +225,7 @@ class SearchFilesViewModel: FileListViewModel {
         }
         if isDisplayingSearchResults {
             currentTask = Task {
-                try? await loadFiles(page: 1, forceRefresh: true)
+                try? await loadFiles(cursor: nil, forceRefresh: true)
             }
         }
     }
