@@ -642,7 +642,6 @@ extension HomeViewController {
 // MARK: - UICollectionViewDelegate
 
 extension HomeViewController {
-
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
