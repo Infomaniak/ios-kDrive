@@ -56,16 +56,17 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
 
         Task {
             do {
-                let activities = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive, page: page)
-                self.empty = self.page == 1 && activities.isEmpty
-                self.moreComing = activities.count == Endpoint.itemsPerPage
+                let activitiesResponse = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive,
+                                                                                              cursor: nextCursor)
+                self.empty = self.nextCursor == nil && activitiesResponse.data.isEmpty
+                self.moreComing = activitiesResponse.response.hasMore
 
-                display(activities: activities)
+                display(activities: activitiesResponse.data)
                 // Update cache
-                if self.page == 1 {
-                    self.driveFileManager.setLocalRecentActivities(activities)
+                if nextCursor == nil {
+                    self.driveFileManager.setLocalRecentActivities(activitiesResponse.data)
                 }
-                self.page += 1
+                self.nextCursor = activitiesResponse.response.cursor
             } catch {
                 let activities = self.driveFileManager.getLocalRecentActivities()
                 self.empty = activities.isEmpty
