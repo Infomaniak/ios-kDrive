@@ -361,17 +361,24 @@ public class DriveApiFetcher: ApiFetcher {
 
     // MARK: -
 
-    public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trash(drive: drive).paginated(page: page).sorted(by: [sortType]))).data
+    public func trashedFiles(drive: AbstractDrive,
+                             cursor: String? = nil,
+                             sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(.trash(drive: drive)
+                .sorted(by: [sortType])
+                .cursored(cursor)))
     }
 
     public func trashedFile(_ file: ProxyFile) async throws -> File {
         try await perform(request: authenticatedRequest(.trashedInfo(file: file))).data
     }
 
-    public func trashedFiles(of directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: 1)
-                .sorted(by: [sortType]))).data
+    public func trashedFiles(of directory: ProxyFile,
+                             cursor: String? = nil,
+                             sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(.trashedFiles(of: directory)
+                .sorted(by: [sortType])
+                .cursored(cursor)))
     }
 
     public func restore(file: ProxyFile, in directory: ProxyFile? = nil) async throws -> CancelableResponse {
