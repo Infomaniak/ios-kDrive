@@ -172,7 +172,7 @@ extension MultipleSelectionFloatingPanelViewController {
                 return
             }
 
-            self.dismiss(animated: true) {
+            dismiss(animated: true) {
                 self.presentingParent?.present(viewController, animated: true)
             }
         }

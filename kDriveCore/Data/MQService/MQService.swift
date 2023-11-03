@@ -74,7 +74,7 @@ public class MQService {
                     DDLogError("[MQService] Error while connecting: \(error)")
                 }
             }
-            
+
             if let currentToken {
                 actionProgressObservers.removeAll()
                 do {
@@ -83,7 +83,7 @@ public class MQService {
                     DDLogError("[MQService] Error while unsubscribing: \(error)")
                 }
             }
-            
+
             currentToken = token
             do {
                 _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .atMostOnce)]).wait()
@@ -94,7 +94,7 @@ public class MQService {
                         guard let data = buffer.readData(length: buffer.readableBytes) else {
                             return
                         }
-                        
+
                         if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
                             for observer in self.actionProgressObservers.values {
                                 observer(message)
