@@ -31,8 +31,8 @@ class HomeOfflineFilesController: HomeRecentFilesController {
                   listStyleEnabled: true)
     }
 
-    override func getFiles() async throws -> [File] {
-        return driveFileManager.getAvailableOfflineFiles()
+    override func getFiles() async throws -> (files: [File], nextCursor: String?) {
+        return (driveFileManager.getAvailableOfflineFiles(), nil)
     }
 
     override func refreshIfNeeded(with file: File) {

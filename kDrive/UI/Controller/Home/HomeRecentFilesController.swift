@@ -42,7 +42,7 @@ class HomeRecentFilesController {
 
     var listStyle: ListStyle = .list
     var listStyleEnabled: Bool
-    var page = 1
+    var nextCursor: String?
     var empty = false
     var loading = false
     var moreComing = true
@@ -71,7 +71,7 @@ class HomeRecentFilesController {
         self.homeViewController = homeViewController
     }
 
-    func getFiles() async throws -> [File] {
+    func getFiles() async throws -> (files: [File], nextCursor: String?) {
         fatalError(#function + " needs to be overwritten")
     }
 
@@ -104,7 +104,7 @@ class HomeRecentFilesController {
 
     func resetController() {
         files = []
-        page = 1
+        nextCursor = nil
         loading = false
         moreComing = true
     }
@@ -123,10 +123,10 @@ class HomeRecentFilesController {
         Task {
             do {
                 let fetchedFiles = try await getFiles()
-                self.files.append(contentsOf: fetchedFiles)
-                self.empty = self.page == 1 && fetchedFiles.isEmpty
-                self.moreComing = fetchedFiles.count == Endpoint.itemsPerPage
-                self.page += 1
+                self.files.append(contentsOf: fetchedFiles.files)
+                self.empty = self.nextCursor == nil && fetchedFiles.files.isEmpty
+                self.moreComing = fetchedFiles.nextCursor == nil
+                self.nextCursor = fetchedFiles.nextCursor
 
                 guard !self.invalidated else {
                     return

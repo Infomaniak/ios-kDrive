@@ -400,7 +400,7 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
         headerView?.titleLabel.text = currentRecentFilesController.title
         headerView?.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
 
-        if currentRecentFilesController.page == 1 {
+        if currentRecentFilesController.nextCursor == nil {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                recentFiles: .file([]),
                                                recentFilesEmpty: false,
