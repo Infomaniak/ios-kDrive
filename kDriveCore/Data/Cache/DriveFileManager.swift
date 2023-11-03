@@ -587,13 +587,13 @@ public final class DriveFileManager {
                           sortType: SortType = .nameAZ,
                           forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
         try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
-         fetchFiles: {
+                        fetchFiles: {
                             let favorites = try await apiFetcher.favorites(drive: drive, cursor: cursor, sortType: sortType)
                             return favorites
-         },
+                        },
                         cursor: cursor,
-         sortType: sortType,
-         keepProperties: [.standard, .extras],
+                        sortType: sortType,
+                        keepProperties: [.standard, .extras],
                         forceRefresh: forceRefresh)
     }
 
@@ -601,17 +601,17 @@ public final class DriveFileManager {
                               sortType: SortType = .nameAZ,
                               forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
         try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
-         fetchFiles: {
+                        fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(
                                 drive: drive,
                                 cursor: cursor,
                                 sortType: sortType
                             )
                             return mySharedFiles
-         },
+                        },
                         cursor: cursor,
-         sortType: sortType,
-         keepProperties: [.standard, .path, .version],
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
                         forceRefresh: forceRefresh)
     }
 
@@ -637,8 +637,8 @@ public final class DriveFileManager {
                            fileType: ConvertedType? = nil,
                            categories: [Category],
                            belongToAllCategories: Bool,
-                           page: Int = 1,
-                           sortType: SortType = .nameAZ) async throws -> Bool {
+                           cursor: String? = nil,
+                           sortType: SortType = .nameAZ) async throws -> (files: [File], nextCursor: String?) {
         do {
             return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
                                          fetchFiles: {
@@ -649,14 +649,14 @@ public final class DriveFileManager {
                                                  fileTypes: [fileType].compactMap { $0 },
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
-                                                 page: page,
+                                                 cursor: cursor,
                                                  sortType: sortType
                                              )
-                                             return (searchResults, nil)
+                                             return searchResults
                                          },
-                                         page: page,
+                                         isInitialCursor: cursor == nil,
                                          sortType: sortType,
-                                         keepProperties: [.standard, .extras]).moreComing
+                                         keepProperties: [.standard, .extras])
         } catch {
             if error.asAFError?.isExplicitlyCancelledError == true {
                 throw DriveError.searchCancelled
@@ -840,22 +840,22 @@ public final class DriveFileManager {
         }
     }
 
-    public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+    public func lastPictures(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
-            let files = try await apiFetcher.searchFiles(
+            let lastPicturesResponse = try await apiFetcher.searchFiles(
                 drive: drive,
                 fileTypes: [.image, .video],
                 categories: [],
                 belongToAllCategories: false,
-                page: page,
+                cursor: cursor,
                 sortType: .newer
             )
-
-            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: page == 1)
-            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+            let files = lastPicturesResponse.data
+            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: cursor == nil)
+            return (files.map { $0.freeze() }, lastPicturesResponse.response.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
-                return (Array(files), false)
+                return (Array(files), nil)
             } else {
                 throw error
             }
