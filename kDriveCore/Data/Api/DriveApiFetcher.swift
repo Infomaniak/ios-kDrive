@@ -289,8 +289,9 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.move(file: file, destination: destination), method: .post)).data
     }
 
-    public func recentActivity(drive: AbstractDrive, page: Int = 1) async throws -> [FileActivity] {
-        try await perform(request: authenticatedRequest(.recentActivity(drive: drive).paginated(page: page))).data
+    public func recentActivity(drive: AbstractDrive, cursor: String? = nil)
+        async throws -> (data: [FileActivity], response: ApiResponse<[FileActivity]>) {
+        try await perform(request: authenticatedRequest(.recentActivity(drive: drive).cursored(cursor)))
     }
 
     public func fileActivities(file: ProxyFile, page: Int) async throws -> [FileActivity] {

@@ -34,9 +34,8 @@ class HomePhotoListController: HomeRecentFilesController {
                   listStyleEnabled: false)
     }
 
-    override func getFiles() async throws -> [File] {
-        // FIXME: Use cursor after having moved recent activities to cursor
-        return try await driveFileManager.lastPictures(cursor: nil).files
+    override func getFiles() async throws -> (files: [File], nextCursor: String?) {
+        return try await driveFileManager.lastPictures(cursor: nextCursor)
     }
 
     override func getLayout(for style: ListStyle, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
