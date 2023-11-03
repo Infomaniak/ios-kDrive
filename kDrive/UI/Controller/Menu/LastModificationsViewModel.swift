@@ -50,22 +50,22 @@ class LastModificationsViewModel: FileListViewModel {
         files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        startRefreshing(page: page)
+        startRefreshing(cursor: cursor)
         defer {
             endRefreshing()
         }
 
-        let (_, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
-        endRefreshing()
-        if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-        }
+        /* let (_, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
+         endRefreshing()
+         if moreComing {
+             try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
+         } */
     }
 
     override func loadActivities() async throws {
-        try await loadFiles(page: 1, forceRefresh: true)
+        // try await loadFiles(page: 1, forceRefresh: true)
     }
 }

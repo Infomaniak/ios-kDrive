@@ -597,18 +597,22 @@ public final class DriveFileManager {
                         forceRefresh: forceRefresh)
     }
 
-    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ,
-                              forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        fatalError("TODO")
-        /* try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
+    public func mySharedFiles(cursor: String? = nil,
+                              sortType: SortType = .nameAZ,
+                              forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
          fetchFiles: {
-             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
-             return (mySharedFiles, nil)
+                            let mySharedFiles = try await apiFetcher.mySharedFiles(
+                                drive: drive,
+                                cursor: cursor,
+                                sortType: sortType
+                            )
+                            return mySharedFiles
          },
-         cursor: "",
+                        cursor: cursor,
          sortType: sortType,
          keepProperties: [.standard, .path, .version],
-         forceRefresh: forceRefresh) */
+                        forceRefresh: forceRefresh)
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
