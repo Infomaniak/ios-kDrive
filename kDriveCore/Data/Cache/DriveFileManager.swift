@@ -824,15 +824,16 @@ public final class DriveFileManager {
         }
     }
 
-    public func lastModifiedFiles(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+    public func lastModifiedFiles(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
-            let files = try await apiFetcher.lastModifiedFiles(drive: drive, page: page)
+            let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)
+            let files = lastModifiedFilesResponse.data
 
-            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: page == 1)
-            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: cursor == nil)
+            return (files.map { $0.freeze() }, lastModifiedFilesResponse.response.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
-                return (Array(files), false)
+                return (Array(files), nil)
             } else {
                 throw error
             }
