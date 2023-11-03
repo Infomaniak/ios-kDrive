@@ -82,7 +82,7 @@ protocol FileCellDelegate: AnyObject {
 
     private var formattedDate: String {
         guard !file.isInvalidated else { return "" }
-        
+
         if let deletedAt = file.deletedAt {
             return Constants.formatFileDeletionRelativeDate(deletedAt)
         } else {
@@ -118,7 +118,7 @@ protocol FileCellDelegate: AnyObject {
 
     func setUpDownloadObserver(_ handler: @escaping (Bool, Bool, Double) -> Void) {
         guard !file.isInvalidated else { return }
-        
+
         downloadProgressObserver?.cancel()
         downloadProgressObserver = DownloadQueue.instance
             .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
