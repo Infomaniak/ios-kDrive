@@ -160,7 +160,7 @@
         <!--Photo List View Controller-->
         <scene sceneID="o5v-5A-Uxe">
             <objects>
-                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="HTJ-aD-7V4">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
