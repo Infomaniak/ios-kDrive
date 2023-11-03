@@ -58,14 +58,14 @@ class LastModificationsViewModel: FileListViewModel {
             endRefreshing()
         }
 
-        /* let (_, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
-         endRefreshing()
-         if moreComing {
-             try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-         } */
+        let (_, nextCursor) = try await driveFileManager.lastModifiedFiles(cursor: cursor)
+        endRefreshing()
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
+        }
     }
 
     override func loadActivities() async throws {
-        // try await loadFiles(page: 1, forceRefresh: true)
+        try await loadFiles(cursor: nil, forceRefresh: true)
     }
 }

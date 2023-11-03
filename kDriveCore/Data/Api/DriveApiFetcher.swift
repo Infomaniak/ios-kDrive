@@ -160,8 +160,9 @@ public class DriveApiFetcher: ApiFetcher {
                 .sorted(by: [.type, sortType])))
     }
 
-    public func lastModifiedFiles(drive: AbstractDrive, page: Int = 1) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).paginated(page: page))).data
+    public func lastModifiedFiles(drive: AbstractDrive,
+                                  cursor: String? = nil) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).cursored(cursor)))
     }
 
     public func shareLink(for file: ProxyFile) async throws -> ShareLink {
