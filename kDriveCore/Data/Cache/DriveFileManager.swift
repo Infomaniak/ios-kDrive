@@ -583,18 +583,18 @@ public final class DriveFileManager {
         }
     }
 
-    public func favorites(page: Int = 1, sortType: SortType = .nameAZ,
-                          forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        fatalError("TODO")
-        /* try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
+    public func favorites(cursor: String? = nil,
+                          sortType: SortType = .nameAZ,
+                          forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
          fetchFiles: {
-             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
-             return (favorites, nil)
+                            let favorites = try await apiFetcher.favorites(drive: drive, cursor: cursor, sortType: sortType)
+                            return favorites
          },
-         cursor: "",
+                        cursor: cursor,
          sortType: sortType,
          keepProperties: [.standard, .extras],
-         forceRefresh: forceRefresh) */
+                        forceRefresh: forceRefresh)
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ,
