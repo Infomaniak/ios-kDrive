@@ -124,7 +124,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         let children = try await self.driveFileManager.apiFetcher.trashedFiles(
                             of: file.proxify(),
                             cursor: cursor
-                        )
+                        ).data
                         var containerItems = [FileProviderItem]()
                         for child in children {
                             autoreleasepool {
