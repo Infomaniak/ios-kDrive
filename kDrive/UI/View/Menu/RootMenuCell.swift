@@ -104,9 +104,8 @@ class RootMenuCell: UICollectionViewCell {
             separatorView.heightAnchor.constraint(equalToConstant: 1),
 
             contentInsetView.heightAnchor.constraint(equalToConstant: 60),
-            contentInsetView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            contentInsetView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            contentInsetView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            contentInsetView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
+            contentInsetView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             topConstraint!,
             bottomConstraint!,
 
