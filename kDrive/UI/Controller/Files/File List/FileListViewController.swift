@@ -288,14 +288,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 return
             }
 
-            self.showEmptyView(!isEmpty)
+            showEmptyView(!isEmpty)
 
             guard !shouldReload else {
-                self.collectionView.reloadData()
+                collectionView.reloadData()
                 return
             }
 
-            self.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
+            updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
