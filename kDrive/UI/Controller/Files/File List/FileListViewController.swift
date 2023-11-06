@@ -586,6 +586,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
 
+        if viewModel.currentDirectory.visibility == .isTeamSpace {
+            let driveName = KDriveResourcesStrings.Localizable.commonDocumentsDescription(viewModel.driveFileManager.drive.name)
+
+            headerView.commonDocumentsDescriptionLabel.text = driveName
+            headerView.commonDocumentsDescriptionLabel.isHidden = false
+        } else {
+            headerView.commonDocumentsDescriptionLabel.isHidden = true
+        }
+
         headerView.sortView.isHidden = !isEmptyViewHidden
 
         headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
