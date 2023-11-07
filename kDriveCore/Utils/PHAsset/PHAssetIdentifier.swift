@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CryptoKit
 import Foundation
 import InfomaniakCore
 import Photos
@@ -100,22 +101,20 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
         }
 
         let group = TolerantDispatchGroup()
-        var hash: String?
-        var imageData = Data()
+        let hasher = StreamHasher<SHA256>()
 
         // TODO: Check iCloud behaviour
         let options = PHAssetResourceRequestOptions()
         options.isNetworkAccessAllowed = true
         options.progressHandler = { progress in
-            print("hashing resource \(progress * 100)% …")
+            Log.photoLibraryUploader("hashing resource \(progress * 100)% …")
         }
 
         PHAssetResourceManager.default().requestData(for: bestResource,
                                                      options: options) { data in
-            // TODO: Hash scanning data, cannot access all at once
-            imageData.append(data)
+            hasher.update(data)
         } completionHandler: { error in
-            hash = imageData.SHA256DigestString
+            hasher.finalize()
             group.leave()
         }
 
@@ -123,6 +122,6 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
         group.enter()
         group.wait()
 
-        return hash
+        return hasher.digestString
     }
 }
