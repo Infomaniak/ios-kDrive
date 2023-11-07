@@ -50,6 +50,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var appLaunchCounter: AppLaunchCounter
+    @LazyInjectService var accountManager: AccountManageable
 
     /// Use this to simulate a long running background session
     static let simulateLongRunningSession = false
@@ -124,6 +126,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         }
 
+        // Increase launch counter, must be done late in the launch process
+        appLaunchCounter.increase()
+
         return true
     }
 
@@ -194,8 +199,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             return false
         }
 
-        @InjectService var accountManager: AccountManageable
-
         if components.path == "store",
            let userId = params.first(where: { $0.name == "userId" })?.value,
            let driveId = params.first(where: { $0.name == "driveId" })?.value {
@@ -228,7 +231,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
         Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
 
-        @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
         let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
@@ -317,7 +319,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             return
         }
 
-        @InjectService var accountManager: AccountManageable
         for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
@@ -397,7 +398,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
-        @InjectService var accountManager: AccountManageable
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
@@ -428,10 +428,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
-        @InjectService var accountManager: AccountManageable
 
         return AppDelegate
-            .currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+            .currentStateVersion == encodedVersion && !(appLaunchCounter.isFirstLaunch || accountManager.accounts.isEmpty)
     }
 
     // MARK: - User activity
