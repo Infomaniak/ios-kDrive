@@ -249,26 +249,7 @@ public final class DriveFileManager {
             fileURL: realmURL,
             schemaVersion: 9,
             migrationBlock: { migration, oldSchemaVersion in
-                if oldSchemaVersion < 1 {
-                    // Migration to version 1: migrating rights
-                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                        newObject?["show"] = oldObject?["show"] ?? false
-                        newObject?["read"] = oldObject?["read"] ?? false
-                        newObject?["write"] = oldObject?["write"] ?? false
-                        newObject?["share"] = oldObject?["share"] ?? false
-                        newObject?["leave"] = oldObject?["leave"] ?? false
-                        newObject?["delete"] = oldObject?["delete"] ?? false
-                        newObject?["rename"] = oldObject?["rename"] ?? false
-                        newObject?["move"] = oldObject?["move"] ?? false
-                        newObject?["createNewFolder"] = oldObject?["createNewFolder"] ?? false
-                        newObject?["createNewFile"] = oldObject?["createNewFile"] ?? false
-                        newObject?["uploadNewFile"] = oldObject?["uploadNewFile"] ?? false
-                        newObject?["moveInto"] = oldObject?["moveInto"] ?? false
-                        newObject?["canBecomeCollab"] = oldObject?["canBecomeCollab"] ?? false
-                        newObject?["canBecomeLink"] = oldObject?["canBecomeLink"] ?? false
-                        newObject?["canFavorite"] = oldObject?["canFavorite"] ?? false
-                    }
-                }
+                // Models older than v5 are cleared, so any migration before that is moot.
                 if oldSchemaVersion < 5 {
                     // Remove rights
                     migration.deleteData(forType: Rights.className())
