@@ -27,6 +27,15 @@ import Sentry
 import SwiftRegex
 
 public final class DriveFileManager {
+    /// Something to centralize schema versioning
+    enum RealmSchemaVersion {
+        /// Current version of the Upload Realm
+        static let upload: UInt64 = 17
+
+        /// Current version of the Drive Realm
+        static let drive: UInt64 = 9
+    }
+
     public class DriveFileManagerConstants {
         public let driveObjectTypes = [
             File.self,
@@ -51,67 +60,84 @@ public final class DriveFileManager {
         public var tmpDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 17
         public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
-            guard let strongSelf = self else { return }
-            if oldSchemaVersion < strongSelf.currentUploadDbVersion {
-                // Migration from version 2 to version 3
-                if oldSchemaVersion < 3 {
-                    migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                        newObject!["maxRetryCount"] = 3
+            let currentUploadSchemaVersion = RealmSchemaVersion.upload
+
+            // Log migration on Sentry
+            SentryDebug.realmMigrationStartedBreadcrumb(
+                form: oldSchemaVersion,
+                to: currentUploadSchemaVersion,
+                realmName: "Upload"
+            )
+            defer {
+                SentryDebug.realmMigrationEndedBreadcrumb(
+                    form: oldSchemaVersion,
+                    to: currentUploadSchemaVersion,
+                    realmName: "Upload"
+                )
+            }
+
+            // Sanity check
+            guard oldSchemaVersion < currentUploadSchemaVersion else {
+                return
+            }
+
+            // Migration from version 2 to version 3
+            if oldSchemaVersion < 3 {
+                migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
+                    newObject!["maxRetryCount"] = 3
+                }
+            }
+            // Migration to version 4 -> 7 is not needed
+            // Migration from version 7 to version 9
+            if oldSchemaVersion < 9 {
+                migration.deleteData(forType: DownloadTask.className())
+            }
+
+            // Migration from version 9 to version 10
+            if oldSchemaVersion < 10 {
+                migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
+                    newObject!["conflictOption"] = ConflictOption.version.rawValue
+                }
+            }
+
+            if oldSchemaVersion < 12 {
+                migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
+                    newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
+                }
+            }
+
+            // Migration for Upload With Chunks
+            if oldSchemaVersion < 14 {
+                migration.deleteData(forType: UploadFile.className())
+            }
+
+            // Migration for UploadFile With dedicated fileProviderItemIdentifier and assetLocalIdentifier fields
+            if oldSchemaVersion < 15 {
+                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
+                    guard let newObject else {
+                        return
                     }
-                }
-                // Migration to version 4 -> 7 is not needed
-                // Migration from version 7 to version 9
-                if oldSchemaVersion < 9 {
-                    migration.deleteData(forType: DownloadTask.className())
-                }
 
-                // Migration from version 9 to version 10
-                if oldSchemaVersion < 10 {
-                    migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                        newObject!["conflictOption"] = ConflictOption.version.rawValue
-                    }
-                }
+                    // Try to migrate the assetLocalIdentifier if possible
+                    let type: String? = oldObject?["rawType"] as? String ?? nil
 
-                if oldSchemaVersion < 12 {
-                    migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
-                        newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
-                    }
-                }
+                    switch type {
+                    case UploadFileType.phAsset.rawValue:
+                        // The object was from a phAsset source, the id has to be the `LocalIdentifier`
+                        let oldAssetIdentifier: String? = oldObject?["id"] as? String ?? nil
 
-                // Migration for Upload With Chunks
-                if oldSchemaVersion < 14 {
-                    migration.deleteData(forType: UploadFile.className())
-                }
+                        newObject["assetLocalIdentifier"] = oldAssetIdentifier
+                        newObject["fileProviderItemIdentifier"] = nil
 
-                // Migration for UploadFile With dedicated fileProviderItemIdentifier and assetLocalIdentifier fields
-                if oldSchemaVersion < 15 {
-                    migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
-                        guard let newObject else {
-                            return
-                        }
+                        // Making sure the ID is unique, and not a PHAsset identifier
+                        newObject["id"] = UUID().uuidString
 
-                        // Try to migrate the assetLocalIdentifier if possible
-                        let type: String? = oldObject?["rawType"] as? String ?? nil
-
-                        switch type {
-                        case UploadFileType.phAsset.rawValue:
-                            // The object was from a phAsset source, the id has to be the `LocalIdentifier`
-                            let oldAssetIdentifier: String? = oldObject?["id"] as? String ?? nil
-
-                            newObject["assetLocalIdentifier"] = oldAssetIdentifier
-                            newObject["fileProviderItemIdentifier"] = nil
-
-                            // Making sure the ID is unique, and not a PHAsset identifier
-                            newObject["id"] = UUID().uuidString
-
-                        default:
-                            // We cannot infer anything, all to nil
-                            newObject["assetLocalIdentifier"] = nil
-                            newObject["fileProviderItemIdentifier"] = nil
-                        }
+                    default:
+                        // We cannot infer anything, all to nil
+                        newObject["assetLocalIdentifier"] = nil
+                        newObject["fileProviderItemIdentifier"] = nil
                     }
                 }
             }
@@ -122,7 +148,7 @@ public final class DriveFileManager {
 
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
             fileURL: uploadsRealmURL,
-            schemaVersion: currentUploadDbVersion,
+            schemaVersion: RealmSchemaVersion.upload,
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
                           PhotoSyncSettings.self,
@@ -247,28 +273,30 @@ public final class DriveFileManager {
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
-            schemaVersion: 9,
+            schemaVersion: RealmSchemaVersion.drive,
             migrationBlock: { migration, oldSchemaVersion in
-                if oldSchemaVersion < 1 {
-                    // Migration to version 1: migrating rights
-                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                        newObject?["show"] = oldObject?["show"] ?? false
-                        newObject?["read"] = oldObject?["read"] ?? false
-                        newObject?["write"] = oldObject?["write"] ?? false
-                        newObject?["share"] = oldObject?["share"] ?? false
-                        newObject?["leave"] = oldObject?["leave"] ?? false
-                        newObject?["delete"] = oldObject?["delete"] ?? false
-                        newObject?["rename"] = oldObject?["rename"] ?? false
-                        newObject?["move"] = oldObject?["move"] ?? false
-                        newObject?["createNewFolder"] = oldObject?["createNewFolder"] ?? false
-                        newObject?["createNewFile"] = oldObject?["createNewFile"] ?? false
-                        newObject?["uploadNewFile"] = oldObject?["uploadNewFile"] ?? false
-                        newObject?["moveInto"] = oldObject?["moveInto"] ?? false
-                        newObject?["canBecomeCollab"] = oldObject?["canBecomeCollab"] ?? false
-                        newObject?["canBecomeLink"] = oldObject?["canBecomeLink"] ?? false
-                        newObject?["canFavorite"] = oldObject?["canFavorite"] ?? false
-                    }
+                let currentDriveSchemeVersion = RealmSchemaVersion.drive
+
+                // Log migration on Sentry
+                SentryDebug.realmMigrationStartedBreadcrumb(
+                    form: oldSchemaVersion,
+                    to: currentDriveSchemeVersion,
+                    realmName: "Drive"
+                )
+                defer {
+                    SentryDebug.realmMigrationEndedBreadcrumb(
+                        form: oldSchemaVersion,
+                        to: currentDriveSchemeVersion,
+                        realmName: "Drive"
+                    )
                 }
+
+                // Sanity check
+                guard oldSchemaVersion < currentDriveSchemeVersion else {
+                    return
+                }
+
+                // Models older than v5 are cleared, so any migration before that is moot.
                 if oldSchemaVersion < 5 {
                     // Remove rights
                     migration.deleteData(forType: Rights.className())
