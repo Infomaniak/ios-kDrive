@@ -27,6 +27,7 @@ public enum SentryDebug {
         static let uploadQueue = "UploadQueue"
         static let apiError = "APIError"
         static let viewModel = "ViewModel"
+        static let realmMigration = "RealmMigration"
     }
 
     enum ErrorNames {
@@ -131,6 +132,39 @@ public enum SentryDebug {
     public static func filesObservationBreadcrumb(state: String) {
         let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation)
         breadcrumb.message = "files modified: \(state) "
+        SentrySDK.addBreadcrumb(breadcrumb)
+    }
+
+    // MARK: - REALM Migration
+
+    static func realmMigrationStartedBreadcrumb(form: UInt64, to: UInt64, realmName: String, function: String = #function) {
+        realmMigrationBreadcrumb(state: .start, form: form, to: to, realmName: realmName, function: function)
+    }
+
+    static func realmMigrationEndedBreadcrumb(form: UInt64, to: UInt64, realmName: String, function: String = #function) {
+        realmMigrationBreadcrumb(state: .end, form: form, to: to, realmName: realmName, function: function)
+    }
+
+    enum MigrationState: String {
+        case start
+        case end
+    }
+
+    private static func realmMigrationBreadcrumb(
+        state: MigrationState,
+        form: UInt64,
+        to: UInt64,
+        realmName: String,
+        function: String
+    ) {
+        let metadata: [String: Any] = ["sate": state.rawValue,
+                                       "realmName": realmName,
+                                       "form": form,
+                                       "to": to,
+                                       "function": function]
+        let breadcrumb = Breadcrumb(level: .info, category: Category.realmMigration)
+        breadcrumb.message = Category.realmMigration
+        breadcrumb.data = metadata
         SentrySDK.addBreadcrumb(breadcrumb)
     }
 
