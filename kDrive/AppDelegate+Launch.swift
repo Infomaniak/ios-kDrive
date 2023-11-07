@@ -40,7 +40,7 @@ extension AppDelegate {
         @InjectService var accountManager: AccountManageable
         if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
             showMigration()
-        } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
+        } else if appLaunchCounter.isFirstLaunch || accountManager.accounts.isEmpty {
             showOnboarding()
         } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
             showAppLock()
@@ -149,10 +149,6 @@ extension AppDelegate {
     private func setGlobalTint() {
         window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
         UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-        // Migration from old UserDefaults
-        if UserDefaults.shared.isFirstLaunch {
-            UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
-        }
     }
 
     // TODO: Refactor to async

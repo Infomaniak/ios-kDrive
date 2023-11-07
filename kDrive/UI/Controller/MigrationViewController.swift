@@ -102,7 +102,6 @@ class MigrationViewController: UIViewController {
 
     @IBAction func migrationDoneButtonPressed(_ sender: Any) {
         if let photoSyncEnabled {
-            UserDefaults.shared.isFirstLaunch = false
             UserDefaults.shared.numberOfConnections = 1
             let mainTabBarViewController = MainTabViewController.instantiate()
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
