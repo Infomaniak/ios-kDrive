@@ -211,8 +211,9 @@ public enum SentryDebug {
 
     public static func loggerBreadcrumb(caller: String, category: String, metadata: [String: Any]? = nil, isError: Bool = false) {
         Task { @MainActor in
-            let message = "\(caller) foreground:\(UIApplication.shared.applicationState != .background)"
-            Task {
+            let isForeground = UIApplication.shared.applicationState != .background
+            Task.detached {
+                let message = "\(caller) foreground:\(isForeground)"
                 let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: category)
                 breadcrumb.message = message
                 breadcrumb.data = metadata
