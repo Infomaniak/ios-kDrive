@@ -210,15 +210,13 @@ public enum SentryDebug {
     // MARK: - Logger
 
     public static func loggerBreadcrumb(caller: String, category: String, metadata: [String: Any]? = nil, isError: Bool = false) {
-        Task { @MainActor in
-            let isForeground = UIApplication.shared.applicationState != .background
-            Task.detached {
-                let message = "\(caller) foreground:\(isForeground)"
-                let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: category)
-                breadcrumb.message = message
-                breadcrumb.data = metadata
-                SentrySDK.addBreadcrumb(breadcrumb)
-            }
+        Task {
+            let isForeground = await UIApplication.shared.applicationState != .background
+            let message = "\(caller) foreground:\(isForeground)"
+            let breadcrumb = Breadcrumb(level: isError ? .error : .info, category: category)
+            breadcrumb.message = message
+            breadcrumb.data = metadata
+            SentrySDK.addBreadcrumb(breadcrumb)
         }
     }
 }
