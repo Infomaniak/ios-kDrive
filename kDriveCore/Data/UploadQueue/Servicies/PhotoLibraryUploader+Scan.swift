@@ -123,7 +123,7 @@ public extension PhotoLibraryUploader {
                     return
                 }
 
-                let algorithmImportVersion = self.currentDiffAlgorithmVersion()
+                let algorithmImportVersion = self.currentDiffAlgorithmVersion
 
                 // New UploadFile to be uploaded
                 let uploadFile = UploadFile(
@@ -252,7 +252,7 @@ public extension PhotoLibraryUploader {
     }
 
     /// Get the current diff algorithm version
-    private func currentDiffAlgorithmVersion() -> Int {
+    private var currentDiffAlgorithmVersion: Int {
         if #available(iOS 15, *) {
             PhotoLibraryImport.hashBestResource.rawValue
         } else {
