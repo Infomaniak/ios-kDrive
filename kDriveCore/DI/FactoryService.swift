@@ -133,9 +133,6 @@ enum FactoryService {
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
-            },
-            Factory(type: AppLaunchCounter.self) { _, _ in
-                AppLaunchCounter()
             }
         ]
         return services
