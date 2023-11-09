@@ -76,8 +76,6 @@ struct PHAssetNameProvider {
             return defaultFileName(burstString, fileExtension, now)
         }
 
-        let lastPathComponent = originalFilename.split(separator: ".")
-
         // Edited pictures need some extra work
         if isPictureWithChanges(originalFilename: originalFilename) {
             // Differentiate the file with edit date
