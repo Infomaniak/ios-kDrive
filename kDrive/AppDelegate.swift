@@ -431,7 +431,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         @InjectService var accountManager: AccountManageable
 
         return AppDelegate
-            .currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+            .currentStateVersion == encodedVersion && !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
     }
 
     // MARK: - User activity
