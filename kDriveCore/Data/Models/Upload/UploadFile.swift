@@ -61,8 +61,6 @@ public class UploadFile: Object, UploadFilable {
     @Persisted(primaryKey: true) public var id = ""
     @Persisted public var name = ""
     @Persisted var relativePath = ""
-    @Persisted var fileProviderItemIdentifier: String? // NSFileProviderItemIdentifier if any
-    @Persisted var assetLocalIdentifier: String? // PHAsset source identifier if any
     @Persisted private var url: String?
     @Persisted private var rawType = "file"
     @Persisted public var parentDirectoryId = 1
@@ -80,6 +78,18 @@ public class UploadFile: Object, UploadFilable {
     @Persisted var _error: Data?
     @Persisted var conflictOption: ConflictOption
     @Persisted var uploadingSession: UploadingSessionTask?
+
+    /// NSFileProviderItemIdentifier if any
+    @Persisted var fileProviderItemIdentifier: String?
+
+    /// PHAsset source identifier if any
+    @Persisted var assetLocalIdentifier: String?
+
+    /// Identifies a specific version of an edited PHAsset.
+    @Persisted var bestResourceSHA256: String?
+
+    /// Identifies the algorithm that selected to import this file
+    @Persisted private var algorithmImportVersion: Int
 
     private var localAsset: PHAsset?
 
@@ -189,6 +199,8 @@ public class UploadFile: Object, UploadFilable {
         driveId: Int,
         name: String,
         asset: PHAsset,
+        bestResourceSHA256: String?,
+        algorithmImportVersion: Int,
         conflictOption: ConflictOption = .rename,
         shouldRemoveAfterUpload: Bool = true,
         priority: Operation.QueuePriority = .normal
@@ -199,6 +211,8 @@ public class UploadFile: Object, UploadFilable {
         self.driveId = driveId
         self.name = name
         assetLocalIdentifier = asset.localIdentifier
+        self.bestResourceSHA256 = bestResourceSHA256
+        self.algorithmImportVersion = algorithmImportVersion
 
         localAsset = asset
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
@@ -286,7 +300,7 @@ public extension UploadFile {
 }
 
 public extension UploadFile {
-    /// Centralize error cleaning
+    /// Centralise error cleaning
     func clearErrorsForRetry() {
         // Clear any stored error
         error = nil

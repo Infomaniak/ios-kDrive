@@ -35,6 +35,23 @@ struct PHAssetNameProvider {
         "\(Self.noName)-\(URL.defaultFileName(date: now))\(burstString).\(fileExtension)"
     }
 
+    public func isPictureWithChanges(originalFilename: String) -> Bool {
+        // Require a valid originalFilename
+        guard !originalFilename.isEmpty else {
+            return false
+        }
+
+        let lastPathComponent = originalFilename.split(separator: ".")
+        let filename = lastPathComponent[0]
+
+        // Edited pictures will have a "FullSizeRender" name
+        guard filename == "FullSizeRender" else {
+            return false
+        }
+
+        return true
+    }
+
     /// Get a filename that can be used by kDrive, taking into consideration burst and edits of a PHAsset.
     public func getFilename(fileExtension: String,
                             originalFilename: String?,
@@ -59,13 +76,13 @@ struct PHAssetNameProvider {
             return defaultFileName(burstString, fileExtension, now)
         }
 
-        let lastPathComponent = originalFilename.split(separator: ".")
-        let filename = lastPathComponent[0]
-
-        // Edited pictures will have a "FullSizeRender" name
-        guard filename != "FullSizeRender" else {
+        // Edited pictures need some extra work
+        if isPictureWithChanges(originalFilename: originalFilename) {
             // Differentiate the file with edit date
             let editDate = modificationDate ?? now
+            if modificationDate == nil {
+                SentryDebug.photoLibraryNameErrorNoModificationDate()
+            }
 
             // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.
             guard let creationDate else {

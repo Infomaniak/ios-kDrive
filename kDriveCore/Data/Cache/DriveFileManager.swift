@@ -30,7 +30,7 @@ public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
-        static let upload: UInt64 = 16
+        static let upload: UInt64 = 17
 
         /// Current version of the Drive Realm
         static let drive: UInt64 = 9

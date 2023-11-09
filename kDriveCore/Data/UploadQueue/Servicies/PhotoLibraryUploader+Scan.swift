@@ -38,7 +38,7 @@ public extension PhotoLibraryUploader {
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
             let typesPredicates = getAssetPredicates(forSettings: settings)
-            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+            let datePredicate = getDatePredicate(with: settings)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
@@ -55,35 +55,6 @@ public extension PhotoLibraryUploader {
     }
 
     // MARK: - Private
-
-    /// Create predicate from settings
-    private func getAssetPredicates(forSettings settings: PhotoSyncSettings) -> [NSPredicate] {
-        var typesPredicates = [NSPredicate]()
-
-        if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
-        } else if settings.syncPicturesEnabled {
-            typesPredicates.append(NSPredicate(
-                format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)",
-                PHAssetMediaType.image.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue
-            ))
-        } else if settings.syncScreenshotsEnabled {
-            typesPredicates.append(NSPredicate(
-                format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)",
-                PHAssetMediaType.image.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue,
-                PHAssetMediaSubtype.photoScreenshot.rawValue
-            ))
-        }
-
-        if settings.syncVideosEnabled {
-            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
-        }
-
-        return typesPredicates
-    }
 
     private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         if let settings = realm.objects(PhotoSyncSettings.self).first {
@@ -140,27 +111,42 @@ public extension PhotoLibraryUploader {
                     burstCount: &burstCount
                 )
 
+                let bestResourceSHA256: String? = asset.bestResourceSHA256
+                Log.photoLibraryUploader("Asset hash:\(bestResourceSHA256)")
+
                 // Check if picture uploaded before
-                guard !assetAlreadyUploaded(assetName: finalName, realm: realm) else {
+                guard !assetAlreadyUploaded(assetName: finalName,
+                                            localIdentifier: asset.localIdentifier,
+                                            bestResourceSHA256: bestResourceSHA256,
+                                            realm: realm) else {
                     Log.photoLibraryUploader("Asset ignored because it was uploaded before")
                     return
                 }
 
-                // Store a new upload file in base
+                let algorithmImportVersion = self.currentDiffAlgorithmVersion
+
+                // New UploadFile to be uploaded
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
                     driveId: settings.driveId,
                     name: finalName,
                     asset: asset,
+                    bestResourceSHA256: bestResourceSHA256,
+                    algorithmImportVersion: algorithmImportVersion,
                     conflictOption: .version,
                     priority: initial ? .low : .high
                 )
+
+                // Lazy creation of sub folder if required in the upload file
                 if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()
                 }
+
+                // DB insertion
                 realm.add(uploadFile, update: .modified)
 
+                // Batching writes
                 if idx < assets.count - 1 && idx % 99 == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
@@ -186,7 +172,7 @@ public extension PhotoLibraryUploader {
         let fileExtension: String
 
         // build fileExtension
-        if let resource = asset.bestResource() {
+        if let resource = asset.bestResource {
             if resource.uniformTypeIdentifier == UTI.heic.identifier,
                let preferredFilenameExtension = settings.photoFormat.uti.preferredFilenameExtension {
                 fileExtension = preferredFilenameExtension
@@ -206,25 +192,71 @@ public extension PhotoLibraryUploader {
         }
         burstIdentifier = asset.burstIdentifier
 
+        // Only generate a different file name if has adjustments
+        var modificationDate: Date?
+        if #available(iOS 15, *), asset.hasAdjustments {
+            modificationDate = asset.modificationDate
+        }
+
         // Build the same name as importing manually a file
         correctName = asset.getFilename(fileExtension: fileExtension,
                                         creationDate: asset.creationDate,
+                                        modificationDate: modificationDate,
                                         burstCount: burstCount,
                                         burstIdentifier: burstIdentifier)
 
         return correctName
     }
 
-    private func assetAlreadyUploaded(assetName: String, realm: Realm) -> Bool {
+    /// Determines if a PHAsset was already uploaded, for a given version of it
+    /// - Parameters:
+    ///   - assetName: The stable name of a file
+    ///   - localIdentifier: The PHAsset local identifier
+    ///   - bestResourceSHA256: A hash to identify the current resource with changes if any
+    ///   - realm: the realm context
+    /// - Returns: True if already uploaded for a specific version of the file
+    private func assetAlreadyUploaded(assetName: String,
+                                      localIdentifier: String,
+                                      bestResourceSHA256: String?,
+                                      realm: Realm) -> Bool {
         // Roughly 10x faster than '.first(where:'
-        guard realm
+        let uploadedPictures = realm
             .objects(UploadFile.self)
             .filter(Self.uploadedAssetPredicate)
-            .filter(NSPredicate(format: "name = %@", assetName))
-            .first != nil else {
-            return false
+
+        /// Identify a PHAsset with a specific `localIdentifier` _and_ a hash, `bestResourceSHA256`, if any.
+        ///
+        /// Only used on iOS15 and up.
+        if #available(iOS 15, *),
+           uploadedPictures.filter(NSPredicate(
+               format: "assetLocalIdentifier = %@ AND bestResourceSHA256 = %@",
+               localIdentifier,
+               bestResourceSHA256 ?? "NULL"
+           ))
+           .first != nil {
+            Log.photoLibraryUploader("AlreadyUploaded match with identifier:\(localIdentifier) hash:\(String(describing: bestResourceSHA256)) ")
+            return true
         }
 
-        return true
+        /// Legacy check only _name_ of the file that should be stable
+        else if uploadedPictures.filter(NSPredicate(format: "name = %@", assetName))
+            .first != nil {
+            Log.photoLibraryUploader("AlreadyUploaded match with name:\(assetName)")
+            return true
+        }
+
+        /// Nothing found
+        else {
+            return false
+        }
+    }
+
+    /// Get the current diff algorithm version
+    private var currentDiffAlgorithmVersion: Int {
+        if #available(iOS 15, *) {
+            PhotoLibraryImport.hashBestResource.rawValue
+        } else {
+            PhotoLibraryImport.legacyName.rawValue
+        }
     }
 }

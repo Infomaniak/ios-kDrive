@@ -23,29 +23,39 @@ import Photos
 import Sentry
 
 public extension PHAsset {
-    static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
-        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
-        var containsHEICPhotos = false
-        assets.enumerateObjects { asset, _, stop in
-            if let resource = asset.bestResource(), resource.uniformTypeIdentifier == UTI.heic.identifier {
-                containsHEICPhotos = true
-                stop.pointee = true
-            }
+    // MARK: - Hash
+
+    /// Get a hash of the base image of a PHAsset _without adjustments_
+    ///
+    /// Will return `nil` for any other resource type (like video)
+    var baseImageSHA256: String? {
+        guard let identifier = PHAssetIdentifier(self) else {
+            return nil
         }
-        return containsHEICPhotos
+
+        return identifier.baseImageSHA256
+    }
+
+    /// Hash of the best resource available. Editing a video or a picture will change this hash
+    var bestResourceSHA256: String? {
+        guard let identifier = PHAssetIdentifier(self) else {
+            return nil
+        }
+
+        return identifier.bestResourceSHA256
     }
 
     // MARK: - Filename
 
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
     func getFilename(fileExtension: String,
-                     creationDate: Date? = nil,
-                     modificationDate: Date? = nil,
-                     burstCount: Int? = nil,
-                     burstIdentifier: String? = nil) -> String {
+                     creationDate: Date?,
+                     modificationDate: Date?,
+                     burstCount: Int?,
+                     burstIdentifier: String?) -> String {
         let nameProvider = PHAssetNameProvider()
         return nameProvider.getFilename(fileExtension: fileExtension,
-                                        originalFilename: bestResource()?.originalFilename,
+                                        originalFilename: bestResource?.originalFilename,
                                         creationDate: creationDate,
                                         modificationDate: modificationDate,
                                         burstCount: burstCount,
@@ -55,7 +65,13 @@ public extension PHAsset {
     /// Get a filename that can be used by kDrive, taking into consideration the edits that may exists on a PHAsset.
     func getFilename(uti: UTI) -> String? {
         let preferredFilenameExtension = uti.preferredFilenameExtension ?? ""
-        return getFilename(fileExtension: preferredFilenameExtension, creationDate: creationDate)
+        return getFilename(
+            fileExtension: preferredFilenameExtension,
+            creationDate: creationDate,
+            modificationDate: nil,
+            burstCount: nil,
+            burstIdentifier: nil
+        )
     }
 
     /// Returns the first Resource matching a list of types.
@@ -75,7 +91,7 @@ public extension PHAsset {
 
     // MARK: - Resource
 
-    func bestResource() -> PHAssetResource? {
+    var bestResource: PHAssetResource? {
         let typesToFetch: [PHAssetResourceType]
 
         switch mediaType {
@@ -99,7 +115,7 @@ public extension PHAsset {
     // MARK: - Url
 
     func getUrl(preferJPEGFormat: Bool) async -> URL? {
-        guard let resource = bestResource() else { return nil }
+        guard let resource = bestResource else { return nil }
 
         let requestResourceOption = PHAssetResourceRequestOptions()
         requestResourceOption.isNetworkAccessAllowed = true
@@ -134,21 +150,36 @@ public extension PHAsset {
         return nil
     }
 
+    // MARK: - HEIC
+
+    static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        var containsHEICPhotos = false
+        assets.enumerateObjects { asset, _, stop in
+            if let resource = asset.bestResource, resource.uniformTypeIdentifier == UTI.heic.identifier {
+                containsHEICPhotos = true
+                stop.pointee = true
+            }
+        }
+        return containsHEICPhotos
+    }
+
     // MARK: - Data
 
     private func writeJpegData(to url: URL, resource: PHAssetResource,
                                options: PHAssetResourceRequestOptions) async throws -> Bool {
         guard let jpegData = try await getJpegData(for: resource, options: options) else { return false }
         try jpegData.write(to: url)
+        let date = Date()
         let attributes = [
-            FileAttributeKey.creationDate: creationDate ?? Date(),
+            FileAttributeKey.creationDate: creationDate ?? date,
             /*
                 We use the creationDate instead of the modificationDate
                 because this date is not always accurate.
                 (It does not seem to correspond to a real modification of the image)
                 Apple Feedback: FB11923430
                 */
-            FileAttributeKey.modificationDate: creationDate ?? Date()
+            FileAttributeKey.modificationDate: creationDate ?? date
         ]
         try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
         return true
