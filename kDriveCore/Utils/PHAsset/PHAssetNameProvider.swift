@@ -77,7 +77,6 @@ struct PHAssetNameProvider {
         }
 
         let lastPathComponent = originalFilename.split(separator: ".")
-        let filename = lastPathComponent[0]
 
         // Edited pictures need some extra work
         if isPictureWithChanges(originalFilename: originalFilename) {
