@@ -169,13 +169,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                      performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         Log.appDelegate("application performFetchWithCompletionHandler")
 
-        // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the
-        // background.
-        if MigrationHelper.canMigrate() {
-            notificationHelper.sendMigrateNotification()
-            return
-        }
-
         handleBackgroundRefresh { newData in
             if newData {
                 completionHandler(.newData)
