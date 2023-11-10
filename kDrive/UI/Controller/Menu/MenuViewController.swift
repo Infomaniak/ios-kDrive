@@ -343,7 +343,7 @@ extension MenuViewController {
     }
 }
 
-extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
+extension MenuViewController: SwitchAccountDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
         needsContentUpdate = true
@@ -352,12 +352,6 @@ extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
     func didSwitchCurrentAccount(_ newAccount: Account) {
         currentAccount = newAccount
         needsContentUpdate = true
-    }
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        driveFileManager = newDriveFileManager
-        needsContentUpdate = true
-        updateContentIfNeeded()
     }
 }
 

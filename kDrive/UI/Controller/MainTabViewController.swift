@@ -161,9 +161,8 @@ class MainTabViewController: UITabBarController {
     func getCurrentDirectory() -> (DriveFileManager, File) {
         if let filesViewController = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController,
-            let driveFileManager = filesViewController.driveFileManager,
             filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-            return (driveFileManager, filesViewController.viewModel.currentDirectory)
+            return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
             let file = driveFileManager.getCachedRootFile()
             return (driveFileManager, file)
@@ -241,28 +240,6 @@ extension MainTabViewController: SwitchAccountDelegate {
          }
          setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
              self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
-         } */
-    }
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        /* driveFileManager = newDriveFileManager
-         // Tell Files app that the drive changed
-         DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-             manager.signalEnumerator(for: .workingSet) { _ in
-                 // META: keep SonarCloud happy
-             }
-             manager.signalEnumerator(for: .rootContainer) { _ in
-                 // META: keep SonarCloud happy
-             }
-         }
-         for viewController in viewControllers ?? [] {
-             guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers
-                 .first as? UIViewController & SwitchDriveDelegate else { continue }
-             if switchDriveDelegate.isViewLoaded {
-                 switchDriveDelegate.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
-             } else {
-                 switchDriveDelegate.driveFileManager = driveFileManager
-             }
          } */
     }
 }

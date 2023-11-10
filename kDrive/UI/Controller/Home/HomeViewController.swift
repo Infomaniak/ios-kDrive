@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable,
+class HomeViewController: UICollectionViewController, SwitchAccountDelegate, TopScrollable,
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
@@ -483,28 +483,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     func presentedFromTabBar() {
         currentRecentFilesController.refreshIfNeeded()
-    }
-
-    // MARK: - Switch drive delegate
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        let isDifferentDrive = newDriveFileManager.drive.id != driveFileManager.drive.id
-        driveFileManager = newDriveFileManager
-
-        if isDifferentDrive {
-            recentFilesControllersCache.removeAll()
-            let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
-                .compactMap { $0 as? HomeLargeTitleHeaderView }.first
-            driveHeaderView?.isEnabled = accountManager.drives.count > 1
-            driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
-
-            showInsufficientStorage = true
-            let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
-            reload(newViewModel: viewModel)
-            setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-        } else {
-            reloadTopRows()
-        }
     }
 
     // MARK: - Switch account delegate

@@ -42,8 +42,8 @@ extension SelectSwitchDriveDelegate {
             Task {
                 // Download root files
                 try await currentDriveFileManager.initRoot()
-                (tabBarController as? SwitchDriveDelegate)?
-                    .didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
+                let newMainTabViewController = MainTabViewController(driveFileManager: currentDriveFileManager)
+                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
             }
         }
     }

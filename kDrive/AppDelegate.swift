@@ -257,7 +257,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
                    !drive.inMaintenance {
-                    (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+                    // FIXME: We need to switch back
                 }
 
                 if let currentDrive = accountManager.getDrive(
@@ -270,8 +270,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                         .first(where: { !$0.inMaintenance }),
                         let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
-                        (rootViewController as? SwitchDriveDelegate)?
-                            .didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+                        // FIXME: We need to switch back
                     } else {
                         let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
                         let driveErrorViewController = driveErrorViewControllerNav.viewControllers
