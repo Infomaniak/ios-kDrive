@@ -343,14 +343,9 @@ extension MenuViewController {
     }
 }
 
-extension MenuViewController: SwitchAccountDelegate {
+extension MenuViewController: UpdateAccountDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
-        needsContentUpdate = true
-    }
-
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-        currentAccount = newAccount
         needsContentUpdate = true
     }
 }

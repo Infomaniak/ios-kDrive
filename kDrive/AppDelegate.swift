@@ -224,16 +224,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         @InjectService var accountManager: AccountManageable
         let currentAccount = accountManager.currentAccount!
-        let rootViewController = window?.rootViewController as? SwitchAccountDelegate
+        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
 
         if preload {
-            Task { @MainActor in
-                // if isSwitching {
-                rootViewController?.didSwitchCurrentAccount(currentAccount)
-                /* } else {
-                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                 } */
-            }
             updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         } else {
             var token: ObservationToken?
@@ -248,12 +241,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         Task {
             do {
-                let (_, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                // if isSwitching {
-                rootViewController?.didSwitchCurrentAccount(currentAccount)
-                /* } else {
-                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                 } */
+                let (account, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+                rootViewController?.didUpdateCurrentAccountInformations(account)
+                
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
                    !drive.inMaintenance {

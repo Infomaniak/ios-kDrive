@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class HomeViewController: UICollectionViewController, SwitchAccountDelegate, TopScrollable,
+class HomeViewController: UICollectionViewController, UpdateAccountDelegate, TopScrollable,
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
@@ -491,10 +491,6 @@ class HomeViewController: UICollectionViewController, SwitchAccountDelegate, Top
         if isViewLoaded {
             reloadTopRows()
         }
-    }
-
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-        // META: keep SonarCloud happy
     }
 
     // MARK: - Top scrollable

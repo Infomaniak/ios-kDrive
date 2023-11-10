@@ -223,24 +223,13 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
-extension MainTabViewController: SwitchAccountDelegate {
+extension MainTabViewController: UpdateAccountDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
-        /* for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
-                 .didUpdateCurrentAccountInformations(currentAccount)
-         } */
-    }
-
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-        updateTabBarProfilePicture()
-        /* for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
-                 .didSwitchCurrentAccount(newAccount)
-         }
-         setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
-             self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
-         } */
+        for viewController in viewControllers ?? [] where viewController.isViewLoaded {
+            ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
+                .didUpdateCurrentAccountInformations(currentAccount)
+        }
     }
 }
 

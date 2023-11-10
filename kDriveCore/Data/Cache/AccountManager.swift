@@ -24,9 +24,8 @@ import InfomaniakLogin
 import RealmSwift
 import Sentry
 
-public protocol SwitchAccountDelegate: AnyObject {
+public protocol UpdateAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
-    func didSwitchCurrentAccount(_ newAccount: Account)
 }
 
 public protocol AccountManagerDelegate: AnyObject {
