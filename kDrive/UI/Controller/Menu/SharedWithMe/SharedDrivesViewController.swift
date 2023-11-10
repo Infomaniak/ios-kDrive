@@ -62,6 +62,12 @@ class SharedDrivesViewController: UIViewController {
             tableView.backgroundView = nil
         }
     }
+
+    static func instantiate() -> SharedDrivesViewController {
+        let viewController = Storyboard.menu
+            .instantiateViewController(withIdentifier: "SharedDrivesViewController") as! SharedDrivesViewController
+        return viewController
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource

@@ -85,6 +85,11 @@ extension AppDelegate {
             return
         }
 
+        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+        guard currentDriveObjectId != driveFileManager.drive.objectId else {
+            return
+        }
+
         window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
         window.makeKeyAndVisible()
     }

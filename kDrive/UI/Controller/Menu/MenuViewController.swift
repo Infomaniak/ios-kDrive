@@ -48,64 +48,50 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     private struct MenuAction: Equatable {
         let name: String
         let image: UIImage
-        let segue: String?
 
         static let store = MenuAction(
             name: KDriveResourcesStrings.Localizable.upgradeOfferTitle,
-            image: KDriveResourcesAsset.upgradeKdrive.image,
-            segue: "toStoreSegue"
+            image: KDriveResourcesAsset.upgradeKdrive.image
         )
-
         static let sharedWithMe = MenuAction(
             name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
-            image: KDriveResourcesAsset.folderSelect2.image,
-            segue: "toDriveListSegue"
+            image: KDriveResourcesAsset.folderSelect2.image
         )
         static let lastModifications = MenuAction(
             name: KDriveResourcesStrings.Localizable.lastEditsTitle,
-            image: KDriveResourcesAsset.clock.image,
-            segue: nil
+            image: KDriveResourcesAsset.clock.image
         )
         static let images = MenuAction(
             name: KDriveResourcesStrings.Localizable.galleryTitle,
-            image: KDriveResourcesAsset.images.image,
-            segue: nil
+            image: KDriveResourcesAsset.images.image
         )
         static let myShares = MenuAction(
             name: KDriveResourcesStrings.Localizable.mySharesTitle,
-            image: KDriveResourcesAsset.folderSelect.image,
-            segue: nil
+            image: KDriveResourcesAsset.folderSelect.image
         )
         static let offline = MenuAction(
             name: KDriveResourcesStrings.Localizable.offlineFileTitle,
-            image: KDriveResourcesAsset.availableOffline.image,
-            segue: nil
+            image: KDriveResourcesAsset.availableOffline.image
         )
         static let trash = MenuAction(
             name: KDriveResourcesStrings.Localizable.trashTitle,
-            image: KDriveResourcesAsset.delete.image,
-            segue: nil
+            image: KDriveResourcesAsset.delete.image
         )
-
         static let switchUser = MenuAction(
             name: KDriveResourcesStrings.Localizable.switchUserTitle,
-            image: KDriveResourcesAsset.userSwitch.image,
-            segue: "switchUserSegue"
+            image: KDriveResourcesAsset.userSwitch.image
         )
         static let parameters = MenuAction(
             name: KDriveResourcesStrings.Localizable.settingsTitle,
-            image: KDriveResourcesAsset.parameters.image,
-            segue: "toParameterSegue"
+            image: KDriveResourcesAsset.parameters.image
         )
         static let help = MenuAction(
             name: KDriveResourcesStrings.Localizable.supportTitle,
-            image: KDriveResourcesAsset.supportLink.image,
-            segue: nil
+            image: KDriveResourcesAsset.supportLink.image
         )
         static let disconnect = MenuAction(
             name: KDriveResourcesStrings.Localizable.buttonLogout,
-            image: KDriveResourcesAsset.logout.image,
-            segue: nil
+            image: KDriveResourcesAsset.logout.image
         )
     }
 
@@ -214,20 +200,6 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
             sections[sectionIndex].actions.insert(.sharedWithMe, at: 0)
         }
     }
-
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let storeViewController = segue.destination as? StoreViewController {
-            storeViewController.driveFileManager = driveFileManager
-        } else if let fileListViewController = segue.destination as? FileListViewController {
-            fileListViewController.driveFileManager = driveFileManager
-        } else if let photoListViewController = segue.destination as? PhotoListViewController {
-            photoListViewController.driveFileManager = driveFileManager
-        } else if let parameterTableViewController = segue.destination as? ParameterTableViewController {
-            parameterTableViewController.driveFileManager = driveFileManager
-        }
-    }
 }
 
 // MARK: - Table view delegate
@@ -329,10 +301,20 @@ extension MenuViewController {
             present(alert, animated: true)
         case .help:
             UIApplication.shared.open(URLConstants.support.url)
+        case .store:
+            let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+            navigationController?.pushViewController(storeViewController, animated: true)
+        case .parameters:
+            let parameterTableViewController = ParameterTableViewController.instantiate(driveFileManager: driveFileManager)
+            navigationController?.pushViewController(parameterTableViewController, animated: true)
+        case .sharedWithMe:
+            let sharedDrivesViewController = SharedDrivesViewController.instantiate()
+            navigationController?.pushViewController(sharedDrivesViewController, animated: true)
+        case .switchUser:
+            let switchUserViewController = SwitchUserViewController.instantiate()
+            navigationController?.pushViewController(switchUserViewController, animated: true)
         default:
-            if let segue = action.segue {
-                performSegue(withIdentifier: segue, sender: nil)
-            }
+            break
         }
     }
 
