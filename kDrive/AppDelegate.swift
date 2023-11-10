@@ -81,6 +81,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         UNUserNotificationCenter.current().delegate = self
 
         if UIApplication.shared.applicationState != .background {
+            window = UIWindow()
             launchSetup()
         }
 

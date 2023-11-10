@@ -185,8 +185,20 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var refreshControl = UIRefreshControl()
 
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init(collectionViewLayout: .init())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)

@@ -144,10 +144,11 @@ class OnboardingViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    private func goToMainScreen() {
+    private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
+        let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
+        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabViewController, animated: true)
     }
 
     private func updateButtonsState() {
@@ -272,12 +273,15 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         Task {
             do {
                 _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
+                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+                    throw DriveError.unknownError
+                }
                 // Download root files
                 try await accountManager.currentDriveFileManager?.initRoot()
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 MatomoUtils.connectUser()
-                goToMainScreen()
+                goToMainScreen(with: currentDriveFileManager)
             } catch {
                 DDLogError(error)
                 if let previousAccount {
