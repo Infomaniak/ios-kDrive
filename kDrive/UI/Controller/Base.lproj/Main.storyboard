@@ -67,26 +67,6 @@
             </objects>
             <point key="canvasLocation" x="-470" y="1110"/>
         </scene>
-        <!--Main Tab View Controller-->
-        <scene sceneID="gOT-CB-BEM">
-            <objects>
-                <tabBarController storyboardIdentifier="MainTabViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="9yd-Vx-ISo" customClass="MainTabViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" itemPositioning="centered" itemSpacing="35" itemWidth="35" id="3v4-Wb-vup" customClass="MainTabBar" customModule="kDrive" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    </tabBar>
-                    <connections>
-                        <segue destination="1wZ-Vi-XZW" kind="relationship" relationship="viewControllers" id="Ege-JW-GhY"/>
-                        <segue destination="v2I-BL-BzU" kind="relationship" relationship="viewControllers" id="YmN-QU-G7Q"/>
-                        <segue destination="KTA-x3-aD3" kind="relationship" relationship="viewControllers" id="ecY-Mb-DaJ"/>
-                        <segue destination="CYM-Sz-GTs" kind="relationship" relationship="viewControllers" id="oIS-Uv-13N"/>
-                    </connections>
-                </tabBarController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="M33-V6-UVQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-684" y="644"/>
-        </scene>
         <!--Onboarding View Controller-->
         <scene sceneID="QEI-PU-Yin">
             <objects>
