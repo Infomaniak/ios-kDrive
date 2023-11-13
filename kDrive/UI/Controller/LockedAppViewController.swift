@@ -16,14 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveResources
-import LocalAuthentication
 import UIKit
 
 class LockedAppViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
+    @LazyInjectService private var appLockHelper: AppLockHelper
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -32,23 +31,13 @@ class LockedAppViewController: UIViewController {
     }
 
     func tryToUnlock() {
-        let context = LAContext()
-        let reason = KDriveResourcesStrings.Localizable.lockAppTitle
-        var error: NSError?
-        if #available(iOS 8.0, *) {
-            if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                    Task { @MainActor in
-                        if success {
-                            self.dismiss(animated: true)
-                            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(
-                                MainTabViewController.instantiate(),
-                                animated: true
-                            )
-                        }
-                    }
-                }
-            }
+        Task {
+            let reason = KDriveResourcesStrings.Localizable.lockAppTitle
+            let success = try await appLockHelper.evaluatePolicy(reason: KDriveResourcesStrings.Localizable.lockAppTitle)
+
+            guard success else { return }
+            appLockHelper.setTime()
+            (UIApplication.shared.delegate as! AppDelegate).launchSetup()
         }
     }
 
