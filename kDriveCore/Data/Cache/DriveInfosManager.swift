@@ -102,7 +102,9 @@ public class DriveInfosManager {
 
     public func getRealm() -> Realm {
         do {
-            return try Realm(configuration: realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
+            realm.refresh()
+            return realm
         } catch {
             // We can't recover from this error but at least we report it correctly on Sentry
             Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)

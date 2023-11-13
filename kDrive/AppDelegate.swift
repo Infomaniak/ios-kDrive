@@ -241,52 +241,53 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         Task {
             do {
-                let (account, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
+                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 rootViewController?.didUpdateCurrentAccountInformations(account)
 
-                if let switchedDrive,
-                   let driveFileManager = accountManager.getDriveFileManager(for: switchedDrive),
-                   !switchedDrive.inMaintenance {
-                    showMainViewController(driveFileManager: driveFileManager)
+                if let oldDriveId,
+                   let newDrive = DriveInfosManager.instance.getDrive(objectId: oldDriveId),
+                   !newDrive.inMaintenance {
+                    // The current drive is still usable, do not switch
+                    restartUploadQueue()
                     return
                 }
 
-                do {
-                    let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-                    let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-                    setRootViewController(newMainTabViewController)
-                } catch DriveError.NoDriveError.noDrive {
-                    let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                        errorType: .noDrive,
-                        drive: nil
-                    )
-                    setRootViewController(driveErrorNavigationViewController)
-                } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
-                    let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                        errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
-                        drive: drive
-                    )
-                    setRootViewController(driveErrorNavigationViewController)
-                } catch {
-                    // Unknown error do nothing
-                    return
-                }
-                // Resolving an upload queue will restart it if this is the first time
-                @InjectService var uploadQueue: UploadQueue
-
-                backgroundUploadSessionManager.reconnectBackgroundTasks()
-                DispatchQueue.global(qos: .utility).async {
-                    Log.appDelegate("Restart queue")
-                    @InjectService var photoUploader: PhotoLibraryUploader
-                    _ = photoUploader.scheduleNewPicturesForUpload()
-
-                    @InjectService var uploadQueue: UploadQueue
-                    uploadQueue.rebuildUploadQueueFromObjectsInRealm()
-                }
+                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+                accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
+                showMainViewController(driveFileManager: driveFileManager)
+                restartUploadQueue()
+            } catch DriveError.NoDriveError.noDrive {
+                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                    errorType: .noDrive,
+                    drive: nil
+                )
+                setRootViewController(driveErrorNavigationViewController)
+            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                    drive: drive
+                )
+                setRootViewController(driveErrorNavigationViewController)
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 Log.appDelegate("Error while updating user account: \(error)", level: .error)
             }
+        }
+    }
+
+    private func restartUploadQueue() {
+        // Resolving an upload queue will restart it if this is the first time
+        @InjectService var uploadQueue: UploadQueue
+
+        backgroundUploadSessionManager.reconnectBackgroundTasks()
+        DispatchQueue.global(qos: .utility).async {
+            Log.appDelegate("Restart queue")
+            @InjectService var photoUploader: PhotoLibraryUploader
+            _ = photoUploader.scheduleNewPicturesForUpload()
+
+            @InjectService var uploadQueue: UploadQueue
+            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 

@@ -92,7 +92,7 @@ public protocol AccountManageable {
     func didFailRefreshToken(_ token: ApiToken)
     func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account
     func createAndSetCurrentAccount(token: ApiToken) async throws -> Account
-    func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?)
+    func updateUser(for account: Account, registerToken: Bool) async throws -> Account
     func loadAccounts() -> [Account]
     func saveAccounts()
     func switchAccount(newAccount: Account)
@@ -326,7 +326,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return newAccount
     }
 
-    public func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?) {
+    public func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
         guard account.isConnected else {
             throw DriveError.unknownToken
         }
@@ -340,7 +340,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty else {
             removeAccount(toDeleteAccount: account)
-            throw DriveError.noDrive
+            throw DriveError.NoDriveError.noDrive
         }
 
         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
@@ -363,7 +363,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             mqService.registerForNotifications(with: driveResponse.ips)
         }
 
-        return (account, switchedDrive)
+        return account
     }
 
     public func loadAccounts() -> [Account] {

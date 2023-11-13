@@ -56,6 +56,7 @@ class SwitchUserViewController: UIViewController {
                 }
                 try await group.waitForAll()
             }
+            tableView.reloadData()
         }
     }
 
