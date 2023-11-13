@@ -87,6 +87,7 @@ class MainTabViewController: UITabBarController {
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
         let homeViewController = HomeViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
         navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
         navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
@@ -106,6 +107,7 @@ class MainTabViewController: UITabBarController {
     private static func initRootViewController(with viewModel: FileListViewModel) -> UIViewController {
         let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: fileListViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
         navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
         navigationViewController.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
