@@ -179,12 +179,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var currentFileLoadingTask: Task<Void, Never>?
 
     var driveFileManager: DriveFileManager {
-        get {
-            viewModel.driveFileManager
-        }
-        set {
-            fatalError("Tried to set a driveFileManager")
-        }
+        viewModel.driveFileManager
     }
 
     // MARK: - View controller lifecycle

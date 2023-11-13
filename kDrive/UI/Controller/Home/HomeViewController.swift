@@ -482,7 +482,7 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
     }
 
     func presentedFromTabBar() {
-        currentRecentFilesController.refreshIfNeeded()
+        currentRecentFilesController?.refreshIfNeeded()
     }
 
     // MARK: - Switch account delegate
