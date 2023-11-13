@@ -38,7 +38,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     private let dependencyInjectionHook = EarlyDIHook()
 
     private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 3
+    private static let currentStateVersion = 4
     private static let appStateVersionKey = "appStateVersionKey"
 
     var window: UIWindow?
