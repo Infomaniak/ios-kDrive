@@ -80,7 +80,7 @@ extension AppDelegate {
 
     // MARK: Set root VC
 
-    private func showMainViewController(driveFileManager: DriveFileManager) {
+    func showMainViewController(driveFileManager: DriveFileManager) {
         guard let window else {
             return
         }

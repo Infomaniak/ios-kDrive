@@ -84,6 +84,7 @@ public protocol AccountManageable {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for drive: Drive) -> DriveFileManager?
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
@@ -220,6 +221,29 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
+        let userDrives = DriveInfosManager.instance.getDrives(for: userId)
+
+        guard !userDrives.isEmpty else {
+            throw DriveError.NoDriveError.noDrive
+        }
+
+        guard let firstAvailableDrive = userDrives.first(where: { !$0.inMaintenance }) else {
+            if userDrives[0].isInTechnicalMaintenance {
+                throw DriveError.NoDriveError.maintenance(drive: userDrives[0])
+            } else {
+                throw DriveError.NoDriveError.blocked(drive: userDrives[0])
+            }
+        }
+
+        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive) else {
+            // We should always have a driveFileManager here
+            throw DriveError.NoDriveError.noDriveFileManager
+        }
+
+        return driveFileManager
     }
 
     private func clearDriveFileManagers() {

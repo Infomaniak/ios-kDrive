@@ -32,7 +32,6 @@ class LockedAppViewController: UIViewController {
 
     func tryToUnlock() {
         Task {
-            let reason = KDriveResourcesStrings.Localizable.lockAppTitle
             let success = try await appLockHelper.evaluatePolicy(reason: KDriveResourcesStrings.Localizable.lockAppTitle)
 
             guard success else { return }

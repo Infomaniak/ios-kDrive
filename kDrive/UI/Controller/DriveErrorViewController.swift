@@ -125,12 +125,16 @@ class DriveErrorViewController: UIViewController {
         circleView.cornerRadius = circleView.bounds.width / 2
     }
 
-    class func instantiate() -> DriveErrorViewController {
-        return Storyboard.main.instantiateViewController(withIdentifier: "DriveErrorViewController") as! DriveErrorViewController
+    class func instantiate(errorType: DriveErrorViewType, drive: Drive?) -> DriveErrorViewController {
+        let driveErrorViewController = Storyboard.main
+            .instantiateViewController(withIdentifier: "DriveErrorViewController") as! DriveErrorViewController
+        driveErrorViewController.driveErrorViewType = errorType
+        driveErrorViewController.drive = drive
+        return driveErrorViewController
     }
 
-    class func instantiateInNavigationController() -> UINavigationController {
-        let driveErrorViewController = instantiate()
+    class func instantiateInNavigationController(errorType: DriveErrorViewType, drive: Drive?) -> UINavigationController {
+        let driveErrorViewController = instantiate(errorType: errorType, drive: drive)
         let navigationController = UINavigationController(rootViewController: driveErrorViewController)
         navigationController.setInfomaniakAppearanceNavigationBar()
         return navigationController

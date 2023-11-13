@@ -243,37 +243,34 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             do {
                 let (account, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 rootViewController?.didUpdateCurrentAccountInformations(account)
-                
-                if let drive = switchedDrive,
-                   let driveFileManager = accountManager.getDriveFileManager(for: drive),
-                   !drive.inMaintenance {
-                    // FIXME: We need to switch back
+
+                if let switchedDrive,
+                   let driveFileManager = accountManager.getDriveFileManager(for: switchedDrive),
+                   !switchedDrive.inMaintenance {
+                    showMainViewController(driveFileManager: driveFileManager)
+                    return
                 }
 
-                if let currentDrive = accountManager.getDrive(
-                    for: accountManager.currentUserId,
-                    driveId: accountManager.currentDriveId,
-                    using: nil
-                ),
-                    currentDrive.inMaintenance {
-                    if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId)
-                        .first(where: { !$0.inMaintenance }),
-                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
-                        accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
-                        // FIXME: We need to switch back
-                    } else {
-                        let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
-                        let driveErrorViewController = driveErrorViewControllerNav.viewControllers
-                            .first as? DriveErrorViewController
-                        driveErrorViewController?.driveErrorViewType = currentDrive
-                            .isInTechnicalMaintenance ? .maintenance : .blocked
-                        if DriveInfosManager.instance.getDrives(for: currentAccount.userId).count == 1 {
-                            driveErrorViewController?.drive = currentDrive
-                        }
-                        setRootViewController(driveErrorViewControllerNav)
-                    }
+                do {
+                    let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+                    let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
+                    setRootViewController(newMainTabViewController)
+                } catch DriveError.NoDriveError.noDrive {
+                    let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                        errorType: .noDrive,
+                        drive: nil
+                    )
+                    setRootViewController(driveErrorNavigationViewController)
+                } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+                    let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                        errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                        drive: drive
+                    )
+                    setRootViewController(driveErrorNavigationViewController)
+                } catch {
+                    // Unknown error do nothing
+                    return
                 }
-
                 // Resolving an upload queue will restart it if this is the first time
                 @InjectService var uploadQueue: UploadQueue
 
@@ -414,7 +411,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         @InjectService var accountManager: AccountManageable
 
         return AppDelegate
-            .currentStateVersion == encodedVersion && !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+            .currentStateVersion == encodedVersion &&
+            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
     }
 
     // MARK: - User activity

@@ -82,35 +82,30 @@ class SwitchUserViewController: UIViewController {
     }
 
     private func switchToConnectedAccount(_ account: Account) {
-        let drives = DriveInfosManager.instance.getDrives(for: account.userId)
-        guard !drives.isEmpty else {
-            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController()
-            let driveErrorViewController = driveErrorNavigationViewController.viewControllers.first as? DriveErrorViewController
-            driveErrorViewController?.driveErrorViewType = .noDrive
+        do {
+            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+            MatomoUtils.track(eventWithCategory: .account, name: "switch")
+            MatomoUtils.connectUser()
+
+            accountManager.switchAccount(newAccount: account)
+            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
+            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+        } catch DriveError.NoDriveError.noDrive {
+            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                errorType: .noDrive,
+                drive: nil
+            )
             present(driveErrorNavigationViewController, animated: true)
-            return
-        }
-
-        guard let firstAvailableDrive = drives.first(where: { !$0.inMaintenance }) else {
-            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController()
-            let driveErrorViewController = driveErrorNavigationViewController.viewControllers.first as? DriveErrorViewController
-            driveErrorViewController?.driveErrorViewType = drives[0].isInTechnicalMaintenance ? .maintenance : .blocked
-            driveErrorViewController?.drive = drives[0]
+        } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                drive: drive
+            )
             present(driveErrorNavigationViewController, animated: true)
+        } catch {
+            // Unknown error do nothing
             return
         }
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: firstAvailableDrive) else {
-            // We should always have a driveFileManager here
-            return
-        }
-
-        MatomoUtils.track(eventWithCategory: .account, name: "switch")
-        MatomoUtils.connectUser()
-
-        accountManager.switchAccount(newAccount: account)
-        let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-        (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
     }
 
     class func instantiate() -> SwitchUserViewController {
