@@ -59,6 +59,8 @@ class MainTabViewController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        restorationIdentifier = "MainTabViewController"
+
         setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
 
         delegate = self
@@ -70,6 +72,16 @@ class MainTabViewController: UITabBarController {
         super.viewWillAppear(animated)
         configureTabBar()
         updateTabBarProfilePicture()
+    }
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+        coder.encode(selectedIndex, forKey: "SelectedIndex")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+        selectedIndex = coder.decodeInteger(forKey: "SelectedIndex")
     }
 
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
