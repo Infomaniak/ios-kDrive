@@ -38,9 +38,7 @@ extension AppDelegate {
         setGlobalTint()
 
         @InjectService var accountManager: AccountManageable
-        if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
-            showMigration()
-        } else if UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty {
+        if UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty {
             showOnboarding()
         } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
             showAppLock()
@@ -77,15 +75,6 @@ extension AppDelegate {
     }
 
     // MARK: Set root VC
-
-    private func showMigration() {
-        guard let window else {
-            return
-        }
-
-        window.rootViewController = MigrationViewController.instantiate()
-        window.makeKeyAndVisible()
-    }
 
     private func showOnboarding() {
         guard let window else {
