@@ -274,7 +274,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
             do {
                 _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-                    throw DriveError.unknownError
+                    throw DriveError.NoDriveError.noDriveFileManager
                 }
                 // Download root files
                 try await accountManager.currentDriveFileManager?.initRoot()
