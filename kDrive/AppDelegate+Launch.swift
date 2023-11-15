@@ -82,6 +82,7 @@ extension AppDelegate {
 
     func showMainViewController(driveFileManager: DriveFileManager) {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
@@ -96,6 +97,7 @@ extension AppDelegate {
 
     private func showOnboarding() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
@@ -117,6 +119,7 @@ extension AppDelegate {
 
     private func showAppLock() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
@@ -126,6 +129,7 @@ extension AppDelegate {
 
     private func showLaunchFloatingPanel() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
