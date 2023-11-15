@@ -66,6 +66,7 @@ class MainTabViewController: UITabBarController, Restorable {
         delegate = self
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         (tabBar as? MainTabBar)?.tabDelegate = self
+        photoPickerDelegate.viewController = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
