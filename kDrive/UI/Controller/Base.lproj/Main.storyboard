@@ -27,46 +27,6 @@
             </objects>
             <point key="canvasLocation" x="2216" y="644"/>
         </scene>
-        <!--HomeVC-->
-        <scene sceneID="G1I-0q-3xw">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Home" referencedIdentifier="HomeVC" id="1wZ-Vi-XZW" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Accueil" image="house" id="xll-1s-ELS"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9bC-SU-EUh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-1128" y="1110"/>
-        </scene>
-        <!--FilesVC-->
-        <scene sceneID="gFS-P5-hYU">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Files" referencedIdentifier="FilesVC" id="v2I-BL-BzU" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" image="folder" id="1ER-CJ-3VH"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="P34-jt-Moh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-917" y="1110"/>
-        </scene>
-        <!--FakeVC-->
-        <scene sceneID="YfV-JJ-VPR">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Main" referencedIdentifier="FakeVC" id="KTA-x3-aD3" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="iJZ-Vr-I2B"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="fBj-H3-jBf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-680" y="1111"/>
-        </scene>
-        <!--FilesVC-->
-        <scene sceneID="Dwi-k2-d1o">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Files" referencedIdentifier="FilesVC" id="CYM-Sz-GTs" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" image="star" selectedImage="star-fill" id="eRF-aR-lyz"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="pZD-6L-YOq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-470" y="1110"/>
-        </scene>
         <!--Onboarding View Controller-->
         <scene sceneID="QEI-PU-Yin">
             <objects>
@@ -596,13 +556,13 @@
             <size key="intrinsicContentSize" width="273" height="34"/>
         </designable>
         <designable name="QKz-Y6-C7W">
-            <size key="intrinsicContentSize" width="106" height="34"/>
+            <size key="intrinsicContentSize" width="101" height="32"/>
         </designable>
         <designable name="aqN-bN-aqi">
             <size key="intrinsicContentSize" width="513" height="17"/>
         </designable>
         <designable name="eyg-Oq-wrC">
-            <size key="intrinsicContentSize" width="183.33333333333334" height="21.666666666666668"/>
+            <size key="intrinsicContentSize" width="102" height="21.666666666666668"/>
         </designable>
         <designable name="gpt-af-Fsa">
             <size key="intrinsicContentSize" width="285.33333333333331" height="21.666666666666668"/>
@@ -613,13 +573,9 @@
     </designables>
     <resources>
         <image name="arrow-right" width="24" height="24"/>
-        <image name="folder" width="24" height="24"/>
-        <image name="house" width="24" height="24"/>
         <image name="lock_infomaniak" width="187" height="187"/>
         <image name="logo" width="209" height="56"/>
         <image name="no-drive" width="89" height="86"/>
-        <image name="star" width="24" height="24"/>
-        <image name="star-fill" width="24" height="24"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
@@ -630,13 +586,13 @@
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryButtonColor">
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
