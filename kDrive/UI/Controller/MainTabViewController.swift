@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class MainTabViewController: UITabBarController {
+class MainTabViewController: UITabBarController, Restorable {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -59,7 +59,7 @@ class MainTabViewController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        restorationIdentifier = "MainTabViewController"
+        restorationIdentifier = defaultRestorationIdentifier
 
         setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
 
