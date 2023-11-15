@@ -178,6 +178,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var bindStore = Set<AnyCancellable>()
     var currentFileLoadingTask: Task<Void, Never>?
 
+    var driveFileManager: DriveFileManager {
+        viewModel.driveFileManager
+    }
+
     // MARK: - View controller lifecycle
 
     deinit {
@@ -963,39 +967,6 @@ extension FileListViewController: FileCellDelegate {
         viewModel.didTapMore(at: indexPath)
     }
 }
-
-// MARK: - Switch drive delegate
-
-#if !ISEXTENSION
-extension FileListViewController: SwitchDriveDelegate {
-    var driveFileManager: DriveFileManager! {
-        get {
-            viewModel.driveFileManager
-        }
-        set {
-            guard viewModel != nil else { return }
-            let isDifferentDrive = newValue.drive.objectId != driveFileManager.drive.objectId
-            if isDifferentDrive {
-                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newValue)
-            } else {
-                viewModel.driveFileManager = newValue
-            }
-        }
-    }
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
-        if isDifferentDrive {
-            viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
-            setupViewModel()
-            tryLoadingFilesOrDisplayError()
-            navigationController?.popToRootViewController(animated: false)
-        } else {
-            viewModel.driveFileManager = newDriveFileManager
-        }
-    }
-}
-#endif
 
 // MARK: - Top scrollable
 

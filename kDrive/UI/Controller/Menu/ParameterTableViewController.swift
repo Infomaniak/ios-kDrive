@@ -192,6 +192,13 @@ class ParameterTableViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
     }
+
+    static func instantiate(driveFileManager: DriveFileManager) -> ParameterTableViewController {
+        let viewController = Storyboard.menu
+            .instantiateViewController(withIdentifier: "ParameterTableViewController") as! ParameterTableViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
 }
 
 extension ParameterTableViewController: DeleteAccountDelegate {

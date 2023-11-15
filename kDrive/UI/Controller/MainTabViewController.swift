@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,12 +18,13 @@
 
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
-class MainTabViewController: UITabBarController, MainTabBarDelegate {
+class MainTabViewController: UITabBarController, Restorable {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -31,47 +32,41 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService var fileImportHelper: FileImportHelper
 
-    override var tabBar: MainTabBar {
-        return super.tabBar as! MainTabBar
+    let driveFileManager: DriveFileManager
+
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        var rootViewControllers = [UIViewController]()
+        rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
+        rootViewControllers.append(Self.initRootViewController(with: ConcreteFileListViewModel(
+            driveFileManager: driveFileManager,
+            currentDirectory: nil
+        )))
+        rootViewControllers.append(UIViewController())
+        rootViewControllers.append(Self.initRootViewController(with: FavoritesViewModel(
+            driveFileManager: driveFileManager,
+            currentDirectory: nil
+        )))
+        rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
+        super.init(nibName: nil, bundle: nil)
+        viewControllers = rootViewControllers
     }
 
-    var driveFileManager: DriveFileManager!
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
-            self.driveFileManager = currentDriveFileManager
-        }
+        restorationIdentifier = defaultRestorationIdentifier
 
-        if let driveFileManager {
-            configureRootViewController(
-                at: 1,
-                with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
-            )
-            configureRootViewController(
-                at: 3,
-                with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
-            )
+        setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
 
-            for viewController in viewControllers ?? [] {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?
-                    .driveFileManager = driveFileManager
-            }
-        } else {
-            viewControllers?.removeAll()
-        }
-
-        tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
-
+        tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        (tabBar as? MainTabBar)?.tabDelegate = self
         photoPickerDelegate.viewController = self
-    }
-
-    private func configureRootViewController(at index: Int, with viewModel: FileListViewModel) {
-        let rootNavigationViewController = (viewControllers?[index] as? UINavigationController)
-        (rootNavigationViewController?.viewControllers.first as? FileListViewController)?.viewModel = viewModel
-        rootNavigationViewController?.tabBarItem.image = viewModel.configuration.tabBarIcon.image
-        rootNavigationViewController?.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
     }
 
     override func viewDidLayoutSubviews() {
@@ -88,16 +83,48 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setAccessibilityLabels()
         configureTabBar()
         updateTabBarProfilePicture()
     }
 
-    private func setAccessibilityLabels() {
-        tabBar.items?[0].accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
-        tabBar.items?[1].accessibilityLabel = KDriveResourcesStrings.Localizable.fileListTitle
-        tabBar.items?[3].accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
-        tabBar.items?[4].accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+        coder.encode(selectedIndex, forKey: "SelectedIndex")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+        selectedIndex = coder.decodeInteger(forKey: "SelectedIndex")
+    }
+
+    private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
+        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
+        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
+        return navigationViewController
+    }
+
+    private static func initMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+        let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: menuViewController)
+        let (placeholder, placeholderSelected) = generateProfileTabImages(image: KDriveResourcesAsset.placeholderAvatar.image)
+        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
+        navigationViewController.tabBarItem.image = placeholder
+        navigationViewController.tabBarItem.selectedImage = placeholderSelected
+        return navigationViewController
+    }
+
+    private static func initRootViewController(with viewModel: FileListViewModel) -> UIViewController {
+        let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: fileListViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
+        navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
+        navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
+        navigationViewController.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
+        return navigationViewController
     }
 
     private func configureTabBar() {
@@ -125,23 +152,24 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func updateTabBarProfilePicture() {
-        setProfilePicture(image: KDriveResourcesAsset.placeholderAvatar.image)
+        accountManager.currentAccount?.user?.getAvatar { [weak self] image in
+            guard let self,
+                  let menuViewController = viewControllers?
+                  .compactMap({
+                      ($0 as? TitleSizeAdjustingNavigationController)?.viewControllers.first as? MenuViewController
+                  }),
+                  let menuNavigationViewController = menuViewController.first?.navigationController else { return }
 
-        accountManager.currentAccount?.user?.getAvatar { image in
-            self.setProfilePicture(image: image)
+            let (placeholder, placeholderSelected) = Self.generateProfileTabImages(image: image)
+            menuNavigationViewController.tabBarItem.image = placeholder
+            menuNavigationViewController.tabBarItem.selectedImage = placeholderSelected
         }
-
-        tabBar.tabDelegate = self
     }
 
-    private func setProfilePicture(image: UIImage) {
-        guard tabBar.items != nil && tabBar.items!.count > 4 else {
-            return
-        }
-
+    private static func generateProfileTabImages(image: UIImage) -> (UIImage, UIImage) {
         let iconSize = 28.0
 
-        tabBar.items![4].selectedImage = image
+        let selectedImage = image
             .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
             .maskImageWithRoundedRect(
                 cornerRadius: CGFloat((iconSize + 2) / 2),
@@ -150,12 +178,35 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             )
             .withRenderingMode(.alwaysOriginal)
 
-        tabBar.items![4].image = image
+        let image = image
             .resize(size: CGSize(width: iconSize, height: iconSize))
             .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
             .withRenderingMode(.alwaysOriginal)
+        return (image, selectedImage)
     }
 
+    func getCurrentDirectory() -> (DriveFileManager, File) {
+        if let filesViewController = (selectedViewController as? UINavigationController)?
+            .topViewController as? FileListViewController,
+            filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
+        } else {
+            let file = driveFileManager.getCachedRootFile()
+            return (driveFileManager, file)
+        }
+    }
+
+    func enableCenterButton(isEnabled: Bool) {
+        (tabBar as? MainTabBar)?.centerButton?.isEnabled = isEnabled
+    }
+
+    func enableCenterButton(from file: File) {
+        enableCenterButton(isEnabled: file.capabilities.canCreateFile)
+    }
+}
+
+// - MARK: MainTabBarDelegate
+extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
@@ -172,48 +223,6 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
         floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
         present(floatingPanelViewController, animated: true)
-    }
-
-    func getCurrentDirectory() -> (DriveFileManager, File) {
-        if let filesViewController = (selectedViewController as? UINavigationController)?
-            .topViewController as? FileListViewController,
-            let driveFileManager = filesViewController.driveFileManager,
-            filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-            return (driveFileManager, filesViewController.viewModel.currentDirectory)
-        } else {
-            let file = driveFileManager.getCachedRootFile()
-            return (driveFileManager, file)
-        }
-    }
-
-    func enableCenterButton(isEnabled: Bool) {
-        tabBar.centerButton?.isEnabled = isEnabled
-    }
-
-    func enableCenterButton(from file: File) {
-        enableCenterButton(isEnabled: file.capabilities.canCreateFile)
-    }
-
-    private func setDriveFileManager(_ driveFileManager: DriveFileManager?, completion: (DriveFileManager) -> Void) {
-        if let driveFileManager {
-            completion(driveFileManager)
-        } else {
-            if accountManager.drives.isEmpty {
-                let driveErrorVC = DriveErrorViewController.instantiate()
-                driveErrorVC.driveErrorViewType = .noDrive
-                (UIApplication.shared.delegate as? AppDelegate)?
-                    .setRootViewController(UINavigationController(rootViewController: driveErrorVC))
-            } else {
-                // Invalid token or unknown error
-                (UIApplication.shared.delegate as? AppDelegate)?
-                    .setRootViewController(SwitchUserViewController.instantiateInNavigationController())
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDisconnected)
-            }
-        }
-    }
-
-    class func instantiate() -> MainTabViewController {
-        return Storyboard.main.instantiateViewController(withIdentifier: "MainTabViewController") as! MainTabViewController
     }
 }
 
@@ -241,45 +250,12 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
-extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
+extension MainTabViewController: UpdateAccountDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
+            ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
                 .didUpdateCurrentAccountInformations(currentAccount)
-        }
-    }
-
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-        updateTabBarProfilePicture()
-        for viewController in viewControllers ?? [] where viewController.isViewLoaded {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?
-                .didSwitchCurrentAccount(newAccount)
-        }
-        setDriveFileManager(accountManager.currentDriveFileManager) { currentDriveFileManager in
-            self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
-        }
-    }
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        driveFileManager = newDriveFileManager
-        // Tell Files app that the drive changed
-        DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-            manager.signalEnumerator(for: .workingSet) { _ in
-                // META: keep SonarCloud happy
-            }
-            manager.signalEnumerator(for: .rootContainer) { _ in
-                // META: keep SonarCloud happy
-            }
-        }
-        for viewController in viewControllers ?? [] {
-            guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers
-                .first as? UIViewController & SwitchDriveDelegate else { continue }
-            if switchDriveDelegate.isViewLoaded {
-                switchDriveDelegate.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
-            } else {
-                switchDriveDelegate.driveFileManager = driveFileManager
-            }
         }
     }
 }

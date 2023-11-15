@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -55,6 +56,7 @@ class SwitchUserViewController: UIViewController {
                 }
                 try await group.waitForAll()
             }
+            tableView.reloadData()
         }
     }
 
@@ -80,6 +82,33 @@ class SwitchUserViewController: UIViewController {
         present(nextViewController, animated: true)
     }
 
+    private func switchToConnectedAccount(_ account: Account) {
+        do {
+            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+            MatomoUtils.track(eventWithCategory: .account, name: "switch")
+            MatomoUtils.connectUser()
+
+            accountManager.switchAccount(newAccount: account)
+            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
+            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+        } catch DriveError.NoDriveError.noDrive {
+            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                errorType: .noDrive,
+                drive: nil
+            )
+            present(driveErrorNavigationViewController, animated: true)
+        } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                drive: drive
+            )
+            present(driveErrorNavigationViewController, animated: true)
+        } catch {
+            // Unknown error do nothing
+            return
+        }
+    }
+
     class func instantiate() -> SwitchUserViewController {
         return Storyboard.menu.instantiateViewController(withIdentifier: "SwitchUserViewController") as! SwitchUserViewController
     }
@@ -103,29 +132,11 @@ extension SwitchUserViewController: UITableViewDelegate {
             infomaniakLogin.webviewLoginFrom(viewController: self,
                                              hideCreateAccountButton: true,
                                              delegate: self)
+            tableView.deselectRow(at: indexPath, animated: true)
             return
         }
 
-        let drives = DriveInfosManager.instance.getDrives(for: account.userId)
-        if drives.count == 1 && drives[0].inMaintenance {
-            let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
-            let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
-            driveErrorViewController?.driveErrorViewType = drives[0].isInTechnicalMaintenance ? .maintenance : .blocked
-            driveErrorViewController?.drive = drives[0]
-            tableView.deselectRow(at: indexPath, animated: true)
-            present(driveErrorViewControllerNav, animated: true)
-        } else {
-            MatomoUtils.track(eventWithCategory: .account, name: "switch")
-            MatomoUtils.connectUser()
-
-            accountManager.switchAccount(newAccount: account)
-            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
-            if isRootViewController {
-                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(MainTabViewController.instantiate())
-            } else {
-                navigationController?.popViewController(animated: true)
-            }
-        }
+        switchToConnectedAccount(account)
     }
 }
 
@@ -158,12 +169,11 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
         Task {
             do {
-                _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
-                Task {
-                    // Download root files
-                    try await accountManager.currentDriveFileManager?.initRoot()
-                    (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
-                }
+                let connectedAccount = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
+                // Download root files
+                try await accountManager.currentDriveFileManager?.initRoot()
+
+                switchToConnectedAccount(connectedAccount)
             } catch {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
             }

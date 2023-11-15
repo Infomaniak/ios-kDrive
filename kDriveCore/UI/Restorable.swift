@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,10 +17,13 @@
  */
 
 import Foundation
-import kDriveCore
 
-@MainActor
-protocol SwitchDriveDelegate: AnyObject {
-    var driveFileManager: DriveFileManager! { get set }
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager)
+public protocol Restorable {
+    var defaultRestorationIdentifier: String { get }
+}
+
+public extension Restorable {
+    var defaultRestorationIdentifier: String {
+        return String(describing: Self.self)
+    }
 }

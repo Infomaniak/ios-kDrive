@@ -144,10 +144,11 @@ class OnboardingViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    private func goToMainScreen() {
+    private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
+        let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
+        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabViewController, animated: true)
     }
 
     private func updateButtonsState() {
@@ -272,29 +273,31 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         Task {
             do {
                 _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
+                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+                    throw DriveError.NoDriveError.noDriveFileManager
+                }
                 // Download root files
                 try await accountManager.currentDriveFileManager?.initRoot()
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 MatomoUtils.connectUser()
-                goToMainScreen()
+                goToMainScreen(with: currentDriveFileManager)
             } catch {
-                DDLogError(error)
+                DDLogError("Error on didCompleteLoginWith \(error)")
+
                 if let previousAccount {
                     accountManager.switchAccount(newAccount: previousAccount)
                 }
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
-                    let driveErrorVC = DriveErrorViewController.instantiate()
-                    driveErrorVC.driveErrorViewType = .noDrive
+                    let driveErrorVC = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
                     present(driveErrorVC, animated: true)
                 } else if let driveError = error as? DriveError,
                           driveError == .noDrive
                           || driveError == .productMaintenance
                           || driveError == .driveMaintenance
                           || driveError == .blocked {
-                    let driveErrorVC = DriveErrorViewController.instantiate()
                     let errorViewType: DriveErrorViewController.DriveErrorViewType
                     switch driveError {
                     case .productMaintenance, .driveMaintenance:
@@ -304,7 +307,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     default:
                         errorViewType = .noDrive
                     }
-                    driveErrorVC.driveErrorViewType = errorViewType
+                    let driveErrorVC = DriveErrorViewController.instantiate(errorType: errorViewType, drive: nil)
                     present(driveErrorVC, animated: true)
                 } else {
                     SentrySDK.capture(error: error) { scope in

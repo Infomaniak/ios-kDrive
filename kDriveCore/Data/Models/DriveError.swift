@@ -61,6 +61,20 @@ public struct DriveError: Error, Equatable {
         case chunksNumberOutOfBounds
     }
 
+    public enum NoDriveError: Error {
+        /// Drive list is empty
+        case noDrive
+
+        /// User has only one drive and it is in maintenance
+        case maintenance(drive: Drive)
+
+        /// User has only one drive and it is blocked
+        case blocked(drive: Drive)
+
+        /// No drive file manager was found
+        case noDriveFileManager
+    }
+
     public enum UserInfoKey: String, Codable {
         case fileId
         case status

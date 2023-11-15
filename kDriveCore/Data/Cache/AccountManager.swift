@@ -24,9 +24,8 @@ import InfomaniakLogin
 import RealmSwift
 import Sentry
 
-public protocol SwitchAccountDelegate: AnyObject {
+public protocol UpdateAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
-    func didSwitchCurrentAccount(_ newAccount: Account)
 }
 
 public protocol AccountManagerDelegate: AnyObject {
@@ -85,6 +84,7 @@ public protocol AccountManageable {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for drive: Drive) -> DriveFileManager?
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
@@ -92,7 +92,7 @@ public protocol AccountManageable {
     func didFailRefreshToken(_ token: ApiToken)
     func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account
     func createAndSetCurrentAccount(token: ApiToken) async throws -> Account
-    func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?)
+    func updateUser(for account: Account, registerToken: Bool) async throws -> Account
     func loadAccounts() -> [Account]
     func saveAccounts()
     func switchAccount(newAccount: Account)
@@ -223,6 +223,29 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
+    public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
+        let userDrives = DriveInfosManager.instance.getDrives(for: userId)
+
+        guard !userDrives.isEmpty else {
+            throw DriveError.NoDriveError.noDrive
+        }
+
+        guard let firstAvailableDrive = userDrives.first(where: { !$0.inMaintenance }) else {
+            if userDrives[0].isInTechnicalMaintenance {
+                throw DriveError.NoDriveError.maintenance(drive: userDrives[0])
+            } else {
+                throw DriveError.NoDriveError.blocked(drive: userDrives[0])
+            }
+        }
+
+        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive) else {
+            // We should always have a driveFileManager here
+            throw DriveError.NoDriveError.noDriveFileManager
+        }
+
+        return driveFileManager
+    }
+
     private func clearDriveFileManagers() {
         driveFileManagers.removeAll()
     }
@@ -303,7 +326,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return newAccount
     }
 
-    public func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?) {
+    public func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
         guard account.isConnected else {
             throw DriveError.unknownToken
         }
@@ -317,7 +340,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty else {
             removeAccount(toDeleteAccount: account)
-            throw DriveError.noDrive
+            throw DriveError.NoDriveError.noDrive
         }
 
         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
@@ -340,7 +363,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             mqService.registerForNotifications(with: driveResponse.ips)
         }
 
-        return (account, switchedDrive)
+        return account
     }
 
     public func loadAccounts() -> [Account] {

@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable,
+class HomeViewController: UICollectionViewController, UpdateAccountDelegate, TopScrollable,
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
@@ -185,8 +185,20 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var refreshControl = UIRefreshControl()
 
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init(collectionViewLayout: .init())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
@@ -470,29 +482,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func presentedFromTabBar() {
-        currentRecentFilesController.refreshIfNeeded()
-    }
-
-    // MARK: - Switch drive delegate
-
-    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-        let isDifferentDrive = newDriveFileManager.drive.id != driveFileManager.drive.id
-        driveFileManager = newDriveFileManager
-
-        if isDifferentDrive {
-            recentFilesControllersCache.removeAll()
-            let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
-                .compactMap { $0 as? HomeLargeTitleHeaderView }.first
-            driveHeaderView?.isEnabled = accountManager.drives.count > 1
-            driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
-
-            showInsufficientStorage = true
-            let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
-            reload(newViewModel: viewModel)
-            setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-        } else {
-            reloadTopRows()
-        }
+        currentRecentFilesController?.refreshIfNeeded()
     }
 
     // MARK: - Switch account delegate
@@ -501,10 +491,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         if isViewLoaded {
             reloadTopRows()
         }
-    }
-
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-        // META: keep SonarCloud happy
     }
 
     // MARK: - Top scrollable

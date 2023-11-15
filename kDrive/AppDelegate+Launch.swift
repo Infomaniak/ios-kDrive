@@ -42,7 +42,8 @@ extension AppDelegate {
             showOnboarding()
         } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
             showAppLock()
-        } else {
+        } else if let driveFileManager = accountManager.currentDriveFileManager {
+            showMainViewController(driveFileManager: driveFileManager)
             UserDefaults.shared.numberOfConnections += 1
 
             // Show launch floating panel
@@ -59,6 +60,9 @@ extension AppDelegate {
 
             // Ask to remove uploaded pictures
             askUserToRemovePicturesIfNecessary()
+        } else {
+            // Default to show onboarding
+            showOnboarding()
         }
     }
 
@@ -76,8 +80,24 @@ extension AppDelegate {
 
     // MARK: Set root VC
 
+    func showMainViewController(driveFileManager: DriveFileManager) {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
+        }
+
+        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+        guard currentDriveObjectId != driveFileManager.drive.objectId else {
+            return
+        }
+
+        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
+        window.makeKeyAndVisible()
+    }
+
     private func showOnboarding() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
@@ -99,6 +119,7 @@ extension AppDelegate {
 
     private func showAppLock() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 
@@ -108,6 +129,7 @@ extension AppDelegate {
 
     private func showLaunchFloatingPanel() {
         guard let window else {
+            SentryDebug.captureNoWindow()
             return
         }
 

@@ -234,4 +234,10 @@ public enum SentryDebug {
             SentrySDK.addBreadcrumb(breadcrumb)
         }
     }
+
+    // MARK: - No Window
+
+    public static func captureNoWindow() {
+        SentrySDK.capture(message: "Trying to call show with no window")
+    }
 }
