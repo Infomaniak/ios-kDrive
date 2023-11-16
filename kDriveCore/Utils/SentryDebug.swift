@@ -240,4 +240,12 @@ public enum SentryDebug {
     public static func captureNoWindow() {
         SentrySDK.capture(message: "Trying to call show with no window")
     }
+
+    // MARK: - Save Media Error
+
+    public static func saveMediaError(_ error: Error) {
+        SentrySDK.capture(message: "Failed to save media") { scope in
+            scope.setContext(value: ["Underlying Error": error], key: "Error")
+        }
+    }
 }

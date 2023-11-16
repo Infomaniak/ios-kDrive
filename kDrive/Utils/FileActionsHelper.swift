@@ -146,6 +146,7 @@ public final class FileActionsHelper {
                                   })
             } catch {
                 DDLogError("Cannot save media: \(error)")
+                SentryDebug.saveMediaError(error)
                 await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
             }
         }
