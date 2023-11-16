@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import RealmSwift
 
 public extension DriveFileManager {
     func fileListing(in directory: ProxyFile,
@@ -44,21 +45,74 @@ public extension DriveFileManager {
         let managedParent = try directory.resolve(using: realm)
 
         try realm.write {
-            managedParent.lastCursor = nextCursor
-            managedParent.versionCode = DriveFileManager.constants.currentVersionCode
-
             realm.add(children, update: .modified)
-            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
-            // the first page will result in an undefined behavior.
+
             if lastCursor == nil {
                 managedParent.children.removeAll()
             }
             managedParent.children.insert(objectsIn: children)
+
+            handleActions(result.data.actions, actionsFiles: result.data.actionsFiles, directory: managedParent, using: realm)
+
+            managedParent.lastCursor = nextCursor
+            managedParent.versionCode = DriveFileManager.constants.currentVersionCode
         }
 
         return (
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
             hasMore ? nextCursor : nil
         )
+    }
+
+    func handleActions(_ actions: [FileAction], actionsFiles: [File], directory: File, using realm: Realm) {
+        let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
+
+        for fileAction in actions {
+            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first else { continue }
+
+            switch fileAction.action {
+            case .fileDelete, .fileTrash:
+                removeFileInDatabase(fileId: fileAction.fileId, cascade: true, withTransaction: false, using: realm)
+
+            case .fileMoveOut:
+                guard let movedOutFile: File = realm.getObject(id: fileAction.fileId),
+                      let oldParent = movedOutFile.parent else { continue }
+
+                oldParent.children.remove(movedOutFile)
+
+            case .fileRename:
+                guard let oldFile: File = realm.getObject(id: fileAction.fileId) else { continue }
+                try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
+                // If the file is a folder we have to copy the old attributes which are not returned by the API
+                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
+                realm.add(actionFile, update: .modified)
+                actionFile.applyLastModifiedDateToLocalFile()
+
+            case .fileMoveIn, .fileRestore, .fileCreate:
+                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
+                realm.add(actionFile, update: .modified)
+
+                if let existingFile: File = realm.getObject(id: fileAction.fileId),
+                   let oldParent = existingFile.parent {
+                    oldParent.children.remove(existingFile)
+                }
+                directory.children.insert(actionFile)
+
+            case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete,
+                 .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate,
+                 .fileColorDelete:
+                guard actionFile.isTrashed else {
+                    removeFileInDatabase(fileId: fileAction.fileId, cascade: true, withTransaction: false, using: realm)
+                    continue
+                }
+
+                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
+                realm.add(actionFile, update: .modified)
+                directory.children.insert(actionFile)
+
+            default:
+                break
+            }
+        }
     }
 }
