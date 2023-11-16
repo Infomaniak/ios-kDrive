@@ -100,26 +100,19 @@ class ConcreteFileListViewModel: FileListViewModel {
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         guard !isLoading || cursor != nil else { return }
 
-        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
-            // try await loadActivitiesIfNeeded()
-        } else {
-            startRefreshing(cursor: cursor)
-            defer {
-                endRefreshing()
-            }
-
-            let (_, nextCursor) = try await driveFileManager.files(
-                in: currentDirectory.proxify(),
-                cursor: cursor,
-                sortType: sortType,
-                forceRefresh: forceRefresh
-            )
+        startRefreshing(cursor: cursor)
+        defer {
             endRefreshing()
-            if let nextCursor {
-                try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
-            } else if !forceRefresh {
-                try await loadActivities()
-            }
+        }
+
+        let (_, nextCursor) = try await driveFileManager.fileListing(
+            in: currentDirectory.proxify(),
+            sortType: sortType,
+            forceRefresh: forceRefresh
+        )
+        endRefreshing()
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
         }
     }
 
