@@ -1508,7 +1508,7 @@ public final class DriveFileManager {
         static let all: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .path, .users, .version, .capabilities]
     }
 
-    private func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
+    func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
