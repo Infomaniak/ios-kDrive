@@ -457,7 +457,7 @@ public extension Endpoint {
     }
 
     static func rename(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/rename", queryItems: [FileWith.fileMinimal.toQueryItem()])
+        return .fileInfoV2(file).appending(path: "/rename", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func count(of directory: AbstractFile) -> Endpoint {
