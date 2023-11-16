@@ -18,14 +18,12 @@
 
 import Foundation
 
-public struct ListingResult: Codable {
-    public let actions: [FileAction]
-    public let files: [File]
-    public let actionsFiles: [File]
+public struct FileAction: Codable {
+    let action: FileActivityType
+    let fileId: Int
 
     enum CodingKeys: String, CodingKey {
-        case actions
-        case files
-        case actionsFiles = "actions_files"
+        case action
+        case fileId = "file_id"
     }
 }

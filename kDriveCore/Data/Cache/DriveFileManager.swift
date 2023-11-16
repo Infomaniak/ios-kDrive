@@ -1413,7 +1413,7 @@ public final class DriveFileManager {
         return Array(children.freeze())
     }
 
-    private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
+    func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
@@ -1581,6 +1581,10 @@ public extension Realm {
         } else {
             try write(block)
         }
+    }
+
+    func getObject<RealmObject: Object, KeyType>(id: KeyType) -> RealmObject? {
+        object(ofType: RealmObject.self, forPrimaryKey: id)
     }
 }
 
