@@ -117,7 +117,7 @@ class ConcreteFileListViewModel: FileListViewModel {
     }
 
     override func loadActivities() async throws {
-        _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
+        try await loadFiles()
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {
