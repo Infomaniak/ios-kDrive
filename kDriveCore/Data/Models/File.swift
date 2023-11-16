@@ -337,6 +337,8 @@ public final class FileVersion: EmbeddedObject, Codable {
     }
 }
 
+public typealias FileCursor = String
+
 public final class File: Object, Codable {
     private let fileManager = FileManager.default
 
@@ -403,6 +405,8 @@ public final class File: Object, Codable {
     @Persisted public var version: FileVersion? // Extra property
     /// File can be converted to another extension
     @Persisted public var conversion: FileConversion?
+
+    @Persisted public var lastCursor: FileCursor?
 
     // Other
     @Persisted public var children: MutableSet<File>
