@@ -53,8 +53,10 @@ class StoreRequest {
                         DDLogError("[StoreRequest] Server error")
                         if let error = result.error {
                             DDLogError("[StoreRequest] \(error)")
-                            // Send server error to Sentry
-                            SentrySDK.capture(error: error)
+                            Task {
+                                // Send server error to Sentry
+                                SentrySDK.capture(error: error)
+                            }
                         }
                     }
                 case .failure(let error):

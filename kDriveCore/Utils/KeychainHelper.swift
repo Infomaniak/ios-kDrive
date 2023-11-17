@@ -124,7 +124,9 @@ public enum KeychainHelper {
                     ]
                     resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
                     DDLogInfo("Successfully updated token ? \(resultCode == noErr)")
-                    SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully updated token"))
+                    Task {
+                        SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully updated token"))
+                    }
                 }
             }
         } else {
@@ -140,15 +142,20 @@ public enum KeychainHelper {
                 ]
                 resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
                 DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
-                SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully saved token"))
+                Task {
+                    SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully saved token"))
+                }
             }
         }
         if resultCode != noErr {
-            SentrySDK.addBreadcrumb(token.generateBreadcrumb(
-                level: .error,
-                message: "Failed saving token",
-                keychainError: resultCode
-            ))
+            let code = resultCode
+            Task {
+                SentrySDK.addBreadcrumb(token.generateBreadcrumb(
+                    level: .error,
+                    message: "Failed saving token",
+                    keychainError: code
+                ))
+            }
         }
     }
 
@@ -203,11 +210,13 @@ public enum KeychainHelper {
             DDLogInfo("Successfully loaded tokens ? \(resultCode == noErr)")
 
             guard resultCode == noErr else {
-                let crumb = Breadcrumb(level: .error, category: "Token")
-                crumb.type = "error"
-                crumb.message = "Failed loading tokens"
-                crumb.data = ["Keychain error code": resultCode]
-                SentrySDK.addBreadcrumb(crumb)
+                Task {
+                    let crumb = Breadcrumb(level: .error, category: "Token")
+                    crumb.type = "error"
+                    crumb.message = "Failed loading tokens"
+                    crumb.data = ["Keychain error code": resultCode]
+                    SentrySDK.addBreadcrumb(crumb)
+                }
                 return
             }
 
@@ -226,7 +235,9 @@ public enum KeychainHelper {
             }
 
             if let token = values.first {
-                SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully loaded token"))
+                Task {
+                    SentrySDK.addBreadcrumb(token.generateBreadcrumb(level: .info, message: "Successfully loaded token"))
+                }
             }
         }
         return values

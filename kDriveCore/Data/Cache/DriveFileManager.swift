@@ -1049,7 +1049,9 @@ public final class DriveFileManager {
                 // No need to wait for the response, no error will be returned
             }
         } else {
-            SentrySDK.capture(message: message)
+            Task {
+                SentrySDK.capture(message: message)
+            }
         }
         // Silently handle error
         DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")

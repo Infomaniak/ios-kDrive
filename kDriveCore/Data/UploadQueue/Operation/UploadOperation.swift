@@ -373,11 +373,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     "No identifier for chunkId:\(uploadedChunk.number) in SUCCESS ufid:\(self.uploadFileId)",
                     level: .error
                 )
-                SentrySDK.capture(message: "Missing chunk identifier") { scope in
-                    scope.setContext(
-                        value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId],
-                        key: "Chunk Infos"
-                    )
+                Task {
+                    SentrySDK.capture(message: "Missing chunk identifier") { scope in
+                        scope.setContext(
+                            value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId],
+                            key: "Chunk Infos"
+                        )
+                    }
                 }
 
                 // We may be running both the app and the extension
@@ -395,8 +397,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             }
         } notFound: {
             Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
-            SentrySDK.capture(message: "Upload matching chunk failed") { scope in
-                scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId], key: "Chunk Infos")
+            Task {
+                SentrySDK.capture(message: "Upload matching chunk failed") { scope in
+                    scope.setContext(value: ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId], key: "Chunk Infos")
+                }
             }
 
             throw ErrorDomain.unableToMatchUploadChunk

@@ -45,10 +45,12 @@ public enum Logging {
     }
 
     public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration) -> Never {
-        SentrySDK.capture(error: error) { scope in
-            scope.setContext(value: [
-                "File URL": realmConfiguration.fileURL?.absoluteString ?? ""
-            ], key: "Realm")
+        Task {
+            SentrySDK.capture(error: error) { scope in
+                scope.setContext(value: [
+                    "File URL": realmConfiguration.fileURL?.absoluteString ?? ""
+                ], key: "Realm")
+            }
         }
         #if DEBUG
         copyDebugInformations()

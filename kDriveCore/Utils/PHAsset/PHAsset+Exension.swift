@@ -143,9 +143,11 @@ public extension PHAsset {
 
             return targetURL
         } catch {
-            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
-            breadcrumb.message = error.localizedDescription
-            SentrySDK.addBreadcrumb(breadcrumb)
+            Task {
+                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
+                breadcrumb.message = error.localizedDescription
+                SentrySDK.addBreadcrumb(breadcrumb)
+            }
         }
         return nil
     }

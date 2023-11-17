@@ -69,7 +69,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
             Log.appDelegate("Error while setting playback audio category", level: .error)
-            SentrySDK.capture(error: error)
+            Task {
+                SentrySDK.capture(error: error)
+            }
         }
 
         registerBackgroundTasks()

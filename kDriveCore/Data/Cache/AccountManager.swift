@@ -273,11 +273,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
-        SentrySDK.capture(message: "Failed refreshing token") { scope in
-            scope.setContext(
-                value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970],
-                key: "Token Infos"
-            )
+        Task {
+            SentrySDK.capture(message: "Failed refreshing token") { scope in
+                scope.setContext(
+                    value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970],
+                    key: "Token Infos"
+                )
+            }
         }
         tokens.removeAll { $0.userId == token.userId }
         KeychainHelper.deleteToken(for: token.userId)

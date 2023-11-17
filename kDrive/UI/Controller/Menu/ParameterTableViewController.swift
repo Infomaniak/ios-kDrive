@@ -217,7 +217,9 @@ extension ParameterTableViewController: DeleteAccountDelegate {
     }
 
     func didFailDeleteAccount(error: InfomaniakLoginError) {
-        SentrySDK.capture(error: error)
+        Task.detached {
+            SentrySDK.capture(error: error)
+        }
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarErrorAccountDeletion)
     }
 }

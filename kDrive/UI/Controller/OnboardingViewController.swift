@@ -127,7 +127,9 @@ class OnboardingViewController: UIViewController {
     @IBAction func signInButtonPressed(_ sender: Any) {
         MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Login WebView") { [weak self] in
-            SentrySDK.capture(message: "Background task expired while logging in")
+            Task {
+                SentrySDK.capture(message: "Background task expired while logging in")
+            }
             self?.endBackgroundTask()
         }
         infomaniakLogin.webviewLoginFrom(viewController: self,
@@ -310,10 +312,12 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     let driveErrorVC = DriveErrorViewController.instantiate(errorType: errorViewType, drive: nil)
                     present(driveErrorVC, animated: true)
                 } else {
-                    SentrySDK.capture(error: error) { scope in
-                        scope.setContext(value: [
-                            "Underlying Error": error.asAFError?.underlyingError.debugDescription ?? "Not an AFError"
-                        ], key: "Error")
+                    Task {
+                        SentrySDK.capture(error: error) { scope in
+                            scope.setContext(value: [
+                                "Underlying Error": error.asAFError?.underlyingError.debugDescription ?? "Not an AFError"
+                            ], key: "Error")
+                        }
                     }
                     okAlert(
                         title: KDriveResourcesStrings.Localizable.errorTitle,

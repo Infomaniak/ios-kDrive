@@ -24,7 +24,7 @@ import Sentry
 import UIKit
 
 @MainActor
-class FilePresenter {
+final class FilePresenter {
     @LazyInjectService var accountManager: AccountManageable
 
     weak var viewController: UIViewController?
@@ -178,8 +178,10 @@ class FilePresenter {
                 viewController?.present(safariViewController, animated: animated)
                 completion?(true)
             } else {
-                SentrySDK.capture(message: "Tried to present unsupported scheme") { scope in
-                    scope.setContext(value: ["URL": url.absoluteString], key: "Details")
+                Task {
+                    SentrySDK.capture(message: "Tried to present unsupported scheme") { scope in
+                        scope.setContext(value: ["URL": url.absoluteString], key: "Details")
+                    }
                 }
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                 completion?(false)
