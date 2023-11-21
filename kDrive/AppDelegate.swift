@@ -39,6 +39,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 4
     private static let appStateVersionKey = "appStateVersionKey"
+    private var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
 
@@ -121,6 +122,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         }
 
+        if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
+            shortcutItemToProcess = shortcutItem
+        }
+
         return true
     }
 
@@ -160,6 +165,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             lockHelper.setTime()
         }
+    }
+
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        shortcutItemToProcess = shortcutItem
     }
 
     func application(_ application: UIApplication,
@@ -228,6 +237,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         // Migration from old UserDefaults
         if UserDefaults.shared.legacyIsFirstLaunch {
             UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
+		}
+	}
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        if let shortcutItem = shortcutItemToProcess {
+
         }
     }
 
