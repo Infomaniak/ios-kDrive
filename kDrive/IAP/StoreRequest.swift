@@ -21,7 +21,6 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import kDriveCore
-import Sentry
 
 struct ReceiptInfo: Encodable {
     let latestReceipt: String
@@ -53,10 +52,7 @@ class StoreRequest {
                         DDLogError("[StoreRequest] Server error")
                         if let error = result.error {
                             DDLogError("[StoreRequest] \(error)")
-                            Task {
-                                // Send server error to Sentry
-                                SentrySDK.capture(error: error)
-                            }
+                            SentryDebug.capture(error: error)
                         }
                     }
                 case .failure(let error):

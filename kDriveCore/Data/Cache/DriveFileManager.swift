@@ -23,7 +23,6 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
-import Sentry
 import SwiftRegex
 
 public final class DriveFileManager {
@@ -1049,9 +1048,7 @@ public final class DriveFileManager {
                 // No need to wait for the response, no error will be returned
             }
         } else {
-            Task {
-                SentrySDK.capture(message: message)
-            }
+            SentryDebug.capture(message: message)
         }
         // Silently handle error
         DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")

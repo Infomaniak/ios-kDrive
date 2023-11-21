@@ -27,7 +27,6 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
-import Sentry
 import StoreKit
 import UIKit
 import UserNotifications
@@ -69,9 +68,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
             Log.appDelegate("Error while setting playback audio category", level: .error)
-            Task {
-                SentrySDK.capture(error: error)
-            }
+            SentryDebug.capture(error: error)
         }
 
         registerBackgroundTasks()

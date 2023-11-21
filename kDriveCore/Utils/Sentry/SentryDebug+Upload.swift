@@ -83,9 +83,7 @@ extension SentryDebug {
             return
         }
 
-        SentrySDK.capture(message: ErrorNames.uploadErrorHandling) { scope in
-            scope.setExtras(metadata)
-        }
+        SentryDebug.capture(message: ErrorNames.uploadErrorHandling, extras: metadata)
     }
 
     static func uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {

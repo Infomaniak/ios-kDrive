@@ -20,7 +20,6 @@ import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import SafariServices
-import Sentry
 import UIKit
 
 @MainActor
@@ -178,11 +177,10 @@ final class FilePresenter {
                 viewController?.present(safariViewController, animated: animated)
                 completion?(true)
             } else {
-                Task {
-                    SentrySDK.capture(message: "Tried to present unsupported scheme") { scope in
-                        scope.setContext(value: ["URL": url.absoluteString], key: "Details")
-                    }
-                }
+                let message = "Tried to present unsupported scheme"
+                let metadata = ["URL": url.absoluteString]
+                SentryDebug.capture(message: message, context: metadata, contextKey: "Details")
+
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                 completion?(false)
             }

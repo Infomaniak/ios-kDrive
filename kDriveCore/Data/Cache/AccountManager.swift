@@ -22,7 +22,6 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
-import Sentry
 
 public protocol UpdateAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
@@ -273,14 +272,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
-        Task {
-            SentrySDK.capture(message: "Failed refreshing token") { scope in
-                scope.setContext(
-                    value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970],
-                    key: "Token Infos"
-                )
-            }
-        }
+        let context = ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970] as [String : Any]
+        SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
+
         tokens.removeAll { $0.userId == token.userId }
         KeychainHelper.deleteToken(for: token.userId)
         if let account = account(for: token) {
