@@ -181,6 +181,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
 
     private func removeFilesAndDisableMultiSelection(_ deletedFiles: [ProxyFile]) {
         multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+        // TODO: Split code away from the ViewController, so it is not pinned to the main thread, and we can remove the .detached
         Task.detached { [weak self] in
             await self?.removeFiles(deletedFiles)
         }

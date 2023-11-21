@@ -127,6 +127,7 @@ public final class FileActionsHelper {
     }
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String?) {
+        // TODO: Move code to a dedicated type that will not be pinned to the main thread, so detached will not be needed anymore
         Task.detached {
             do {
                 @InjectService var photoLibrarySaver: PhotoLibrarySavable

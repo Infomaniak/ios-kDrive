@@ -162,7 +162,7 @@ public enum Log {
 
         if level == .error {
             // Add a breadcrumb only for .errors only
-            SentryDebug.loggerBreadcrumb(caller: "\(function)", category: category, metadata: ["message": messageString])
+            SentryDebug.loggerBreadcrumb(caller: "\(function)", metadata: ["message": messageString])
         }
 
         ABLog(messageString,
@@ -187,7 +187,6 @@ public enum Log {
 
         SentryDebug.loggerBreadcrumb(
             caller: "\(function)",
-            category: category,
             metadata: ["message": messageString],
             isError: level == .error
         )

@@ -81,7 +81,10 @@ struct PHAssetNameProvider {
             // Differentiate the file with edit date
             let editDate = modificationDate ?? now
             if modificationDate == nil {
-                SentryDebug.photoLibraryNameErrorNoModificationDate()
+                let message = "We are trying to generate a file name for a modified file, without a modification date"
+                let metadata = ["function": #function]
+                SentryDebug.addBreadcrumb(message: message, category: .viewModel, level: .error, metadata: metadata)
+                SentryDebug.capture(message: SentryDebug.ErrorNames.viewModelNotConnectedToView, extras: metadata)
             }
 
             // Making sure edited pictures on Photo.app have a unique name that will trigger an upload and do not collide.

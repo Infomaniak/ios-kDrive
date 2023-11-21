@@ -260,7 +260,12 @@ public struct DriveError: Error, Equatable {
     }
 
     public init(apiError: ApiError) {
-        SentryDebug.apiErrorBreadcrumb("\(apiError)", ["code": apiError.code, "description": apiError.description])
+        SentryDebug.addBreadcrumb(
+            message: "\(apiError)",
+            category: SentryDebug.Category.apiError,
+            level: .error,
+            metadata: ["code": apiError.code, "description": apiError.description]
+        )
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiError.code }) {
             self = error.wrapping(apiError)
         } else {

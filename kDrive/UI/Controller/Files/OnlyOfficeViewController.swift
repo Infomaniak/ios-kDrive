@@ -174,11 +174,7 @@ final class OnlyOfficeViewController: UIViewController {
     }
 
     private func showErrorMessage(context: [String: Any] = [:]) {
-        Task.detached {
-            SentrySDK.capture(message: "Failed to load office editor") { scope in
-                scope.setContext(value: context, key: "office")
-            }
-        }
+        SentryDebug.capture(message: "Failed to load office editor", context: context, contextKey: "office")
         dismiss(animated: true) {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLoadingOfficeEditor)
         }
