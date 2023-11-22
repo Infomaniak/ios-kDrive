@@ -50,9 +50,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
-    /// Use this to simulate a long running background session
-    static let simulateLongRunningSession = false
-
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
@@ -79,10 +76,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         notificationHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
 
-        if UIApplication.shared.applicationState != .background {
-            window = UIWindow()
-            launchSetup()
-        }
+        window = UIWindow()
+        setGlobalTint()
+        let currentState = RootViewControllerState.getCurrentState()
+        prepareRootViewController(currentState: currentState)
 
         if CommandLine.arguments.contains("testing") {
             UIView.setAnimationsEnabled(false)
@@ -212,10 +209,26 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
-        launchSetup()
+
+        let currentState = RootViewControllerState.getCurrentState()
+        prepareRootViewController(currentState: currentState)
+        if case .mainViewController = currentState {
+            UserDefaults.shared.numberOfConnections += 1
+            launchSetup()
+        }
 
         // Remove all notifications on App Opening
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+    }
+
+    /// Set global tint color
+    private func setGlobalTint() {
+        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
+        // Migration from old UserDefaults
+        if UserDefaults.shared.legacyIsFirstLaunch {
+            UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
+        }
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {

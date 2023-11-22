@@ -28,53 +28,21 @@ extension AppDelegate {
     // MARK: Launch
 
     func launchSetup() {
-        // Simulating a "background foreground" if requested
-        guard !Self.simulateLongRunningSession else {
-            launchSetupSimulateBackground()
-            return
-        }
-
-        // Change app tint
-        setGlobalTint()
-
-        @InjectService var accountManager: AccountManageable
-        if UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty {
-            showOnboarding()
-        } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
-            showAppLock()
-        } else if let driveFileManager = accountManager.currentDriveFileManager {
-            showMainViewController(driveFileManager: driveFileManager)
-            UserDefaults.shared.numberOfConnections += 1
-
-            // Show launch floating panel
-            showLaunchFloatingPanel()
-
-            // Request App Store review
-            requestAppStoreReview()
-
-            // Refresh data
-            refreshCacheData(preload: false, isSwitching: false)
-
-            // Upload edited files
-            uploadEditedFiles()
-
-            // Ask to remove uploaded pictures
-            askUserToRemovePicturesIfNecessary()
-        } else {
-            // Default to show onboarding
-            showOnboarding()
-        }
+        refreshCacheData(preload: false, isSwitching: false)
+        uploadEditedFiles()
     }
 
-    private func launchSetupSimulateBackground() {
-        window?.rootViewController = UIViewController()
-        window?.makeKeyAndVisible()
-
-        Log.appDelegate("handleBackgroundRefresh begin")
-        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.5) {
-            self.handleBackgroundRefresh { success in
-                Log.appDelegate("handleBackgroundRefresh success:\(success)")
-            }
+    func prepareRootViewController(currentState: RootViewControllerState) {
+        switch currentState {
+        case .appLock:
+            showAppLock()
+        case .mainViewController(let driveFileManager):
+            showMainViewController(driveFileManager: driveFileManager)
+            showLaunchFloatingPanel()
+            requestAppStoreReview()
+            askUserToRemovePicturesIfNecessary()
+        case .onboarding:
+            showOnboarding()
         }
     }
 
@@ -153,16 +121,6 @@ extension AppDelegate {
             }
         } else {
             SKStoreReviewController.requestReview()
-        }
-    }
-
-    /// Set global tint color
-    private func setGlobalTint() {
-        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
-        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-        // Migration from old UserDefaults
-        if UserDefaults.shared.legacyIsFirstLaunch {
-            UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
         }
     }
 
