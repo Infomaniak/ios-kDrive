@@ -20,7 +20,6 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import Photos
-import Sentry
 
 public extension PHAsset {
     // MARK: - Hash
@@ -143,11 +142,7 @@ public extension PHAsset {
 
             return targetURL
         } catch {
-            Task {
-                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
-                breadcrumb.message = error.localizedDescription
-                SentrySDK.addBreadcrumb(breadcrumb)
-            }
+            SentryDebug.addBreadcrumb(message: error.localizedDescription, category: SentryDebug.Category.PHAsset, level: .error)
         }
         return nil
     }

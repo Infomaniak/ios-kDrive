@@ -24,6 +24,7 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
+import Sentry
 
 public enum Logging {
     public static func initLogging() {

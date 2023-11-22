@@ -23,11 +23,20 @@ import UIKit
 /// Something to track errors
 public enum SentryDebug {
     public enum Category: String {
+        /// Upload operation error handling
         case uploadOperation = "UploadOperation"
+        /// Upload queue error handling
         case uploadQueue = "UploadQueue"
+        /// API errors, not token related
         case apiError = "APIError"
+        /// API token
+        case apiToken = "Token"
+        /// View model update
         case viewModel = "ViewModel"
+        /// Model migration
         case realmMigration = "RealmMigration"
+        /// Photo library assets
+        case PHAsset
     }
 
     public enum ErrorNames {

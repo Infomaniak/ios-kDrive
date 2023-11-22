@@ -22,7 +22,6 @@ import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
-import Sentry
 import UIKit
 
 public class FloatingPanelAction: Equatable {
@@ -298,8 +297,8 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             if let file = driveFileManager.getCachedFile(id: newFile.id, freeze: false) {
                 newFile = file
             } else {
-                SentrySDK
-                    .capture(message: "Got a file that doesn't exist in Realm in FileQuickActionsFloatingPanelViewController!")
+                let message = "Got a file that doesn't exist in Realm in FileQuickActionsFloatingPanelViewController!"
+                SentryDebug.capture(message: message)
             }
         }
 

@@ -17,7 +17,6 @@
  */
 
 import Foundation
-import Sentry
 
 extension SentryDebug {
     // MARK: - UploadOperation
@@ -71,10 +70,7 @@ extension SentryDebug {
 
     static func uploadOperationErrorHandling(_ message: String, _ error: Error, _ metadata: [String: Any]) {
         // Add a breadcrumb for any error
-        let breadcrumb = Breadcrumb(level: .error, category: Category.uploadOperation.rawValue)
-        breadcrumb.message = message
-        breadcrumb.data = metadata
-        SentrySDK.addBreadcrumb(breadcrumb)
+        SentryDebug.addBreadcrumb(message: message, category: .uploadOperation, level: .error, metadata: metadata)
 
         // Skip operationFinished
         // And we capture the upload error with a detailed state of the upload task.
