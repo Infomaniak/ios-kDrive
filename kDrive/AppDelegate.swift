@@ -30,6 +30,7 @@ import Kingfisher
 import StoreKit
 import UIKit
 import UserNotifications
+import VisionKit
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
@@ -243,7 +244,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func applicationDidBecomeActive(_ application: UIApplication) {
         if let shortcutItem = shortcutItemToProcess {
 
+    private func scanAction(_ mainTabViewController: MainTabViewController, currentDriveFileManager: DriveFileManager) {
+        guard VNDocumentCameraViewController.isSupported else {
+            DDLogError("VNDocumentCameraViewController is not supported on this device")
+            return
         }
+
+        let scanDoc = VNDocumentCameraViewController()
+        let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
+        navigationViewController.modalPresentationStyle = .fullScreen
+        navigationViewController.currentDriveFileManager = currentDriveFileManager
+        scanDoc.delegate = navigationViewController
+        mainTabViewController.present(navigationViewController, animated: true)
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
