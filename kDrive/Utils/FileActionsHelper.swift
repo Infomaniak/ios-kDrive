@@ -127,6 +127,7 @@ public final class FileActionsHelper {
     }
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String?) {
+        // TODO: Move code to a dedicated type that will not be pinned to the main thread, so detached will not be needed anymore
         Task.detached {
             do {
                 @InjectService var photoLibrarySaver: PhotoLibrarySavable
@@ -150,7 +151,9 @@ public final class FileActionsHelper {
                     await UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
                 } else {
                     DDLogError("Cannot save media: \(error)")
-                    SentryDebug.saveMediaError(error)
+                    let message = "Failed to save media"
+                    let context = ["Underlying Error": error]
+                    SentryDebug.capture(message: message, context: context, contextKey: "Error")
                     await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                 }
             }

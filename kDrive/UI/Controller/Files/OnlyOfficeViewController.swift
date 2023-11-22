@@ -23,7 +23,7 @@ import Sentry
 import UIKit
 import WebKit
 
-class OnlyOfficeViewController: UIViewController {
+final class OnlyOfficeViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
     weak var previewParent: PreviewViewController?
@@ -174,9 +174,7 @@ class OnlyOfficeViewController: UIViewController {
     }
 
     private func showErrorMessage(context: [String: Any] = [:]) {
-        SentrySDK.capture(message: "Failed to load office editor") { scope in
-            scope.setContext(value: context, key: "office")
-        }
+        SentryDebug.capture(message: "Failed to load office editor", context: context, contextKey: "office")
         dismiss(animated: true) {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLoadingOfficeEditor)
         }
