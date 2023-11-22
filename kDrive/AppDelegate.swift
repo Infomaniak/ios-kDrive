@@ -243,6 +243,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         if let shortcutItem = shortcutItemToProcess {
+            @InjectService var accountManager: AccountManageable
+
+            guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+                return
+            }
+
+            // Dismiss all view controllers presented
+            rootViewController.dismiss(animated: false)
+
+            guard let navController = rootViewController.selectedViewController as? UINavigationController, let viewController = navController.topViewController, let driveFileManager = accountManager.currentDriveFileManager else {
+                return
+            }
+
+            switch shortcutItem.type {
+            case "com.infomaniak.drive.scan":
+                scanAction(rootViewController, currentDriveFileManager: driveFileManager)
+            case "com.infomaniak.drive.search":
+                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+                viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+            case "com.infomaniak.drive.upload":
+                print("UPLOAD")
+            default:
+                break
+            }
+        }
+    }
 
     private func scanAction(_ mainTabViewController: MainTabViewController, currentDriveFileManager: DriveFileManager) {
         guard VNDocumentCameraViewController.isSupported else {
