@@ -525,8 +525,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 // New token has been fetched correctly
                 if let token {
                     let message = "Refreshing token - Success with remote"
-                    let breadcrumbMetadata = (credential as ApiToken).breadcrumbMetadata()
-                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: breadcrumbMetadata)
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
 
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))

@@ -124,7 +124,7 @@ public enum KeychainHelper {
                     resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
                     DDLogInfo("Successfully updated token ? \(resultCode == noErr)")
 
-                    let metadata = token.breadcrumbMetadata()
+                    let metadata = token.breadcrumbMetadata(keychainError: resultCode)
                     SentryDebug.addBreadcrumb(
                         message: "Successfully updated token",
                         category: .apiToken,
