@@ -89,41 +89,40 @@ public enum SentryDebug {
         }
     }
 
-    public static func capture(error: Error, context: [String: Any]? = nil, contextKey: String? = nil) {
+    public static func capture(
+        error: Error,
+        context: [String: Any]? = nil,
+        contextKey: String? = nil,
+        extras: [String: Any]? = nil
+    ) {
         Task {
-            guard let context, let contextKey else {
-                SentrySDK.capture(error: error)
-                return
-            }
-
             SentrySDK.capture(error: error) { scope in
-                scope.setContext(value: context, key: contextKey)
+                if let context, let contextKey {
+                    scope.setContext(value: context, key: contextKey)
+                }
+
+                if let extras {
+                    scope.setExtras(extras)
+                }
             }
         }
     }
 
-    public static func capture(message: String, extras: [String: Any]? = nil) {
+    public static func capture(
+        message: String,
+        context: [String: Any]? = nil,
+        contextKey: String? = nil,
+        extras: [String: Any]? = nil
+    ) {
         Task {
-            guard let extras else {
-                SentrySDK.capture(message: message)
-                return
-            }
-
             SentrySDK.capture(message: message) { scope in
-                scope.setExtras(extras)
-            }
-        }
-    }
+                if let context, let contextKey {
+                    scope.setContext(value: context, key: contextKey)
+                }
 
-    public static func capture(message: String, context: [String: Any]? = nil, contextKey: String? = nil) {
-        Task {
-            guard let context, let contextKey else {
-                SentrySDK.capture(message: message)
-                return
-            }
-
-            SentrySDK.capture(message: message) { scope in
-                scope.setContext(value: context, key: contextKey)
+                if let extras {
+                    scope.setExtras(extras)
+                }
             }
         }
     }
