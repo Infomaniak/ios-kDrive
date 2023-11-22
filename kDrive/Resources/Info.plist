@@ -119,11 +119,23 @@
 	<array>
 		<dict>
 			<key>UIApplicationShortcutItemType</key>
-			<string>com.infomaniak.drive.Test</string>
+			<string>com.infomaniak.drive.import</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>Test LN</string>
+			<string>Upload photo or video</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.drive.scan</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Scan document</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.drive.search</string>
 			<key>UIApplicationShortcutItemIconType</key>
 			<string>UIApplicationShortcutIconTypeSearch</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Search</string>
 		</dict>
 	</array>
 </dict>
