@@ -145,8 +145,14 @@ public final class FileActionsHelper {
                                       }
                                   })
             } catch {
-                DDLogError("Cannot save media: \(error)")
-                await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                if #available(iOS 15, *),
+                   (error as? PHPhotosError)?.code == PHPhotosError.notEnoughSpace {
+                    await UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+                } else {
+                    DDLogError("Cannot save media: \(error)")
+                    SentryDebug.saveMediaError(error)
+                    await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                }
             }
         }
     }
