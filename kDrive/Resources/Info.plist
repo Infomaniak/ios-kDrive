@@ -137,6 +137,12 @@
 			<key>UIApplicationShortcutItemTitle</key>
 			<string>Search</string>
 		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.shortcut.support</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Support</string>
+		</dict>
 	</array>
 </dict>
 </plist>

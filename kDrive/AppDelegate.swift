@@ -266,9 +266,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
             case Constants.applicationShortcutUpload:
                 openPhoto(rootViewController, driveFileManager)
+            case Constants.applicationShortcutSupport:
+                UIApplication.shared.open(URLConstants.support.url)
             default:
                 break
             }
+
+            // reset the shortcut item
+            shortcutItemToProcess = nil
         }
     }
 
