@@ -61,6 +61,10 @@ public enum Constants {
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
 
+    public static let applicationShortcutScan = "com.infomaniak.shortcut.scan"
+    public static let applicationShortcutSearch = "com.infomaniak.shortcut.search"
+    public static let applicationShortcutUpload = "com.infomaniak.shortcut.upload"
+
     public static let notificationTopicUpload = "uploadTopic"
     public static let notificationTopicShared = "sharedTopic"
     public static let notificationTopicComments = "commentsTopic"

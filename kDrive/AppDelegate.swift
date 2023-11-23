@@ -259,20 +259,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             }
 
             switch shortcutItem.type {
-            case "com.infomaniak.drive.scan":
-                scanAction(rootViewController, currentDriveFileManager: driveFileManager)
-            case "com.infomaniak.drive.search":
+            case Constants.applicationShortcutScan:
+                openScan(rootViewController, driveFileManager)
+            case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
                 viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
-            case "com.infomaniak.drive.upload":
-                print("UPLOAD")
+            case Constants.applicationShortcutUpload:
+                openPhoto(rootViewController, driveFileManager)
             default:
                 break
             }
         }
     }
 
-    private func scanAction(_ mainTabViewController: MainTabViewController, currentDriveFileManager: DriveFileManager) {
+    private func openScan(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
         guard VNDocumentCameraViewController.isSupported else {
             DDLogError("VNDocumentCameraViewController is not supported on this device")
             return
@@ -281,7 +281,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         let scanDoc = VNDocumentCameraViewController()
         let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
         navigationViewController.modalPresentationStyle = .fullScreen
-        navigationViewController.currentDriveFileManager = currentDriveFileManager
+        navigationViewController.currentDriveFileManager = driveFileManager
         scanDoc.delegate = navigationViewController
         mainTabViewController.present(navigationViewController, animated: true)
     }
