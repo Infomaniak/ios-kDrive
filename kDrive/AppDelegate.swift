@@ -27,6 +27,8 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import PhotosUI
+import Sentry
 import StoreKit
 import UIKit
 import UserNotifications
@@ -282,6 +284,37 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         navigationViewController.currentDriveFileManager = currentDriveFileManager
         scanDoc.delegate = navigationViewController
         mainTabViewController.present(navigationViewController, animated: true)
+    }
+
+    private func openPhoto(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
+        mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
+
+        if #available(iOS 14, *) {
+            // Check permission
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
+                if authorizationStatus == .authorized {
+                    var configuration = PHPickerConfiguration(photoLibrary: .shared())
+                    configuration.selectionLimit = 0
+
+                    Task { @MainActor in
+                        let picker = PHPickerViewController(configuration: configuration)
+                        picker.delegate = mainTabViewController.photoPickerDelegate
+                        mainTabViewController.present(picker, animated: true)
+                    }
+                } else {
+                    Task { @MainActor in
+                        let alert = AlertTextViewController(
+                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
+                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
+                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                        ) {
+                            Constants.openSettings()
+                        }
+                        mainTabViewController.present(alert, animated: true)
+                    }
+                }
+            }
+        }
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
