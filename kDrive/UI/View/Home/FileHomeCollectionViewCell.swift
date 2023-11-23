@@ -37,7 +37,7 @@ final class FileHomeCollectionViewCell: FileGridCollectionViewCell {
 
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
         super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
-        timeLabel.text = Constants.formatDate(file.lastModifiedAt, style: .datetime, relative: true)
+        timeLabel.text = Constants.formatDate(file.lastModifiedAt, style: .dateTime, relative: true)
     }
 
     override func configureLoading() {
