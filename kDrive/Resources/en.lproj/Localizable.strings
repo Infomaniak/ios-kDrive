@@ -1,12 +1,32 @@
-﻿/*
+/*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
  * Release: Working copy
  * Locale: en, English
- * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Tue, 28 Feb 2023 11:43:47 +0100
+ * Exported at: Fri, 24 Nov 2023 14:20:59 +0100
  */
+
+/* loco:6093e8088464ef18a96d1db3 */
+"CFBundleDisplayName" = "Save to kDrive";
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Camera access is required to scan documents and take pictures.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID will be used to unlock the application.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Used only in debug mode.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Microphone access is required to take videos.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Access to your photo library is required to save your photos and videos.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Access to your photo library is required to save your photos.";
 
 /* loco:610a8791fa12ab20713c09e4 */
 "NotificationsDisabledDescription" = "Application notifications are disabled: you can enable them in the Settings";
@@ -81,13 +101,16 @@
 "allDeletedFilePattern" = "'Deleted on 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e58ac6621d7e5809353952 */
-"allDeletedFileRelativeTime" = "Deleted %s";
+"allDeletedFileRelativeTime" = "Deleted %@";
 
 /* loco:6049df4d5c2c3a04bc397914 */
 "allDisabled" = "Disabled";
 
 /* loco:6049df4d5c2c3a04bc397916 */
 "allEmptyInputError" = "This field cannot be empty";
+
+/* loco:62de625bdb405f26a2769423 */
+"allErrorFeatureNotAvailableInFdroid" = "Feature not available since F-Droid";
 
 /* loco:6049df4d5c2c3a04bc397917 */
 "allFileAddFavoris" = "%@ added to favorites";
@@ -129,7 +152,7 @@
 "allLastModifiedFilePattern" = "'Changed on 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e589524e0dcd1d45523c62 */
-"allLastModifiedFileRelativeTime" = "Changed %s";
+"allLastModifiedFileRelativeTime" = "Changed %@";
 
 /* loco:6049df4d5c2c3a04bc39791f */
 "allMinutesShort" = "%d min";
@@ -164,6 +187,12 @@
 /* loco:6049df4d5c2c3a04bc397928 */
 "allPdf" = "PDF";
 
+/* loco:6049dfb2105eca5bbd0801b2 */
+"allPermissionNeeded" = "You must allow access to your files to be able to upload and save them";
+
+/* loco:6315c52392205a1278658ad2 */
+"allPermissionNeededAndroid13" = "You must authorize access to your media files to be able to upload and save them. But also allow notifications to follow the progress.";
+
 /* loco:6049df4d5c2c3a04bc397929 */
 "allPictures" = "Images";
 
@@ -180,7 +209,7 @@
 "allUntitledFileName" = "Untitled";
 
 /* loco:6049df4d5c2c3a04bc39792e */
-"allUploadErrorDescription" = "The file %@ could not be uploaded: %@";
+"allUploadErrorDescription" = "The file %1$@ could not be uploaded: %2$@";
 
 /* loco:6049df4d5c2c3a04bc397abc */
 "allUploadFinishedDescription" = "%@ was uploaded";
@@ -211,6 +240,27 @@
 
 /* loco:6049df4d5c2c3a04bc397934 */
 "appSecurityTitle" = "App lock";
+
+/* loco:624458d433ab63043a0665e2 */
+"backgroundSyncCheckboxTitle" = "I’ve taken the appropriate steps";
+
+/* loco:62445198dfac30561519bea3 */
+"backgroundSyncDescription" = "To ensure proper kDrive’s functioning, please enable background synchronization on your phone";
+
+/* loco:62445593146a9b79e704cbd2 */
+"backgroundSyncOpenGuideButton" = "Open guide";
+
+/* loco:6244576b9d5f8a73f33c4fd5 */
+"backgroundSyncOpenGuideDescription" = "It may be possible that your phone model blocks the background synchronization even though the option is activated. Please follow this guide to make it work. Otherwise, you will have to manually sync your files from the application.";
+
+/* loco:624454762ecbf1044b562202 */
+"backgroundSyncSwitchDescription" = "The application will automatically synchronize your files in the background.";
+
+/* loco:62445318e5c1be37da2c5902 */
+"backgroundSyncSwitchTitle" = "Allow the application to run in the background";
+
+/* loco:62444f7ac80389157d3aabe5 */
+"backgroundSyncTitle" = "Background synchronization";
 
 /* loco:616960a4b9fa15412d6a2fb2 */
 "belongToAllCategoriesFilterDescription" = "Results must belong to all selected categories";
@@ -349,9 +399,6 @@
 
 /* loco:6049df4d5c2c3a04bc397953 */
 "buttonMenu" = "Menu";
-
-/* loco:6049df4d5c2c3a04bc397abe */
-"buttonMigrationDone" = "Let’s get started!";
 
 /* loco:6049df4d5c2c3a04bc397954 */
 "buttonMove" = "Move";
@@ -556,6 +603,15 @@
 
 /* loco:616961fe123aaf53247698b2 */
 "categoryWork" = "Work";
+
+/* loco:6193850e44b1e5524d2bad12 */
+"cloudStorageMissingPermissionNotifDescription" = "The app can’t run in background because of a missing permission.";
+
+/* loco:6049df4d5c2c3a04bc397972 */
+"cloudStorageQuerySearchImpossibleSelectDrive" = "No search possible: no drive selected";
+
+/* loco:6548a6eb63ec2f8b5001ac32 */
+"commonDocumentsDescription" = "This space belongs to %s and centralizes your organization's common files.";
 
 /* loco:6049df4d5c2c3a04bc397974 */
 "commonFolderDescription" = "Share this folder with users of kDrive %@";
@@ -808,6 +864,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a5 */
 "errorSave" = "Save error";
+
+/* loco:611ac98c6415451cf2416c62 */
+"errorShareAddUser" = "This file is already shared with this user.";
 
 /* loco:6049df4d5c2c3a04bc3979a6 */
 "errorShareLink" = "Error when creating link";
@@ -1313,32 +1372,14 @@
 /* loco:614c861005fa88548e40ee83 */
 "manageStorageTitle" = "Manage local storage";
 
+/* loco:60f0383d7d52f600347968e2 */
+"mediaFoldersSelected" = "One folder selected";
+
+/* loco:60f0387bc42bca5b372bd4b2 */
+"mediaFoldersSelected-plural" = "%d folders selected";
+
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Menu";
-
-/* loco:604ba9819f30f868ec006e32 */
-"migrateNotificationDescription" = "Please launch the kDrive app to complete the update";
-
-/* loco:604f299ee194875c6c2dea23 */
-"migrateNotificationTitle" = "Important: action is required";
-
-/* loco:6049df4d5c2c3a04bc397ac4 */
-"migratePhotoSyncSettingsDescription" = "After the migration, please reconfigure the photo backup.";
-
-/* loco:6049df4d5c2c3a04bc397ac3 */
-"migratePhotoSyncSettingsTitle" = "Please reconfigure the automatic photo backup";
-
-/* loco:6049df4d5c2c3a04bc397ac0 */
-"migrationDescription" = "Discover an application that’s been redesigned to offer you a better, more intuitive user experience.";
-
-/* loco:6049df4d5c2c3a04bc397ac1 */
-"migrationFailed" = "Migration failed.";
-
-/* loco:6049df4d5c2c3a04bc397ac2 */
-"migrationInProgress" = "Migration in progress, please wait…";
-
-/* loco:6049df4d5c2c3a04bc397abf */
-"migrationTitle" = "Welcome to the new kDrive application that’s 100% Infomaniak";
 
 /* loco:614c8925d281f46671687393 */
 "modalClearCacheDirectoryDescription" = "Do you want to clear the content of “%@”?";
@@ -1372,6 +1413,9 @@
 
 /* loco:60e44729e8e4b7695643f9b2 */
 "modalDeletePhotosDescription" = "Would you like to delete photos uploaded to kDrive from your device?";
+
+/* loco:60e725640a9a230db1197e02 */
+"modalDeletePhotosNumericDescription" = "Would you like to delete %d photos uploaded to kDrive from your device?";
 
 /* loco:60e442f92f7b3f3b756eb962 */
 "modalDeletePhotosTitle" = "Automatic photo deletion";
@@ -1427,6 +1471,9 @@
 /* loco:6049df4d5c2c3a04bc397a08 */
 "newFolderTitle" = "What would you like to add?";
 
+/* loco:64dccae7af195d3a28059bc2 */
+"newMediaDetected" = "New media detected";
+
 /* loco:60ad169bd79aa2487c624742 */
 "noAccountDescription" = "No account available. Launch the application to log in.";
 
@@ -1447,6 +1494,15 @@
 
 /* loco:60c11597ba8b664750680ca2 */
 "noMediaFolderTitle" = "No media folders available";
+
+/* loco:60f03781c286826eee1778b4 */
+"noSelectMediaFolders" = "No folder selected";
+
+/* loco:60b62f7fb38b8129cc73a443 */
+"noSyncFolderNotificationDescription" = "Click here to configure the folders to synchronize";
+
+/* loco:60b62e5614e5e874ef4bae82 */
+"noSyncFolderNotificationTitle" = "No folder selected for automatic backup";
 
 /* loco:6049df4d5c2c3a04bc397a0d */
 "notEnoughStorageDescription1" = "Your kDrive storage space is almost full. Upgrade your plan and unlock new features.";
@@ -1547,8 +1603,17 @@
 /* loco:6049df4d5c2c3a04bc397a22 */
 "picturesNoFile" = "No photo at this time";
 
+/* loco:62de5b6914fc17318c0cf062 */
+"preparingToUpload" = "Preparing to upload 1 file";
+
+/* loco:62de5bb353414972250da302 */
+"preparingToUpload-plural" = "Preparing to upload %d files";
+
 /* loco:6049df4d5c2c3a04bc397a24 */
 "previewDownloadIndication" = "Loading in progress, please wait…";
+
+/* loco:6528f45d04fb1c341b0ccfa2 */
+"previewFileProtectedError" = "No preview available, this file is password protected";
 
 /* loco:6049df4d5c2c3a04bc397a25 */
 "previewLoadError" = "Unable to load preview";
@@ -1625,6 +1690,12 @@
 /* loco:6049df4d5c2c3a04bc397a37 */
 "selectFolderTitle" = "Select a folder";
 
+/* loco:60ae665e57e7d617786850f2 */
+"selectMediaFoldersDescription" = "Select the folders on your device that should be automatically saved to your kDrive.";
+
+/* loco:60ae666c74f8302df90b4b53 */
+"selectMediaFoldersTitle" = "Folders to save";
+
 /* loco:627cf1f7089b7c7d9e3597e3 */
 "selectPhotoFormat" = "Save .HEIC photos as";
 
@@ -1659,7 +1730,7 @@
 "shareLinkOfficePermissionWriteTitle" = "Modify";
 
 /* loco:61814fb574c48e49a560d35d */
-"shareLinkPasswordRightDescription" = "Anyone who has the link will have to enter a password to access the %s.";
+"shareLinkPasswordRightDescription" = "Anyone who has the link will have to enter a password to access the %@.";
 
 /* loco:6049df4d5c2c3a04bc397a42 */
 "shareLinkPasswordRightTitle" = "With password";
@@ -1686,7 +1757,7 @@
 "shareLinkPublicRightTitle" = "Public";
 
 /* loco:618151be73ed775a66144903 */
-"shareLinkRestrictedRightDescription" = "Only the users added can access this %s according to their rights.";
+"shareLinkRestrictedRightDescription" = "Only the users added can access this %@ according to their rights.";
 
 /* loco:618e669594f4573acb14d382 */
 "shareLinkRestrictedRightDocumentDescriptionShort" = "Only the users added can access the document.";
@@ -1745,6 +1816,30 @@
 /* loco:6049df4d5c2c3a04bc397a3d */
 "sharedWithMeTitle" = "Shared with me";
 
+/* loco:655dd97d373ea808580bb882 */
+"shortcutFeedbackShortDescription" = "Support";
+
+/* loco:65523cca72fc611fb10cfe92 */
+"shortcutScanShortDescription" = "Scan";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Scan Document";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Search";
+
+/* loco:655f674ad1c3177d5f0299d2 */
+"shortcutSupportSubtitle" = "A problem, a question or a doubt? ";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Help & Support";
+
+/* loco:65523d5a72fc611fb10cfe98 */
+"shortcutUploadShortDescription" = "Upload";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Upload Photo Or Video";
+
 /* loco:629f1ad12117e31124690d64 */
 "snackBarAccountDeleted" = "Account deleted";
 
@@ -1756,6 +1851,9 @@
 
 /* loco:62a8409e5803ef33d9677572 */
 "snackBarImageVideoSaved" = "%d files saved in the photo library";
+
+/* loco:623b363bc005720bb4116802 */
+"snackBarInvalidFileNameError" = "Character \"%1$@\" of file %2$@ not supported for offline availability";
 
 /* loco:619f6999f44e9d3a394a6d62 */
 "snackBarUploadError" = "A file could not be imported";
@@ -1890,7 +1988,7 @@
 "storePeriodYear" = "year";
 
 /* loco:6126132cf0f4844e5e174b02 */
-"storePricing" = "%@ for %@";
+"storePricing" = "%1$@ for %2$@";
 
 /* loco:612612ba2fe2170e18255842 */
 "storeRetrieving" = "Retrieving…";
@@ -1945,6 +2043,12 @@
 
 /* loco:6049df4d5c2c3a04bc397a6c */
 "syncSettingsDescription" = "Automatically save the photos and videos taken with your device to your kDrive.";
+
+/* loco:6447c3523e8d13f7b80f3f62 */
+"syncSettingsNotSavedDescription" = "Do you really want to leave this page? Your changes will not be saved.";
+
+/* loco:6447c24567043ee81704f173 */
+"syncSettingsNotSavedTitle" = "Unsaved changes";
 
 /* loco:6049df4d5c2c3a04bc397a6d */
 "syncSettingsSaveDateAllPictureValue" = "All photos";
@@ -2111,11 +2215,17 @@
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "Waiting for WiFi network";
 
+/* loco:607588ae89a54b45c77c2b92 */
+"uploadOutOfMemoryError" = "Insufficient available ram memory";
+
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Some uploads are still in progress in kDrive. Open the app and keep the device connected to speed up the upload.";
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Upload suspended";
+
+/* loco:610d4d885c054476e07c0c14 */
+"uploadPermissionError" = "Additional permissions requested";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Invite via email";

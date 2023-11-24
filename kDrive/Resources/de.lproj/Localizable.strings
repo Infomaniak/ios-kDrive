@@ -1,12 +1,32 @@
-﻿/*
+/*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
  * Release: Working copy
  * Locale: de, German
- * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Tue, 28 Feb 2023 11:43:48 +0100
+ * Exported at: Fri, 24 Nov 2023 14:20:59 +0100
  */
+
+/* loco:6093e8088464ef18a96d1db3 */
+"CFBundleDisplayName" = "Speichern auf kDrive";
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Der Zugriff auf die Kamera ist erforderlich, um Dokumente zu scannen und Fotos aufzunehmen.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID wird für die Entsperrung der Anwendung verwendet.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Nur im Debugging-Modus verwendet.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Der Zugriff auf das Mikrofon ist erforderlich, um Videos aufzunehmen.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos und Videos aufzunehmen.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos zu speichern.";
 
 /* loco:610a8791fa12ab20713c09e4 */
 "NotificationsDisabledDescription" = "Anwendungsbenachrichtigungen sind deaktiviert, Sie können diesen Parameter unter Einstellungen ändern";
@@ -81,13 +101,16 @@
 "allDeletedFilePattern" = "'Gelöscht am 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e58ac6621d7e5809353952 */
-"allDeletedFileRelativeTime" = "Gelöscht %s";
+"allDeletedFileRelativeTime" = "Gelöscht %@";
 
 /* loco:6049df4d5c2c3a04bc397914 */
 "allDisabled" = "Deaktiviert";
 
 /* loco:6049df4d5c2c3a04bc397916 */
 "allEmptyInputError" = "Dieses Feld darf nicht leer sein";
+
+/* loco:62de625bdb405f26a2769423 */
+"allErrorFeatureNotAvailableInFdroid" = "Funktion nicht verfügbar seit F-Droid";
 
 /* loco:6049df4d5c2c3a04bc397917 */
 "allFileAddFavoris" = "%@ zu Favoriten hinzugefügt";
@@ -129,7 +152,7 @@
 "allLastModifiedFilePattern" = "'Geändert am 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e589524e0dcd1d45523c62 */
-"allLastModifiedFileRelativeTime" = "Geändert %s";
+"allLastModifiedFileRelativeTime" = "Geändert %@";
 
 /* loco:6049df4d5c2c3a04bc39791f */
 "allMinutesShort" = "%d min";
@@ -164,6 +187,12 @@
 /* loco:6049df4d5c2c3a04bc397928 */
 "allPdf" = "PDF";
 
+/* loco:6049dfb2105eca5bbd0801b2 */
+"allPermissionNeeded" = "Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import und zu speichern durchführen zu können";
+
+/* loco:6315c52392205a1278658ad2 */
+"allPermissionNeededAndroid13" = "Sie müssen den Zugriff auf Ihre Mediendateien genehmigen, um den Import und zu speichern durchführen zu können. Erlauben Sie aber auch Benachrichtigungen, um den Fortschritt zu verfolgen.";
+
 /* loco:6049df4d5c2c3a04bc397929 */
 "allPictures" = "Bilder";
 
@@ -180,7 +209,7 @@
 "allUntitledFileName" = "Ohne Titel";
 
 /* loco:6049df4d5c2c3a04bc39792e */
-"allUploadErrorDescription" = "Die Datei %@ konnte nicht importiert werden: %@";
+"allUploadErrorDescription" = "Die Datei %1$@ konnte nicht importiert werden: %2$@";
 
 /* loco:6049df4d5c2c3a04bc397abc */
 "allUploadFinishedDescription" = "%@ wurde importiert";
@@ -211,6 +240,27 @@
 
 /* loco:6049df4d5c2c3a04bc397934 */
 "appSecurityTitle" = "Sperrung der Anwendung";
+
+/* loco:624458d433ab63043a0665e2 */
+"backgroundSyncCheckboxTitle" = "Ich habe das Notwendige getan";
+
+/* loco:62445198dfac30561519bea3 */
+"backgroundSyncDescription" = "Um die korrekte Funktion von kDrive zu gewährleisten, aktivieren Sie bitte die Hintergrundsynchronisation auf Ihrem Telefon";
+
+/* loco:62445593146a9b79e704cbd2 */
+"backgroundSyncOpenGuideButton" = "Leitfaden öffnen";
+
+/* loco:6244576b9d5f8a73f33c4fd5 */
+"backgroundSyncOpenGuideDescription" = "Es ist möglich, dass Ihr Telefonmodell die Synchronisierung im Hintergrund blockiert, obwohl Sie die Option aktiviert haben. Bitte folgen Sie dieser Anleitung, um die Synchronisation zum Laufen zu bringen. Andernfalls müssen Sie Ihre Dateien manuell aus der App heraus synchronisieren.";
+
+/* loco:624454762ecbf1044b562202 */
+"backgroundSyncSwitchDescription" = "Die App wird Ihre Dateien automatisch im Hintergrund synchronisieren.";
+
+/* loco:62445318e5c1be37da2c5902 */
+"backgroundSyncSwitchTitle" = "Zulassen, dass die App im Hintergrund läuft";
+
+/* loco:62444f7ac80389157d3aabe5 */
+"backgroundSyncTitle" = "Hintergrundsynchronisation";
 
 /* loco:616960a4b9fa15412d6a2fb2 */
 "belongToAllCategoriesFilterDescription" = "Die Ergebnisse müssen allen ausgewählten Kategorien angehören";
@@ -349,9 +399,6 @@
 
 /* loco:6049df4d5c2c3a04bc397953 */
 "buttonMenu" = "Menü";
-
-/* loco:6049df4d5c2c3a04bc397abe */
-"buttonMigrationDone" = "Es geht los!";
 
 /* loco:6049df4d5c2c3a04bc397954 */
 "buttonMove" = "Verschieben";
@@ -556,6 +603,15 @@
 
 /* loco:616961fe123aaf53247698b2 */
 "categoryWork" = "Arbeit";
+
+/* loco:6193850e44b1e5524d2bad12 */
+"cloudStorageMissingPermissionNotifDescription" = "Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden.";
+
+/* loco:6049df4d5c2c3a04bc397972 */
+"cloudStorageQuerySearchImpossibleSelectDrive" = "Suche nicht möglich, es wurde kein Drive ausgewählt";
+
+/* loco:6548a6eb63ec2f8b5001ac32 */
+"commonDocumentsDescription" = "Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.";
 
 /* loco:6049df4d5c2c3a04bc397974 */
 "commonFolderDescription" = "Teilen Sie diesen Ordner mit den Benutzern des kDrive %@";
@@ -808,6 +864,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a5 */
 "errorSave" = "Fehler bei der Speicherung";
+
+/* loco:611ac98c6415451cf2416c62 */
+"errorShareAddUser" = "Diese Datei ist bereits für diesen Benutzer freigegeben.";
 
 /* loco:6049df4d5c2c3a04bc3979a6 */
 "errorShareLink" = "Fehler bei der Erstellung des Links";
@@ -1313,32 +1372,14 @@
 /* loco:614c861005fa88548e40ee83 */
 "manageStorageTitle" = "Verwalten von lokalem Speicher";
 
+/* loco:60f0383d7d52f600347968e2 */
+"mediaFoldersSelected" = "Ein Ordner ausgewählt";
+
+/* loco:60f0387bc42bca5b372bd4b2 */
+"mediaFoldersSelected-plural" = "%d Ordner ausgewählt";
+
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Menü";
-
-/* loco:604ba9819f30f868ec006e32 */
-"migrateNotificationDescription" = "Bitte starten Sie die App kDrive, um die Aktualisierung abzuschliessen";
-
-/* loco:604f299ee194875c6c2dea23 */
-"migrateNotificationTitle" = "Wichtiger Hinweis: Es ist eine Aktion erforderlich";
-
-/* loco:6049df4d5c2c3a04bc397ac4 */
-"migratePhotoSyncSettingsDescription" = "Bitte richten Sie nach der Migration erneut die Sicherung der Fotos ein.";
-
-/* loco:6049df4d5c2c3a04bc397ac3 */
-"migratePhotoSyncSettingsTitle" = "Bitte richten Sie erneut die automatische Sicherung Ihrer Fotos ein";
-
-/* loco:6049df4d5c2c3a04bc397ac0 */
-"migrationDescription" = "Entdecken Sie schnell eine überarbeitete Anwendung, die Ihnen ein intuitiveres und angenehmeres Benutzererlebnis bietet.";
-
-/* loco:6049df4d5c2c3a04bc397ac1 */
-"migrationFailed" = "Die Migration ist fehlgeschlagen.";
-
-/* loco:6049df4d5c2c3a04bc397ac2 */
-"migrationInProgress" = "Migration läuft, bitte warten…";
-
-/* loco:6049df4d5c2c3a04bc397abf */
-"migrationTitle" = "Willkommen bei der neuen, reinen Infomaniak-Anwendung kDrive";
 
 /* loco:614c8925d281f46671687393 */
 "modalClearCacheDirectoryDescription" = "Möchten Sie den Inhalt von \"%@\" löschen?";
@@ -1372,6 +1413,9 @@
 
 /* loco:60e44729e8e4b7695643f9b2 */
 "modalDeletePhotosDescription" = "Möchten Sie die auf kDrive hochgeladenen Fotos von Ihrem Gerät löschen?";
+
+/* loco:60e725640a9a230db1197e02 */
+"modalDeletePhotosNumericDescription" = "Möchten Sie %d Fotos von Ihrem Gerät löschen, die bereits auf kDrive hochgeladen wurden?";
 
 /* loco:60e442f92f7b3f3b756eb962 */
 "modalDeletePhotosTitle" = "Automatisches Löschen von Fotos";
@@ -1427,6 +1471,9 @@
 /* loco:6049df4d5c2c3a04bc397a08 */
 "newFolderTitle" = "Was möchten Sie hinzufügen?";
 
+/* loco:64dccae7af195d3a28059bc2 */
+"newMediaDetected" = "Neue Medien entdeckt";
+
 /* loco:60ad169bd79aa2487c624742 */
 "noAccountDescription" = "Kein Konto verfügbar. Starten Sie die Anwendung, um sich anzumelden.";
 
@@ -1447,6 +1494,15 @@
 
 /* loco:60c11597ba8b664750680ca2 */
 "noMediaFolderTitle" = "Keine Medienordner vorhanden";
+
+/* loco:60f03781c286826eee1778b4 */
+"noSelectMediaFolders" = "Kein Ordner ausgewählt";
+
+/* loco:60b62f7fb38b8129cc73a443 */
+"noSyncFolderNotificationDescription" = "Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren";
+
+/* loco:60b62e5614e5e874ef4bae82 */
+"noSyncFolderNotificationTitle" = "Keine Ordner für die automatische Sicherung ausgewählt";
 
 /* loco:6049df4d5c2c3a04bc397a0d */
 "notEnoughStorageDescription1" = "Der Speicherplatz Ihres kDrive ist fast voll. Erweitern Sie Ihr Angebot und schalten Sie neue Funktionen frei.";
@@ -1547,8 +1603,17 @@
 /* loco:6049df4d5c2c3a04bc397a22 */
 "picturesNoFile" = "Derzeit kein Foto";
 
+/* loco:62de5b6914fc17318c0cf062 */
+"preparingToUpload" = "Vorbereitung auf den Import von 1 Datei";
+
+/* loco:62de5bb353414972250da302 */
+"preparingToUpload-plural" = "Vorbereitung auf den Import von %d Dateien";
+
 /* loco:6049df4d5c2c3a04bc397a24 */
 "previewDownloadIndication" = "Wird geladen, bitte warten…";
+
+/* loco:6528f45d04fb1c341b0ccfa2 */
+"previewFileProtectedError" = "Keine Vorschau verfügbar, diese Datei ist passwortgeschützt";
 
 /* loco:6049df4d5c2c3a04bc397a25 */
 "previewLoadError" = "Vorschau kann nicht geladen werden";
@@ -1625,6 +1690,12 @@
 /* loco:6049df4d5c2c3a04bc397a37 */
 "selectFolderTitle" = "Ordner auswählen";
 
+/* loco:60ae665e57e7d617786850f2 */
+"selectMediaFoldersDescription" = "Wählen Sie die Ordner auf Ihrem Gerät aus, die automatisch auf Ihrem kDrive gesichert werden sollen.";
+
+/* loco:60ae666c74f8302df90b4b53 */
+"selectMediaFoldersTitle" = "Zu speichernde Dateien";
+
 /* loco:627cf1f7089b7c7d9e3597e3 */
 "selectPhotoFormat" = "Speichern Sie .HEIC-Fotos im Format";
 
@@ -1659,7 +1730,7 @@
 "shareLinkOfficePermissionWriteTitle" = "Bearbeiten";
 
 /* loco:61814fb574c48e49a560d35d */
-"shareLinkPasswordRightDescription" = "Jeder, der den Link hat, muss ein Passwort eingeben, um auf die %s zuzugreifen.";
+"shareLinkPasswordRightDescription" = "Jeder, der den Link hat, muss ein Passwort eingeben, um auf die %@ zuzugreifen.";
 
 /* loco:6049df4d5c2c3a04bc397a42 */
 "shareLinkPasswordRightTitle" = "Mit Passwort";
@@ -1686,7 +1757,7 @@
 "shareLinkPublicRightTitle" = "Öffentlich";
 
 /* loco:618151be73ed775a66144903 */
-"shareLinkRestrictedRightDescription" = "Nur hinzugefügte Benutzer können je nach Berechtigung auf dieses %s zugreifen.";
+"shareLinkRestrictedRightDescription" = "Nur hinzugefügte Benutzer können je nach Berechtigung auf dieses %@ zugreifen.";
 
 /* loco:618e669594f4573acb14d382 */
 "shareLinkRestrictedRightDocumentDescriptionShort" = "Nur hinzugefügte Benutzer können auf die Dokument zugreifen.";
@@ -1745,6 +1816,30 @@
 /* loco:6049df4d5c2c3a04bc397a3d */
 "sharedWithMeTitle" = "Mit mir geteilt";
 
+/* loco:655dd97d373ea808580bb882 */
+"shortcutFeedbackShortDescription" = "Support";
+
+/* loco:65523cca72fc611fb10cfe92 */
+"shortcutScanShortDescription" = "Scannen";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Dokument Scannen";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Suchen";
+
+/* loco:655f674ad1c3177d5f0299d2 */
+"shortcutSupportSubtitle" = "A problem, a question or a doubt? ";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Hilfe & Unterstützung";
+
+/* loco:65523d5a72fc611fb10cfe98 */
+"shortcutUploadShortDescription" = "Hochladen";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Foto Oder Video Hochladen";
+
 /* loco:629f1ad12117e31124690d64 */
 "snackBarAccountDeleted" = "Gelöschtes Konto";
 
@@ -1756,6 +1851,9 @@
 
 /* loco:62a8409e5803ef33d9677572 */
 "snackBarImageVideoSaved" = "%d Dateien, die in der Fotobibliothek gespeichert sind";
+
+/* loco:623b363bc005720bb4116802 */
+"snackBarInvalidFileNameError" = "Das Zeichen \"%1$@\" in der Datei %2$@ wird für die Offline-Schaltung nicht unterstützt";
 
 /* loco:619f6999f44e9d3a394a6d62 */
 "snackBarUploadError" = "Eine Datei konnte nicht importiert werden";
@@ -1890,7 +1988,7 @@
 "storePeriodYear" = "Jahr";
 
 /* loco:6126132cf0f4844e5e174b02 */
-"storePricing" = "%@ für %@";
+"storePricing" = "%1$@ für %2$@";
 
 /* loco:612612ba2fe2170e18255842 */
 "storeRetrieving" = "Wiederherstellung…";
@@ -1946,6 +2044,12 @@
 /* loco:6049df4d5c2c3a04bc397a6c */
 "syncSettingsDescription" = "Speichern Sie Ihre mit Ihrem Gerät aufgenommenen Fotos und Videos automatisch in Ihrem kDrive.";
 
+/* loco:6447c3523e8d13f7b80f3f62 */
+"syncSettingsNotSavedDescription" = "Möchten Sie diese Seite wirklich verlassen? Ihre Änderungen werden nicht gespeichert.";
+
+/* loco:6447c24567043ee81704f173 */
+"syncSettingsNotSavedTitle" = "Nicht gespeicherte Änderungen";
+
 /* loco:6049df4d5c2c3a04bc397a6d */
 "syncSettingsSaveDateAllPictureValue" = "Alle Fotos";
 
@@ -1977,7 +2081,7 @@
 "syncSettingsSyncPeriodicityOneQuarterValue" = "Alle 15 Minuten";
 
 /* loco:6049df4d5c2c3a04bc397a75 */
-"syncSettingsTitle" = "Speicherung der Fotos";
+"syncSettingsTitle" = "Sicherung der Fotos";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporäre Dateien";
@@ -2111,11 +2215,17 @@
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "Warten auf WLAN";
 
+/* loco:607588ae89a54b45c77c2b92 */
+"uploadOutOfMemoryError" = "Unzureichend verfügbarer RAM";
+
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Einige Uploads sind in kDrive noch im Gange. Öffnen Sie die App und lassen Sie das Gerät verbunden, um den Upload zu beschleunigen.";
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pause importieren";
+
+/* loco:610d4d885c054476e07c0c14 */
+"uploadPermissionError" = "Zusätzlich beantragte Genehmigungen";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Per E-Mail einladen";
