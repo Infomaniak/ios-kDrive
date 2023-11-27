@@ -264,10 +264,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
                 viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
             case Constants.applicationShortcutUpload:
                 openPhoto(rootViewController, driveFileManager)
             case Constants.applicationShortcutSupport:
                 UIApplication.shared.open(URLConstants.support.url)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "support")
             default:
                 break
             }
@@ -289,6 +291,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         navigationViewController.currentDriveFileManager = driveFileManager
         scanDoc.delegate = navigationViewController
         mainTabViewController.present(navigationViewController, animated: true)
+        MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
     }
 
     private func openPhoto(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
@@ -305,6 +308,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                         let picker = PHPickerViewController(configuration: configuration)
                         picker.delegate = mainTabViewController.photoPickerDelegate
                         mainTabViewController.present(picker, animated: true)
+                        MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
                     }
                 } else {
                     Task { @MainActor in
