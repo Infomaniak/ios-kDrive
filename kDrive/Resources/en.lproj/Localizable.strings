@@ -1,11 +1,11 @@
-﻿/*
+/*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
  * Release: Working copy
  * Locale: en, English
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Tue, 28 Feb 2023 11:43:47 +0100
+ * Exported at: Mon, 27 Nov 2023 13:37:54 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -81,7 +81,7 @@
 "allDeletedFilePattern" = "'Deleted on 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e58ac6621d7e5809353952 */
-"allDeletedFileRelativeTime" = "Deleted %s";
+"allDeletedFileRelativeTime" = "Deleted %@";
 
 /* loco:6049df4d5c2c3a04bc397914 */
 "allDisabled" = "Disabled";
@@ -129,7 +129,7 @@
 "allLastModifiedFilePattern" = "'Changed on 'dd MMM yyyy '-' HH:mm";
 
 /* loco:60e589524e0dcd1d45523c62 */
-"allLastModifiedFileRelativeTime" = "Changed %s";
+"allLastModifiedFileRelativeTime" = "Changed %@";
 
 /* loco:6049df4d5c2c3a04bc39791f */
 "allMinutesShort" = "%d min";
@@ -180,7 +180,7 @@
 "allUntitledFileName" = "Untitled";
 
 /* loco:6049df4d5c2c3a04bc39792e */
-"allUploadErrorDescription" = "The file %@ could not be uploaded: %@";
+"allUploadErrorDescription" = "The file %1$@ could not be uploaded: %2$@";
 
 /* loco:6049df4d5c2c3a04bc397abc */
 "allUploadFinishedDescription" = "%@ was uploaded";
@@ -349,9 +349,6 @@
 
 /* loco:6049df4d5c2c3a04bc397953 */
 "buttonMenu" = "Menu";
-
-/* loco:6049df4d5c2c3a04bc397abe */
-"buttonMigrationDone" = "Let’s get started!";
 
 /* loco:6049df4d5c2c3a04bc397954 */
 "buttonMove" = "Move";
@@ -556,6 +553,9 @@
 
 /* loco:616961fe123aaf53247698b2 */
 "categoryWork" = "Work";
+
+/* loco:6548a6eb63ec2f8b5001ac32 */
+"commonDocumentsDescription" = "This space belongs to %s and centralizes your organization's common files.";
 
 /* loco:6049df4d5c2c3a04bc397974 */
 "commonFolderDescription" = "Share this folder with users of kDrive %@";
@@ -1316,30 +1316,6 @@
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Menu";
 
-/* loco:604ba9819f30f868ec006e32 */
-"migrateNotificationDescription" = "Please launch the kDrive app to complete the update";
-
-/* loco:604f299ee194875c6c2dea23 */
-"migrateNotificationTitle" = "Important: action is required";
-
-/* loco:6049df4d5c2c3a04bc397ac4 */
-"migratePhotoSyncSettingsDescription" = "After the migration, please reconfigure the photo backup.";
-
-/* loco:6049df4d5c2c3a04bc397ac3 */
-"migratePhotoSyncSettingsTitle" = "Please reconfigure the automatic photo backup";
-
-/* loco:6049df4d5c2c3a04bc397ac0 */
-"migrationDescription" = "Discover an application that’s been redesigned to offer you a better, more intuitive user experience.";
-
-/* loco:6049df4d5c2c3a04bc397ac1 */
-"migrationFailed" = "Migration failed.";
-
-/* loco:6049df4d5c2c3a04bc397ac2 */
-"migrationInProgress" = "Migration in progress, please wait…";
-
-/* loco:6049df4d5c2c3a04bc397abf */
-"migrationTitle" = "Welcome to the new kDrive application that’s 100% Infomaniak";
-
 /* loco:614c8925d281f46671687393 */
 "modalClearCacheDirectoryDescription" = "Do you want to clear the content of “%@”?";
 
@@ -1550,6 +1526,9 @@
 /* loco:6049df4d5c2c3a04bc397a24 */
 "previewDownloadIndication" = "Loading in progress, please wait…";
 
+/* loco:6528f45d04fb1c341b0ccfa2 */
+"previewFileProtectedError" = "No preview available, this file is password protected";
+
 /* loco:6049df4d5c2c3a04bc397a25 */
 "previewLoadError" = "Unable to load preview";
 
@@ -1659,7 +1638,7 @@
 "shareLinkOfficePermissionWriteTitle" = "Modify";
 
 /* loco:61814fb574c48e49a560d35d */
-"shareLinkPasswordRightDescription" = "Anyone who has the link will have to enter a password to access the %s.";
+"shareLinkPasswordRightDescription" = "Anyone who has the link will have to enter a password to access the %@.";
 
 /* loco:6049df4d5c2c3a04bc397a42 */
 "shareLinkPasswordRightTitle" = "With password";
@@ -1686,7 +1665,7 @@
 "shareLinkPublicRightTitle" = "Public";
 
 /* loco:618151be73ed775a66144903 */
-"shareLinkRestrictedRightDescription" = "Only the users added can access this %s according to their rights.";
+"shareLinkRestrictedRightDescription" = "Only the users added can access this %@ according to their rights.";
 
 /* loco:618e669594f4573acb14d382 */
 "shareLinkRestrictedRightDocumentDescriptionShort" = "Only the users added can access the document.";
@@ -1890,7 +1869,7 @@
 "storePeriodYear" = "year";
 
 /* loco:6126132cf0f4844e5e174b02 */
-"storePricing" = "%@ for %@";
+"storePricing" = "%1$@ for %2$@";
 
 /* loco:612612ba2fe2170e18255842 */
 "storeRetrieving" = "Retrieving…";
@@ -1945,6 +1924,12 @@
 
 /* loco:6049df4d5c2c3a04bc397a6c */
 "syncSettingsDescription" = "Automatically save the photos and videos taken with your device to your kDrive.";
+
+/* loco:6447c3523e8d13f7b80f3f62 */
+"syncSettingsNotSavedDescription" = "Do you really want to leave this page? Your changes will not be saved.";
+
+/* loco:6447c24567043ee81704f173 */
+"syncSettingsNotSavedTitle" = "Unsaved changes";
 
 /* loco:6049df4d5c2c3a04bc397a6d */
 "syncSettingsSaveDateAllPictureValue" = "All photos";
