@@ -254,7 +254,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             // Dismiss all view controllers presented
             rootViewController.dismiss(animated: false)
 
-            guard let navController = rootViewController.selectedViewController as? UINavigationController, let viewController = navController.topViewController, let driveFileManager = accountManager.currentDriveFileManager else {
+            guard let navController = rootViewController.selectedViewController as? UINavigationController, 
+                    let viewController = navController.topViewController,
+                    let driveFileManager = accountManager.currentDriveFileManager else {
                 return
             }
 
