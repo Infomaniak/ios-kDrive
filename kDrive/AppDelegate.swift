@@ -27,12 +27,9 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
-import PhotosUI
-import Sentry
 import StoreKit
 import UIKit
 import UserNotifications
-import VisionKit
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
@@ -262,13 +259,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
             switch shortcutItem.type {
             case Constants.applicationShortcutScan:
-                openScan(rootViewController, driveFileManager)
+                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+                openMediaHelper.openScan(mainTabViewController, false)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
             case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
                 viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
             case Constants.applicationShortcutUpload:
-                openPhoto(rootViewController, driveFileManager)
+                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+                openMediaHelper.openMedia(mainTabViewController, .library)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
             case Constants.applicationShortcutSupport:
                 UIApplication.shared.open(URLConstants.support.url)
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "support")
@@ -279,18 +280,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             // reset the shortcut item
             shortcutItemToProcess = nil
         }
-    }
-
-    private func openScan(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
-        let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-        openMediaHelper.openScan(mainTabViewController, false)
-        MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
-    }
-
-    private func openPhoto(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
-        let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-        openMediaHelper.openMedia(mainTabViewController, .library)
-        MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
