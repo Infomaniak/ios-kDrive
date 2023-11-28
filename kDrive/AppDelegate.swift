@@ -260,7 +260,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             switch shortcutItem.type {
             case Constants.applicationShortcutScan:
                 let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-                openMediaHelper.openScan(mainTabViewController, false)
+                openMediaHelper.openScan(rootViewController, false)
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
             case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
@@ -268,7 +268,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
             case Constants.applicationShortcutUpload:
                 let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-                openMediaHelper.openMedia(mainTabViewController, .library)
+                openMediaHelper.openMedia(rootViewController, .library)
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
             case Constants.applicationShortcutSupport:
                 UIApplication.shared.open(URLConstants.support.url)
