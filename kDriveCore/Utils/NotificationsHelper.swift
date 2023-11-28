@@ -41,8 +41,6 @@ public protocol NotificationsHelpable {
 
     func sendDisconnectedNotification()
 
-    func sendMigrateNotification()
-
     func sendPhotoSyncErrorNotification()
 }
 
@@ -201,15 +199,6 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.disconnected)
-    }
-
-    public func sendMigrateNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = KDriveResourcesStrings.Localizable.migrateNotificationTitle
-        content.body = KDriveResourcesStrings.Localizable.migrateNotificationDescription
-        content.categoryIdentifier = CategoryIdentifier.general
-        content.sound = .default
-        sendImmediately(notification: content, id: NotificationIdentifier.migrate)
     }
 
     public func sendPhotoSyncErrorNotification() {
