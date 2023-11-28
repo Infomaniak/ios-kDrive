@@ -240,8 +240,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         // Migration from old UserDefaults
         if UserDefaults.shared.legacyIsFirstLaunch {
             UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
-		}
-	}
+        }
+    }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         if let shortcutItem = shortcutItemToProcess {
@@ -254,9 +254,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             // Dismiss all view controllers presented
             rootViewController.dismiss(animated: false)
 
-            guard let navController = rootViewController.selectedViewController as? UINavigationController, 
-                    let viewController = navController.topViewController,
-                    let driveFileManager = accountManager.currentDriveFileManager else {
+            guard let navController = rootViewController.selectedViewController as? UINavigationController,
+                  let viewController = navController.topViewController,
+                  let driveFileManager = accountManager.currentDriveFileManager else {
                 return
             }
 
@@ -282,50 +282,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     private func openScan(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
-        guard VNDocumentCameraViewController.isSupported else {
-            DDLogError("VNDocumentCameraViewController is not supported on this device")
-            return
-        }
-
-        let scanDoc = VNDocumentCameraViewController()
-        let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
-        navigationViewController.modalPresentationStyle = .fullScreen
-        navigationViewController.currentDriveFileManager = driveFileManager
-        scanDoc.delegate = navigationViewController
-        mainTabViewController.present(navigationViewController, animated: true)
+        let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+        openMediaHelper.openScan(mainTabViewController, false)
         MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
     }
 
     private func openPhoto(_ mainTabViewController: MainTabViewController, _ driveFileManager: DriveFileManager) {
-        mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-
-        if #available(iOS 14, *) {
-            // Check permission
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
-                if authorizationStatus == .authorized {
-                    var configuration = PHPickerConfiguration(photoLibrary: .shared())
-                    configuration.selectionLimit = 0
-
-                    Task { @MainActor in
-                        let picker = PHPickerViewController(configuration: configuration)
-                        picker.delegate = mainTabViewController.photoPickerDelegate
-                        mainTabViewController.present(picker, animated: true)
-                        MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
-                    }
-                } else {
-                    Task { @MainActor in
-                        let alert = AlertTextViewController(
-                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
-                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
-                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                        ) {
-                            Constants.openSettings()
-                        }
-                        mainTabViewController.present(alert, animated: true)
-                    }
-                }
-            }
-        }
+        let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+        openMediaHelper.openMedia(mainTabViewController, .library)
+        MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
     }
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
