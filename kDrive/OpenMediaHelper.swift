@@ -33,7 +33,7 @@ struct OpenMediaHelper {
         case library, camera
     }
 
-    public func openMedia(_ mainTabViewController: MainTabViewController, _ media: Media) {
+    func openMedia(_ mainTabViewController: MainTabViewController, _ media: Media) {
         mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
         mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory?.freezeIfNeeded()
 
@@ -92,7 +92,7 @@ struct OpenMediaHelper {
         }
     }
 
-    public func openScan(_ mainTabViewController: MainTabViewController, _ presentedAboveFileList: Bool) {
+    func openScan(_ mainTabViewController: MainTabViewController, _ presentedAboveFileList: Bool) {
         guard VNDocumentCameraViewController.isSupported else {
             DDLogError("VNDocumentCameraViewController is not supported on this device")
             return
