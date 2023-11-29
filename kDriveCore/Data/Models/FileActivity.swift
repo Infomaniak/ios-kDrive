@@ -89,7 +89,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
 }
 
 public class FileActivity: Object, Decodable {
-    @Persisted(primaryKey: true) public var id = 0
+    @Persisted(primaryKey: true) public var id: Int = UUID().uuidString.hashValue
     /// Date Activity File was created at
     @Persisted public var createdAt: Date
     /// Use `action` instead
@@ -120,9 +120,12 @@ public class FileActivity: Object, Decodable {
         }
     }
 
-    public required init(from decoder: Decoder) throws {
+    public required convenience init(from decoder: Decoder) throws {
+        self.init()
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let userContainer = try? container.nestedContainer(keyedBy: UserCodingKeys.self, forKey: .user)
+
         id = try container.decode(Int.self, forKey: .id)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         rawAction = try container.decode(String.self, forKey: .action)
@@ -134,7 +137,8 @@ public class FileActivity: Object, Decodable {
     }
 
     override public init() {
-        // We have to keep it for Realm
+        // Required by Realm
+        super.init()
     }
 
     private enum CodingKeys: String, CodingKey {

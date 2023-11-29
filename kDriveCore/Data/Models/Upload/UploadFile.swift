@@ -45,7 +45,7 @@ public protocol UploadFilable {
     var maxRetryCount: Int { get }
 }
 
-public class UploadFile: Object, UploadFilable {
+public final class UploadFile: Object, UploadFilable {
     /// As a number of chunks can fail in one UploadRequest, the retryCount is slightly higher now
     public static let defaultMaxRetryCount = 5
 
@@ -58,7 +58,8 @@ public class UploadFile: Object, UploadFilable {
                                             "modificationDate",
                                             "_error"]
 
-    @Persisted(primaryKey: true) public var id = ""
+    // We need a strictly unique id for each UploadOperation
+    @Persisted(primaryKey: true) public var id = UUID().uuidString
     @Persisted public var name = ""
     @Persisted var relativePath = ""
     @Persisted private var url: String?
@@ -164,6 +165,12 @@ public class UploadFile: Object, UploadFilable {
         }
     }
 
+    override public init() {
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
+    }
+
     public init(
         parentDirectoryId: Int,
         userId: Int,
@@ -176,7 +183,8 @@ public class UploadFile: Object, UploadFilable {
         initiatedFromFileManager: Bool = false,
         priority: Operation.QueuePriority = .normal
     ) {
-        id = UUID().uuidString // We need a strictly unique id for each UploadOperation
+        super.init()
+        // primary key is set as default value
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -205,7 +213,8 @@ public class UploadFile: Object, UploadFilable {
         shouldRemoveAfterUpload: Bool = true,
         priority: Operation.QueuePriority = .normal
     ) {
-        id = UUID().uuidString // We need a strictly unique id for each UploadOperation
+        super.init()
+        // primary key is set as default value
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -228,10 +237,6 @@ public class UploadFile: Object, UploadFilable {
         taskCreationDate = Date()
         self.conflictOption = conflictOption
         rawPriority = priority.rawValue
-    }
-
-    override public init() {
-        // We have to keep it for Realm
     }
 
     public enum ThumbnailRequest {

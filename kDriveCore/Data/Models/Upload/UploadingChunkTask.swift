@@ -26,7 +26,8 @@ public final class UploadingChunkTask: EmbeddedObject {
     @LazyInjectService var fileManager: FileManagerable
 
     override public init() {
-        // We have to keep it for Realm
+        // Required by Realm
+        super.init()
     }
 
     convenience init(chunkNumber: Int64, range: DataRange) {
