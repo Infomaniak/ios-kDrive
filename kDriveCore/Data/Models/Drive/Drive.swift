@@ -66,7 +66,7 @@ public final class DrivePreferences: EmbeddedObject, Codable {
 }
 
 public final class Drive: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = UUID().uuidString
+    @Persisted(primaryKey: true) public var objectId: String
     /*
      User data
      */
@@ -169,7 +169,8 @@ public final class Drive: Object, Codable {
     override public init() {
         // Required by Realm
         super.init()
-        // Primary key set as default value
+        // In the meantime to ensure it is non nil
+        self.objectId = UUID().uuidString
     }
 
     public func categories(for file: File) -> [Category] {
