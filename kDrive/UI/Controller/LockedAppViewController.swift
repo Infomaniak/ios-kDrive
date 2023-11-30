@@ -36,7 +36,8 @@ class LockedAppViewController: UIViewController {
 
             guard success else { return }
             appLockHelper.setTime()
-            (UIApplication.shared.delegate as! AppDelegate).launchSetup()
+            let currentState = RootViewControllerState.getCurrentState()
+            (UIApplication.shared.delegate as? AppDelegate)?.prepareRootViewController(currentState: currentState)
         }
     }
 
