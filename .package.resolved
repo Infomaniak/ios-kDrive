@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "3b0a9848e8ee790084fc55842d80fb9f85e7d061",
-        "version" : "4.1.27"
+        "revision" : "e68b9bf7a448b01e9d37f4184225d27f930b2b74",
+        "version" : "4.1.28"
       }
     },
     {
@@ -235,6 +235,15 @@
       }
     },
     {
+      "identity" : "swift-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-algorithms",
+      "state" : {
+        "revision" : "f6919dfc309e7f1b56224378b11e28bab5bccc42",
+        "version" : "1.2.0"
+      }
+    },
+    {
       "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics.git",
@@ -257,8 +266,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/swift-concurrency",
       "state" : {
-        "revision" : "c889db8cb90c4cd4a59713f6d6791315499e4b4f",
-        "version" : "0.0.1"
+        "revision" : "bc1a5bd1b5e250908af429a2496bcf684248119d",
+        "version" : "0.0.3"
       }
     },
     {
@@ -295,6 +304,15 @@
       "state" : {
         "revision" : "e7403c35ca6bb539a7ca353b91cc2d8ec0362d58",
         "version" : "1.19.0"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics.git",
+      "state" : {
+        "revision" : "0a5bc04095a675662cf24757cc0640aa2204253b",
+        "version" : "1.0.2"
       }
     },
     {

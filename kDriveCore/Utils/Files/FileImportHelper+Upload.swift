@@ -35,7 +35,7 @@ public extension FileImportHelper {
         let userId = drive.userId
         let driveId = drive.id
 
-        _ = await files.concurrentMap { file in
+        await files.concurrentForEach { file in
             let uploadFile = UploadFile(
                 parentDirectoryId: parentDirectoryId,
                 userId: userId,
