@@ -35,10 +35,14 @@ class LockedAppViewController: UIViewController {
             let success = try await appLockHelper.evaluatePolicy(reason: KDriveResourcesStrings.Localizable.lockAppTitle)
 
             guard success else { return }
-            appLockHelper.setTime()
-            let currentState = RootViewControllerState.getCurrentState()
-            (UIApplication.shared.delegate as? AppDelegate)?.prepareRootViewController(currentState: currentState)
+            unlockApp()
         }
+    }
+
+    func unlockApp() {
+        appLockHelper.setTime()
+        let currentState = RootViewControllerState.getCurrentState()
+        (UIApplication.shared.delegate as? AppDelegate)?.prepareRootViewController(currentState: currentState)
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {

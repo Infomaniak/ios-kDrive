@@ -139,7 +139,7 @@ enum FactoryService {
     }
 
     /// Debug services
-    private static var debugServices: [FactoryWithIdentifier] {
+    static var debugServices: [FactoryWithIdentifier] {
         if #available(iOS 14.0, *) {
             let loggerFactory = Factory(type: Logger.self) { parameters, _ in
                 guard let category = parameters?["category"] as? String else {
