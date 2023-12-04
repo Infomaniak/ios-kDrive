@@ -119,7 +119,7 @@
 	<array>
 		<dict>
 			<key>UIApplicationShortcutItemIconFile</key>
-			<string></string>
+			<string>shortcut-upload</string>
 			<key>UIApplicationShortcutItemType</key>
 			<string>com.infomaniak.shortcut.upload</string>
 			<key>UIApplicationShortcutItemTitle</key>
@@ -142,14 +142,12 @@
 			<string>shortcut-search</string>
 		</dict>
 		<dict>
-			<key>UIApplicationShortcutItemSubtitle</key>
-			<string>shortcutSupportSubtitle</string>
 			<key>UIApplicationShortcutItemTitle</key>
 			<string>shortcutSupportTitle</string>
 			<key>UIApplicationShortcutItemType</key>
 			<string>com.infomaniak.shortcut.support</string>
 			<key>UIApplicationShortcutItemIconFile</key>
-			<string></string>
+			<string>shortcut-support</string>
 		</dict>
 	</array>
 </dict>
