@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakConcurrency
 import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
@@ -44,8 +45,6 @@ public final class FileImportHelper {
     @LazyInjectService var uploadQueue: UploadQueue
 
     let imageCompression = 0.8
-
-    let parallelTaskMapper = ParallelTaskMapper()
 
     /// Domain specific errors
     public enum ErrorDomain: Error {
@@ -77,30 +76,29 @@ public final class FileImportHelper {
 
         Task {
             do {
-                let results: [Result<ImportedFile, Error>?] = try await self.parallelTaskMapper
-                    .map(collection: assetIdentifiers) { assetIdentifier in
-                        defer {
-                            progress.completedUnitCount += 1
-                        }
-
-                        guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil).firstObject
-                        else {
-                            return .failure(ErrorDomain.itemProviderNotFound)
-                        }
-
-                        guard let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) else {
-                            return .failure(ErrorDomain.URLNotFound)
-                        }
-
-                        let uti = UTI(filenameExtension: url.pathExtension)
-                        var name = url.lastPathComponent
-                        if let uti, let originalName = asset.getFilename(uti: uti) {
-                            name = originalName
-                        }
-
-                        let importedFile = ImportedFile(name: name, path: url, uti: uti ?? .data)
-                        return .success(importedFile)
+                let results: [Result<ImportedFile, Error>?] = await assetIdentifiers.concurrentMap { assetIdentifier in
+                    defer {
+                        progress.completedUnitCount += 1
                     }
+
+                    guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil).firstObject
+                    else {
+                        return .failure(ErrorDomain.itemProviderNotFound)
+                    }
+
+                    guard let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) else {
+                        return .failure(ErrorDomain.URLNotFound)
+                    }
+
+                    let uti = UTI(filenameExtension: url.pathExtension)
+                    var name = url.lastPathComponent
+                    if let uti, let originalName = asset.getFilename(uti: uti) {
+                        name = originalName
+                    }
+
+                    let importedFile = ImportedFile(name: name, path: url, uti: uti ?? .data)
+                    return .success(importedFile)
+                }
 
                 // Count errors
                 let errorCount = results.reduce(0) { partialResult, taskResult in
@@ -141,45 +139,44 @@ public final class FileImportHelper {
 
         Task {
             do {
-                let results: [Result<URL, Error>?] = try await self.parallelTaskMapper
-                    .map(collection: safeArray.values) { itemProvider in
-                        let underlyingType = itemProvider.underlyingType
-                        switch underlyingType {
-                        case .isURL:
-                            let getPlist = try ItemProviderURLRepresentation(from: itemProvider)
-                            progress.addChild(getPlist.progress, withPendingUnitCount: perItemUnitCount)
-                            return await getPlist.result
+                let results: [Result<URL, Error>?] = try await safeArray.values.concurrentMap { itemProvider in
+                    let underlyingType = itemProvider.underlyingType
+                    switch underlyingType {
+                    case .isURL:
+                        let getPlist = try ItemProviderURLRepresentation(from: itemProvider)
+                        progress.addChild(getPlist.progress, withPendingUnitCount: perItemUnitCount)
+                        return await getPlist.result
 
-                        case .isText:
-                            let getText = try ItemProviderTextRepresentation(from: itemProvider)
-                            progress.addChild(getText.progress, withPendingUnitCount: perItemUnitCount)
-                            return await getText.result
+                    case .isText:
+                        let getText = try ItemProviderTextRepresentation(from: itemProvider)
+                        progress.addChild(getText.progress, withPendingUnitCount: perItemUnitCount)
+                        return await getText.result
 
-                        case .isUIImage:
-                            let getUIImage = try ItemProviderUIImageRepresentation(from: itemProvider)
-                            progress.addChild(getUIImage.progress, withPendingUnitCount: perItemUnitCount)
-                            return await getUIImage.result
+                    case .isUIImage:
+                        let getUIImage = try ItemProviderUIImageRepresentation(from: itemProvider)
+                        progress.addChild(getUIImage.progress, withPendingUnitCount: perItemUnitCount)
+                        return await getUIImage.result
 
-                        case .isImageData, .isCompressedData, .isMiscellaneous:
+                    case .isImageData, .isCompressedData, .isMiscellaneous:
 
-                            // handle .heic .jpg tranform here.
-                            let getFile = try ItemProviderFileRepresentation(
-                                from: itemProvider,
-                                preferredImageFileFormat: userPreferredPhotoFormat?.uti
-                            )
-                            progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
+                        // handle .heic .jpg tranform here.
+                        let getFile = try ItemProviderFileRepresentation(
+                            from: itemProvider,
+                            preferredImageFileFormat: userPreferredPhotoFormat?.uti
+                        )
+                        progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
 
-                            return await getFile.result
+                        return await getFile.result
 
-                        case .isDirectory:
-                            let getFile = try ItemProviderZipRepresentation(from: itemProvider)
-                            progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
-                            return await getFile.result
+                    case .isDirectory:
+                        let getFile = try ItemProviderZipRepresentation(from: itemProvider)
+                        progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
+                        return await getFile.result
 
-                        case .none:
-                            return .failure(ErrorDomain.UTINotFound)
-                        }
+                    case .none:
+                        return .failure(ErrorDomain.UTINotFound)
                     }
+                }
 
                 // Count errors
                 let errorCount = results.reduce(0) { partialResult, taskResult in

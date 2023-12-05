@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
+import Algorithms
 
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
@@ -98,7 +99,7 @@ extension UploadQueue: UploadQueueable {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
             }
 
-            let batches = uploadingFileIds.chunked(into: 100)
+            let batches = uploadingFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batched count:\(batches.count)")
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
@@ -262,7 +263,7 @@ extension UploadQueue: UploadQueueable {
             }
 
             // Remove in batches from upload queue. This may take a while.
-            let batches = uploadingFilesIds.chunked(into: 100)
+            let batches = uploadingFilesIds.chunks(ofCount: 100)
             for fileIds in batches {
                 autoreleasepool {
                     fileIds.forEach { id in
@@ -351,7 +352,7 @@ extension UploadQueue: UploadQueueable {
         Log.uploadQueue("retryAllOperations parentId:\(parentId)")
         concurrentQueue.async {
             let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
-            let batches = failedFileIds.chunked(into: 100)
+            let batches = failedFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batches:\(batches.count)")
 
             self.resumeAllOperations()
@@ -386,7 +387,7 @@ extension UploadQueue: UploadQueueable {
         return failedFileIds
     }
 
-    private func cancelAnyInBatch(_ batch: [String]) {
+    private func cancelAnyInBatch(_ batch: ArraySlice<String>) {
         try? transactionWithUploadRealm { realm in
             batch.forEach { uploadFileId in
                 // Cancel operation if any
@@ -407,7 +408,7 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    private func enqueueAnyInBatch(_ batch: [String]) {
+    private func enqueueAnyInBatch(_ batch: ArraySlice<String>) {
         try? transactionWithUploadRealm { realm in
             batch.forEach { uploadFileId in
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
