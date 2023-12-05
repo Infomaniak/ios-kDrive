@@ -61,6 +61,11 @@ public enum Constants {
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
 
+    public static let applicationShortcutScan = "com.infomaniak.shortcut.scan"
+    public static let applicationShortcutSearch = "com.infomaniak.shortcut.search"
+    public static let applicationShortcutUpload = "com.infomaniak.shortcut.upload"
+    public static let applicationShortcutSupport = "com.infomaniak.shortcut.support"
+
     public static let notificationTopicUpload = "uploadTopic"
     public static let notificationTopicShared = "sharedTopic"
     public static let notificationTopicComments = "commentsTopic"
@@ -82,10 +87,10 @@ public enum Constants {
     public enum DateTimeStyle {
         case date
         case time
-        case datetime
+        case dateTime
     }
 
-    public static func formatDate(_ date: Date, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
+    public static func formatDate(_ date: Date, style: DateTimeStyle = .dateTime, relative: Bool = false) -> String {
         // Relative time
         let timeInterval = Date().timeIntervalSince(date)
         if relative && style != .date && timeInterval < 3600 {
@@ -104,7 +109,7 @@ public enum Constants {
         case .time:
             dateFormatter.dateStyle = .none
             dateFormatter.timeStyle = .short
-        case .datetime:
+        case .dateTime:
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
         }

@@ -39,6 +39,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 4
     private static let appStateVersionKey = "appStateVersionKey"
+    private var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
 
@@ -121,6 +122,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         }
 
+        if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
+            shortcutItemToProcess = shortcutItem
+        }
+
         return true
     }
 
@@ -160,6 +165,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             lockHelper.setTime()
         }
+    }
+
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        shortcutItemToProcess = shortcutItem
     }
 
     func application(_ application: UIApplication,
@@ -228,6 +237,48 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         // Migration from old UserDefaults
         if UserDefaults.shared.legacyIsFirstLaunch {
             UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
+        }
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        if let shortcutItem = shortcutItemToProcess {
+            @InjectService var accountManager: AccountManageable
+
+            guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+                return
+            }
+
+            // Dismiss all view controllers presented
+            rootViewController.dismiss(animated: false)
+
+            guard let navController = rootViewController.selectedViewController as? UINavigationController,
+                  let viewController = navController.topViewController,
+                  let driveFileManager = accountManager.currentDriveFileManager else {
+                return
+            }
+
+            switch shortcutItem.type {
+            case Constants.applicationShortcutScan:
+                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+                openMediaHelper.openScan(rootViewController, false)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
+            case Constants.applicationShortcutSearch:
+                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+                viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
+            case Constants.applicationShortcutUpload:
+                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
+                openMediaHelper.openMedia(rootViewController, .library)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
+            case Constants.applicationShortcutSupport:
+                UIApplication.shared.open(URLConstants.support.url)
+                MatomoUtils.track(eventWithCategory: .shortcuts, name: "support")
+            default:
+                break
+            }
+
+            // reset the shortcut item
+            shortcutItemToProcess = nil
         }
     }
 
