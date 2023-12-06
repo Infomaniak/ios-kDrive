@@ -50,6 +50,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - UIApplicationDelegate
 
@@ -167,7 +168,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+    func application(
+        _ application: UIApplication,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
         shortcutItemToProcess = shortcutItem
     }
 
@@ -192,8 +197,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
         }
-
-        @InjectService var accountManager: AccountManageable
 
         if components.path == "store",
            let userId = params.first(where: { $0.name == "userId" })?.value,
@@ -242,8 +245,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         if let shortcutItem = shortcutItemToProcess {
-            @InjectService var accountManager: AccountManageable
-
             guard let rootViewController = window?.rootViewController as? MainTabViewController else {
                 return
             }
@@ -264,7 +265,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
             case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-                viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+                viewController.present(
+                    SearchViewController.instantiateInNavigationController(viewModel: viewModel),
+                    animated: true
+                )
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
             case Constants.applicationShortcutUpload:
                 let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
@@ -285,8 +289,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
         Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
 
-        @InjectService var accountManager: AccountManageable
-        let currentAccount = accountManager.currentAccount!
+        guard let currentAccount = accountManager.currentAccount else {
+            Log.appDelegate("No account to refresh")
+            return
+        }
+
         let rootViewController = window?.rootViewController as? UpdateAccountDelegate
 
         if preload {
@@ -361,7 +368,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             return
         }
 
-        @InjectService var accountManager: AccountManageable
         for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
@@ -441,7 +447,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
-        @InjectService var accountManager: AccountManageable
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
@@ -472,7 +477,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
-        @InjectService var accountManager: AccountManageable
 
         return AppDelegate
             .currentStateVersion == encodedVersion &&
@@ -522,7 +526,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
                 // Upload notification
                 let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
-                @InjectService var accountManager: AccountManageable
 
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:

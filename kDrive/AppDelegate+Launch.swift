@@ -132,7 +132,6 @@ extension AppDelegate {
             return
         }
 
-        @InjectService var accountManager: AccountManageable
         let group = DispatchGroup()
         var shouldCleanFolder = false
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
