@@ -195,6 +195,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         super.viewDidLoad()
         navigationItem.title = driveFileManager.drive.name
 
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
