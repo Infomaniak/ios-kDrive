@@ -83,6 +83,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         let currentState = RootViewControllerState.getCurrentState()
         prepareRootViewController(currentState: currentState)
 
+        accountManager.delegate = self
+
         if CommandLine.arguments.contains("testing") {
             UIView.setAnimationsEnabled(false)
         }
@@ -463,7 +465,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // MARK: - Account manager delegate
 
     func currentAccountNeedsAuthentication() {
-        setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+        DispatchQueue.main.async { [weak self] in
+            self?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+        }
     }
 
     // MARK: - State restoration
