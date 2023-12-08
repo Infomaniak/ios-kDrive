@@ -60,6 +60,10 @@ public class MQService {
         return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
     }
 
+    deinit {
+        try? client.syncShutdownGracefully()
+    }
+
     public init() {
         // META: keep SonarCloud happy
     }

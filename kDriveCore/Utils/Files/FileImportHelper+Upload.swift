@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakConcurrency
 import InfomaniakCore
 import PDFKit
 import Photos
@@ -34,7 +35,7 @@ public extension FileImportHelper {
         let userId = drive.userId
         let driveId = drive.id
 
-        _ = try await parallelTaskMapper.map(collection: files) { file in
+        await files.concurrentForEach { file in
             let uploadFile = UploadFile(
                 parentDirectoryId: parentDirectoryId,
                 userId: userId,

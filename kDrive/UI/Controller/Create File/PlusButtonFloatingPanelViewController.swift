@@ -277,62 +277,8 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     }
 
     private func mediaAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
-        mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-        mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
-
-        if #available(iOS 14, *), action == .importMediaAction {
-            // Check permission
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
-                if authorizationStatus == .authorized {
-                    var configuration = PHPickerConfiguration(photoLibrary: .shared())
-                    configuration.selectionLimit = 0
-
-                    Task { @MainActor in
-                        let picker = PHPickerViewController(configuration: configuration)
-                        picker.delegate = mainTabViewController.photoPickerDelegate
-                        mainTabViewController.present(picker, animated: true)
-                    }
-                } else {
-                    Task { @MainActor in
-                        let alert = AlertTextViewController(
-                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
-                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
-                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                        ) {
-                            Constants.openSettings()
-                        }
-                        mainTabViewController.present(alert, animated: true)
-                    }
-                }
-            }
-        } else {
-            // Present camera or old photo picker
-            let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
-
-            guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
-                let alert = AlertTextViewController(
-                    title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle,
-                    message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription,
-                    action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                ) {
-                    Constants.openSettings()
-                }
-                mainTabViewController.present(alert, animated: true)
-                return
-            }
-
-            guard UIImagePickerController.isSourceTypeAvailable(sourceType) else {
-                DDLogError("Source type \(sourceType) is not available on this device")
-                return
-            }
-
-            let picker = UIImagePickerController()
-            picker.sourceType = sourceType
-            picker.delegate = mainTabViewController.photoPickerDelegate
-            picker.mediaTypes = UIImagePickerController
-                .availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
-            mainTabViewController.present(picker, animated: true)
-        }
+        let openMediaHelper = OpenMediaHelper(currentDirectory: currentDirectory, driveFileManager: driveFileManager)
+        openMediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
     }
 
     private func documentAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
