@@ -149,6 +149,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         uploadQueue.waitForCompletion {
             group.leave()
         }
+
+        // The documentation specifies `approximately five seconds [to] return` from applicationWillTerminate
+        // Therefore to not display a crash feedback on TestFlight, we give up after 4.5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
+            group.leave()
+        }
+
         group.enter()
         group.wait()
     }
@@ -167,7 +174,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+    func application(
+        _ application: UIApplication,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
         shortcutItemToProcess = shortcutItem
     }
 
@@ -264,7 +275,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
             case Constants.applicationShortcutSearch:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-                viewController.present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+                viewController.present(
+                    SearchViewController.instantiateInNavigationController(viewModel: viewModel),
+                    animated: true
+                )
                 MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
             case Constants.applicationShortcutUpload:
                 let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
