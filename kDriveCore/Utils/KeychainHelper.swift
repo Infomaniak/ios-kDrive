@@ -148,7 +148,12 @@ public enum KeychainHelper {
                 DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
 
                 let metadata = token.breadcrumbMetadata(keychainError: resultCode)
-                SentryDebug.addBreadcrumb(message: "Successfully saved token", category: .apiToken, level: .info, metadata: metadata)
+                SentryDebug.addBreadcrumb(
+                    message: "Successfully saved token",
+                    category: .apiToken,
+                    level: .info,
+                    metadata: metadata
+                )
             }
         }
         if resultCode != noErr {

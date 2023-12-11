@@ -44,7 +44,7 @@ public final class DownloadTask: Object {
                 sessionUrl: String) {
         super.init()
         // primary key is set as default value
-        
+
         self.fileId = fileId
         self.isDirectory = isDirectory
         self.driveId = driveId

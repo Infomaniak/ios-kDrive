@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Algorithms
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import Algorithms
 
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
