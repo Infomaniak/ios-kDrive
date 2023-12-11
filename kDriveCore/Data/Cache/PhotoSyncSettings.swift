@@ -38,7 +38,7 @@ public enum PhotoSyncMode: Int, PersistableEnum {
 }
 
 public final class PhotoSyncSettings: Object {
-    @Persisted(primaryKey: true) public var userId: Int
+    @Persisted(primaryKey: true) public var userId = UUID().uuidString.hashValue
     @Persisted public var driveId: Int
     @Persisted public var parentDirectoryId: Int
     @Persisted public var lastSync = Date(timeIntervalSince1970: 0)
@@ -81,7 +81,6 @@ public final class PhotoSyncSettings: Object {
     override public init() {
         // Required by Realm
         super.init()
-        self.userId = UUID().uuidString.hashValue
     }
 
     public func isContentEqual(to settings: PhotoSyncSettings) -> Bool {
