@@ -81,6 +81,7 @@ public final class PhotoSyncSettings: Object {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     public func isContentEqual(to settings: PhotoSyncSettings) -> Bool {

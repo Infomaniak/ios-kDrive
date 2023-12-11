@@ -86,6 +86,7 @@ public final class DriveUser: Object, Codable, InfomaniakUser {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     public convenience init(user: InfomaniakCore.UserProfile) {

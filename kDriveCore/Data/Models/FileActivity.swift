@@ -139,6 +139,7 @@ public class FileActivity: Object, Decodable {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     private enum CodingKeys: String, CodingKey {

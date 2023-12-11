@@ -33,6 +33,7 @@ public final class DownloadTask: Object {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     public init(fileId: Int,
@@ -42,7 +43,8 @@ public final class DownloadTask: Object {
                 sessionId: String,
                 sessionUrl: String) {
         super.init()
-
+        // primary key is set as default value
+        
         self.fileId = fileId
         self.isDirectory = isDirectory
         self.driveId = driveId

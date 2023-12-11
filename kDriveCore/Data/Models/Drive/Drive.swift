@@ -144,6 +144,7 @@ public final class Drive: Object, Codable {
 
     public required init(from decoder: Decoder) throws {
         super.init()
+        // primary key is set as default value
 
         let values = try decoder.container(keyedBy: CodingKeys.self)
         accountId = try values.decode(Int.self, forKey: .accountId)
@@ -169,6 +170,7 @@ public final class Drive: Object, Codable {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     public func categories(for file: File) -> [Category] {

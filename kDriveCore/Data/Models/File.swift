@@ -758,6 +758,7 @@ public final class File: Object, Codable {
     override public init() {
         // Required by Realm
         super.init()
+        // primary key is set as default value
     }
 
     convenience init(id: Int, name: String) {
