@@ -63,7 +63,7 @@ public enum UserPermission: String, Codable, CaseIterable {
 }
 
 public final class DriveUser: Object, Codable, InfomaniakUser {
-    @Persisted(primaryKey: true) public var id: Int = UUID().uuidString.hashValue
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var email = ""
     @Persisted private var _avatar = ""
     @Persisted private var _avatarUrl: String?
@@ -87,7 +87,7 @@ public final class DriveUser: Object, Codable, InfomaniakUser {
         // Required by Realm
         super.init()
     }
-    
+
     public convenience init(user: InfomaniakCore.UserProfile) {
         self.init()
         id = user.id

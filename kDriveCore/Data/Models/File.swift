@@ -342,7 +342,7 @@ public final class File: Object, Codable {
 
     @LazyInjectService var accountManager: AccountManageable
 
-    @Persisted(primaryKey: true) public var id: Int = UUID().uuidString.hashValue
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int

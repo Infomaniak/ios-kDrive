@@ -89,7 +89,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
 }
 
 public class FileActivity: Object, Decodable {
-    @Persisted(primaryKey: true) public var id: Int = UUID().uuidString.hashValue
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     /// Date Activity File was created at
     @Persisted public var createdAt: Date
     /// Use `action` instead
