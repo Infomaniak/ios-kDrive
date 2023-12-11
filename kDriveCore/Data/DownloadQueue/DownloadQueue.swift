@@ -23,7 +23,7 @@ import InfomaniakDI
 import RealmSwift
 
 public final class DownloadTask: Object {
-    @Persisted(primaryKey: true) var fileId: Int
+    @Persisted(primaryKey: true) var fileId = UUID().uuidString.hashValue
     @Persisted var isDirectory = false
     @Persisted var driveId: Int
     @Persisted var userId: Int
@@ -33,7 +33,6 @@ public final class DownloadTask: Object {
     override public init() {
         // Required by Realm
         super.init()
-        self.fileId = UUID().uuidString.hashValue
     }
 
     public init(fileId: Int,
