@@ -152,7 +152,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         // The documentation specifies `approximately five seconds [to] return` from applicationWillTerminate
         // Therefore to not display a crash feedback on TestFlight, we give up after 4.5 seconds
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 4.5) {
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + AppDelegateConstants.closeApplicationGiveUpTime) {
             group.leave()
         }
 
