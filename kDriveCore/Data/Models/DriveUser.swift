@@ -90,7 +90,7 @@ public final class DriveUser: Object, Codable, InfomaniakUser {
     }
     
     public convenience init(user: InfomaniakCore.UserProfile) {
-        super.init()
+        self.init()
         id = user.id
         email = user.email
         _avatar = user.avatar
