@@ -24,7 +24,7 @@ import UIKit
 public class Team: Object, Codable {
     public static let allUsersId = 0
 
-    @Persisted(primaryKey: true) public var id: Int
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var name: String
     @Persisted public var usersCount: Int?
     @Persisted public var colorId: Int
@@ -71,7 +71,9 @@ public class Team: Object, Codable {
     }
 
     override public init() {
-        // META: keep SonarCloud happy
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
     }
 
     enum CodingKeys: String, CodingKey {

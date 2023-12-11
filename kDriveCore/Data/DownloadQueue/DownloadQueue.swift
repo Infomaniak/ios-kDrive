@@ -23,15 +23,28 @@ import InfomaniakDI
 import RealmSwift
 
 public final class DownloadTask: Object {
-    @Persisted(primaryKey: true) var fileId = 0
+    @Persisted(primaryKey: true) var fileId = UUID().uuidString.hashValue
     @Persisted var isDirectory = false
-    @Persisted var driveId = 0
-    @Persisted var userId = 0
+    @Persisted var driveId: Int
+    @Persisted var userId: Int
     @Persisted var sessionUrl = ""
     @Persisted var sessionId: String?
 
-    convenience init(fileId: Int, isDirectory: Bool, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
-        self.init()
+    override public init() {
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
+    }
+
+    public init(fileId: Int,
+                isDirectory: Bool,
+                driveId: Int,
+                userId: Int,
+                sessionId: String,
+                sessionUrl: String) {
+        super.init()
+        // primary key is set as default value
+        
         self.fileId = fileId
         self.isDirectory = isDirectory
         self.driveId = driveId

@@ -96,7 +96,8 @@ public class Rights: EmbeddedObject, Codable {
     }
 
     override public init() {
-        // We have to keep it for Realm
+        // Required by Realm
+        super.init()
     }
 }
 

@@ -37,10 +37,10 @@ public enum PhotoSyncMode: Int, PersistableEnum {
     }
 }
 
-public class PhotoSyncSettings: Object {
-    @Persisted public var userId: Int = -1
-    @Persisted public var driveId: Int = -1
-    @Persisted public var parentDirectoryId: Int = -1
+public final class PhotoSyncSettings: Object {
+    @Persisted(primaryKey: true) public var userId = UUID().uuidString.hashValue
+    @Persisted public var driveId: Int
+    @Persisted public var parentDirectoryId: Int
     @Persisted public var lastSync = Date(timeIntervalSince1970: 0)
     @Persisted public var syncMode: PhotoSyncMode = .new
     @Persisted public var fromDate = Date()
@@ -63,6 +63,7 @@ public class PhotoSyncSettings: Object {
                 createDatedSubFolders: Bool,
                 deleteAssetsAfterImport: Bool,
                 photoFormat: PhotoFileFormat) {
+        super.init()
         self.userId = userId
         self.driveId = driveId
         self.parentDirectoryId = parentDirectoryId
@@ -78,11 +79,9 @@ public class PhotoSyncSettings: Object {
     }
 
     override public init() {
-        // META: keep SonarCloud happy
-    }
-
-    override public class func primaryKey() -> String? {
-        return "userId"
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
     }
 
     public func isContentEqual(to settings: PhotoSyncSettings) -> Bool {

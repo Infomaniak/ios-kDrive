@@ -34,7 +34,8 @@ public final class UploadingSessionTask: EmbeddedObject {
     @Persisted public var filePath: String
 
     override public init() {
-        // We have to keep it for Realm
+        // Required by Realm
+        super.init()
     }
 
     public convenience init(uploadSession: UploadSession,

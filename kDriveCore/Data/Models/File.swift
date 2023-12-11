@@ -276,7 +276,7 @@ public enum FileImportStatus: String, PersistableEnum, Codable {
     case waiting, inProgress = "in_progress", done, failed, canceling, canceled
 }
 
-public class FileExternalImport: EmbeddedObject, Codable {
+public final class FileExternalImport: EmbeddedObject, Codable {
     @Persisted public var id: Int
     @Persisted public var directoryId: Int
     @Persisted public var accountName: String
@@ -304,7 +304,7 @@ public class FileExternalImport: EmbeddedObject, Codable {
     }
 }
 
-public class FileConversion: EmbeddedObject, Codable {
+public final class FileConversion: EmbeddedObject, Codable {
     /// File can be converted to another extension
     @Persisted public var whenDownload: Bool
     /// Available file convertible extensions
@@ -322,7 +322,7 @@ public class FileConversion: EmbeddedObject, Codable {
     }
 }
 
-public class FileVersion: EmbeddedObject, Codable {
+public final class FileVersion: EmbeddedObject, Codable {
     /// File has multi-version
     @Persisted public var isMultiple: Bool
     /// Get number of version
@@ -342,7 +342,7 @@ public final class File: Object, Codable {
 
     @LazyInjectService var accountManager: AccountManageable
 
-    @Persisted(primaryKey: true) public var id = 0
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int
@@ -719,7 +719,9 @@ public final class File: Object, Codable {
         return ProxyFile(driveId: driveId, id: id)
     }
 
-    public required init(from decoder: Decoder) throws {
+    public convenience init(from decoder: Decoder) throws {
+        self.init()
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         parentId = try container.decode(Int.self, forKey: .parentId)
@@ -754,7 +756,9 @@ public final class File: Object, Codable {
     }
 
     override public init() {
-        // We have to keep it for Realm
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
     }
 
     convenience init(id: Int, name: String) {

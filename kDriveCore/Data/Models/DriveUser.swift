@@ -62,8 +62,8 @@ public enum UserPermission: String, Codable, CaseIterable {
     }
 }
 
-public class DriveUser: Object, Codable, InfomaniakUser {
-    @Persisted(primaryKey: true) public var id: Int = -1
+public final class DriveUser: Object, Codable, InfomaniakUser {
+    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var email = ""
     @Persisted private var _avatar = ""
     @Persisted private var _avatarUrl: String?
@@ -81,6 +81,12 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
         case role
+    }
+
+    override public init() {
+        // Required by Realm
+        super.init()
+        // primary key is set as default value
     }
 
     public convenience init(user: InfomaniakCore.UserProfile) {

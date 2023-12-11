@@ -20,7 +20,7 @@ import Foundation
 import InfomaniakCore
 import RealmSwift
 
-public class DriveResponse: Codable {
+public final class DriveResponse: Codable {
     public let drives: [Drive]
     public let users: [DriveUser]
     public let teams: [Team]
@@ -34,7 +34,7 @@ public class DriveResponse: Codable {
     }
 }
 
-public class DriveUsersCategories: EmbeddedObject, Codable {
+public final class DriveUsersCategories: EmbeddedObject, Codable {
     @Persisted public var account: List<Int>
     @Persisted public var drive: List<Int>
     @Persisted public var internalUsers: List<Int>
@@ -48,7 +48,7 @@ public class DriveUsersCategories: EmbeddedObject, Codable {
     }
 }
 
-public class DriveTeamsCategories: EmbeddedObject, Codable {
+public final class DriveTeamsCategories: EmbeddedObject, Codable {
     @Persisted public var account: List<Int>
     @Persisted public var drive: List<Int>
 }
@@ -60,13 +60,13 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     case technical
 }
 
-public class DrivePreferences: EmbeddedObject, Codable {
+public final class DrivePreferences: EmbeddedObject, Codable {
     @Persisted public var color = "#0098FF"
     @Persisted public var hide = false
 }
 
-public class Drive: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId = ""
+public final class Drive: Object, Codable {
+    @Persisted(primaryKey: true) public var objectId = UUID().uuidString
     /*
      User data
      */
@@ -143,6 +143,9 @@ public class Drive: Object, Codable {
     }
 
     public required init(from decoder: Decoder) throws {
+        super.init()
+        // primary key is set as default value
+
         let values = try decoder.container(keyedBy: CodingKeys.self)
         accountId = try values.decode(Int.self, forKey: .accountId)
         id = try values.decode(Int.self, forKey: .id)
@@ -166,6 +169,8 @@ public class Drive: Object, Codable {
 
     override public init() {
         // Required by Realm
+        super.init()
+        // primary key is set as default value
     }
 
     public func categories(for file: File) -> [Category] {
