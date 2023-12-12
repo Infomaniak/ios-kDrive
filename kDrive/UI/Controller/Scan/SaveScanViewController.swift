@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -125,9 +126,16 @@ extension SaveScanViewController {
 extension SaveScanViewController: SaveScanWorkerDelegate {
     func recognizedStrings(_ strings: [String]) {
         // Use the first string as the filename
-        guard let firstResult = strings.first else { return }
+        guard let firstResult = strings.first else {
+            DDLogInfo("[Scan] Unable to recognise text.")
+            return
+        }
 
         items.first?.name = firstResult.localizedCapitalized
         tableView.reloadData()
+    }
+
+    func errorWhileProcessing(_ error: Error?) {
+        DDLogError("[Scan] failed with error: \(error).")
     }
 }

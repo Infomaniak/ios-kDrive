@@ -16,17 +16,20 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import Vision
 import VisionKit
 
 /// Something to process a document and extract text from it
 public protocol SaveScanWorkable: AnyObject {
+    /// Init method
+    /// - Parameters:
+    ///   - scan: The scanned document
+    ///   - resultDelegate: Object to use for callback
+    init(scan: VNDocumentCameraScan, resultDelegate: SaveScanWorkerDelegate)
+
     /// Start the document processing, result is dispatched with `resultDelegate`
     func detectFileName() async
-
-    init(scan: VNDocumentCameraScan, resultDelegate: SaveScanWorkerDelegate)
 }
 
 public final class SaveScanWorker: SaveScanWorkable {
@@ -35,6 +38,9 @@ public final class SaveScanWorker: SaveScanWorkable {
 
     /// Used to send the result of the processing
     private weak var resultDelegate: SaveScanWorkerDelegate?
+
+    /// Min threshold to consider a string
+    private static let minConfidence: Float = 0.6
 
     public init(scan: VNDocumentCameraScan, resultDelegate: SaveScanWorkerDelegate) {
         self.scan = scan
@@ -52,19 +58,25 @@ public final class SaveScanWorker: SaveScanWorkable {
             // Perform the text-recognition request
             try requestHandler.perform([request])
         } catch {
-            DDLogError("[Scan] Unable to perform the requests: \(error).")
+            Task { @MainActor in
+                self.resultDelegate?.errorWhileProcessing(error)
+            }
         }
     }
 
     private func recognizeTextHandler(request: VNRequest, error: Error?) {
-        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+        guard error == nil,
+              let observations = request.results as? [VNRecognizedTextObservation] else {
+            Task { @MainActor in
+                self.resultDelegate?.errorWhileProcessing(error)
+            }
             return
         }
-        let minConfidence: Float = 0.6
+
         let recognizedStrings: [String] = observations.compactMap { observation in
             // Return the string of the top VNRecognizedText instance
             let topCandidate = observation.topCandidates(1).first
-            if let topCandidate, topCandidate.confidence >= minConfidence {
+            if let topCandidate, topCandidate.confidence >= Self.minConfidence {
                 return topCandidate.string
             } else {
                 return nil

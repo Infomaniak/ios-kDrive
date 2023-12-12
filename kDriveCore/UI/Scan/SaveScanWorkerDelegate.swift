@@ -22,4 +22,7 @@ import Foundation
 @MainActor public protocol SaveScanWorkerDelegate: AnyObject {
     /// Callback with the processed strings found in content
     func recognizedStrings(_ strings: [String])
+
+    /// Error Callback
+    func errorWhileProcessing(_ error: Error?)
 }
