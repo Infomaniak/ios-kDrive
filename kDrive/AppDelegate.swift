@@ -292,7 +292,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
 
         guard let currentAccount = accountManager.currentAccount else {
-            Log.appDelegate("No account to refresh")
+            Log.appDelegate("No account to refresh", level: .error)
             return
         }
 
@@ -465,8 +465,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // MARK: - Account manager delegate
 
     func currentAccountNeedsAuthentication() {
-        DispatchQueue.main.async { [weak self] in
-            self?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+        Task { @MainActor in
+            setRootViewController(SwitchUserViewController.instantiateInNavigationController())
         }
     }
 
