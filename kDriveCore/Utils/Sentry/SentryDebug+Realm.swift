@@ -47,6 +47,6 @@ extension SentryDebug {
                                        "form": form,
                                        "to": to,
                                        "function": function]
-        Self.addBreadcrumb(message: Category.realmMigration.rawValue, category: .realmMigration, level: .info, metadata: metadata)
+        addBreadcrumb(message: Category.realmMigration.rawValue, category: .realmMigration, level: .info, metadata: metadata)
     }
 }

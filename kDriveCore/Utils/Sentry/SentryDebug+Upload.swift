@@ -22,11 +22,11 @@ extension SentryDebug {
     // MARK: - UploadOperation
 
     static func uploadOperationBeginBreadcrumb(_ uploadFileId: String) {
-        Self.addBreadcrumb(message: "Begin for \(uploadFileId)", category: .uploadOperation, level: .info)
+        addBreadcrumb(message: "Begin for \(uploadFileId)", category: .uploadOperation, level: .info)
     }
 
     static func uploadOperationEndBreadcrumb(_ uploadFileId: String, _ error: Error?) {
-        Self.addBreadcrumb(
+        addBreadcrumb(
             message: "End for \(uploadFileId)",
             category: .uploadOperation,
             level: (error == nil) ? .info : .error,
@@ -35,37 +35,37 @@ extension SentryDebug {
     }
 
     static func uploadOperationFinishedBreadcrumb(_ uploadFileId: String) {
-        Self.addBreadcrumb(message: "Finished for \(uploadFileId)", category: .uploadOperation, level: .info)
+        addBreadcrumb(message: "Finished for \(uploadFileId)", category: .uploadOperation, level: .info)
     }
 
     static func uploadOperationCloseSessionAndEndBreadcrumb(_ uploadFileId: String) {
         let message = "Close session and end for \(uploadFileId)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .info)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .info)
     }
 
     static func uploadOperationCleanSessionRemotelyBreadcrumb(_ uploadFileId: String, _ success: Bool) {
         let message = "Clean uploading session remotely for \(uploadFileId), success:\(success)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
     static func uploadOperationCleanSessionBreadcrumb(_ uploadFileId: String) {
         let message = "Clean uploading session for \(uploadFileId)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
     static func uploadOperationBackgroundExpiringBreadcrumb(_ uploadFileId: String) {
         let message = "Background task expiring for \(uploadFileId)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
     static func uploadOperationRetryCountDecreaseBreadcrumb(_ uploadFileId: String, _ retryCount: Int) {
         let message = "Try decrement retryCount:\(retryCount) for \(uploadFileId)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .info)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .info)
     }
 
     static func uploadOperationRescheduledBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
         let message = "UploadOperation for \(uploadFileId) rescheduled"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .info)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .info)
     }
 
     static func uploadOperationErrorHandling(_ message: String, _ error: Error, _ metadata: [String: Any]) {
@@ -84,27 +84,27 @@ extension SentryDebug {
 
     static func uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(_ uploadFileId: String, _ metadata: [String: Any]) {
         let message = "Cannot close session for \(uploadFileId)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error, metadata: metadata)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error, metadata: metadata)
     }
 
     public static func updateFileListBreadcrumb(id: String, step: String) {
         let message = "updateFileList opId: \(id) step: \(step)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
     public static func filesObservationBreadcrumb(state: String) {
         let message = "files modified: \(state)"
-        Self.addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
     // MARK: - Upload notifications
 
     static func uploadNotificationError(_ metadata: [String: Any]) {
-        Self.capture(message: ErrorNames.uploadErrorUserNotification, extras: metadata)
+        capture(message: ErrorNames.uploadErrorUserNotification, extras: metadata)
     }
 
     static func uploadNotificationBreadcrumb(_ metadata: [String: Any]) {
-        Self.addBreadcrumb(
+        addBreadcrumb(
             message: ErrorNames.uploadErrorUserNotification,
             category: .uploadOperation,
             level: .error,

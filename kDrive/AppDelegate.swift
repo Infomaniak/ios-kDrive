@@ -152,6 +152,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         uploadQueue.waitForCompletion {
             group.leave()
         }
+
+        // The documentation specifies `approximately five seconds [to] return` from applicationWillTerminate
+        // Therefore to not display a crash feedback on TestFlight, we give up after 4.5 seconds
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + AppDelegateConstants.closeApplicationGiveUpTime) {
+            group.leave()
+        }
+
         group.enter()
         group.wait()
     }
