@@ -115,7 +115,6 @@ extension AppDelegate {
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         Log.bgTaskScheduling("handleBackgroundRefresh")
         // User installed the app but never logged in
-        @InjectService var accountManager: AccountManageable
         if accountManager.accounts.isEmpty {
             completion(false)
             return

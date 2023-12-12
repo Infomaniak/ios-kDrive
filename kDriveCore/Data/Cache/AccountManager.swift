@@ -69,7 +69,7 @@ public extension InfomaniakLogin {
 }
 
 /// Abstract interface on AccountManager
-public protocol AccountManageable {
+public protocol AccountManageable: AnyObject {
     var currentAccount: Account! { get }
     var accounts: [Account] { get }
     var tokens: [ApiToken] { get }
@@ -79,6 +79,7 @@ public protocol AccountManageable {
     var currentDriveFileManager: DriveFileManager? { get }
     var mqService: MQService { get }
     var refreshTokenLockedQueue: DispatchQueue { get }
+    var delegate: AccountManagerDelegate? { get set }
 
     func forceReload()
     func reloadTokensAndAccounts()
