@@ -52,8 +52,8 @@ public enum SentryDebug {
         let metadata = ["function": function]
         let message = "The ViewModel is not linked to a view to dispatch changes"
 
-        Self.addBreadcrumb(message: message, category: .viewModel, level: .error, metadata: metadata)
-        Self.capture(message: ErrorNames.viewModelNotConnectedToView, extras: metadata)
+        addBreadcrumb(message: message, category: .viewModel, level: .error, metadata: metadata)
+        capture(message: ErrorNames.viewModelNotConnectedToView, extras: metadata)
     }
 
     // MARK: - Logger
@@ -63,14 +63,14 @@ public enum SentryDebug {
             let isForeground = await UIApplication.shared.applicationState != .background
             let message = "\(caller) foreground:\(isForeground)"
 
-            Self.addBreadcrumb(message: message, category: .uploadOperation, level: isError ? .error : .info, metadata: metadata)
+            addBreadcrumb(message: message, category: .uploadOperation, level: isError ? .error : .info, metadata: metadata)
         }
     }
 
     // MARK: - No Window
 
     public static func captureNoWindow() {
-        Self.capture(message: "Trying to call show with no window")
+        capture(message: "Trying to call show with no window")
     }
 
     // MARK: - SHARED -

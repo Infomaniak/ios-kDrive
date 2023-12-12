@@ -123,7 +123,7 @@ public extension PhotoLibraryUploader {
                     return
                 }
 
-                let algorithmImportVersion = self.currentDiffAlgorithmVersion
+                let algorithmImportVersion = currentDiffAlgorithmVersion
 
                 // New UploadFile to be uploaded
                 let uploadFile = UploadFile(
@@ -234,7 +234,10 @@ public extension PhotoLibraryUploader {
                bestResourceSHA256 ?? "NULL"
            ))
            .first != nil {
-            Log.photoLibraryUploader("AlreadyUploaded match with identifier:\(localIdentifier) hash:\(String(describing: bestResourceSHA256)) ")
+            Log
+                .photoLibraryUploader(
+                    "AlreadyUploaded match with identifier:\(localIdentifier) hash:\(String(describing: bestResourceSHA256)) "
+                )
             return true
         }
 

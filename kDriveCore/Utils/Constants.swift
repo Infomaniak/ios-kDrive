@@ -169,3 +169,12 @@ public enum Constants {
         }
     }
 }
+
+/// App lifecycle Constants
+public enum AppDelegateConstants {
+    /// Amount of time we can use max in `applicationWillTerminate`
+    ///
+    /// The documentation specifies `approximately five seconds [to] return` from applicationWillTerminate
+    /// Therefore to not display a crash feedback on TestFlight, we give up after 4.5 seconds
+    public static let closeApplicationGiveUpTime = 4.5
+}
