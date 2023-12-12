@@ -53,7 +53,7 @@ public extension FileImportHelper {
         scanType: ScanFileFormat,
         in directory: File,
         drive: Drive
-    ) throws {
+    ) async throws {
         if !directory.capabilities.canUpload {
             throw ImportError.accessDenied
         }
