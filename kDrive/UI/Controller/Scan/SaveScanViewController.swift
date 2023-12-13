@@ -129,8 +129,13 @@ extension SaveScanViewController: SaveScanWorkerDelegate {
             return
         }
 
+        guard let fileNameSection = sections.firstIndex(of: .fileName) else {
+            DDLogError("[Scan] Unable refresh section for fileName.")
+            return
+        }
+
         items.first?.name = firstResult.localizedCapitalized
-        tableView.reloadData()
+        tableView.reloadSections(IndexSet(integer: fileNameSection), with: .automatic)
     }
 
     func errorWhileProcessing(_ error: Error?) {
