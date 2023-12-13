@@ -89,8 +89,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             Log.fileProvider("item for identifier - File:\(fileId)")
             return FileProviderItem(file: file, domain: domain)
         } else {
-            Log.fileProvider("item for identifier - nsError(code: .noSuchItem)")
-            throw nsError(code: .noSuchItem)
+            Log.fileProvider("item for identifier - NSFileProviderError(code: .noSuchItem)")
+            throw NSFileProviderError(.noSuchItem)
         }
     }
 
@@ -154,7 +154,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 if FileManager.default.fileExists(atPath: url.path) {
                     completionHandler(nil)
                 } else {
-                    completionHandler(self.nsError(code: .noSuchItem))
+                    completionHandler(NSFileProviderError(.noSuchItem))
                 }
                 return
             }
@@ -197,7 +197,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     private func isFileProviderExtensionEnabled() throws {
         Log.fileProvider("isFileProviderExtensionEnabled")
         guard UserDefaults.shared.isFileProviderExtensionEnabled else {
-            throw nsError(code: .notAuthenticated)
+            throw NSFileProviderError(.notAuthenticated)
         }
     }
 
@@ -208,7 +208,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             driveFileManager = setDriveFileManager()
         }
         guard driveFileManager != nil else {
-            throw nsError(code: .notAuthenticated)
+            throw NSFileProviderError(.notAuthenticated)
         }
     }
 
@@ -380,16 +380,5 @@ final class FileProviderExtension: NSFileProviderExtension {
                 try await task()
             }
         }
-    }
-}
-
-// MARK: - Convenient methods
-
-extension FileProviderExtension {
-    // Create an NSError based on the file provider error code
-    func nsError(domain: String = NSFileProviderErrorDomain,
-                 code: NSFileProviderError.Code,
-                 userInfo dict: [String: Any]? = nil) -> NSError {
-        return NSError(domain: NSFileProviderErrorDomain, code: code.rawValue, userInfo: dict)
     }
 }

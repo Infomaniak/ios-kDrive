@@ -69,7 +69,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
         Log.fileProvider("enumerateItems for observer")
         enqueue {
             guard let fileId = self.containerItemIdentifier.toFileId() else {
-                observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
+                observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
                 return
             }
             let cursor = page.isInitialPage ? nil : page.toCursor
@@ -238,15 +238,5 @@ extension NSFileProviderSyncAnchor {
 
     var toInt: Int {
         return rawValue.withUnsafeBytes { $0.load(as: Int.self) }.littleEndian
-    }
-}
-
-extension FileProviderEnumerator {
-    // Create an NSError based on the file provider error code.
-    //
-    func nsError(domain: String = NSFileProviderErrorDomain,
-                 code: NSFileProviderError.Code,
-                 userInfo dict: [String: Any]? = nil) -> NSError {
-        return NSError(domain: NSFileProviderErrorDomain, code: code.rawValue, userInfo: dict)
     }
 }

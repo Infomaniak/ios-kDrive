@@ -65,7 +65,7 @@ extension FileProviderExtension {
         Log.fileProvider("deleteItem")
         enqueue {
             guard let fileId = itemIdentifier.toFileId() else {
-                completionHandler(self.nsError(code: .noSuchItem))
+                completionHandler(NSFileProviderError(.noSuchItem))
                 return
             }
 
@@ -78,7 +78,7 @@ extension FileProviderExtension {
                     try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
                 } else {
-                    completionHandler(self.nsError(code: .serverUnreachable))
+                    completionHandler(NSFileProviderError(.serverUnreachable))
                 }
             } catch {
                 completionHandler(error)
@@ -314,7 +314,7 @@ extension FileProviderExtension {
         Log.fileProvider("untrashItem withIdentifier:\(fileId)")
         enqueue {
             guard let fileId else {
-                completionHandler(nil, self.nsError(code: .noSuchItem))
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
             }
 
@@ -340,7 +340,7 @@ extension FileProviderExtension {
                 try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
             } catch {
-                completionHandler(nil, self.nsError(code: .noSuchItem))
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
             }
         }
     }
