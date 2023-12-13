@@ -31,12 +31,10 @@ final class SaveScanViewController: SaveFileViewController {
         tableView.register(cellView: ScanTypeTableViewCell.self)
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
-
-        let saveScanWorker = SaveScanWorker(scan: scan, resultDelegate: self)
-        worker = saveScanWorker
+        worker = SaveScanWorker(scan: scan, resultDelegate: self)
 
         Task {
-            await saveScanWorker.detectFileName()
+            await worker?.detectFileName()
         }
     }
 
