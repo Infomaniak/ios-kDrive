@@ -256,7 +256,7 @@ extension FileProviderExtension {
         Log.fileProvider("setLastUsedDate forItemIdentifier")
         enqueue {
             // kDrive doesn't support this
-            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
+            completionHandler(nil, NSError.featureUnsupported)
         }
     }
 
@@ -268,7 +268,7 @@ extension FileProviderExtension {
         Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
         enqueue {
             // kDrive doesn't support this
-            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
+            completionHandler(nil, NSError.featureUnsupported)
         }
     }
 

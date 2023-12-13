@@ -24,6 +24,10 @@ import InfomaniakLogin
 import kDriveCore
 import RealmSwift
 
+extension NSError {
+    static let featureUnsupported = NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError)
+}
+
 final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
