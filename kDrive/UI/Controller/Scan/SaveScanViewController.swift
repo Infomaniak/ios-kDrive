@@ -19,20 +19,23 @@
 import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
-import PDFKit
 import UIKit
-import Vision
 import VisionKit
 
-class SaveScanViewController: SaveFileViewController {
+final class SaveScanViewController: SaveFileViewController {
     var scan: VNDocumentCameraScan!
     var scanType = ScanFileFormat(rawValue: 0)!
+    var worker: SaveScanWorker?
 
     override func viewDidLoad() {
         tableView.register(cellView: ScanTypeTableViewCell.self)
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
-        detectFileName()
+        worker = SaveScanWorker(scan: scan, resultDelegate: self)
+
+        Task {
+            await worker?.detectFileName()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -73,29 +76,20 @@ class SaveScanViewController: SaveFileViewController {
             return
         }
 
-        DispatchQueue.global(qos: .userInteractive).async { [self] in
+        Task {
+            defer { footer.footerButton.setLoading(false) }
+
             do {
-                try fileImportHelper.upload(
+                try await fileImportHelper.upload(
                     scan: scan,
                     name: filename,
                     scanType: scanType,
                     in: selectedDirectory,
                     drive: selectedDriveFileManager.drive
                 )
-                Task {
-                    let parent = presentingViewController
-                    footer.footerButton.setLoading(false)
-                    dismiss(animated: true) {
-                        parent?.dismiss(animated: true) {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allUploadInProgress(filename))
-                        }
-                    }
-                }
+                dismissAndShowUploadInProgress(filename: filename)
             } catch {
-                Task {
-                    footer.footerButton.setLoading(false)
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUpload)
-                }
+                showUploadError()
             }
         }
     }
@@ -106,40 +100,45 @@ class SaveScanViewController: SaveFileViewController {
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }
+}
 
-    private func detectFileName() {
-        // Get the first page
-        guard let cgImage = scan.imageOfPage(at: 0).cgImage else { return }
+// MARK: - Snackbar
 
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
-
-        do {
-            // Perform the text-recognition request
-            try requestHandler.perform([request])
-        } catch {
-            DDLogInfo("[Scan] Unable to perform the requests: \(error).")
+extension SaveScanViewController {
+    private func dismissAndShowUploadInProgress(filename: String) {
+        let parent = presentingViewController
+        dismiss(animated: true) {
+            parent?.dismiss(animated: true) {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allUploadInProgress(filename))
+            }
         }
     }
 
-    func recognizeTextHandler(request: VNRequest, error: Error?) {
-        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+    private func showUploadError() {
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUpload)
+    }
+}
+
+// MARK: - SaveScanWorkerDelegate
+
+extension SaveScanViewController: SaveScanWorkerDelegate {
+    func recognizedStrings(_ strings: [String]) {
+        // Use the first string as the filename
+        guard let firstResult = strings.first else {
+            DDLogInfo("[Scan] Unable to recognise text.")
             return
         }
-        let minConfidence: Float = 0.6
-        let recognizedStrings: [String] = observations.compactMap { observation in
-            // Return the string of the top VNRecognizedText instance
-            let topCandidate = observation.topCandidates(1).first
-            if let topCandidate, topCandidate.confidence >= minConfidence {
-                return topCandidate.string
-            } else {
-                return nil
-            }
+
+        guard let fileNameSection = sections.firstIndex(of: .fileName) else {
+            DDLogError("[Scan] Unable refresh section for fileName.")
+            return
         }
 
-        // Use the first string as the filename
-        guard let firstResult = recognizedStrings.first else { return }
         items.first?.name = firstResult.localizedCapitalized
-        tableView.reloadData()
+        tableView.reloadSections(IndexSet(integer: fileNameSection), with: .automatic)
+    }
+
+    func errorWhileProcessing(_ error: Error?) {
+        DDLogError("[Scan] failed with error: \(error).")
     }
 }
