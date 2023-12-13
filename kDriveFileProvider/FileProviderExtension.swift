@@ -350,12 +350,13 @@ final class FileProviderExtension: NSFileProviderExtension {
         try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
-            return FileProviderEnumerator(
-                containerItemIdentifier: .workingSet,
+            return WorkingSetEnumerator(
+                containerItemIdentifier: containerItemIdentifier,
                 driveFileManager: driveFileManager,
                 domain: domain
             )
         }
+
         let item = try item(for: containerItemIdentifier)
         return FileProviderEnumerator(containerItem: item, driveFileManager: driveFileManager, domain: domain)
     }

@@ -68,86 +68,70 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         Log.fileProvider("enumerateItems for observer")
         enqueue {
-            // Recent files folder
-            if self.containerItemIdentifier == .workingSet {
-                let workingSetFiles = self.driveFileManager.getWorkingSet()
+            guard let fileId = self.containerItemIdentifier.toFileId() else {
+                observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
+                return
+            }
+            let cursor = page.isInitialPage ? nil : page.toCursor
+
+            var forceRefresh = false
+            if let lastResponseAt = self.driveFileManager.getCachedFile(id: fileId)?.responseAt {
+                let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime)
+                    .timeIntervalSince1970)
+                forceRefresh = lastResponseAt < anchorExpireTimestamp
+            }
+
+            do {
+                let file = try await self.driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
+                let (children, moreComing) = try await self.driveFileManager
+                    .files(in: file.proxify(), cursor: cursor, forceRefresh: forceRefresh)
+                // No need to freeze $0 it should already be frozen
                 var containerItems = [FileProviderItem]()
-                for file in workingSetFiles {
+                for child in children {
                     autoreleasepool {
-                        containerItems.append(FileProviderItem(file: file, domain: self.domain))
+                        containerItems.append(FileProviderItem(file: child, domain: self.domain))
                     }
                 }
-                containerItems += self.fileProviderState.getWorkingDocumentValues()
+
+                containerItems.append(FileProviderItem(file: file, domain: self.domain))
                 observer.didEnumerate(containerItems)
-                observer.finishEnumerating(upTo: nil)
-            }
-            // Any other folder
-            else {
-                guard let fileId = self.containerItemIdentifier.toFileId() else {
-                    observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
-                    return
-                }
-                let cursor = page.isInitialPage ? nil : page.toCursor
 
-                var forceRefresh = false
-                if let lastResponseAt = self.driveFileManager.getCachedFile(id: fileId)?.responseAt {
-                    let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime)
-                        .timeIntervalSince1970)
-                    forceRefresh = lastResponseAt < anchorExpireTimestamp
+                if self.isDirectory, let cursor {
+                    observer.finishEnumerating(upTo: NSFileProviderPage(cursor))
+                } else {
+                    observer.finishEnumerating(upTo: nil)
                 }
-
+            } catch {
+                // Maybe this is a trashed file
                 do {
-                    let file = try await self.driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
-                    let (children, moreComing) = try await self.driveFileManager
-                        .files(in: file.proxify(), cursor: cursor, forceRefresh: forceRefresh)
-                    // No need to freeze $0 it should already be frozen
+                    let file = try await self.driveFileManager.apiFetcher
+                        .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                    let children = try await self.driveFileManager.apiFetcher.trashedFiles(
+                        of: file.proxify(),
+                        cursor: cursor
+                    ).data
                     var containerItems = [FileProviderItem]()
                     for child in children {
                         autoreleasepool {
-                            containerItems.append(FileProviderItem(file: child, domain: self.domain))
+                            let item = FileProviderItem(file: child, domain: self.domain)
+                            item.parentItemIdentifier = self.containerItemIdentifier
+                            containerItems.append(item)
                         }
                     }
-
                     containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
-
-                    if self.isDirectory, let cursor {
-                        observer.finishEnumerating(upTo: NSFileProviderPage(cursor))
-                    } else {
-                        observer.finishEnumerating(upTo: nil)
-                    }
+                    // FIXME: Cursors also for trash
+                    /* if self.isDirectory && children.count == Endpoint.itemsPerPage {
+                         observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
+                     } else {
+                         observer.finishEnumerating(upTo: nil)
+                     } */
                 } catch {
-                    // Maybe this is a trashed file
-                    do {
-                        let file = try await self.driveFileManager.apiFetcher
-                            .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
-                        let children = try await self.driveFileManager.apiFetcher.trashedFiles(
-                            of: file.proxify(),
-                            cursor: cursor
-                        ).data
-                        var containerItems = [FileProviderItem]()
-                        for child in children {
-                            autoreleasepool {
-                                let item = FileProviderItem(file: child, domain: self.domain)
-                                item.parentItemIdentifier = self.containerItemIdentifier
-                                containerItems.append(item)
-                            }
-                        }
-                        containerItems.append(FileProviderItem(file: file, domain: self.domain))
-                        observer.didEnumerate(containerItems)
-                        // FIXME: Cursors also for trash
-                        /* if self.isDirectory && children.count == Endpoint.itemsPerPage {
-                             observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
-                         } else {
-                             observer.finishEnumerating(upTo: nil)
-                         } */
-                    } catch {
-                        if let error = error as? DriveError, error == .productMaintenance {
-                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
-                        } else {
-                            // File not found
-                            observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
-                        }
+                    if let error = error as? DriveError, error == .productMaintenance {
+                        observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                    } else {
+                        // File not found
+                        observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
                     }
                 }
             }
@@ -204,9 +188,6 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         }
                     }
                 }
-            } else {
-                // Update working set
-                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
             }
         }
     }
