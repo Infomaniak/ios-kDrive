@@ -27,7 +27,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     @LazyInjectService private var accountManager: AccountManageable
 
     private let driveFileManager: DriveFileManager
-    private var uploadCountManager: UploadCountManager?
+    var uploadCountManager: UploadCountManager?
 
     private struct Section: Equatable {
         let id: Int
