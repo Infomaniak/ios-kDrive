@@ -89,12 +89,29 @@ let project = Project(name: "kDrive",
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
-                                 bundleId: "com.infomaniak.drive.tests",
+                                 bundleId: "com.infomaniak.drive.mainTests",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
-                                 sources: "kDriveTests/**",
+                                 sources: [
+                                    "kDriveTests/**",
+                                    "kDriveTestShared/**"
+                                 ],
                                  resources: [
                                      "kDriveTests/**/*.jpg"
+                                 ],
+                                 dependencies: [
+                                     .target(name: "kDrive")
+                                 ],
+                                 settings: .settings(base: Constants.baseSettings)),
+                          Target(name: "kDriveAPITests",
+                                 platform: .iOS,
+                                 product: .unitTests,
+                                 bundleId: "com.infomaniak.drive.apiTests",
+                                 deploymentTarget: Constants.deploymentTarget,
+                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
+                                 sources: [
+                                    "kDriveAPITests/**", 
+                                    "kDriveTestShared/**"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
@@ -103,10 +120,10 @@ let project = Project(name: "kDrive",
                           Target(name: "kDriveUITests",
                                  platform: .iOS,
                                  product: .uiTests,
-                                 bundleId: "com.infomaniak.drive.uitests",
+                                 bundleId: "com.infomaniak.drive.uiTests",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
-                                 sources: "kDriveUITests/**",
+                                 sources: ["kDriveUITests/**", "kDriveTestShared/**"],
                                  dependencies: [
                                      .target(name: "kDrive"),
                                      .target(name: "kDriveCore")
