@@ -91,7 +91,7 @@ let project = Project(name: "kDrive",
                                  product: .unitTests,
                                  bundleId: "com.infomaniak.drive.mainTests",
                                  deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
+                                 infoPlist: .default,
                                  sources: [
                                     "kDriveTests/**",
                                     "kDriveTestShared/**"
@@ -108,7 +108,7 @@ let project = Project(name: "kDrive",
                                  product: .unitTests,
                                  bundleId: "com.infomaniak.drive.apiTests",
                                  deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
+                                 infoPlist: .default,
                                  sources: [
                                     "kDriveAPITests/**", 
                                     "kDriveTestShared/**"
@@ -122,11 +122,10 @@ let project = Project(name: "kDrive",
                                  product: .uiTests,
                                  bundleId: "com.infomaniak.drive.uiTests",
                                  deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
+                                 infoPlist: .default,
                                  sources: ["kDriveUITests/**", "kDriveTestShared/**"],
                                  dependencies: [
-                                     .target(name: "kDrive"),
-                                     .target(name: "kDriveCore")
+                                     .target(name: "kDrive")
                                  ]),
                           Target(name: "kDriveResources",
                                  platform: .iOS,
@@ -153,7 +152,6 @@ let project = Project(name: "kDrive",
                                  ],
                                  dependencies: [
                                      .target(name: "kDriveResources"),
-                                     .package(product: "Algorithms"),
                                      .package(product: "Alamofire"),
                                      .package(product: "Atlantis"),
                                      .package(product: "MQTTNIO"),
