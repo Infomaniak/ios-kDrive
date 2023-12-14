@@ -22,32 +22,15 @@ import kDriveCore
 
 final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
     private let containerItemIdentifier: NSFileProviderItemIdentifier
-    private let domain: NSFileProviderDomain?
-    private let driveFileManager: DriveFileManager
-    @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
-    init(
-        containerItemIdentifier: NSFileProviderItemIdentifier,
-        driveFileManager: DriveFileManager,
-        domain: NSFileProviderDomain?
-    ) {
+    init(containerItemIdentifier: NSFileProviderItemIdentifier) {
         self.containerItemIdentifier = containerItemIdentifier
-        self.domain = domain
-        self.driveFileManager = driveFileManager
     }
 
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        let workingSetFiles = driveFileManager.getWorkingSet()
-        var containerItems = [FileProviderItem]()
-        for file in workingSetFiles {
-            autoreleasepool {
-                containerItems.append(FileProviderItem(file: file, domain: domain))
-            }
-        }
-        containerItems += fileProviderState.getWorkingDocumentValues()
-        observer.didEnumerate(containerItems)
+        observer.didEnumerate([])
         observer.finishEnumerating(upTo: nil)
     }
 

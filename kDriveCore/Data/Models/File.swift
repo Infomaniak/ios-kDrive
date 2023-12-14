@@ -772,7 +772,7 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String) {
+    public convenience init(id: Int, name: String) {
         self.init()
         self.id = id
         self.name = name

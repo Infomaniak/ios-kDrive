@@ -94,7 +94,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         isTrashed = file.isTrashed
         creationDate = file.createdAt
         contentModificationDate = file.lastModifiedAt
-        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
+        var modifiedAtInterval = file.lastModifiedAt.timeIntervalSince1970
+        versionIdentifier = Data(bytes: &modifiedAtInterval, count: MemoryLayout.size(ofValue: modifiedAtInterval))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
         let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         if DownloadQueue.instance.hasOperation(for: file) {

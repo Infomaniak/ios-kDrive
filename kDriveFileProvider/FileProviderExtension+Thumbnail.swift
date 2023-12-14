@@ -30,13 +30,12 @@ extension FileProviderExtension {
         let urlSession = URLSession(configuration: URLSessionConfiguration.default)
         let progress = Progress(totalUnitCount: Int64(itemIdentifiers.count))
 
-        guard let token = driveFileManager.apiFetcher.currentToken else {
+        guard let token = fileProviderManager.driveApiFetcher.currentToken else {
             return Progress(totalUnitCount: 0)
         }
 
         for identifier in itemIdentifiers {
-            guard let fileId = identifier.toFileId(),
-                  let file = driveFileManager.getCachedFile(id: fileId) else {
+            guard let file = try? fileProviderManager.getFile(for: identifier) else {
                 perThumbnailCompletionHandler(identifier, nil, NSFileProviderError(.noSuchItem))
                 progress.completedUnitCount += 1
                 if progress.isFinished {

@@ -69,7 +69,7 @@ public extension InfomaniakLogin {
 }
 
 /// Abstract interface on AccountManager
-public protocol AccountManageable: AnyObject {
+public protocol AccountManageable: AnyObject, RefreshTokenDelegate {
     var currentAccount: Account! { get }
     var accounts: [Account] { get }
     var tokens: [ApiToken] { get }
