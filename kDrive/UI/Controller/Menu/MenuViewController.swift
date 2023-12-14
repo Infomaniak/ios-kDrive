@@ -24,10 +24,9 @@ import Sentry
 import UIKit
 
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
-    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService private var accountManager: AccountManageable
 
-    let driveFileManager: DriveFileManager
-
+    private let driveFileManager: DriveFileManager
     private var uploadCountManager: UploadCountManager?
 
     private struct Section: Equatable {
@@ -92,13 +91,15 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     }
 
     private var sections: [Section] = []
-    private var currentAccount: Account!
-
+    private var currentAccount: Account
     private var needsContentUpdate = false
 
     init(driveFileManager: DriveFileManager) {
+        @InjectService var manager: AccountManageable
+        currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
         super.init(style: .plain)
+
         observeUploadCount()
     }
 
@@ -117,7 +118,6 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
-        currentAccount = accountManager.currentAccount
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
