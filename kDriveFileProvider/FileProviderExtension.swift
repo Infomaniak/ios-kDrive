@@ -332,6 +332,8 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         if containerItemIdentifier == .workingSet {
             return WorkingSetEnumerator(containerItemIdentifier: containerItemIdentifier)
+        } else if containerItemIdentifier == .rootContainer {
+            return RootEnumerator()
         }
 
         let file = try fileProviderManager.getFile(for: containerItemIdentifier)
