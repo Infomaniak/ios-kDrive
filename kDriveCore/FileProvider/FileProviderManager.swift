@@ -17,22 +17,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
-import kDriveCore
 import Realm
 import RealmSwift
 
-class FileProviderManager {
-    let drive: Drive
-    let driveApiFetcher: DriveApiFetcher
-    let realmConfiguration: Realm.Configuration
+public class FileProviderManager {
+    public let drive: Drive
+    public let driveApiFetcher: DriveApiFetcher
+    public let realmConfiguration: Realm.Configuration
 
-    let manager: NSFileProviderManager
-    let domain: NSFileProviderDomain?
+    public let manager: NSFileProviderManager
+    public let domain: NSFileProviderDomain?
 
-    init?(domain: NSFileProviderDomain?) {
+    public init?(domain: NSFileProviderDomain?) {
         @InjectService var accountManager: AccountManageable
         guard let token = accountManager.getTokenForUserId(accountManager.currentUserId) else {
             return nil
@@ -71,11 +71,13 @@ class FileProviderManager {
 
         let realm = getRealm()
         try? realm.write {
-            realm.add(File(id: DriveFileManager.constants.rootID, name: drive.name), update: .all)
+            let rootFile = File(id: DriveFileManager.constants.rootID, name: drive.name)
+            rootFile.driveId = drive.id
+            realm.add(rootFile, update: .all)
         }
     }
 
-    func getRealm() -> Realm {
+    public func getRealm() -> Realm {
         do {
             let realm = try Realm(configuration: realmConfiguration)
             realm.refresh()
@@ -85,7 +87,7 @@ class FileProviderManager {
         }
     }
 
-    func keepCacheAttributesForFile(newFile: File, using realm: Realm) {
+    public func keepCacheAttributesForFile(newFile: File, using realm: Realm) {
         guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id),
               !savedChild.isInvalidated else { return }
         newFile.lastCursor = savedChild.lastCursor
@@ -95,7 +97,7 @@ class FileProviderManager {
         newFile.children = savedChild.children
     }
 
-    func writeChildrenToParent(
+    public func writeChildrenToParent(
         _ parent: File,
         children: [File],
         shouldClearChildren: Bool,
@@ -119,9 +121,9 @@ class FileProviderManager {
         return children.map { $0.freezeIfNeeded() }
     }
 
-    func getFile(for identifier: NSFileProviderItemIdentifier,
-                 using realm: Realm? = nil,
-                 shouldFreeze: Bool = true) throws -> File {
+    public func getFile(for identifier: NSFileProviderItemIdentifier,
+                        using realm: Realm? = nil,
+                        shouldFreeze: Bool = true) throws -> File {
         guard let fileId = identifier.toFileId() else {
             throw NSFileProviderError(.noSuchItem)
         }
