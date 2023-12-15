@@ -122,9 +122,10 @@ let project = Project(name: "kDrive",
                                  bundleId: "com.infomaniak.drive.uiTests",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
-                                 sources: ["kDriveUITests/**", "kDriveTestShared/**"],
+                                 sources: "kDriveUITests/**",
                                  dependencies: [
-                                     .target(name: "kDrive")
+                                     .target(name: "kDrive"),
+                                     .target(name: "kDriveCore")
                                  ]),
                           Target(name: "kDriveResources",
                                  platform: .iOS,
