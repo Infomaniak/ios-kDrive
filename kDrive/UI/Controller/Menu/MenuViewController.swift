@@ -23,16 +23,11 @@ import kDriveResources
 import Sentry
 import UIKit
 
-class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
-    @LazyInjectService var accountManager: AccountManageable
+final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
+    @LazyInjectService private var accountManager: AccountManageable
 
-    var driveFileManager: DriveFileManager! {
-        didSet {
-            observeUploadCount()
-        }
-    }
-
-    private var uploadCountManager: UploadCountManager!
+    private let driveFileManager: DriveFileManager
+    var uploadCountManager: UploadCountManager?
 
     private struct Section: Equatable {
         let id: Int
@@ -96,13 +91,16 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     }
 
     private var sections: [Section] = []
-    private var currentAccount: Account!
-
+    private var currentAccount: Account
     private var needsContentUpdate = false
 
     init(driveFileManager: DriveFileManager) {
+        @InjectService var manager: AccountManageable
+        currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
         super.init(style: .plain)
+
+        observeUploadCount()
     }
 
     @available(*, unavailable)
@@ -120,7 +118,6 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
-        currentAccount = accountManager.currentAccount
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
@@ -154,13 +151,12 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     }
 
     private func observeUploadCount() {
-        guard driveFileManager != nil else { return }
-
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self else { return }
 
             guard let index = sections.firstIndex(where: { $0 == .uploads }),
                   let cell = tableView?.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell,
+                  let uploadCountManager,
                   uploadCountManager.uploadCount > 0 else {
                 // Delete / Add cell
                 reloadData()
@@ -186,7 +182,7 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
             sections = [.header, .more, .options]
         }
 
-        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
+        if let uploadCountManager, uploadCountManager.uploadCount > 0 {
             sections.insert(.uploads, at: 1)
         }
 
@@ -230,7 +226,7 @@ extension MenuViewController {
             let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.progressView.enableIndeterminate()
-            cell.setUploadCount(uploadCountManager.uploadCount)
+            cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
             return cell
         } else {
             let action = section.actions[indexPath.row]
