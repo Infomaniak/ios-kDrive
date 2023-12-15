@@ -94,7 +94,8 @@ let project = Project(name: "kDrive",
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
                                  sources: "kDriveTests/**",
                                  resources: [
-                                     "kDriveTests/**/*.jpg"
+                                     "kDriveTests/**/*.jpg",
+                                     "kDriveTests/**/*.json"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
