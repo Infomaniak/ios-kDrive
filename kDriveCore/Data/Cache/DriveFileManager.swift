@@ -60,7 +60,7 @@ public final class DriveFileManager {
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
         public let currentVersionCode = 1
-        public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
+        public lazy var uploadsMigrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             let currentUploadSchemaVersion = RealmSchemaVersion.upload
 
             // Log migration on Sentry
@@ -142,13 +142,98 @@ public final class DriveFileManager {
             }
         }
 
+        public lazy var driveMigrationBlock = { (migration: Migration, oldSchemaVersion: UInt64) in
+            let currentDriveSchemeVersion = RealmSchemaVersion.drive
+
+            // Log migration on Sentry
+            SentryDebug.realmMigrationStartedBreadcrumb(
+                form: oldSchemaVersion,
+                to: currentDriveSchemeVersion,
+                realmName: "Drive"
+            )
+            defer {
+                SentryDebug.realmMigrationEndedBreadcrumb(
+                    form: oldSchemaVersion,
+                    to: currentDriveSchemeVersion,
+                    realmName: "Drive"
+                )
+            }
+
+            // Sanity check
+            guard oldSchemaVersion < currentDriveSchemeVersion else {
+                return
+            }
+
+            // Models older than v5 are cleared, so any migration before that is moot.
+            if oldSchemaVersion < 5 {
+                // Remove rights
+                migration.deleteData(forType: Rights.className())
+                // Delete file categories for migration
+                migration.deleteData(forType: FileCategory.className())
+            }
+            if oldSchemaVersion < 7 {
+                // Migrate file category
+                migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
+                    newObject?["categoryId"] = oldObject?["id"]
+                    newObject?["addedAt"] = oldObject?["addedToFileAt"]
+                    newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
+                    newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
+                }
+                // Migrate rights
+                migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
+                    newObject?["canShow"] = oldObject?["show"] ?? false
+                    newObject?["canRead"] = oldObject?["read"] ?? false
+                    newObject?["canWrite"] = oldObject?["write"] ?? false
+                    newObject?["canShare"] = oldObject?["share"] ?? false
+                    newObject?["canLeave"] = oldObject?["leave"] ?? false
+                    newObject?["canDelete"] = oldObject?["delete"] ?? false
+                    newObject?["canRename"] = oldObject?["rename"] ?? false
+                    newObject?["canMove"] = oldObject?["move"] ?? false
+                    newObject?["canCreateDirectory"] = oldObject?["createNewFolder"] ?? false
+                    newObject?["canCreateFile"] = oldObject?["createNewFile"] ?? false
+                    newObject?["canUpload"] = oldObject?["uploadNewFile"] ?? false
+                    newObject?["canMoveInto"] = oldObject?["moveInto"] ?? false
+                    newObject?["canBecomeDropbox"] = oldObject?["canBecomeCollab"] ?? false
+                    newObject?["canBecomeSharelink"] = oldObject?["canBecomeLink"] ?? false
+                    newObject?["canUseFavorite"] = oldObject?["canFavorite"] ?? false
+                    newObject?["canUseTeam"] = false
+                }
+                // Migrate file
+                migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
+                    newObject?["sortedName"] = oldObject?["nameNaturalSorting"]
+                    newObject?["extensionType"] = oldObject?["rawConvertedType"]
+                    newObject?["_capabilities"] = oldObject?["rights"] as? Rights
+                    newObject?["rawType"] = oldObject?["type"]
+                    newObject?["rawStatus"] = oldObject?["status"]
+                    newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
+                    newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
+                    newObject?["lastModifiedAt"] =
+                        Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
+                    if let createdAt = oldObject?["fileCreatedAt"] as? Int {
+                        newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+                    }
+                    if let deletedAt = oldObject?["deletedAt"] as? Int {
+                        newObject?["deletedAt"] = Date(timeIntervalSince1970: TimeInterval(deletedAt))
+                    }
+                }
+            }
+            if oldSchemaVersion < 8 {
+                migration.enumerateObjects(ofType: FileActivity.className()) { oldObject, newObject in
+                    newObject?["newPath"] = oldObject?["pathNew"]
+                    if let createdAt = oldObject?["createdAt"] as? Int {
+                        newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+                    }
+                }
+            }
+        }
+
         /// Path of the upload DB
         public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
 
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
             fileURL: uploadsRealmURL,
             schemaVersion: RealmSchemaVersion.upload,
-            migrationBlock: migrationBlock,
+            migrationBlock: uploadsMigrationBlock,
             objectTypes: [DownloadTask.self,
                           PhotoSyncSettings.self,
                           UploadSession.self,
@@ -273,90 +358,7 @@ public final class DriveFileManager {
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
             schemaVersion: RealmSchemaVersion.drive,
-            migrationBlock: { migration, oldSchemaVersion in
-                let currentDriveSchemeVersion = RealmSchemaVersion.drive
-
-                // Log migration on Sentry
-                SentryDebug.realmMigrationStartedBreadcrumb(
-                    form: oldSchemaVersion,
-                    to: currentDriveSchemeVersion,
-                    realmName: "Drive"
-                )
-                defer {
-                    SentryDebug.realmMigrationEndedBreadcrumb(
-                        form: oldSchemaVersion,
-                        to: currentDriveSchemeVersion,
-                        realmName: "Drive"
-                    )
-                }
-
-                // Sanity check
-                guard oldSchemaVersion < currentDriveSchemeVersion else {
-                    return
-                }
-
-                // Models older than v5 are cleared, so any migration before that is moot.
-                if oldSchemaVersion < 5 {
-                    // Remove rights
-                    migration.deleteData(forType: Rights.className())
-                    // Delete file categories for migration
-                    migration.deleteData(forType: FileCategory.className())
-                }
-                if oldSchemaVersion < 7 {
-                    // Migrate file category
-                    migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
-                        newObject?["categoryId"] = oldObject?["id"]
-                        newObject?["addedAt"] = oldObject?["addedToFileAt"]
-                        newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
-                        newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
-                    }
-                    // Migrate rights
-                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                        newObject?["canShow"] = oldObject?["show"] ?? false
-                        newObject?["canRead"] = oldObject?["read"] ?? false
-                        newObject?["canWrite"] = oldObject?["write"] ?? false
-                        newObject?["canShare"] = oldObject?["share"] ?? false
-                        newObject?["canLeave"] = oldObject?["leave"] ?? false
-                        newObject?["canDelete"] = oldObject?["delete"] ?? false
-                        newObject?["canRename"] = oldObject?["rename"] ?? false
-                        newObject?["canMove"] = oldObject?["move"] ?? false
-                        newObject?["canCreateDirectory"] = oldObject?["createNewFolder"] ?? false
-                        newObject?["canCreateFile"] = oldObject?["createNewFile"] ?? false
-                        newObject?["canUpload"] = oldObject?["uploadNewFile"] ?? false
-                        newObject?["canMoveInto"] = oldObject?["moveInto"] ?? false
-                        newObject?["canBecomeDropbox"] = oldObject?["canBecomeCollab"] ?? false
-                        newObject?["canBecomeSharelink"] = oldObject?["canBecomeLink"] ?? false
-                        newObject?["canUseFavorite"] = oldObject?["canFavorite"] ?? false
-                        newObject?["canUseTeam"] = false
-                    }
-                    // Migrate file
-                    migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
-                        newObject?["sortedName"] = oldObject?["nameNaturalSorting"]
-                        newObject?["extensionType"] = oldObject?["rawConvertedType"]
-                        newObject?["_capabilities"] = oldObject?["rights"] as? Rights
-                        newObject?["rawType"] = oldObject?["type"]
-                        newObject?["rawStatus"] = oldObject?["status"]
-                        newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
-                        newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
-                        newObject?["lastModifiedAt"] =
-                            Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
-                        if let createdAt = oldObject?["fileCreatedAt"] as? Int {
-                            newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
-                        }
-                        if let deletedAt = oldObject?["deletedAt"] as? Int {
-                            newObject?["deletedAt"] = Date(timeIntervalSince1970: TimeInterval(deletedAt))
-                        }
-                    }
-                }
-                if oldSchemaVersion < 8 {
-                    migration.enumerateObjects(ofType: FileActivity.className()) { oldObject, newObject in
-                        newObject?["newPath"] = oldObject?["pathNew"]
-                        if let createdAt = oldObject?["createdAt"] as? Int {
-                            newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
-                        }
-                    }
-                }
-            },
+            migrationBlock: DriveFileManager.constants.driveMigrationBlock,
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
 
