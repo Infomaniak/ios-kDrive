@@ -526,6 +526,8 @@ public final class File: Object, Codable {
                metadataSize.intValue != remoteSize {
                 return false
             }
+        } catch let error as POSIXError where error.code == .ENOENT {
+            return false
         } catch {
             DDLogError("[File] unable to read metadata on disk: \(error)")
         }
