@@ -268,7 +268,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             let right = ShareLinkPermission(rawValue: value)!
             Task { [proxyFile = file.proxify()] in
                 do {
-                    _ = try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
+                    try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)

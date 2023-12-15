@@ -38,6 +38,11 @@ public class DrivePack: EmbeddedObject, Codable {
         return _capabilities ?? DrivePackCapabilities()
     }
 
+    /// Convenience enum bridge
+    public var drivePackId: DrivePackId? {
+        DrivePackId(rawValue: id)
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case name
