@@ -30,20 +30,20 @@ public extension DriveApiFetcher {
     }
 
     func files(in directory: ProxyFile,
-               listingCursor: FileCursor,
+               advancedListingCursor: FileCursor,
                sortType: SortType = .nameAZ) async throws -> (data: ListingResult, response: ApiResponse<ListingResult>) {
         try await perform(request: authenticatedRequest(
-            .fileListingContinue(file: directory, cursor: listingCursor)
+            .fileListingContinue(file: directory, cursor: advancedListingCursor)
                 .sorted(by: [.type, sortType]),
             method: .get
         ))
     }
 
     func files(in directory: ProxyFile,
-               listingCursor: FileCursor?,
+               advancedListingCursor: FileCursor?,
                sortType: SortType = .nameAZ) async throws -> (data: ListingResult, response: ApiResponse<ListingResult>) {
-        if let listingCursor {
-            return try await files(in: directory, listingCursor: listingCursor, sortType: sortType)
+        if let advancedListingCursor {
+            return try await files(in: directory, advancedListingCursor: advancedListingCursor, sortType: sortType)
         } else {
             return try await files(in: directory, sortType: sortType)
         }
