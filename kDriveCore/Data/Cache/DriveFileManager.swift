@@ -362,11 +362,6 @@ public final class DriveFileManager {
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
 
-        // Only compact in the background
-        /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-             compactRealmsIfNeeded()
-         } */
-
         // Init root file
         let realm = getRealm()
         if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
@@ -377,51 +372,6 @@ public final class DriveFileManager {
         }
         Task {
             try await initRoot()
-        }
-    }
-
-    private func compactRealmsIfNeeded() {
-        DDLogInfo("Trying to compact realms if needed")
-        let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
-            let fiftyMB = 50 * 1024 * 1024
-            let compactingNeeded = (totalBytes > fiftyMB) && (Double(usedBytes) / Double(totalBytes)) < 0.5
-            return compactingNeeded
-        }
-
-        let config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
-            shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [
-                Drive.self,
-                DrivePreferences.self,
-                DriveUsersCategories.self,
-                DriveTeamsCategories.self,
-                DriveUser.self,
-                Team.self,
-                Category.self,
-                CategoryRights.self
-            ]
-        )
-        do {
-            _ = try Realm(configuration: config)
-        } catch {
-            DDLogError("Failed to compact drive infos realm: \(error)")
-        }
-
-        let files = (try? fileManager
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil)) ?? []
-        for file in files where file.pathExtension == "realm" {
-            do {
-                let realmConfiguration = Realm.Configuration(
-                    fileURL: file,
-                    deleteRealmIfMigrationNeeded: true,
-                    shouldCompactOnLaunch: compactingCondition,
-                    objectTypes: [File.self, Rights.self, FileActivity.self]
-                )
-                _ = try Realm(configuration: realmConfiguration)
-            } catch {
-                DDLogError("Failed to compact realm: \(error)")
-            }
         }
     }
 
