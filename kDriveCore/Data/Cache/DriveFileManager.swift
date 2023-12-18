@@ -25,6 +25,20 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+public enum DriveFileManagerContext {
+    case drive
+    case fileProvider
+
+    var additionalPath: String {
+        switch self {
+        case .drive:
+            return ""
+        case .fileProvider:
+            return "-fp"
+        }
+    }
+}
+
 public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
@@ -350,10 +364,11 @@ public final class DriveFileManager {
     /// Path of the main Realm DB
     var realmURL: URL
 
-    init(drive: Drive, apiFetcher: DriveApiFetcher) {
+    init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        realmURL = DriveFileManager.constants.rootDocumentsURL
+            .appendingPathComponent("\(drive.userId)-\(drive.id)\(context.additionalPath).realm")
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
@@ -373,6 +388,11 @@ public final class DriveFileManager {
         Task {
             try await initRoot()
         }
+    }
+
+    /// Recreate a DriveFileManager from a different context
+    public convenience init(driveFileManager: DriveFileManager, context: DriveFileManagerContext = .drive) {
+        self.init(drive: driveFileManager.drive, apiFetcher: driveFileManager.apiFetcher, context: context)
     }
 
     public func getRealm() -> Realm {
@@ -468,26 +488,41 @@ public final class DriveFileManager {
         }
 
         let managedParent = try directory.resolve(using: realm)
-        // Update parent
-        try realm.write {
-            managedParent.responseAt = response?.responseAt ?? Int(Date().timeIntervalSince1970)
-            if children.count < Endpoint.itemsPerPage {
-                managedParent.versionCode = DriveFileManager.constants.currentVersionCode
-                managedParent.fullyDownloaded = true
-            }
-            realm.add(children, update: .modified)
-            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
-            // the first page will result in an undefined behavior.
-            if isInitialCursor {
-                managedParent.children.removeAll()
-            }
-            managedParent.children.insert(objectsIn: children)
-        }
+        try writeChildrenToParent(
+            children,
+            liveParent: managedParent,
+            responseAt: response?.responseAt,
+            isInitialCursor: isInitialCursor,
+            using: realm
+        )
 
         return (
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
             response?.hasMore == true ? response?.cursor : nil
         )
+    }
+
+    public func writeChildrenToParent(
+        _ children: [File],
+        liveParent: File,
+        responseAt: Int?,
+        isInitialCursor: Bool,
+        using realm: Realm
+    ) throws {
+        try realm.write {
+            liveParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            if children.count < Endpoint.itemsPerPage {
+                liveParent.versionCode = DriveFileManager.constants.currentVersionCode
+                liveParent.fullyDownloaded = true
+            }
+            realm.add(children, update: .modified)
+            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
+            // the first page will result in an undefined behavior.
+            if isInitialCursor {
+                liveParent.children.removeAll()
+            }
+            liveParent.children.insert(objectsIn: children)
+        }
     }
 
     private func files(in directory: ProxyFile,
@@ -1444,21 +1479,25 @@ public final class DriveFileManager {
         }
     }
 
-    struct FilePropertiesOptions: OptionSet {
-        let rawValue: Int
+    public struct FilePropertiesOptions: OptionSet {
+        public let rawValue: Int
+        
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
 
-        static let fullyDownloaded = FilePropertiesOptions(rawValue: 1 << 0)
-        static let children = FilePropertiesOptions(rawValue: 1 << 1)
-        static let responseAt = FilePropertiesOptions(rawValue: 1 << 2)
-        static let path = FilePropertiesOptions(rawValue: 1 << 3)
-        static let users = FilePropertiesOptions(rawValue: 1 << 4)
-        static let version = FilePropertiesOptions(rawValue: 1 << 5)
-        static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
-        static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
+        public static let fullyDownloaded = FilePropertiesOptions(rawValue: 1 << 0)
+        public static let children = FilePropertiesOptions(rawValue: 1 << 1)
+        public static let responseAt = FilePropertiesOptions(rawValue: 1 << 2)
+        public static let path = FilePropertiesOptions(rawValue: 1 << 3)
+        public static let users = FilePropertiesOptions(rawValue: 1 << 4)
+        public static let version = FilePropertiesOptions(rawValue: 1 << 5)
+        public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
+        public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
 
-        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastCursor]
-        static let extras: FilePropertiesOptions = [.path, .users, .version]
-        static let all: FilePropertiesOptions = [
+        public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastCursor]
+        public static let extras: FilePropertiesOptions = [.path, .users, .version]
+        public static let all: FilePropertiesOptions = [
             .fullyDownloaded,
             .children,
             .responseAt,
@@ -1470,7 +1509,7 @@ public final class DriveFileManager {
         ]
     }
 
-    func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
+    public func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 

@@ -28,6 +28,19 @@ extension NSError {
     static let featureUnsupported = NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError)
 }
 
+extension DriveFileManager {
+    func getCachedFile(itemIdentifier: NSFileProviderItemIdentifier,
+                       freeze: Bool = true,
+                       using realm: Realm? = nil) throws -> File {
+        guard let fileId = itemIdentifier.toFileId(),
+              let file = getCachedFile(id: fileId, freeze: freeze, using: realm) else {
+            throw NSFileProviderError(.noSuchItem)
+        }
+
+        return file
+    }
+}
+
 final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
@@ -38,7 +51,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var uploadQueue: UploadQueueable
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-    @LazyInjectService var fileProviderManager: FileProviderManager
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -47,12 +59,28 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     @LazyInjectService var accountManager: AccountManageable
+    lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
         if let domain {
             return NSFileProviderManager(for: domain) ?? .default
         }
         return .default
     }()
+
+    private func setDriveFileManager() -> DriveFileManager? {
+        var currentDriveFileManager: DriveFileManager?
+        if let objectId = domain?.identifier.rawValue,
+           let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
+           let driveFileManager = accountManager.getDriveFileManager(for: drive) {
+            currentDriveFileManager = driveFileManager
+        } else {
+            currentDriveFileManager = accountManager.currentDriveFileManager
+        }
+
+        guard let currentDriveFileManager else { return nil }
+
+        return DriveFileManager(driveFileManager: currentDriveFileManager, context: .fileProvider)
+    }
 
     // MARK: - NSFileProviderExtension Override
 
@@ -64,18 +92,13 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         Logging.initLogging()
         super.init()
-
-        let currentManager = Factory(type: FileProviderManager.self) { [domain] _, _ in
-            // TODO: can DI throw ?
-            return FileProviderManager(domain: domain)!
-        }
-        SimpleResolver.sharedResolver.store(factory: currentManager)
     }
 
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
         Log.fileProvider("item for identifier")
         try isFileProviderExtensionEnabled()
         // Try to reload account if user logged in
+        try updateDriveFileManager()
 
         if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
             Log.fileProvider("item for identifier - Working Document")
@@ -83,9 +106,13 @@ final class FileProviderExtension: NSFileProviderExtension {
         } else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
             Log.fileProvider("item for identifier - Imported Document")
             return item
-        } else {
-            let file = try fileProviderManager.getFile(for: identifier)
+        } else if let fileId = identifier.toFileId(),
+                  let file = driveFileManager.getCachedFile(id: fileId) {
+            Log.fileProvider("item for identifier - File:\(fileId)")
             return FileProviderItem(file: file, domain: domain)
+        } else {
+            Log.fileProvider("item for identifier - nsError(code: .noSuchItem)")
+            throw NSFileProviderError(.noSuchItem)
         }
     }
 
@@ -93,7 +120,8 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("urlForItem(withPersistentIdentifier identifier:)")
         if let item = fileProviderState.getImportedDocument(forKey: identifier) {
             return item.storageUrl
-        } else if let file = try? fileProviderManager.getFile(for: identifier) {
+        } else if let fileId = identifier.toFileId(),
+                  let file = driveFileManager.getCachedFile(id: fileId) {
             return FileProviderItem(file: file, domain: domain).storageUrl
         } else {
             return nil
@@ -191,6 +219,17 @@ final class FileProviderExtension: NSFileProviderExtension {
     private func isFileProviderExtensionEnabled() throws {
         Log.fileProvider("isFileProviderExtensionEnabled")
         guard UserDefaults.shared.isFileProviderExtensionEnabled else {
+            throw NSFileProviderError(.notAuthenticated)
+        }
+    }
+
+    private func updateDriveFileManager() throws {
+        Log.fileProvider("updateDriveFileManager")
+        if driveFileManager == nil {
+            accountManager.forceReload()
+            driveFileManager = setDriveFileManager()
+        }
+        guard driveFileManager != nil else {
             throw NSFileProviderError(.notAuthenticated)
         }
     }
@@ -329,16 +368,26 @@ final class FileProviderExtension: NSFileProviderExtension {
     override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
         Log.fileProvider("enumerator for :\(containerItemIdentifier.rawValue)")
         try isFileProviderExtensionEnabled()
+        // Try to reload account if user logged in
+        try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
             return WorkingSetEnumerator(containerItemIdentifier: containerItemIdentifier)
         } else if containerItemIdentifier == .rootContainer {
-            return RootEnumerator()
+            return RootEnumerator(driveFileManager: driveFileManager, domain: domain)
         }
 
-        let file = try fileProviderManager.getFile(for: containerItemIdentifier)
+        guard let fileId = containerItemIdentifier.toFileId(),
+              let file = driveFileManager.getCachedFile(id: fileId) else {
+            throw NSFileProviderError(.noSuchItem)
+        }
+
         if file.isDirectory {
-            return DirectoryEnumerator(containerItemIdentifier: containerItemIdentifier)
+            return DirectoryEnumerator(
+                containerItemIdentifier: containerItemIdentifier,
+                driveFileManager: driveFileManager,
+                domain: domain
+            )
         }
 
         throw NSError.featureUnsupported

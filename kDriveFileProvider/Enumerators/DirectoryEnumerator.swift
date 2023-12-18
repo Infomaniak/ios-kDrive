@@ -21,12 +21,18 @@ import InfomaniakDI
 import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService private var fileProviderManager: FileProviderManager
-
     let containerItemIdentifier: NSFileProviderItemIdentifier
+    let driveFileManager: DriveFileManager
+    let domain: NSFileProviderDomain?
 
-    init(containerItemIdentifier: NSFileProviderItemIdentifier) {
+    init(
+        containerItemIdentifier: NSFileProviderItemIdentifier,
+        driveFileManager: DriveFileManager,
+        domain: NSFileProviderDomain?
+    ) {
         self.containerItemIdentifier = containerItemIdentifier
+        self.driveFileManager = driveFileManager
+        self.domain = domain
         super.init()
     }
 
@@ -39,34 +45,39 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
 
-            let parentDirectory = try fileProviderManager.getFile(for: containerItemIdentifier)
+            let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
 
             guard !parentDirectory.fullyDownloaded else {
                 let files = Array(parentDirectory.children) + [parentDirectory]
-                observer.didEnumerate(files.map { FileProviderItem(file: $0, domain: fileProviderManager.domain) })
+                observer.didEnumerate(files.map { FileProviderItem(file: $0, domain: self.domain) })
                 observer.finishEnumerating(upTo: nil)
                 return
             }
 
             do {
                 let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-                let (listingResult, response) = try await fileProviderManager.driveApiFetcher.files(
+                let (listingResult, response) = try await driveFileManager.apiFetcher.files(
                     in: parentDirectory.proxify(),
                     advancedListingCursor: currentPageCursor,
                     sortType: .nameAZ
                 )
 
-                let realm = fileProviderManager.getRealm()
-                let liveParentDirectory = try fileProviderManager.getFile(
-                    for: containerItemIdentifier,
-                    using: realm,
-                    shouldFreeze: false
+                let realm = driveFileManager.getRealm()
+                let liveParentDirectory = try driveFileManager.getCachedFile(
+                    itemIdentifier: containerItemIdentifier,
+                    freeze: false,
+                    using: realm
                 )
 
-                var updatedFiles = try fileProviderManager.writeChildrenToParent(
-                    liveParentDirectory,
-                    children: listingResult.files,
-                    shouldClearChildren: page.isInitialPage,
+                for child in listingResult.files {
+                    driveFileManager.keepCacheAttributesForFile(newFile: child, keepProperties: [.standard], using: realm)
+                }
+
+                try driveFileManager.writeChildrenToParent(
+                    listingResult.files,
+                    liveParent: liveParentDirectory,
+                    responseAt: response.responseAt,
+                    isInitialCursor: page.isInitialPage,
                     using: realm
                 )
 
@@ -83,9 +94,10 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 }
 
-                updatedFiles.append(liveParentDirectory)
-
-                observer.didEnumerate(updatedFiles.map { FileProviderItem(file: $0, domain: fileProviderManager.domain) })
+                observer.didEnumerate(
+                    listingResult.files.map { FileProviderItem(file: $0, domain: self.domain) } +
+                        [FileProviderItem(file: liveParentDirectory, domain: domain)]
+                )
 
                 if response.hasMore,
                    let nextCursor = response.cursor {
