@@ -69,3 +69,5 @@ release/
 
 ### Tests ###
 kDriveTests/Env.swift
+kDriveAPITests/Env.swift
+kDriveUITests/Env.swift

@@ -73,7 +73,6 @@ let project = Project(name: "kDrive",
                                      .target(name: "kDriveCore"),
                                      .target(name: "kDriveShareExtension"),
                                      .target(name: "kDriveActionExtension"),
-                                     .package(product: "Algorithms"),
                                      .package(product: "FloatingPanel"),
                                      .package(product: "Lottie"),
                                      .package(product: "DropDown"),
@@ -89,12 +88,29 @@ let project = Project(name: "kDrive",
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
-                                 bundleId: "com.infomaniak.drive.tests",
+                                 bundleId: "com.infomaniak.drive.mainTests",
                                  deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
-                                 sources: "kDriveTests/**",
+                                 infoPlist: .default,
+                                 sources: [
+                                    "kDriveTests/**",
+                                    "kDriveTestShared/**"
+                                 ],
                                  resources: [
                                      "kDriveTests/**/*.jpg"
+                                 ],
+                                 dependencies: [
+                                     .target(name: "kDrive")
+                                 ],
+                                 settings: .settings(base: Constants.baseSettings)),
+                          Target(name: "kDriveAPITests",
+                                 platform: .iOS,
+                                 product: .unitTests,
+                                 bundleId: "com.infomaniak.drive.apiTests",
+                                 deploymentTarget: Constants.deploymentTarget,
+                                 infoPlist: .default,
+                                 sources: [
+                                    "kDriveAPITests/**", 
+                                    "kDriveTestShared/**"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
@@ -103,9 +119,9 @@ let project = Project(name: "kDrive",
                           Target(name: "kDriveUITests",
                                  platform: .iOS,
                                  product: .uiTests,
-                                 bundleId: "com.infomaniak.drive.uitests",
+                                 bundleId: "com.infomaniak.drive.uiTests",
                                  deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDriveTests/Tests.plist"),
+                                 infoPlist: .default,
                                  sources: "kDriveUITests/**",
                                  dependencies: [
                                      .target(name: "kDrive"),
@@ -136,8 +152,8 @@ let project = Project(name: "kDrive",
                                  ],
                                  dependencies: [
                                      .target(name: "kDriveResources"),
-                                     .package(product: "Algorithms"),
                                      .package(product: "Alamofire"),
+                                     .package(product: "Algorithms"),
                                      .package(product: "Atlantis"),
                                      .package(product: "MQTTNIO"),
                                      .package(product: "InfomaniakCore"),
