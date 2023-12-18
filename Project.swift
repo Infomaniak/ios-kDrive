@@ -96,7 +96,8 @@ let project = Project(name: "kDrive",
                                     "kDriveTestShared/**"
                                  ],
                                  resources: [
-                                     "kDriveTests/**/*.jpg"
+                                     "kDriveTests/**/*.jpg",
+                                     "kDriveTests/**/*.json"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")

@@ -1,0 +1,218 @@
+{
+  "account_admin": true,
+  "account_id": 98765,
+  "capabilities": {
+    "can_add_user": true,
+    "can_rewind": false,
+    "can_see_stats": true,
+    "can_upgrade_to_ksuite": false,
+    "use_team_space": false,
+    "use_upload_compression": false,
+    "use_versioning": true
+  },
+  "categories": [
+    {
+      "color": "#1ABC9C",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 1,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_CONTRACT"
+    },
+    {
+      "color": "#11806A",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 2,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_BILL"
+    },
+    {
+      "color": "#206694",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 6,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_WARRANTY"
+    },
+    {
+      "color": "#9B59B6",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 7,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_ID"
+    },
+    {
+      "color": "#71368A",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 8,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_FORM"
+    },
+    {
+      "color": "#E91E63",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 9,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_QUOTATION"
+    },
+    {
+      "color": "#C45911",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 13,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_BANKING"
+    },
+    {
+      "color": "#E74C3C",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 15,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_TAXATION"
+    },
+    {
+      "color": "#9D00FF",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 17,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_INSURANCE"
+    },
+    {
+      "color": "#00B0F0",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 18,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_TRANSPORTATION"
+    },
+    {
+      "color": "#2E77B5",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 22,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_WORK"
+    },
+    {
+      "color": "#70AD47",
+      "created_at": 1643969478,
+      "created_by": 1,
+      "id": 23,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_HOBBIES"
+    },
+    {
+      "color": "#70AD47",
+      "created_at": 1659000255,
+      "created_by": 0,
+      "id": 27,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_RESUME"
+    },
+    {
+      "color": "#ad1457",
+      "created_at": 1669190277,
+      "created_by": 10111213,
+      "id": 36,
+      "is_predefined": false,
+      "name": "test4"
+    }
+  ],
+  "categories_permissions": {
+    "can_create": true,
+    "can_delete": true,
+    "can_edit": true,
+    "can_put_on_file": true,
+    "can_read_on_file": true
+  },
+  "created_at": 1643969336,
+  "description": "",
+  "expired_at": null,
+  "id": 98765,
+  "in_maintenance": false,
+  "is_demo": false,
+  "is_in_app_subscription": false,
+  "is_locked": false,
+  "maintenance_at": null,
+  "maintenance_types": [
+  ],
+  "name": "John Appleseed",
+  "pack": {
+    "capabilities": {
+      "can_access_dashboard": false,
+      "can_rewind": false,
+      "can_set_sharelink_custom_url": false,
+      "can_set_sharelink_expiration": false,
+      "can_set_sharelink_password": false,
+      "can_set_trash_duration": false,
+      "use_dropbox": false,
+      "use_folder_custom_color": false,
+      "use_manage_right": false,
+      "use_vault": false
+    },
+    "id": 6,
+    "name": "free"
+  },
+  "preferences": {
+    "color": "#009688",
+    "default": false,
+    "default_page": "private",
+    "hide": false
+  },
+  "product_id": 54321,
+  "rewind": null,
+  "rights": {
+    "statistic": true,
+    "technical": true
+  },
+  "role": "admin",
+  "settings": {
+    "ai_scan": {
+      "has_approved": true,
+      "has_approved_ai_categories": null,
+      "is_enabled": false,
+      "updated_at": 1643969602
+    },
+    "max_keep_deleted_user": "6 months",
+    "versioning": {
+      "max_days": 30,
+      "max_numbers": 30
+    }
+  },
+  "size": 16106127360,
+  "tags": [
+  ],
+  "teams": {
+    "account": [
+      0
+    ],
+    "drive": [
+    ]
+  },
+  "updated_at": 1702650132,
+  "used_size": 4586343632,
+  "users": {
+    "account": [
+      10111213,
+      10111214,
+      10111215
+    ],
+    "drive": [
+      10111216
+    ],
+    "external": [
+    ],
+    "internal": [
+      10111217
+    ]
+  },
+  "users_count": 1,
+  "users_quota": 1,
+  "version": "3.6"
+}

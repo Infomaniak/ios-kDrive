@@ -1,0 +1,253 @@
+{
+  "account_admin": false,
+  "account_id": 98765,
+  "capabilities": {
+    "can_add_user": true,
+    "can_rewind": false,
+    "can_see_stats": true,
+    "can_upgrade_to_ksuite": true,
+    "use_team_space": true,
+    "use_upload_compression": false,
+    "use_versioning": true
+  },
+  "categories": [
+    {
+      "color": "#1ABC9C",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 1,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_CONTRACT"
+    },
+    {
+      "color": "#11806A",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 2,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_BILL"
+    },
+    {
+      "color": "#206694",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 6,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_WARRANTY"
+    },
+    {
+      "color": "#9B59B6",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 7,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_ID"
+    },
+    {
+      "color": "#71368A",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 8,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_FORM"
+    },
+    {
+      "color": "#E91E63",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 9,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_QUOTATION"
+    },
+    {
+      "color": "#C45911",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 13,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_BANKING"
+    },
+    {
+      "color": "#E74C3C",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 15,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_TAXATION"
+    },
+    {
+      "color": "#9D00FF",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 17,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_INSURANCE"
+    },
+    {
+      "color": "#00B0F0",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 18,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_TRANSPORTATION"
+    },
+    {
+      "color": "#2E77B5",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 22,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_WORK"
+    },
+    {
+      "color": "#70AD47",
+      "created_at": 1643969225,
+      "created_by": 1,
+      "id": 23,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_HOBBIES"
+    },
+    {
+      "color": "#FF0000",
+      "created_at": 1645697060,
+      "created_by": 1011121314,
+      "id": 482,
+      "is_predefined": false,
+      "name": "updateCategory-6b941316-ca2f-4930-9212-12313c61d7fa}"
+    },
+    {
+      "color": "#0000FF",
+      "created_at": 1645697061,
+      "created_by": 1011121315,
+      "id": 483,
+      "is_predefined": false,
+      "name": "category test c9e3419a-e812-41c9-bbeb-c23ea6f8d717}"
+    },
+    {
+      "color": "#9d00ff",
+      "created_at": 1648124986,
+      "created_by": 1011121316,
+      "id": 2537,
+      "is_predefined": false,
+      "name": "poney"
+    },
+    {
+      "color": "#0000FF",
+      "created_at": 1653387432,
+      "created_by": 1011121317,
+      "id": 2878,
+      "is_predefined": false,
+      "name": "testCreateCategory-05215a91-e553-4f89-ab0a-5f93815aa240}"
+    },
+    {
+      "color": "#70AD47",
+      "created_at": 1658994198,
+      "created_by": 0,
+      "id": 3297,
+      "is_predefined": true,
+      "name": "PREDEF_CAT_RESUME"
+    },
+    {
+      "color": "#0000FF",
+      "created_at": 1663926526,
+      "created_by": 1011121318,
+      "id": 3543,
+      "is_predefined": false,
+      "name": "category-46a467f0-bcd2-4db7-9dd5-31950e34a15e}"
+    }
+  ],
+  "categories_permissions": {
+    "can_create": true,
+    "can_delete": true,
+    "can_edit": true,
+    "can_put_on_file": true,
+    "can_read_on_file": true
+  },
+  "created_at": 1643969223,
+  "description": "",
+  "expired_at": null,
+  "id": 98765,
+  "in_maintenance": false,
+  "is_demo": false,
+  "is_in_app_subscription": false,
+  "is_locked": false,
+  "maintenance_at": null,
+  "maintenance_types": [
+  ],
+  "name": "Team Mobile Test",
+  "pack": {
+    "capabilities": {
+      "can_access_dashboard": true,
+      "can_rewind": false,
+      "can_set_sharelink_custom_url": true,
+      "can_set_sharelink_expiration": true,
+      "can_set_sharelink_password": true,
+      "can_set_trash_duration": true,
+      "use_dropbox": true,
+      "use_folder_custom_color": true,
+      "use_manage_right": true,
+      "use_vault": false
+    },
+    "id": 2,
+    "name": "team"
+  },
+  "preferences": {
+    "color": "#673AB7",
+    "default": false,
+    "default_page": "private",
+    "hide": false
+  },
+  "product_id": 5138536,
+  "rewind": null,
+  "rights": {
+    "statistic": true,
+    "technical": true
+  },
+  "role": "admin",
+  "settings": {
+    "ai_scan": {
+      "has_approved": true,
+      "has_approved_ai_categories": null,
+      "is_enabled": false,
+      "updated_at": 1643969326
+    },
+    "max_keep_deleted_user": "6 months",
+    "versioning": {
+      "max_days": 60,
+      "max_numbers": 100
+    }
+  },
+  "size": 3298534883328,
+  "tags": [
+  ],
+  "teams": {
+    "account": [
+      0
+    ],
+    "drive": [
+    ]
+  },
+  "updated_at": 1702650124,
+  "used_size": 6666595193,
+  "users": {
+    "account": [
+      123,
+      456,
+      789,
+      1011
+    ],
+    "drive": [
+      1011121314,
+      1011121315
+    ],
+    "external": [
+    ],
+    "internal": [
+      1011121314,
+      1011121315
+    ]
+  },
+  "users_count": 2,
+  "users_quota": 6,
+  "version": "3.6"
+}

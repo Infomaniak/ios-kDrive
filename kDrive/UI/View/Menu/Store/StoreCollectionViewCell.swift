@@ -26,7 +26,7 @@ protocol StoreCellDelegate: AnyObject {
     func selectButtonTapped(item: StoreViewController.Item)
 }
 
-class StoreCollectionViewCell: UICollectionViewCell {
+final class StoreCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var titleLabel: IKLabel!
     @IBOutlet weak var descriptionLabel: IKLabel!

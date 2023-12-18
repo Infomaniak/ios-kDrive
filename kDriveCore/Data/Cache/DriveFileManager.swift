@@ -1327,6 +1327,7 @@ public final class DriveFileManager {
         return createdFile.freeze()
     }
 
+    @discardableResult
     public func createOrRemoveShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink? {
         if right == .restricted {
             // Remove share link
