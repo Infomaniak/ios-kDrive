@@ -23,22 +23,12 @@ import XCTest
 final class ITDrive: XCTestCase {
     // MARK: - Parsing
 
-    // TODO: Move to a shared helper
-    private func data(forResource resource: String, withExtension extension: String) -> Data? {
-        guard let file = Bundle(for: type(of: self)).url(forResource: resource, withExtension: `extension`),
-              let data = try? Data(contentsOf: file) else {
-            return nil
-        }
-
-        return data
-    }
-
     private func freeDriveJson() -> Data? {
-        data(forResource: "free_drive", withExtension: "json")
+        JSONHelper.data(forResource: "free_drive", withExtension: "json")
     }
 
     private func paidDriveJson() -> Data? {
-        data(forResource: "paid_drive", withExtension: "json")
+        JSONHelper.data(forResource: "paid_drive", withExtension: "json")
     }
 
     func testFreeDriveIsFree() {
