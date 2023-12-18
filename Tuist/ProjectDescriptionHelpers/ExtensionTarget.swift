@@ -22,7 +22,7 @@ public extension Target {
     static func extensionTarget(
         name: String,
         bundleId: String,
-        entitlements: Path,
+        entitlements: String,
         additionalResources: [ResourceFileElement] = [],
         settings: Settings
     ) -> Target {
@@ -97,7 +97,7 @@ public extension Target {
                           "kDrive/Utils/**"
                       ],
                       resources: ResourceFileElements(resources: resources),
-                      entitlements: entitlements,
+                      entitlements: Entitlements(stringLiteral: entitlements),
                       scripts: [Constants.swiftlintScript],
                       dependencies: [
                           .target(name: "kDriveCore"),
