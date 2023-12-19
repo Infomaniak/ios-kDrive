@@ -221,6 +221,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
             }
             return true
+        } else if components.host == "file",
+                  let filePath = params.first(where: { $0.name == "url" })?.value {
+            let fileUrl = URL(fileURLWithPath: filePath)
+            if let driveFileManager = accountManager.currentDriveFileManager,
+               var viewController = window?.rootViewController {
+                while let presentedViewController = viewController.presentedViewController {
+                    viewController = presentedViewController
+                }
+                let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
+                let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+                viewController.present(vc, animated: true)
+            }
+            return true
         }
         return false
     }
