@@ -22,6 +22,8 @@ import kDriveCore
 import RealmSwift
 
 class MockAccountManager: AccountManageable, RefreshTokenDelegate {
+    var delegate: AccountManagerDelegate?
+
     var currentAccount: Account! {
         return accounts.first!
     }
