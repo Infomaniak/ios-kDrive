@@ -79,6 +79,7 @@ final class ITAppLaunchTest: XCTestCase {
     }
 
     func testUnlock() throws {
+        // GIVEN applock enabled
         UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
@@ -91,8 +92,11 @@ final class ITAppLaunchTest: XCTestCase {
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
 
+        // WHEN
         let lockedAppViewController = LockedAppViewController.instantiate()
         lockedAppViewController.unlockApp()
+
+        // THEN
         let rootViewController = (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController
         XCTAssertNotNil(
             rootViewController as? MainTabViewController,

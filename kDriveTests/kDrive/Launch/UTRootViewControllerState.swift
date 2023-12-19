@@ -41,7 +41,7 @@ final class UTRootViewControllerState: XCTestCase {
 
         let services = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
-                return InfomaniakNetworkLogin(clientId: "", redirectUri: "")
+                InfomaniakNetworkLogin(clientId: "", redirectUri: "")
             },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
