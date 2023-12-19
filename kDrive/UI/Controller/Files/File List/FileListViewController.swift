@@ -112,7 +112,7 @@ class ConcreteFileListViewModel: FileListViewModel {
         )
         endRefreshing()
         if let nextCursor {
-            try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
