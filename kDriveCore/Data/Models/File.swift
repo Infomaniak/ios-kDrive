@@ -337,6 +337,13 @@ public final class FileVersion: EmbeddedObject, Codable {
     }
 }
 
+public enum FileSupportedBy: String, PersistableEnum, Codable {
+    /// This file can have a thumbnail generated
+    case thumbnail
+    /// This file can be read by OnlyOffice
+    case onlyOffice = "onlyoffice"
+}
+
 public typealias FileCursor = String
 
 public final class File: Object, Codable {
@@ -395,10 +402,10 @@ public final class File: Object, Codable {
     // File only
     /// Size of File (byte unit)
     @Persisted public var size: Int?
-    /// File has thumbnail, if so you can request thumbnail route
-    @Persisted public var hasThumbnail: Bool
-    /// File can be handled by only-office
-    @Persisted public var hasOnlyoffice: Bool
+
+    /// Contains all the services that supports this file, for available services see *FileSupportedBy*
+    @Persisted public var supportedBy: MutableSet<FileSupportedBy>
+
     /// File type
     @Persisted public var extensionType: String?
     /// Information when file has multi-version
@@ -444,12 +451,11 @@ public final class File: Object, Codable {
         case color
         case dropbox
         case size
-        case hasThumbnail = "has_thumbnail"
-        case hasOnlyoffice = "has_onlyoffice"
         case extensionType = "extension_type"
         case externalImport = "external_import"
         case version
         case conversion = "conversion_capabilities"
+        case supportedBy = "supported_by"
     }
 
     public var parent: File? {
@@ -532,7 +538,7 @@ public final class File: Object, Codable {
     }
 
     public var isOfficeFile: Bool {
-        return hasOnlyoffice || conversion?.whenOnlyoffice == true
+        return supportedBy.contains(.onlyOffice) || conversion?.whenOnlyoffice == true
     }
 
     public var isBookmark: Bool {
@@ -752,8 +758,9 @@ public final class File: Object, Codable {
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         externalImport = try container.decodeIfPresent(FileExternalImport.self, forKey: .externalImport)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
-        hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail) ?? false
-        hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice) ?? false
+        let rawSupportedBy = try container.decodeIfPresent([String].self, forKey: .supportedBy) ?? []
+        supportedBy = MutableSet()
+        supportedBy.insert(objectsIn: rawSupportedBy.compactMap { FileSupportedBy(rawValue: $0) })
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
         version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
