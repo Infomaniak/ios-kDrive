@@ -49,7 +49,7 @@ class MySharesViewModel: FileListViewModel {
         let (_, nextCursor) = try await driveFileManager.mySharedFiles(cursor: cursor, sortType: sortType, forceRefresh: true)
         endRefreshing()
         if let nextCursor {
-            try await loadFiles(cursor: cursor, forceRefresh: true)
+            try await loadFiles(cursor: nextCursor)
         }
     }
 }

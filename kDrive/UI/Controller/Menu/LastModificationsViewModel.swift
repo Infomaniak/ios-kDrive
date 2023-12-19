@@ -61,7 +61,7 @@ class LastModificationsViewModel: FileListViewModel {
         let (_, nextCursor) = try await driveFileManager.lastModifiedFiles(cursor: cursor)
         endRefreshing()
         if let nextCursor {
-            try await loadFiles(cursor: nextCursor, forceRefresh: forceRefresh)
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
