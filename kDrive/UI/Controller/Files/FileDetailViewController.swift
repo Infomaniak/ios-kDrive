@@ -124,7 +124,8 @@ class FileDetailViewController: UIViewController {
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
+        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.supportedBy
+            .contains(.thumbnail) {
             return .default
         } else {
             return .lightContent
@@ -134,7 +135,7 @@ class FileDetailViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation
-            .isPortrait && file.hasThumbnail ? .white : nil
+            .isPortrait && file.supportedBy.contains(.thumbnail) ? .white : nil
         let navigationBarAppearanceStandard = UINavigationBarAppearance()
         navigationBarAppearanceStandard.configureWithTransparentBackground()
         navigationBarAppearanceStandard.backgroundColor = KDriveResourcesAsset.backgroundColor.color
@@ -551,7 +552,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            if !file.hasThumbnail {
+            if !file.supportedBy.contains(.thumbnail) {
                 let cell = tableView.dequeueReusableCell(type: FileDetailHeaderAltTableViewCell.self, for: indexPath)
                 cell.delegate = self
                 cell.configureWith(file: file)
@@ -798,7 +799,7 @@ extension FileDetailViewController {
                 navigationController?.navigationBar.tintColor = nil
             } else {
                 title = ""
-                navigationController?.navigationBar.tintColor = file.hasThumbnail ? .white : nil
+                navigationController?.navigationBar.tintColor = file.supportedBy.contains(.thumbnail) ? .white : nil
             }
         } else {
             title = scrollView.contentOffset.y > 200 ? file.name : ""
