@@ -1502,10 +1502,20 @@ public final class DriveFileManager {
         static let users = FilePropertiesOptions(rawValue: 1 << 4)
         static let version = FilePropertiesOptions(rawValue: 1 << 5)
         static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
+        static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
 
-        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt]
+        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastCursor]
         static let extras: FilePropertiesOptions = [.path, .users, .version]
-        static let all: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .path, .users, .version, .capabilities]
+        static let all: FilePropertiesOptions = [
+            .fullyDownloaded,
+            .children,
+            .responseAt,
+            .lastCursor,
+            .path,
+            .users,
+            .version,
+            .capabilities
+        ]
     }
 
     func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
@@ -1524,6 +1534,9 @@ public final class DriveFileManager {
         }
         if keepProperties.contains(.responseAt) {
             newFile.responseAt = savedChild.responseAt
+        }
+        if keepProperties.contains(.lastCursor) {
+            newFile.lastCursor = savedChild.lastCursor
         }
         if keepProperties.contains(.path) {
             newFile.path = savedChild.path
