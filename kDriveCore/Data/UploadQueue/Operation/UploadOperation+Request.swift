@@ -29,13 +29,15 @@ extension UploadOperation {
     ///   - sessionToken: The Upload Session token
     ///   - driveId: The target drive
     ///   - accessToken: Oauth token
+    ///   - host: The domain to upload to
     /// - Returns: A configured URL request
     func buildRequest(chunkNumber: Int64,
                       chunkSize: Int64,
                       chunkHash: String,
                       sessionToken: String,
                       driveId: Int,
-                      accessToken: String) throws -> URLRequest {
+                      accessToken: String,
+                      host: String) throws -> URLRequest {
         // Access Token must be added for non AF requests
         let headerParameters = ["Authorization": "Bearer \(accessToken)"]
         let headers = HTTPHeaders(headerParameters)
@@ -45,6 +47,8 @@ extension UploadOperation {
         guard var urlComponents = URLComponents(url: route.url, resolvingAgainstBaseURL: false) else {
             throw Self.ErrorDomain.unableToBuildRequest
         }
+
+        urlComponents.host = host
 
         let getParameters = [
             URLQueryItem(name: APIUploadParameter.chunkNumber.rawValue, value: "\(chunkNumber)"),
