@@ -170,11 +170,11 @@ public extension Endpoint {
 
     static func fileListing(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/listing", queryItems: [FileWith.fileListingMinimal.toQueryItem()])
-        }
+    }
 
     static func fileListingContinue(file: AbstractFile, cursor: String) -> Endpoint {
         return .fileInfo(file).appending(path: "/listing/continue", queryItems: [URLQueryItem(name: "cursor", value: cursor),
-                                                                        FileWith.fileListingMinimal.toQueryItem()])
+                                                                                 FileWith.fileListingMinimal.toQueryItem()])
     }
 
     // MARK: Activities

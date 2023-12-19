@@ -29,10 +29,10 @@ public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
-        static let upload: UInt64 = 17
+        static let upload: UInt64 = 18
 
         /// Current version of the Drive Realm
-        static let drive: UInt64 = 9
+        static let drive: UInt64 = 10
     }
 
     public class DriveFileManagerConstants {
@@ -138,6 +138,17 @@ public final class DriveFileManager {
                         newObject["assetLocalIdentifier"] = nil
                         newObject["fileProviderItemIdentifier"] = nil
                     }
+                }
+            }
+
+            // Migration for APIV3
+            if oldSchemaVersion < 18 {
+                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
+                    guard let newObject else {
+                        return
+                    }
+
+                    newObject["uploadingSession"] = nil
                 }
             }
         }
