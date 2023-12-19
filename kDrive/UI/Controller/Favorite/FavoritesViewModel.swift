@@ -51,7 +51,7 @@ class FavoritesViewModel: FileListViewModel {
         let (_, nextCursor) = try await driveFileManager.favorites(cursor: cursor, sortType: sortType, forceRefresh: true)
         endRefreshing()
         if let nextCursor {
-            try await loadFiles(cursor: nextCursor, forceRefresh: true)
+            try await loadFiles(cursor: nextCursor)
         }
     }
 }
