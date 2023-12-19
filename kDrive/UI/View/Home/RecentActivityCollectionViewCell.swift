@@ -156,7 +156,8 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         } else {
             let activity = activities[indexPath.item]
             let more = indexPath.item == 2 && activities.count > 3 ? activities.count - 2 : nil
-            if let file = activity.file, file.hasThumbnail && (file.convertedType == .image || file.convertedType == .video) {
+            if let file = activity.file,
+               file.supportedBy.contains(.thumbnail) && (file.convertedType == .image || file.convertedType == .video) {
                 cell.configureWithPreview(file: file, more: more)
             } else {
                 cell.configureWithoutPreview(file: activity.file, more: more)
