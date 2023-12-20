@@ -529,7 +529,8 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
+                    // TODO: fixme:
+//                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }

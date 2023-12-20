@@ -269,7 +269,8 @@ extension FileActionsFloatingPanelViewController {
             floatingPanelViewController?.actionHandler = { [weak self] _ in
                 driveFloatingPanelController.dismiss(animated: true) {
                     guard let self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    // TODO: fixme:
+//                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
             }
             present(driveFloatingPanelController, animated: true)
