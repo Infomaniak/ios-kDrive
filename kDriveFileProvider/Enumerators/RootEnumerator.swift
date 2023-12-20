@@ -91,6 +91,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
             } catch let error as NSFileProviderError {
                 observer.finishEnumeratingWithError(error)
             } catch {
+                Log.fileProvider("RootEnumerator - Error in enumerateItems \(error)", level: .error)
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
@@ -103,47 +104,54 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         }
 
         Task {
-            let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
-                drive: driveFileManager.drive,
-                cursor: cursor
-            )
+            do {
+                let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+                    drive: driveFileManager.drive,
+                    cursor: cursor
+                )
 
-            let realm = driveFileManager.getRealm()
-            guard let liveParentDirectory = try? driveFileManager.getCachedFile(
-                itemIdentifier: containerItemIdentifier,
-                freeze: false,
-                using: realm
-            ) else {
-                observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
-                return
+                let realm = driveFileManager.getRealm()
+                guard let liveParentDirectory = try? driveFileManager.getCachedFile(
+                    itemIdentifier: containerItemIdentifier,
+                    freeze: false,
+                    using: realm
+                ) else {
+                    observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
+                    return
+                }
+
+                guard let syncAnchor = NSFileProviderSyncAnchor(response.cursor) else {
+                    observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
+                    return
+                }
+
+                let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
+                try driveFileManager.writeChildrenToParent(
+                    files,
+                    liveParent: liveParentDirectory,
+                    responseAt: response.responseAt,
+                    isInitialCursor: false,
+                    using: realm
+                )
+
+                let childIdsAfterUpdate = Set(liveParentDirectory.children.map { $0.id })
+
+                // Manual diffing since we don't have activities for root
+                let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
+
+                let updatedFiles = liveParentDirectory.children + [liveParentDirectory]
+                observer.didUpdate(updatedFiles.map { FileProviderItem(file: $0, domain: domain) })
+                observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
+                observer.finishEnumeratingChanges(
+                    upTo: syncAnchor,
+                    moreComing: response.hasMore
+                )
+            } catch let error as NSFileProviderError {
+                observer.finishEnumeratingWithError(error)
+            } catch {
+                Log.fileProvider("RootEnumerator - Error in enumerateChanges \(error)", level: .error)
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
-
-            guard let syncAnchor = NSFileProviderSyncAnchor(response.cursor) else {
-                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-                return
-            }
-
-            let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
-            try driveFileManager.writeChildrenToParent(
-                files,
-                liveParent: liveParentDirectory,
-                responseAt: response.responseAt,
-                isInitialCursor: false,
-                using: realm
-            )
-
-            let childIdsAfterUpdate = Set(liveParentDirectory.children.map { $0.id })
-
-            // Manual diffing since we don't have activities for root
-            let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
-
-            let updatedFiles = liveParentDirectory.children + [liveParentDirectory]
-            observer.didUpdate(updatedFiles.map { FileProviderItem(file: $0, domain: domain) })
-            observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
-            observer.finishEnumeratingChanges(
-                upTo: syncAnchor,
-                moreComing: response.hasMore
-            )
         }
     }
 

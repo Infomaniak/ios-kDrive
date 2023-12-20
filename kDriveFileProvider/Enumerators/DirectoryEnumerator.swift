@@ -105,8 +105,10 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 } else {
                     observer.finishEnumerating(upTo: nil)
                 }
+            } catch let error as NSFileProviderError {
+                observer.finishEnumeratingWithError(error)
             } catch {
-                Log.fileProvider("Error in enumerateItems \(error)", level: .error)
+                Log.fileProvider("DirectoryEnumerator - Error in enumerateItems \(error)", level: .error)
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
@@ -177,8 +179,10 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     upTo: nextAnchor,
                     moreComing: response.hasMore
                 )
+            } catch let error as NSFileProviderError {
+                observer.finishEnumeratingWithError(error)
             } catch {
-                Log.fileProvider("Error in enumerateChanges \(error)", level: .error)
+                Log.fileProvider("DirectoryEnumerator - Error in enumerateChanges \(error)", level: .error)
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
