@@ -96,7 +96,7 @@ class PhotoListViewModel: FileListViewModel {
 
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "hasThumbnail"], on: .main) { [weak self] change in
+        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
             guard let self else {
                 return
             }
