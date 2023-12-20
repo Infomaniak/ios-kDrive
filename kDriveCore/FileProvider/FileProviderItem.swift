@@ -87,7 +87,10 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         // Every file should have a parent, root file parent should not be called
         parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
         let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
-        childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
+        if file.isDirectory && file.fullyDownloaded {
+            childItemCount = NSNumber(value: file.children.count + tmpChildren.count)
+        }
+
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
