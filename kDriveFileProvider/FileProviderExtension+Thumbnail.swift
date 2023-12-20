@@ -44,7 +44,7 @@ extension FileProviderExtension {
                 continue
             }
 
-            guard file.hasThumbnail else {
+            guard file.supportedBy.contains(.thumbnail) else {
                 perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
                 progress.completedUnitCount += 1
                 if progress.isFinished {
