@@ -160,7 +160,7 @@ let project = Project(name: "kDrive",
                                  bundleId: "com.infomaniak.drive.FileProvider",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
-                                 sources: "kDriveFileProvider/**",
+                                 sources: ["kDriveFileProvider/**", "kDrive/Utils/**"],
                                  headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",
                                  dependencies: [

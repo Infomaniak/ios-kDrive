@@ -17,14 +17,14 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
-import InfomaniakDI
 
 class NewFolderTypeTableViewController: UITableViewController {
     @LazyInjectService private var navigationManager: NavigationManageable
-    
+
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 

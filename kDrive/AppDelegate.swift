@@ -27,10 +27,10 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import os.log
 import StoreKit
 import UIKit
 import UserNotifications
-import os.log
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
@@ -201,7 +201,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
-        
+
         let deeplinkParser = DeeplinkParser(window: window)
         return deeplinkParser.parse(url: url)
     }

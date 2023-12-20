@@ -21,6 +21,6 @@ import UIKit
 
 public protocol NavigationManageable {
     func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
-    
+
     func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
 }

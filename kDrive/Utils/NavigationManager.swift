@@ -33,7 +33,11 @@ class NavigationManager: NavigationManageable {
     }
 
     func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+        #if ISEXTENSION
+        print("noop")
+        #else
         let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
         viewController.present(vc, animated: true)
+        #endif
     }
 }
