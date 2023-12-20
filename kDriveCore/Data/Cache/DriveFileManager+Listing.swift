@@ -83,15 +83,6 @@ public extension DriveFileManager {
                       let oldParent = movedOutFile.parent else { continue }
 
                 oldParent.children.remove(movedOutFile)
-
-            case .fileRename:
-                guard let oldFile: File = realm.getObject(id: fileAction.fileId) else { continue }
-                try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
-                // If the file is a folder we have to copy the old attributes which are not returned by the API
-                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
-                realm.add(actionFile, update: .modified)
-                actionFile.applyLastModifiedDateToLocalFile()
-
             case .fileMoveIn, .fileRestore, .fileCreate:
                 keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
                 realm.add(actionFile, update: .modified)
@@ -102,18 +93,22 @@ public extension DriveFileManager {
                 }
                 directory.children.insert(actionFile)
 
-            case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete,
-                 .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate,
-                 .fileColorDelete:
-                guard actionFile.isTrashed else {
-                    removeFileInDatabase(fileId: fileAction.fileId, cascade: true, withTransaction: false, using: realm)
-                    continue
+            case .fileRename,
+                 .fileFavoriteCreate, .fileUpdate, .fileFavoriteRemove,
+                 .fileShareCreate, .fileShareUpdate, .fileShareDelete,
+                 .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete,
+                 .fileColorUpdate, .fileColorDelete,
+                 .fileCategorize, .fileUncategorize:
+
+                if let oldFile: File = realm.getObject(id: fileAction.fileId),
+                   oldFile.name != actionFile.name {
+                    try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
                 }
 
                 keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
                 realm.add(actionFile, update: .modified)
                 directory.children.insert(actionFile)
-
+                actionFile.applyLastModifiedDateToLocalFile()
             default:
                 break
             }
