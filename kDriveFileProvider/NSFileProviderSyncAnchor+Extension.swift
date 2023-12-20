@@ -21,26 +21,19 @@ import Foundation
 import kDriveCore
 
 extension NSFileProviderSyncAnchor {
-    struct DatedCursor: Codable {
-        let cursor: String
-        let responseAt: Date
-    }
-
     init?(_ cursor: FileCursor?) {
         guard let cursor else {
             return nil
         }
-        let jsonEncoder = JSONEncoder()
-        guard let datedCursorData = try? jsonEncoder.encode(DatedCursor(cursor: cursor, responseAt: Date())) else {
+        guard let cursorData = cursor.data(using: .utf8) else {
             return nil
         }
 
-        self.init(datedCursorData)
+        self.init(cursorData)
     }
 
-    var toDatedCursor: DatedCursor? {
-        let jsonDecoder = JSONDecoder()
-        guard let cursor = try? jsonDecoder.decode(DatedCursor.self, from: rawValue) else {
+    var toCursor: FileCursor? {
+        guard let cursor = String(data: rawValue, encoding: .utf8) else {
             return nil
         }
 

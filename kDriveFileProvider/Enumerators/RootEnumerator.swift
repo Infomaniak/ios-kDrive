@@ -97,7 +97,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
-        guard let datedCursor = syncAnchor.toDatedCursor else {
+        guard let cursor = syncAnchor.toCursor else {
             observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
             return
         }
@@ -105,7 +105,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         Task {
             let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
                 drive: driveFileManager.drive,
-                cursor: datedCursor.cursor
+                cursor: cursor
             )
 
             let realm = driveFileManager.getRealm()
