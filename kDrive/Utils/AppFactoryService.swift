@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,19 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
+import InfomaniakDI
 import kDriveCore
-import UIKit
+import os.log
 
-class StorePresenter {
-    static func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
-        #if ISEXTENSION
-        UIConstants.openUrl(
-            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
-            from: viewController
-        )
-        #else
-        let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-        viewController.present(storeViewController, animated: true)
-        #endif
+/// Something that loads the DI on init
+public struct EarlyDIHook {
+    public init() {
+        // setup DI ASAP
+
+        let navigationManagerFactory = Factory(type: NavigationManageable.self) { _, _ in
+            NavigationManager()
+        }
+
+        os_log("EarlyDIHook")
+        FactoryService.setupDependencyInjection(other: [navigationManagerFactory])
     }
 }

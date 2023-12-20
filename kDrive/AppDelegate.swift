@@ -30,6 +30,7 @@ import Kingfisher
 import StoreKit
 import UIKit
 import UserNotifications
+import os.log
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
@@ -200,42 +201,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
-
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let params = components.queryItems else {
-            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
-        }
-
-        if components.path == "store",
-           let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController,
-               let userId = Int(userId), let driveId = Int(driveId),
-               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // Get presented view controller
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                // Show store
-                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
-            }
-            return true
-        } else if components.host == "file",
-                  let filePath = params.first(where: { $0.name == "url" })?.value {
-            let fileUrl = URL(fileURLWithPath: filePath)
-            if let driveFileManager = accountManager.currentDriveFileManager,
-               var viewController = window?.rootViewController {
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
-                let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
-                viewController.present(vc, animated: true)
-            }
-            return true
-        }
-        return false
+        
+        let deeplinkParser = DeeplinkParser(window: window)
+        return deeplinkParser.parse(url: url)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
