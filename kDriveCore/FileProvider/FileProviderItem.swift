@@ -112,6 +112,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             isShared = true
             @InjectService var accountManager: AccountManageable
             isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
+        } else if file.visibility == .isTeamSpace {
+            isShared = true
+            isSharedByCurrentUser = false
         } else {
             isShared = false
             isSharedByCurrentUser = false
