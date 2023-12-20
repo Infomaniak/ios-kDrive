@@ -23,38 +23,49 @@ import kDriveCore
 import RealmSwift
 
 class RootEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService private var fileProviderManager: FileProviderManager
+    private let driveFileManager: DriveFileManager
+    private let domain: NSFileProviderDomain?
 
     let containerItemIdentifier = NSFileProviderItemIdentifier.rootContainer
+
+    init(driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
+        self.driveFileManager = driveFileManager
+        self.domain = domain
+    }
 
     func invalidate() {}
 
     func fetchRoot(page: NSFileProviderPage) async throws -> (files: [File], nextCursor: String?) {
-        let parentDirectory = try fileProviderManager.getFile(for: containerItemIdentifier)
+        let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
 
         guard !parentDirectory.fullyDownloaded else {
             return (Array(parentDirectory.children) + [parentDirectory], nil)
         }
 
         let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-        let (files, response) = try await fileProviderManager.driveApiFetcher.rootFiles(
-            drive: fileProviderManager.drive,
+        let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+            drive: driveFileManager.drive,
             cursor: currentPageCursor
         )
 
-        let realm = fileProviderManager.getRealm()
-        let liveParentDirectory = try fileProviderManager.getFile(for: containerItemIdentifier, using: realm, shouldFreeze: false)
+        let realm = driveFileManager.getRealm()
+        let liveParentDirectory = try driveFileManager.getCachedFile(
+            itemIdentifier: containerItemIdentifier,
+            freeze: false,
+            using: realm
+        )
 
-        let updatedFiles = try fileProviderManager.writeChildrenToParent(
-            liveParentDirectory,
-            children: files,
-            shouldClearChildren: page.isInitialPage,
+        try driveFileManager.writeChildrenToParent(
+            files,
+            liveParent: liveParentDirectory,
+            responseAt: response.responseAt,
+            isInitialCursor: page.isInitialPage,
             using: realm
         )
 
         try updateAnchor(for: liveParentDirectory, from: response, using: realm)
 
-        return (updatedFiles + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
+        return (files + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
     }
 
     func updateAnchor(for parent: File, from response: ApiResponse<[File]>, using realm: Realm) throws {
@@ -69,7 +80,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         Task {
             do {
                 let (files, nextCursor) = try await self.fetchRoot(page: page)
-                observer.didEnumerate(files.map { FileProviderItem(file: $0, domain: fileProviderManager.domain) })
+                observer.didEnumerate(files.map { FileProviderItem(file: $0, domain: domain) })
 
                 // there should never be more cursors but still implement next page logic just in case
                 if let nextCursor {
@@ -85,56 +96,64 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    /* func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
-         guard let datedCursor = syncAnchor.toDatedCursor else {
-             observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-             return
-         }
+    func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
+        guard let datedCursor = syncAnchor.toDatedCursor else {
+            observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
+            return
+        }
 
-         Task {
-             let (driveFiles, response) = try await fileProviderManager.driveApiFetcher.rootFiles(
-                 drive: fileProviderManager.drive,
-                 cursor: datedCursor.cursor
-             )
-             let files = driveFiles.map { FPFile(file: $0) }
+        Task {
+            let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+                drive: driveFileManager.drive,
+                cursor: datedCursor.cursor
+            )
 
-             let realm = fileProviderManager.getRealm()
-             guard let liveParentDirectory = try? fileProviderManager.getFile(
-                 for: containerItemIdentifier,
-                 using: realm,
-                 shouldFreeze: false
-             ) else {
-                 observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
-                 return
-             }
+            let realm = driveFileManager.getRealm()
+            guard let liveParentDirectory = try? driveFileManager.getCachedFile(
+                itemIdentifier: containerItemIdentifier,
+                freeze: false,
+                using: realm
+            ) else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
+                return
+            }
 
-             guard let syncAnchor = NSFileProviderSyncAnchor(response.cursor) else {
-                 observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-                 return
-             }
+            guard let syncAnchor = NSFileProviderSyncAnchor(response.cursor) else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
+                return
+            }
 
-             let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
-             let updatedFiles = try fileProviderManager.writeChildrenToParent(
-                 liveParentDirectory,
-                 children: files,
-                 shouldClearChildren: false,
-                 using: realm
-             )
-             let childIdsAfterUpdate = Set(liveParentDirectory.children.map { $0.id })
+            let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
+            try driveFileManager.writeChildrenToParent(
+                files,
+                liveParent: liveParentDirectory,
+                responseAt: response.responseAt,
+                isInitialCursor: false,
+                using: realm
+            )
 
-             // Manual diffing since we don't have activities for root
-             let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
+            let childIdsAfterUpdate = Set(liveParentDirectory.children.map { $0.id })
 
-             observer.didUpdate(updatedFiles + [liveParentDirectory.freezeIfNeeded()])
-             observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
-             observer.finishEnumeratingChanges(
-                 upTo: syncAnchor,
-                 moreComing: response.hasMore
-             )
-         }
-     } */
+            // Manual diffing since we don't have activities for root
+            let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
+
+            let updatedFiles = liveParentDirectory.children + [liveParentDirectory]
+            observer.didUpdate(updatedFiles.map { FileProviderItem(file: $0, domain: domain) })
+            observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
+            observer.finishEnumeratingChanges(
+                upTo: syncAnchor,
+                moreComing: response.hasMore
+            )
+        }
+    }
 
     func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
-        return nil
+        guard let parentDirectory = try? driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier),
+              parentDirectory.fullyDownloaded,
+              let currentSyncAnchor = NSFileProviderSyncAnchor(parentDirectory.lastCursor) else {
+            return nil
+        }
+
+        return currentSyncAnchor
     }
 }
