@@ -106,18 +106,119 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     observer.finishEnumerating(upTo: nil)
                 }
             } catch {
-                // Maybe this is a trashed file
-                print("Error while enumerating \(error)")
-                // await enumerateItemsInTrash(for: observer, startingAt: page)
+                Log.fileProvider("Error in enumerateItems \(error)", level: .error)
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
     }
 
-    /* func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
-         observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-     }
+    func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
+        Task { [weak self] in
+            guard let self else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                return
+            }
 
-     func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
-         return nil
-     } */
+            guard containerItemIdentifier != .rootContainer,
+                  let fileId = containerItemIdentifier.toFileId(),
+                  let cursor = syncAnchor.toCursor else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
+                return
+            }
+
+            do {
+                let proxyFile = ProxyFile(driveId: driveFileManager.drive.id, id: fileId)
+                let (result, response) = try await driveFileManager.apiFetcher.files(
+                    in: proxyFile,
+                    advancedListingCursor: cursor,
+                    sortType: .nameAZ
+                )
+
+                let (updatedFiles, deletedFiles) = handleActions(result.actions, actionsFiles: result.actionsFiles)
+
+                var updatedItems = [File]()
+                var deletedItems = [NSFileProviderItemIdentifier]()
+
+                let realm = driveFileManager.getRealm()
+                let parentDirectory = try driveFileManager.getCachedFile(
+                    itemIdentifier: containerItemIdentifier,
+                    freeze: false,
+                    using: realm
+                )
+
+                try realm.write {
+                    for updatedChild in updatedFiles {
+                        driveFileManager.keepCacheAttributesForFile(
+                            newFile: updatedChild,
+                            keepProperties: [.standard],
+                            using: realm
+                        )
+                        realm.add(updatedChild, update: .all)
+                        parentDirectory.children.insert(updatedChild)
+                        updatedItems.append(updatedChild)
+                    }
+                    for deletedChild in deletedFiles {
+                        deletedItems.append(NSFileProviderItemIdentifier(deletedChild.id))
+                        realm.delete(deletedChild)
+                    }
+                    parentDirectory.lastCursor = response.cursor
+                }
+
+                observer.didUpdate(updatedItems.map { FileProviderItem(file: $0, domain: domain) })
+                observer.didDeleteItems(withIdentifiers: deletedItems)
+
+                guard let newLastCursor = response.cursor,
+                      let nextAnchor = NSFileProviderSyncAnchor(newLastCursor) else {
+                    observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                    return
+                }
+
+                observer.finishEnumeratingChanges(
+                    upTo: nextAnchor,
+                    moreComing: response.hasMore
+                )
+            } catch {
+                Log.fileProvider("Error in enumerateChanges \(error)", level: .error)
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+            }
+        }
+    }
+
+    func handleActions(_ actions: [FileAction], actionsFiles: [File])
+        -> (updated: Set<File>, deleted: Set<File>) {
+        let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
+
+        var deletedFiles = Set<File>()
+        var updatedFiles = Set<File>()
+
+        for fileAction in actions {
+            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first else { continue }
+
+            switch fileAction.action {
+            case .fileDelete, .fileTrash, .fileMoveOut:
+                deletedFiles.insert(actionFile)
+            case .fileRename, .fileMoveIn, .fileRestore, .fileCreate, .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate,
+                 .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate,
+                 .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
+                updatedFiles.insert(actionFile)
+            default:
+                break
+            }
+        }
+        return (updatedFiles, deletedFiles)
+    }
+
+    func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
+        guard let file = try? driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier) else {
+            return nil
+        }
+
+        guard let lastCursor = file.lastCursor,
+              file.fullyDownloaded,
+              let anchor = NSFileProviderSyncAnchor(lastCursor) else {
+            return nil
+        }
+
+        return anchor
+    }
 }

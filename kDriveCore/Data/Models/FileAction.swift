@@ -19,8 +19,8 @@
 import Foundation
 
 public struct FileAction: Codable {
-    let action: FileActivityType
-    let fileId: Int
+    public let action: FileActivityType
+    public let fileId: Int
 
     enum CodingKeys: String, CodingKey {
         case action
