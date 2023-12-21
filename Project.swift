@@ -101,8 +101,7 @@ let project = Project(name: "kDrive",
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
-                                 ],
-                                 settings: .settings(base: Constants.baseSettings)),
+                                 ]),
                           Target(name: "kDriveAPITests",
                                  platform: .iOS,
                                  product: .unitTests,
@@ -115,8 +114,7 @@ let project = Project(name: "kDrive",
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
-                                 ],
-                                 settings: .settings(base: Constants.baseSettings)),
+                                 ]),
                           Target(name: "kDriveUITests",
                                  platform: .iOS,
                                  product: .uiTests,
