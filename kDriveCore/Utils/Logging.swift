@@ -81,7 +81,7 @@ public enum Logging {
     private static func initNetworkLogging() {
         #if DEBUG && !TEST
         if !Bundle.main.isExtension {
-//                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+            Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
         }
         #endif
     }
