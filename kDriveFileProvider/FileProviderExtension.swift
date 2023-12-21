@@ -372,7 +372,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
-            return WorkingSetEnumerator(containerItemIdentifier: containerItemIdentifier)
+            return WorkingSetEnumerator(driveFileManager: driveFileManager, domain: domain)
         } else if containerItemIdentifier == .rootContainer {
             return RootEnumerator(driveFileManager: driveFileManager, domain: domain)
         }

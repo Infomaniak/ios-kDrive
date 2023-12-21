@@ -21,24 +21,28 @@ import InfomaniakDI
 import kDriveCore
 
 final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
-    private let containerItemIdentifier: NSFileProviderItemIdentifier
+    @LazyInjectService var additionalState: FileProviderExtensionAdditionalStatable
 
-    init(containerItemIdentifier: NSFileProviderItemIdentifier) {
-        self.containerItemIdentifier = containerItemIdentifier
+    let driveFileManager: DriveFileManager
+    let domain: NSFileProviderDomain?
+
+    init(driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
+        self.driveFileManager = driveFileManager
+        self.domain = domain
     }
 
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        observer.didEnumerate([])
+        let workingSetFiles = driveFileManager.getWorkingSet()
+        var containerItems = [FileProviderItem]()
+        for file in workingSetFiles {
+            autoreleasepool {
+                containerItems.append(FileProviderItem(file: file, parent: .workingSet, domain: self.domain))
+            }
+        }
+        containerItems += additionalState.getWorkingDocumentValues()
+        observer.didEnumerate(containerItems)
         observer.finishEnumerating(upTo: nil)
-    }
-
-    func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
-        observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
-    }
-
-    func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
-        return nil
     }
 }

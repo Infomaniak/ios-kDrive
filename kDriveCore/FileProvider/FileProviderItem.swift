@@ -74,7 +74,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var storageUrl: URL
     public var alreadyEnumerated = false
 
-    public init(file: File, domain: NSFileProviderDomain?) {
+    public init(file: File, parent: NSFileProviderItemIdentifier? = nil, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
 
         @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
@@ -85,7 +85,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
         capabilities = FileProviderItem.rightsToCapabilities(rights)
         // Every file should have a parent, root file parent should not be called
-        parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
+        // If provided a different parent eg. WorkingSet
+        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parent?.id ?? 1)
         let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
         if file.isDirectory && file.fullyDownloaded {
             childItemCount = NSNumber(value: file.children.count + tmpChildren.count)
