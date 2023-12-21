@@ -21,6 +21,8 @@ import InfomaniakDI
 import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
+    @LazyInjectService var additionalState: FileProviderExtensionAdditionalStatable
+
     let containerItemIdentifier: NSFileProviderItemIdentifier
     let driveFileManager: DriveFileManager
     let domain: NSFileProviderDomain?
@@ -140,6 +142,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
+                deletedItems += additionalState.deleteAlreadyEnumeratedImportedDocuments(forParent: containerItemIdentifier)
 
                 let realm = driveFileManager.getRealm()
                 let parentDirectory = try driveFileManager.getCachedFile(
