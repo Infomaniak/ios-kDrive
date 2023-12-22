@@ -163,8 +163,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         updatedItems.append(updatedChild)
                     }
                     for deletedChild in deletedFiles {
-                        deletedItems.append(NSFileProviderItemIdentifier(deletedChild.id))
-                        realm.delete(deletedChild)
+                        guard let existingDeletedFile: File = realm.getObject(id: deletedChild.id) else { continue }
+                        deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
+                        realm.delete(existingDeletedFile)
                     }
                     parentDirectory.lastCursor = response.cursor
                 }
