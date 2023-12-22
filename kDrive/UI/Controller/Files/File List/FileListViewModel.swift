@@ -107,7 +107,7 @@ class FileListViewModel: SelectDelegate {
     /// Internal realm collection of Files observed
     ///
     /// They should be frozen by convention.
-    #if DEBUG
+    #if DEBUG || TEST
     var _frozenFiles = AnyRealmCollection(List<File>()) {
         willSet {
             for item in newValue {
