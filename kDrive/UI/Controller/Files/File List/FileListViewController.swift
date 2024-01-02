@@ -229,6 +229,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
+        guard viewModel != nil else { return }
         #if !ISEXTENSION
         let plusButtonDirectory: File
         if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
