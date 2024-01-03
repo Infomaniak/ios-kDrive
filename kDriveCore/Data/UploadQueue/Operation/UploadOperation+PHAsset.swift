@@ -38,6 +38,16 @@ extension UploadOperation {
             return
         }
 
+        // Check if we are not restarting a session for an already imported asset
+        if let existingFileURL = file.pathURL,
+           fileManager.fileExists(atPath: existingFileURL.path) {
+            try transactionWithFile { file in
+                file.uploadingSession?.filePath = existingFileURL.path
+            }
+
+            return
+        }
+
         // Async load the url of the asset
         guard let url = await photoLibraryUploader.getUrl(for: asset) else {
             Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
