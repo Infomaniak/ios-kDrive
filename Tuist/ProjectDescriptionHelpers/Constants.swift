@@ -19,6 +19,10 @@
 import ProjectDescription
 
 public enum Constants {
+    public static let testSettings: [String: SettingValue] = [
+        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "TEST DEBUG"
+    ]
+
     public static let baseSettings = SettingsDictionary()
         .automaticCodeSigning(devTeam: "864VDCS2QY")
         .currentProjectVersion("1")

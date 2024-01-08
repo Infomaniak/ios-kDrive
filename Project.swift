@@ -125,7 +125,8 @@ let project = Project(name: "kDrive",
                                  dependencies: [
                                      .target(name: "kDrive"),
                                      .target(name: "kDriveCore")
-                                 ]),
+                                 ],
+                                 settings: .settings(base: Constants.testSettings)),
                           Target(name: "kDriveResources",
                                  platform: .iOS,
                                  product: .staticLibrary,
