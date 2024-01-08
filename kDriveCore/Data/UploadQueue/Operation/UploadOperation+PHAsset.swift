@@ -41,10 +41,6 @@ extension UploadOperation {
         // Check if we are not restarting a session for an already imported asset
         if let existingFileURL = file.pathURL,
            fileManager.fileExists(atPath: existingFileURL.path) {
-            try transactionWithFile { file in
-                file.uploadingSession?.filePath = existingFileURL.path
-            }
-
             return
         }
 
@@ -58,7 +54,6 @@ extension UploadOperation {
         Log.uploadOperation("Got photo asset, writing URL:\(url) ufid:\(uploadFileId)")
         try transactionWithFile { file in
             file.pathURL = url
-            file.uploadingSession?.filePath = url.path
         }
     }
 }

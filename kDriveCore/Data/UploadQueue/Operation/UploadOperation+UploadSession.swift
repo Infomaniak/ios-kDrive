@@ -405,9 +405,6 @@ extension UploadOperation {
             // Store the session token asap as a non null ivar
             uploadingSessionTask.token = session.token
 
-            // The file at the moment we created the UploadingSessionTask
-            uploadingSessionTask.filePath = fileUrl.path
-
             // Store the session
             uploadingSessionTask.uploadSession = session
 
