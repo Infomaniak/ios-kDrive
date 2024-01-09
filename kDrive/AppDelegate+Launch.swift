@@ -27,8 +27,9 @@ import UIKit
 extension AppDelegate {
     // MARK: Launch
 
-    func launchSetup() {
-        refreshCacheData(preload: false, isSwitching: false)
+    /// Refresh cache for `currentDrive`, Scan photo library and restart upload.
+    func refreshCacheAndRestartUpload() {
+        refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
         uploadEditedFiles()
     }
 

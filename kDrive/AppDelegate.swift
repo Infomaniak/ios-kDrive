@@ -233,9 +233,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         let currentState = RootViewControllerState.getCurrentState()
         prepareRootViewController(currentState: currentState)
-        if case .mainViewController = currentState {
+        switch currentState {
+        case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
-            launchSetup()
+            refreshCacheAndRestartUpload()
+        case .onboarding: break
+            // NOOP
         }
 
         // Remove all notifications on App Opening
@@ -295,8 +298,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
+    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
+        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
         guard let currentAccount = accountManager.currentAccount else {
             Log.appDelegate("No account to refresh", level: .error)
@@ -328,14 +331,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                    let newDrive = DriveInfosManager.instance.getDrive(objectId: oldDriveId),
                    !newDrive.inMaintenance {
                     // The current drive is still usable, do not switch
-                    restartUploadQueue()
+                    scanLibraryAndRestartUpload()
                     return
                 }
 
                 let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
                 accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
                 showMainViewController(driveFileManager: driveFileManager)
-                restartUploadQueue()
+                scanLibraryAndRestartUpload()
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                     errorType: .noDrive,
@@ -355,7 +358,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    private func restartUploadQueue() {
+    private func scanLibraryAndRestartUpload() {
         // Resolving an upload queue will restart it if this is the first time
         @InjectService var uploadQueue: UploadQueue
 
@@ -465,7 +468,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     @objc func reloadDrive(_ notification: Notification) {
         Task { @MainActor in
-            self.refreshCacheData(preload: false, isSwitching: false)
+            self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
         }
     }
 
