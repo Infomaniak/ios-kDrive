@@ -30,9 +30,6 @@ public final class UploadingSessionTask: EmbeddedObject {
     @Persisted public var sessionExpiration: Date
     @Persisted public var chunkTasks: List<UploadingChunkTask>
 
-    /// The source file path
-    @Persisted public var filePath: String
-
     override public init() {
         // Required by Realm
         super.init()
@@ -40,14 +37,12 @@ public final class UploadingSessionTask: EmbeddedObject {
 
     public convenience init(uploadSession: UploadSession,
                             sessionExpiration: Date,
-                            chunkTasks: List<UploadingChunkTask>,
-                            filePath: String) {
+                            chunkTasks: List<UploadingChunkTask>) {
         self.init()
 
         self.uploadSession = uploadSession
         self.sessionExpiration = sessionExpiration
         self.chunkTasks = chunkTasks
-        self.filePath = filePath
     }
 
     // MARK: - Computed Properties
