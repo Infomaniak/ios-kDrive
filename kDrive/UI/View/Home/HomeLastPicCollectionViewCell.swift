@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import Kingfisher
 import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
@@ -26,6 +27,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var darkLayer: UIView!
     @IBOutlet weak var checkmarkImage: UIImageView!
     @IBOutlet weak var videoData: UIView!
+
+    private var thumbnailDownloadTask: Kingfisher.DownloadTask?
 
     override var isSelected: Bool {
         didSet {
@@ -52,6 +55,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        thumbnailDownloadTask?.cancel()
         darkLayer.isHidden = true
         fileImage.image = nil
         fileImage.backgroundColor = nil
@@ -75,7 +79,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         self.file = file
         checkmarkImage.isHidden = !selectionMode
         darkLayer.isHidden = false
-        file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
+        thumbnailDownloadTask = file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
             if fileId == self?.file?.id {
                 self?.darkLayer.isHidden = true
                 self?.fileImage.image = isThumbnail ? image : KDriveResourcesAsset.fileImageSmall.image
