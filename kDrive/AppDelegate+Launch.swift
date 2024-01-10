@@ -27,12 +27,6 @@ import UIKit
 extension AppDelegate {
     // MARK: Launch
 
-    /// Refresh cache for `currentDrive`, Scan photo library and restart upload.
-    func refreshCacheAndRestartUpload() {
-        refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
-        uploadEditedFiles()
-    }
-
     func prepareRootViewController(currentState: RootViewControllerState) {
         switch currentState {
         case .appLock:
@@ -126,7 +120,7 @@ extension AppDelegate {
     }
 
     // TODO: Refactor to async
-    private func uploadEditedFiles() {
+    func uploadEditedFiles() {
         Log.appDelegate("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {

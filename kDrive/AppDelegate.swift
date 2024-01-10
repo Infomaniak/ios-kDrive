@@ -80,8 +80,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         window = UIWindow()
         setGlobalTint()
-        let currentState = RootViewControllerState.getCurrentState()
-        prepareRootViewController(currentState: currentState)
+
+        let state = UIApplication.shared.applicationState
+        if state != .background {
+            appWillBePresentedToTheUser()
+        }
 
         accountManager.delegate = self
 
@@ -118,12 +121,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             // META: keep SonarCloud happy
         }
         application.registerForRemoteNotifications()
-
-        let state = UIApplication.shared.applicationState
-        if state != .background {
-            // Remove all notifications on App Opening
-            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-        }
 
         if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
             shortcutItemToProcess = shortcutItem
@@ -227,7 +224,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         Log.appDelegate("applicationWillEnterForeground")
+        appWillBePresentedToTheUser()
+    }
 
+    private func appWillBePresentedToTheUser() {
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
@@ -236,7 +236,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
-            refreshCacheAndRestartUpload()
+            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            uploadEditedFiles()
         case .onboarding: break
             // NOOP
         }
