@@ -469,7 +469,7 @@ public final class FileActionsHelper {
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { _ in
                 driveFloatingPanelController.dismiss(animated: true) {
-                    @LazyInjectService var navigationManager: NavigationManageable
+                    @InjectService var navigationManager: NavigationManageable
                     navigationManager.showStore(from: viewController, driveFileManager: driveFileManager)
                 }
             }
