@@ -129,8 +129,8 @@ class MainTabViewController: UITabBarController, Restorable {
         navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
-        navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
-        navigationViewController.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.gallery.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.galleryFill.image
         return navigationViewController
     }
 
