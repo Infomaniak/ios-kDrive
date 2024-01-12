@@ -262,6 +262,7 @@ public enum FileVisibility: String {
     case isTeamSpace = "is_team_space"
     case isTeamSpaceFolder = "is_team_space_folder"
     case isInTeamSpaceFolder = "is_in_team_space_folder"
+    case isPrivateSpace = "is_private_space"
 }
 
 public enum FileStatus: String {
@@ -456,6 +457,19 @@ public final class File: Object, Codable {
         case version
         case conversion = "conversion_capabilities"
         case supportedBy = "supported_by"
+    }
+
+    public var localizedName: String {
+        switch visibility {
+        case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder:
+            return name
+        case .isPrivateSpace:
+            return "privé"
+        case .isTeamSpace:
+            return "team"
+        case nil:
+            return name
+        }
     }
 
     public var parent: File? {
