@@ -123,10 +123,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
             guard let self else { return }
             switch changes {
             case .initial(let children):
-                rootViewChildren = Array(children)
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource?.apply(itemsSnapshot, animatingDifferences: false)
             case .update(let children, _, _, _):
-                rootViewChildren = Array(children)
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource?.apply(itemsSnapshot, animatingDifferences: true)
             case .error:
                 break
