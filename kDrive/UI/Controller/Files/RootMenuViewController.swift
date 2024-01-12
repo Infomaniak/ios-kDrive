@@ -134,6 +134,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task {
+            try await driveFileManager.initRoot()
+        }
+    }
+
     @objc func presentSearch() {
         let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
