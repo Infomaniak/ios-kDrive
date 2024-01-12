@@ -23,7 +23,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class RootMenuViewController: CustomLargeTitleCollectionViewController {
+class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
@@ -178,7 +178,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
                     options: drives,
                     selectedOption: driveFileManager.drive,
                     headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                    delegate: nil
+                    delegate: self
                 )
                 present(floatingPanelViewController, animated: true)
             }
