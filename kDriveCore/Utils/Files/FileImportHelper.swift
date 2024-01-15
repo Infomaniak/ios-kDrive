@@ -26,7 +26,13 @@ import kDriveResources
 import Photos
 import RealmSwift
 
-extension ItemProviderURLRepresentation {
+// TODO: move to core
+protocol ItemProviderResultable {
+    var result: Result<(url: URL, title: String), Error> { get async }
+    var URLResult: Result<URL, Error> { get async }
+}
+
+extension ItemProviderResultable {
     var URLResult: Result<URL, Error> {
         get async {
             let result = await result
@@ -40,33 +46,11 @@ extension ItemProviderURLRepresentation {
     }
 }
 
-extension ItemProviderFileRepresentation {
-    var URLResult: Result<URL, Error> {
-        get async {
-            let result = await result
-            switch result {
-            case .success((let url, _)):
-                return .success(url)
-            case .failure(let error):
-                return .failure(error)
-            }
-        }
-    }
-}
+extension ItemProviderURLRepresentation: ItemProviderResultable {}
 
-extension ItemProviderZipRepresentation {
-    var URLResult: Result<URL, Error> {
-        get async {
-            let result = await result
-            switch result {
-            case .success((let url, _)):
-                return .success(url)
-            case .failure(let error):
-                return .failure(error)
-            }
-        }
-    }
-}
+extension ItemProviderFileRepresentation: ItemProviderResultable {}
+
+extension ItemProviderZipRepresentation: ItemProviderResultable {}
 
 public enum ImportError: LocalizedError {
     case accessDenied
