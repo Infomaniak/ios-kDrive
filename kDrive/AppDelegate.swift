@@ -202,8 +202,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
 
-        let deeplinkParser = DeeplinkParser(window: window)
-        return deeplinkParser.parse(url: url)
+        return DeeplinkParser().parse(url: url)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {

@@ -20,13 +20,16 @@ import InfomaniakDI
 import SwiftUI
 
 public struct DeeplinkParser {
+    private enum DeeplinkPath: String {
+        case store
+        case file
+    }
+
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var navigationManager: NavigationManageable
 
-    private let window: UIWindow?
-
-    public init(window: UIWindow?) {
-        self.window = window
+    public init() {
+        // META: keep SonarCloud happy
     }
 
     public func parse(url: URL) -> Bool {
@@ -36,33 +39,22 @@ public struct DeeplinkParser {
             return false
         }
 
-        if components.path == "store",
+        if components.path == DeeplinkPath.store.rawValue,
            let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController,
-               let userId = Int(userId), let driveId = Int(driveId),
-               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // Get presented view controller
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                // Show store
-                navigationManager.showStore(from: viewController, driveFileManager: driveFileManager)
-            }
+           let driveId = params.first(where: { $0.name == "driveId" })?.value,
+           let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
+            navigationManager.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
             return true
-        } else if components.host == "file",
+
+        } else if components.host == DeeplinkPath.file.rawValue,
                   let filePath = params.first(where: { $0.name == "url" })?.value {
             let fileUrl = URL(fileURLWithPath: filePath)
-            if let driveFileManager = accountManager.currentDriveFileManager,
-               var viewController = window?.rootViewController {
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
-                navigationManager.showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
-            }
+            let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
+            navigationManager.navigate(to: .saveFile(file: file))
             return true
         }
+
+        Log.appDelegate("unable to parse deeplink URL: \(url)", level: .error)
         return false
     }
 }

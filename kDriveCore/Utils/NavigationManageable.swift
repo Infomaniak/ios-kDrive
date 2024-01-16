@@ -19,8 +19,29 @@
 import Foundation
 import UIKit
 
+/// Abstract `Routes` that can be navigated to
+public enum NavigationRoutes: Equatable {
+    case store(driveId: Int, userId: Int)
+    case saveFile(file: ImportedFile)
+
+    public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
+        switch (lhs, rhs) {
+        case (.store(let lhdDriveId, let lhdUserId), .store(let rhdDriveId, let rhdUserId)):
+            return lhdDriveId == rhdDriveId && lhdUserId == rhdUserId
+        case (.saveFile(let lhdFile), .saveFile(let rhdDile)):
+            return lhdFile == rhdDile
+        default:
+            return false
+        }
+    }
+}
+
+/// Something that abstracts the navigation within the app
 public protocol NavigationManageable {
     func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
 
     func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
+
+    /// Navigate to a specified abstracted location
+    func navigate(to route: NavigationRoutes)
 }
