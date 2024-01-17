@@ -86,6 +86,7 @@ extension UploadQueue: UploadPublishable {
 
     func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
+        logFileUploadedWithSuccess(for: result.uploadFile)
         sendFileUploadedNotificationIfNeeded(with: result)
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -98,6 +99,24 @@ extension UploadQueue: UploadPublishable {
                     closure(uploadFile, result.driveFile)
                 }
             }
+        }
+    }
+
+    // MARK: Private
+
+    func logFileUploadedWithSuccess(for uploadFile: UploadFile?) {
+        Task {
+            let metadata: [String: Any]
+            if let uploadFile {
+                assert(uploadFile.realm == nil || uploadFile.isFrozen, "Expecting something that can be used concurrently")
+                metadata = ["fid": uploadFile.id,
+                            "uploadDate": "\(String(describing: uploadFile.uploadDate))",
+                            "taskCreationDate": "\(String(describing: uploadFile.taskCreationDate))",
+                            "type": "\(uploadFile.convertedType)"]
+            } else {
+                metadata = ["no_uploadFile": ""]
+            }
+            SentryDebug.uploadOperationCompletedWithSuccess(metadata)
         }
     }
 }
