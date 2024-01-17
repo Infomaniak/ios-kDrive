@@ -39,6 +39,10 @@ public enum SentryDebug {
         case PHAsset
     }
 
+    public enum EventNames {
+        static let uploadCompletedSuccess = "UploadCompletedSuccess"
+    }
+
     public enum ErrorNames {
         static let uploadErrorHandling = "UploadErrorHandling"
         static let uploadSessionErrorHandling = "UploadSessionErrorHandling"
