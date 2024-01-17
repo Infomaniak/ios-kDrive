@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "504932a51c978b6aa0bbc086054875a36241674e",
-        "version" : "5.0.1"
+        "revision" : "a1341fb7d6d5bc48576cc8400682476c441f2d23",
+        "version" : "6.0.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "2ade7b9cfc5942d1126570b40a6680e4ffcff105",
-        "version" : "3.0.0"
+        "revision" : "400b26b6a266bb9206ad4eade1231a9f264e98e7",
+        "version" : "4.0.0"
       }
     },
     {
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
-        "revision" : "ba2e72bc84a673d4e1626f898419da82b54baefb",
-        "version" : "5.0.0"
+        "revision" : "94dee9d95d92c5fbe152476b78b04985fbddaa7c",
+        "version" : "6.0.1"
       }
     },
     {
@@ -122,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "277f1ab2c6664b19b4a412e32b094b201e2d5757",
-        "version" : "7.10.0"
+        "revision" : "3ec0ab0bca4feb56e8b33e289c9496e89059dd08",
+        "version" : "7.10.2"
       }
     },
     {
@@ -138,9 +138,9 @@
     {
       "identity" : "localizekit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PhilippeWeidmann/LocalizeKit",
+      "location" : "https://github.com/Infomaniak/LocalizeKit",
       "state" : {
-        "revision" : "1abb86ce614ae8d925bf82123c7360ab95827975",
+        "revision" : "a8f5b63a242a7cb5d8939db011fc9ee871a2a300",
         "version" : "1.0.1"
       }
     },
@@ -230,8 +230,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit.git",
       "state" : {
-        "revision" : "f222cbdf325885926566172f6f5f06af95473158",
-        "version" : "5.6.0"
+        "revision" : "e74fe2a978d1216c3602b129447c7301573cc2d8",
+        "version" : "5.7.0"
       }
     },
     {
@@ -257,8 +257,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "a902f1823a7ff3c9ab2fba0f992396b948eda307",
-        "version" : "1.0.5"
+        "revision" : "d029d9d39c87bed85b1c50adee7c41795261a192",
+        "version" : "1.0.6"
       }
     },
     {
