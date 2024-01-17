@@ -33,19 +33,6 @@ public protocol AccountManagerDelegate: AnyObject {
 }
 
 public extension InfomaniakLogin {
-    static func apiToken(username: String, applicationPassword: String) async throws -> ApiToken {
-        try await withCheckedThrowingContinuation { continuation in
-            @InjectService var tokenable: InfomaniakTokenable
-            tokenable.getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
-                if let token {
-                    continuation.resume(returning: token)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
-    }
-
     static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
         try await withCheckedThrowingContinuation { continuation in
             @InjectService var tokenable: InfomaniakTokenable
@@ -270,11 +257,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+        SentryDebug.logTokenMigration(newToken: newToken, oldToken: oldToken)
         updateToken(newToken: newToken, oldToken: oldToken)
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
-        let context = ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970] as [String: Any]
+        let context = ["User id": token.userId,
+                       "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
 
         tokens.removeAll { $0.userId == token.userId }
