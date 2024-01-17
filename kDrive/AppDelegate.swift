@@ -27,6 +27,7 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import os.log
 import StoreKit
 import UIKit
 import UserNotifications
@@ -198,28 +199,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
 
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let params = components.queryItems else {
-            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
-        }
-
-        if components.path == "store",
-           let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController,
-               let userId = Int(userId), let driveId = Int(driveId),
-               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // Get presented view controller
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                // Show store
-                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
-            }
-            return true
-        }
-        return false
+        return DeeplinkParser().parse(url: url)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {

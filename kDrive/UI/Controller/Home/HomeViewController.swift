@@ -29,6 +29,7 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
     private static let loadingCellCount = 12
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var navigationManager: NavigationManageable
 
     enum HomeFileType {
         case file([File])
@@ -529,7 +530,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
+                    navigationManager.showStore(from: self, driveFileManager: driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }
