@@ -19,6 +19,7 @@
 @testable import Alamofire
 @testable import InfomaniakCore
 @testable import InfomaniakDI
+import InfomaniakLogin
 @testable import kDrive
 @testable import kDriveCore
 import XCTest
