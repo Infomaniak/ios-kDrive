@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: .tuist-bin/tuist build kDrive
 
-  test_unit_itegration:
+  test_unit_integration:
     name: Unit & Integration tests
     runs-on: [ self-hosted, iOS ]
 
@@ -83,7 +83,7 @@ jobs:
       - name: Test
         run: xcodebuild test -workspace kDrive.xcworkspace -scheme kDrive -allowProvisioningUpdates -only-testing "kDriveUITests" -destination "platform=iOS Simulator,name=iPhone 15,OS=17.0"
 
-  test_unit_itegration_legacy:
+  test_unit_integration_legacy:
     name: Unit & Integration tests on legacy OS
     runs-on: [ self-hosted, iOS ]
 
