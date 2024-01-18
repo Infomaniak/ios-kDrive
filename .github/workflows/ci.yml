@@ -107,7 +107,7 @@ jobs:
       - name: Tuist generate
         run: .tuist-bin/tuist generate
       - name: Test Legacy
-        run: xcodebuild test -workspace kDrive.xcworkspace -scheme kDrive -allowProvisioningUpdates -only-testing "kDriveTests" -destination "platform=iOS Simulator,name=iPhone X,OS=13.0"
+        run: xcodebuild test -workspace kDrive.xcworkspace -scheme kDrive -allowProvisioningUpdates -only-testing "kDriveTests" -destination "platform=iOS Simulator,name=iPhone 13,OS=15.2"
 
   test_api:
     name: API tests
