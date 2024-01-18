@@ -27,6 +27,7 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import os.log
 import StoreKit
 import UIKit
 import UserNotifications
@@ -80,8 +81,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         window = UIWindow()
         setGlobalTint()
-        let currentState = RootViewControllerState.getCurrentState()
-        prepareRootViewController(currentState: currentState)
+
+        let state = UIApplication.shared.applicationState
+        if state != .background {
+            appWillBePresentedToTheUser()
+        }
 
         accountManager.delegate = self
 
@@ -118,12 +122,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             // META: keep SonarCloud happy
         }
         application.registerForRemoteNotifications()
-
-        let state = UIApplication.shared.applicationState
-        if state != .background {
-            // Remove all notifications on App Opening
-            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-        }
 
         if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
             shortcutItemToProcess = shortcutItem
@@ -201,41 +199,27 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
 
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let params = components.queryItems else {
-            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
-        }
-
-        if components.path == "store",
-           let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController,
-               let userId = Int(userId), let driveId = Int(driveId),
-               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // Get presented view controller
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                // Show store
-                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
-            }
-            return true
-        }
-        return false
+        return DeeplinkParser().parse(url: url)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         Log.appDelegate("applicationWillEnterForeground")
+        appWillBePresentedToTheUser()
+    }
 
+    private func appWillBePresentedToTheUser() {
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
         let currentState = RootViewControllerState.getCurrentState()
         prepareRootViewController(currentState: currentState)
-        if case .mainViewController = currentState {
+        switch currentState {
+        case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
-            launchSetup()
+            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            uploadEditedFiles()
+        case .onboarding: break
+            // NOOP
         }
 
         // Remove all notifications on App Opening
@@ -295,8 +279,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    func refreshCacheData(preload: Bool, isSwitching: Bool) {
-        Log.appDelegate("refreshCacheData preload:\(preload) isSwitching:\(preload)")
+    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
+        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
         guard let currentAccount = accountManager.currentAccount else {
             Log.appDelegate("No account to refresh", level: .error)
@@ -328,14 +312,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                    let newDrive = DriveInfosManager.instance.getDrive(objectId: oldDriveId),
                    !newDrive.inMaintenance {
                     // The current drive is still usable, do not switch
-                    restartUploadQueue()
+                    scanLibraryAndRestartUpload()
                     return
                 }
 
                 let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
                 accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
                 showMainViewController(driveFileManager: driveFileManager)
-                restartUploadQueue()
+                scanLibraryAndRestartUpload()
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                     errorType: .noDrive,
@@ -355,7 +339,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    private func restartUploadQueue() {
+    private func scanLibraryAndRestartUpload() {
         // Resolving an upload queue will restart it if this is the first time
         @InjectService var uploadQueue: UploadQueue
 
@@ -465,7 +449,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     @objc func reloadDrive(_ notification: Notification) {
         Task { @MainActor in
-            self.refreshCacheData(preload: false, isSwitching: false)
+            self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
         }
     }
 

@@ -31,10 +31,10 @@ private let appGroupName = "group.com.infomaniak.drive"
 private let realmRootPath = "drives"
 
 /// Something that setups the service factories
-enum FactoryService {
-    static func setupDependencyInjection() {
+public enum FactoryService {
+    public static func setupDependencyInjection(other: [Factory] = []) {
         SimpleResolver.register(debugServices)
-        let factories = networkingServices + miscServices
+        let factories = networkingServices + miscServices + other
         SimpleResolver.register(factories)
     }
 
@@ -172,14 +172,5 @@ public extension SimpleResolver {
 
     static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
         factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
-    }
-}
-
-/// Something that loads the DI on init
-public struct EarlyDIHook {
-    public init() {
-        // setup DI ASAP
-        os_log("EarlyDIHook")
-        FactoryService.setupDependencyInjection()
     }
 }

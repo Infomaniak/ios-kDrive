@@ -28,7 +28,7 @@ import QuickLookThumbnailing
 import RealmSwift
 import VisionKit
 
-public final class ImportedFile: CustomStringConvertible {
+public final class ImportedFile: CustomStringConvertible, Equatable {
     public var name: String
     public var path: URL
     public var uti: UTI
@@ -52,11 +52,17 @@ public final class ImportedFile: CustomStringConvertible {
 
     public var description: String {
         """
-        <\(String(describing: self)) :
+        <ImportedFile :
         name:\(name)
         path:\(path)
         uti:\(uti)
         >
         """
+    }
+
+    // MARK: Equatable
+
+    public static func == (lhs: ImportedFile, rhs: ImportedFile) -> Bool {
+        return lhs.name == rhs.name && lhs.path == rhs.path && lhs.uti == rhs.uti
     }
 }

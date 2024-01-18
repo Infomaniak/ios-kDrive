@@ -58,6 +58,16 @@
 				<string>kdrive</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.infomaniak.kdrive.file-sharing</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kdrive-file-sharing</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
@@ -85,6 +95,41 @@
 	<string>Auto upload</string>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconFile</key>
+			<string>shortcut-upload</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>shortcutUploadTitle</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.shortcut.upload</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconFile</key>
+			<string>shortcut-scan</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>shortcutScanTitle</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.shortcut.scan</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconFile</key>
+			<string>shortcut-search</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>shortcutSearchTitle</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.shortcut.search</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconFile</key>
+			<string>shortcut-support</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>shortcutSupportTitle</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.infomaniak.shortcut.support</string>
+		</dict>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -114,41 +159,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UIApplicationShortcutItems</key>
-	<array>
-		<dict>
-			<key>UIApplicationShortcutItemIconFile</key>
-			<string>shortcut-upload</string>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.infomaniak.shortcut.upload</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>shortcutUploadTitle</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemIconFile</key>
-			<string>shortcut-scan</string>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.infomaniak.shortcut.scan</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>shortcutScanTitle</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.infomaniak.shortcut.search</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>shortcutSearchTitle</string>
-			<key>UIApplicationShortcutItemIconFile</key>
-			<string>shortcut-search</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>shortcutSupportTitle</string>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.infomaniak.shortcut.support</string>
-			<key>UIApplicationShortcutItemIconFile</key>
-			<string>shortcut-support</string>
-		</dict>
 	</array>
 </dict>
 </plist>

@@ -287,7 +287,10 @@ extension MenuViewController {
                 self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(
+                        preload: true,
+                        isSwitching: true
+                    )
                 } else {
                     SentrySDK.setUser(nil)
                     self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)

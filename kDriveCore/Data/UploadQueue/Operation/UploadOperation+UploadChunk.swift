@@ -32,7 +32,7 @@ extension UploadOperation {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
 
-            filePath = uploadingSessionTask.filePath
+            filePath = file.pathURL?.path ?? ""
             let sessionToken = uploadingSessionTask.token
 
             // Look for the next chunk to generate
