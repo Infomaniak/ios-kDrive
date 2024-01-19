@@ -117,8 +117,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         configureDataSource()
 
-        let rootChildren = driveFileManager.getRealm()
-            .object(ofType: File.self, forPrimaryKey: DriveFileManager.constants.rootID)?.children
+        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+        let rootChildren = driveFileManager.getRealm().object(ofType: File.self, forPrimaryKey: rootFileUid)?.children
         rootChildrenObservationToken = rootChildren?.observe { [weak self] changes in
             guard let self else { return }
             switch changes {

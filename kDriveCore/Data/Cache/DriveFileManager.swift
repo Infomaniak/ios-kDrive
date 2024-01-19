@@ -468,7 +468,8 @@ public final class DriveFileManager {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
+        let uid = File.uid(driveId: drive.id, fileId: id)
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
             return nil
         }
         return freeze ? file.freeze() : file
@@ -736,7 +737,7 @@ public final class DriveFileManager {
                     token?.cancel()
                     if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
-                        self.updateFileProperty(fileId: safeFile.id) { file in
+                        self.updateFileProperty(fileUid: safeFile.uid) { file in
                             file.isAvailableOffline = false
                         }
                     }
@@ -762,14 +763,14 @@ public final class DriveFileManager {
     }
 
     public func setFileShareLink(file: ProxyFile, shareLink: ShareLink?) {
-        updateFileProperty(fileId: file.id) { file in
+        updateFileProperty(fileUid: file.uid) { file in
             file.sharelink = shareLink
             file.capabilities.canBecomeSharelink = shareLink == nil
         }
     }
 
     public func setFileDropBox(file: ProxyFile, dropBox: DropBox?) {
-        updateFileProperty(fileId: file.id) { file in
+        updateFileProperty(fileUid: file.uid) { file in
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
         }
@@ -882,7 +883,7 @@ public final class DriveFileManager {
         let timestamp = try TimeInterval(timestamp ?? file.resolve(using: realm).responseAt)
         var page = 1
         var moreComing = true
-        var pagedActions = [Int: FileActivityType]()
+        var pagedActions = [String: FileActivityType]()
         var pagedActivities = ActivitiesResult()
         var responseAt = 0
         while moreComing {
@@ -916,7 +917,7 @@ public final class DriveFileManager {
     // swiftlint:disable:next cyclomatic_complexity
     private func apply(activities: [FileActivity],
                        to file: File,
-                       pagedActions: inout [Int: FileActivityType],
+                       pagedActions: inout [String: FileActivityType],
                        timestamp: Int,
                        using realm: Realm? = nil) -> ActivitiesResult {
         var insertedFiles = [File]()
@@ -926,14 +927,14 @@ public final class DriveFileManager {
         realm.refresh()
         realm.beginWrite()
         for activity in activities {
-            let fileId = activity.fileId
+            let fileId = File.uid(driveId: file.driveId, fileId: activity.fileId)
             if pagedActions[fileId] == nil {
                 switch activity.action {
                 case .fileDelete, .fileTrash:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
                         deletedFiles.append(file.freeze())
                     }
-                    removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
+                    removeFileInDatabase(fileUid: fileId, cascade: true, withTransaction: false, using: realm)
                     if let file = activity.file {
                         deletedFiles.append(file)
                     }
@@ -980,7 +981,7 @@ public final class DriveFileManager {
                      .fileColorDelete:
                     if let newFile = activity.file {
                         if newFile.isTrashed {
-                            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
+                            removeFileInDatabase(fileUid: fileId, cascade: true, withTransaction: false, using: realm)
                             deletedFiles.append(newFile)
                             pagedActions[fileId] = .fileDelete
                         } else {
@@ -1080,7 +1081,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: file)
         if response.result {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
@@ -1091,7 +1092,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.add(drive: drive, category: category, to: files)
         for fileResponse in response where fileResponse.result {
-            updateFileProperty(fileId: fileResponse.id) { file in
+            updateFileProperty(fileUid: File.uid(driveId: drive.id, fileId: fileResponse.id)) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
@@ -1102,7 +1103,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.remove(category: category, from: file)
         if response {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -1114,7 +1115,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
         for fileResponse in response where fileResponse.result {
-            updateFileProperty(fileId: fileResponse.id) { file in
+            updateFileProperty(fileUid: File.uid(driveId: drive.id, fileId: fileResponse.id)) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -1185,7 +1186,7 @@ public final class DriveFileManager {
             response = try await apiFetcher.unfavorite(file: file)
         }
         if response {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 file.isFavorite = favorite
             }
         }
@@ -1196,7 +1197,7 @@ public final class DriveFileManager {
         backgroundQueue.async { [self] in
             let localRealm = getRealm()
             let savedFile = try? file.resolve(using: localRealm).freeze()
-            removeFileInDatabase(fileId: file.id, cascade: true, withTransaction: true, using: localRealm)
+            removeFileInDatabase(fileUid: file.uid, cascade: true, withTransaction: true, using: localRealm)
             if let file = savedFile {
                 savedFile?.signalChanges(userId: drive.userId)
                 notifyObserversWith(file: file)
@@ -1414,18 +1415,18 @@ public final class DriveFileManager {
         return Array(children.freeze())
     }
 
-    func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
+    func removeFileInDatabase(fileUid: String, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
             if fileManager.fileExists(atPath: file.localContainerUrl.path) {
                 try? fileManager.removeItem(at: file.localContainerUrl) // Check that it was correctly removed?
             }
 
             if cascade {
                 for child in file.children.freeze() where !child.isInvalidated {
-                    removeFileInDatabase(fileId: child.id, cascade: cascade, withTransaction: withTransaction, using: realm)
+                    removeFileInDatabase(fileUid: child.uid, cascade: cascade, withTransaction: withTransaction, using: realm)
                 }
             }
             if withTransaction {
@@ -1460,11 +1461,11 @@ public final class DriveFileManager {
         }
     }
 
-    private func updateFileProperty(fileId: Int, using realm: Realm? = nil, _ block: (File) -> Void) {
+    private func updateFileProperty(fileUid: String, using realm: Realm? = nil, _ block: (File) -> Void) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
             try? realm.write {
                 block(file)
             }
@@ -1523,7 +1524,7 @@ public final class DriveFileManager {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id),
+        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.uid),
               !savedChild.isInvalidated else { return }
         newFile.isAvailableOffline = savedChild.isAvailableOffline
         newFile.versionCode = savedChild.versionCode
@@ -1577,10 +1578,10 @@ public final class DriveFileManager {
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
-        let fileId = directory.id
+        let fileUid = directory.uid
         let result = try await apiFetcher.updateColor(directory: directory.proxify(), color: color)
         if result {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileUid: fileUid) { file in
                 file.color = color
             }
         }
