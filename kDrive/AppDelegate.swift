@@ -49,9 +49,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
 
     // MARK: - UIApplicationDelegate
 
@@ -71,7 +71,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             SentryDebug.capture(error: error)
         }
 
-        registerBackgroundTasks()
+        backgroundTasksService.registerBackgroundTasks()
 
         // In some cases the application can show the old Nextcloud import notification badge
         UIApplication.shared.applicationIconBadgeNumber = 0
@@ -167,8 +167,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         Log.appDelegate("applicationDidEnterBackground")
+        backgroundTasksService.scheduleBackgroundRefresh()
 
-        scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             lockHelper.setTime()
@@ -181,19 +181,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         completionHandler: @escaping (Bool) -> Void
     ) {
         shortcutItemToProcess = shortcutItem
-    }
-
-    func application(_ application: UIApplication,
-                     performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        Log.appDelegate("application performFetchWithCompletionHandler")
-
-        handleBackgroundRefresh { newData in
-            if newData {
-                completionHandler(.newData)
-            } else {
-                completionHandler(.noData)
-            }
-        }
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
