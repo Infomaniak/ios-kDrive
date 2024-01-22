@@ -44,10 +44,12 @@ public protocol BackgroundTasksServiceable {
 }
 
 struct BackgroundTasksService: BackgroundTasksServiceable {
-    @LazyInjectService var scheduler: BGTaskScheduler
+    @LazyInjectService private var scheduler: BGTaskScheduler
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var uploadQueue: UploadQueue
 
     public init() {
-        // Sonar Cloud happy
+        // META: keep SonarCloud happy
     }
 
     public func registerBackgroundTasks() {
@@ -64,7 +66,6 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
             task.setTaskCompleted(success: true)
         }
 
-        @InjectService var uploadQueue: UploadQueue
         task.expirationHandler = {
             Log.backgroundTaskScheduling("Task \(identifier) EXPIRED", level: .error)
             uploadQueue.suspendAllOperations()
@@ -86,7 +87,6 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         Log.backgroundTaskScheduling("handleBackgroundRefresh")
         // User installed the app but never logged in
-        @InjectService var accountManager: AccountManageable
         if accountManager.accounts.isEmpty {
             completion(false)
             return
