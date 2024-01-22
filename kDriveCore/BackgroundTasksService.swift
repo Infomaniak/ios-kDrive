@@ -50,23 +50,13 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         // Sonar Cloud happy
     }
 
-    func registerBackgroundTasks() {
+    public func registerBackgroundTasks() {
         Log.backgroundTaskScheduling("registerBackgroundTasks")
         registerBackgroundTask(identifier: Constants.backgroundRefreshIdentifier)
         registerBackgroundTask(identifier: Constants.longBackgroundRefreshIdentifier)
     }
 
-    func registerBackgroundTask(identifier: String) {
-        let registered = scheduler.register(
-            forTaskWithIdentifier: Constants.backgroundRefreshIdentifier,
-            using: nil
-        ) { task in
-            buildBackgroundTask(task, identifier: Constants.backgroundRefreshIdentifier, scheduler: scheduler)
-        }
-        Log.backgroundTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
-    }
-
-    func buildBackgroundTask(_ task: BGTask, identifier: String, scheduler: BGTaskScheduler) {
+    public func buildBackgroundTask(_ task: BGTask, identifier: String, scheduler: BGTaskScheduler) {
         scheduleBackgroundRefresh()
 
         handleBackgroundRefresh { _ in
@@ -81,6 +71,16 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
             uploadQueue.rescheduleRunningOperations()
             task.setTaskCompleted(success: false)
         }
+    }
+
+    func registerBackgroundTask(identifier: String) {
+        let registered = scheduler.register(
+            forTaskWithIdentifier: Constants.backgroundRefreshIdentifier,
+            using: nil
+        ) { task in
+            buildBackgroundTask(task, identifier: Constants.backgroundRefreshIdentifier, scheduler: scheduler)
+        }
+        Log.backgroundTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
@@ -109,7 +109,6 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
     }
 
-    /// schedule background tasks
     func scheduleBackgroundRefresh() {
         Log.backgroundTaskScheduling("scheduleBackgroundRefresh")
         // List pictures + upload files (+pictures) / photoKit
