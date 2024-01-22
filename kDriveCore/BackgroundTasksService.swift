@@ -56,7 +56,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         registerBackgroundTask(identifier: Constants.longBackgroundRefreshIdentifier)
     }
 
-    public func buildBackgroundTask(_ task: BGTask, identifier: String, scheduler: BGTaskScheduler) {
+    public func buildBackgroundTask(_ task: BGTask, identifier: String) {
         scheduleBackgroundRefresh()
 
         handleBackgroundRefresh { _ in
@@ -75,12 +75,12 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
 
     func registerBackgroundTask(identifier: String) {
         let registered = scheduler.register(
-            forTaskWithIdentifier: Constants.backgroundRefreshIdentifier,
+            forTaskWithIdentifier: identifier,
             using: nil
         ) { task in
-            buildBackgroundTask(task, identifier: Constants.backgroundRefreshIdentifier, scheduler: scheduler)
+            buildBackgroundTask(task, identifier: identifier)
         }
-        Log.backgroundTaskScheduling("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
+        Log.backgroundTaskScheduling("Task \(identifier) registered ? \(registered)")
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
