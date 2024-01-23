@@ -47,6 +47,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     @LazyInjectService private var scheduler: BGTaskScheduler
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var uploadQueue: UploadQueue
+    @LazyInjectService private var photoUploader: PhotoLibraryUploader
 
     public init() {
         // META: keep SonarCloud happy
@@ -93,11 +94,9 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("Enqueue new pictures")
-        @InjectService var photoUploader: PhotoLibraryUploader
         photoUploader.scheduleNewPicturesForUpload()
 
         Log.backgroundTaskScheduling("Clean errors for all uploads")
-        @InjectService var uploadQueue: UploadQueue
         uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
 
         Log.backgroundTaskScheduling("Reload operations in queue")
