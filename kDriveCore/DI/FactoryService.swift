@@ -133,6 +133,9 @@ public enum FactoryService {
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
+            },
+            Factory(type: BackgroundTasksServiceable.self) { _, _ in
+                BackgroundTasksService()
             }
         ]
         return services
