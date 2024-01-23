@@ -122,41 +122,6 @@
             </objects>
             <point key="canvasLocation" x="-436" y="921"/>
         </scene>
-        <!--Shared Drives View Controller-->
-        <scene sceneID="KtL-Ub-qLh">
-            <objects>
-                <viewController storyboardIdentifier="SharedDrivesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="FVV-mz-rrp" customClass="SharedDrivesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Wnk-0e-vBU">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qcp-PP-32U">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
-                                <connections>
-                                    <outlet property="dataSource" destination="FVV-mz-rrp" id="e2A-gt-DkB"/>
-                                    <outlet property="delegate" destination="FVV-mz-rrp" id="sN6-NZ-62V"/>
-                                </connections>
-                            </tableView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="zFy-xq-P44"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="qcp-PP-32U" secondAttribute="trailing" id="XiD-zL-qwC"/>
-                            <constraint firstItem="qcp-PP-32U" firstAttribute="leading" secondItem="Wnk-0e-vBU" secondAttribute="leading" id="XnA-IG-7Ev"/>
-                            <constraint firstAttribute="bottom" secondItem="qcp-PP-32U" secondAttribute="bottom" id="c7t-Yx-HnV"/>
-                            <constraint firstItem="qcp-PP-32U" firstAttribute="top" secondItem="Wnk-0e-vBU" secondAttribute="top" id="f8U-UV-a4s"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Lhp-9h-vfB"/>
-                    <connections>
-                        <outlet property="tableView" destination="qcp-PP-32U" id="HLr-hT-sg8"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="F21-Zq-gVZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="516" y="921"/>
-        </scene>
         <!--Photo List View Controller-->
         <scene sceneID="o5v-5A-Uxe">
             <objects>
