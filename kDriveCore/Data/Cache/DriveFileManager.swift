@@ -250,7 +250,7 @@ public final class DriveFileManager {
             }
             return freeze ? root.freeze() : root
         } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name)
+            return File(id: DriveFileManager.constants.rootID, name: drive.name, driveId: drive.id)
         }
     }
 
@@ -1565,6 +1565,10 @@ public final class DriveFileManager {
         if let cachedFile = getCachedFile(id: file.id, freeze: false, using: realm) {
             return cachedFile
         } else {
+            if file.isRoot {
+                file.driveId = drive.id
+                file.uid = File.uid(driveId: file.driveId, fileId: file.id)
+            }
             keepCacheAttributesForFile(newFile: file, keepProperties: [.all], using: realm)
             try? realm.write {
                 realm.add(file, update: .all)
