@@ -25,6 +25,23 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+public enum DriveFileManagerContext {
+    case drive
+    case fileProvider
+    case sharedWithMe
+
+    func realmURL(using drive: Drive) -> URL {
+        switch self {
+        case .drive:
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        case .sharedWithMe:
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
+        case .fileProvider:
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
+        }
+    }
+}
+
 public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
@@ -265,10 +282,10 @@ public final class DriveFileManager {
     /// Path of the main Realm DB
     var realmURL: URL
 
-    init(drive: Drive, apiFetcher: DriveApiFetcher) {
+    init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        realmURL = context.realmURL(using: drive)
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
@@ -376,6 +393,10 @@ public final class DriveFileManager {
         Task {
             try await initRoot()
         }
+    }
+
+    public func sharedWithMeInstance() -> DriveFileManager {
+        return DriveFileManager(drive: drive, apiFetcher: apiFetcher, context: .sharedWithMe)
     }
 
     private func compactRealmsIfNeeded() {
@@ -604,6 +625,24 @@ public final class DriveFileManager {
         try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(
+                                drive: drive,
+                                cursor: cursor,
+                                sortType: sortType
+                            )
+                            return mySharedFiles
+                        },
+                        cursor: cursor,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
+    }
+
+    public func sharedWithMeFiles(cursor: String? = nil,
+                                  sortType: SortType = .nameAZ,
+                                  forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
+        try await files(in: getManagedFile(from: DriveFileManager.sharedWithMeRootFile).proxify(),
+                        fetchFiles: {
+                            let mySharedFiles = try await apiFetcher.sharedWithMeFiles(
                                 drive: drive,
                                 cursor: cursor,
                                 sortType: sortType
