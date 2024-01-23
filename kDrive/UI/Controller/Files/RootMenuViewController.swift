@@ -230,6 +230,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)
         case DriveFileManager.trashRootFile.id:
             destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.mySharedRootFile.id:
+            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager)
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
