@@ -458,11 +458,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+        // App Restore disabled until we rework it
+        return false
 
-        return AppDelegate
-            .currentStateVersion == encodedVersion &&
-            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+        /*
+         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+
+         return AppDelegate
+             .currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)*/
     }
 
     // MARK: - User activity
