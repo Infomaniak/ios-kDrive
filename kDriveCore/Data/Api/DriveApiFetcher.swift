@@ -485,6 +485,25 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 return
             }
 
+            if let storedToken = self.accountManager.getTokenForUserId(credential.userId) {
+                // Someone else refreshed our token and we already have an infinite token
+                if storedToken.expirationDate == nil && credential.expirationDate != nil {
+                    let message = "Refreshing token - Success with local (infinite)"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
+                // Someone else refreshed our token and we don't have an infinite token
+                if let storedTokenExpirationDate = storedToken.expirationDate,
+                   let tokenExpirationDate = credential.expirationDate,
+                   tokenExpirationDate > storedTokenExpirationDate {
+                    let message = "Refreshing token - Success with local"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
+            }
+
             let group = DispatchGroup()
             group.enter()
             var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
