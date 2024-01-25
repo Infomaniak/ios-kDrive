@@ -26,6 +26,8 @@ import RealmSwift
 import XCTest
 
 final class ITAppLaunchTest: XCTestCase {
+    let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
+
     let fakeAccount = Account(apiToken: ApiToken(
         accessToken: "",
         expiresIn: 0,
@@ -42,7 +44,7 @@ final class ITAppLaunchTest: XCTestCase {
         SimpleResolver.register(FactoryService.debugServices)
         let services = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
-                return InfomaniakNetworkLogin(clientId: "", redirectUri: "")
+                return InfomaniakNetworkLogin(config: self.loginConfig)
             },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
@@ -66,7 +68,7 @@ final class ITAppLaunchTest: XCTestCase {
                                      resolver: resolver)
             },
             Factory(type: InfomaniakLoginable.self) { _, _ in
-                InfomaniakLogin(clientId: DriveApiFetcher.clientId)
+                InfomaniakLogin(config: self.loginConfig)
             },
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()

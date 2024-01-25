@@ -111,19 +111,32 @@ public enum KeychainHelper {
 
         if let savedToken = getSavedToken(for: token.userId) {
             keychainQueue.sync {
-                // Save token only if it's more recent
-                if savedToken.expirationDate <= token.expirationDate {
-                    let queryUpdate: [String: Any] = [
-                        kSecClass as String: kSecClassGenericPassword,
-                        kSecAttrAccount as String: "\(token.userId)"
-                    ]
+                let queryUpdate: [String: Any] = [
+                    kSecClass as String: kSecClassGenericPassword,
+                    kSecAttrAccount as String: "\(token.userId)"
+                ]
 
-                    let attributes: [String: Any] = [
-                        kSecValueData as String: tokenData
-                    ]
+                let attributes: [String: Any] = [
+                    kSecValueData as String: tokenData
+                ]
+
+                // Save token only if it's more recent
+                if let savedTokenExpirationDate = savedToken.expirationDate,
+                   let newTokenExpirationDate = token.expirationDate,
+                   savedTokenExpirationDate <= newTokenExpirationDate {
                     resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
                     DDLogInfo("Successfully updated token ? \(resultCode == noErr)")
-
+                    let metadata = token.breadcrumbMetadata(keychainError: resultCode)
+                    SentryDebug.addBreadcrumb(
+                        message: "Successfully updated token",
+                        category: .apiToken,
+                        level: .info,
+                        metadata: metadata
+                    )
+                } else if savedToken.expirationDate == nil || token.expirationDate == nil {
+                    // Or if one of them is now an infinite refresh token
+                    resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
+                    DDLogInfo("Successfully updated unlimited token ? \(resultCode == noErr)")
                     let metadata = token.breadcrumbMetadata(keychainError: resultCode)
                     SentryDebug.addBreadcrumb(
                         message: "Successfully updated token",
