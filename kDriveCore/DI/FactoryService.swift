@@ -29,12 +29,13 @@ public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 private let appGroupName = "group.com.infomaniak.drive"
 private let realmRootPath = "drives"
+private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
 /// Something that setups the service factories
-enum FactoryService {
-    static func setupDependencyInjection() {
+public enum FactoryService {
+    public static func setupDependencyInjection(other: [Factory] = []) {
         SimpleResolver.register(debugServices)
-        let factories = networkingServices + miscServices
+        let factories = networkingServices + miscServices + other
         SimpleResolver.register(factories)
     }
 
@@ -42,9 +43,7 @@ enum FactoryService {
     private static var networkingServices: [Factory] {
         let services = [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
-                let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
-                let redirectUri = "com.infomaniak.drive://oauth2redirect"
-                return InfomaniakNetworkLogin(clientId: clientId, redirectUri: redirectUri)
+                return InfomaniakNetworkLogin(config: loginConfig)
             },
             Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
                 try resolver.resolve(type: InfomaniakNetworkLogin.self,
@@ -53,7 +52,7 @@ enum FactoryService {
                                      resolver: resolver)
             },
             Factory(type: InfomaniakLoginable.self) { _, _ in
-                InfomaniakLogin(clientId: DriveApiFetcher.clientId)
+                InfomaniakLogin(config: loginConfig)
             },
             Factory(type: InfomaniakTokenable.self) { _, resolver in
                 try resolver.resolve(type: InfomaniakLoginable.self,
@@ -133,6 +132,9 @@ enum FactoryService {
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
+            },
+            Factory(type: BackgroundTasksServiceable.self) { _, _ in
+                BackgroundTasksService()
             }
         ]
         return services
@@ -172,14 +174,5 @@ public extension SimpleResolver {
 
     static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
         factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
-    }
-}
-
-/// Something that loads the DI on init
-public struct EarlyDIHook {
-    public init() {
-        // setup DI ASAP
-        os_log("EarlyDIHook")
-        FactoryService.setupDependencyInjection()
     }
 }

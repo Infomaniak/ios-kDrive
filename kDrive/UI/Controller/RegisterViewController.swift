@@ -123,7 +123,7 @@ extension RegisterViewController: WKNavigationDelegate {
     ) {
         guard let host = navigationAction.request.url?.host,
               let kDriveHost = URLConstants.kDriveWeb.url.host,
-              let loginHost = URL(string: InfomaniakCore.Constants.LOGIN_URL)?.host else {
+              let loginHost = infomaniakLogin.config.loginURL.host else {
             decisionHandler(.allow)
             return
         }

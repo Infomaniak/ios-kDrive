@@ -52,8 +52,6 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 }
 
 public class DriveApiFetcher: ApiFetcher {
-    public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
-
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 
@@ -514,15 +512,23 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 return
             }
 
-            // Maybe someone else refreshed our token
-            self.accountManager.reloadTokensAndAccounts()
-            if let token = self.accountManager.getTokenForUserId(credential.userId),
-               token.expirationDate > credential.expirationDate {
-                let message = "Refreshing token - Success with local"
-                SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
-
-                completion(.success(token))
-                return
+            if let storedToken = self.accountManager.getTokenForUserId(credential.userId) {
+                // Someone else refreshed our token and we already have an infinite token
+                if storedToken.expirationDate == nil && credential.expirationDate != nil {
+                    let message = "Refreshing token - Success with local (infinite)"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
+                // Someone else refreshed our token and we don't have an infinite token
+                if let storedTokenExpirationDate = storedToken.expirationDate,
+                   let tokenExpirationDate = credential.expirationDate,
+                   tokenExpirationDate > storedTokenExpirationDate {
+                    let message = "Refreshing token - Success with local"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
             }
 
             let group = DispatchGroup()

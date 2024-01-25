@@ -27,6 +27,7 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import os.log
 import StoreKit
 import UIKit
 import UserNotifications
@@ -48,9 +49,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
 
     // MARK: - UIApplicationDelegate
 
@@ -70,7 +71,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             SentryDebug.capture(error: error)
         }
 
-        registerBackgroundTasks()
+        backgroundTasksService.registerBackgroundTasks()
 
         // In some cases the application can show the old Nextcloud import notification badge
         UIApplication.shared.applicationIconBadgeNumber = 0
@@ -166,8 +167,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         Log.appDelegate("applicationDidEnterBackground")
+        backgroundTasksService.scheduleBackgroundRefresh()
 
-        scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             lockHelper.setTime()
@@ -182,44 +183,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         shortcutItemToProcess = shortcutItem
     }
 
-    func application(_ application: UIApplication,
-                     performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        Log.appDelegate("application performFetchWithCompletionHandler")
-
-        handleBackgroundRefresh { newData in
-            if newData {
-                completionHandler(.newData)
-            } else {
-                completionHandler(.noData)
-            }
-        }
-    }
-
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         Log.appDelegate("application app open url\(url)")
 
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let params = components.queryItems else {
-            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
-        }
-
-        if components.path == "store",
-           let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController,
-               let userId = Int(userId), let driveId = Int(driveId),
-               let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
-                // Get presented view controller
-                while let presentedViewController = viewController.presentedViewController {
-                    viewController = presentedViewController
-                }
-                // Show store
-                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
-            }
-            return true
-        }
-        return false
+        return DeeplinkParser().parse(url: url)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -491,11 +458,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+        // App Restore disabled until we rework it
+        return false
 
-        return AppDelegate
-            .currentStateVersion == encodedVersion &&
-            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+        /*
+         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+
+         return AppDelegate
+             .currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)*/
     }
 
     // MARK: - User activity
