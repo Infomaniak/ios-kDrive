@@ -131,13 +131,16 @@ public class TeamFileAccess: FileAccessElement {
     }
 
     public var shareable: Shareable? {
-        return DriveInfosManager.instance.getTeam(id: id)
+        let driveInfoManager = DriveInfosManager.instance
+        let realm = driveInfoManager.getRealm()
+        return driveInfoManager.getFrozenTeam(id: id, using: realm)
     }
 
     public var icon: UIImage {
         get async {
             // Improve this
-            DriveInfosManager.instance.getTeam(id: id)?.icon ?? UIImage()
+            let driveInfoManager = DriveInfosManager.instance
+            return await driveInfoManager.getFrozenTeam(id: id)?.icon ?? UIImage()
         }
     }
 }

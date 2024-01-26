@@ -51,8 +51,10 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     private func setDriveFileManager() -> DriveFileManager? {
+        let driveInfosManager = DriveInfosManager.instance
+        let realm = driveInfosManager.getRealm()
         if let objectId = domain?.identifier.rawValue,
-           let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
+           let drive = driveInfosManager.getFrozenDrive(objectId: objectId, using: realm),
            let driveFileManager = accountManager.getDriveFileManager(for: drive) {
             return driveFileManager
         } else {

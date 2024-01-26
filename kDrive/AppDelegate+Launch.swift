@@ -134,8 +134,10 @@ extension AppDelegate {
         for driveFolder in driveFolders {
             // Read drive folder
             let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
+            let driveInfosManager = DriveInfosManager.instance
+            let realm = driveInfosManager.getRealm()
             guard let driveId = Int(driveFolder),
-                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
+                  let drive = driveInfosManager.getFrozenDrive(id: driveId, userId: accountManager.currentUserId, using: realm),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
                 Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue

@@ -74,7 +74,7 @@ public protocol AccountManageable: AnyObject {
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
+    func getDrive(id: Int, userId: Int) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
     func didFailRefreshToken(_ token: ApiToken)
@@ -94,6 +94,12 @@ public protocol AccountManageable: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    public func getDrive(id: Int, userId: Int) -> Drive? {
+        let driveInfosManager = DriveInfosManager.instance
+        let realm = driveInfosManager.getRealm()
+        return driveInfosManager.getFrozenDrive(id: id, userId: userId, using: realm)
+    }
+
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -160,7 +166,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let account = account(for: currentUserId) ?? accounts.first {
             setCurrentAccount(account: account)
 
-            if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
+            let driveInfosManager = DriveInfosManager.instance
+            let realm = driveInfosManager.getRealm()
+            if let currentDrive = driveInfosManager
+                .getFrozenDrive(id: currentDriveId, userId: currentUserId, using: realm) ?? drives
+                .first {
                 setCurrentDriveForCurrentAccount(drive: currentDrive)
             }
         }
@@ -198,11 +208,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
+        let driveInfosManager = DriveInfosManager.instance
+        let realm = driveInfosManager.getRealm()
 
         if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
         } else if let token = getTokenForUserId(userId),
-                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
+                  let drive = driveInfosManager.getFrozenDrive(id: driveId, userId: userId, using: realm) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
             driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
             return driveFileManagers[objectId]
@@ -246,10 +258,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             apiFetchers[userId] = apiFetcher
             return apiFetcher
         }
-    }
-
-    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm? = nil) -> Drive? {
-        return DriveInfosManager.instance.getDrive(id: driveId, userId: accountId, using: realm)
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {

@@ -26,7 +26,7 @@ protocol SearchUserDelegate: AnyObject {
     func didSelect(email: String)
 }
 
-class InviteUserTableViewCell: InsetTableViewCell {
+final class InviteUserTableViewCell: InsetTableViewCell {
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var dropDownAnchorView: UIView!
 
@@ -48,11 +48,14 @@ class InviteUserTableViewCell: InsetTableViewCell {
     var drive: Drive! {
         didSet {
             guard drive != nil else { return }
-            let realm = DriveInfosManager.instance.getRealm()
-            let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId, using: realm)
+            let driveInfosManager = DriveInfosManager.instance
+            let realm = driveInfosManager.getRealm()
+            let users = driveInfosManager.getFrozenUsers(for: drive.id, userId: drive.userId, using: realm)
             shareables = users.sorted { $0.displayName < $1.displayName }
             if canUseTeam {
-                let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
+                let teams = driveInfosManager.getFrozenTeams(for: drive.id,
+                                                             userId: drive.userId,
+                                                             using: realm)
                 shareables = teams.sorted() + shareables
             }
             results = shareables.filter { shareable in

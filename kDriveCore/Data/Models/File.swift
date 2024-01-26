@@ -455,7 +455,9 @@ public final class File: Object, Codable {
 
     public var creator: DriveUser? {
         if let createdBy {
-            return DriveInfosManager.instance.getUser(id: createdBy)
+            let driveInfosManager = DriveInfosManager.instance
+            let realm = driveInfosManager.getRealm()
+            return driveInfosManager.getFrozenUser(id: createdBy, using: realm)
         }
         return nil
     }

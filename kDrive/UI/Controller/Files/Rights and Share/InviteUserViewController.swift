@@ -220,9 +220,12 @@ class InviteUserViewController: UIViewController {
         }
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
-        let realm = DriveInfosManager.instance.getRealm()
-        shareables = restoredUserIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
-            + restoredTeamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
+        let driveInfosManager = DriveInfosManager.instance
+        let realm = driveInfosManager.getRealm()
+        shareables = restoredUserIds.compactMap { userId in
+            driveInfosManager.getFrozenUser(id: userId, using: realm)
+        }
+            + restoredTeamIds.compactMap { DriveInfosManager.instance.getFrozenTeam(id: $0, using: realm) }
         // Update UI
         setTitle()
         reloadInvited()

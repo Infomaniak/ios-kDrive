@@ -69,15 +69,18 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             notAcceptedView.isHidden = false
             externalUserView.isHidden = true
         } else if let team = element as? TeamFileAccess {
-            titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
-            if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id),
-               let usersCount = savedTeam.usersCount {
-                detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(usersCount)
-            } else {
-                detailLabel.text = nil
+            Task { @MainActor in
+                titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
+
+                if let savedTeam = await DriveInfosManager.instance.getFrozenTeam(id: team.id),
+                   let usersCount = savedTeam.usersCount {
+                    detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(usersCount)
+                } else {
+                    detailLabel.text = nil
+                }
+                notAcceptedView.isHidden = true
+                externalUserView.isHidden = true
             }
-            notAcceptedView.isHidden = true
-            externalUserView.isHidden = true
         }
     }
 }

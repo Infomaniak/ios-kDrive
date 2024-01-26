@@ -104,7 +104,7 @@ public final class DownloadQueue {
                            userId: Int,
                            itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         dispatchQueue.async { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+            guard let drive = self.accountManager.getDrive(id: driveId, userId: userId),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
@@ -133,7 +133,7 @@ public final class DownloadQueue {
 
     public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
         dispatchQueue.async {
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+            guard let drive = self.accountManager.getDrive(id: driveId, userId: userId),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
                 return
             }
@@ -166,7 +166,7 @@ public final class DownloadQueue {
             fileId = file.id,
             isManagedByRealm = file.isManagedByRealm
         ] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
+            guard let drive = self.accountManager.getDrive(id: driveId, userId: userId),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {

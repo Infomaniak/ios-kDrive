@@ -24,7 +24,8 @@ import Realm
 import RealmSwift
 import Sentry
 
-public class DriveInfosManager {
+public final class DriveInfosManager: RealmAccessible {
+    // TODO: Use DI
     public static let instance = DriveInfosManager()
     private static let currentDbVersion: UInt64 = 9
     private let currentFpStorageVersion = 1
@@ -98,17 +99,6 @@ public class DriveInfosManager {
                 CategoryRights.self
             ]
         )
-    }
-
-    public func getRealm() -> Realm {
-        do {
-            let realm = try Realm(configuration: realmConfiguration)
-            realm.refresh()
-            return realm
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
     }
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
@@ -280,53 +270,102 @@ public class DriveInfosManager {
         return Array(realmDriveList.map { $0.freeze() })
     }
 
-    public func getDrive(id: Int, userId: Int, using realm: Realm? = nil) -> Drive? {
-        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
+    public func getFrozenDrive(id: Int, userId: Int) async -> Drive? {
+        var drive: Drive?
+        await realmTransaction.execute { realm in
+            drive = self.getFrozenDrive(id: id, userId: userId, using: realm)
+        }
+        return drive
     }
 
-    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-        guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
+    public func getFrozenDrive(id: Int, userId: Int, using realm: Realm) -> Drive? {
+        let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
+        return getFrozenDrive(objectId: objectId, using: realm)
+    }
+
+    public func getFrozenDrive(objectId: String) async -> Drive? {
+        var drive: Drive?
+        await realmTransaction.execute { realm in
+            drive = self.getFrozenDrive(objectId: objectId, using: realm)
+        }
+        return drive
+    }
+
+    public func getFrozenDrive(objectId: String, using realm: Realm) -> Drive? {
+        getLiveDrive(objectId: objectId, using: realm)?.freeze()
+    }
+
+    public func getLiveDrive(objectId: String, using realm: Realm) -> Drive? {
+        guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId),
+              !drive.isInvalidated else {
             return nil
         }
-        return freeze ? drive.freeze() : drive
+        return drive
     }
 
-    public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-        let drive = getDrive(id: driveId, userId: userId, using: realm)
-        let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive {
-            return realmUserList.filter { drive.users.drive.contains($0.id) }
+    public func getFrozenUsers(for driveId: Int, userId: Int) async -> [DriveUser] {
+        var driveUsers = [DriveUser]()
+        await realmTransaction.execute { realm in
+            driveUsers = self.getFrozenUsers(for: driveId, userId: userId, using: realm)
         }
-        return []
+        return driveUsers
     }
 
-    public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-        guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id), !user.isInvalidated else {
+    // TODO: This is now frozen, check that is works
+    public func getFrozenUsers(for driveId: Int, userId: Int, using realm: Realm) -> [DriveUser] {
+        guard let drive = getFrozenDrive(id: driveId, userId: userId, using: realm) else {
+            return []
+        }
+
+        let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
+        let users = realmUserList.filter { drive.users.drive.contains($0.id) }
+        return users.map { $0.freeze() }
+    }
+
+    public func getFrozenUser(id: Int, using realm: Realm) async -> DriveUser? {
+        var driveUser: DriveUser?
+        await realmTransaction.execute { realm in
+            driveUser = self.getFrozenUser(id: id, using: realm)
+        }
+        return driveUser
+    }
+
+    public func getFrozenUser(id: Int, using realm: Realm) -> DriveUser? {
+        guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id),
+              !user.isInvalidated else {
             return nil
         }
         return user.freeze()
     }
 
-    public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-        let drive = getDrive(id: driveId, userId: userId, using: realm)
-        let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive {
-            return realmTeamList.filter { drive.teams.account.contains($0.id) }
+    public func getFrozenTeams(for driveId: Int, userId: Int) async -> [Team] {
+        var teams = [Team]()
+        await realmTransaction.execute { realm in
+            teams = self.getFrozenTeams(for: driveId, userId: userId, using: realm)
         }
-        return []
+        return teams
     }
 
-    public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
-        let realm = realm ?? getRealm()
-        realm.refresh()
+    // TODO: This is now frozen, check that is works
+    public func getFrozenTeams(for driveId: Int, userId: Int, using realm: Realm) -> [Team] {
+        guard let drive = getFrozenDrive(id: driveId, userId: userId, using: realm) else {
+            return []
+        }
+
+        let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
+        let filteredTeams = realmTeamList.filter { drive.teams.account.contains($0.id) }
+        return filteredTeams.map { $0.freeze() }
+    }
+
+    public func getFrozenTeam(id: Int) async -> Team? {
+        var team: Team?
+        await realmTransaction.execute { realm in
+            team = self.getFrozenTeam(id: id, using: realm)
+        }
+        return team
+    }
+
+    public func getFrozenTeam(id: Int, using realm: Realm) -> Team? {
         guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
             return nil
         }

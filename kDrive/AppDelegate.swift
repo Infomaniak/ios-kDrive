@@ -296,8 +296,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 rootViewController?.didUpdateCurrentAccountInformations(account)
 
+                let driveInfosManager = DriveInfosManager.instance
                 if let oldDriveId,
-                   let newDrive = DriveInfosManager.instance.getDrive(objectId: oldDriveId),
+                   let newDrive = await driveInfosManager.getFrozenDrive(objectId: oldDriveId),
                    !newDrive.inMaintenance {
                     // The current drive is still usable, do not switch
                     scanLibraryAndRestartUpload()

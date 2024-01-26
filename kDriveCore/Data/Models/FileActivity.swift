@@ -114,7 +114,9 @@ public class FileActivity: Object, Decodable {
 
     public var user: DriveUser? {
         if let id = userId {
-            return DriveInfosManager.instance.getUser(id: id)
+            let driveInfosManager = DriveInfosManager.instance
+            let realm = driveInfosManager.getRealm()
+            return driveInfosManager.getFrozenUser(id: id, using: realm)
         } else {
             return nil
         }
