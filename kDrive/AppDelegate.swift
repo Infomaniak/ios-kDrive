@@ -145,6 +145,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         uploadQueue.suspendAllOperations()
         uploadQueue.rescheduleRunningOperations()
 
+        // TODO: use BackgroundExecutor instead
         // Await on upload queue to terminate gracefully, if time allows for it.
         let group = TolerantDispatchGroup()
         uploadQueue.waitForCompletion {

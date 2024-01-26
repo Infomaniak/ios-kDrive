@@ -25,7 +25,7 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
-public final class DriveFileManager {
+public final class DriveFileManager: RealmAccessible {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
@@ -366,15 +366,19 @@ public final class DriveFileManager {
          } */
 
         // Init root file
-        let realm = getRealm()
-        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
-            let rootFile = getCachedRootFile(using: realm)
-            try? realm.safeWrite {
-                realm.add(rootFile)
-            }
-        }
         Task {
-            try await initRoot()
+            await self.realmTransaction.execute { realm in
+                if self.getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
+                    let rootFile = self.getCachedRootFile(using: realm)
+                    try? realm.safeWrite {
+                        realm.add(rootFile)
+                    }
+                }
+
+                Task {
+                    try await self.initRoot()
+                }
+            }
         }
     }
 
@@ -420,28 +424,6 @@ public final class DriveFileManager {
             } catch {
                 DDLogError("Failed to compact realm: \(error)")
             }
-        }
-    }
-
-    public func getRealm() -> Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "file cache realm" from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try realmURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-            DDLogInfo("realmURL : \(realmURL)")
-        }
-
-        do {
-            return try Realm(configuration: realmConfiguration)
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
         }
     }
 
@@ -867,7 +849,7 @@ public final class DriveFileManager {
                                from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
         // Get all pages and assemble
         let realm = getRealm()
-        realm.refresh()
+
         let timestamp = try TimeInterval(timestamp ?? file.resolve(using: realm).responseAt)
         var page = 1
         var moreComing = true

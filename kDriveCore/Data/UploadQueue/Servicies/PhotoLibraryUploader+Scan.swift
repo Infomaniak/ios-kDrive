@@ -37,16 +37,16 @@ public extension PhotoLibraryUploader {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-            let typesPredicates = getAssetPredicates(forSettings: settings)
-            let datePredicate = getDatePredicate(with: settings)
+            let typesPredicates = self.getAssetPredicates(forSettings: settings)
+            let datePredicate = self.getDatePredicate(with: settings)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
             Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
             let assets = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-            updateLastSyncDate(syncDate, using: realm)
+            self.addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
+            self.updateLastSyncDate(syncDate, using: realm)
 
             newAssetsCount = assets.count
             Log.photoLibraryUploader("New assets count:\(newAssetsCount)")

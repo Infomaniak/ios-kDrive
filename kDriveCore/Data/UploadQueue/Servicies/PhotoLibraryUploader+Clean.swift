@@ -40,7 +40,7 @@ public extension PhotoLibraryUploader {
         var toRemoveFileIDs = [String]()
         var toRemoveAssets = PHFetchResult<PHAsset>()
         BackgroundRealm.uploads.execute { realm in
-            toRemoveFileIDs = uploadQueue
+            toRemoveFileIDs = self.uploadQueue
                 .getUploadedFiles(using: realm)
                 .filter("rawType = %@", UploadFileType.phAsset.rawValue)
                 .map(\.id)

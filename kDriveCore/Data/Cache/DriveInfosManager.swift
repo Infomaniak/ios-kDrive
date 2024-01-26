@@ -264,6 +264,7 @@ public class DriveInfosManager {
 
     public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm? = nil) -> [Drive] {
         let realm = realm ?? getRealm()
+        realm.refresh()
         var realmDriveList = realm.objects(Drive.self)
             .sorted(byKeyPath: "name", ascending: true)
             .sorted(byKeyPath: "sharedWithMe", ascending: true)
@@ -285,6 +286,7 @@ public class DriveInfosManager {
 
     public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
         let realm = realm ?? getRealm()
+        realm.refresh()
         guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
             return nil
         }
@@ -293,6 +295,7 @@ public class DriveInfosManager {
 
     public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
         let realm = realm ?? getRealm()
+        realm.refresh()
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
         if let drive {
@@ -303,6 +306,7 @@ public class DriveInfosManager {
 
     public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
         let realm = realm ?? getRealm()
+        realm.refresh()
         guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id), !user.isInvalidated else {
             return nil
         }
@@ -311,6 +315,7 @@ public class DriveInfosManager {
 
     public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
         let realm = realm ?? getRealm()
+        realm.refresh()
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
         if let drive {
@@ -321,6 +326,7 @@ public class DriveInfosManager {
 
     public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
         let realm = realm ?? getRealm()
+        realm.refresh()
         guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
             return nil
         }

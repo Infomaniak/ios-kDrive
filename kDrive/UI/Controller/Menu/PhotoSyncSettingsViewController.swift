@@ -217,32 +217,33 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     func saveSettings() {
         BackgroundRealm.uploads.execute { _ in
-            if photoSyncEnabled {
-                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
+            if self.photoSyncEnabled {
+                guard self.newSyncSettings.userId != -1 && self.newSyncSettings.driveId != -1 && self.newSyncSettings
+                    .parentDirectoryId != -1
                 else { return }
-                switch newSyncSettings.syncMode {
+                switch self.newSyncSettings.syncMode {
                 case .new:
-                    newSyncSettings.lastSync = Date()
+                    self.newSyncSettings.lastSync = Date()
                 case .all:
-                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    if let currentSyncSettings = self.photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
+                        self.newSyncSettings.lastSync = currentSyncSettings.lastSync
                     } else {
-                        newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                        self.newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
                     }
                 case .fromDate:
-                    if let currentSyncSettings = photoLibraryUploader.settings,
+                    if let currentSyncSettings = self.photoLibraryUploader.settings,
                        currentSyncSettings
                        .syncMode == .all ||
                        (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                           .compare(newSyncSettings.fromDate) == .orderedAscending) {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
+                           .compare(self.newSyncSettings.fromDate) == .orderedAscending) {
+                        self.newSyncSettings.lastSync = currentSyncSettings.lastSync
                     } else {
-                        newSyncSettings.lastSync = newSyncSettings.fromDate
+                        self.newSyncSettings.lastSync = self.newSyncSettings.fromDate
                     }
                 }
-                photoLibraryUploader.enableSync(with: newSyncSettings)
+                self.photoLibraryUploader.enableSync(with: self.newSyncSettings)
             } else {
-                photoLibraryUploader.disableSync()
+                self.photoLibraryUploader.disableSync()
             }
         }
     }
