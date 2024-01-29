@@ -159,7 +159,7 @@ public final class DriveFileManager {
             }
 
             // Migration for APIV3
-            if oldSchemaVersion < 18 {
+            if oldSchemaVersion < 19 {
                 migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
                     guard let newObject else {
                         return
