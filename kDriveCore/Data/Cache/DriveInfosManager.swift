@@ -25,8 +25,6 @@ import RealmSwift
 import Sentry
 
 public final class DriveInfosManager: RealmAccessible {
-    // TODO: Use DI
-    public static let instance = DriveInfosManager()
     private static let currentDbVersion: UInt64 = 9
     private let currentFpStorageVersion = 1
     public let realmConfiguration: Realm.Configuration
@@ -42,7 +40,7 @@ public final class DriveInfosManager: RealmAccessible {
         }
     }
 
-    private init() {
+    init() {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,

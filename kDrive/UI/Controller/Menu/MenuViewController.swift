@@ -25,6 +25,7 @@ import UIKit
 
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     private let driveFileManager: DriveFileManager
     var uploadCountManager: UploadCountManager?
@@ -189,7 +190,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         // Hide shared with me action if no shared with me drive
         guard let sectionIndex = sections.firstIndex(of: .more) else { return }
         let sharedWithMeInList = sections[sectionIndex].actions.contains(.sharedWithMe)
-        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: true).isEmpty
+        let hasSharedWithMe = !driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
             sections[sectionIndex].actions.removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {

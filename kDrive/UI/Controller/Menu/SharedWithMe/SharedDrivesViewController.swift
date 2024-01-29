@@ -25,7 +25,8 @@ import UIKit
 class SharedDrivesViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     var drives: [Drive?] = []
 
@@ -36,7 +37,7 @@ class SharedDrivesViewController: UIViewController {
 
         navigationItem.hideBackButtonText()
 
-        drives = DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: true)
+        drives = driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: true)
         showEmptyView()
     }
 

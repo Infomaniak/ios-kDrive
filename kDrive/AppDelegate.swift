@@ -52,6 +52,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     // MARK: - UIApplicationDelegate
 
@@ -296,7 +297,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 rootViewController?.didUpdateCurrentAccountInformations(account)
 
-                let driveInfosManager = DriveInfosManager.instance
                 if let oldDriveId,
                    let newDrive = await driveInfosManager.getFrozenDrive(objectId: oldDriveId),
                    !newDrive.inMaintenance {
@@ -350,7 +350,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             return
         }
 
-        for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
+        for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
             }

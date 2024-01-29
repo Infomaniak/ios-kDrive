@@ -34,8 +34,9 @@ public protocol DownloadOperationable: Operationable {
 public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     private let fileManager = FileManager.default
     private let driveFileManager: DriveFileManager
@@ -197,7 +198,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
                 DownloadQueue.instance.publishProgress(newValue, for: fileId)
             }
             if let itemIdentifier {
-                DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
+                driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in
                     manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
                         // META: keep SonarCloud happy
                     }

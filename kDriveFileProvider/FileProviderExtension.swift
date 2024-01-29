@@ -28,11 +28,13 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
+    @LazyInjectService private var uploadQueueObservable: UploadQueueObservable
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
 
     @LazyInjectService var uploadQueue: UploadQueueable
-    @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
     lazy var fileCoordinator: NSFileCoordinator = {
@@ -51,7 +53,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     private func setDriveFileManager() -> DriveFileManager? {
-        let driveInfosManager = DriveInfosManager.instance
         let realm = driveInfosManager.getRealm()
         if let objectId = domain?.identifier.rawValue,
            let drive = driveInfosManager.getFrozenDrive(objectId: objectId, using: realm),

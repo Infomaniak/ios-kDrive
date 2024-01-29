@@ -26,8 +26,9 @@ import UIKit
 class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
@@ -154,7 +155,7 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
         cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
-        cell.isUserInteractionEnabled = !DriveInfosManager.instance.getDrives(for: account.userId).isEmpty
+        cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: account.userId).isEmpty
 
         account.user.getAvatar { image in
             cell.logoImage.image = image

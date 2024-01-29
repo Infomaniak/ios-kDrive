@@ -94,8 +94,9 @@ public protocol AccountManageable: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     public func getDrive(id: Int, userId: Int) -> Drive? {
-        let driveInfosManager = DriveInfosManager.instance
         let realm = driveInfosManager.getRealm()
         return driveInfosManager.getFrozenDrive(id: id, userId: userId, using: realm)
     }
@@ -131,7 +132,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public var drives: [Drive] {
-        return DriveInfosManager.instance.getDrives(for: currentUserId)
+        return driveInfosManager.getDrives(for: currentUserId)
     }
 
     public var currentDriveFileManager: DriveFileManager? {
@@ -166,7 +167,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let account = account(for: currentUserId) ?? accounts.first {
             setCurrentAccount(account: account)
 
-            let driveInfosManager = DriveInfosManager.instance
             let realm = driveInfosManager.getRealm()
             if let currentDrive = driveInfosManager
                 .getFrozenDrive(id: currentDriveId, userId: currentUserId, using: realm) ?? drives
@@ -208,7 +208,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
-        let driveInfosManager = DriveInfosManager.instance
         let realm = driveInfosManager.getRealm()
 
         if let driveFileManager = driveFileManagers[objectId] {
@@ -224,7 +223,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
-        let userDrives = DriveInfosManager.instance.getDrives(for: userId)
+        let userDrives = driveInfosManager.getDrives(for: userId)
 
         guard !userDrives.isEmpty else {
             throw DriveError.NoDriveError.noDrive
@@ -307,7 +306,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         addAccount(account: newAccount)
         setCurrentAccount(account: newAccount)
 
-        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
         guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
             throw driveResponse.drives.first?.isInTechnicalMaintenance == true ? DriveError.productMaintenance : DriveError
@@ -338,7 +337,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.NoDriveError.noDrive
         }
 
-        let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        let driveRemovedList = driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
         var switchedDrive: Drive?
         for driveRemoved in driveRemovedList {
@@ -436,7 +435,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
             photoLibraryUploader.disableSync()
         }
-        DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
+        driveInfosManager.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
         accounts.removeAll { account -> Bool in
             account == toDeleteAccount

@@ -340,6 +340,8 @@ public final class FileVersion: EmbeddedObject, Codable {
 public final class File: Object, Codable {
     private let fileManager = FileManager.default
 
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     @LazyInjectService var accountManager: AccountManageable
 
     @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
@@ -455,7 +457,6 @@ public final class File: Object, Codable {
 
     public var creator: DriveUser? {
         if let createdBy {
-            let driveInfosManager = DriveInfosManager.instance
             let realm = driveInfosManager.getRealm()
             return driveInfosManager.getFrozenUser(id: createdBy, using: realm)
         }
@@ -707,7 +708,7 @@ public final class File: Object, Codable {
         } else {
             identifier = .rootContainer
         }
-        DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
+        driveInfosManager.getFileProviderManager(driveId: driveId, userId: userId) { manager in
             manager.signalEnumerator(for: .workingSet) { _ in
                 // META: keep SonarCloud happy
             }

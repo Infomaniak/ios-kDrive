@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveResources
 import UIKit
 
@@ -131,16 +132,16 @@ public class TeamFileAccess: FileAccessElement {
     }
 
     public var shareable: Shareable? {
-        let driveInfoManager = DriveInfosManager.instance
-        let realm = driveInfoManager.getRealm()
-        return driveInfoManager.getFrozenTeam(id: id, using: realm)
+        @InjectService var driveInfosManager: DriveInfosManager
+        let realm = driveInfosManager.getRealm()
+        return driveInfosManager.getFrozenTeam(id: id, using: realm)
     }
 
     public var icon: UIImage {
         get async {
             // Improve this
-            let driveInfoManager = DriveInfosManager.instance
-            return await driveInfoManager.getFrozenTeam(id: id)?.icon ?? UIImage()
+            @InjectService var driveInfosManager: DriveInfosManager
+            return await driveInfosManager.getFrozenTeam(id: id)?.icon ?? UIImage()
         }
     }
 }

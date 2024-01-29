@@ -18,6 +18,7 @@
 
 import DropDown
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import UIKit
 
@@ -27,6 +28,8 @@ protocol SearchUserDelegate: AnyObject {
 }
 
 final class InviteUserTableViewCell: InsetTableViewCell {
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var dropDownAnchorView: UIView!
 
@@ -48,7 +51,6 @@ final class InviteUserTableViewCell: InsetTableViewCell {
     var drive: Drive! {
         didSet {
             guard drive != nil else { return }
-            let driveInfosManager = DriveInfosManager.instance
             let realm = driveInfosManager.getRealm()
             let users = driveInfosManager.getFrozenUsers(for: drive.id, userId: drive.userId, using: realm)
             shareables = users.sorted { $0.displayName < $1.displayName }

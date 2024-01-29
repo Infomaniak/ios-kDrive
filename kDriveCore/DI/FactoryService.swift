@@ -35,7 +35,7 @@ private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9
 public enum FactoryService {
     public static func setupDependencyInjection(other: [Factory] = []) {
         SimpleResolver.register(debugServices)
-        let factories = networkingServices + miscServices + other
+        let factories = networkingServices + coreServices + miscServices + other
         SimpleResolver.register(factories)
     }
 
@@ -60,9 +60,6 @@ public enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
-            Factory(type: AccountManageable.self) { _, _ in
-                AccountManager()
-            },
             Factory(type: BackgroundUploadSessionManager.self) { _, _ in
                 BackgroundUploadSessionManager()
             },
@@ -74,6 +71,19 @@ public enum FactoryService {
             },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
+            }
+        ]
+        return services
+    }
+
+    /// Core  services
+    private static var coreServices: [Factory] {
+        let services = [
+            Factory(type: DriveInfosManager.self) { _, _ in
+                return DriveInfosManager()
+            },
+            Factory(type: AccountManageable.self) { _, _ in
+                AccountManager()
             }
         ]
         return services

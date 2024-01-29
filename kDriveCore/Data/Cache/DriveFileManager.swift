@@ -26,6 +26,8 @@ import RealmSwift
 import SwiftRegex
 
 public final class DriveFileManager: RealmAccessible {
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
@@ -1096,7 +1098,6 @@ public final class DriveFileManager: RealmAccessible {
     public func createCategory(name: String, color: String) async throws -> Category {
         let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
         // Add category to drive
-        let driveInfosManager = DriveInfosManager.instance
         let realm = driveInfosManager.getRealm()
         let drive = driveInfosManager.getLiveDrive(objectId: drive.objectId, using: realm)
         try? realm.write {
@@ -1112,7 +1113,6 @@ public final class DriveFileManager: RealmAccessible {
         let categoryId = category.id
         let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
         // Update category on drive
-        let driveInfosManager = DriveInfosManager.instance
         let realm = driveInfosManager.getRealm()
         if let drive = driveInfosManager.getLiveDrive(objectId: drive.objectId, using: realm) {
             try? realm.write {
@@ -1130,7 +1130,6 @@ public final class DriveFileManager: RealmAccessible {
         let response = try await apiFetcher.deleteCategory(drive: drive, category: category)
         if response {
             // Delete category from drive
-            let driveInfosManager = DriveInfosManager.instance
             let realmDrive = driveInfosManager.getRealm()
             if let liveDrive = driveInfosManager.getLiveDrive(objectId: drive.objectId, using: realmDrive) {
                 try? realmDrive.write {

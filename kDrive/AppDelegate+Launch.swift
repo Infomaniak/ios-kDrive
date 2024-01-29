@@ -66,7 +66,7 @@ extension AppDelegate {
 
         defer {
             // Clean File Provider domains on first launch in case we had some dangling
-            DriveInfosManager.instance.deleteAllFileProviderDomains()
+            driveInfosManager.deleteAllFileProviderDomains()
         }
 
         // Check if presenting onboarding
@@ -134,7 +134,6 @@ extension AppDelegate {
         for driveFolder in driveFolders {
             // Read drive folder
             let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
-            let driveInfosManager = DriveInfosManager.instance
             let realm = driveInfosManager.getRealm()
             guard let driveId = Int(driveFolder),
                   let drive = driveInfosManager.getFrozenDrive(id: driveId, userId: accountManager.currentUserId, using: realm),
