@@ -459,19 +459,6 @@ public final class File: Object, Codable {
         case supportedBy = "supported_by"
     }
 
-    public var localizedName: String {
-        switch visibility {
-        case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder:
-            return name
-        case .isPrivateSpace:
-            return "privé"
-        case .isTeamSpace:
-            return "team"
-        case nil:
-            return name
-        }
-    }
-
     public var parent: File? {
         // We want to get the real parent not one of the fake roots
         return parentLink.filter(NSPredicate(format: "id > 0")).first
