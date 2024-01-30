@@ -143,6 +143,11 @@ extension UploadOperation {
         try transactionWithFile { file in
             // Get the current uploading session
             guard let uploadingSessionTask: UploadingSessionTask = file.uploadingSession else {
+                Log.uploadOperation("fanOut no session task for:\(self.uploadFileId)", level: .error)
+                throw ErrorDomain.uploadSessionTaskMissing
+            }
+
+            guard let uploadSession = uploadingSessionTask.uploadSession else {
                 Log.uploadOperation("fanOut no session for:\(self.uploadFileId)", level: .error)
                 throw ErrorDomain.uploadSessionTaskMissing
             }
@@ -180,7 +185,9 @@ extension UploadOperation {
                                                         chunkHash: chunkHashHeader,
                                                         sessionToken: uploadingSessionTask.token,
                                                         driveId: file.driveId,
-                                                        accessToken: accessToken)
+                                                        accessToken: accessToken,
+                                                        host: uploadSession.uploadHost)
+
                     let uploadTask = self.urlSession.uploadTask(with: request,
                                                                 fromFile: chunkUrl,
                                                                 completionHandler: self.uploadCompletion)
