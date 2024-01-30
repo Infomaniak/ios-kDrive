@@ -196,7 +196,7 @@ class FileListViewModel: SelectDelegate {
                 title = driveFileManager.drive.name
             }
         } else {
-            title = self.currentDirectory.name
+            title = self.currentDirectory.formattedLocalizedName()
         }
 
         if configuration.showUploadingFiles {

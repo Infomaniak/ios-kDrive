@@ -34,6 +34,7 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
+    @IBOutlet weak var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet weak var sortView: UIView!
     @IBOutlet weak var sortButton: UIButton!
     @IBOutlet weak var listOrGridButton: UIButton!

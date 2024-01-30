@@ -262,6 +262,7 @@ public enum FileVisibility: String {
     case isTeamSpace = "is_team_space"
     case isTeamSpaceFolder = "is_team_space_folder"
     case isInTeamSpaceFolder = "is_in_team_space_folder"
+    case isPrivateSpace = "is_private_space"
 }
 
 public enum FileStatus: String {
