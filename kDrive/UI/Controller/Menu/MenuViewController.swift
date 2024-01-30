@@ -253,16 +253,6 @@ extension MenuViewController {
         }
     }
 
-    private func createAndPushFileListViewController<T: FileListViewController>(
-        with viewModel: FileListViewModel,
-        as _: T.Type,
-        shouldHideBottomBar: Bool = true
-    ) {
-        let fileListViewController = T.instantiate(viewModel: viewModel)
-        fileListViewController.hidesBottomBarWhenPushed = shouldHideBottomBar
-        navigationController?.pushViewController(fileListViewController, animated: true)
-    }
-
     // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {

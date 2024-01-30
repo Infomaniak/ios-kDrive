@@ -160,6 +160,14 @@ public class DriveApiFetcher: ApiFetcher {
                 .sorted(by: [.type, sortType])))
     }
 
+    public func sharedWithMeFiles(drive: AbstractDrive,
+                                  cursor: String? = nil,
+                                  sortType: SortType = .nameAZ) async throws -> (data: [File], response: ApiResponse<[File]>) {
+        try await perform(request: authenticatedRequest(.sharedWithMeFiles(drive: drive)
+                .cursored(cursor)
+                .sorted(by: [.type, sortType])))
+    }
+
     public func lastModifiedFiles(drive: AbstractDrive,
                                   cursor: String? = nil) async throws -> (data: [File], response: ApiResponse<[File]>) {
         try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).cursored(cursor)))
