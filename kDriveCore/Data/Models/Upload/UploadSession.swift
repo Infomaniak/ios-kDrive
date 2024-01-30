@@ -34,6 +34,8 @@ public final class UploadSession: EmbeddedObject, Decodable {
 
     @Persisted public var token: String
 
+    @Persisted public var uploadHost: String
+
     public required convenience init(from decoder: Decoder) throws {
         self.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -43,6 +45,7 @@ public final class UploadSession: EmbeddedObject, Decodable {
         fileName = try container.decode(String.self, forKey: .fileName)
         result = try container.decode(Bool.self, forKey: .result)
         token = try container.decode(String.self, forKey: .token)
+        uploadHost = try container.decode(String.self, forKey: .uploadHost)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -52,5 +55,6 @@ public final class UploadSession: EmbeddedObject, Decodable {
         case fileName = "file_name"
         case result
         case token
+        case uploadHost = "upload_url"
     }
 }

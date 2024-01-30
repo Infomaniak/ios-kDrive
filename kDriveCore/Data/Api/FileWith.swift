@@ -43,6 +43,19 @@ enum FileWith: String, CaseIterable {
     case user
     case version
 
+    case files
+    case filesCapabilities = "files.capabilities"
+    case filesPath = "files.path"
+    case filesSortedName = "files.sorted_name"
+    case filesDropbox = "files.dropbox"
+    case filesDropboxCapabilities = "files.dropbox.capabilities"
+    case filesIsFavorite = "files.is_favorite"
+    case filesShareLink = "files.sharelink"
+    case filesCategories = "files.categories"
+    case filesConversionCapabilities = "files.conversion_capabilities"
+    case filesExternalImport = "files.external_import"
+    case filesSupportedBy = "files.supported_by"
+
     static let fileMinimal: [FileWith] = [.capabilities,
                                           .categories,
                                           .conversionCapabilities,
@@ -52,6 +65,17 @@ enum FileWith: String, CaseIterable {
                                           .isFavorite,
                                           .shareLink,
                                           .sortedName]
+    static let fileListingMinimal: [FileWith] = [.files,
+                                                 .filesCapabilities,
+                                                 .filesCategories,
+                                                 .filesConversionCapabilities,
+                                                 .filesDropbox,
+                                                 .filesDropboxCapabilities,
+                                                 .filesExternalImport,
+                                                 .filesIsFavorite,
+                                                 .filesShareLink,
+                                                 .filesSortedName,
+                                                 .filesSupportedBy]
     static let fileExtra: [FileWith] = fileMinimal + [.path, .users, .version]
     static let fileActivities: [FileWith] = [.file,
                                              .fileCapabilities,

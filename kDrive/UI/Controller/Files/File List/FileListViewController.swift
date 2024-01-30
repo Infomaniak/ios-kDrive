@@ -97,34 +97,27 @@ class ConcreteFileListViewModel: FileListViewModel {
         files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
-            try await loadActivitiesIfNeeded()
-        } else {
-            startRefreshing(page: page)
-            defer {
-                endRefreshing()
-            }
-
-            let (_, moreComing) = try await driveFileManager.files(
-                in: currentDirectory.proxify(),
-                page: page,
-                sortType: sortType,
-                forceRefresh: forceRefresh
-            )
+        startRefreshing(cursor: cursor)
+        defer {
             endRefreshing()
-            if moreComing {
-                try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-            } else if !forceRefresh {
-                try await loadActivities()
-            }
+        }
+
+        let (_, nextCursor) = try await driveFileManager.fileListing(
+            in: currentDirectory.proxify(),
+            sortType: sortType,
+            forceRefresh: forceRefresh
+        )
+        endRefreshing()
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
     override func loadActivities() async throws {
-        _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
+        try await loadFiles()
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {

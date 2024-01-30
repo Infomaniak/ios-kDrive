@@ -479,32 +479,36 @@ public final class DriveFileManager {
         _ = try await files(in: root.proxify())
     }
 
-    public func files(in directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ,
-                      forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        let fetchFiles: () async throws -> ([File], Int?)
+    public func files(in directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ,
+                      forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
+        let fetchFiles: () async throws -> ([File], ApiResponse<[File]>)
         if directory.isRoot {
             fetchFiles = {
-                let (children, responseAt) = try await self.apiFetcher
-                    .rootFiles(drive: self.drive, page: page, sortType: sortType)
-                return (children, responseAt)
+                let (children, response) = try await self.apiFetcher
+                    .rootFiles(drive: self.drive, cursor: cursor, sortType: sortType)
+                return (children, response)
             }
         } else {
             fetchFiles = {
-                let (children, responseAt) = try await self.apiFetcher.files(in: directory, page: page, sortType: sortType)
-                return (children, responseAt)
+                let (children, response) = try await self.apiFetcher.files(in: directory, cursor: cursor, sortType: sortType)
+                return (children, response)
             }
         }
-        return try await files(in: directory, fetchFiles: fetchFiles,
-                               page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
+        return try await files(in: directory,
+                               fetchFiles: fetchFiles,
+                               cursor: cursor,
+                               sortType: sortType,
+                               keepProperties: [.standard, .extras],
+                               forceRefresh: forceRefresh)
     }
 
     private func remoteFiles(in directory: ProxyFile,
-                             fetchFiles: () async throws -> ([File], Int?),
-                             page: Int,
+                             fetchFiles: () async throws -> ([File], ApiResponse<[File]>?),
+                             isInitialCursor: Bool,
                              sortType: SortType,
-                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], moreComing: Bool) {
+                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], nextCursor: String?) {
         // Get children from API
-        let (children, responseAt) = try await fetchFiles()
+        let (children, response) = try await fetchFiles()
         let realm = getRealm()
         // Keep cached properties for children
         for child in children {
@@ -514,7 +518,7 @@ public final class DriveFileManager {
         let managedParent = try directory.resolve(using: realm)
         // Update parent
         try realm.write {
-            managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            managedParent.responseAt = response?.responseAt ?? Int(Date().timeIntervalSince1970)
             if children.count < Endpoint.itemsPerPage {
                 managedParent.versionCode = DriveFileManager.constants.currentVersionCode
                 managedParent.fullyDownloaded = true
@@ -522,7 +526,7 @@ public final class DriveFileManager {
             realm.add(children, update: .modified)
             // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
             // the first page will result in an undefined behavior.
-            if page == 1 {
+            if isInitialCursor {
                 managedParent.children.removeAll()
             }
             managedParent.children.insert(objectsIn: children)
@@ -530,26 +534,26 @@ public final class DriveFileManager {
 
         return (
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
-            children.count == Endpoint.itemsPerPage
+            response?.hasMore == true ? response?.cursor : nil
         )
     }
 
     private func files(in directory: ProxyFile,
-                       fetchFiles: () async throws -> ([File], Int?),
-                       page: Int,
+                       fetchFiles: () async throws -> ([File], ApiResponse<[File]>),
+                       cursor: String?,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
-                       forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
+                       forceRefresh: Bool) async throws -> (files: [File], nextCursor: String?) {
         if let cachedParent = getCachedFile(id: directory.id, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have
            // anyway
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
-            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
+            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), nil)
         } else {
             return try await remoteFiles(
                 in: directory,
                 fetchFiles: fetchFiles,
-                page: page,
+                isInitialCursor: cursor == nil,
                 sortType: sortType,
                 keepProperties: keepProperties
             )
@@ -579,27 +583,33 @@ public final class DriveFileManager {
         }
     }
 
-    public func favorites(page: Int = 1, sortType: SortType = .nameAZ,
-                          forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+    public func favorites(cursor: String? = nil,
+                          sortType: SortType = .nameAZ,
+                          forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
         try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
                         fetchFiles: {
-                            let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
-                            return (favorites, nil)
+                            let favorites = try await apiFetcher.favorites(drive: drive, cursor: cursor, sortType: sortType)
+                            return favorites
                         },
-                        page: page,
+                        cursor: cursor,
                         sortType: sortType,
                         keepProperties: [.standard, .extras],
                         forceRefresh: forceRefresh)
     }
 
-    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ,
-                              forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+    public func mySharedFiles(cursor: String? = nil,
+                              sortType: SortType = .nameAZ,
+                              forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
         try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
-                            let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
-                            return (mySharedFiles, nil)
+                            let mySharedFiles = try await apiFetcher.mySharedFiles(
+                                drive: drive,
+                                cursor: cursor,
+                                sortType: sortType
+                            )
+                            return mySharedFiles
                         },
-                        page: page,
+                        cursor: cursor,
                         sortType: sortType,
                         keepProperties: [.standard, .path, .version],
                         forceRefresh: forceRefresh)
@@ -627,8 +637,8 @@ public final class DriveFileManager {
                            fileType: ConvertedType? = nil,
                            categories: [Category],
                            belongToAllCategories: Bool,
-                           page: Int = 1,
-                           sortType: SortType = .nameAZ) async throws -> Bool {
+                           cursor: String? = nil,
+                           sortType: SortType = .nameAZ) async throws -> (files: [File], nextCursor: String?) {
         do {
             return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
                                          fetchFiles: {
@@ -639,14 +649,14 @@ public final class DriveFileManager {
                                                  fileTypes: [fileType].compactMap { $0 },
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
-                                                 page: page,
+                                                 cursor: cursor,
                                                  sortType: sortType
                                              )
-                                             return (searchResults, nil)
+                                             return searchResults
                                          },
-                                         page: page,
+                                         isInitialCursor: cursor == nil,
                                          sortType: sortType,
-                                         keepProperties: [.standard, .extras]).moreComing
+                                         keepProperties: [.standard, .extras])
         } catch {
             if error.asAFError?.isExplicitlyCancelledError == true {
                 throw DriveError.searchCancelled
@@ -814,37 +824,38 @@ public final class DriveFileManager {
         }
     }
 
-    public func lastModifiedFiles(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+    public func lastModifiedFiles(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
-            let files = try await apiFetcher.lastModifiedFiles(drive: drive, page: page)
+            let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)
+            let files = lastModifiedFilesResponse.data
 
-            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: page == 1)
-            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: cursor == nil)
+            return (files.map { $0.freeze() }, lastModifiedFilesResponse.response.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
-                return (Array(files), false)
+                return (Array(files), nil)
             } else {
                 throw error
             }
         }
     }
 
-    public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+    public func lastPictures(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
-            let files = try await apiFetcher.searchFiles(
+            let lastPicturesResponse = try await apiFetcher.searchFiles(
                 drive: drive,
                 fileTypes: [.image, .video],
                 categories: [],
                 belongToAllCategories: false,
-                page: page,
+                cursor: cursor,
                 sortType: .newer
             )
-
-            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: page == 1)
-            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+            let files = lastPicturesResponse.data
+            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: cursor == nil)
+            return (files.map { $0.freeze() }, lastPicturesResponse.response.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
-                return (Array(files), false)
+                return (Array(files), nil)
             } else {
                 throw error
             }
@@ -876,14 +887,14 @@ public final class DriveFileManager {
         var responseAt = 0
         while moreComing {
             // Get activities page
-            let (activities, pageResponseAt) = try await apiFetcher.fileActivities(
+            let (activities, response) = try await apiFetcher.fileActivities(
                 file: file,
                 from: Date(timeIntervalSince1970: timestamp),
                 page: page
             )
             moreComing = activities.count == Endpoint.itemsPerPage
             page += 1
-            responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
+            responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
             // Get file from Realm
             let realm = getRealm()
             let cachedFile = try file.resolve(using: realm)
@@ -995,10 +1006,10 @@ public final class DriveFileManager {
     }
 
     public func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
-        let (result, responseAt) = try await apiFetcher
+        let (result, response) = try await apiFetcher
             .filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
         // Update last sync date
-        if let responseAt {
+        if let responseAt = response.responseAt {
             UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
         }
         return result
@@ -1403,7 +1414,7 @@ public final class DriveFileManager {
         return Array(children.freeze())
     }
 
-    private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
+    func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
@@ -1492,13 +1503,23 @@ public final class DriveFileManager {
         static let users = FilePropertiesOptions(rawValue: 1 << 4)
         static let version = FilePropertiesOptions(rawValue: 1 << 5)
         static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
+        static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
 
-        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt]
+        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastCursor]
         static let extras: FilePropertiesOptions = [.path, .users, .version]
-        static let all: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .path, .users, .version, .capabilities]
+        static let all: FilePropertiesOptions = [
+            .fullyDownloaded,
+            .children,
+            .responseAt,
+            .lastCursor,
+            .path,
+            .users,
+            .version,
+            .capabilities
+        ]
     }
 
-    private func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
+    func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
@@ -1514,6 +1535,9 @@ public final class DriveFileManager {
         }
         if keepProperties.contains(.responseAt) {
             newFile.responseAt = savedChild.responseAt
+        }
+        if keepProperties.contains(.lastCursor) {
+            newFile.lastCursor = savedChild.lastCursor
         }
         if keepProperties.contains(.path) {
             newFile.path = savedChild.path
@@ -1571,6 +1595,10 @@ public extension Realm {
         } else {
             try write(block)
         }
+    }
+
+    func getObject<RealmObject: Object, KeyType>(id: KeyType) -> RealmObject? {
+        object(ofType: RealmObject.self, forPrimaryKey: id)
     }
 }
 

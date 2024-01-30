@@ -22,7 +22,7 @@ import UIKit
 public extension File {
     @discardableResult
     func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        if hasThumbnail, let currentDriveFileManager = accountManager.currentDriveFileManager {
+        if supportedBy.contains(.thumbnail), let currentDriveFileManager = accountManager.currentDriveFileManager {
             return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
                                                           options: [.requestModifier(currentDriveFileManager.apiFetcher
                                                                   .authenticatedKF)]) { result in

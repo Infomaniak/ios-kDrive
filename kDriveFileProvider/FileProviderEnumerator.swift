@@ -87,7 +87,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     observer.finishEnumeratingWithError(self.nsError(code: .noSuchItem))
                     return
                 }
-                let pageIndex = page.isInitialPage ? 1 : page.toInt
+                let cursor = page.isInitialPage ? nil : page.toCursor
 
                 var forceRefresh = false
                 if let lastResponseAt = self.driveFileManager.getCachedFile(id: fileId)?.responseAt {
@@ -99,7 +99,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 do {
                     let file = try await self.driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
                     let (children, moreComing) = try await self.driveFileManager
-                        .files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
+                        .files(in: file.proxify(), cursor: cursor, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -111,8 +111,8 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
-                    if self.isDirectory && moreComing {
-                        observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
+                    if self.isDirectory, let cursor {
+                        observer.finishEnumerating(upTo: NSFileProviderPage(cursor))
                     } else {
                         observer.finishEnumerating(upTo: nil)
                     }
@@ -123,8 +123,8 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                         let children = try await self.driveFileManager.apiFetcher.trashedFiles(
                             of: file.proxify(),
-                            page: pageIndex
-                        )
+                            cursor: cursor
+                        ).data
                         var containerItems = [FileProviderItem]()
                         for child in children {
                             autoreleasepool {
@@ -135,11 +135,12 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         }
                         containerItems.append(FileProviderItem(file: file, domain: self.domain))
                         observer.didEnumerate(containerItems)
-                        if self.isDirectory && children.count == Endpoint.itemsPerPage {
-                            observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
-                        } else {
-                            observer.finishEnumerating(upTo: nil)
-                        }
+                        // FIXME: Cursors also for trash
+                        /* if self.isDirectory && children.count == Endpoint.itemsPerPage {
+                             observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
+                         } else {
+                             observer.finishEnumerating(upTo: nil)
+                         } */
                     } catch {
                         if let error = error as? DriveError, error == .productMaintenance {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
@@ -235,12 +236,12 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
 }
 
 extension NSFileProviderPage {
-    init(_ integer: Int) {
-        self.init(withUnsafeBytes(of: integer.littleEndian) { Data($0) })
+    init(_ cursor: String) {
+        self.init(cursor.data(using: .utf8) ?? Data())
     }
 
-    var toInt: Int {
-        return rawValue.withUnsafeBytes { $0.load(as: Int.self) }.littleEndian
+    var toCursor: String? {
+        return String(data: rawValue, encoding: .utf8)
     }
 
     var isInitialPage: Bool {

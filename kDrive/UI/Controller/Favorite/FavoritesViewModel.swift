@@ -37,21 +37,21 @@ class FavoritesViewModel: FileListViewModel {
             .filesSorted(by: sortType))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
         // Only show loading indicator if we have nothing in cache
         if !currentDirectory.canLoadChildrenFromCache {
-            startRefreshing(page: page)
+            startRefreshing(cursor: cursor)
         }
         defer {
             endRefreshing()
         }
 
-        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: true)
+        let (_, nextCursor) = try await driveFileManager.favorites(cursor: cursor, sortType: sortType, forceRefresh: true)
         endRefreshing()
-        if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: true)
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 }
