@@ -142,7 +142,7 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static var drive: Endpoint {
+    private static var driveV3: Endpoint {
         return Endpoint(hostKeypath: \.apiDriveHost, path: "/3/drive")
     }
 
@@ -266,7 +266,7 @@ public extension Endpoint {
     // MARK: Drive (complete me)
 
     static func driveInfo(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/\(drive.id)")
+        return .driveV3.appending(path: "/\(drive.id)")
     }
 
     static func driveInfoV2(drive: AbstractDrive) -> Endpoint {
@@ -487,7 +487,7 @@ public extension Endpoint {
     // MARK: Preferences
 
     static var userPreferences: Endpoint {
-        return .drive.appending(path: "/preferences")
+        return .driveV3.appending(path: "/preferences")
     }
 
     static func preferences(drive: AbstractDrive) -> Endpoint {
@@ -626,7 +626,7 @@ public extension Endpoint {
     // Direct Upload
 
     static func directUpload(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/\(drive.id)/upload")
+        return .driveV3.appending(path: "/\(drive.id)/upload")
     }
 
     // Chunk Upload
