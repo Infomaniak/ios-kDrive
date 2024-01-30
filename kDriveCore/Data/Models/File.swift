@@ -352,7 +352,8 @@ public final class File: Object, Codable {
 
     @LazyInjectService var accountManager: AccountManageable
 
-    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
+    @Persisted(primaryKey: true) public var uid = UUID().uuidString
+    @Persisted public var id: Int
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int
@@ -730,13 +731,20 @@ public final class File: Object, Codable {
         return ProxyFile(driveId: driveId, id: id)
     }
 
+    public static func uid(driveId: Int, fileId: Int) -> String {
+        "\(fileId)\(driveId)"
+    }
+
     public convenience init(from decoder: Decoder) throws {
         self.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
+        let id = try container.decode(Int.self, forKey: .id)
+        self.id = id
         parentId = try container.decode(Int.self, forKey: .parentId)
-        driveId = try container.decode(Int.self, forKey: .driveId)
+        let driveId = try container.decode(Int.self, forKey: .driveId)
+        self.driveId = driveId
+        uid = File.uid(driveId: driveId, fileId: id)
         let decodedName = try container.decode(String.self, forKey: .name)
         name = decodedName
         sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
@@ -773,10 +781,14 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String) {
+    convenience init(id: Int, name: String, driveId: Int? = nil) {
         self.init()
         self.id = id
         self.name = name
+        if let driveId {
+            self.driveId = driveId
+            uid = File.uid(driveId: driveId, fileId: id)
+        }
         rawType = "dir"
         children = MutableSet<File>()
     }
