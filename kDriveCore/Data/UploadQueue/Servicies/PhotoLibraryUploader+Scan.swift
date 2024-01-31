@@ -125,7 +125,7 @@ public extension PhotoLibraryUploader {
 
                 let algorithmImportVersion = currentDiffAlgorithmVersion
 
-                // New UploadFile to be uploaded
+                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
@@ -135,7 +135,7 @@ public extension PhotoLibraryUploader {
                     bestResourceSHA256: bestResourceSHA256,
                     algorithmImportVersion: algorithmImportVersion,
                     conflictOption: .version,
-                    priority: initial ? .low : .high
+                    priority: initial ? .low : .normal
                 )
 
                 // Lazy creation of sub folder if required in the upload file
