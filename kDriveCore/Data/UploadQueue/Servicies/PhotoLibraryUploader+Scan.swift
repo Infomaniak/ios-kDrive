@@ -125,7 +125,7 @@ public extension PhotoLibraryUploader {
 
                 let algorithmImportVersion = currentDiffAlgorithmVersion
 
-                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.medium`
+                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
