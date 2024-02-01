@@ -43,7 +43,7 @@ public final class PhotoLibraryUploader {
     }
 
     public init() {
-        if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
+        if let settings = DriveFileManager.driveUploadManager.uploadsRealm.objects(PhotoSyncSettings.self).first {
             _settings = PhotoSyncSettings(value: settings)
         }
     }

@@ -45,7 +45,7 @@ public final class BackgroundRealm {
     private static let writeBufferSize = 20
     private static let writeBufferExpiration = 1.0
 
-    public static let uploads = getQueue(for: DriveFileManager.constants.realmConfiguration)
+    public static let uploads = getQueue(for: DriveFileManager.driveUploadManager.realmConfiguration)
     private static var instances: [String: BackgroundRealm] = [:]
 
     private let realm: Realm

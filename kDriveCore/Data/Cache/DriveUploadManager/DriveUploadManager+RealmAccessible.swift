@@ -34,7 +34,7 @@ public extension DriveUploadManager {
         metadata.isExcludedFromBackup = true
         do {
             try uploadsRealmURL.setResourceValues(metadata)
-            try cacheDirectoryURL.setResourceValues(metadata)
+            try DriveUploadManager.constants.cacheDirectoryURL.setResourceValues(metadata)
         } catch {
             DDLogError(error)
         }

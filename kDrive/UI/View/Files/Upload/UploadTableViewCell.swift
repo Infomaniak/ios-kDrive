@@ -151,7 +151,7 @@ class UploadTableViewCell: InsetTableViewCell {
                 return
             }
 
-            let realm = DriveFileManager.constants.uploadsRealm
+            let realm = DriveFileManager.driveUploadManager.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated {
                 self.uploadQueue.cancel(uploadFile: file)
             }

@@ -26,30 +26,11 @@ import RealmSwift
 import SwiftRegex
 
 public final class DriveUploadManager: RealmAccessible {
-    public let driveObjectTypes = [
-        File.self,
-        Rights.self,
-        FileActivity.self,
-        FileCategory.self,
-        FileConversion.self,
-        FileVersion.self,
-        FileExternalImport.self,
-        ShareLink.self,
-        ShareLinkCapabilities.self,
-        DropBox.self,
-        DropBoxCapabilities.self,
-        DropBoxSize.self,
-        DropBoxValidity.self
-    ]
     private let fileManager = FileManager.default
-    public let rootDocumentsURL: URL
-    public let importDirectoryURL: URL
-    public let groupDirectoryURL: URL
-    public var cacheDirectoryURL: URL
-    public var tmpDirectoryURL: URL
-    public let openInPlaceDirectoryURL: URL?
-    public let rootID = 1
-    public let currentVersionCode = 1
+
+    // TODO: Use DI
+    public static let constants = DriveConstants()
+
     public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
         let currentUploadSchemaVersion = RealmSchemaVersion.upload
 
@@ -133,7 +114,7 @@ public final class DriveUploadManager: RealmAccessible {
     }
 
     /// Path of the upload DB
-    public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
+    public lazy var uploadsRealmURL = DriveUploadManager.constants.rootDocumentsURL.appendingPathComponent("uploads.realm")
 
     public lazy var realmConfiguration = Realm.Configuration(
         fileURL: uploadsRealmURL,
@@ -154,17 +135,6 @@ public final class DriveUploadManager: RealmAccessible {
     }
 
     init() {
-        @InjectService var pathProvider: AppGroupPathProvidable
-        groupDirectoryURL = pathProvider.groupDirectoryURL
-        rootDocumentsURL = pathProvider.realmRootURL
-        importDirectoryURL = pathProvider.importDirectoryURL
-        tmpDirectoryURL = pathProvider.tmpDirectoryURL
-        cacheDirectoryURL = pathProvider.cacheDirectoryURL
-        openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
-
-        DDLogInfo(
-            "App working path is: \(fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? "")"
-        )
-        DDLogInfo("Group container path is: \(groupDirectoryURL.absoluteString)")
+        // META: keep SonarCloud happy
     }
 }

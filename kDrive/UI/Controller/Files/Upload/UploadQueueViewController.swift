@@ -36,7 +36,7 @@ final class UploadQueueViewController: UIViewController {
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
     private var notificationToken: NotificationToken?
 
-    private let realm = DriveFileManager.constants.uploadsRealm
+    private let realm = DriveFileManager.driveUploadManager.uploadsRealm
 
     override func viewDidLoad() {
         super.viewDidLoad()

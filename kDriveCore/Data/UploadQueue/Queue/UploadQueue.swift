@@ -125,13 +125,13 @@ public final class UploadQueue {
     public func getUploadingFiles(withParent parentId: Int,
                                   userId: Int,
                                   driveId: Int,
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+                                  using realm: Realm = DriveFileManager.driveUploadManager.uploadsRealm) -> Results<UploadFile> {
         return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveId: Int,
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+                                  using realm: Realm = DriveFileManager.driveUploadManager.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self)
             .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
             .sorted(byKeyPath: "taskCreationDate")
@@ -139,13 +139,13 @@ public final class UploadQueue {
 
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+                                  using realm: Realm = DriveFileManager.driveUploadManager.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self)
             .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
             .sorted(byKeyPath: "taskCreationDate")
     }
 
-    public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+    public func getUploadedFiles(using realm: Realm = DriveFileManager.driveUploadManager.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
     }
 }
