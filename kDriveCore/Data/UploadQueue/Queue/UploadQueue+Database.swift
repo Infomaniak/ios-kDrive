@@ -27,7 +27,7 @@ extension UploadQueue {
     func transactionWithUploadRealm(function: StaticString = #function,
                                     _ task: @escaping (_ realm: Realm) throws -> Void) throws {
         try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.realmConfiguration)
             uploadsRealm.refresh()
             try task(uploadsRealm)
         }

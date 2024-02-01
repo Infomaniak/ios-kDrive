@@ -69,7 +69,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("init")
 
         // Load types into realm so it does not scan all types and uses more that 20MiB or ram.
-        _ = try? Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
+        _ = try? Realm(configuration: DriveFileManager.constants.realmConfiguration)
 
         Logging.initLogging()
         super.init()

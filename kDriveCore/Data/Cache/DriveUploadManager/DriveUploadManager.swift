@@ -25,8 +25,7 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
-// TODO: Make a dedicated type for the upload realm
-public class DriveFileManagerConstants {
+public final class DriveUploadManager: RealmAccessible {
     public let driveObjectTypes = [
         File.self,
         Rights.self,
@@ -136,7 +135,7 @@ public class DriveFileManagerConstants {
     /// Path of the upload DB
     public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
 
-    public lazy var uploadsRealmConfiguration = Realm.Configuration(
+    public lazy var realmConfiguration = Realm.Configuration(
         fileURL: uploadsRealmURL,
         schemaVersion: RealmSchemaVersion.upload,
         migrationBlock: migrationBlock,
@@ -151,25 +150,7 @@ public class DriveFileManagerConstants {
 
     /// realm db used for file upload
     public var uploadsRealm: Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "upload file realm" and custom cache from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try uploadsRealmURL.setResourceValues(metadata)
-                try cacheDirectoryURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-        }
-
-        do {
-            return try Realm(configuration: uploadsRealmConfiguration)
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: uploadsRealmConfiguration)
-        }
+        getRealm()
     }
 
     init() {

@@ -29,7 +29,7 @@ public final class DriveFileManager: RealmAccessible {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     // TODO: Use DI
-    public static let constants = DriveFileManagerConstants()
+    public static let constants = DriveUploadManager()
 
     private let fileManager = FileManager.default
     public static var favoriteRootFile: File {
