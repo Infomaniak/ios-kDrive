@@ -35,7 +35,7 @@ extension UploadOperation {
         }
 
         try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.driveUploadManager.realmConfiguration)
+            let uploadsRealm = try Realm(configuration: driveUploadManager.realmConfiguration)
             uploadsRealm.refresh()
 
             guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
@@ -119,7 +119,7 @@ extension UploadOperation {
     /// Does not check upload.finished state of the upload operation
     func readOnlyFile() throws -> UploadFile {
         return try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.driveUploadManager.realmConfiguration)
+            let uploadsRealm = try Realm(configuration: driveUploadManager.realmConfiguration)
             uploadsRealm.refresh()
 
             guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),

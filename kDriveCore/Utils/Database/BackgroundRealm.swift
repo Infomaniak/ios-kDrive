@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 import Sentry
 
@@ -45,7 +46,11 @@ public final class BackgroundRealm {
     private static let writeBufferSize = 20
     private static let writeBufferExpiration = 1.0
 
-    public static let uploads = getQueue(for: DriveFileManager.driveUploadManager.realmConfiguration)
+    public static let uploads: BackgroundRealm = {
+        @InjectService var driveUploadManager: DriveUploadManager
+        return getQueue(for: driveUploadManager.realmConfiguration)
+    }()
+
     private static var instances: [String: BackgroundRealm] = [:]
 
     private let realm: Realm

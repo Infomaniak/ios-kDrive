@@ -25,11 +25,10 @@ import UIKit
 class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
 
+    @LazyInjectService private var driveUploadManager: DriveUploadManager
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var uploadQueue: UploadQueue
     @LazyInjectService private var driveInfosManager: DriveInfosManager
-
-    private let realm = DriveFileManager.driveUploadManager.getRealm()
 
     private var userId: Int {
         return driveFileManager.drive.userId
@@ -62,6 +61,7 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
+        let realm = driveUploadManager.getRealm()
         // Observe uploading files
         notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])

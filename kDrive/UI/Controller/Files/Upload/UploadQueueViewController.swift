@@ -25,6 +25,8 @@ import RealmSwift
 import UIKit
 
 final class UploadQueueViewController: UIViewController {
+    @LazyInjectService private var driveUploadManager: DriveUploadManager
+
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
@@ -35,8 +37,6 @@ final class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
     private var notificationToken: NotificationToken?
-
-    private let realm = DriveFileManager.driveUploadManager.getRealm()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +71,7 @@ final class UploadQueueViewController: UIViewController {
             return
         }
 
+        let realm = driveUploadManager.getRealm()
         notificationToken?.invalidate()
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,

@@ -31,6 +31,8 @@ public struct UploadCompletionResult {
 }
 
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+    @LazyInjectService var driveUploadManager: DriveUploadManager
+
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed

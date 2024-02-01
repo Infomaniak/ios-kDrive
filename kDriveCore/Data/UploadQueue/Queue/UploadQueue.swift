@@ -23,6 +23,7 @@ import RealmSwift
 import Sentry
 
 public final class UploadQueue {
+    @LazyInjectService var driveUploadManager: DriveUploadManager
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
@@ -124,28 +125,48 @@ public final class UploadQueue {
 
     public func getUploadingFiles(withParent parentId: Int,
                                   userId: Int,
+                                  driveId: Int) -> Results<UploadFile> {
+        getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: driveUploadManager.getRealm())
+    }
+
+    public func getUploadingFiles(withParent parentId: Int,
+                                  userId: Int,
                                   driveId: Int,
-                                  using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) -> Results<UploadFile> {
+                                  using realm: Realm) -> Results<UploadFile> {
         return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
     }
 
     public func getUploadingFiles(userId: Int,
+                                  driveId: Int) -> Results<UploadFile> {
+        getUploadingFiles(userId: userId, driveId: driveId, using: driveUploadManager.getRealm())
+    }
+
+    public func getUploadingFiles(userId: Int,
                                   driveId: Int,
-                                  using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) -> Results<UploadFile> {
+                                  using realm: Realm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self)
             .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
             .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadingFiles(userId: Int,
+                                  driveIds: [Int]) -> Results<UploadFile> {
+        getUploadingFiles(userId: userId, driveIds: driveIds, using: driveUploadManager.getRealm())
+    }
+
+    public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
-                                  using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) -> Results<UploadFile> {
+                                  using realm: Realm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self)
             .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
             .sorted(byKeyPath: "taskCreationDate")
     }
 
-    public func getUploadedFiles(using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) -> Results<UploadFile> {
+    public func getUploadedFiles() -> Results<UploadFile> {
+        getUploadedFiles(using: driveUploadManager.getRealm())
+    }
+
+    public func getUploadedFiles(using realm: Realm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
     }
 }

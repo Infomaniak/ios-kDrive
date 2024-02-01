@@ -56,7 +56,11 @@ public extension PhotoLibraryUploader {
 
     // MARK: - Private
 
-    private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) {
+    private func updateLastSyncDate(_ date: Date) {
+        updateLastSyncDate(date, using: driveUploadManager.getRealm())
+    }
+
+    private func updateLastSyncDate(_ date: Date, using realm: Realm) {
         if let settings = realm.objects(PhotoSyncSettings.self).first {
             try? realm.safeWrite {
                 if !settings.isInvalidated {
@@ -72,8 +76,13 @@ public extension PhotoLibraryUploader {
     }
 
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
+                                             initial: Bool) {
+        addImageAssetsToUploadQueue(assets: assets, initial: initial, using: driveUploadManager.getRealm())
+    }
+
+    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
                                              initial: Bool,
-                                             using realm: Realm = DriveFileManager.driveUploadManager.getRealm()) {
+                                             using realm: Realm) {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         autoreleasepool {
             var burstIdentifier: String?

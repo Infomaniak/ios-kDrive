@@ -25,6 +25,7 @@ import RealmSwift
 import Sentry
 
 public final class PhotoLibraryUploader {
+    @LazyInjectService var driveUploadManager: DriveUploadManager
     @LazyInjectService var uploadQueue: UploadQueue
 
     /// Threshold value to trigger cleaning of photo roll if enabled
@@ -43,7 +44,10 @@ public final class PhotoLibraryUploader {
     }
 
     public init() {
-        if let settings = DriveFileManager.driveUploadManager.getRealm().objects(PhotoSyncSettings.self).first {
+        @InjectService var driveUploadManager: DriveUploadManager
+
+        // TODO: Move away query from the init of an object
+        if let settings = driveUploadManager.getRealm().objects(PhotoSyncSettings.self).first {
             _settings = PhotoSyncSettings(value: settings)
         }
     }

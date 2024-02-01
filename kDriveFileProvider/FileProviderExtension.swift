@@ -68,8 +68,9 @@ final class FileProviderExtension: NSFileProviderExtension {
     override init() {
         Log.fileProvider("init")
 
+        @InjectService var driveUploadManager: DriveUploadManager
         // Load types into realm so it does not scan all types and uses more that 20MiB or ram.
-        _ = try? Realm(configuration: DriveFileManager.driveUploadManager.realmConfiguration)
+        _ = try? Realm(configuration: driveUploadManager.realmConfiguration)
 
         Logging.initLogging()
         super.init()

@@ -25,6 +25,8 @@ import RealmSwift
 import UIKit
 
 class UploadTableViewCell: InsetTableViewCell {
+    @LazyInjectService private var driveUploadManager: DriveUploadManager
+
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
@@ -151,7 +153,7 @@ class UploadTableViewCell: InsetTableViewCell {
                 return
             }
 
-            let realm = DriveFileManager.driveUploadManager.getRealm()
+            let realm = self.driveUploadManager.getRealm()
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated {
                 self.uploadQueue.cancel(uploadFile: file)
             }

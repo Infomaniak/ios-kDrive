@@ -30,7 +30,7 @@ public final class DriveFileManager: RealmAccessible {
 
     // TODO: Use DI
 //    @LazyInjectService private var driveUploadManager: DriveUploadManager
-    public static let driveUploadManager = DriveUploadManager()
+    private static let driveUploadManager = DriveUploadManager()
 
     // TODO: Use DI
 //    @LazyInjectService public var constants: DriveConstants
