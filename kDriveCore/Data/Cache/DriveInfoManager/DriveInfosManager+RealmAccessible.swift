@@ -16,36 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import RealmSwift
 
-public extension DriveFileManager {
+public extension DriveInfosManager {
     /// get something to make a safe realm transaction with the system.
-    var realmTransaction: RealmTransaction {
+    internal var realmTransaction: RealmTransaction {
         RealmTransaction(realmAccessible: self)
     }
 
     // MARK: - RealmAccessible
 
     func excludeRealmFromBackup() {
-        // TODO:
+        // NOOP
     }
 
     func getRealm() -> Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "file cache realm" from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try realmURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-            DDLogInfo("realmURL : \(realmURL)")
-        }
-
         do {
             let realm = try Realm(configuration: realmConfiguration)
             realm.refresh()

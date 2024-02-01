@@ -72,10 +72,11 @@ public extension DriveFileManager {
         return Array(children.freeze())
     }
 
-    /**
-     Get a live version for the given file (if the file is not cached in realm it is added and then returned)
-     - Returns: A realm managed file
-     */
+    /// Get a live version for the given file (if the file is not cached in realm it is added and then returned)
+    /// - Parameters:
+    ///   - file: A File to work with
+    ///   - realm: Optionally pass a realm
+    /// - Returns: A realm managed file
     func getLiveManagedFile(from file: File, using realm: Realm? = nil) -> File {
         let realm = realm ?? getRealm()
         realm.refresh()

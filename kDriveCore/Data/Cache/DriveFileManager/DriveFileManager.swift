@@ -37,6 +37,7 @@ public final class DriveFileManager: RealmAccessible {
         static let drive: UInt64 = 9
     }
 
+    // TODO: Make a type for the upload realm
     public class DriveFileManagerConstants {
         public let driveObjectTypes = [
             File.self,

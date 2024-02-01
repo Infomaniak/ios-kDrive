@@ -19,26 +19,16 @@
 import Foundation
 import RealmSwift
 
-public extension DriveInfosManager {
-    /// get something to make a safe realm transaction with the system.
-    internal var realmTransaction: RealmTransaction {
-        RealmTransaction(realmAccessible: self)
-    }
+// TODO: Move to Core
+/// Something that can access a realm with a given configuration
+public protocol RealmAccessible {
+    /// Configuration for a given realm
+    var realmConfiguration: Realm.Configuration { get }
 
-    // MARK: - RealmAccessible
+    /// Fetches an up to date realm for a given configuration, or fail in a controlled manner
+    func getRealm() -> Realm
 
-    func excludeRealmFromBackup() {
-        // TODO:
-    }
-
-    func getRealm() -> Realm {
-        do {
-            let realm = try Realm(configuration: realmConfiguration)
-            realm.refresh()
-            return realm
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
-    }
+    /// Set `isExcludedFromBackup = true`  to the folder where realm is located to exclude a realm cache from an iCloud backup
+    /// - Important: Avoid calling this method too often as this can be expensive, prefer calling it once at init time
+    func excludeRealmFromBackup()
 }

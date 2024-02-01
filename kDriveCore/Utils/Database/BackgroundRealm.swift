@@ -22,61 +22,7 @@ import InfomaniakCore
 import RealmSwift
 import Sentry
 
-/// Something that can access a realm with a given configuration
-public protocol RealmAccessible {
-    /// Configuration for a given realm
-    var realmConfiguration: Realm.Configuration { get }
-
-    /// Fetches an up to date realm for a given configuration, or fail in a controlled manner
-    func getRealm() -> Realm
-
-    /// Set `isExcludedFromBackup = true`  to the folder where realm is located to exclude a realm cache from an iCloud backup
-    /// - Important: Avoid calling this method too often as this can be expensive, prefer calling it once at init time
-    func excludeRealmFromBackup()
-}
-
-public final class RealmTransaction {
-    private let queue: DispatchQueue
-
-    public let realmAccessible: RealmAccessible
-
-    public init(realmAccessible: RealmAccessible) {
-        self.realmAccessible = realmAccessible
-        guard let fileURL = realmAccessible.realmConfiguration.fileURL else {
-            fatalError("Realm configurations without file URL not supported")
-        }
-        queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)", autoreleaseFrequency: .workItem)
-    }
-
-    /// Execute a transaction, while making the system aware that we wish not to be interrupted.
-    public func execute<T>(_ block: @escaping (Realm) -> T, completion: @escaping (T) -> Void) {
-        BackgroundExecutor.executeWithBackgroundTask { [weak self] taskCompleted in
-            guard let self else {
-                taskCompleted()
-                return
-            }
-
-            queue.async {
-                let realm = self.realmAccessible.getRealm()
-                completion(block(realm))
-                taskCompleted()
-            }
-        } onExpired: {
-            let expiredBreadcrumb = Breadcrumb(level: .warning, category: "BackgroundRealm")
-            expiredBreadcrumb.message = "Task expired before completing"
-            SentrySDK.addBreadcrumb(expiredBreadcrumb)
-        }
-    }
-
-    public func execute<T>(_ block: @escaping (Realm) -> T) async -> T {
-        return await withCheckedContinuation { (continuation: CheckedContinuation<T, Never>) in
-            execute(block) { result in
-                continuation.resume(returning: result)
-            }
-        }
-    }
-}
-
+// TODO: Rework and assess bufferedWrite
 public final class BackgroundRealm {
     private struct WriteOperation: Equatable, Hashable {
         let parent: File?
@@ -143,7 +89,7 @@ public final class BackgroundRealm {
                 endBackgroundTask()
             }
         } onExpired: {
-            // woops
+            // TODO: Sentry
         }
     }
 
@@ -179,7 +125,8 @@ public final class BackgroundRealm {
                 }
             }
         } onExpired: {
-            // woops
+            // TODO: Assess if could gracefully stop / flush buffered transactions
+            // TODO: Sentry
         }
     }
 
