@@ -309,7 +309,6 @@ public final class DriveInfosManager: RealmAccessible {
         return driveUsers
     }
 
-    // TODO: This is now frozen, check that is works
     public func getFrozenUsers(for driveId: Int, userId: Int, using realm: Realm) -> [DriveUser] {
         guard let drive = getFrozenDrive(id: driveId, userId: userId, using: realm) else {
             return []
@@ -344,7 +343,6 @@ public final class DriveInfosManager: RealmAccessible {
         return teams
     }
 
-    // TODO: This is now frozen, check that is works
     public func getFrozenTeams(for driveId: Int, userId: Int, using realm: Realm) -> [Team] {
         guard let drive = getFrozenDrive(id: driveId, userId: userId, using: realm) else {
             return []

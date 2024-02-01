@@ -52,13 +52,13 @@ final class InviteUserTableViewCell: InsetTableViewCell {
         didSet {
             guard drive != nil else { return }
             let realm = driveInfosManager.getRealm()
-            let users = driveInfosManager.getFrozenUsers(for: drive.id, userId: drive.userId, using: realm)
-            shareables = users.sorted { $0.displayName < $1.displayName }
+            let frozenUsers = driveInfosManager.getFrozenUsers(for: drive.id, userId: drive.userId, using: realm)
+            shareables = frozenUsers.sorted { $0.displayName < $1.displayName }
             if canUseTeam {
-                let teams = driveInfosManager.getFrozenTeams(for: drive.id,
-                                                             userId: drive.userId,
-                                                             using: realm)
-                shareables = teams.sorted() + shareables
+                let frozenTeams = driveInfosManager.getFrozenTeams(for: drive.id,
+                                                                   userId: drive.userId,
+                                                                   using: realm)
+                shareables = frozenTeams.sorted() + shareables
             }
             results = shareables.filter { shareable in
                 !ignoredShareables.contains { $0.id == shareable.id }
