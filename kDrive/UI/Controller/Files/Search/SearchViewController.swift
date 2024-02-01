@@ -124,7 +124,7 @@ class SearchFilesViewModel: FileListViewModel {
                                           rightBarButtons: [.searchFilters],
                                           matomoViewPath: [MatomoUtils.Views.search.displayName])
         filters = Filters()
-        let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
+        let searchFakeRoot = driveFileManager.getLiveManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
         files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
     }

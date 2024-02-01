@@ -70,7 +70,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
         enqueue {
             // Recent files folder
             if self.containerItemIdentifier == .workingSet {
-                let workingSetFiles = self.driveFileManager.getWorkingSet()
+                let workingSetFiles = self.driveFileManager.getLiveWorkingSet()
                 var containerItems = [FileProviderItem]()
                 for file in workingSetFiles {
                     autoreleasepool {

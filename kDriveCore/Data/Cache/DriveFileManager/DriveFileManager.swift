@@ -240,22 +240,6 @@ public final class DriveFileManager: RealmAccessible {
         return offlineRoot
     }
 
-    public func getCachedRootFile(freeze: Bool = true, using realm: Realm? = nil) -> File {
-        if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
-            if root.name != drive.name {
-                let realm = realm ?? getRealm()
-                realm.refresh()
-
-                try? realm.safeWrite {
-                    root.name = drive.name
-                }
-            }
-            return freeze ? root.freeze() : root
-        } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name)
-        }
-    }
-
     // autorelease frequecy so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration
@@ -513,7 +497,7 @@ public final class DriveFileManager: RealmAccessible {
         }
 
         return (
-            getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
+            getFrozenLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
             children.count == Endpoint.itemsPerPage
         )
     }
@@ -528,7 +512,7 @@ public final class DriveFileManager: RealmAccessible {
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have
            // anyway
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
-            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
+            return (getFrozenLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             return try await remoteFiles(
                 in: directory,
@@ -565,7 +549,7 @@ public final class DriveFileManager: RealmAccessible {
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ,
                           forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
+        try await files(in: getLiveManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
                         fetchFiles: {
                             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
                             return (favorites, nil)
@@ -578,7 +562,7 @@ public final class DriveFileManager: RealmAccessible {
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ,
                               forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
+        try await files(in: getLiveManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
                             return (mySharedFiles, nil)
@@ -589,17 +573,9 @@ public final class DriveFileManager: RealmAccessible {
                         forceRefresh: forceRefresh)
     }
 
-    public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let offlineFiles = getRealm().objects(File.self)
-            .filter(NSPredicate(format: "isAvailableOffline = true"))
-            .sorted(by: [sortType.value.sortDescriptor]).freeze()
-
-        return offlineFiles.map { $0.freeze() }
-    }
-
     public func removeSearchChildren() {
         let realm = getRealm()
-        let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, using: realm)
+        let searchRoot = getLiveManagedFile(from: DriveFileManager.searchFilesRootFile, using: realm)
         try? realm.write {
             searchRoot.fullyDownloaded = false
             searchRoot.children.removeAll()
@@ -747,10 +723,6 @@ public final class DriveFileManager: RealmAccessible {
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
         }
-    }
-
-    public func getLocalRecentActivities() -> [FileActivity] {
-        return Array(getRealm().objects(FileActivity.self).sorted(by: \.createdAt, ascending: false).freeze())
     }
 
     public func setLocalRecentActivities(_ activities: [FileActivity]) {
@@ -989,7 +961,7 @@ public final class DriveFileManager: RealmAccessible {
     }
 
     public func updateAvailableOfflineFiles() async throws {
-        let offlineFiles = getAvailableOfflineFiles()
+        let offlineFiles = getFrozenAvailableOfflineFiles()
         guard !offlineFiles.isEmpty else { return }
         let date = Date(timeIntervalSince1970: TimeInterval(UserDefaults.shared.lastSyncDateOfflineFiles))
         // Get activities
@@ -1036,17 +1008,6 @@ public final class DriveFileManager: RealmAccessible {
         }
         // Silently handle error
         DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
-    }
-
-    public func getWorkingSet() -> [File] {
-        // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
-        // -3600).timeIntervalSince1970))
-        let files = getRealm().objects(File.self).sorted(by: \.lastModifiedAt, ascending: false)
-        var result = [File]()
-        for i in 0 ..< min(20, files.count) {
-            result.append(files[i])
-        }
-        return result
     }
 
     public func add(category: Category, to file: ProxyFile) async throws {
@@ -1377,16 +1338,6 @@ public final class DriveFileManager: RealmAccessible {
 
     // MARK: - Utilities
 
-    public func getLocalSortedDirectoryFiles(directory: File, sortType: SortType) -> [File] {
-        let children = directory.children.sorted(by: [
-            SortDescriptor(keyPath: \File.type, ascending: true),
-            SortDescriptor(keyPath: \File.visibility, ascending: false),
-            sortType.value.sortDescriptor
-        ])
-
-        return Array(children.freeze())
-    }
-
     private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
@@ -1482,7 +1433,7 @@ public final class DriveFileManager: RealmAccessible {
         static let all: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .path, .users, .version, .capabilities]
     }
 
-    private func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
+    func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
@@ -1510,25 +1461,6 @@ public final class DriveFileManager: RealmAccessible {
         }
         if keepProperties.contains(.capabilities) {
             newFile.capabilities = Rights(value: savedChild.capabilities)
-        }
-    }
-
-    /**
-     Get a live version for the given file (if the file is not cached in realm it is added and then returned)
-     - Returns: A realm managed file
-     */
-    public func getManagedFile(from file: File, using realm: Realm? = nil) -> File {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-
-        if let cachedFile = getCachedFile(id: file.id, freeze: false, using: realm) {
-            return cachedFile
-        } else {
-            keepCacheAttributesForFile(newFile: file, keepProperties: [.all], using: realm)
-            try? realm.write {
-                realm.add(file, update: .all)
-            }
-            return file
         }
     }
 

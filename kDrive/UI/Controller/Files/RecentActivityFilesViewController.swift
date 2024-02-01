@@ -112,7 +112,7 @@ class RecentActivityFilesViewController: FileListViewController {
     override func onFilePresented(_ file: File) {
         #if !ISEXTENSION
         if file.isDirectory {
-            let managedFile = driveFileManager.getManagedFile(from: file.detached())
+            let managedFile = driveFileManager.getLiveManagedFile(from: file.detached())
             filePresenter.present(driveFileManager: viewModel.driveFileManager,
                                   file: managedFile,
                                   files: viewModel.getAllFiles(),

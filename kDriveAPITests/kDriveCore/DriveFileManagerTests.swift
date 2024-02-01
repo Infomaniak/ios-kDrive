@@ -179,8 +179,8 @@ final class DriveFileManagerTests: XCTestCase {
             DriveFileManagerTests.driveFileManager.setFileAvailableOffline(file: officeFile, available: true) { error in
                 XCTAssertNil(error, TestsMessages.noError)
                 expectations[0].expectation.fulfill()
-                let offlineFiles = DriveFileManagerTests.driveFileManager.getAvailableOfflineFiles()
-                let availableOffline = offlineFiles.contains { $0.id == officeFile.id }
+                let frozenOfflineFiles = DriveFileManagerTests.driveFileManager.getFrozenAvailableOfflineFiles()
+                let availableOffline = frozenOfflineFiles.contains { $0.id == officeFile.id }
                 XCTAssertTrue(availableOffline, "New offline file should be in list")
                 expectations[1].expectation.fulfill()
             }

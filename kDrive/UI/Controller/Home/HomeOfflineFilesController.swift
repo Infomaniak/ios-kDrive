@@ -32,7 +32,7 @@ class HomeOfflineFilesController: HomeRecentFilesController {
     }
 
     override func getFiles() async throws -> [File] {
-        return driveFileManager.getAvailableOfflineFiles()
+        return driveFileManager.getFrozenAvailableOfflineFiles()
     }
 
     override func refreshIfNeeded(with file: File) {

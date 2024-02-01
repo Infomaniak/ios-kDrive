@@ -789,7 +789,7 @@ extension HomeViewController: RecentActivityDelegate {
         } else {
             filePresenter.present(
                 driveFileManager: driveFileManager,
-                file: driveFileManager.getManagedFile(from: file),
+                file: driveFileManager.getLiveManagedFile(from: file),
                 files: activities.compactMap(\.file),
                 normalFolderHierarchy: false
             )
