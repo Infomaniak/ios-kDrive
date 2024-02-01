@@ -73,7 +73,7 @@ public protocol UploadQueueable {
 extension UploadQueue: UploadQueueable {
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         Log.uploadQueue("waitForCompletion")
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: UploadQueue.qos.qosClass).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
             Log.uploadQueue("🎉 AllOperationsAreFinished")
             completionHandler()
@@ -104,10 +104,10 @@ extension UploadQueue: UploadQueueable {
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
                 try? self.transactionWithUploadRealm { realm in
-                    batch.forEach { fileId in
+                    for fileId in batch {
                         guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId),
                               !file.isInvalidated else {
-                            return
+                            continue
                         }
                         self.addToQueueIfNecessary(uploadFile: file, using: realm)
                     }
@@ -169,9 +169,9 @@ extension UploadQueue: UploadQueueable {
 
     public func rescheduleRunningOperations() {
         Log.uploadQueue("rescheduleRunningOperations")
-        operationQueue.operations.filter(\.isExecuting).forEach { operation in
+        for operation in operationQueue.operations.filter(\.isExecuting) {
             guard let uploadOperation = operation as? UploadOperation else {
-                return
+                continue
             }
 
             // Mark the operation as rescheduled
@@ -266,7 +266,7 @@ extension UploadQueue: UploadQueueable {
             let batches = uploadingFilesIds.chunks(ofCount: 100)
             for fileIds in batches {
                 autoreleasepool {
-                    fileIds.forEach { id in
+                    for id in fileIds {
                         // Cancel operation if any
                         if let operation = self.keyedUploadOperations.getObject(forKey: id) {
                             operation.cancel()
@@ -304,7 +304,7 @@ extension UploadQueue: UploadQueueable {
                 Log.uploadQueue("will clean errors for uploads:\(failedUploadFiles.count)")
 
                 try? realm.safeWrite {
-                    failedUploadFiles.forEach { file in
+                    for file in failedUploadFiles {
                         file.clearErrorsForRetry()
                     }
                 }
@@ -389,7 +389,7 @@ extension UploadQueue: UploadQueueable {
 
     private func cancelAnyInBatch(_ batch: ArraySlice<String>) {
         try? transactionWithUploadRealm { realm in
-            batch.forEach { uploadFileId in
+            for uploadFileId in batch {
                 // Cancel operation if any
                 if let operation = self.operation(uploadFileId: uploadFileId) {
                     operation.cancel()
@@ -399,7 +399,7 @@ extension UploadQueue: UploadQueueable {
                 // Clean errors in db file
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
-                    return
+                    continue
                 }
                 try? realm.safeWrite {
                     file.clearErrorsForRetry()
@@ -410,10 +410,10 @@ extension UploadQueue: UploadQueueable {
 
     private func enqueueAnyInBatch(_ batch: ArraySlice<String>) {
         try? transactionWithUploadRealm { realm in
-            batch.forEach { uploadFileId in
+            for uploadFileId in batch {
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
-                    return
+                    continue
                 }
 
                 self.addToQueueIfNecessary(uploadFile: file, using: realm)

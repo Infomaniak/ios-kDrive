@@ -54,8 +54,27 @@ public final class DownloadTask: Object {
     }
 }
 
+extension QualityOfService {
+    var dispatchQoS: DispatchQoS {
+        switch self {
+        case .background:
+            return .background
+        case .default:
+            return .default
+        case .userInitiated:
+            return .userInitiated
+        case .userInteractive:
+            return .userInteractive
+        case .utility:
+            return .utility
+        }
+    }
+}
+
 public final class DownloadQueue {
     // MARK: - Attributes
+
+    static let qos: QualityOfService = .userInitiated
 
     @LazyInjectService var accountManager: AccountManageable
 
@@ -67,7 +86,7 @@ public final class DownloadQueue {
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
-        queue.qualityOfService = .userInitiated
+        queue.qualityOfService = DownloadQueue.qos
         queue.maxConcurrentOperationCount = 4
         return queue
     }()
@@ -161,7 +180,7 @@ public final class DownloadQueue {
                                   userId: Int,
                                   onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
                                   completion: @escaping (DriveError?) -> Void) {
-        dispatchQueue.async(qos: .userInitiated) { [
+        dispatchQueue.async(qos: DownloadQueue.qos.dispatchQoS) { [
             driveId = file.driveId,
             fileId = file.id,
             isManagedByRealm = file.isManagedByRealm
@@ -220,25 +239,25 @@ public final class DownloadQueue {
     }
 
     private func publishFileDownloaded(fileId: Int, error: DriveError?) {
-        observations.didDownloadFile.values.forEach { closure in
+        for closure in observations.didDownloadFile.values {
             closure(fileId, error)
         }
     }
 
     func publishProgress(_ progress: Double, for fileId: Int) {
-        observations.didChangeProgress.values.forEach { closure in
+        for closure in observations.didChangeProgress.values {
             closure(fileId, progress)
         }
     }
 
     private func publishArchiveDownloaded(archiveId: String, archiveUrl: URL?, error: DriveError?) {
-        observations.didDownloadArchive.values.forEach { closure in
+        for closure in observations.didDownloadArchive.values {
             closure(archiveId, archiveUrl, error)
         }
     }
 
     func publishProgress(_ progress: Double, for archiveId: String) {
-        observations.didChangeArchiveProgress.values.forEach { closure in
+        for closure in observations.didChangeArchiveProgress.values {
             closure(archiveId, progress)
         }
     }

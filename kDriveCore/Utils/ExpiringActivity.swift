@@ -35,12 +35,16 @@ public protocol ExpiringActivityable {
     func end()
 }
 
+// TODO: Use new version to come in ios-core 7.0.0
 public final class ExpiringActivity: ExpiringActivityable {
     /// Keep track of the locks on blocks
     private var locks = [TolerantDispatchGroup]()
 
+    /// QoS used by the underlying queues
+    private static let qos: DispatchQoS = .userInitiated
+
     /// For thread safety
-    private let queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync")
+    private let queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync", qos: ExpiringActivity.qos)
 
     /// Something to identify the background activity in debug
     let id: String
@@ -62,7 +66,7 @@ public final class ExpiringActivity: ExpiringActivityable {
     }
 
     public func start() {
-        let group = TolerantDispatchGroup()
+        let group = TolerantDispatchGroup(qos: Self.qos)
 
         queue.sync {
             self.locks.append(group)
