@@ -84,6 +84,12 @@ public enum FactoryService {
             },
             Factory(type: AccountManageable.self) { _, _ in
                 AccountManager()
+            },
+            Factory(type: DriveConstants.self) { _, _ in
+                DriveConstants()
+            },
+            Factory(type: DriveUploadManager.self) { _, _ in
+                DriveUploadManager()
             }
         ]
         return services

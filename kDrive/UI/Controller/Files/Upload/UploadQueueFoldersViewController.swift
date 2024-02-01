@@ -29,7 +29,7 @@ class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var uploadQueue: UploadQueue
     @LazyInjectService private var driveInfosManager: DriveInfosManager
 
-    private let realm = DriveFileManager.driveUploadManager.uploadsRealm
+    private let realm = DriveFileManager.driveUploadManager.getRealm()
 
     private var userId: Int {
         return driveFileManager.drive.userId

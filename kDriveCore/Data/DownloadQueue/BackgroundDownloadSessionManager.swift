@@ -81,7 +81,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     public func reconnectBackgroundTasks() {
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
-            let realm = DriveFileManager.driveUploadManager.uploadsRealm
+            let realm = DriveFileManager.driveUploadManager.getRealm()
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                    let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?
@@ -157,7 +157,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = DriveFileManager.driveUploadManager.uploadsRealm.objects(DownloadTask.self)
+                  let downloadTask = DriveFileManager.driveUploadManager.getRealm().objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
                   let driveFileManager = accountManager.getDriveFileManager(
                       for: downloadTask.driveId,

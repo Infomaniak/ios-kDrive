@@ -25,6 +25,7 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+/// Handle the realm db used for file upload
 public final class DriveUploadManager: RealmAccessible {
     private let fileManager = FileManager.default
 
@@ -128,11 +129,6 @@ public final class DriveUploadManager: RealmAccessible {
                       UploadedChunk.self,
                       UploadingSessionTask.self]
     )
-
-    /// realm db used for file upload
-    public var uploadsRealm: Realm {
-        getRealm()
-    }
 
     init() {
         // META: keep SonarCloud happy
