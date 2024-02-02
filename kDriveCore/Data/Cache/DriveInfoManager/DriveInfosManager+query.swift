@@ -41,10 +41,8 @@ public extension DriveInfosManager {
     }
 
     func getFrozenDrive(id: Int, userId: Int) async -> Drive? {
-        var drive: Drive?
-        await realmTransaction.execute { realm in
-            drive = self.getFrozenDrive(id: id, userId: userId, using: realm)
-        }
+        let realm = getRealm()
+        let drive = getFrozenDrive(id: id, userId: userId, using: realm)
         return drive
     }
 
@@ -54,10 +52,8 @@ public extension DriveInfosManager {
     }
 
     func getFrozenDrive(objectId: String) async -> Drive? {
-        var drive: Drive?
-        await realmTransaction.execute { realm in
-            drive = self.getFrozenDrive(objectId: objectId, using: realm)
-        }
+        let realm = getRealm()
+        let drive = getFrozenDrive(objectId: objectId, using: realm)
         return drive
     }
 
@@ -74,10 +70,8 @@ public extension DriveInfosManager {
     }
 
     func getFrozenUsers(for driveId: Int, userId: Int) async -> [DriveUser] {
-        var driveUsers = [DriveUser]()
-        await realmTransaction.execute { realm in
-            driveUsers = self.getFrozenUsers(for: driveId, userId: userId, using: realm)
-        }
+        let realm = getRealm()
+        let driveUsers = getFrozenUsers(for: driveId, userId: userId, using: realm)
         return driveUsers
     }
 
@@ -91,11 +85,9 @@ public extension DriveInfosManager {
         return users.map { $0.freeze() }
     }
 
-    func getFrozenUser(id: Int, using realm: Realm) async -> DriveUser? {
-        var driveUser: DriveUser?
-        await realmTransaction.execute { realm in
-            driveUser = self.getFrozenUser(id: id, using: realm)
-        }
+    func getFrozenUser(id: Int) async -> DriveUser? {
+        let realm = getRealm()
+        let driveUser = getFrozenUser(id: id, using: realm)
         return driveUser
     }
 
@@ -108,10 +100,8 @@ public extension DriveInfosManager {
     }
 
     func getFrozenTeams(for driveId: Int, userId: Int) async -> [Team] {
-        var teams = [Team]()
-        await realmTransaction.execute { realm in
-            teams = self.getFrozenTeams(for: driveId, userId: userId, using: realm)
-        }
+        let realm = getRealm()
+        let teams = getFrozenTeams(for: driveId, userId: userId, using: realm)
         return teams
     }
 
@@ -126,10 +116,8 @@ public extension DriveInfosManager {
     }
 
     func getFrozenTeam(id: Int) async -> Team? {
-        var team: Team?
-        await realmTransaction.execute { realm in
-            team = self.getFrozenTeam(id: id, using: realm)
-        }
+        let realm = getRealm()
+        let team = getFrozenTeam(id: id, using: realm)
         return team
     }
 
