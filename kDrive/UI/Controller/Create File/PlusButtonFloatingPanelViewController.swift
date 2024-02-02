@@ -20,6 +20,7 @@ import AVFoundation
 import CocoaLumberjackSwift
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PhotosUI
@@ -28,6 +29,8 @@ import Vision
 import VisionKit
 
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+    @LazyInjectService var constants: DriveConstants
+
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
@@ -167,11 +170,11 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesStrings.Localizable
+            cell.titleLabel.text = currentDirectory.id == constants.rootID ? KDriveResourcesStrings.Localizable
                 .allRootName(driveFileManager.drive.name) : currentDirectory.name
-            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesAsset.drive
+            cell.accessoryImageView.image = currentDirectory.id == constants.rootID ? KDriveResourcesAsset.drive
                 .image : KDriveResourcesAsset.folderFilled.image
-            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants
+            cell.accessoryImageView.tintColor = currentDirectory.id == constants
                 .rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
             cell.separator?.isHidden = false
             cell.selectionStyle = .none

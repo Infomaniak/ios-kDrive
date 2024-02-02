@@ -23,7 +23,8 @@ import InfomaniakDI
 
 public extension NSFileProviderItemIdentifier {
     init(_ directoryId: Int) {
-        if directoryId == DriveFileManager.constants.rootID {
+        @InjectService var constants: DriveConstants
+        if directoryId == constants.rootID {
             self.init(NSFileProviderItemIdentifier.rootContainer.rawValue)
         } else {
             self.init("\(directoryId)")
@@ -31,8 +32,9 @@ public extension NSFileProviderItemIdentifier {
     }
 
     func toFileId() -> Int? {
+        @InjectService var constants: DriveConstants
         if self == .rootContainer {
-            return DriveFileManager.constants.rootID
+            return constants.rootID
         } else {
             let fileId = Int(rawValue)
             return fileId

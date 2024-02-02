@@ -44,6 +44,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     var window: UIWindow?
 
+    @LazyInjectService var constants: DriveConstants
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager

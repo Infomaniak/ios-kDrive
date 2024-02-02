@@ -24,7 +24,7 @@ public extension DriveFileManager {
     // MARK: - Get
 
     func getCachedRootFile(freeze: Bool = true, using realm: Realm? = nil) -> File {
-        if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
+        if let root = getCachedFile(id: constants.rootID, freeze: false) {
             if root.name != drive.name {
                 let realm = realm ?? getRealm()
                 realm.refresh()
@@ -35,7 +35,7 @@ public extension DriveFileManager {
             }
             return freeze ? root.freeze() : root
         } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name)
+            return File(id: constants.rootID, name: drive.name)
         }
     }
 

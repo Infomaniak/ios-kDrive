@@ -26,15 +26,8 @@ import RealmSwift
 import SwiftRegex
 
 public final class DriveFileManager: RealmAccessible {
+    @LazyInjectService var constants: DriveConstants
     @LazyInjectService private var driveInfosManager: DriveInfosManager
-
-    // TODO: Use DI
-//    @LazyInjectService private var driveUploadManager: DriveUploadManager
-    private static let driveUploadManager = DriveUploadManager()
-
-    // TODO: Use DI
-//    @LazyInjectService public var constants: DriveConstants
-    public static let constants = DriveConstants()
 
     private let fileManager = FileManager.default
     public static var favoriteRootFile: File {
@@ -89,7 +82,8 @@ public final class DriveFileManager: RealmAccessible {
     init(drive: Drive, apiFetcher: DriveApiFetcher) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        @InjectService var constants: DriveConstants
+        realmURL = constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
@@ -178,7 +172,7 @@ public final class DriveFileManager: RealmAccessible {
                     }
                 }
             },
-            objectTypes: DriveFileManager.constants.driveObjectTypes
+            objectTypes: constants.driveObjectTypes
         )
 
         // Only compact in the background
@@ -189,7 +183,7 @@ public final class DriveFileManager: RealmAccessible {
         // Init root file
         Task {
             await self.realmTransaction.execute { realm in
-                if self.getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
+                if self.getCachedFile(id: self.constants.rootID, freeze: false, using: realm) == nil {
                     let rootFile = self.getCachedRootFile(using: realm)
                     try? realm.safeWrite {
                         realm.add(rootFile)
@@ -212,7 +206,7 @@ public final class DriveFileManager: RealmAccessible {
         }
 
         let config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
+            fileURL: constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [
                 Drive.self,
@@ -232,7 +226,7 @@ public final class DriveFileManager: RealmAccessible {
         }
 
         let files = (try? fileManager
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil)) ?? []
+            .contentsOfDirectory(at: constants.rootDocumentsURL, includingPropertiesForKeys: nil)) ?? []
         for file in files where file.pathExtension == "realm" {
             do {
                 let realmConfiguration = Realm.Configuration(
@@ -253,8 +247,12 @@ public final class DriveFileManager: RealmAccessible {
     ///   - userId: User ID
     ///   - driveId: Drive ID (`nil` if all user drives)
     public static func deleteUserDriveFiles(userId: Int, driveId: Int? = nil) {
-        let files = (try? FileManager.default
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil))
+        @InjectService var constants: DriveConstants
+
+        let files = (try? FileManager.default.contentsOfDirectory(
+            at: constants.rootDocumentsURL,
+            includingPropertiesForKeys: nil
+        ))
         files?.forEach { file in
             if let matches = Regex(pattern: "(\\d+)-(\\d+).realm.*")?.firstMatch(in: file.lastPathComponent), matches.count > 2 {
                 let fileUserId = matches[1]
@@ -278,7 +276,7 @@ public final class DriveFileManager: RealmAccessible {
     }
 
     public func initRoot() async throws {
-        let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
+        let root = try await file(id: constants.rootID, forceRefresh: true)
         _ = try await files(in: root.proxify())
     }
 
@@ -319,7 +317,7 @@ public final class DriveFileManager: RealmAccessible {
         try realm.write {
             managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
             if children.count < Endpoint.itemsPerPage {
-                managedParent.versionCode = DriveFileManager.constants.currentVersionCode
+                managedParent.versionCode = constants.currentVersionCode
                 managedParent.fullyDownloaded = true
             }
             realm.add(children, update: .modified)

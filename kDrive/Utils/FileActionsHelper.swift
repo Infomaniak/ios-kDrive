@@ -27,6 +27,8 @@ import UIKit
 
 @MainActor
 public final class FileActionsHelper {
+    @LazyInjectService private var constants: DriveConstants
+
     private var interactionController: UIDocumentInteractionController!
 
     public static let instance = FileActionsHelper()
@@ -34,7 +36,7 @@ public final class FileActionsHelper {
     // MARK: - Single file
 
     public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
-        guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
+        guard let rootFolderURL = constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return

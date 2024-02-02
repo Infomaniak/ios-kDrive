@@ -338,6 +338,8 @@ public final class FileVersion: EmbeddedObject, Codable {
 }
 
 public final class File: Object, Codable {
+    @LazyInjectService var constants: DriveConstants
+
     private let fileManager = FileManager.default
 
     @LazyInjectService private var driveInfosManager: DriveInfosManager
@@ -464,7 +466,7 @@ public final class File: Object, Codable {
     }
 
     public var isRoot: Bool {
-        return id <= DriveFileManager.constants.rootID
+        return id <= constants.rootID
     }
 
     public var isDirectory: Bool {
@@ -494,7 +496,7 @@ public final class File: Object, Codable {
     }
 
     public var localContainerUrl: URL {
-        let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants
+        let directory = isAvailableOffline ? constants.rootDocumentsURL : constants
             .cacheDirectoryURL
         return directory.appendingPathComponent("\(driveId)", isDirectory: true)
             .appendingPathComponent("\(id)", isDirectory: true)
@@ -637,7 +639,7 @@ public final class File: Object, Codable {
 
     /// Indicate if we can use the cached children or if we must call API.
     public var canLoadChildrenFromCache: Bool {
-        return fullyDownloaded && versionCode == DriveFileManager.constants.currentVersionCode
+        return fullyDownloaded && versionCode == constants.currentVersionCode
     }
 
     public var canBeColored: Bool {
@@ -701,9 +703,9 @@ public final class File: Object, Codable {
     public func signalChanges(userId: Int) {
         let identifier: NSFileProviderItemIdentifier
         if isDirectory {
-            identifier = id == DriveFileManager.constants.rootID ? .rootContainer : NSFileProviderItemIdentifier("\(id)")
+            identifier = id == constants.rootID ? .rootContainer : NSFileProviderItemIdentifier("\(id)")
         } else if let parentId = parent?.id {
-            identifier = parentId == DriveFileManager.constants
+            identifier = parentId == constants
                 .rootID ? .rootContainer : NSFileProviderItemIdentifier("\(parentId)")
         } else {
             identifier = .rootContainer

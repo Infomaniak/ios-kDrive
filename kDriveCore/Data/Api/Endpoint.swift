@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 
 // MARK: - Type definition
@@ -115,7 +116,8 @@ public struct ProxyFile: AbstractFile, Sendable {
     public var driveId: Int
     public var id: Int
     public var isRoot: Bool {
-        return id <= DriveFileManager.constants.rootID
+        @InjectService var constants: DriveConstants
+        return id <= constants.rootID
     }
 
     public init(driveId: Int, id: Int) {

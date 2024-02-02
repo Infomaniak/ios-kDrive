@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
 
@@ -25,12 +26,14 @@ class InMemoryFileListViewModel: FileListViewModel {
     private let realm: Realm
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
+        @InjectService var constants: DriveConstants
+
         if let realm = currentDirectory.realm {
             self.realm = realm
         } else {
             let unCachedRealmConfiguration = Realm.Configuration(
                 inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
-                objectTypes: DriveFileManager.constants.driveObjectTypes
+                objectTypes: constants.driveObjectTypes
             )
             do {
                 realm = try Realm(configuration: unCachedRealmConfiguration)

@@ -26,6 +26,7 @@ import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
+    @LazyInjectService var constants: DriveConstants
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
 
@@ -434,7 +435,7 @@ extension SaveFileViewController: UITableViewDelegate {
 
 extension SaveFileViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
-        if folder.id == DriveFileManager.constants.rootID {
+        if folder.id == constants.rootID {
             selectedDirectory = selectedDriveFileManager?.getCachedRootFile()
         } else {
             selectedDirectory = folder

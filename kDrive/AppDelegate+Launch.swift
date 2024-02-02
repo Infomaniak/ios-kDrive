@@ -122,7 +122,7 @@ extension AppDelegate {
     // TODO: Refactor to async
     func uploadEditedFiles() {
         Log.appDelegate("uploadEditedFiles")
-        guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
+        guard let folderURL = constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
         }

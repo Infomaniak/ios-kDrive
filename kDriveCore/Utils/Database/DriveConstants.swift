@@ -25,6 +25,7 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+// TODO: Rename, not really consts since we mutate some of them
 public final class DriveConstants {
     private let fileManager = FileManager.default
 

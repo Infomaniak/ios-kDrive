@@ -25,6 +25,8 @@ import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, Restorable {
+    @LazyInjectService var constants: DriveConstants
+
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -191,7 +193,7 @@ class MainTabViewController: UITabBarController, Restorable {
     func getCurrentDirectory() -> (DriveFileManager, File) {
         if let filesViewController = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController,
-            filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            filesViewController.viewModel.currentDirectory.id >= constants.rootID {
             return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
             let file = driveFileManager.getCachedRootFile()

@@ -17,11 +17,14 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class StorageTableViewController: UITableViewController {
+    @LazyInjectService var constants: DriveConstants
+
     private enum Section: CaseIterable {
         case header, directories, files
     }
@@ -85,11 +88,11 @@ class StorageTableViewController: UITableViewController {
     private func reload() {
         totalSize = 0
         // Get directories
-        var paths = [DriveFileManager.constants.rootDocumentsURL,
+        var paths = [constants.rootDocumentsURL,
                      NSFileProviderManager.default.documentStorageURL,
-                     DriveFileManager.constants.importDirectoryURL,
+                     constants.importDirectoryURL,
                      fileManager.temporaryDirectory,
-                     DriveFileManager.constants.cacheDirectoryURL]
+                     constants.cacheDirectoryURL]
         // Append document directory if it exists
         if let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
             paths.insert(documentDirectory, at: 1)
@@ -98,7 +101,7 @@ class StorageTableViewController: UITableViewController {
         // Get total size
         totalSize = directories.reduce(0) { $0 + $1.size }
         // Get files
-        files = exploreDirectory(at: DriveFileManager.constants.cacheDirectoryURL.path) ?? []
+        files = exploreDirectory(at: constants.cacheDirectoryURL.path) ?? []
         files.removeAll { $0.path.contains("logs") } // Exclude log files
     }
 

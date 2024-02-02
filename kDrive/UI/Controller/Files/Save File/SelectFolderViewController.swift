@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -29,11 +30,12 @@ protocol SelectFolderDelegate: AnyObject {
 class SelectFolderViewModel: ConcreteFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile()
+        @InjectService var constants: DriveConstants
         let configuration = Configuration(showUploadingFiles: false,
                                           isMultipleSelectionEnabled: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
                                           emptyViewType: .emptyFolderSelectFolder,
-                                          leftBarButtons: currentDirectory.id == DriveFileManager.constants
+                                          leftBarButtons: currentDirectory.id == constants
                                               .rootID ? [.cancel] : nil,
                                           rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
                                           matomoViewPath: [MatomoUtils.Views.save.displayName, "SelectFolder"])

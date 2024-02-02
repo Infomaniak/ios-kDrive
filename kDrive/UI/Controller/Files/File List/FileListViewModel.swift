@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Combine
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -49,6 +50,8 @@ enum ControllerPresentationType {
 
 @MainActor
 class FileListViewModel: SelectDelegate {
+    @LazyInjectService var constants: DriveConstants
+
     /// deletions, insertions, modifications, moved, isEmpty, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], [(source: Int, target: Int)], Bool, Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void

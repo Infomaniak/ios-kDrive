@@ -87,7 +87,8 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Helping methods
 
     func getRootDirectory() async throws -> ProxyFile {
-        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data
+        @InjectService var constants: DriveConstants
+        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: constants.rootID)).data
             .proxify()
     }
 
@@ -136,9 +137,10 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Test methods
 
     func testGetRootFile() async throws {
+        @InjectService var constants: DriveConstants
         let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(
             driveId: Env.driveId,
-            id: DriveFileManager.constants.rootID
+            id: constants.rootID
         ))
         _ = try await currentApiFetcher.files(in: file.proxify())
     }

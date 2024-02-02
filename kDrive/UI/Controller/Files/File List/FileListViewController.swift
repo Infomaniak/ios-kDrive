@@ -140,6 +140,8 @@ class ConcreteFileListViewModel: FileListViewModel {
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+    @LazyInjectService var constants: DriveConstants
+
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -232,7 +234,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         guard viewModel != nil else { return }
         #if !ISEXTENSION
         let plusButtonDirectory: File
-        if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+        if viewModel.currentDirectory.id >= constants.rootID {
             plusButtonDirectory = viewModel.currentDirectory
         } else {
             plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
@@ -827,7 +829,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
         let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
 
-        if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
+        if !(maybeCurrentDirectory == nil && directoryId > constants.rootID),
            let viewModelName,
            let viewModel = getViewModel(
                viewModelName: viewModelName,

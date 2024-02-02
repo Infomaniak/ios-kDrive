@@ -18,13 +18,16 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 public class PdfPreviewCache {
     public static let shared = PdfPreviewCache()
     private let pdfCacheDirectory: URL
 
     private init() {
-        pdfCacheDirectory = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("PdfPreviews", isDirectory: true)
+        @InjectService var constants: DriveConstants
+
+        pdfCacheDirectory = constants.cacheDirectoryURL.appendingPathComponent("PdfPreviews", isDirectory: true)
         try? FileManager.default.createDirectory(
             atPath: pdfCacheDirectory.path,
             withIntermediateDirectories: true,

@@ -67,7 +67,8 @@ public enum Logging {
     private static func initLogger() {
         DDOSLogger.sharedInstance.logFormatter = LogFormatter()
         DDLog.add(DDOSLogger.sharedInstance)
-        let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL
+        @InjectService var constants: DriveConstants
+        let logFileManager = DDLogFileManagerDefault(logsDirectory: constants.cacheDirectoryURL
             .appendingPathComponent(
                 "logs",
                 isDirectory: true
@@ -107,6 +108,7 @@ public enum Logging {
     private static func copyDebugInformations() {
         #if DEBUG && !TEST
         guard !Bundle.main.isExtension else { return }
+
         let fileManager = FileManager.default
         let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(
             "debug",
@@ -124,10 +126,11 @@ public enum Logging {
             try? fileManager.removeItem(atPath: documentDrivesPath)
             try? fileManager.removeItem(atPath: documentLogsPath)
 
-            if fileManager.fileExists(atPath: DriveFileManager.constants.rootDocumentsURL.path) {
-                try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
+            @InjectService var constants: DriveConstants
+            if fileManager.fileExists(atPath: constants.rootDocumentsURL.path) {
+                try fileManager.copyItem(atPath: constants.rootDocumentsURL.path, toPath: documentDrivesPath)
             }
-            let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
+            let cachedLogsUrl = constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
             if fileManager.fileExists(atPath: cachedLogsUrl.path) {
                 try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
             }

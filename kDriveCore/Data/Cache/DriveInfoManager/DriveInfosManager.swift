@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import Realm
 import RealmSwift
 import Sentry
@@ -41,8 +42,10 @@ public final class DriveInfosManager: RealmAccessible {
     }
 
     init() {
+        @InjectService var constants: DriveConstants
+
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
+            fileURL: constants.rootDocumentsURL.appendingPathComponent(dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
