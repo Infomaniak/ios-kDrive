@@ -23,7 +23,6 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-// TODO: Rework and assess bufferedWrite
 public final class BackgroundRealm {
     private struct WriteOperation: Equatable, Hashable {
         let parent: File?
@@ -87,14 +86,14 @@ public final class BackgroundRealm {
         self.queue = queue
     }
 
-    public func execute(_ block: @escaping (Realm) -> Void) {
-        BackgroundExecutor.executeWithBackgroundTask { endBackgroundTask in
-            self.queue.async {
-                block(self.realm)
-                endBackgroundTask()
-            }
-        } onExpired: {
-            // TODO: Sentry
+    public func execute(_ block: (Realm) -> Void) {
+        queue.sync {
+            let activity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
+            activity.start()
+
+            block(realm)
+
+            activity.endAll()
         }
     }
 
@@ -109,36 +108,27 @@ public final class BackgroundRealm {
 
      */
     public func bufferedWrite(in parent: File?, file: File) {
-        BackgroundExecutor.executeWithBackgroundTask { endBackgroundTask in
-            self.queue.async {
-                self.buffer.insert(WriteOperation(parent: parent, file: file))
-                if self.buffer.count > BackgroundRealm.writeBufferSize {
-                    self.debouncedBufferWrite?.cancel()
-                    self.debouncedBufferWrite = nil
-                    self.writeBuffer()
-                    endBackgroundTask()
-                }
+        buffer.insert(WriteOperation(parent: parent, file: file))
+        if buffer.count > BackgroundRealm.writeBufferSize {
+            debouncedBufferWrite?.cancel()
+            debouncedBufferWrite = nil
+            writeBuffer()
+        }
 
-                if self.debouncedBufferWrite == nil {
-                    let debouncedWorkItem = DispatchWorkItem { [weak self] in
-                        self?.writeBuffer()
-                        self?.debouncedBufferWrite = nil
-                        endBackgroundTask()
-                    }
-                    self.queue.asyncAfter(deadline: .now() + BackgroundRealm.writeBufferExpiration, execute: debouncedWorkItem)
-                    self.debouncedBufferWrite = debouncedWorkItem
-                }
+        if debouncedBufferWrite == nil {
+            let debouncedWorkItem = DispatchWorkItem { [weak self] in
+                self?.writeBuffer()
+                self?.debouncedBufferWrite = nil
             }
-        } onExpired: {
-            // TODO: Assess if could gracefully stop / flush buffered transactions
-            // TODO: Sentry
+            queue.asyncAfter(deadline: .now() + BackgroundRealm.writeBufferExpiration, execute: debouncedWorkItem)
+            debouncedBufferWrite = debouncedWorkItem
         }
     }
 
     private func writeBuffer() {
         try? realm.safeWrite {
-            for write in self.buffer {
-                self.realm.add(write.file, update: .all)
+            for write in buffer {
+                realm.add(write.file, update: .all)
                 if write.parent?.isInvalidated == false {
                     write.parent?.children.insert(write.file)
                 }

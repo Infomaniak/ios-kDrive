@@ -48,25 +48,21 @@ public final class RealmTransaction: RealmTransactionable {
         guard let fileURL = realmAccessible.realmConfiguration.fileURL else {
             fatalError("Realm configurations without file URL not supported")
         }
-        queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)", autoreleaseFrequency: .workItem)
+        queue = DispatchQueue(
+            label: "com.infomaniak.drive.\(fileURL.lastPathComponent).\(UUID().uuidString)",
+            autoreleaseFrequency: .workItem
+        )
     }
 
     public func execute<T>(_ block: @escaping (Realm) -> T, completion: @escaping (T) -> Void) {
-        BackgroundExecutor.executeWithBackgroundTask { [weak self] taskCompleted in
-            guard let self else {
-                taskCompleted()
-                return
-            }
+        queue.async {
+            let activity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
+            activity.start()
 
-            queue.async {
-                let realm = self.realmAccessible.getRealm()
-                completion(block(realm))
-                taskCompleted()
-            }
-        } onExpired: {
-            let expiredBreadcrumb = Breadcrumb(level: .warning, category: "BackgroundRealm")
-            expiredBreadcrumb.message = "Task expired before completing"
-            SentrySDK.addBreadcrumb(expiredBreadcrumb)
+            let realm = self.realmAccessible.getRealm()
+            completion(block(realm))
+
+            activity.endAll()
         }
     }
 

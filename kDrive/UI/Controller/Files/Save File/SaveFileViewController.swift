@@ -495,7 +495,7 @@ extension SaveFileViewController: FooterButtonDelegate {
             return
         }
 
-        Task {
+        Task(priority: .userInitiated) {
             let message: String
             do {
                 try await fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)

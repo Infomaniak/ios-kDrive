@@ -27,7 +27,7 @@ public final class UploadQueue {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
-    static let qos: DispatchQoS = .userInitiated
+    static let qos: QualityOfService = .userInitiated
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
@@ -37,11 +37,11 @@ public final class UploadQueue {
     public var pausedNotificationSent = false
 
     /// A serial queue to lock access to ivars an observations.
-    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: UploadQueue.qos)
+    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: UploadQueue.qos.dispatchQoS)
 
     /// A concurrent queue.
     let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
-                                        qos: .userInitiated,
+                                        qos: UploadQueue.qos.dispatchQoS,
                                         attributes: [.concurrent])
 
     /// Something to track an operation for a File ID
@@ -50,7 +50,7 @@ public final class UploadQueue {
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
-        queue.qualityOfService = .userInitiated
+        queue.qualityOfService = UploadQueue.qos
 
         // In extension to reduce memory footprint, we reduce drastically parallelism
         let parallelism: Int

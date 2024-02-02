@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import RealmSwift
 
 extension UploadQueue {
@@ -27,9 +28,14 @@ extension UploadQueue {
     func transactionWithUploadRealm(function: StaticString = #function,
                                     _ task: @escaping (_ realm: Realm) throws -> Void) throws {
         try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: driveUploadManager.realmConfiguration)
+            let activity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
+            activity.start()
+
+            let uploadsRealm = try Realm(configuration: self.driveUploadManager.realmConfiguration)
             uploadsRealm.refresh()
             try task(uploadsRealm)
+
+            activity.endAll()
         }
     }
 }

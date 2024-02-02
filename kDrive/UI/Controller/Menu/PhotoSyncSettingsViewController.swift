@@ -215,7 +215,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    func saveSettings() {
+    func saveSettings() async {
         BackgroundRealm.uploads.execute { _ in
             if self.photoSyncEnabled {
                 guard self.newSyncSettings.userId != -1 && self.newSyncSettings.driveId != -1 && self.newSyncSettings
@@ -525,8 +525,9 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton(_ sender: AnyObject) {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.saveSettings()
+        Task(priority: .userInitiated) {
+            await self.saveSettings()
+
             Task { @MainActor in
                 self.navigationController?.popViewController(animated: true)
             }

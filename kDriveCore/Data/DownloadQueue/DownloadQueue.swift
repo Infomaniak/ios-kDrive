@@ -54,23 +54,6 @@ public final class DownloadTask: Object {
     }
 }
 
-extension QualityOfService {
-    var dispatchQoS: DispatchQoS {
-        switch self {
-        case .background:
-            return .background
-        case .default:
-            return .default
-        case .userInitiated:
-            return .userInitiated
-        case .userInteractive:
-            return .userInteractive
-        case .utility:
-            return .utility
-        }
-    }
-}
-
 public final class DownloadQueue {
     // MARK: - Attributes
 

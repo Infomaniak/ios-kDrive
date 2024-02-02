@@ -147,7 +147,7 @@ public class AlertChoiceViewController: AlertViewController {
     @objc override public func action() {
         if loading {
             setLoading(true)
-            DispatchQueue.global(qos: .userInitiated).async {
+            Task(priority: .userInitiated) {
                 self.handler?(self.selectedIndex)
                 Task { @MainActor in
                     self.setLoading(false)
