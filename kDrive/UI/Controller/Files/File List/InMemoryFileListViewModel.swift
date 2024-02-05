@@ -40,10 +40,12 @@ class InMemoryFileListViewModel: FileListViewModel {
         }
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+
+        guard let liveDirectory = try? currentDirectory.thaw() else { return }
         try? realm.write {
-            realm.add(currentDirectory)
+            realm.add(liveDirectory)
         }
-        files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        files = AnyRealmCollection(AnyRealmCollection(liveDirectory.children).filesSorted(by: sortType))
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
