@@ -546,8 +546,8 @@ public extension Endpoint {
     }
 
     static func sharedWithMeFiles(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/files/shared_with_me",
-                                queryItems: [(FileWith.fileMinimal).toQueryItem()])
+        return .driveV3.appending(path: "/files/shared_with_me",
+                                  queryItems: [(FileWith.fileMinimal).toQueryItem()])
     }
 
     static func countInRoot(drive: AbstractDrive) -> Endpoint {
