@@ -23,7 +23,7 @@ import kDriveResources
 import StoreKit
 import UIKit
 
-class StoreViewController: UICollectionViewController {
+final class StoreViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
 
     struct Item {

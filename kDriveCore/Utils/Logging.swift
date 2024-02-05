@@ -50,7 +50,7 @@ public enum Logging {
         ]
         SentryDebug.capture(error: error, context: context, contextKey: "Realm")
 
-        #if DEBUG
+        #if DEBUG && !TEST
         copyDebugInformations()
         DDLogError(
             "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
@@ -79,9 +79,9 @@ public enum Logging {
     }
 
     private static func initNetworkLogging() {
-        #if DEBUG
+        #if DEBUG && !TEST
         if !Bundle.main.isExtension {
-//                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+            Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
         }
         #endif
     }
@@ -95,7 +95,7 @@ public enum Logging {
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]
-                #if DEBUG
+                #if DEBUG || TEST
                 return nil
                 #else
                 return event
@@ -105,7 +105,7 @@ public enum Logging {
     }
 
     private static func copyDebugInformations() {
-        #if DEBUG
+        #if DEBUG && !TEST
         guard !Bundle.main.isExtension else { return }
         let fileManager = FileManager.default
         let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(

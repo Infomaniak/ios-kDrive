@@ -97,6 +97,10 @@ extension SentryDebug {
         addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
+    static func uploadOperationCompletedWithSuccess(_ metadata: [String: Any] = [:]) {
+        SentryDebug.capture(message: EventNames.uploadCompletedSuccess, extras: metadata)
+    }
+
     // MARK: - Upload notifications
 
     static func uploadNotificationError(_ metadata: [String: Any]) {

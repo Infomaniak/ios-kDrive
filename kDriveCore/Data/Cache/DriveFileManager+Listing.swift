@@ -74,12 +74,14 @@ public extension DriveFileManager {
                   !alreadyHandledActionIds.contains(fileAction.fileId) else { continue }
             alreadyHandledActionIds.insert(fileAction.fileId)
 
+            let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
+
             switch fileAction.action {
             case .fileDelete, .fileTrash:
-                removeFileInDatabase(fileId: fileAction.fileId, cascade: true, withTransaction: false, using: realm)
+                removeFileInDatabase(fileUid: fileUid, cascade: true, withTransaction: false, using: realm)
 
             case .fileMoveOut:
-                guard let movedOutFile: File = realm.getObject(id: fileAction.fileId),
+                guard let movedOutFile: File = realm.getObject(id: fileUid),
                       let oldParent = movedOutFile.parent else { continue }
 
                 oldParent.children.remove(movedOutFile)
@@ -87,7 +89,7 @@ public extension DriveFileManager {
                 keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
                 realm.add(actionFile, update: .modified)
 
-                if let existingFile: File = realm.getObject(id: fileAction.fileId),
+                if let existingFile: File = realm.getObject(id: fileUid),
                    let oldParent = existingFile.parent {
                     oldParent.children.remove(existingFile)
                 }
@@ -100,7 +102,7 @@ public extension DriveFileManager {
                  .fileColorUpdate, .fileColorDelete,
                  .fileCategorize, .fileUncategorize:
 
-                if let oldFile: File = realm.getObject(id: fileAction.fileId),
+                if let oldFile: File = realm.getObject(id: fileUid),
                    oldFile.name != actionFile.name {
                     try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
                 }

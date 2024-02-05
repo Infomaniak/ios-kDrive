@@ -79,7 +79,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         guard let currentDriveFileManager else { return nil }
 
-        return DriveFileManager(driveFileManager: currentDriveFileManager, context: .fileProvider)
+        return currentDriveFileManager.instanceWith(context: .fileProvider)
     }
 
     // MARK: - NSFileProviderExtension Override

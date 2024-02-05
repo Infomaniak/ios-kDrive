@@ -23,16 +23,11 @@ import kDriveResources
 import Sentry
 import UIKit
 
-class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
-    @LazyInjectService var accountManager: AccountManageable
+final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
+    @LazyInjectService private var accountManager: AccountManageable
 
-    var driveFileManager: DriveFileManager! {
-        didSet {
-            observeUploadCount()
-        }
-    }
-
-    private var uploadCountManager: UploadCountManager!
+    private let driveFileManager: DriveFileManager
+    var uploadCountManager: UploadCountManager?
 
     private struct Section: Equatable {
         let id: Int
@@ -41,8 +36,7 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
         static var header = Section(id: 1, actions: [])
         static var uploads = Section(id: 2, actions: [])
         static var upgrade = Section(id: 3, actions: [.store])
-        static var more = Section(id: 4, actions: [.sharedWithMe, .lastModifications, .images, .offline, .myShares, .trash])
-        static var options = Section(id: 5, actions: [.switchUser, .parameters, .help, .disconnect])
+        static var options = Section(id: 4, actions: [.switchUser, .parameters, .help, .disconnect])
     }
 
     private struct MenuAction: Equatable {
@@ -52,30 +46,6 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
         static let store = MenuAction(
             name: KDriveResourcesStrings.Localizable.upgradeOfferTitle,
             image: KDriveResourcesAsset.upgradeKdrive.image
-        )
-        static let sharedWithMe = MenuAction(
-            name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
-            image: KDriveResourcesAsset.folderSelect2.image
-        )
-        static let lastModifications = MenuAction(
-            name: KDriveResourcesStrings.Localizable.lastEditsTitle,
-            image: KDriveResourcesAsset.clock.image
-        )
-        static let images = MenuAction(
-            name: KDriveResourcesStrings.Localizable.galleryTitle,
-            image: KDriveResourcesAsset.images.image
-        )
-        static let myShares = MenuAction(
-            name: KDriveResourcesStrings.Localizable.mySharesTitle,
-            image: KDriveResourcesAsset.folderSelect.image
-        )
-        static let offline = MenuAction(
-            name: KDriveResourcesStrings.Localizable.offlineFileTitle,
-            image: KDriveResourcesAsset.availableOffline.image
-        )
-        static let trash = MenuAction(
-            name: KDriveResourcesStrings.Localizable.trashTitle,
-            image: KDriveResourcesAsset.delete.image
         )
         static let switchUser = MenuAction(
             name: KDriveResourcesStrings.Localizable.switchUserTitle,
@@ -96,13 +66,16 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     }
 
     private var sections: [Section] = []
-    private var currentAccount: Account!
-
+    private var currentAccount: Account
     private var needsContentUpdate = false
 
     init(driveFileManager: DriveFileManager) {
+        @InjectService var manager: AccountManageable
+        currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
         super.init(style: .plain)
+
+        observeUploadCount()
     }
 
     @available(*, unavailable)
@@ -120,7 +93,6 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
-        currentAccount = accountManager.currentAccount
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
@@ -154,13 +126,12 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     }
 
     private func observeUploadCount() {
-        guard driveFileManager != nil else { return }
-
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self else { return }
 
             guard let index = sections.firstIndex(where: { $0 == .uploads }),
                   let cell = tableView?.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell,
+                  let uploadCountManager,
                   uploadCountManager.uploadCount > 0 else {
                 // Delete / Add cell
                 reloadData()
@@ -181,23 +152,13 @@ class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     private func updateTableContent() {
         // Show upgrade section if free drive
         if driveFileManager.drive.isFreePack {
-            sections = [.header, .upgrade, .more, .options]
+            sections = [.header, .upgrade, .options]
         } else {
-            sections = [.header, .more, .options]
+            sections = [.header, .options]
         }
 
-        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
+        if let uploadCountManager, uploadCountManager.uploadCount > 0 {
             sections.insert(.uploads, at: 1)
-        }
-
-        // Hide shared with me action if no shared with me drive
-        guard let sectionIndex = sections.firstIndex(of: .more) else { return }
-        let sharedWithMeInList = sections[sectionIndex].actions.contains(.sharedWithMe)
-        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: true).isEmpty
-        if sharedWithMeInList && !hasSharedWithMe {
-            sections[sectionIndex].actions.removeFirst()
-        } else if !sharedWithMeInList && hasSharedWithMe {
-            sections[sectionIndex].actions.insert(.sharedWithMe, at: 0)
         }
     }
 }
@@ -230,7 +191,7 @@ extension MenuViewController {
             let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.progressView.enableIndeterminate()
-            cell.setUploadCount(uploadCountManager.uploadCount)
+            cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
             return cell
         } else {
             let action = section.actions[indexPath.row]
@@ -256,32 +217,6 @@ extension MenuViewController {
         }
         let action = section.actions[indexPath.row]
         switch action {
-        case .lastModifications:
-            createAndPushFileListViewController(
-                with: LastModificationsViewModel(driveFileManager: driveFileManager),
-                as: FileListViewController.self
-            )
-        case .trash:
-            createAndPushFileListViewController(
-                with: TrashListViewModel(driveFileManager: driveFileManager),
-                as: FileListViewController.self
-            )
-        case .myShares:
-            createAndPushFileListViewController(
-                with: MySharesViewModel(driveFileManager: driveFileManager),
-                as: FileListViewController.self,
-                shouldHideBottomBar: false
-            )
-        case .offline:
-            createAndPushFileListViewController(
-                with: OfflineFilesViewModel(driveFileManager: driveFileManager),
-                as: FileListViewController.self
-            )
-        case .images:
-            createAndPushFileListViewController(
-                with: PhotoListViewModel(driveFileManager: driveFileManager),
-                as: PhotoListViewController.self
-            )
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle,
                                                 message: KDriveResourcesStrings.Localizable
@@ -291,7 +226,10 @@ extension MenuViewController {
                 self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(
+                        preload: true,
+                        isSwitching: true
+                    )
                 } else {
                     SentrySDK.setUser(nil)
                     self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
@@ -307,25 +245,12 @@ extension MenuViewController {
         case .parameters:
             let parameterTableViewController = ParameterTableViewController.instantiate(driveFileManager: driveFileManager)
             navigationController?.pushViewController(parameterTableViewController, animated: true)
-        case .sharedWithMe:
-            let sharedDrivesViewController = SharedDrivesViewController.instantiate()
-            navigationController?.pushViewController(sharedDrivesViewController, animated: true)
         case .switchUser:
             let switchUserViewController = SwitchUserViewController.instantiate()
             navigationController?.pushViewController(switchUserViewController, animated: true)
         default:
             break
         }
-    }
-
-    private func createAndPushFileListViewController<T: FileListViewController>(
-        with viewModel: FileListViewModel,
-        as _: T.Type,
-        shouldHideBottomBar: Bool = true
-    ) {
-        let fileListViewController = T.instantiate(viewModel: viewModel)
-        fileListViewController.hidesBottomBarWhenPushed = shouldHideBottomBar
-        navigationController?.pushViewController(fileListViewController, animated: true)
     }
 
     // MARK: - Cell Button Action

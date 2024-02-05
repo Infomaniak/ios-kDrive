@@ -107,7 +107,7 @@ class FileListViewModel: SelectDelegate {
     /// Internal realm collection of Files observed
     ///
     /// They should be frozen by convention.
-    #if DEBUG
+    #if DEBUG || TEST
     var _frozenFiles = AnyRealmCollection(List<File>()) {
         willSet {
             for item in newValue {
@@ -196,7 +196,7 @@ class FileListViewModel: SelectDelegate {
                 title = driveFileManager.drive.name
             }
         } else {
-            title = self.currentDirectory.name
+            title = self.currentDirectory.formattedLocalizedName()
         }
 
         if configuration.showUploadingFiles {

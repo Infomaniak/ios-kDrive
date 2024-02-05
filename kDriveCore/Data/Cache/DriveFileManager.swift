@@ -28,13 +28,16 @@ import SwiftRegex
 public enum DriveFileManagerContext {
     case drive
     case fileProvider
+    case sharedWithMe
 
-    var additionalPath: String {
+    func realmURL(using drive: Drive) -> URL {
         switch self {
         case .drive:
-            return ""
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        case .sharedWithMe:
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
         case .fileProvider:
-            return "-fp"
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
         }
     }
 }
@@ -43,10 +46,10 @@ public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
-        static let upload: UInt64 = 17
+        static let upload: UInt64 = 19
 
         /// Current version of the Drive Realm
-        static let drive: UInt64 = 9
+        static let drive: UInt64 = 10
     }
 
     public class DriveFileManagerConstants {
@@ -74,7 +77,7 @@ public final class DriveFileManager {
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
         public let currentVersionCode = 1
-        public lazy var uploadsMigrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
+        public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             let currentUploadSchemaVersion = RealmSchemaVersion.upload
 
             // Log migration on Sentry
@@ -154,89 +157,15 @@ public final class DriveFileManager {
                     }
                 }
             }
-        }
 
-        public lazy var driveMigrationBlock = { (migration: Migration, oldSchemaVersion: UInt64) in
-            let currentDriveSchemeVersion = RealmSchemaVersion.drive
-
-            // Log migration on Sentry
-            SentryDebug.realmMigrationStartedBreadcrumb(
-                form: oldSchemaVersion,
-                to: currentDriveSchemeVersion,
-                realmName: "Drive"
-            )
-            defer {
-                SentryDebug.realmMigrationEndedBreadcrumb(
-                    form: oldSchemaVersion,
-                    to: currentDriveSchemeVersion,
-                    realmName: "Drive"
-                )
-            }
-
-            // Sanity check
-            guard oldSchemaVersion < currentDriveSchemeVersion else {
-                return
-            }
-
-            // Models older than v5 are cleared, so any migration before that is moot.
-            if oldSchemaVersion < 5 {
-                // Remove rights
-                migration.deleteData(forType: Rights.className())
-                // Delete file categories for migration
-                migration.deleteData(forType: FileCategory.className())
-            }
-            if oldSchemaVersion < 7 {
-                // Migrate file category
-                migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
-                    newObject?["categoryId"] = oldObject?["id"]
-                    newObject?["addedAt"] = oldObject?["addedToFileAt"]
-                    newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
-                    newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
-                }
-                // Migrate rights
-                migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                    newObject?["canShow"] = oldObject?["show"] ?? false
-                    newObject?["canRead"] = oldObject?["read"] ?? false
-                    newObject?["canWrite"] = oldObject?["write"] ?? false
-                    newObject?["canShare"] = oldObject?["share"] ?? false
-                    newObject?["canLeave"] = oldObject?["leave"] ?? false
-                    newObject?["canDelete"] = oldObject?["delete"] ?? false
-                    newObject?["canRename"] = oldObject?["rename"] ?? false
-                    newObject?["canMove"] = oldObject?["move"] ?? false
-                    newObject?["canCreateDirectory"] = oldObject?["createNewFolder"] ?? false
-                    newObject?["canCreateFile"] = oldObject?["createNewFile"] ?? false
-                    newObject?["canUpload"] = oldObject?["uploadNewFile"] ?? false
-                    newObject?["canMoveInto"] = oldObject?["moveInto"] ?? false
-                    newObject?["canBecomeDropbox"] = oldObject?["canBecomeCollab"] ?? false
-                    newObject?["canBecomeSharelink"] = oldObject?["canBecomeLink"] ?? false
-                    newObject?["canUseFavorite"] = oldObject?["canFavorite"] ?? false
-                    newObject?["canUseTeam"] = false
-                }
-                // Migrate file
-                migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
-                    newObject?["sortedName"] = oldObject?["nameNaturalSorting"]
-                    newObject?["extensionType"] = oldObject?["rawConvertedType"]
-                    newObject?["_capabilities"] = oldObject?["rights"] as? Rights
-                    newObject?["rawType"] = oldObject?["type"]
-                    newObject?["rawStatus"] = oldObject?["status"]
-                    newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
-                    newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
-                    newObject?["lastModifiedAt"] =
-                        Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
-                    if let createdAt = oldObject?["fileCreatedAt"] as? Int {
-                        newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+            // Migration for APIV3
+            if oldSchemaVersion < 19 {
+                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
+                    guard let newObject else {
+                        return
                     }
-                    if let deletedAt = oldObject?["deletedAt"] as? Int {
-                        newObject?["deletedAt"] = Date(timeIntervalSince1970: TimeInterval(deletedAt))
-                    }
-                }
-            }
-            if oldSchemaVersion < 8 {
-                migration.enumerateObjects(ofType: FileActivity.className()) { oldObject, newObject in
-                    newObject?["newPath"] = oldObject?["pathNew"]
-                    if let createdAt = oldObject?["createdAt"] as? Int {
-                        newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
-                    }
+
+                    newObject["uploadingSession"] = nil
                 }
             }
         }
@@ -247,7 +176,7 @@ public final class DriveFileManager {
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
             fileURL: uploadsRealmURL,
             schemaVersion: RealmSchemaVersion.upload,
-            migrationBlock: uploadsMigrationBlock,
+            migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self,
                           PhotoSyncSettings.self,
                           UploadSession.self,
@@ -349,7 +278,7 @@ public final class DriveFileManager {
             }
             return freeze ? root.freeze() : root
         } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name)
+            return File(id: DriveFileManager.constants.rootID, name: drive.name, driveId: drive.id)
         }
     }
 
@@ -367,13 +296,107 @@ public final class DriveFileManager {
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = DriveFileManager.constants.rootDocumentsURL
-            .appendingPathComponent("\(drive.userId)-\(drive.id)\(context.additionalPath).realm")
+        realmURL = context.realmURL(using: drive)
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
             schemaVersion: RealmSchemaVersion.drive,
-            migrationBlock: DriveFileManager.constants.driveMigrationBlock,
+            migrationBlock: { migration, oldSchemaVersion in
+                let currentDriveSchemeVersion = RealmSchemaVersion.drive
+
+                // Log migration on Sentry
+                SentryDebug.realmMigrationStartedBreadcrumb(
+                    form: oldSchemaVersion,
+                    to: currentDriveSchemeVersion,
+                    realmName: "Drive"
+                )
+                defer {
+                    SentryDebug.realmMigrationEndedBreadcrumb(
+                        form: oldSchemaVersion,
+                        to: currentDriveSchemeVersion,
+                        realmName: "Drive"
+                    )
+                }
+
+                // Sanity check
+                guard oldSchemaVersion < currentDriveSchemeVersion else {
+                    return
+                }
+
+                // Models older than v5 are cleared, so any migration before that is moot.
+                if oldSchemaVersion < 5 {
+                    // Remove rights
+                    migration.deleteData(forType: Rights.className())
+                    // Delete file categories for migration
+                    migration.deleteData(forType: FileCategory.className())
+                }
+                if oldSchemaVersion < 7 {
+                    // Migrate file category
+                    migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
+                        newObject?["categoryId"] = oldObject?["id"]
+                        newObject?["addedAt"] = oldObject?["addedToFileAt"]
+                        newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
+                        newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
+                    }
+                    // Migrate rights
+                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
+                        newObject?["canShow"] = oldObject?["show"] ?? false
+                        newObject?["canRead"] = oldObject?["read"] ?? false
+                        newObject?["canWrite"] = oldObject?["write"] ?? false
+                        newObject?["canShare"] = oldObject?["share"] ?? false
+                        newObject?["canLeave"] = oldObject?["leave"] ?? false
+                        newObject?["canDelete"] = oldObject?["delete"] ?? false
+                        newObject?["canRename"] = oldObject?["rename"] ?? false
+                        newObject?["canMove"] = oldObject?["move"] ?? false
+                        newObject?["canCreateDirectory"] = oldObject?["createNewFolder"] ?? false
+                        newObject?["canCreateFile"] = oldObject?["createNewFile"] ?? false
+                        newObject?["canUpload"] = oldObject?["uploadNewFile"] ?? false
+                        newObject?["canMoveInto"] = oldObject?["moveInto"] ?? false
+                        newObject?["canBecomeDropbox"] = oldObject?["canBecomeCollab"] ?? false
+                        newObject?["canBecomeSharelink"] = oldObject?["canBecomeLink"] ?? false
+                        newObject?["canUseFavorite"] = oldObject?["canFavorite"] ?? false
+                        newObject?["canUseTeam"] = false
+                    }
+                    // Migrate file
+                    migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
+                        newObject?["sortedName"] = oldObject?["nameNaturalSorting"]
+                        newObject?["extensionType"] = oldObject?["rawConvertedType"]
+                        newObject?["_capabilities"] = oldObject?["rights"] as? Rights
+                        newObject?["rawType"] = oldObject?["type"]
+                        newObject?["rawStatus"] = oldObject?["status"]
+                        newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
+                        newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
+                        newObject?["lastModifiedAt"] =
+                            Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
+                        if let createdAt = oldObject?["fileCreatedAt"] as? Int {
+                            newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+                        }
+                        if let deletedAt = oldObject?["deletedAt"] as? Int {
+                            newObject?["deletedAt"] = Date(timeIntervalSince1970: TimeInterval(deletedAt))
+                        }
+                    }
+                }
+                if oldSchemaVersion < 8 {
+                    migration.enumerateObjects(ofType: FileActivity.className()) { oldObject, newObject in
+                        newObject?["newPath"] = oldObject?["pathNew"]
+                        if let createdAt = oldObject?["createdAt"] as? Int {
+                            newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+                        }
+                    }
+                }
+                if oldSchemaVersion < 10 {
+                    migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
+                        if let id = oldObject?["id"] as? Int,
+                           let driveId = oldObject?["driveId"] as? Int {
+                            newObject?["uid"] = File.uid(driveId: driveId, fileId: id)
+                        } else if let oldObject {
+                            migration.delete(oldObject)
+                        } else if let newObject {
+                            migration.delete(newObject)
+                        }
+                    }
+                }
+            },
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
 
@@ -390,9 +413,8 @@ public final class DriveFileManager {
         }
     }
 
-    /// Recreate a DriveFileManager from a different context
-    public convenience init(driveFileManager: DriveFileManager, context: DriveFileManagerContext = .drive) {
-        self.init(drive: driveFileManager.drive, apiFetcher: driveFileManager.apiFetcher, context: context)
+    public func instanceWith(context: DriveFileManagerContext) -> DriveFileManager {
+        return DriveFileManager(drive: drive, apiFetcher: apiFetcher, context: context)
     }
 
     public func getRealm() -> Realm {
@@ -440,7 +462,8 @@ public final class DriveFileManager {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
+        let uid = File.uid(driveId: drive.id, fileId: id)
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
             return nil
         }
         return freeze ? file.freeze() : file
@@ -448,7 +471,7 @@ public final class DriveFileManager {
 
     public func initRoot() async throws {
         let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
-        _ = try await files(in: root.proxify())
+        _ = try await files(in: root.proxify(), forceRefresh: true)
     }
 
     public func files(in directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ,
@@ -500,29 +523,6 @@ public final class DriveFileManager {
             getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
             response?.hasMore == true ? response?.cursor : nil
         )
-    }
-
-    public func writeChildrenToParent(
-        _ children: [File],
-        liveParent: File,
-        responseAt: Int?,
-        isInitialCursor: Bool,
-        using realm: Realm
-    ) throws {
-        try realm.write {
-            liveParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
-            if children.count < Endpoint.itemsPerPage {
-                liveParent.versionCode = DriveFileManager.constants.currentVersionCode
-                liveParent.fullyDownloaded = true
-            }
-            realm.add(children, update: .modified)
-            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
-            // the first page will result in an undefined behavior.
-            if isInitialCursor {
-                liveParent.children.removeAll()
-            }
-            liveParent.children.insert(objectsIn: children)
-        }
     }
 
     private func files(in directory: ProxyFile,
@@ -590,6 +590,24 @@ public final class DriveFileManager {
         try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(
+                                drive: drive,
+                                cursor: cursor,
+                                sortType: sortType
+                            )
+                            return mySharedFiles
+                        },
+                        cursor: cursor,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
+    }
+
+    public func sharedWithMeFiles(cursor: String? = nil,
+                                  sortType: SortType = .nameAZ,
+                                  forceRefresh: Bool = false) async throws -> (files: [File], nextCursor: String?) {
+        try await files(in: getManagedFile(from: DriveFileManager.sharedWithMeRootFile).proxify(),
+                        fetchFiles: {
+                            let mySharedFiles = try await apiFetcher.sharedWithMeFiles(
                                 drive: drive,
                                 cursor: cursor,
                                 sortType: sortType
@@ -723,7 +741,7 @@ public final class DriveFileManager {
                     token?.cancel()
                     if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
-                        self.updateFileProperty(fileId: safeFile.id) { file in
+                        self.updateFileProperty(fileUid: safeFile.uid) { file in
                             file.isAvailableOffline = false
                         }
                     }
@@ -749,14 +767,14 @@ public final class DriveFileManager {
     }
 
     public func setFileShareLink(file: ProxyFile, shareLink: ShareLink?) {
-        updateFileProperty(fileId: file.id) { file in
+        updateFileProperty(fileUid: file.uid) { file in
             file.sharelink = shareLink
             file.capabilities.canBecomeSharelink = shareLink == nil
         }
     }
 
     public func setFileDropBox(file: ProxyFile, dropBox: DropBox?) {
-        updateFileProperty(fileId: file.id) { file in
+        updateFileProperty(fileUid: file.uid) { file in
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
         }
@@ -869,7 +887,7 @@ public final class DriveFileManager {
         let timestamp = try TimeInterval(timestamp ?? file.resolve(using: realm).responseAt)
         var page = 1
         var moreComing = true
-        var pagedActions = [Int: FileActivityType]()
+        var pagedActions = [String: FileActivityType]()
         var pagedActivities = ActivitiesResult()
         var responseAt = 0
         while moreComing {
@@ -903,7 +921,7 @@ public final class DriveFileManager {
     // swiftlint:disable:next cyclomatic_complexity
     private func apply(activities: [FileActivity],
                        to file: File,
-                       pagedActions: inout [Int: FileActivityType],
+                       pagedActions: inout [String: FileActivityType],
                        timestamp: Int,
                        using realm: Realm? = nil) -> ActivitiesResult {
         var insertedFiles = [File]()
@@ -913,14 +931,14 @@ public final class DriveFileManager {
         realm.refresh()
         realm.beginWrite()
         for activity in activities {
-            let fileId = activity.fileId
+            let fileId = File.uid(driveId: file.driveId, fileId: activity.fileId)
             if pagedActions[fileId] == nil {
                 switch activity.action {
                 case .fileDelete, .fileTrash:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
                         deletedFiles.append(file.freeze())
                     }
-                    removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
+                    removeFileInDatabase(fileUid: fileId, cascade: true, withTransaction: false, using: realm)
                     if let file = activity.file {
                         deletedFiles.append(file)
                     }
@@ -967,7 +985,7 @@ public final class DriveFileManager {
                      .fileColorDelete:
                     if let newFile = activity.file {
                         if newFile.isTrashed {
-                            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
+                            removeFileInDatabase(fileUid: fileId, cascade: true, withTransaction: false, using: realm)
                             deletedFiles.append(newFile)
                             pagedActions[fileId] = .fileDelete
                         } else {
@@ -1067,7 +1085,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: file)
         if response.result {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
@@ -1078,7 +1096,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.add(drive: drive, category: category, to: files)
         for fileResponse in response where fileResponse.result {
-            updateFileProperty(fileId: fileResponse.id) { file in
+            updateFileProperty(fileUid: File.uid(driveId: drive.id, fileId: fileResponse.id)) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
@@ -1089,7 +1107,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.remove(category: category, from: file)
         if response {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -1101,7 +1119,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
         for fileResponse in response where fileResponse.result {
-            updateFileProperty(fileId: fileResponse.id) { file in
+            updateFileProperty(fileUid: File.uid(driveId: drive.id, fileId: fileResponse.id)) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -1172,7 +1190,7 @@ public final class DriveFileManager {
             response = try await apiFetcher.unfavorite(file: file)
         }
         if response {
-            updateFileProperty(fileId: file.id) { file in
+            updateFileProperty(fileUid: file.uid) { file in
                 file.isFavorite = favorite
             }
         }
@@ -1183,7 +1201,7 @@ public final class DriveFileManager {
         backgroundQueue.async { [self] in
             let localRealm = getRealm()
             let savedFile = try? file.resolve(using: localRealm).freeze()
-            removeFileInDatabase(fileId: file.id, cascade: true, withTransaction: true, using: localRealm)
+            removeFileInDatabase(fileUid: file.uid, cascade: true, withTransaction: true, using: localRealm)
             if let file = savedFile {
                 savedFile?.signalChanges(userId: drive.userId)
                 notifyObserversWith(file: file)
@@ -1325,6 +1343,7 @@ public final class DriveFileManager {
         return createdFile.freeze()
     }
 
+    @discardableResult
     public func createOrRemoveShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink? {
         if right == .restricted {
             // Remove share link
@@ -1400,18 +1419,41 @@ public final class DriveFileManager {
         return Array(children.freeze())
     }
 
-    func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
+    public func writeChildrenToParent(
+        _ children: [File],
+        liveParent: File,
+        responseAt: Int?,
+        isInitialCursor: Bool,
+        using realm: Realm
+    ) throws {
+        try realm.write {
+            liveParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            if children.count < Endpoint.itemsPerPage {
+                liveParent.versionCode = DriveFileManager.constants.currentVersionCode
+                liveParent.fullyDownloaded = true
+            }
+            realm.add(children, update: .modified)
+            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
+            // the first page will result in an undefined behavior.
+            if isInitialCursor {
+                liveParent.children.removeAll()
+            }
+            liveParent.children.insert(objectsIn: children)
+        }
+    }
+
+    func removeFileInDatabase(fileUid: String, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
             if fileManager.fileExists(atPath: file.localContainerUrl.path) {
                 try? fileManager.removeItem(at: file.localContainerUrl) // Check that it was correctly removed?
             }
 
             if cascade {
                 for child in file.children.freeze() where !child.isInvalidated {
-                    removeFileInDatabase(fileId: child.id, cascade: cascade, withTransaction: withTransaction, using: realm)
+                    removeFileInDatabase(fileUid: child.uid, cascade: cascade, withTransaction: withTransaction, using: realm)
                 }
             }
             if withTransaction {
@@ -1446,11 +1488,11 @@ public final class DriveFileManager {
         }
     }
 
-    private func updateFileProperty(fileId: Int, using realm: Realm? = nil, _ block: (File) -> Void) {
+    private func updateFileProperty(fileUid: String, using realm: Realm? = nil, _ block: (File) -> Void) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
             try? realm.write {
                 block(file)
             }
@@ -1481,10 +1523,6 @@ public final class DriveFileManager {
 
     public struct FilePropertiesOptions: OptionSet {
         public let rawValue: Int
-        
-        public init(rawValue: Int) {
-            self.rawValue = rawValue
-        }
 
         public static let fullyDownloaded = FilePropertiesOptions(rawValue: 1 << 0)
         public static let children = FilePropertiesOptions(rawValue: 1 << 1)
@@ -1507,13 +1545,17 @@ public final class DriveFileManager {
             .version,
             .capabilities
         ]
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
     }
 
     public func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         realm.refresh()
 
-        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id),
+        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.uid),
               !savedChild.isInvalidated else { return }
         newFile.isAvailableOffline = savedChild.isAvailableOffline
         newFile.versionCode = savedChild.versionCode
@@ -1554,6 +1596,10 @@ public final class DriveFileManager {
         if let cachedFile = getCachedFile(id: file.id, freeze: false, using: realm) {
             return cachedFile
         } else {
+            if file.isRoot {
+                file.driveId = drive.id
+                file.uid = File.uid(driveId: file.driveId, fileId: file.id)
+            }
             keepCacheAttributesForFile(newFile: file, keepProperties: [.all], using: realm)
             try? realm.write {
                 realm.add(file, update: .all)
@@ -1567,10 +1613,10 @@ public final class DriveFileManager {
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
-        let fileId = directory.id
+        let fileUid = directory.uid
         let result = try await apiFetcher.updateColor(directory: directory.proxify(), color: color)
         if result {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileUid: fileUid) { file in
                 file.color = color
             }
         }

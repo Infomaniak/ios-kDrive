@@ -17,11 +17,14 @@
  */
 
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
+    @LazyInjectService private var navigationManager: NavigationManageable
+
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 
@@ -113,7 +116,7 @@ class NewFolderTypeTableViewController: UITableViewController {
             floatingPanelViewController?.actionHandler = { _ in
                 driveFloatingPanelController.dismiss(animated: true) { [weak self] in
                     guard let self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: driveFileManager)
+                    navigationManager.showStore(from: self, driveFileManager: driveFileManager)
                 }
             }
             present(driveFloatingPanelController, animated: true)

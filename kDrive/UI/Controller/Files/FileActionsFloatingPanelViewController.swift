@@ -228,6 +228,8 @@ public class FloatingPanelAction: Equatable {
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var navigationManager: NavigationManageable
+
     var driveFileManager: DriveFileManager!
     var file: File!
     var normalFolderHierarchy = true

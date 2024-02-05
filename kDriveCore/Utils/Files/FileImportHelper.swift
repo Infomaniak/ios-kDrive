@@ -26,6 +26,32 @@ import kDriveResources
 import Photos
 import RealmSwift
 
+// TODO: move to core
+protocol ItemProviderResultable {
+    var result: Result<(url: URL, title: String), Error> { get async }
+    var URLResult: Result<URL, Error> { get async }
+}
+
+extension ItemProviderResultable {
+    var URLResult: Result<URL, Error> {
+        get async {
+            let result = await result
+            switch result {
+            case .success((let url, _)):
+                return .success(url)
+            case .failure(let error):
+                return .failure(error)
+            }
+        }
+    }
+}
+
+extension ItemProviderURLRepresentation: ItemProviderResultable {}
+
+extension ItemProviderFileRepresentation: ItemProviderResultable {}
+
+extension ItemProviderZipRepresentation: ItemProviderResultable {}
+
 public enum ImportError: LocalizedError {
     case accessDenied
     case emptyImageData
@@ -145,7 +171,7 @@ public final class FileImportHelper {
                     case .isURL:
                         let getPlist = try ItemProviderURLRepresentation(from: itemProvider)
                         progress.addChild(getPlist.progress, withPendingUnitCount: perItemUnitCount)
-                        return await getPlist.result
+                        return await getPlist.URLResult
 
                     case .isText:
                         let getText = try ItemProviderTextRepresentation(from: itemProvider)
@@ -166,12 +192,12 @@ public final class FileImportHelper {
                         )
                         progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
 
-                        return await getFile.result
+                        return await getFile.URLResult
 
                     case .isDirectory:
                         let getFile = try ItemProviderZipRepresentation(from: itemProvider)
                         progress.addChild(getFile.progress, withPendingUnitCount: perItemUnitCount)
-                        return await getFile.result
+                        return await getFile.URLResult
 
                     case .none:
                         return .failure(ErrorDomain.UTINotFound)

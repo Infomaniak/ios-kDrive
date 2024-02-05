@@ -18,11 +18,12 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 
 public extension ApiToken {
     func breadcrumbMetadata(keychainError: OSStatus = noErr) -> [String: Any] {
         return ["User id": userId,
-                "Expiration date": expirationDate.timeIntervalSince1970,
+                "Expiration date": expirationDate?.timeIntervalSince1970 ?? "",
                 "Access Token": truncatedAccessToken,
                 "Refresh Token": truncatedRefreshToken,
                 "Keychain error code": keychainError]

@@ -95,6 +95,7 @@ class MainTabViewController: UITabBarController, Restorable {
         let homeViewController = HomeViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
+        navigationViewController.restorationIdentifier = String(describing: HomeViewController.self)
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
         navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
         navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
@@ -115,6 +116,7 @@ class MainTabViewController: UITabBarController, Restorable {
         let menuViewController = MenuViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: menuViewController)
         let (placeholder, placeholderSelected) = generateProfileTabImages(image: KDriveResourcesAsset.placeholderAvatar.image)
+        navigationViewController.restorationIdentifier = String(describing: MenuViewController.self)
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
         navigationViewController.tabBarItem.image = placeholder
         navigationViewController.tabBarItem.selectedImage = placeholderSelected
@@ -124,10 +126,11 @@ class MainTabViewController: UITabBarController, Restorable {
     private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
         let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
+        navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
-        navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
-        navigationViewController.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.gallery.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.galleryFill.image
         return navigationViewController
     }
 

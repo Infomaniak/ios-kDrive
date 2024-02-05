@@ -24,7 +24,7 @@ import MatomoTracker
 class MatomoUtils {
     static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
-        #if DEBUG
+        #if DEBUG || TEST
         tracker.isOptedOut = true
         #endif
         @InjectService var accountManager: AccountManageable

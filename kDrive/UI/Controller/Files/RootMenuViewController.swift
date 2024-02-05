@@ -23,7 +23,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class RootMenuViewController: CustomLargeTitleCollectionViewController {
+class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
@@ -78,7 +78,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
 
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(name: $0.name, image: $0.icon, destinationFile: $0)
+            RootMenuItem(name: $0.formattedLocalizedName(), image: $0.icon, destinationFile: $0)
         } ?? []
 
         var menuItems = userRootFolders + RootMenuViewController.baseItems
@@ -117,20 +117,27 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
 
         configureDataSource()
 
-        let rootChildren = driveFileManager.getRealm()
-            .object(ofType: File.self, forPrimaryKey: DriveFileManager.constants.rootID)?.children
+        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+        let rootChildren = driveFileManager.getRealm().object(ofType: File.self, forPrimaryKey: rootFileUid)?.children
         rootChildrenObservationToken = rootChildren?.observe { [weak self] changes in
             guard let self else { return }
             switch changes {
             case .initial(let children):
-                rootViewChildren = Array(children)
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource?.apply(itemsSnapshot, animatingDifferences: false)
             case .update(let children, _, _, _):
-                rootViewChildren = Array(children)
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource?.apply(itemsSnapshot, animatingDifferences: true)
             case .error:
                 break
             }
+        }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task {
+            try await driveFileManager.initRoot()
         }
     }
 
@@ -171,7 +178,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
                     options: drives,
                     selectedOption: driveFileManager.drive,
                     headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                    delegate: nil
+                    delegate: self
                 )
                 present(floatingPanelViewController, animated: true)
             }
@@ -217,12 +224,14 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController {
         case DriveFileManager.lastModificationsRootFile.id:
             destinationViewModel = LastModificationsViewModel(driveFileManager: driveFileManager)
         case DriveFileManager.sharedWithMeRootFile.id:
-            navigationController?.pushViewController(SharedDrivesViewController.instantiate(), animated: true)
-            return
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
         case DriveFileManager.offlineRoot.id:
             destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)
         case DriveFileManager.trashRootFile.id:
             destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.mySharedRootFile.id:
+            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager)
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,

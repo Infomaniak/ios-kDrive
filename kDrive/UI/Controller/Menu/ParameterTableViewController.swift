@@ -206,7 +206,7 @@ extension ParameterTableViewController: DeleteAccountDelegate {
         accountManager.removeTokenAndAccount(token: accountManager.currentAccount.token)
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
             driveFileManager = accountManager.currentDriveFileManager
         } else {
             SentrySDK.setUser(nil)

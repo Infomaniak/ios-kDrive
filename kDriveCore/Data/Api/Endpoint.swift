@@ -118,6 +118,10 @@ public protocol AbstractFile {
 }
 
 public struct ProxyFile: AbstractFile, Sendable {
+    public var uid: String {
+        File.uid(driveId: driveId, fileId: id)
+    }
+
     public var driveId: Int
     public var id: Int
     public var isRoot: Bool {
@@ -130,7 +134,7 @@ public struct ProxyFile: AbstractFile, Sendable {
     }
 
     func resolve(using realm: Realm) throws -> File {
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: id), !file.isInvalidated else {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
         return file
@@ -142,7 +146,7 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static var drive: Endpoint {
+    private static var driveV3: Endpoint {
         return Endpoint(hostKeypath: \.apiDriveHost, path: "/3/drive")
     }
 
@@ -170,11 +174,11 @@ public extension Endpoint {
 
     static func fileListing(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/listing", queryItems: [FileWith.fileListingMinimal.toQueryItem()])
-        }
+    }
 
     static func fileListingContinue(file: AbstractFile, cursor: String) -> Endpoint {
         return .fileInfo(file).appending(path: "/listing/continue", queryItems: [URLQueryItem(name: "cursor", value: cursor),
-                                                                        FileWith.fileListingMinimal.toQueryItem()])
+                                                                                 FileWith.fileListingMinimal.toQueryItem()])
     }
 
     // MARK: Activities
@@ -266,7 +270,7 @@ public extension Endpoint {
     // MARK: Drive (complete me)
 
     static func driveInfo(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/\(drive.id)")
+        return .driveV3.appending(path: "/\(drive.id)")
     }
 
     static func driveInfoV2(drive: AbstractDrive) -> Endpoint {
@@ -487,7 +491,7 @@ public extension Endpoint {
     // MARK: Preferences
 
     static var userPreferences: Endpoint {
-        return .drive.appending(path: "/preferences")
+        return .driveV3.appending(path: "/preferences")
     }
 
     static func preferences(drive: AbstractDrive) -> Endpoint {
@@ -539,6 +543,11 @@ public extension Endpoint {
     static func mySharedFiles(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/my_shared",
                                                   queryItems: [(FileWith.fileMinimal + [.users]).toQueryItem()])
+    }
+
+    static func sharedWithMeFiles(drive: AbstractDrive) -> Endpoint {
+        return .driveV3.appending(path: "/files/shared_with_me",
+                                  queryItems: [(FileWith.fileMinimal).toQueryItem()])
     }
 
     static func countInRoot(drive: AbstractDrive) -> Endpoint {
@@ -626,7 +635,7 @@ public extension Endpoint {
     // Direct Upload
 
     static func directUpload(drive: AbstractDrive) -> Endpoint {
-        return .drive.appending(path: "/\(drive.id)/upload")
+        return .driveV3.appending(path: "/\(drive.id)/upload")
     }
 
     // Chunk Upload
