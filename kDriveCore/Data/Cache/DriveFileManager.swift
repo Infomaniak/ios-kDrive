@@ -49,7 +49,7 @@ public final class DriveFileManager {
         static let upload: UInt64 = 19
 
         /// Current version of the Drive Realm
-        static let drive: UInt64 = 9
+        static let drive: UInt64 = 10
     }
 
     public class DriveFileManagerConstants {
@@ -381,6 +381,18 @@ public final class DriveFileManager {
                         newObject?["newPath"] = oldObject?["pathNew"]
                         if let createdAt = oldObject?["createdAt"] as? Int {
                             newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
+                        }
+                    }
+                }
+                if oldSchemaVersion < 10 {
+                    migration.enumerateObjects(ofType: File.className()) { oldObject, newObject in
+                        if let id = oldObject?["id"] as? Int,
+                           let driveId = oldObject?["driveId"] as? Int {
+                            newObject?["uid"] = File.uid(driveId: driveId, fileId: id)
+                        } else if let oldObject {
+                            migration.delete(oldObject)
+                        } else if let newObject {
+                            migration.delete(newObject)
                         }
                     }
                 }
