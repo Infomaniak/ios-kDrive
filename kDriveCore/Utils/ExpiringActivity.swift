@@ -46,6 +46,9 @@ public protocol ExpiringActivityable {
 
     /// Terminate all the expiring activities
     func endAll()
+
+    /// True if the system asked to stop the background activity
+    var shouldTerminate: Bool { get }
 }
 
 public final class ExpiringActivity: ExpiringActivityable {
@@ -58,6 +61,8 @@ public final class ExpiringActivity: ExpiringActivityable {
     var locks = [TolerantDispatchGroup]()
 
     let id: String
+
+    public var shouldTerminate = false
 
     weak var delegate: ExpiringActivityDelegate?
 
@@ -104,6 +109,7 @@ public final class ExpiringActivity: ExpiringActivityable {
             }
 
             if shouldTerminate {
+                self.shouldTerminate = true
                 delegate?.backgroundActivityExpiring()
             }
 

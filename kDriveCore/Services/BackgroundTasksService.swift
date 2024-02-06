@@ -86,25 +86,53 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
+        let expiringActivity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
+        expiringActivity.start()
+
         Log.backgroundTaskScheduling("handleBackgroundRefresh")
         // User installed the app but never logged in
-        if accountManager.accounts.isEmpty {
+        if expiringActivity.shouldTerminate || accountManager.accounts.isEmpty {
+            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
             completion(false)
+            expiringActivity.endAll()
             return
         }
 
         Log.backgroundTaskScheduling("Enqueue new pictures")
         photoUploader.scheduleNewPicturesForUpload()
 
+        guard expiringActivity.shouldTerminate == false else {
+            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+            completion(false)
+            expiringActivity.endAll()
+            return
+        }
+
         Log.backgroundTaskScheduling("Clean errors for all uploads")
         uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
+
+        guard expiringActivity.shouldTerminate == false else {
+            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+            completion(false)
+            expiringActivity.endAll()
+            return
+        }
 
         Log.backgroundTaskScheduling("Reload operations in queue")
         uploadQueue.rebuildUploadQueueFromObjectsInRealm()
 
+        guard expiringActivity.shouldTerminate == false else {
+            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+            completion(false)
+            expiringActivity.endAll()
+            return
+        }
+
         Log.backgroundTaskScheduling("waitForCompletion")
         uploadQueue.waitForCompletion {
+            Log.backgroundTaskScheduling("Background activity ended with success")
             completion(true)
+            expiringActivity.endAll()
         }
     }
 
