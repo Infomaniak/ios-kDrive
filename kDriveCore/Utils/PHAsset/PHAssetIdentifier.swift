@@ -41,6 +41,29 @@ protocol PHAssetIdentifiable {
     var bestResourceSHA256: String? { get }
 }
 
+/// Something that will be called in case an activity is expiring
+///
+/// It will unlock a linked TolerantDispatchGroup, and write an error to a given reference
+final class AssetExpiringActivityDelegate: ExpiringActivityDelegate {
+    enum ErrorDomain: Error {
+        case assetActivityExpired
+    }
+
+    let group: TolerantDispatchGroup
+    var errorPointer: NSErrorPointer
+
+    init(group: TolerantDispatchGroup, errorPointer: inout NSErrorPointer) {
+        self.group = group
+        self.errorPointer = errorPointer
+    }
+
+    func backgroundActivityExpiring() {
+        let error = ErrorDomain.assetActivityExpired as NSError
+        errorPointer?.pointee = error
+        group.leave()
+    }
+}
+
 struct PHAssetIdentifier: PHAssetIdentifiable {
     let asset: PHAsset
 
@@ -57,7 +80,15 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             return nil
         }
 
+        // We build an ExpiringActivity to track system termination
+        let uid = "\(asset.localIdentifier)-\(UUID().uuidString)"
         let group = TolerantDispatchGroup()
+        var error: NSError?
+        var errorPointer = NSErrorPointer(&error)
+        let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
+        let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
+        activity.start()
+
         var hash: String?
 
         let options = PHContentEditingInputRequestOptions()
@@ -87,6 +118,14 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
         // wait for the request to finish
         group.enter()
         group.wait()
+
+        activity.endAll()
+
+        // We need to check the errorPointer to see if it is pointing to some error
+        guard errorPointer?.pointee == nil else {
+            // The processing of the hash was interrupted by the system
+            return nil
+        }
 
         return hash
     }
