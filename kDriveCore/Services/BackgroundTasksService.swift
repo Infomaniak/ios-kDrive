@@ -44,6 +44,8 @@ public protocol BackgroundTasksServiceable {
 }
 
 struct BackgroundTasksService: BackgroundTasksServiceable {
+    private static let activityShouldTerminateMessage = "Notified activity should terminate"
+
     @LazyInjectService private var scheduler: BGTaskScheduler
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var uploadQueue: UploadQueue
@@ -92,7 +94,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         Log.backgroundTaskScheduling("handleBackgroundRefresh")
         // User installed the app but never logged in
         if expiringActivity.shouldTerminate || accountManager.accounts.isEmpty {
-            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
             completion(false)
             expiringActivity.endAll()
             return
@@ -101,8 +103,8 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         Log.backgroundTaskScheduling("Enqueue new pictures")
         photoUploader.scheduleNewPicturesForUpload()
 
-        guard expiringActivity.shouldTerminate == false else {
-            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+        guard !expiringActivity.shouldTerminate else {
+            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
             completion(false)
             expiringActivity.endAll()
             return
@@ -111,8 +113,8 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         Log.backgroundTaskScheduling("Clean errors for all uploads")
         uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
 
-        guard expiringActivity.shouldTerminate == false else {
-            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+        guard !expiringActivity.shouldTerminate else {
+            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
             completion(false)
             expiringActivity.endAll()
             return
@@ -121,8 +123,8 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         Log.backgroundTaskScheduling("Reload operations in queue")
         uploadQueue.rebuildUploadQueueFromObjectsInRealm()
 
-        guard expiringActivity.shouldTerminate == false else {
-            Log.backgroundTaskScheduling("Notified activity should terminate", level: .error)
+        guard !expiringActivity.shouldTerminate else {
+            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
             completion(false)
             expiringActivity.endAll()
             return
