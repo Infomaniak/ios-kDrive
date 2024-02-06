@@ -52,16 +52,14 @@ final class AssetExpiringActivityDelegate: ExpiringActivityDelegate {
     }
 
     let group: TolerantDispatchGroup
-    var errorPointer: NSErrorPointer
+    var error: Error?
 
-    init(group: TolerantDispatchGroup, errorPointer: inout NSErrorPointer) {
+    init(group: TolerantDispatchGroup) {
         self.group = group
-        self.errorPointer = errorPointer
     }
 
     func backgroundActivityExpiring() {
-        let error = ErrorDomain.assetActivityExpired as NSError
-        errorPointer?.pointee = error
+        error = ErrorDomain.assetActivityExpired
         group.leave()
     }
 }
@@ -86,9 +84,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             // We build an ExpiringActivity to track system termination
             let uid = "\(#function)-\(asset.localIdentifier)-\(UUID().uuidString)"
             let group = TolerantDispatchGroup()
-            var error: NSError?
-            var errorPointer = NSErrorPointer(&error)
-            let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
+            let activityDelegate = AssetExpiringActivityDelegate(group: group)
             let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
             activity.start()
 
@@ -123,7 +119,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             group.wait()
             activity.endAll()
 
-            guard let error = errorPointer?.pointee else {
+            guard let error = activityDelegate.error else {
                 // All good
                 return hash
             }
@@ -149,9 +145,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             // We build an ExpiringActivity to track system termination
             let uid = "\(#function)-\(asset.localIdentifier)-\(UUID().uuidString)"
             let group = TolerantDispatchGroup()
-            var error: NSError?
-            var errorPointer = NSErrorPointer(&error)
-            let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
+            let activityDelegate = AssetExpiringActivityDelegate(group: group)
             let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
             activity.start()
 
@@ -175,7 +169,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             group.wait()
             activity.endAll()
 
-            guard let error = errorPointer?.pointee else {
+            guard let error = activityDelegate.error else {
                 // All good
                 return hasher.digestString
             }
