@@ -32,16 +32,18 @@ protocol PHAssetIdentifiable {
     /// Get a hash of the base image of a PHAsset _without adjustments_
     ///
     /// Other types of PHAsset will return nil
-    var baseImageSHA256: String? { get }
+    /// - Throws: if the system is trying to end a background activity
+    var baseImageSHA256: String? { get throws }
 
     /// Computes the SHA of the `.bestResource` available
     ///
     /// Anything accessible with a `requestData` will work (photo / video …)
     /// A picture with adjustments will see its hash change here
-    var bestResourceSHA256: String? { get }
+    /// - Throws: if the system is trying to end a background activity
+    var bestResourceSHA256: String? { get throws }
 }
 
-/// Something that will be called in case an activity is expiring
+/// Something that will be called in case an asset activity is expiring
 ///
 /// It will unlock a linked TolerantDispatchGroup, and write an error to a given reference
 final class AssetExpiringActivityDelegate: ExpiringActivityDelegate {
@@ -76,91 +78,110 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
     }
 
     var baseImageSHA256: String? {
-        guard #available(iOS 15, *) else {
-            return nil
-        }
-
-        // We build an ExpiringActivity to track system termination
-        let uid = "\(asset.localIdentifier)-\(UUID().uuidString)"
-        let group = TolerantDispatchGroup()
-        var error: NSError?
-        var errorPointer = NSErrorPointer(&error)
-        let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
-        let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
-        activity.start()
-
-        var hash: String?
-
-        let options = PHContentEditingInputRequestOptions()
-        options.canHandleAdjustmentData = { _ -> Bool in
-            return true
-        }
-
-        // Trigger a request in order to intercept change data
-        asset.requestContentEditingInput(with: options) { input, _ in
-            defer {
-                group.leave()
+        get throws {
+            guard #available(iOS 15, *) else {
+                return nil
             }
 
-            guard let input else {
-                return
+            // We build an ExpiringActivity to track system termination
+            let uid = "\(#function)-\(asset.localIdentifier)-\(UUID().uuidString)"
+            let group = TolerantDispatchGroup()
+            var error: NSError?
+            var errorPointer = NSErrorPointer(&error)
+            let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
+            let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
+            activity.start()
+
+            var hash: String?
+
+            let options = PHContentEditingInputRequestOptions()
+            options.canHandleAdjustmentData = { _ -> Bool in
+                return true
             }
 
-            guard let url = input.fullSizeImageURL else {
-                return
+            // Trigger a request in order to intercept change data
+            asset.requestContentEditingInput(with: options) { input, _ in
+                defer {
+                    group.leave()
+                }
+
+                guard let input else {
+                    return
+                }
+
+                guard let url = input.fullSizeImageURL else {
+                    return
+                }
+
+                // Hashing the raw data of the picture is the only reliable solution to know when effects were applied
+                // This will exclude changes related to like and albums
+                hash = url.dataRepresentation.SHA256DigestString
             }
 
-            // Hashing the raw data of the picture is the only reliable solution to know when effects were applied
-            // This will exclude changes related to like and albums
-            hash = url.dataRepresentation.SHA256DigestString
-        }
+            // wait for the request to finish
+            group.enter()
+            group.wait()
+            activity.endAll()
 
-        // wait for the request to finish
-        group.enter()
-        group.wait()
+            guard let error = errorPointer?.pointee else {
+                // All good
+                return hash
+            }
 
-        activity.endAll()
-
-        // We need to check the errorPointer to see if it is pointing to some error
-        guard errorPointer?.pointee == nil else {
             // The processing of the hash was interrupted by the system
-            return nil
+            throw error
         }
-
-        return hash
     }
 
     var bestResourceSHA256: String? {
-        guard #available(iOS 15, *) else {
-            return nil
+        get throws {
+            guard #available(iOS 15, *) else {
+                return nil
+            }
+
+            guard let bestResource = asset.bestResource else {
+                let hashFallback = try baseImageSHA256
+                return hashFallback
+            }
+
+            let hasher = StreamHasher<SHA256>()
+
+            // We build an ExpiringActivity to track system termination
+            let uid = "\(#function)-\(asset.localIdentifier)-\(UUID().uuidString)"
+            let group = TolerantDispatchGroup()
+            var error: NSError?
+            var errorPointer = NSErrorPointer(&error)
+            let activityDelegate = AssetExpiringActivityDelegate(group: group, errorPointer: &errorPointer)
+            let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
+            activity.start()
+
+            // TODO: Check iCloud behaviour
+            let options = PHAssetResourceRequestOptions()
+            options.isNetworkAccessAllowed = true
+            options.progressHandler = { progress in
+                Log.photoLibraryUploader("hashing resource \(progress * 100)% …")
+            }
+
+            PHAssetResourceManager.default().requestData(for: bestResource,
+                                                         options: options) { data in
+                hasher.update(data)
+            } completionHandler: { error in
+                hasher.finalize()
+                group.leave()
+            }
+
+            // wait for the request to finish
+            group.enter()
+            group.wait()
+            activity.endAll()
+
+            guard let error = errorPointer?.pointee else {
+                // All good
+                return hasher.digestString
+            }
+
+            // The processing of the hash was interrupted by the system
+            throw error
         }
-
-        guard let bestResource = asset.bestResource else {
-            return baseImageSHA256
-        }
-
-        let group = TolerantDispatchGroup()
-        let hasher = StreamHasher<SHA256>()
-
-        // TODO: Check iCloud behaviour
-        let options = PHAssetResourceRequestOptions()
-        options.isNetworkAccessAllowed = true
-        options.progressHandler = { progress in
-            Log.photoLibraryUploader("hashing resource \(progress * 100)% …")
-        }
-
-        PHAssetResourceManager.default().requestData(for: bestResource,
-                                                     options: options) { data in
-            hasher.update(data)
-        } completionHandler: { error in
-            hasher.finalize()
-            group.leave()
-        }
-
-        // wait for the request to finish
-        group.enter()
-        group.wait()
-
-        return hasher.digestString
     }
 }
