@@ -141,7 +141,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         case search
         case insufficientStorage
         case uploadsInProgress
-        case recentFilesSelector
     }
 
     enum RecentFileRow: Differentiable {
@@ -162,13 +161,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     private lazy var filePresenter = FilePresenter(viewController: self)
 
-    private var currentRecentFilesController: HomeRecentFilesController!
-    private var recentFilesControllersCache = [String: HomeRecentFilesController]()
-    private let recentFilesControllers = [
-        HomeRecentActivitiesController.self,
-        HomeOfflineFilesController.self,
-        HomePhotoListController.self
-    ]
+    private var recentActivitiesController: HomeRecentActivitiesController?
 
     private let reloadQueue = DispatchQueue(label: "com.infomaniak.drive.reloadQueue", qos: .userInitiated)
     private lazy var viewModel = HomeViewModel(
@@ -200,7 +193,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
-        collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
@@ -208,7 +200,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
         collectionView.register(cellView: FileHomeCollectionViewCell.self)
-        collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(cellView: RecentActivityCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
@@ -228,7 +219,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             }
         }
 
-        setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
+        initRecentActivitiesController()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -241,7 +232,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         filesObserver?.cancel()
         filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [weak self] file in
             guard let self else { return }
-            currentRecentFilesController?.refreshIfNeeded(with: file)
+            recentActivitiesController?.refreshIfNeeded(with: file)
         }
     }
 
@@ -283,9 +274,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private func getTopRows() -> [HomeTopRow] {
         var topRows: [HomeTopRow]
         if ReachabilityListener.instance.currentStatus == .offline {
-            topRows = [.offline, .search, .recentFilesSelector]
+            topRows = [.offline, .search]
         } else {
-            topRows = [.search, .recentFilesSelector]
+            topRows = [.search]
         }
 
         if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
@@ -312,9 +303,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
         refreshControl.endRefreshing()
-        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
-            .compactMap { $0 as? HomeRecentFilesHeaderView }.first
-        headerView?.switchLayoutButton.isEnabled = !isEmpty
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          recentFilesEmpty: isEmpty,
@@ -338,26 +326,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     @objc func forceRefresh() {
-        currentRecentFilesController?.invalidated = true
-        recentFilesControllersCache.removeAll()
+        recentActivitiesController?.invalidated = true
         let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
         reload(newViewModel: viewModel)
-        setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
+        initRecentActivitiesController()
     }
 
-    private func getCachedRecentFilesController(for index: Int) -> HomeRecentFilesController {
-        let controllerName = String(describing: recentFilesControllers[index])
-        if let controller = recentFilesControllersCache[controllerName] {
-            return controller
-        } else {
-            let controller = recentFilesControllers[index]
-                .initInstance(driveFileManager: driveFileManager, homeViewController: self)
-            recentFilesControllersCache[controllerName] = controller
-            return controller
-        }
-    }
-
-    private func setSelectedHomeIndex(_ index: Int) {
+    private func initRecentActivitiesController() {
         let emptyViewModel = HomeViewModel(
             topRows: viewModel.topRows,
             recentFiles: .file([]),
@@ -366,28 +341,30 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
         reload(newViewModel: emptyViewModel)
 
-        UserDefaults.shared.selectedHomeIndex = index
-        currentRecentFilesController?.invalidated = true
+        recentActivitiesController?.invalidated = true
 
-        currentRecentFilesController = getCachedRecentFilesController(for: index)
+        let recentActivitiesController = HomeRecentActivitiesController(
+            driveFileManager: driveFileManager,
+            homeViewController: self
+        )
+        self.recentActivitiesController = recentActivitiesController
 
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
             .compactMap { $0 as? HomeRecentFilesHeaderView }.first
-        headerView?.titleLabel.text = currentRecentFilesController.title
-        headerView?.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
+        headerView?.titleLabel.text = recentActivitiesController.title
 
-        if currentRecentFilesController.nextCursor == nil {
+        if recentActivitiesController.nextCursor == nil {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                recentFiles: .file([]),
                                                recentFilesEmpty: false,
                                                isLoading: true))
-            currentRecentFilesController.loadNextPage()
+            recentActivitiesController.loadNextPage()
         } else {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                recentFiles: .file([]),
                                                recentFilesEmpty: false,
                                                isLoading: false))
-            currentRecentFilesController.restoreCachedPages()
+            recentActivitiesController.restoreCachedPages()
         }
     }
 
@@ -398,17 +375,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             case .top:
                 return generateTopSectionLayout()
             case .recentFiles:
-                if let recentFilesController = currentRecentFilesController {
-                    if recentFilesController.empty {
-                        return recentFilesController.getEmptyLayout()
-                    } else {
-                        return recentFilesController.getLayout(
-                            for: UserDefaults.shared.homeListStyle,
-                            layoutEnvironment: layoutEnvironment
-                        )
-                    }
+                if recentActivitiesController?.empty == true {
+                    return recentActivitiesController?.getEmptyLayout()
                 } else {
-                    return nil
+                    return recentActivitiesController?.getLayout(
+                        for: UserDefaults.shared.homeListStyle,
+                        layoutEnvironment: layoutEnvironment
+                    )
                 }
             }
         }
@@ -440,7 +413,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     func presentedFromTabBar() {
-        currentRecentFilesController?.refreshIfNeeded()
+        recentActivitiesController?.refreshIfNeeded()
     }
 
     // MARK: - Switch account delegate
@@ -509,73 +482,30 @@ extension HomeViewController {
                 tableCell.progressView.enableIndeterminate()
                 tableCell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
-            case .recentFilesSelector:
-                let cell = collectionView.dequeueReusableCell(
-                    type: HomeRecentFilesSelectorCollectionViewCell.self,
-                    for: indexPath
-                )
-                let controllers = recentFilesControllers
-                    .map { $0.initInstance(driveFileManager: driveFileManager, homeViewController: self) }
-                cell.setRecentFilesControllerTitles(controllers.map(\.selectorTitle))
-                cell.selector.selectedSegmentIndex = UserDefaults.shared.selectedHomeIndex
-                cell.valueChangeHandler = { [weak self] selector in
-                    guard let self else { return }
-                    MatomoUtils.track(eventWithCategory: .home,
-                                      name: "switchView\(["Activity", "Offline", "Images"][selector.selectedSegmentIndex])")
-                    setSelectedHomeIndex(selector.selectedSegmentIndex)
-                }
-                return cell
             }
         case .recentFiles:
             if viewModel.recentFilesEmpty {
                 let cell = collectionView.dequeueReusableCell(type: HomeEmptyFilesCollectionViewCell.self, for: indexPath)
-                currentRecentFilesController?.configureEmptyCell(cell)
+                recentActivitiesController?.configureEmptyCell(cell)
+                return cell
+            } else if let cellType = recentActivitiesController?.listCellType,
+                      let cell = collectionView.dequeueReusableCell(
+                          type: cellType,
+                          for: indexPath
+                      ) as? RecentActivityCollectionViewCell {
+                cell.initWithPositionAndShadow()
+                if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
+                    cell.configureLoading()
+                } else {
+                    if case .fileActivity(let activities) = viewModel.recentFiles {
+                        let activity = activities[indexPath.row]
+                        cell.configureWith(recentActivity: activity)
+                        cell.delegate = self
+                    }
+                }
                 return cell
             } else {
-                let cellType = UserDefaults.shared.homeListStyle == .list ? currentRecentFilesController
-                    .listCellType : currentRecentFilesController.gridCellType
-                if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? FileCollectionViewCell {
-                    if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
-                        cell.configureLoading()
-                    } else {
-                        if case .file(let files) = viewModel.recentFiles {
-                            let file = files[indexPath.row]
-                            cell.delegate = self
-                            cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: false)
-                        }
-                    }
-                    return cell
-                } else if let cell = collectionView.dequeueReusableCell(
-                    type: cellType,
-                    for: indexPath
-                ) as? HomeLastPicCollectionViewCell {
-                    if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
-                        cell.configureLoading()
-                    } else {
-                        if case .file(let files) = viewModel.recentFiles {
-                            let file = files[indexPath.row]
-                            cell.configureWith(file: file)
-                        }
-                    }
-                    return cell
-                } else if let cell = collectionView.dequeueReusableCell(
-                    type: cellType,
-                    for: indexPath
-                ) as? RecentActivityCollectionViewCell {
-                    cell.initWithPositionAndShadow()
-                    if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
-                        cell.configureLoading()
-                    } else {
-                        if case .fileActivity(let activities) = viewModel.recentFiles {
-                            let activity = activities[indexPath.row]
-                            cell.configureWith(recentActivity: activity)
-                            cell.delegate = self
-                        }
-                    }
-                    return cell
-                } else {
-                    fatalError("Unsupported cell type")
-                }
+                fatalError("Unsupported cell type")
             }
         }
     }
@@ -614,26 +544,7 @@ extension HomeViewController {
                     view: HomeRecentFilesHeaderView.self,
                     for: indexPath
                 )
-                headerView.titleLabel.text = currentRecentFilesController.title
-                headerView.switchLayoutButton.setImage(
-                    UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid
-                        .image,
-                    for: .normal
-                )
-                headerView.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
-                headerView.actionHandler = { button in
-                    MatomoUtils.track(eventWithCategory: .displayList,
-                                      name: UserDefaults.shared.homeListStyle == .list ? "viewList" : "viewGrid")
-                    UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
-                    button.setImage(
-                        UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset
-                            .grid.image,
-                        for: .normal
-                    )
-                    collectionView.performBatchUpdates {
-                        collectionView.reloadSections([1])
-                    }
-                }
+                headerView.titleLabel.text = recentActivitiesController?.title ?? ""
                 return headerView
             }
         } else {
@@ -649,7 +560,7 @@ extension HomeViewController {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
-            case .offline, .insufficientStorage, .recentFilesSelector:
+            case .offline, .insufficientStorage:
                 return
             case .uploadsInProgress:
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
@@ -680,14 +591,17 @@ extension HomeViewController {
         willDisplay cell: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
+        guard let recentActivitiesController else { return }
+
         if HomeSection.allCases[indexPath.section] == .recentFiles {
-            if indexPath.row >= viewModel.recentFilesCount - 10 && !currentRecentFilesController
-                .loading && currentRecentFilesController.moreComing {
+            if indexPath.row >= viewModel.recentFilesCount - 10 &&
+                !recentActivitiesController.loading &&
+                recentActivitiesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                    recentFiles: viewModel.recentFiles,
                                                    recentFilesEmpty: false,
                                                    isLoading: true))
-                currentRecentFilesController?.loadNextPage()
+                recentActivitiesController.loadNextPage()
             }
         }
     }

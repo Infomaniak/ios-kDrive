@@ -319,15 +319,6 @@ public extension UserDefaults {
         }
     }
 
-    var selectedHomeIndex: Int {
-        get {
-            return integer(forKey: key(.selectedHomeIndex))
-        }
-        set {
-            set(newValue, forKey: key(.selectedHomeIndex))
-        }
-    }
-
     var fpStorageVersion: Int {
         get {
             return integer(forKey: key(.fpStorageVersion))
