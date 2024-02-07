@@ -525,6 +525,10 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton(_ sender: AnyObject) {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
+        // Making sure the user cannot spam the button on tasks that may take a while
+        let button = sender as? IKLargeButton
+        button?.setLoading(true)
+
         Task(priority: .userInitiated) {
             await self.saveSettings()
 
