@@ -24,6 +24,13 @@ import SnackBar
 import UIKit
 
 public enum UIConstants {
+    private static let style: SnackBarStyle = {
+        var style = SnackBarStyle.infomaniakStyle
+        style.anchor = 20.0
+        style.maxWidth = 600.0
+        return style
+    }()
+
     public static let inputCornerRadius = 2.0
     public static let imageCornerRadius = 3.0
     public static let cornerRadius = 6.0
@@ -41,9 +48,12 @@ public enum UIConstants {
 
     @discardableResult
     @MainActor
-    public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong,
+    public static func showSnackBar(message: String,
+                                    duration: SnackBar.Duration = .lengthLong,
                                     action: IKSnackBar.Action? = nil) -> IKSnackBar? {
-        let snackbar = IKSnackBar.make(message: message, duration: duration)
+        let snackbar = IKSnackBar.make(message: message,
+                                       duration: duration,
+                                       style: style)
         if let action {
             snackbar?.setAction(action).show()
         } else {
