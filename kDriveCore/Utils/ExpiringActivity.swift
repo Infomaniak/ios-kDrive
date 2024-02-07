@@ -19,71 +19,107 @@
 import Foundation
 import InfomaniakCore
 
+// TODO: User core 7.0.0 version ASAP
 /// Delegation mechanism to notify the end of an `ExpiringActivity`
 public protocol ExpiringActivityDelegate: AnyObject {
     /// Called when the system is requiring us to terminate an expiring activity
     func backgroundActivityExpiring()
 }
 
+/// Something that can perform arbitrary short background tasks, with a super simple API.
 public protocol ExpiringActivityable {
+    /// Common init method
+    /// - Parameters:
+    ///   - id: Something to identify the background activity in debug
+    ///   - qos: QoS used by the underlying queues
+    ///   - delegate: The delegate to notify we should terminate
+    init(id: String, qos: DispatchQoS, delegate: ExpiringActivityDelegate?)
+
+    /// init method
+    /// - Parameters:
+    ///   - id: Something to identify the background activity in debug
+    ///   - delegate: The delegate to notify we should terminate
     init(id: String, delegate: ExpiringActivityDelegate?)
 
     /// Register with the system an expiring activity
     func start()
 
-    /// Terminate the expiring activity if needed.
-    func end()
+    /// Terminate all the expiring activities
+    func endAll()
+
+    /// True if the system asked to stop the background activity
+    var shouldTerminate: Bool { get }
 }
 
 public final class ExpiringActivity: ExpiringActivityable {
-    /// Keep track of the locks on blocks
-    private var locks = [TolerantDispatchGroup]()
+    private let qos: DispatchQoS
 
-    /// For thread safety
-    private let queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync")
+    private let queue: DispatchQueue
 
-    /// Something to identify the background activity in debug
+    private let processInfo = ProcessInfo.processInfo
+
+    var locks = [TolerantDispatchGroup]()
+
     let id: String
 
-    /// The delegate to notify we should terminate
+    public var shouldTerminate = false
+
     weak var delegate: ExpiringActivityDelegate?
 
     // MARK: Lifecycle
 
-    public init(id: String, delegate: ExpiringActivityDelegate?) {
+    public init(id: String, qos: DispatchQoS, delegate: ExpiringActivityDelegate?) {
         self.id = id
+        self.qos = qos
         self.delegate = delegate
+        queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync", qos: qos)
+    }
+
+    public convenience init(id: String, delegate: ExpiringActivityDelegate?) {
+        self.init(id: id, qos: .userInitiated, delegate: delegate)
     }
 
     deinit {
         queue.sync {
-            assert(locks.isEmpty, "please make sure to balance 'start()' and 'end()' before releasing this object")
+            assert(locks.isEmpty, "please make sure to call 'endAll()' once explicitly before releasing this object")
         }
     }
 
     public func start() {
-        let group = TolerantDispatchGroup()
+        let group = TolerantDispatchGroup(qos: qos)
 
         queue.sync {
             self.locks.append(group)
         }
 
+        #if os(macOS)
+        // We block a non cooperative queue that matches current QoS
+        DispatchQueue.global(qos: qos.qosClass).async {
+            self.processInfo.performActivity(options: .suddenTerminationDisabled, reason: self.id) {
+                // No expiration handler as we are running on macOS
+                group.enter()
+                group.wait()
+            }
+        }
+        #else
         // Make sure to not lock an unexpected thread that would deinit()
-        ProcessInfo.processInfo.performExpiringActivity(withReason: id) { [weak self] shouldTerminate in
+        processInfo.performExpiringActivity(withReason: id) { [weak self] shouldTerminate in
             guard let self else {
                 return
             }
 
             if shouldTerminate {
+                self.shouldTerminate = true
                 delegate?.backgroundActivityExpiring()
             }
 
             group.enter()
             group.wait()
         }
+        #endif
     }
 
-    public func end() {
+    public func endAll() {
         queue.sync {
             // Release locks, oldest first
             for group in locks.reversed() {
