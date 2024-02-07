@@ -47,6 +47,7 @@ protocol FileCellDelegate: AnyObject {
     ]
     var file: File
     var selectionMode: Bool
+    var isSelected = false
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
@@ -148,7 +149,8 @@ protocol FileCellDelegate: AnyObject {
         // Fetch thumbnail
         thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
             guard let self,
-                  !self.file.isInvalidated else {
+                  !self.file.isInvalidated,
+                  !self.isSelected else {
                 return
             }
 
@@ -196,6 +198,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override var isSelected: Bool {
         didSet {
+            viewModel.isSelected = isSelected
             configureForSelection()
         }
     }
@@ -330,6 +333,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configureForSelection() {
         guard viewModel?.selectionMode == true else { return }
+
         if isSelected {
             configureCheckmarkImage()
             configureImport(shouldDisplay: false)
