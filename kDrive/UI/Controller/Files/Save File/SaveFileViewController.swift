@@ -181,6 +181,19 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    private func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
+        Task {
+            // Cleanup file that were duplicated to appGroup on extension mode
+            if Bundle.main.isExtension && clean {
+                await items.concurrentForEach { item in
+                    try? FileManager.default.removeItem(at: item.path)
+                }
+            }
+
+            navigationController?.dismiss(animated: animated, completion: completion)
+        }
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -275,7 +288,7 @@ class SaveFileViewController: UIViewController {
 
     @IBAction func close(_ sender: Any) {
         importProgress?.cancel()
-        navigationController?.dismiss(animated: true)
+        dismiss(animated: true)
     }
 }
 
@@ -490,7 +503,7 @@ extension SaveFileViewController: FooterButtonDelegate {
 
         let items = items
         guard !items.isEmpty else {
-            navigationController?.dismiss(animated: true)
+            dismiss(animated: true)
             return
         }
 
@@ -512,7 +525,7 @@ extension SaveFileViewController: FooterButtonDelegate {
         }
 
         Task { @MainActor in
-            self.navigationController?.dismiss(animated: true) {
+            self.dismiss(animated: true, clean: false) {
                 UIConstants.showSnackBar(message: message)
             }
         }
@@ -521,20 +534,17 @@ extension SaveFileViewController: FooterButtonDelegate {
 
 /// Something to process the files to be uploaded
 struct SaveFileViewControllerWorker {
+    @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var fileImportHelper: FileImportHelper
 
-    func navigateToUploadsInApp() {
-        // TODO: create deep-link
-//        let url = URL(string: "://")
-//        UIApplication.shared.open(<#T##url: URL##URL#>)
+    func showOpenAppToContinueNotification() {
+        notificationHelper.sendPausedUploadQueueNotification()
     }
 
     func processForUpload(files: [ImportedFile], directory: File, drive: Drive) async throws {
-        #if ISEXTENSION
-        defer { navigateToUploadsInApp() }
-
-        #else
-        #endif
         try await fileImportHelper.saveForUpload(files, in: directory, drive: drive)
+        if Bundle.main.isExtension {
+            showOpenAppToContinueNotification()
+        }
     }
 }
