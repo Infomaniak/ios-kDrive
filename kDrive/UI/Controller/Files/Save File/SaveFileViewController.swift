@@ -479,8 +479,8 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
 
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton(_ sender: AnyObject) {
-        guard let selectedDriveFileManager,
-              let selectedDirectory else {
+        guard let drive = selectedDriveFileManager?.drive,
+              let directory = selectedDirectory else {
             return
         }
 
@@ -495,22 +495,46 @@ extension SaveFileViewController: FooterButtonDelegate {
         }
 
         Task {
-            let message: String
-            do {
-                try await fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+            await presentSnackBarSaveAndDismiss(files: items, directory: directory, drive: drive)
+        }
+    }
 
-                message = items.count > 1 ? KDriveResourcesStrings.Localizable
-                    .allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable
-                    .allUploadInProgress(items[0].name)
-            } catch {
-                message = error.localizedDescription
-            }
+    private func presentSnackBarSaveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {
+        let message: String
+        do {
+            try await SaveFileViewControllerWorker().processForUpload(files: files, directory: directory, drive: drive)
 
-            Task { @MainActor in
-                self.navigationController?.dismiss(animated: true) {
-                    UIConstants.showSnackBar(message: message)
-                }
+            message = files.count > 1 ? KDriveResourcesStrings.Localizable
+                .allUploadInProgressPlural(files.count) : KDriveResourcesStrings.Localizable
+                .allUploadInProgress(files[0].name)
+        } catch {
+            message = error.localizedDescription
+        }
+
+        Task { @MainActor in
+            self.navigationController?.dismiss(animated: true) {
+                UIConstants.showSnackBar(message: message)
             }
         }
+    }
+}
+
+/// Something to process the files to be uploaded
+struct SaveFileViewControllerWorker {
+    @LazyInjectService var fileImportHelper: FileImportHelper
+
+    func navigateToUploadsInApp() {
+        // TODO: create deep-link
+//        let url = URL(string: "://")
+//        UIApplication.shared.open(<#T##url: URL##URL#>)
+    }
+
+    func processForUpload(files: [ImportedFile], directory: File, drive: Drive) async throws {
+        #if ISEXTENSION
+        defer { navigateToUploadsInApp() }
+
+        #else
+        #endif
+        try await fileImportHelper.saveForUpload(files, in: directory, drive: drive)
     }
 }

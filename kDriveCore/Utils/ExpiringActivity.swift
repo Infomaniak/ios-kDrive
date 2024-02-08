@@ -75,7 +75,7 @@ public final class ExpiringActivity: ExpiringActivityable {
         queue = DispatchQueue(label: "com.infomaniak.ExpiringActivity.sync", qos: qos)
     }
 
-    public convenience init(id: String, delegate: ExpiringActivityDelegate?) {
+    public convenience init(id: String = "\(#function)-\(UUID().uuidString)", delegate: ExpiringActivityDelegate? = nil) {
         self.init(id: id, qos: .userInitiated, delegate: delegate)
     }
 

@@ -139,11 +139,7 @@ final class DroppableFileListViewModel {
                 let drive = driveFileManager.drive
                 Task {
                     do {
-                        try await self.fileImportHelper.upload(
-                            files: importedFiles,
-                            in: frozenDestination,
-                            drive: drive
-                        )
+                        try await self.fileImportHelper.saveForUpload(importedFiles, in: frozenDestination, drive: drive)
                     } catch {
                         UIConstants.showSnackBarIfNeeded(error: error)
                     }
