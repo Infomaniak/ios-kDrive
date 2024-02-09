@@ -32,8 +32,10 @@ public protocol UploadQueueable {
     /// - Parameters:
     ///   - uploadFile: The upload file to be processed
     ///   - itemIdentifier: Optional item identifier
+    ///   - addToQueue: Should we schedule the upload as well ?
     /// - Returns: An UploadOperation if any
-    func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperationable?
+    func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?, addToQueue: Bool)
+        -> UploadOperationable?
 
     func suspendAllOperations()
 
@@ -126,12 +128,10 @@ extension UploadQueue: UploadQueueable {
 
     @discardableResult
     public func saveToRealm(_ uploadFile: UploadFile,
-                            itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperationable? {
+                            itemIdentifier: NSFileProviderItemIdentifier? = nil,
+                            addToQueue: Bool = true) -> UploadOperationable? {
         let expiringActivity = ExpiringActivity()
         expiringActivity.start()
-
-        // We enqueue the upload only in main app
-        let addToQueue = !Bundle.main.isExtension
 
         Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
 
@@ -447,8 +447,6 @@ extension UploadQueue: UploadQueueable {
 
     private func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil,
                                        using realm: Realm) {
-        assert(!Bundle.main.isExtension, "This should not be called from extension")
-
         guard !uploadFile.isInvalidated else {
             return
         }
@@ -466,8 +464,6 @@ extension UploadQueue: UploadQueueable {
     @discardableResult
     private func addToQueue(uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
-        assert(!Bundle.main.isExtension, "This should not be called from extension")
-
         guard !uploadFile.isInvalidated,
               uploadFile.maxRetryCount > 0,
               keyedUploadOperations.getObject(forKey: uploadFile.id) == nil else {

@@ -67,7 +67,9 @@ extension SaveFileViewController: FooterButtonDelegate {
     }
 
     private func processForUpload(files: [ImportedFile], directory: File, drive: Drive) async throws {
-        try await fileImportHelper.saveForUpload(files, in: directory, drive: drive)
+        // We only schedule for uploading in main app target
+        let addToQueue = !Bundle.main.isExtension
+        try await fileImportHelper.saveForUpload(files, in: directory, drive: drive, addToQueue: addToQueue)
         #if ISEXTENSION
         showOpenAppToContinueNotification()
         #endif

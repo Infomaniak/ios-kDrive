@@ -26,7 +26,7 @@ import RealmSwift
 import VisionKit
 
 public extension FileImportHelper {
-    func saveForUpload(_ files: [ImportedFile], in directory: File, drive: Drive) async throws {
+    func saveForUpload(_ files: [ImportedFile], in directory: File, drive: Drive, addToQueue: Bool) async throws {
         guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
@@ -47,7 +47,7 @@ public extension FileImportHelper {
                 name: file.name
             )
 
-            self.uploadQueue.saveToRealm(uploadFile)
+            self.uploadQueue.saveToRealm(uploadFile, addToQueue: addToQueue)
         }
 
         expiringActivity.endAll()

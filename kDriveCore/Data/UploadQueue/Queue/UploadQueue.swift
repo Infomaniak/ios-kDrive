@@ -82,13 +82,8 @@ public final class UploadQueue {
 
     /// Should suspend operation queue based on network status
     var shouldSuspendQueue: Bool {
-        #if ISEXTENSION
-        // Explicitly disable upload queue in extension mode
-        return true
-        #else
         let status = ReachabilityListener.instance.currentStatus
         return status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
-        #endif
     }
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
@@ -101,11 +96,6 @@ public final class UploadQueue {
     )
 
     public init() {
-        guard !Bundle.main.isExtension else {
-            Log.uploadQueue("Disabled in extension mode", level: .warning)
-            return
-        }
-
         Log.uploadQueue("Starting up")
 
         concurrentQueue.async {
