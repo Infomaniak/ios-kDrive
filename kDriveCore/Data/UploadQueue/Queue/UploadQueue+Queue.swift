@@ -492,7 +492,7 @@ extension UploadQueue: UploadQueueable {
 
             publishFileUploaded(result: operation.result)
             publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
-            OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: keyedUploadOperations.isEmpty)
+            OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !keyedUploadOperations.isEmpty)
         }
 
         Log.uploadQueue("add operation :\(operation) ufid:\(uploadFileId)")
