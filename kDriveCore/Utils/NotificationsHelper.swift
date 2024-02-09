@@ -225,12 +225,7 @@ public struct NotificationsHelper: NotificationsHelpable {
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
                 UNUserNotificationCenter.current().add(request)
             } else {
-                let snackbar = IKSnackBar.make(message: notification.body, duration: .lengthLong)
-                if let action {
-                    snackbar?.setAction(action).show()
-                } else {
-                    snackbar?.show()
-                }
+                UIConstants.showSnackBar(message: notification.body, duration: .lengthLong, action: action)
             }
         }
     }

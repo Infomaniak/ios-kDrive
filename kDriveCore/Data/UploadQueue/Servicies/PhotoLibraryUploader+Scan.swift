@@ -111,8 +111,17 @@ public extension PhotoLibraryUploader {
                     burstCount: &burstCount
                 )
 
-                let bestResourceSHA256: String? = asset.bestResourceSHA256
-                Log.photoLibraryUploader("Asset hash:\(bestResourceSHA256)")
+                let bestResourceSHA256: String?
+                do {
+                    bestResourceSHA256 = try asset.bestResourceSHA256
+                } catch {
+                    // Error thrown while hashing a resource, we stop ASAP.
+                    Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
+                    stop.pointee = true
+                    return
+                }
+
+                Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
 
                 // Check if picture uploaded before
                 guard !assetAlreadyUploaded(assetName: finalName,

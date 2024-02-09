@@ -193,7 +193,7 @@ extension AppDelegate {
                         }
                         group.leave()
                     }
-                uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: nil)
+                uploadQueue.saveToRealm(uploadFile, itemIdentifier: nil)
             }
         }
 
