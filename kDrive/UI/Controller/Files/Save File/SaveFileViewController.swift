@@ -515,7 +515,7 @@ extension SaveFileViewController: FooterButtonDelegate {
     private func presentSnackBarSaveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {
         let message: String
         do {
-            try await SaveFileViewControllerWorker().processForUpload(files: files, directory: directory, drive: drive)
+            try await processForUpload(files: files, directory: directory, drive: drive)
 
             message = files.count > 1 ? KDriveResourcesStrings.Localizable
                 .allUploadInProgressPlural(files.count) : KDriveResourcesStrings.Localizable
@@ -530,21 +530,34 @@ extension SaveFileViewController: FooterButtonDelegate {
             }
         }
     }
-}
 
-/// Something to process the files to be uploaded
-struct SaveFileViewControllerWorker {
-    @LazyInjectService var notificationHelper: NotificationsHelpable
-    @LazyInjectService var fileImportHelper: FileImportHelper
+    private func processForUpload(files: [ImportedFile], directory: File, drive: Drive) async throws {
+        try await fileImportHelper.saveForUpload(files, in: directory, drive: drive)
+        #if ISEXTENSION
+        showOpenAppToContinueNotification()
+        #endif
+    }
+
+    #if ISEXTENSION
+    //  Dynamic hook to be able to open an URL within an extension
+    @objc func openURL(_ url: URL) -> Bool {
+        var responder: UIResponder? = self
+        while responder != nil {
+            if let application = responder as? UIApplication {
+                return application.perform(#selector(openURL(_:)), with: url) != nil
+            }
+            responder = responder?.next
+        }
+        return false
+    }
 
     func showOpenAppToContinueNotification() {
-        notificationHelper.sendPausedUploadQueueNotification()
-    }
-
-    func processForUpload(files: [ImportedFile], directory: File, drive: Drive) async throws {
-        try await fileImportHelper.saveForUpload(files, in: directory, drive: drive)
-        if Bundle.main.isExtension {
-            showOpenAppToContinueNotification()
+        guard openURL(URLConstants.kDriveRedirection.url) else {
+            // Fallback on a local notification if failure to open URL
+            @InjectService var notificationHelper: NotificationsHelpable
+            notificationHelper.sendPausedUploadQueueNotification()
+            return
         }
     }
+    #endif
 }
