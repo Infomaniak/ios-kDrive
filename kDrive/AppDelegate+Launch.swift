@@ -23,6 +23,7 @@ import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
+import VersionChecker
 
 extension AppDelegate {
     // MARK: Launch
@@ -99,6 +100,13 @@ extension AppDelegate {
         let launchPanelsController = LaunchPanelsController()
         if let viewController = window.rootViewController {
             launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+        }
+    }
+    
+    private func showUpdateRequired() {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
         }
     }
 

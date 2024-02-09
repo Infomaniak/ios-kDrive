@@ -81,7 +81,6 @@ let project = Project(name: "kDrive",
                                      .package(product: "Highlightr"),
                                      .package(product: "MarkdownKit"),
                                      .package(product: "MatomoTracker"),
-                                     .package(product: "VersionChecker"),
                                      .sdk(name: "StoreKit", type: .framework, status: .required)
                                  ],
                                  settings: .settings(base: Constants.baseSettings),
@@ -170,7 +169,8 @@ let project = Project(name: "kDrive",
                                      .package(product: "CocoaLumberjackSwift"),
                                      .package(product: "MaterialOutlinedTextField"),
                                      .package(product: "SwiftRegex"),
-                                     .package(product: "Sentry")
+                                     .package(product: "Sentry"),
+                                     .package(product: "VersionChecker")
                                  ]),
                           Target(name: "kDriveFileProvider",
                                  platform: .iOS,
