@@ -323,8 +323,6 @@ public extension UploadFile {
         error = nil
         // Reset retry count to default
         maxRetryCount = UploadFile.defaultMaxRetryCount
-        // Assign the UploadFile to the main app, not the FileManager extension
-        initiatedFromFileManager = false
     }
 }
 
