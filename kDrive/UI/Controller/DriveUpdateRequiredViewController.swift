@@ -17,24 +17,27 @@
  */
 
 import InfomaniakCoreUI
+import kDriveCore
 import kDriveResources
 import SwiftUI
 import UIKit
 import VersionChecker
-import kDriveCore
 
 class DriveUpdateRequiredViewController: UIViewController {
-    private let sharedStyle = TemplateSharedStyle(
-        background: KDriveResourcesAsset.backgroundColor.swiftUIColor,
-        titleTextStyle: .init(font: Font(TextStyle.header1.font), color: Color(TextStyle.header1.color)),
-        descriptionTextStyle: .init(font: Font(TextStyle.body1.font), color: Color(TextStyle.body1.color)),
-        buttonStyle: .init(
-            background: .accentColor,
-            textStyle: .init(font: Font(TextStyle.body1.font), color: .white),
-            height: 60,
-            radius: 16
+    private let sharedStyle: TemplateSharedStyle = {
+        let largeButtonStyle = IKLargeButton.Style.primaryButton
+        return TemplateSharedStyle(
+            background: KDriveResourcesAsset.backgroundColor.swiftUIColor,
+            titleTextStyle: .init(font: Font(TextStyle.header2.font), color: Color(TextStyle.header2.color)),
+            descriptionTextStyle: .init(font: Font(TextStyle.body1.font), color: Color(TextStyle.body1.color)),
+            buttonStyle: .init(
+                background: Color(largeButtonStyle.backgroundColor),
+                textStyle: .init(font: Font(largeButtonStyle.titleFont), color: Color(largeButtonStyle.titleColor)),
+                height: 60,
+                radius: UIConstants.buttonCornerRadius
+            )
         )
-    )
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()

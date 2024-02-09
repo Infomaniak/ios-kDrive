@@ -48,9 +48,9 @@ import UIKit
     public var disabledBackgroundColor = KDriveResourcesAsset.buttonDisabledBackgroundColor.color
 
     public struct Style: RawRepresentable {
-        var titleFont: UIFont
-        var titleColor: UIColor
-        var backgroundColor: UIColor
+        public var titleFont: UIFont
+        public var titleColor: UIColor
+        public var backgroundColor: UIColor
 
         public static let primaryButton = Style(
             titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
