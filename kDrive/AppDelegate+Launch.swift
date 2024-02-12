@@ -23,7 +23,6 @@ import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
-import VersionChecker
 
 extension AppDelegate {
     // MARK: Launch
@@ -39,6 +38,8 @@ extension AppDelegate {
             askUserToRemovePicturesIfNecessary()
         case .onboarding:
             showOnboarding()
+        case .updateRequired:
+            showUpdateRequired()
         }
     }
 
@@ -102,12 +103,15 @@ extension AppDelegate {
             launchPanelsController.pickAndDisplayPanel(viewController: viewController)
         }
     }
-    
+
     private func showUpdateRequired() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
         }
+
+        window.rootViewController = DriveUpdateRequiredViewController()
+        window.makeKeyAndVisible()
     }
 
     // MARK: Misc
