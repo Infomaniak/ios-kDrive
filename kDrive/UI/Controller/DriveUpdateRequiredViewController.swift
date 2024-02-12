@@ -65,9 +65,7 @@ class DriveUpdateRequiredViewController: UIViewController {
 
     private func updateApp() {
         let storeURL: URLConstants = Bundle.main.isRunningInTestFlight ? .testFlight : .appStore
-        if UIApplication.shared.canOpenURL(storeURL.url) {
-            UIApplication.shared.open(storeURL.url)
-        }
+        UIConstants.openUrl(storeURL.url, from: self)
     }
 }
 
