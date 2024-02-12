@@ -572,8 +572,8 @@ public extension Endpoint {
         if let date {
             queryItems += [
                 URLQueryItem(name: "modified_at", value: "custom"),
-                URLQueryItem(name: "from", value: "\(Int(date.start.timeIntervalSince1970))"),
-                URLQueryItem(name: "until", value: "\(Int(date.end.timeIntervalSince1970))")
+                URLQueryItem(name: "modified_after", value: "\(Int(date.start.timeIntervalSince1970))"),
+                URLQueryItem(name: "modified_before", value: "\(Int(date.end.timeIntervalSince1970))")
             ]
         }
         for fileType in fileTypes {
