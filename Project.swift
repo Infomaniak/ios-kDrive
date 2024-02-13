@@ -46,7 +46,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
                           .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
                           .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
-                          .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "1.1.0")),
+                          .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "1.1.1")),
                       ],
                       targets: [
                           Target(name: "kDrive",
