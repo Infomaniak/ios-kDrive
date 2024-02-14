@@ -63,6 +63,7 @@ public extension Target {
                       infoPlist: .file(path: "\(name)/Info.plist"),
                       sources: [
                           "\(name)/**",
+                          "kDrive/UI/Controller/DriveUpdateRequiredViewController.swift",
                           "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
                           "kDrive/UI/Controller/Create File/FloatingPanelUtils.swift",
                           "kDrive/UI/Controller/Files/Categories/**",

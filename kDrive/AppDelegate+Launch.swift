@@ -38,6 +38,8 @@ extension AppDelegate {
             askUserToRemovePicturesIfNecessary()
         case .onboarding:
             showOnboarding()
+        case .updateRequired:
+            showUpdateRequired()
         }
     }
 
@@ -100,6 +102,16 @@ extension AppDelegate {
         if let viewController = window.rootViewController {
             launchPanelsController.pickAndDisplayPanel(viewController: viewController)
         }
+    }
+
+    private func showUpdateRequired() {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
+        }
+
+        window.rootViewController = DriveUpdateRequiredViewController()
+        window.makeKeyAndVisible()
     }
 
     // MARK: Misc
