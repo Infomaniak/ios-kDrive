@@ -24,6 +24,8 @@ import UIKit
 import VersionChecker
 
 class DriveUpdateRequiredViewController: UIViewController {
+    var dismissHandler: (() -> Void)?
+
     private let sharedStyle: TemplateSharedStyle = {
         let largeButtonStyle = IKLargeButton.Style.primaryButton
         return TemplateSharedStyle(
@@ -45,7 +47,8 @@ class DriveUpdateRequiredViewController: UIViewController {
         let hostingViewController = UIHostingController(rootView: UpdateRequiredView(
             image: KDriveResourcesAsset.updateRequired.swiftUIImage,
             sharedStyle: sharedStyle,
-            handler: updateApp
+            updateHandler: updateApp,
+            dismissHandler: dismissHandler
         ))
         guard let hostingView = hostingViewController.view else { return }
 
@@ -61,6 +64,10 @@ class DriveUpdateRequiredViewController: UIViewController {
         ])
 
         hostingViewController.didMove(toParent: self)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 
     private func updateApp() {
