@@ -26,6 +26,7 @@ enum RootViewControllerState {
     case onboarding
     case appLock
     case mainViewController(DriveFileManager)
+    case updateRequired
 
     static func getCurrentState() -> RootViewControllerState {
         @InjectService var accountManager: AccountManageable

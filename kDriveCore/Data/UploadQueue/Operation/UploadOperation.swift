@@ -245,7 +245,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             Log.uploadOperation("call finish ufid:\(uploadFileId)")
 
             // Make sure we stop the expiring activity
-            self.expiringActivity?.end()
+            self.expiringActivity?.endAll()
 
             // Make sure we stop all the network requests (if any)
             self.cancelAllUploadRequests()

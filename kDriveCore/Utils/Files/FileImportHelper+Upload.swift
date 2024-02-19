@@ -26,10 +26,13 @@ import RealmSwift
 import VisionKit
 
 public extension FileImportHelper {
-    func upload(files: [ImportedFile], in directory: File, drive: Drive) async throws {
+    func saveForUpload(_ files: [ImportedFile], in directory: File, drive: Drive, addToQueue: Bool) async throws {
         guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
+
+        let expiringActivity = ExpiringActivity()
+        expiringActivity.start()
 
         let parentDirectoryId = directory.id
         let userId = drive.userId
@@ -43,8 +46,11 @@ public extension FileImportHelper {
                 url: file.path,
                 name: file.name
             )
-            self.uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile)
+
+            self.uploadQueue.saveToRealm(uploadFile, addToQueue: addToQueue)
         }
+
+        expiringActivity.endAll()
     }
 
     func upload(
@@ -133,7 +139,7 @@ public extension FileImportHelper {
             url: targetURL,
             name: name
         )
-        uploadQueue.saveToRealmAndAddToQueue(uploadFile: newFile)
+        uploadQueue.saveToRealm(newFile)
     }
 }
 

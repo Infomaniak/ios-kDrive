@@ -193,13 +193,13 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
-    var viewModel: FileViewModel!
+    var viewModel: FileViewModel?
 
     weak var delegate: FileCellDelegate?
 
     override var isSelected: Bool {
         didSet {
-            viewModel.isSelected = isSelected
+            viewModel?.isSelected = isSelected
             configureForSelection()
         }
     }
@@ -327,7 +327,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     /// Update the cell selection mode.
     /// - Parameter selectionMode: The new selection mode (enabled/disabled).
     func setSelectionMode(_ selectionMode: Bool) {
-        guard viewModel != nil else { return }
+        guard let viewModel else { return }
         viewModel.selectionMode = selectionMode
         configure(with: viewModel)
     }
@@ -344,6 +344,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     private func configureLogoImage() {
+        guard let viewModel else { return }
         logoImage.isAccessibilityElement = true
         logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
         logoImage.image = viewModel.icon
@@ -365,6 +366,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureImport(shouldDisplay: Bool) {
+        guard let viewModel else { return }
+
         if shouldDisplay && viewModel.isImporting {
             logoImage.isHidden = true
             importProgressView?.isHidden = false
@@ -396,10 +399,13 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
 extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return min(viewModel.categories.count, 3)
+        return min(viewModel?.categories.count ?? 0, 3)
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let viewModel else {
+            return UICollectionViewCell()
+        }
         let cell = collectionView.dequeueReusableCell(type: CategoryBadgeCollectionViewCell.self, for: indexPath)
         let category = viewModel.categories[indexPath.row]
         let more = indexPath.item == 2 && viewModel.categories.count > 3 ? viewModel.categories.count - 3 : nil

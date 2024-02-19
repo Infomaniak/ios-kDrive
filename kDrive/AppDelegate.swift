@@ -31,6 +31,7 @@ import os.log
 import StoreKit
 import UIKit
 import UserNotifications
+import VersionChecker
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
@@ -205,12 +206,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UserDefaults.shared.numberOfConnections += 1
             refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             uploadEditedFiles()
-        case .onboarding: break
+        case .onboarding, .updateRequired: break
             // NOOP
         }
 
         // Remove all notifications on App Opening
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
+        Task {
+            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
+                prepareRootViewController(currentState: .updateRequired)
+            }
+        }
     }
 
     /// Set global tint color
