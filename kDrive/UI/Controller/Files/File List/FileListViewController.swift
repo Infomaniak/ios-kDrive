@@ -582,9 +582,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func onFilePresented(_ file: File) {
         #if !ISEXTENSION
-        filePresenter.present(driveFileManager: viewModel.driveFileManager,
-                              file: file,
+        filePresenter.present(for: file,
                               files: viewModel.getAllFiles(),
+                              driveFileManager: viewModel.driveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                               fromActivities: viewModel.configuration.fromActivities)
         #endif

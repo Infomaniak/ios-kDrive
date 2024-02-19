@@ -424,9 +424,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                                                   viewController: fileListViewController)
                 } else {
                     let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(driveFileManager: driveFileManager,
-                                          file: file,
+                    filePresenter.present(for: file,
                                           files: [file],
+                                          driveFileManager: driveFileManager,
                                           normalFolderHierarchy: false)
                 }
             }

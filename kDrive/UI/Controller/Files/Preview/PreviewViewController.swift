@@ -402,9 +402,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if currentFile.isBookmark {
             floatingPanelViewController.dismiss(animated: false)
             FilePresenter(viewController: self).present(
-                driveFileManager: driveFileManager,
-                file: currentFile,
+                for: currentFile,
                 files: [],
+                driveFileManager: driveFileManager,
                 normalFolderHierarchy: true
             ) { success in
                 if !success {
