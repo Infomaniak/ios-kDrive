@@ -21,11 +21,5 @@ import kDriveCore
 import UIKit
 
 class HomeRecentFilesHeaderView: UICollectionReusableView {
-    @IBOutlet weak var switchLayoutButton: UIButton!
     @IBOutlet weak var titleLabel: IKLabel!
-    var actionHandler: ((UIButton) -> Void)?
-
-    @IBAction func didPressSwitchLayout(_ sender: UIButton) {
-        actionHandler?(sender)
-    }
 }

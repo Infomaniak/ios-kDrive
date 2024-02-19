@@ -21,6 +21,7 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import UIKit
+import VersionChecker
 
 final class ActionNavigationController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
@@ -44,6 +45,10 @@ final class ActionNavigationController: TitleSizeAdjustingNavigationController {
 
         saveFileViewController.itemProviders = itemProviders
         viewControllers = [saveFileViewController]
+
+        Task {
+            try? await checkAppVersion()
+        }
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
@@ -51,5 +56,12 @@ final class ActionNavigationController: TitleSizeAdjustingNavigationController {
             return
         }
         extensionContext.completeRequest(returningItems: extensionContext.inputItems, completionHandler: nil)
+    }
+
+    private func checkAppVersion() async throws {
+        guard try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired else { return }
+        Task { @MainActor in
+            viewControllers = [DriveUpdateRequiredViewController()]
+        }
     }
 }

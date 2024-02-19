@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -15,17 +15,8 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F1t-4r-UDd">
-                    <rect key="frame" x="296" y="13" width="24" height="24"/>
-                    <color key="tintColor" name="primaryTextColor"/>
-                    <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
-                    <state key="normal" image="list"/>
-                    <connections>
-                        <action selector="didPressSwitchLayout:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="14H-bk-0Og"/>
-                    </connections>
-                </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8gW-N4-qaK" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                    <rect key="frame" x="0.0" y="16" width="36" height="18"/>
+                    <rect key="frame" x="0.0" y="16" width="320" height="18"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                     <color key="textColor" name="primaryTextColor"/>
@@ -37,15 +28,12 @@
             </subviews>
             <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
             <constraints>
-                <constraint firstItem="F1t-4r-UDd" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8gW-N4-qaK" secondAttribute="trailing" constant="8" id="4Cb-gw-Ga9"/>
-                <constraint firstAttribute="trailing" secondItem="F1t-4r-UDd" secondAttribute="trailing" id="4e9-K6-bhZ"/>
                 <constraint firstItem="8gW-N4-qaK" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="16" id="7z3-Cp-pWz"/>
                 <constraint firstItem="8gW-N4-qaK" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" id="CWv-bb-xeA"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" secondItem="8gW-N4-qaK" secondAttribute="trailing" id="KYA-SH-4yu"/>
                 <constraint firstAttribute="bottom" secondItem="8gW-N4-qaK" secondAttribute="bottom" constant="16" id="VcV-s4-6c4"/>
-                <constraint firstItem="F1t-4r-UDd" firstAttribute="centerY" secondItem="U6b-Vx-4bR" secondAttribute="centerY" id="mKF-Yx-8Nk"/>
             </constraints>
             <connections>
-                <outlet property="switchLayoutButton" destination="F1t-4r-UDd" id="rzE-Ed-58z"/>
                 <outlet property="titleLabel" destination="8gW-N4-qaK" id="Xgw-mP-v9j"/>
             </connections>
             <point key="canvasLocation" x="118.84057971014494" y="-14.0625"/>
@@ -57,9 +45,8 @@
         </designable>
     </designables>
     <resources>
-        <image name="list" width="24" height="24"/>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

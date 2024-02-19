@@ -359,7 +359,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
             }
 
-            _ = self.uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: item.itemIdentifier)
+            _ = self.uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
         }
     }
 

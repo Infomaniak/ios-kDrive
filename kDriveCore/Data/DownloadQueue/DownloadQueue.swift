@@ -123,7 +123,7 @@ public final class DownloadQueue {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     self.publishFileDownloaded(fileId: fileId, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -149,7 +149,7 @@ public final class DownloadQueue {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -179,7 +179,7 @@ public final class DownloadQueue {
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
                     completion(operation.error)
                 }
             }

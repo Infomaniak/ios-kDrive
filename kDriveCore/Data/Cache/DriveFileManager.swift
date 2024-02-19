@@ -645,7 +645,7 @@ public final class DriveFileManager {
                            cursor: String? = nil,
                            sortType: SortType = .nameAZ) async throws -> (files: [File], nextCursor: String?) {
         do {
-            return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
+            return try await remoteFiles(in: getManagedFile(from: DriveFileManager.searchFilesRootFile).proxify(),
                                          fetchFiles: {
                                              let searchResults = try await apiFetcher.searchFiles(
                                                  drive: drive,
