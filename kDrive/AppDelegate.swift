@@ -384,14 +384,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func setRootViewController(_ vc: UIViewController,
                                animated: Bool = true) {
-        guard animated, let window else {
-            self.window?.rootViewController = vc
-            self.window?.makeKeyAndVisible()
+        guard let window else {
             return
         }
 
         window.rootViewController = vc
         window.makeKeyAndVisible()
+
+        guard animated else {
+            return
+        }
+
         UIView.transition(with: window, duration: 0.3,
                           options: .transitionCrossDissolve,
                           animations: nil,
