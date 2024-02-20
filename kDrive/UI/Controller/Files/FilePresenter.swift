@@ -63,18 +63,16 @@ final class FilePresenter {
 
     func presentParent(of file: File, driveFileManager: DriveFileManager, animated: Bool = true) {
         if let parent = file.parent {
-            present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
+            present(for: parent, files: [], driveFileManager: driveFileManager, normalFolderHierarchy: true, animated: animated)
         } else if file.parentId != 0 {
             Task {
                 do {
                     let parent = try await driveFileManager.file(id: file.parentId)
-                    present(
-                        driveFileManager: driveFileManager,
-                        file: parent,
-                        files: [],
-                        normalFolderHierarchy: true,
-                        animated: animated
-                    )
+                    present(for: parent,
+                            files: [],
+                            driveFileManager: driveFileManager,
+                            normalFolderHierarchy: true,
+                            animated: animated)
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
                 }
@@ -84,93 +82,124 @@ final class FilePresenter {
         }
     }
 
-    func present(driveFileManager: DriveFileManager,
-                 file: File,
+    func present(for file: File,
                  files: [File],
+                 driveFileManager: DriveFileManager,
                  normalFolderHierarchy: Bool,
                  fromActivities: Bool = false,
                  animated: Bool = true,
                  completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
-            // Show files list
-            let viewModel: FileListViewModel
-            if driveFileManager.drive.sharedWithMe {
-                viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
-            } else if file.isTrashed || file.deletedAt != nil {
-                viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
-            } else {
-                viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
-            }
-            let nextVC = FileListViewController.instantiate(viewModel: viewModel)
-            if file.isDisabled {
-                if driveFileManager.drive.isUserAdmin {
-                    let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
-                    let floatingPanelViewController = accessFileDriveFloatingPanelController
-                        .contentViewController as? AccessFileFloatingPanelViewController
-                    floatingPanelViewController?.actionHandler = { [weak self] _ in
-                        guard let self else { return }
-                        floatingPanelViewController?.rightButton.setLoading(true)
-                        Task { [proxyFile = file.proxify()] in
-                            do {
-                                let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
-                                if response {
-                                    accessFileDriveFloatingPanelController.dismiss(animated: true)
-                                    self.navigationController?.pushViewController(nextVC, animated: true)
-                                } else {
-                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
-                                }
-                            } catch {
-                                UIConstants.showSnackBarIfNeeded(error: error)
-                            }
-                        }
-                    }
-                    viewController?.present(accessFileDriveFloatingPanelController, animated: true)
-                } else {
-                    viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
-                }
-            } else {
-                navigationController?.pushViewController(nextVC, animated: animated)
-            }
-            completion?(true)
+            presentDirectory(for: file, driveFileManager: driveFileManager, animated: animated, completion: completion)
         } else if file.isBookmark {
-            // Open bookmark URL
-            if file.isMostRecentDownloaded {
-                presentBookmark(for: file, completion: completion)
-            } else {
-                // Download file
-                DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
-                    Task {
-                        if let error {
+            downloadAndPresentBookmark(for: file, completion: completion)
+        } else {
+            presentFile(
+                for: file,
+                files: files,
+                driveFileManager: driveFileManager,
+                normalFolderHierarchy: normalFolderHierarchy,
+                fromActivities: fromActivities,
+                animated: animated,
+                completion: completion
+            )
+        }
+    }
+
+    private func presentFile(for file: File,
+                             files: [File],
+                             driveFileManager: DriveFileManager,
+                             normalFolderHierarchy: Bool,
+                             fromActivities: Bool,
+                             animated: Bool,
+                             completion: ((Bool) -> Void)?) {
+        // Show file preview
+        let files = files.filter { !$0.isDirectory && !$0.isTrashed }
+        if let index = files.firstIndex(where: { $0.id == file.id }) {
+            let previewViewController = PreviewViewController.instantiate(
+                files: files,
+                index: Int(index),
+                driveFileManager: driveFileManager,
+                normalFolderHierarchy: normalFolderHierarchy,
+                fromActivities: fromActivities
+            )
+            navigationController?.pushViewController(previewViewController, animated: animated)
+            completion?(true)
+        }
+        if file.isTrashed {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)
+            completion?(false)
+        }
+    }
+
+    private func presentDirectory(
+        for file: File,
+        driveFileManager: DriveFileManager,
+        animated: Bool,
+        completion: ((Bool) -> Void)?
+    ) {
+        // Show files list
+        let viewModel: FileListViewModel
+        if driveFileManager.drive.sharedWithMe {
+            viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else if file.isTrashed || file.deletedAt != nil {
+            viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else {
+            viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        }
+        let nextVC = FileListViewController.instantiate(viewModel: viewModel)
+        if file.isDisabled {
+            if driveFileManager.drive.isUserAdmin {
+                let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = accessFileDriveFloatingPanelController
+                    .contentViewController as? AccessFileFloatingPanelViewController
+                floatingPanelViewController?.actionHandler = { [weak self] _ in
+                    guard let self else { return }
+                    floatingPanelViewController?.rightButton.setLoading(true)
+                    Task { [proxyFile = file.proxify()] in
+                        do {
+                            let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
+                            if response {
+                                accessFileDriveFloatingPanelController.dismiss(animated: true)
+                                self.navigationController?.pushViewController(nextVC, animated: true)
+                            } else {
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
+                            }
+                        } catch {
                             UIConstants.showSnackBarIfNeeded(error: error)
-                            completion?(false)
-                        } else {
-                            self.presentBookmark(for: file, completion: completion)
                         }
                     }
                 }
+                viewController?.present(accessFileDriveFloatingPanelController, animated: true)
+            } else {
+                viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
             }
         } else {
-            // Show file preview
-            let files = files.filter { !$0.isDirectory && !$0.isTrashed }
-            if let index = files.firstIndex(where: { $0.id == file.id }) {
-                let previewViewController = PreviewViewController.instantiate(
-                    files: files,
-                    index: Int(index),
-                    driveFileManager: driveFileManager,
-                    normalFolderHierarchy: normalFolderHierarchy,
-                    fromActivities: fromActivities
-                )
-                navigationController?.pushViewController(previewViewController, animated: animated)
-                completion?(true)
-            }
-            if file.isTrashed {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)
-                completion?(false)
+            navigationController?.pushViewController(nextVC, animated: animated)
+        }
+        completion?(true)
+    }
+
+    private func downloadAndPresentBookmark(for file: File, completion: ((Bool) -> Void)?) {
+        // Open bookmark URL
+        if file.isMostRecentDownloaded {
+            presentBookmark(for: file, completion: completion)
+        } else {
+            // Download file
+            DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
+                Task {
+                    if let error {
+                        UIConstants.showSnackBarIfNeeded(error: error)
+                        completion?(false)
+                    } else {
+                        self.presentBookmark(for: file, completion: completion)
+                    }
+                }
             }
         }
     }
 
-    private func presentBookmark(for file: File, animated: Bool = true, completion: ((Bool) -> Void)? = nil) {
+    private func presentBookmark(for file: File, animated: Bool = true, completion: ((Bool) -> Void)?) {
         if let url = file.getBookmarkURL() {
             if url.scheme == "http" || url.scheme == "https" {
                 let safariViewController = SFSafariViewController(url: url)
