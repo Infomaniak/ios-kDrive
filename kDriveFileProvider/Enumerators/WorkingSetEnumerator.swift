@@ -34,15 +34,18 @@ final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        let workingSetFiles = driveFileManager.getWorkingSet()
-        var containerItems = [FileProviderItem]()
-        for file in workingSetFiles {
-            autoreleasepool {
-                containerItems.append(FileProviderItem(file: file, parent: .workingSet, domain: self.domain))
+        Task {
+            let workingSetFiles = driveFileManager.getWorkingSet()
+            var containerItems = [FileProviderItem]()
+            for file in workingSetFiles {
+                autoreleasepool {
+                    containerItems.append(FileProviderItem(file: file, parent: .workingSet, domain: self.domain))
+                }
             }
+
+            containerItems += additionalState.getWorkingDocumentValues()
+            observer.didEnumerate(containerItems)
+            observer.finishEnumerating(upTo: nil)
         }
-        containerItems += additionalState.getWorkingDocumentValues()
-        observer.didEnumerate(containerItems)
-        observer.finishEnumerating(upTo: nil)
     }
 }

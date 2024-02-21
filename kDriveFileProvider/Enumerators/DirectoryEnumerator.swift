@@ -38,6 +38,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
         super.init()
     }
 
+    // MARK: - NSFileProviderEnumerator
+
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
@@ -192,7 +194,23 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    func handleActions(_ actions: [FileAction], actionsFiles: [File])
+    func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
+        guard let file = try? driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier) else {
+            return nil
+        }
+
+        guard let lastCursor = file.lastCursor,
+              file.fullyDownloaded,
+              let anchor = NSFileProviderSyncAnchor(lastCursor) else {
+            return nil
+        }
+
+        return anchor
+    }
+
+    // MARK: - Private
+
+    private func handleActions(_ actions: [FileAction], actionsFiles: [File])
         -> (updated: Set<File>, deleted: Set<File>) {
         let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
 
@@ -214,19 +232,5 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             }
         }
         return (updatedFiles, deletedFiles)
-    }
-
-    func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
-        guard let file = try? driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier) else {
-            return nil
-        }
-
-        guard let lastCursor = file.lastCursor,
-              file.fullyDownloaded,
-              let anchor = NSFileProviderSyncAnchor(lastCursor) else {
-            return nil
-        }
-
-        return anchor
     }
 }

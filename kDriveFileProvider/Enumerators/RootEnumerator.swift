@@ -22,7 +22,7 @@ import InfomaniakDI
 import kDriveCore
 import RealmSwift
 
-class RootEnumerator: NSObject, NSFileProviderEnumerator {
+final class RootEnumerator: NSObject, NSFileProviderEnumerator {
     private let driveFileManager: DriveFileManager
     private let domain: NSFileProviderDomain?
 
@@ -33,53 +33,19 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         self.domain = domain
     }
 
+    // MARK: - NSFileProviderEnumerator
+
     func invalidate() {}
 
-    func fetchRoot(page: NSFileProviderPage) async throws -> (files: [File], nextCursor: String?) {
-        let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
-
-        guard !parentDirectory.fullyDownloaded else {
-            return (Array(parentDirectory.children) + [parentDirectory], nil)
-        }
-
-        let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-        let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
-            drive: driveFileManager.drive,
-            cursor: currentPageCursor
-        )
-
-        let realm = driveFileManager.getRealm()
-        let liveParentDirectory = try driveFileManager.getCachedFile(
-            itemIdentifier: containerItemIdentifier,
-            freeze: false,
-            using: realm
-        )
-
-        try driveFileManager.writeChildrenToParent(
-            files,
-            liveParent: liveParentDirectory,
-            responseAt: response.responseAt,
-            isInitialCursor: page.isInitialPage,
-            using: realm
-        )
-
-        try updateAnchor(for: liveParentDirectory, from: response, using: realm)
-
-        return (files + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
-    }
-
-    func updateAnchor(for parent: File, from response: ApiResponse<[File]>, using realm: Realm) throws {
-        try realm.write {
-            parent.responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
-            parent.lastCursor = response.cursor
-            parent.fullyDownloaded = response.hasMore
-        }
-    }
-
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        Task {
+        Task { [weak self] in
+            guard let self else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                return
+            }
+
             do {
-                let (files, nextCursor) = try await self.fetchRoot(page: page)
+                let (files, nextCursor) = try await fetchRoot(page: page)
                 observer.didEnumerate(files.map { FileProviderItem(file: $0, parent: .rootContainer, domain: domain) })
 
                 // there should never be more cursors but still implement next page logic just in case
@@ -103,7 +69,12 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
             return
         }
 
-        Task {
+        Task { [weak self] in
+            guard let self else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                return
+            }
+
             do {
                 let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
                     drive: driveFileManager.drive,
@@ -163,5 +134,48 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         }
 
         return currentSyncAnchor
+    }
+
+    // MARK: - Private
+
+    private func fetchRoot(page: NSFileProviderPage) async throws -> (files: [File], nextCursor: String?) {
+        let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
+
+        guard !parentDirectory.fullyDownloaded else {
+            return (Array(parentDirectory.children) + [parentDirectory], nil)
+        }
+
+        let currentPageCursor = page.isInitialPage ? nil : page.toCursor
+        let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+            drive: driveFileManager.drive,
+            cursor: currentPageCursor
+        )
+
+        let realm = driveFileManager.getRealm()
+        let liveParentDirectory = try driveFileManager.getCachedFile(
+            itemIdentifier: containerItemIdentifier,
+            freeze: false,
+            using: realm
+        )
+
+        try driveFileManager.writeChildrenToParent(
+            files,
+            liveParent: liveParentDirectory,
+            responseAt: response.responseAt,
+            isInitialCursor: page.isInitialPage,
+            using: realm
+        )
+
+        try updateAnchor(for: liveParentDirectory, from: response, using: realm)
+
+        return (files + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
+    }
+
+    private func updateAnchor(for parent: File, from response: ApiResponse<[File]>, using realm: Realm) throws {
+        try realm.write {
+            parent.responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
+            parent.lastCursor = response.cursor
+            parent.fullyDownloaded = response.hasMore
+        }
     }
 }
