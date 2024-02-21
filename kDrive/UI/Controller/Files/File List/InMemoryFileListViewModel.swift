@@ -25,7 +25,14 @@ class InMemoryFileListViewModel: FileListViewModel {
     private let realm: Realm
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
-        if let realm = currentDirectory.realm {
+        // TODO: Refactor to explicit realm state
+        /// We expect the object to be live in this view controller, if not detached.
+        var currentDirectory = currentDirectory
+        if currentDirectory.isFrozen, let liveDirectory = currentDirectory.thaw() {
+            currentDirectory = liveDirectory
+        }
+
+        if let realm = currentDirectory.realm, !currentDirectory.isFrozen {
             self.realm = realm
         } else {
             let unCachedRealmConfiguration = Realm.Configuration(
@@ -40,6 +47,7 @@ class InMemoryFileListViewModel: FileListViewModel {
         }
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+
         try? realm.write {
             realm.add(currentDirectory)
         }

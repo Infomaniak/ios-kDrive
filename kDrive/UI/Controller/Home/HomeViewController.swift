@@ -574,9 +574,9 @@ extension HomeViewController {
                 switch viewModel.recentFiles {
                 case .file(let files):
                     filePresenter.present(
-                        driveFileManager: driveFileManager,
-                        file: files[indexPath.row],
+                        for: files[indexPath.row],
                         files: files,
+                        driveFileManager: driveFileManager,
                         normalFolderHierarchy: false
                     )
                 case .fileActivity:
@@ -653,9 +653,9 @@ extension HomeViewController: RecentActivityDelegate {
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
             filePresenter.present(
-                driveFileManager: driveFileManager,
-                file: driveFileManager.getManagedFile(from: file),
+                for: driveFileManager.getManagedFile(from: file),
                 files: activities.compactMap(\.file),
+                driveFileManager: driveFileManager,
                 normalFolderHierarchy: false
             )
         }
