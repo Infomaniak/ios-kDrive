@@ -26,7 +26,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("createDirectory withName '\(directoryName)'")
-        enqueue {
+        Task {
             guard let fileId = parentItemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
@@ -63,7 +63,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (Error?) -> Void
     ) {
         Log.fileProvider("deleteItem")
-        enqueue {
+        Task {
             guard let fileId = itemIdentifier.toFileId() else {
                 completionHandler(NSFileProviderError(.noSuchItem))
                 return
@@ -92,7 +92,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("importDocument")
-        enqueue {
+        Task {
             let accessingSecurityScopedResource = fileURL.startAccessingSecurityScopedResource()
 
             // Call completion handler with error if the file name already exists
@@ -155,7 +155,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("renameItem")
-        enqueue {
+        Task {
             // Doc says we should do network request after renaming local file but we could end up with model desync
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.filename = itemName
@@ -199,7 +199,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("reparentItem")
-        enqueue {
+        Task {
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.parentItemIdentifier = parentItemIdentifier
                 try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
@@ -233,7 +233,7 @@ extension FileProviderExtension {
     ) {
         let fileId = itemIdentifier.toFileId()
         Log.fileProvider("setFavoriteRank forItemIdentifier:\(fileId)")
-        enqueue {
+        Task {
             // How should we save favourite rank in database?
             guard let fileId,
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
@@ -254,10 +254,8 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("setLastUsedDate forItemIdentifier")
-        enqueue {
-            // kDrive doesn't support this
-            completionHandler(nil, NSError.featureUnsupported)
-        }
+        // kDrive doesn't support this
+        completionHandler(nil, NSError.featureUnsupported)
     }
 
     override func setTagData(
@@ -266,10 +264,8 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
-        enqueue {
-            // kDrive doesn't support this
-            completionHandler(nil, NSError.featureUnsupported)
-        }
+        // kDrive doesn't support this
+        completionHandler(nil, NSError.featureUnsupported)
     }
 
     override func trashItem(
@@ -279,7 +275,7 @@ extension FileProviderExtension {
         let fileId = itemIdentifier.toFileId()
         let uploadFileId = itemIdentifier.rawValue
         Log.fileProvider("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
-        enqueue {
+        Task {
             // Cancel upload if any matching
             self.uploadQueue.cancel(uploadFileId: uploadFileId)
 
@@ -312,7 +308,7 @@ extension FileProviderExtension {
     ) {
         let fileId = itemIdentifier.toFileId()
         Log.fileProvider("untrashItem withIdentifier:\(fileId)")
-        enqueue {
+        Task {
             guard let fileId else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return

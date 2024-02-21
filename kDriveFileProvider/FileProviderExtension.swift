@@ -45,9 +45,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook()
 
-    /// Something to enqueue async await tasks in a serial manner.
-    let asyncAwaitQueue = TaskQueue()
-
     @LazyInjectService var uploadQueue: UploadQueueable
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
@@ -135,7 +132,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func providePlaceholder(at url: URL, completionHandler: @escaping (Error?) -> Void) {
         Log.fileProvider("providePlaceholder at url:\(url)")
-        enqueue {
+        Task {
             guard let identifier = self.persistentIdentifierForItem(at: url) else {
                 completionHandler(NSFileProviderError(.noSuchItem))
                 return
@@ -160,7 +157,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func itemChanged(at url: URL) {
         Log.fileProvider("itemChanged at url:\(url)")
-        enqueue {
+        Task {
             if let identifier = self.persistentIdentifierForItem(at: url),
                let item = try? self.item(for: identifier) as? FileProviderItem {
                 self.backgroundUploadItem(item)
@@ -170,7 +167,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
         Log.fileProvider("startProvidingItem at url:\(url)")
-        enqueue {
+        Task {
             guard let fileId = FileProviderItem.identifier(for: url, domain: self.domain)?.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 if FileManager.default.fileExists(atPath: url.path) {
@@ -194,7 +191,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func stopProvidingItem(at url: URL) {
         Log.fileProvider("stopProvidingItem at url:\(url)")
-        enqueue {
+        Task {
             if let identifier = self.persistentIdentifierForItem(at: url),
                let item = try? self.item(for: identifier) as? FileProviderItem {
                 if let remoteModificationDate = item.contentModificationDate,
@@ -244,7 +241,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     private func downloadRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         Log.fileProvider("downloadRemoteFile file:\(file.id)")
-        enqueue {
+        Task {
             // LocalVersion is OlderThanRemote
             if file.isLocalVersionOlderThanRemote {
                 try await self.downloadFreshRemoteFile(file, for: item, completion: completion)
@@ -309,7 +306,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     private func cleanupAt(url: URL) {
         Log.fileProvider("cleanupAt url:\(url)")
-        enqueue {
+        Task {
             do {
                 try FileManager.default.removeItem(at: url)
             } catch {
@@ -326,7 +323,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
         let fileProviderItemIdentifier = item.itemIdentifier.rawValue
         Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(fileProviderItemIdentifier)")
-        enqueue {
+        Task {
             let uploadFile = UploadFile(
                 parentDirectoryId: item.parentItemIdentifier.toFileId()!,
                 userId: self.driveFileManager.drive.userId,
@@ -400,17 +397,5 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("supportedServiceSources for :\(itemIdentifier.rawValue)")
         let validationService = FileProviderValidationServiceSource(fileProviderExtension: self, itemIdentifier: itemIdentifier)!
         return [validationService]
-    }
-
-    // MARK: - Async
-
-    /// Enqueue an async/await closure in the underlaying serial execution queue.
-    /// - Parameter task: A closure with async await code to be dispatched
-    func enqueue(_ task: @escaping () async throws -> Void) {
-        Task {
-            try await asyncAwaitQueue.enqueue(asap: false) {
-                try await task()
-            }
-        }
     }
 }
