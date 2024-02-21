@@ -61,7 +61,11 @@ final class ShareNavigationViewController: TitleSizeAdjustingNavigationControlle
     private func checkAppVersion() async throws {
         guard try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired else { return }
         Task { @MainActor in
-            viewControllers = [DriveUpdateRequiredViewController()]
+            let updateRequiredViewController = DriveUpdateRequiredViewController()
+            updateRequiredViewController.dismissHandler = { [weak self] in
+                self?.dismiss(animated: true)
+            }
+            viewControllers = [updateRequiredViewController]
         }
     }
 }
