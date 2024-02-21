@@ -66,6 +66,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var downloadingError: Error?
     public var isShared = false
     public var isSharedByCurrentUser = false
+    public var isDirectory = false
     public var ownerNameComponents: PersonNameComponents?
     public var favoriteRank: NSNumber?
 
@@ -95,6 +96,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
+        isDirectory = file.isDirectory
         isTrashed = file.isTrashed
         creationDate = file.createdAt
         contentModificationDate = file.lastModifiedAt

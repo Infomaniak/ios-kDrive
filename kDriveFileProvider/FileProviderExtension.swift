@@ -119,7 +119,13 @@ final class FileProviderExtension: NSFileProviderExtension {
             return item.storageUrl
         } else if let fileId = identifier.toFileId(),
                   let file = driveFileManager.getCachedFile(id: fileId) {
-            return FileProviderItem(file: file, domain: domain).storageUrl
+            let item = FileProviderItem(file: file, domain: domain)
+            guard !item.isDirectory else {
+                // TODO: Support download folder, recursively download content
+                return nil
+            }
+
+            return item.storageUrl
         } else {
             return nil
         }
