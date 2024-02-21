@@ -587,9 +587,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         headerView.delegate = self
 
         if viewModel.currentDirectory.visibility == .isTeamSpace {
-            let driveName = KDriveResourcesStrings.Localizable.commonDocumentsDescription(viewModel.driveFileManager.drive.name)
+            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
+            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
 
-            headerView.commonDocumentsDescriptionLabel.text = driveName
+            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
             headerView.commonDocumentsDescriptionLabel.isHidden = false
         } else {
             headerView.commonDocumentsDescriptionLabel.isHidden = true

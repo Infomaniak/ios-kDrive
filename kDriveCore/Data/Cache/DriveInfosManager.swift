@@ -26,7 +26,7 @@ import Sentry
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 9
+    private static let currentDbVersion: UInt64 = 10
     private let currentFpStorageVersion = 1
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
@@ -93,6 +93,7 @@ public class DriveInfosManager {
                 DriveCapabilities.self,
                 DrivePackCapabilities.self,
                 DriveRights.self,
+                DriveAccount.self,
                 Team.self,
                 Category.self,
                 CategoryRights.self
