@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: de, German
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Mon, 27 Nov 2023 13:37:54 +0100
+ * Exported by: Charlene Hoareau
+ * Exported at: Thu, 22 Feb 2024 16:49:24 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -361,6 +361,9 @@
 
 /* loco:61261341bbb2fe14eb477766 */
 "buttonNext" = "Weiter";
+
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "Nein";
 
 /* loco:6049df4d5c2c3a04bc397956 */
 "buttonNoDriveAnotherUser" = "Ein anderes Infomaniak-Profil verwenden";
@@ -1077,7 +1080,7 @@
 "fileDetailsInfosCreationDateTitle" = "Angelegt";
 
 /* loco:6049df4d5c2c3a04bc3979d9 */
-"fileDetailsInfosOriginalSize" = "Originalgröße";
+"fileDetailsInfosOriginalSize" = "Originalgrösse";
 
 /* loco:6049df4d5c2c3a04bc3979da */
 "fileDetailsInfosOwnerTitle" = "Eigentümer";
@@ -1291,6 +1294,12 @@
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Letzte Änderungen";
+
+/* loco:65a13fff84b88c92410f5052 */
+"localizedFilenamePrivateSpace" = "Meine Dateien";
+
+/* loco:65a140c3cdbe107c5a025352 */
+"localizedFilenameTeamSpace" = "Akten der Organisation";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Finden Sie";
@@ -1558,6 +1567,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Eingeschränkter Freigabelink";
+
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "Mögen Sie kDrive?";
 
 /* loco:6049df4d5c2c3a04bc397a2d */
 "saveExternalFileInputFileName" = "Name des Dokuments";
@@ -2037,7 +2049,7 @@
 "uploadErrorTitle" = "Fehler beim Import";
 
 /* loco:61e15913fefa9c6c80093ed2 */
-"uploadFileSizeExceeded" = "Die zulässige Gesamtgröße der Datei wurde überschritten.";
+"uploadFileSizeExceeded" = "Die zulässige Gesamtgrösse der Datei wurde überschritten.";
 
 /* loco:6049df4d5c2c3a04bc397a82 */
 "uploadFolderNotFoundError" = "Ordner gelöscht oder inexistent";

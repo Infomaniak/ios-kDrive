@@ -34,7 +34,7 @@ extension AppDelegate {
         case .mainViewController(let driveFileManager):
             showMainViewController(driveFileManager: driveFileManager)
             showLaunchFloatingPanel()
-            requestAppStoreReview()
+            askForReview()
             askUserToRemovePicturesIfNecessary()
         case .onboarding:
             showOnboarding()
@@ -116,11 +116,30 @@ extension AppDelegate {
 
     // MARK: Misc
 
-    private func requestAppStoreReview() {
-        guard UserDefaults.shared.numberOfConnections == 10 else {
+    private func askForReview() {
+        guard let presentingViewController = window?.rootViewController, UserDefaults.shared.numberOfConnections == 10 else {
             return
         }
 
+        let alert = UIAlertController(
+            title: KDriveResourcesStrings.Localizable.reviewAlertTitle,
+            message: nil,
+            preferredStyle: .alert
+        )
+
+        alert
+            .addAction(UIAlertAction(title: KDriveResourcesStrings.Localizable.buttonYes, style: .default) { _ in
+                self.requestAppStoreReview()
+            })
+        alert
+            .addAction(UIAlertAction(title: KDriveResourcesStrings.Localizable.buttonNo, style: .default) { _ in
+                self.openUserReport()
+            })
+
+        presentingViewController.present(alert, animated: true)
+    }
+
+    private func requestAppStoreReview() {
         if #available(iOS 14.0, *) {
             if let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
@@ -129,6 +148,13 @@ extension AppDelegate {
         } else {
             SKStoreReviewController.requestReview()
         }
+    }
+
+    private func openUserReport() {
+        guard let url = URL(string: "http://www.google.com") else {
+            return
+        }
+        UIApplication.shared.open(url)
     }
 
     // TODO: Refactor to async
