@@ -205,7 +205,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                    .contentModificationDate,
                    remoteModificationDate > localModificationDate {
                     self.backgroundUploadItem(item) {
-                        self.cleanupAt(url: url)
+                        self.cleanupAt(url: url, parentItemIdentifier: item.parentItemIdentifier)
                     }
                 } else {
                     self.cleanupAt(url: url)
@@ -270,47 +270,51 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
+        defer {
+            self.signalEnumerator(for: item.parentItemIdentifier)
+        }
+
         var observationToken: ObservationToken?
         observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
             observationToken?.cancel()
             item.isDownloading = false
 
+            defer {
+                self.signalEnumerator(for: item.parentItemIdentifier)
+            }
+
             if error != nil {
                 item.isDownloaded = false
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                    completion(NSFileProviderError(.serverUnreachable))
-                }
+                completion(NSFileProviderError(.serverUnreachable))
             } else {
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
                     item.isDownloaded = true
-                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                        completion(nil)
-                    }
+                    completion(nil)
                 } catch {
                     completion(error)
                 }
             }
         }
+
         DownloadQueue.instance.addToQueue(
             file: file,
             userId: driveFileManager.drive.userId,
             itemIdentifier: item.itemIdentifier
         )
-        try await manager.signalEnumerator(for: item.parentItemIdentifier)
     }
 
     private func saveFreshLocalFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) async {
         do {
             try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-            try await manager.signalEnumerator(for: item.parentItemIdentifier)
             completion(nil)
         } catch {
             completion(error)
         }
+        signalEnumerator(for: item.parentItemIdentifier)
     }
 
-    private func cleanupAt(url: URL) {
+    private func cleanupAt(url: URL, parentItemIdentifier: NSFileProviderItemIdentifier? = nil) {
         Log.fileProvider("cleanupAt url:\(url)")
         Task {
             do {
@@ -323,6 +327,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             self.providePlaceholder(at: url) { _ in
                 // TODO: handle any error, do any necessary cleanup
             }
+
+            self.signalEnumerator(for: parentItemIdentifier)
         }
     }
 
@@ -346,9 +352,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             observationToken = self.uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
                 observationToken?.cancel()
                 defer {
-                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                        completion?()
-                    }
+                    completion?()
+                    self.signalEnumerator(for: item.parentItemIdentifier)
                 }
 
                 item.isUploading = false

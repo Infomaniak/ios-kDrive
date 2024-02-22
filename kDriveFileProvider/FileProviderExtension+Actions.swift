@@ -74,8 +74,6 @@ extension FileProviderExtension {
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
                     self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                    try await self.manager.signalEnumerator(for: .workingSet)
-                    try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
                 } else {
                     completionHandler(NSFileProviderError(.serverUnreachable))
@@ -83,6 +81,8 @@ extension FileProviderExtension {
             } catch {
                 completionHandler(error)
             }
+
+            self.signalEnumerator(for: itemIdentifier)
         }
     }
 
@@ -144,8 +144,8 @@ extension FileProviderExtension {
 
             self.backgroundUploadItem(importedItem)
 
-            try await self.manager.signalEnumerator(for: parentItemIdentifier)
             completionHandler(importedItem, nil)
+            self.signalEnumerator(for: parentItemIdentifier)
         }
     }
 
@@ -159,14 +159,15 @@ extension FileProviderExtension {
             // Doc says we should do network request after renaming local file but we could end up with model desync
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.filename = itemName
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
+                self.signalEnumerator(for: item.parentItemIdentifier)
                 return
             }
 
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
+                self.signalEnumerator()
                 return
             }
 
@@ -179,15 +180,19 @@ extension FileProviderExtension {
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
                !collidingItem.isTrashed {
                 completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
+                self.signalEnumerator(for: item.parentItemIdentifier)
                 return
             }
 
             let proxyFile = file.proxify()
             do {
                 let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                let fileProviderItem = FileProviderItem(file: file.freeze(), domain: self.domain)
+                completionHandler(fileProviderItem, nil)
+                self.signalEnumerator(for: fileProviderItem.parentItemIdentifier)
             } catch {
                 completionHandler(nil, error)
+                self.signalEnumerator()
             }
         }
     }
@@ -202,8 +207,8 @@ extension FileProviderExtension {
         Task {
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.parentItemIdentifier = parentItemIdentifier
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
+                self.signalEnumerator(for: item.parentItemIdentifier)
                 return
             }
 
@@ -212,6 +217,7 @@ extension FileProviderExtension {
                   let parentId = parentItemIdentifier.toFileId(),
                   let parent = self.driveFileManager.getCachedFile(id: parentId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
+                self.signalEnumerator()
                 return
             }
 
@@ -219,9 +225,12 @@ extension FileProviderExtension {
             let proxyParent = parent.proxify()
             do {
                 let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                let fileProviderItem = FileProviderItem(file: file.freeze(), domain: self.domain)
+                completionHandler(fileProviderItem, nil)
+                self.signalEnumerator(for: fileProviderItem.parentItemIdentifier)
             } catch {
                 completionHandler(nil, error)
+                self.signalEnumerator()
             }
         }
     }
@@ -309,6 +318,9 @@ extension FileProviderExtension {
         let fileId = itemIdentifier.toFileId()
         Log.fileProvider("untrashItem withIdentifier:\(fileId)")
         Task {
+            defer {
+                self.signalEnumerator(for: parentItemIdentifier)
+            }
             guard let fileId else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
@@ -332,8 +344,6 @@ extension FileProviderExtension {
                 }
                 item.isTrashed = false
                 self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                try await self.manager.signalEnumerator(for: .workingSet)
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
