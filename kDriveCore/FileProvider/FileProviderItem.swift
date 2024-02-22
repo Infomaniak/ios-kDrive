@@ -82,9 +82,10 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
         filename = file.name.isEmpty ? "Root" : file.name
+        isDirectory = file.isDirectory
         typeIdentifier = file.typeIdentifier
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
-        capabilities = FileProviderItem.rightsToCapabilities(rights)
+        capabilities = FileProviderItem.rightsToCapabilities(rights, isDirectory: isDirectory)
         // Every file should have a parent, root file parent should not be called
         // If provided a different parent eg. WorkingSet
         parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parent?.id ?? 1)
@@ -96,7 +97,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
-        isDirectory = file.isDirectory
         isTrashed = file.isTrashed
         creationDate = file.createdAt
         contentModificationDate = file.lastModifiedAt
@@ -176,12 +176,12 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
       (add file to folder) .allowsAddingSubItems -> rights.moveInto
       (list folder files)  .allowsContentEnumerating -> rights.read
      */
-    private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
+    private class func rightsToCapabilities(_ rights: Rights, isDirectory: Bool) -> NSFileProviderItemCapabilities {
         var capabilities: NSFileProviderItemCapabilities = []
-        if rights.canWrite {
+        if rights.canWrite && !isDirectory {
             capabilities.insert(.allowsWriting)
         }
-        if rights.canRead {
+        if rights.canRead && !isDirectory {
             capabilities.insert(.allowsReading)
         }
         if rights.canRename {

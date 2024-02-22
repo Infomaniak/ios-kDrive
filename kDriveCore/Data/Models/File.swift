@@ -521,6 +521,10 @@ public final class File: Object, Codable {
 
     public var isDownloaded: Bool {
         // Check that size on disk matches, if available
+        guard !isDirectory else {
+            return true
+        }
+
         do {
             let attributes = try fileManager.attributesOfItem(atPath: localUrl.path)
             if let remoteSize = size,
