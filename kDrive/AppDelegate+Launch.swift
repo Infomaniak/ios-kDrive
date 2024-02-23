@@ -117,7 +117,7 @@ extension AppDelegate {
     // MARK: Misc
 
     private func askForReview() {
-        guard let presentingViewController = window?.rootViewController, UserDefaults.shared.numberOfConnections == 10 else {
+        guard let presentingViewController = window?.rootViewController, UserDefaults.shared.numberOfConnections == 10
             else { return }
 
         let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
@@ -132,9 +132,11 @@ extension AppDelegate {
         )
 
         presentingViewController.present(alert, animated: true)
+        MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
     }
 
     private func requestAppStoreReview() {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "like")
         if #available(iOS 14.0, *) {
             if let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
@@ -146,6 +148,7 @@ extension AppDelegate {
     }
 
     private func openUserReport() {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
         guard let url = URL(string: "http://www.google.com") else {
             return
         }
