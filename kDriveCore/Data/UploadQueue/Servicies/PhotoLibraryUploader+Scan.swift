@@ -43,13 +43,25 @@ public extension PhotoLibraryUploader {
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
             Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assets = PHAsset.fetchAssets(with: options)
+            let assetsFetchResult = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-            updateLastSyncDate(syncDate, using: realm)
 
-            newAssetsCount = assets.count
-            Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            do {
+                try addImageAssetsToUploadQueue(
+                    assetsFetchResult: assetsFetchResult,
+                    initial: settings.lastSync.timeIntervalSince1970 == 0,
+                    using: realm
+                )
+
+                updateLastSyncDate(syncDate, using: realm)
+
+                newAssetsCount = assets.count
+                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            } catch ErrorDomain.importCancelledBySystem {
+                Log.photoLibraryUploader("System is requesting to stop", level: .error)
+            } catch {
+                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+            }
         }
         return newAssetsCount
     }
@@ -71,15 +83,28 @@ public extension PhotoLibraryUploader {
         }
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
+    private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
                                              initial: Bool,
-                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         autoreleasepool {
+            let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
+            expiringActivity.start()
+            defer {
+                expiringActivity.endAll()
+            }
+
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
             assets.enumerateObjects { [self] asset, idx, stop in
+                guard !expiringActivity.shouldTerminate else {
+                    Log.photoLibraryUploader("system is asking to terminate")
+                    realm.cancelWrite()
+                    stop.pointee = true
+                    return
+                }
+
                 guard let settings else {
                     Log.photoLibraryUploader("no settings")
                     realm.cancelWrite()
@@ -168,6 +193,10 @@ public extension PhotoLibraryUploader {
                 }
             }
             try? realm.commitWrite()
+
+            guard !expiringActivity.shouldTerminate else {
+                throw ErrorDomain.importCancelledBySystem
+            }
         }
     }
 
