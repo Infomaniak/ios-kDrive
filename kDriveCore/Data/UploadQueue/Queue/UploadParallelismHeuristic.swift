@@ -30,6 +30,9 @@ protocol ParallelismHeuristicDelegate: AnyObject {
 /// Value can change depending on many factors, including thermal state battery or extension mode.
 /// Scaling is achieved given the number of active cores available.
 final class UploadParallelismHeuristic {
+    /// With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB memory usage.
+    private static let reducedParallelism = 2
+
     private weak var delegate: ParallelismHeuristicDelegate?
 
     init(delegate: ParallelismHeuristicDelegate) {
@@ -66,28 +69,27 @@ final class UploadParallelismHeuristic {
         // If the device is too hot we allow it to cool down
         let state = processInfo.thermalState
         guard state != .critical else {
-            currentParallelism = 2
+            currentParallelism = Self.reducedParallelism
             return
         }
 
         // In low power mode, we reduce parallelism
         guard !processInfo.isLowPowerModeEnabled else {
-            currentParallelism = 2
+            currentParallelism = Self.reducedParallelism
             return
         }
 
         // In extension, to reduce memory footprint, we reduce drastically parallelism
-        let parallelism: Int
-        if Bundle.main.isExtension {
-            parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
-        } else {
-            parallelism = max(4, processInfo.activeProcessorCount)
+        guard !Bundle.main.isExtension else {
+            currentParallelism = Self.reducedParallelism
+            return
         }
 
-        currentParallelism = parallelism
+        // Scaling with the number of activeProcessor
+        currentParallelism = max(4, processInfo.activeProcessorCount)
     }
 
-    public var currentParallelism = 0 {
+    public private(set) var currentParallelism = 0 {
         didSet {
             delegate?.parallelismShouldChange(value: currentParallelism)
         }
