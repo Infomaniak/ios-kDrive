@@ -87,13 +87,13 @@ public extension PhotoLibraryUploader {
                                              initial: Bool,
                                              using realm: Realm = DriveFileManager.constants.uploadsRealm) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
-        autoreleasepool {
-            let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
-            expiringActivity.start()
-            defer {
-                expiringActivity.endAll()
-            }
+        let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
+        expiringActivity.start()
+        defer {
+            expiringActivity.endAll()
+        }
 
+        autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
