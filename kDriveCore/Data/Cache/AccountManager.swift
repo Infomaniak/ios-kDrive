@@ -93,7 +93,7 @@ public protocol AccountManageable: AnyObject, RefreshTokenDelegate {
     func updateToken(newToken: ApiToken, oldToken: ApiToken)
 }
 
-public class AccountManager: RefreshTokenDelegate, AccountManageable {
+public final class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -309,6 +309,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
         saveAccounts()
         mqService.registerForNotifications(with: driveResponse.ips)
+        signalFileManagerAccountChange(newAccount)
 
         return newAccount
     }
@@ -390,6 +391,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentAccount(account: newAccount)
         setCurrentDriveForCurrentAccount(drive: drives.first!)
         saveAccounts()
+        signalFileManagerAccountChange(newAccount)
     }
 
     private func setCurrentAccount(account: Account) {
@@ -467,6 +469,40 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?
             .userId == newToken.userId {
             driveFileManager.apiFetcher.currentToken = newToken
+        }
+    }
+}
+
+extension Account {
+    var fileManagerDomains: [NSFileProviderDomain] {
+        let drives = DriveInfosManager.instance.getDrives(for: userId)
+        return drives.map {
+            NSFileProviderDomain(
+                identifier: NSFileProviderDomainIdentifier($0.objectId),
+                displayName: "\($0.name) (\(user.email))",
+                pathRelativeToDocumentStorage: "\($0.objectId)"
+            )
+        }
+    }
+}
+
+extension AccountManager {
+    /// Tell file.app that an account has changed
+    func signalFileManagerAccountChange(_ account: Account) {
+        let fileManagerDomains = account.fileManagerDomains
+
+        for domain in fileManagerDomains {
+            guard let manager = NSFileProviderManager(for: domain) else {
+                return
+            }
+
+            // Notify the workingSet because FileProvider needs to save the new unauthenticated state.
+            manager.signalEnumerator(for: .workingSet) { error in
+                guard let error else {
+                    return
+                }
+                DDLogError("❌ failed to signal working set for \(account.userId): \(error)")
+            }
         }
     }
 }
