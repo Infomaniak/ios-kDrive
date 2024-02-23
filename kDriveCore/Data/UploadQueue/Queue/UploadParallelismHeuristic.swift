@@ -18,10 +18,17 @@
 
 import Foundation
 
+/// Delegate protocol of UploadParallelismHeuristic
 protocol ParallelismHeuristicDelegate: AnyObject {
+    /// This method is called with a new parallelism to apply each time to the uploadQueue
+    /// - Parameter value: The new parallelism value to use
     func parallelismShouldChange(value: Int)
 }
 
+/// Something to maintain a coherent parallelism value for the UploadQueue
+///
+/// Value can change depending on many factors, including thermal state battery or extension mode.
+/// Scaling is achieved given the number of active cores available.
 final class UploadParallelismHeuristic {
     private weak var delegate: ParallelismHeuristicDelegate?
 
@@ -56,20 +63,20 @@ final class UploadParallelismHeuristic {
     @objc private func computeParallelism() {
         let processInfo = ProcessInfo.processInfo
 
-        // if the device is too hot we allow it to cool down
+        // If the device is too hot we allow it to cool down
         let state = processInfo.thermalState
         guard state != .critical else {
             currentParallelism = 2
             return
         }
 
-        // if the device is in low power mode, we reduce parallelism
+        // In low power mode, we reduce parallelism
         guard !processInfo.isLowPowerModeEnabled else {
             currentParallelism = 2
             return
         }
 
-        // In extension to reduce memory footprint, we reduce drastically parallelism
+        // In extension, to reduce memory footprint, we reduce drastically parallelism
         let parallelism: Int
         if Bundle.main.isExtension {
             parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
