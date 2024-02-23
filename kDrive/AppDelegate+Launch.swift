@@ -118,23 +118,18 @@ extension AppDelegate {
 
     private func askForReview() {
         guard let presentingViewController = window?.rootViewController, UserDefaults.shared.numberOfConnections == 10 else {
-            return
-        }
+            else { return }
 
-        let alert = UIAlertController(
-            title: KDriveResourcesStrings.Localizable.reviewAlertTitle,
-            message: nil,
-            preferredStyle: .alert
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+        let alert = AlertTextViewController(
+            title: appName,
+            message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
+            action: KDriveResourcesStrings.Localizable.buttonYes,
+            hasCancelButton: true,
+            cancelString: KDriveResourcesStrings.Localizable.buttonNo,
+            handler: requestAppStoreReview,
+            cancelHandler: openUserReport
         )
-
-        alert
-            .addAction(UIAlertAction(title: KDriveResourcesStrings.Localizable.buttonYes, style: .default) { _ in
-                self.requestAppStoreReview()
-            })
-        alert
-            .addAction(UIAlertAction(title: KDriveResourcesStrings.Localizable.buttonNo, style: .default) { _ in
-                self.openUserReport()
-            })
 
         presentingViewController.present(alert, animated: true)
     }
