@@ -28,8 +28,8 @@ import Vision
 import VisionKit
 
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
-    var currentDirectory: File!
-    var driveFileManager: DriveFileManager!
+    let currentDirectory: File
+    let driveFileManager: DriveFileManager
 
     let presentedFromPlusButton: Bool
     let presentedAboveFileList: Bool
