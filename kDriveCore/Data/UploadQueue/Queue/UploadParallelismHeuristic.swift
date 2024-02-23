@@ -48,6 +48,11 @@ final class UploadParallelismHeuristic {
         computeParallelism()
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: ProcessInfo.thermalStateDidChangeNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSProcessInfoPowerStateDidChange, object: nil)
+    }
+
     @objc private func computeParallelism() {
         let processInfo = ProcessInfo.processInfo
 
