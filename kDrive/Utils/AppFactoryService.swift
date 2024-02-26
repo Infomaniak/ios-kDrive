@@ -21,14 +21,23 @@ import InfomaniakDI
 import kDriveCore
 import os.log
 
+public enum AppContext {
+    case app
+    case actionExtension
+    case fileProviderExtension
+    case shareExtension
+}
+
 /// Something that loads the DI on init
 public struct EarlyDIHook {
-    public init() {
+    public init(context: AppContext) {
         // setup DI ASAP
 
         let navigationManagerFactory = Factory(type: NavigationManageable.self) { _, _ in
             NavigationManager()
         }
+
+        // TODO: Insert context in dedicated DI object
 
         os_log("EarlyDIHook")
         FactoryService.setupDependencyInjection(other: [navigationManagerFactory])

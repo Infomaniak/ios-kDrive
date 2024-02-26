@@ -36,7 +36,7 @@ import VersionChecker
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 4
