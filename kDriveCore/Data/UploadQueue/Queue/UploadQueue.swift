@@ -22,7 +22,7 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public final class UploadQueue {
+public final class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
@@ -43,6 +43,8 @@ public final class UploadQueue {
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
+
+    var uploadParallelismHeuristic: UploadParallelismHeuristic?
 
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
@@ -98,6 +100,8 @@ public final class UploadQueue {
     public init() {
         Log.uploadQueue("Starting up")
 
+        uploadParallelismHeuristic = UploadParallelismHeuristic(delegate: self)
+
         concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
             self.rebuildUploadQueueFromObjectsInRealm()
@@ -145,5 +149,12 @@ public final class UploadQueue {
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
+    }
+
+    // MARK: - ParallelismHeuristicDelegate
+
+    func parallelismShouldChange(value: Int) {
+        Log.uploadQueue("Upload queue new parallelism: \(value)", level: .info)
+        operationQueue.maxConcurrentOperationCount = value
     }
 }
