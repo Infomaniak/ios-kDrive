@@ -37,7 +37,7 @@ public extension PhotoLibraryUploader {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-            let typesPredicates = getAssetPredicates(forSettings: settings)
+            let typesPredicates = self.getAssetPredicates(forSettings: settings)
             let datePredicate = getDatePredicate(with: settings)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
@@ -55,7 +55,7 @@ public extension PhotoLibraryUploader {
 
                 updateLastSyncDate(syncDate, using: realm)
 
-                newAssetsCount = assets.count
+                newAssetsCount = assetsFetchResult.count
                 Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
             } catch ErrorDomain.importCancelledBySystem {
                 Log.photoLibraryUploader("System is requesting to stop", level: .error)
@@ -97,7 +97,7 @@ public extension PhotoLibraryUploader {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
-            assets.enumerateObjects { [self] asset, idx, stop in
+            assetsFetchResult.enumerateObjects { [self] asset, idx, stop in
                 guard !expiringActivity.shouldTerminate else {
                     Log.photoLibraryUploader("system is asking to terminate")
                     realm.cancelWrite()
@@ -181,7 +181,7 @@ public extension PhotoLibraryUploader {
                 realm.add(uploadFile, update: .modified)
 
                 // Batching writes
-                if idx < assets.count - 1 && idx % 99 == 0 {
+                if idx < assetsFetchResult.count - 1 && idx % 99 == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
@@ -193,10 +193,10 @@ public extension PhotoLibraryUploader {
                 }
             }
             try? realm.commitWrite()
+        }
 
-            guard !expiringActivity.shouldTerminate else {
-                throw ErrorDomain.importCancelledBySystem
-            }
+        guard !expiringActivity.shouldTerminate else {
+            throw ErrorDomain.importCancelledBySystem
         }
     }
 
