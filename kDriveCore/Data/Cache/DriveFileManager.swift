@@ -282,6 +282,13 @@ public final class DriveFileManager {
         }
     }
 
+    public func getCachedMyFilesRoot() -> File? {
+        return getRealm().objects(File.self).filter(NSPredicate(
+            format: "rawVisibility == %@",
+            FileVisibility.isPrivateSpace.rawValue
+        )).first?.freeze()
+    }
+
     // autorelease frequecy so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration

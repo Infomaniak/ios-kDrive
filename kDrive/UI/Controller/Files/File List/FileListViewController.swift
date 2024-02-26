@@ -223,15 +223,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         guard viewModel != nil else { return }
-        #if !ISEXTENSION
-        let plusButtonDirectory: File
-        if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-            plusButtonDirectory = viewModel.currentDirectory
-        } else {
-            plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
-        }
-        (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
-        #endif
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
 
         tryLoadingFilesOrDisplayError()
     }
