@@ -54,7 +54,6 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
-    @LazyInjectService var appContextService: AppContextServiceable
 
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
