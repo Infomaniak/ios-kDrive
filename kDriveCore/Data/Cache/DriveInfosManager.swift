@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakConcurrency
 import InfomaniakCore
 import Realm
 import RealmSwift
@@ -116,6 +117,8 @@ public class DriveInfosManager {
         drive.sharedWithMe = sharedWithMe
     }
 
+    private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
+
     private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
@@ -129,54 +132,62 @@ public class DriveInfosManager {
                 }
                 UserDefaults.shared.fpStorageVersion = currentFpStorageVersion
             } catch {
-                // Silently handle error
+                // TODO: Sentry
             }
         }
 
-        let updatedDomains = drives.map {
-            NSFileProviderDomain(
-                identifier: NSFileProviderDomainIdentifier($0.objectId),
-                displayName: "\($0.name) (\(user.email))",
-                pathRelativeToDocumentStorage: "\($0.objectId)"
-            )
-        }
+        // TODO: Start Activity
         Task {
+            let updatedDomains = drives.map {
+                NSFileProviderDomain(
+                    identifier: NSFileProviderDomainIdentifier($0.objectId),
+                    displayName: "\($0.name) (\(user.email))",
+                    pathRelativeToDocumentStorage: "\($0.objectId)"
+                )
+            }
+
             do {
                 let allDomains = try await NSFileProviderManager.domains()
-                var domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
-                await withThrowingTaskGroup(of: Void.self) { group in
-                    for newDomain in updatedDomains {
-                        // Check if domain already added
-                        if let existingDomainIndex = domainsForCurrentUser
-                            .firstIndex(where: { $0.identifier == newDomain.identifier }) {
-                            let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
-                            // Domain exists but its name could have changed
-                            if existingDomain.displayName != newDomain.displayName {
-                                group.addTask {
-                                    try await NSFileProviderManager.remove(existingDomain)
-                                    try await NSFileProviderManager.add(newDomain)
-                                }
-                            }
-                        } else {
-                            // Domain didn't exist we have to add it
-                            group.addTask {
-                                try await NSFileProviderManager.add(newDomain)
-                            }
-                        }
+                let existingDomainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
+
+                let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
+                    let existingDomain = existingDomainsForCurrentUser.first { $0.identifier == newDomain.identifier }
+                    return (newDomain, existingDomain)
+                }
+
+                try await updatedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { domain in
+                    // Simply add domain if new
+                    let newDomain = domain.new
+                    guard let existingDomain = domain.existing else {
+                        try await NSFileProviderManager.add(newDomain)
+                        return
+                    }
+
+                    // Update existing accounts if necessary
+                    if existingDomain.displayName != newDomain.displayName {
+                        try await NSFileProviderManager.remove(existingDomain)
+                        try await NSFileProviderManager.add(newDomain)
                     }
                 }
 
-                // Remove left domains
-                await withThrowingTaskGroup(of: Void.self) { group in
-                    for domain in domainsForCurrentUser {
-                        group.addTask {
-                            try await NSFileProviderManager.remove(domain)
-                        }
+                // Remove domains no longer present for current user
+                let removedDomainsForCurrentUser = updatedDomains.filter { updatedDomain in
+                    guard existingDomainsForCurrentUser.contains(where: { $0.identifier == updatedDomain.identifier }) else {
+                        return true
                     }
+
+                    return false
+                }
+
+                try await removedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { oldDomain in
+                    try await NSFileProviderManager.remove(oldDomain)
                 }
             } catch {
                 DDLogError("Error while updating file provider domains: \(error)")
+                // TODO: add Sentry
             }
+
+            // TODO: notify for consistency
         }
     }
 
