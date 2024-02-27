@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 /// The internal methods of RangeProviderGuts, made testable
 public protocol RangeProviderGutsable {
@@ -45,6 +46,8 @@ public protocol RangeProviderGutsable {
 
 /// Subdivided **RangeProvider**, so it is easier to test
 public struct RangeProviderGuts: RangeProviderGutsable {
+    @LazyInjectService private var appContextService: AppContextServiceable
+
     /// The URL of the local file to scan
     public let fileURL: URL
 
@@ -107,7 +110,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
 
     public func preferredChunkSize(for fileSize: UInt64) -> UInt64 {
         // In extension to reduce memory footprint, we reduce drastically chunk size
-        guard !Bundle.main.isExtension else {
+        guard !appContextService.isExtension else {
             let capChunkSize = min(fileSize, RangeProvider.APIConstants.chunkMinSize)
             return capChunkSize
         }

@@ -25,6 +25,7 @@ import Sentry
 public final class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
@@ -53,7 +54,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
         // In extension to reduce memory footprint, we reduce drastically parallelism
         let parallelism: Int
-        if Bundle.main.isExtension {
+        if appContextService.isExtension {
             parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
         } else {
             parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)

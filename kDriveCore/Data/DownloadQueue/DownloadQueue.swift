@@ -58,6 +58,7 @@ public final class DownloadQueue {
     // MARK: - Attributes
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
@@ -90,7 +91,7 @@ public final class DownloadQueue {
     )
 
     private var bestSession: FileDownloadSession {
-        if Bundle.main.isExtension {
+        if appContextService.isExtension {
             @InjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
             return backgroundDownloadSessionManager
         } else {
@@ -220,25 +221,25 @@ public final class DownloadQueue {
     }
 
     private func publishFileDownloaded(fileId: Int, error: DriveError?) {
-        observations.didDownloadFile.values.forEach { closure in
+        for closure in observations.didDownloadFile.values {
             closure(fileId, error)
         }
     }
 
     func publishProgress(_ progress: Double, for fileId: Int) {
-        observations.didChangeProgress.values.forEach { closure in
+        for closure in observations.didChangeProgress.values {
             closure(fileId, progress)
         }
     }
 
     private func publishArchiveDownloaded(archiveId: String, archiveUrl: URL?, error: DriveError?) {
-        observations.didDownloadArchive.values.forEach { closure in
+        for closure in observations.didDownloadArchive.values {
             closure(archiveId, archiveUrl, error)
         }
     }
 
     func publishProgress(_ progress: Double, for archiveId: String) {
-        observations.didChangeArchiveProgress.values.forEach { closure in
+        for closure in observations.didChangeArchiveProgress.values {
             closure(archiveId, progress)
         }
     }

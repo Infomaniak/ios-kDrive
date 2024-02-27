@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 /// Delegate protocol of UploadParallelismHeuristic
 protocol ParallelismHeuristicDelegate: AnyObject {
@@ -32,6 +33,8 @@ protocol ParallelismHeuristicDelegate: AnyObject {
 final class UploadParallelismHeuristic {
     /// With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB memory usage.
     private static let reducedParallelism = 2
+
+    @LazyInjectService private var appContextService: AppContextServiceable
 
     private weak var delegate: ParallelismHeuristicDelegate?
 
@@ -80,7 +83,7 @@ final class UploadParallelismHeuristic {
         }
 
         // In extension, to reduce memory footprint, we reduce drastically parallelism
-        guard !Bundle.main.isExtension else {
+        guard !appContextService.isExtension else {
             currentParallelism = Self.reducedParallelism
             return
         }

@@ -28,6 +28,7 @@ import UIKit
 class SaveFileViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
+    @LazyInjectService var appContextService: AppContextServiceable
 
     enum SaveFileSection {
         case alert
@@ -184,7 +185,7 @@ class SaveFileViewController: UIViewController {
     func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
         Task {
             // Cleanup file that were duplicated to appGroup on extension mode
-            if Bundle.main.isExtension && clean {
+            if appContextService.isExtension && clean {
                 await items.concurrentForEach { item in
                     try? FileManager.default.removeItem(at: item.path)
                 }

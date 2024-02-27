@@ -80,7 +80,8 @@ public enum Logging {
 
     private static func initNetworkLogging() {
         #if DEBUG && !TEST
-        if !Bundle.main.isExtension {
+        @InjectService var appContextService: AppContextServiceable
+        if !appContextService.isExtension {
             Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
         }
         #endif
@@ -106,7 +107,11 @@ public enum Logging {
 
     private static func copyDebugInformations() {
         #if DEBUG && !TEST
-        guard !Bundle.main.isExtension else { return }
+        @InjectService var appContextService: AppContextServiceable
+        guard !appContextService.isExtension else {
+            return
+        }
+
         let fileManager = FileManager.default
         let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(
             "debug",
