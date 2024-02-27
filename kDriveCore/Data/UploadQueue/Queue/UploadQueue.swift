@@ -85,6 +85,11 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
     /// Should suspend operation queue based on network status
     var shouldSuspendQueue: Bool {
+        // Explicitly disable the upload queue from the share extension
+        guard appContextService.context != .shareExtension else {
+            return true
+        }
+
         let status = ReachabilityListener.instance.currentStatus
         return status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
     }
@@ -99,6 +104,11 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     )
 
     public init() {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
+            return
+        }
+
         Log.uploadQueue("Starting up")
 
         uploadParallelismHeuristic = UploadParallelismHeuristic(delegate: self)
