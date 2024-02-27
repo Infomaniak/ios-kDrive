@@ -66,9 +66,9 @@ final class UploadParallelismHeuristic {
     @objc private func computeParallelism() {
         let processInfo = ProcessInfo.processInfo
 
-        // If the device is too hot we allow it to cool down
-        let state = processInfo.thermalState
-        guard state != .critical else {
+        // If the device is too hot we cool down now
+        let thermalState = processInfo.thermalState
+        guard thermalState != .critical else {
             currentParallelism = Self.reducedParallelism
             return
         }
@@ -86,7 +86,15 @@ final class UploadParallelismHeuristic {
         }
 
         // Scaling with the number of activeProcessor
-        currentParallelism = max(4, processInfo.activeProcessorCount)
+        let parallelism = max(4, processInfo.activeProcessorCount)
+
+        // Beginning with .serious state, we start reducing the load on the system
+        guard thermalState != .serious else {
+            currentParallelism = max(Self.reducedParallelism, parallelism / 2)
+            return
+        }
+
+        currentParallelism = parallelism
     }
 
     public private(set) var currentParallelism = 0 {
