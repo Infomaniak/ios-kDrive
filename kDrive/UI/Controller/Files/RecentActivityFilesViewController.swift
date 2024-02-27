@@ -113,9 +113,9 @@ class RecentActivityFilesViewController: FileListViewController {
         #if !ISEXTENSION
         if file.isDirectory {
             let managedFile = driveFileManager.getManagedFile(from: file.detached())
-            filePresenter.present(driveFileManager: viewModel.driveFileManager,
-                                  file: managedFile,
+            filePresenter.present(for: managedFile,
                                   files: viewModel.getAllFiles(),
+                                  driveFileManager: viewModel.driveFileManager,
                                   normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                                   fromActivities: viewModel.configuration.fromActivities)
         } else {

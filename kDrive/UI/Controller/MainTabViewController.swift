@@ -277,14 +277,15 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    uploadQueue.saveToRealmAndAddToQueue(uploadFile:
+                    uploadQueue.saveToRealm(
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,
                             driveId: documentPicker.importDrive.id,
                             url: targetURL,
                             name: url.lastPathComponent
-                        ))
+                        )
+                    )
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }

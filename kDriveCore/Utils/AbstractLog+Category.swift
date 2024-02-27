@@ -90,13 +90,13 @@ public enum Log {
     ///
     /// In system console, visualize them with `subsystem:com.infomaniak.drive category:BGTaskScheduling`
     ///
-    public static func bgTaskScheduling(_ message: @autoclosure () -> Any,
-                                        level: AbstractLogLevel = .debug,
-                                        context: Int = 0,
-                                        file: StaticString = #file,
-                                        function: StaticString = #function,
-                                        line: UInt = #line,
-                                        tag: Any? = nil) {
+    public static func backgroundTaskScheduling(_ message: @autoclosure () -> Any,
+                                                level: AbstractLogLevel = .debug,
+                                                context: Int = 0,
+                                                file: StaticString = #file,
+                                                function: StaticString = #function,
+                                                line: UInt = #line,
+                                                tag: Any? = nil) {
         let category = "BGTaskScheduling"
         defaultLogHandler(message(),
                           category: category,

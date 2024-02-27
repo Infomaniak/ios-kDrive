@@ -52,8 +52,6 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 }
 
 public class DriveApiFetcher: ApiFetcher {
-    public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
-
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
 
@@ -467,6 +465,7 @@ public class DriveApiFetcher: ApiFetcher {
 class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     override func refresh(
         _ credential: OAuthAuthenticator.Credential,
@@ -487,21 +486,29 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 return
             }
 
-            // Maybe someone else refreshed our token
-            self.accountManager.reloadTokensAndAccounts()
-            if let token = self.accountManager.getTokenForUserId(credential.userId),
-               token.expirationDate > credential.expirationDate {
-                let message = "Refreshing token - Success with local"
-                SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
-
-                completion(.success(token))
-                return
+            if let storedToken = self.accountManager.getTokenForUserId(credential.userId) {
+                // Someone else refreshed our token and we already have an infinite token
+                if storedToken.expirationDate == nil && credential.expirationDate != nil {
+                    let message = "Refreshing token - Success with local (infinite)"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
+                // Someone else refreshed our token and we don't have an infinite token
+                if let storedTokenExpirationDate = storedToken.expirationDate,
+                   let tokenExpirationDate = credential.expirationDate,
+                   tokenExpirationDate > storedTokenExpirationDate {
+                    let message = "Refreshing token - Success with local"
+                    SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
+                    completion(.success(storedToken))
+                    return
+                }
             }
 
             let group = DispatchGroup()
             group.enter()
             var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
-            if !Bundle.main.isExtension {
+            if !self.appContextService.isExtension {
                 // It is absolutely necessary that the app stays awake while we refresh the token
                 taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
                     let message = "Refreshing token failed - Background task expired"

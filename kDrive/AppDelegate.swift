@@ -31,11 +31,12 @@ import os.log
 import StoreKit
 import UIKit
 import UserNotifications
+import VersionChecker
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 4
@@ -49,9 +50,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    @LazyInjectService var backgroundTaskScheduler: BGTaskScheduler
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
 
     // MARK: - UIApplicationDelegate
 
@@ -71,7 +72,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             SentryDebug.capture(error: error)
         }
 
-        registerBackgroundTasks()
+        backgroundTasksService.registerBackgroundTasks()
 
         // In some cases the application can show the old Nextcloud import notification badge
         UIApplication.shared.applicationIconBadgeNumber = 0
@@ -167,8 +168,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         Log.appDelegate("applicationDidEnterBackground")
+        backgroundTasksService.scheduleBackgroundRefresh()
 
-        scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled,
            !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             lockHelper.setTime()
@@ -181,19 +182,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         completionHandler: @escaping (Bool) -> Void
     ) {
         shortcutItemToProcess = shortcutItem
-    }
-
-    func application(_ application: UIApplication,
-                     performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        Log.appDelegate("application performFetchWithCompletionHandler")
-
-        handleBackgroundRefresh { newData in
-            if newData {
-                completionHandler(.newData)
-            } else {
-                completionHandler(.noData)
-            }
-        }
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
@@ -218,12 +206,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UserDefaults.shared.numberOfConnections += 1
             refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             uploadEditedFiles()
-        case .onboarding: break
+        case .onboarding, .updateRequired: break
             // NOOP
         }
 
         // Remove all notifications on App Opening
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
+        Task {
+            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
+                prepareRootViewController(currentState: .updateRequired)
+            }
+        }
     }
 
     /// Set global tint color
@@ -390,14 +384,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func setRootViewController(_ vc: UIViewController,
                                animated: Bool = true) {
-        guard animated, let window else {
-            self.window?.rootViewController = vc
-            self.window?.makeKeyAndVisible()
+        guard let window else {
             return
         }
 
         window.rootViewController = vc
         window.makeKeyAndVisible()
+
+        guard animated else {
+            return
+        }
+
         UIView.transition(with: window, duration: 0.3,
                           options: .transitionCrossDissolve,
                           animations: nil,
@@ -430,9 +427,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                                                   viewController: fileListViewController)
                 } else {
                     let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(driveFileManager: driveFileManager,
-                                          file: file,
+                    filePresenter.present(for: file,
                                           files: [file],
+                                          driveFileManager: driveFileManager,
                                           normalFolderHierarchy: false)
                 }
             }
@@ -471,11 +468,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+        // App Restore disabled until we rework it
+        return false
 
-        return AppDelegate
-            .currentStateVersion == encodedVersion &&
-            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+        /*
+         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+
+         return AppDelegate
+             .currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)*/
     }
 
     // MARK: - User activity

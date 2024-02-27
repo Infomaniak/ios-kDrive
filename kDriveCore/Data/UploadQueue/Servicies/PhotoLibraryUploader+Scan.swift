@@ -37,19 +37,31 @@ public extension PhotoLibraryUploader {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-            let typesPredicates = getAssetPredicates(forSettings: settings)
+            let typesPredicates = self.getAssetPredicates(forSettings: settings)
             let datePredicate = getDatePredicate(with: settings)
             let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
             options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
             Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assets = PHAsset.fetchAssets(with: options)
+            let assetsFetchResult = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-            updateLastSyncDate(syncDate, using: realm)
 
-            newAssetsCount = assets.count
-            Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            do {
+                try addImageAssetsToUploadQueue(
+                    assetsFetchResult: assetsFetchResult,
+                    initial: settings.lastSync.timeIntervalSince1970 == 0,
+                    using: realm
+                )
+
+                updateLastSyncDate(syncDate, using: realm)
+
+                newAssetsCount = assetsFetchResult.count
+                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            } catch ErrorDomain.importCancelledBySystem {
+                Log.photoLibraryUploader("System is requesting to stop", level: .error)
+            } catch {
+                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+            }
         }
         return newAssetsCount
     }
@@ -71,15 +83,28 @@ public extension PhotoLibraryUploader {
         }
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>,
+    private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
                                              initial: Bool,
-                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
+        let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
+        expiringActivity.start()
+        defer {
+            expiringActivity.endAll()
+        }
+
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
             realm.beginWrite()
-            assets.enumerateObjects { [self] asset, idx, stop in
+            assetsFetchResult.enumerateObjects { [self] asset, idx, stop in
+                guard !expiringActivity.shouldTerminate else {
+                    Log.photoLibraryUploader("system is asking to terminate")
+                    realm.cancelWrite()
+                    stop.pointee = true
+                    return
+                }
+
                 guard let settings else {
                     Log.photoLibraryUploader("no settings")
                     realm.cancelWrite()
@@ -111,8 +136,17 @@ public extension PhotoLibraryUploader {
                     burstCount: &burstCount
                 )
 
-                let bestResourceSHA256: String? = asset.bestResourceSHA256
-                Log.photoLibraryUploader("Asset hash:\(bestResourceSHA256)")
+                let bestResourceSHA256: String?
+                do {
+                    bestResourceSHA256 = try asset.bestResourceSHA256
+                } catch {
+                    // Error thrown while hashing a resource, we stop ASAP.
+                    Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
+                    stop.pointee = true
+                    return
+                }
+
+                Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
 
                 // Check if picture uploaded before
                 guard !assetAlreadyUploaded(assetName: finalName,
@@ -125,7 +159,7 @@ public extension PhotoLibraryUploader {
 
                 let algorithmImportVersion = currentDiffAlgorithmVersion
 
-                // New UploadFile to be uploaded
+                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
                 let uploadFile = UploadFile(
                     parentDirectoryId: settings.parentDirectoryId,
                     userId: settings.userId,
@@ -135,7 +169,7 @@ public extension PhotoLibraryUploader {
                     bestResourceSHA256: bestResourceSHA256,
                     algorithmImportVersion: algorithmImportVersion,
                     conflictOption: .version,
-                    priority: initial ? .low : .high
+                    priority: initial ? .low : .normal
                 )
 
                 // Lazy creation of sub folder if required in the upload file
@@ -147,7 +181,7 @@ public extension PhotoLibraryUploader {
                 realm.add(uploadFile, update: .modified)
 
                 // Batching writes
-                if idx < assets.count - 1 && idx % 99 == 0 {
+                if idx < assetsFetchResult.count - 1 && idx % 99 == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
@@ -159,6 +193,10 @@ public extension PhotoLibraryUploader {
                 }
             }
             try? realm.commitWrite()
+        }
+
+        guard !expiringActivity.shouldTerminate else {
+            throw ErrorDomain.importCancelledBySystem
         }
     }
 

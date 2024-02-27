@@ -67,8 +67,12 @@ public enum ImportError: LocalizedError {
 }
 
 public final class FileImportHelper {
+    /// Shorthand for default FileManager
+    private let fileManager = FileManager.default
+
     @LazyInjectService var pathProvider: AppGroupPathProvidable
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var appContextService: AppContextServiceable
 
     let imageCompression = 0.8
 
@@ -102,7 +106,7 @@ public final class FileImportHelper {
 
         Task {
             do {
-                let results: [Result<ImportedFile, Error>?] = await assetIdentifiers.concurrentMap { assetIdentifier in
+                let results: [Result<ImportedFile, Error>?] = try await assetIdentifiers.concurrentMap { assetIdentifier in
                     defer {
                         progress.completedUnitCount += 1
                     }
@@ -117,12 +121,27 @@ public final class FileImportHelper {
                     }
 
                     let uti = UTI(filenameExtension: url.pathExtension)
-                    var name = url.lastPathComponent
-                    if let uti, let originalName = asset.getFilename(uti: uti) {
-                        name = originalName
+                    var fileName = url.lastPathComponent
+                    if let uti,
+                       let originalName = asset.getFilename(uti: uti) {
+                        fileName = originalName
                     }
 
-                    let importedFile = ImportedFile(name: name, path: url, uti: uti ?? .data)
+                    var finalUrl: URL
+                    if self.appContextService.isExtension {
+                        // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
+                        let appGroupURL = try URL.appGroupUniqueFolderURL()
+
+                        // Get import URL
+                        let appGroupFileURL = appGroupURL.appendingPathComponent(fileName)
+                        try self.fileManager.copyItem(atPath: url.path, toPath: appGroupFileURL.path)
+                        finalUrl = appGroupFileURL
+                    } else {
+                        // Path obtained within the main app are stable, and will stay accessible.
+                        finalUrl = url
+                    }
+
+                    let importedFile = ImportedFile(name: fileName, path: finalUrl, uti: uti ?? .data)
                     return .success(importedFile)
                 }
 
@@ -213,14 +232,29 @@ public final class FileImportHelper {
                 }
 
                 // Build a collection of `ImportedFile`
-                let processedFiles: [ImportedFile] = results.compactMap { taskResult in
+                let processedFiles: [ImportedFile] = try await results.concurrentCompactMap { taskResult in
                     guard case .success(let url) = taskResult else {
                         return nil
                     }
 
                     let fileName = url.lastPathComponent
                     let uti = UTI(filenameExtension: url.pathExtension) ?? UTI.data
-                    let importedFile = ImportedFile(name: fileName, path: url, uti: uti)
+
+                    var finalUrl: URL
+                    if self.appContextService.isExtension {
+                        // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
+                        let appGroupURL = try URL.appGroupUniqueFolderURL()
+
+                        // Get import URL
+                        let appGroupFileURL = appGroupURL.appendingPathComponent(fileName)
+                        try self.fileManager.copyItem(atPath: url.path, toPath: appGroupFileURL.path)
+                        finalUrl = appGroupFileURL
+                    } else {
+                        // Path obtained within the main app are stable, and will stay accessible.
+                        finalUrl = url
+                    }
+
+                    let importedFile = ImportedFile(name: fileName, path: finalUrl, uti: uti)
                     return importedFile
                 }
 
@@ -235,5 +269,18 @@ public final class FileImportHelper {
         }
 
         return progress
+    }
+}
+
+// TODO: move to core
+extension URL {
+    /// Build a path where a file can be moved within the appGroup while preventing collisions
+    static func appGroupUniqueFolderURL() throws -> URL {
+        // Use a unique folder to prevent collisions
+        @InjectService var pathProvider: AppGroupPathProvidable
+        let targetFolderURL = pathProvider.groupDirectoryURL
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: targetFolderURL, withIntermediateDirectories: true)
+        return targetFolderURL
     }
 }

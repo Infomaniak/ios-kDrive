@@ -171,6 +171,18 @@ public final class UploadFile: Object, UploadFilable {
         // primary key is set as default value
     }
 
+    /// Init method of the UploadFile object
+    /// - Parameters:
+    ///   - parentDirectoryId: Parent directory.
+    ///   - userId: linked userId.
+    ///   - driveId: linked driveId.
+    ///   - fileProviderItemIdentifier: optional identifier from fileProvider.
+    ///   - url: the url of the file to be uploaded.
+    ///   - name: the name to be used.
+    ///   - conflictOption: How to resolve an upload conflict with the API.
+    ///   - shouldRemoveAfterUpload: remove after the upload in finished.
+    ///   - initiatedFromFileManager: true if created from file manager.
+    ///   - priority: The relative priority of the upload within the upload queue, defaults to `.high`.
     public init(
         parentDirectoryId: Int,
         userId: Int,
@@ -181,7 +193,7 @@ public final class UploadFile: Object, UploadFilable {
         conflictOption: ConflictOption = .rename,
         shouldRemoveAfterUpload: Bool = true,
         initiatedFromFileManager: Bool = false,
-        priority: Operation.QueuePriority = .normal
+        priority: Operation.QueuePriority = .high
     ) {
         super.init()
         // primary key is set as default value
@@ -311,8 +323,6 @@ public extension UploadFile {
         error = nil
         // Reset retry count to default
         maxRetryCount = UploadFile.defaultMaxRetryCount
-        // Assign the UploadFile to the main app, not the FileManager extension
-        initiatedFromFileManager = false
     }
 }
 

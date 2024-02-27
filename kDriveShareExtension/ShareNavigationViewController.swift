@@ -21,10 +21,11 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import UIKit
+import VersionChecker
 
 final class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook(context: .shareExtension)
 
     @LazyInjectService var accountManager: AccountManageable
 
@@ -44,6 +45,10 @@ final class ShareNavigationViewController: TitleSizeAdjustingNavigationControlle
 
         saveViewController.itemProviders = attachments
         viewControllers = [saveViewController]
+
+        Task {
+            try? await checkAppVersion()
+        }
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
@@ -51,5 +56,16 @@ final class ShareNavigationViewController: TitleSizeAdjustingNavigationControlle
             return
         }
         extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
+    }
+
+    private func checkAppVersion() async throws {
+        guard try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired else { return }
+        Task { @MainActor in
+            let updateRequiredViewController = DriveUpdateRequiredViewController()
+            updateRequiredViewController.dismissHandler = { [weak self] in
+                self?.dismiss(animated: true)
+            }
+            viewControllers = [updateRequiredViewController]
+        }
     }
 }

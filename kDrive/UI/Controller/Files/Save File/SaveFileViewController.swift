@@ -28,6 +28,7 @@ import UIKit
 class SaveFileViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
+    @LazyInjectService var appContextService: AppContextServiceable
 
     enum SaveFileSection {
         case alert
@@ -181,6 +182,19 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
+        Task {
+            // Cleanup file that were duplicated to appGroup on extension mode
+            if appContextService.isExtension && clean {
+                await items.concurrentForEach { item in
+                    try? FileManager.default.removeItem(at: item.path)
+                }
+            }
+
+            navigationController?.dismiss(animated: animated, completion: completion)
+        }
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -275,7 +289,7 @@ class SaveFileViewController: UIViewController {
 
     @IBAction func close(_ sender: Any) {
         importProgress?.cancel()
-        navigationController?.dismiss(animated: true)
+        dismiss(animated: true)
     }
 }
 
@@ -470,46 +484,6 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
                 setItemProviders()
             } else {
                 setAssetIdentifiers()
-            }
-        }
-    }
-}
-
-// MARK: - FooterButtonDelegate
-
-extension SaveFileViewController: FooterButtonDelegate {
-    @objc func didClickOnButton(_ sender: AnyObject) {
-        guard let selectedDriveFileManager,
-              let selectedDirectory else {
-            return
-        }
-
-        // Making sure the user cannot spam the button on tasks that may take a while
-        let button = sender as? IKLargeButton
-        button?.setLoading(true)
-
-        let items = items
-        guard !items.isEmpty else {
-            navigationController?.dismiss(animated: true)
-            return
-        }
-
-        Task {
-            let message: String
-            do {
-                try await fileImportHelper.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
-
-                message = items.count > 1 ? KDriveResourcesStrings.Localizable
-                    .allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable
-                    .allUploadInProgress(items[0].name)
-            } catch {
-                message = error.localizedDescription
-            }
-
-            Task { @MainActor in
-                self.navigationController?.dismiss(animated: true) {
-                    UIConstants.showSnackBar(message: message)
-                }
             }
         }
     }

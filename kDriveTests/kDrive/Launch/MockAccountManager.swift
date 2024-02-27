@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
 import RealmSwift
 

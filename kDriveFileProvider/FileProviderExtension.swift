@@ -26,7 +26,7 @@ import RealmSwift
 
 final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook(context: .fileProviderExtension)
 
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
@@ -337,7 +337,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
             }
 
-            _ = self.uploadQueue.saveToRealmAndAddToQueue(uploadFile: uploadFile, itemIdentifier: item.itemIdentifier)
+            _ = self.uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
         }
     }
 
