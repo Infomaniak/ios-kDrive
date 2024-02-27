@@ -25,7 +25,7 @@ import VersionChecker
 
 final class ActionNavigationController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook()
+    private let dependencyInjectionHook = EarlyDIHook(context: .actionExtension)
 
     @LazyInjectService var accountManager: AccountManageable
 

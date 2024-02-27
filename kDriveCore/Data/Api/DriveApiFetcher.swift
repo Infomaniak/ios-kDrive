@@ -465,6 +465,7 @@ public class DriveApiFetcher: ApiFetcher {
 class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     override func refresh(
         _ credential: OAuthAuthenticator.Credential,
@@ -507,7 +508,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             let group = DispatchGroup()
             group.enter()
             var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
-            if !Bundle.main.isExtension {
+            if !self.appContextService.isExtension {
                 // It is absolutely necessary that the app stays awake while we refresh the token
                 taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
                     let message = "Refreshing token failed - Background task expired"

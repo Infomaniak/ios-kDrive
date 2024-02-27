@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveResources
 import UserNotifications
 
@@ -45,6 +46,8 @@ public protocol NotificationsHelpable {
 }
 
 public struct NotificationsHelper: NotificationsHelpable {
+    @LazyInjectService private var appContextService: AppContextServiceable
+
     public enum CategoryIdentifier {
         public static let general = "com.kdrive.notification.general"
         public static let upload = "com.kdrive.notification.upload"
@@ -218,7 +221,7 @@ public struct NotificationsHelper: NotificationsHelpable {
                 return
             }
 
-            let isInBackground = Bundle.main.isExtension || UIApplication.shared.applicationState != .active
+            let isInBackground = appContextService.isExtension || UIApplication.shared.applicationState != .active
 
             if isInBackground {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)

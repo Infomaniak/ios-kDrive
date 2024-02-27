@@ -25,6 +25,7 @@ import Sentry
 public final class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     public static let backgroundBaseIdentifier = ".backgroundsession.upload"
     public static var backgroundIdentifier: String {
@@ -53,7 +54,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
         // In extension to reduce memory footprint, we reduce drastically parallelism
         let parallelism: Int
-        if Bundle.main.isExtension {
+        if appContextService.isExtension {
             parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
         } else {
             parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
@@ -84,6 +85,11 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
     /// Should suspend operation queue based on network status
     var shouldSuspendQueue: Bool {
+        // Explicitly disable the upload queue from the share extension
+        guard appContextService.context != .shareExtension else {
+            return true
+        }
+
         let status = ReachabilityListener.instance.currentStatus
         return status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
     }
@@ -98,6 +104,11 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     )
 
     public init() {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
+            return
+        }
+
         Log.uploadQueue("Starting up")
 
         uploadParallelismHeuristic = UploadParallelismHeuristic(delegate: self)

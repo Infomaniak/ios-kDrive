@@ -72,6 +72,7 @@ public final class FileImportHelper {
 
     @LazyInjectService var pathProvider: AppGroupPathProvidable
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var appContextService: AppContextServiceable
 
     let imageCompression = 0.8
 
@@ -127,7 +128,7 @@ public final class FileImportHelper {
                     }
 
                     var finalUrl: URL
-                    if Bundle.main.isExtension {
+                    if self.appContextService.isExtension {
                         // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
                         let appGroupURL = try URL.appGroupUniqueFolderURL()
 
@@ -240,7 +241,7 @@ public final class FileImportHelper {
                     let uti = UTI(filenameExtension: url.pathExtension) ?? UTI.data
 
                     var finalUrl: URL
-                    if Bundle.main.isExtension {
+                    if self.appContextService.isExtension {
                         // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
                         let appGroupURL = try URL.appGroupUniqueFolderURL()
 
