@@ -19,16 +19,18 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
-import InfomaniakConcurrency
 import InfomaniakCore
 import Realm
 import RealmSwift
 import Sentry
 
-public class DriveInfosManager {
+public final class DriveInfosManager {
+    // TODO: use DI
     public static let instance = DriveInfosManager()
     private static let currentDbVersion: UInt64 = 9
-    private let currentFpStorageVersion = 1
+
+    let currentFpStorageVersion = 1
+
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
@@ -115,135 +117,6 @@ public class DriveInfosManager {
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
         drive.userId = userId
         drive.sharedWithMe = sharedWithMe
-    }
-
-    private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
-
-    private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
-        // Clean file provider storage if needed
-        if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
-            do {
-                let fileURLs = try FileManager.default.contentsOfDirectory(
-                    at: NSFileProviderManager.default.documentStorageURL,
-                    includingPropertiesForKeys: nil
-                )
-                for url in fileURLs {
-                    try FileManager.default.removeItem(at: url)
-                }
-                UserDefaults.shared.fpStorageVersion = currentFpStorageVersion
-            } catch {
-                // TODO: Sentry
-            }
-        }
-
-        // TODO: Start Activity
-        Task {
-            let updatedDomains = drives.map {
-                NSFileProviderDomain(
-                    identifier: NSFileProviderDomainIdentifier($0.objectId),
-                    displayName: "\($0.name) (\(user.email))",
-                    pathRelativeToDocumentStorage: "\($0.objectId)"
-                )
-            }
-
-            do {
-                let allDomains = try await NSFileProviderManager.domains()
-                let existingDomainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
-
-                let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
-                    let existingDomain = existingDomainsForCurrentUser.first { $0.identifier == newDomain.identifier }
-                    return (newDomain, existingDomain)
-                }
-
-                try await updatedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { domain in
-                    // Simply add domain if new
-                    let newDomain = domain.new
-                    guard let existingDomain = domain.existing else {
-                        try await NSFileProviderManager.add(newDomain)
-                        return
-                    }
-
-                    // Update existing accounts if necessary
-                    if existingDomain.displayName != newDomain.displayName {
-                        try await NSFileProviderManager.remove(existingDomain)
-                        try await NSFileProviderManager.add(newDomain)
-                    }
-                }
-
-                // Remove domains no longer present for current user
-                let removedDomainsForCurrentUser = updatedDomains.filter { updatedDomain in
-                    guard existingDomainsForCurrentUser.contains(where: { $0.identifier == updatedDomain.identifier }) else {
-                        return true
-                    }
-
-                    return false
-                }
-
-                try await removedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { oldDomain in
-                    try await NSFileProviderManager.remove(oldDomain)
-                }
-            } catch {
-                DDLogError("Error while updating file provider domains: \(error)")
-                // TODO: add Sentry
-            }
-
-            // TODO: notify for consistency
-        }
-    }
-
-    func deleteFileProviderDomains(for userId: Int) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
-            if let error {
-                DDLogError("Error while getting domains: \(error)")
-            }
-
-            let domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
-            for domain in domainsForCurrentUser {
-                NSFileProviderManager.remove(domain) { error in
-                    if let error {
-                        DDLogError("Error while removing domain \(domain.displayName): \(error)")
-                    }
-                }
-            }
-        }
-    }
-
-    public func deleteAllFileProviderDomains() {
-        NSFileProviderManager.removeAllDomains { error in
-            if let error {
-                DDLogError("Error while removing domains: \(error)")
-            }
-        }
-    }
-
-    func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
-            if let error {
-                DDLogError("Error while getting domains: \(error)")
-                completion(nil)
-            } else {
-                completion(domains.first { $0.identifier.rawValue == driveId })
-            }
-        }
-    }
-
-    public func getFileProviderManager(for drive: Drive, completion: @escaping (NSFileProviderManager) -> Void) {
-        getFileProviderManager(for: drive.objectId, completion: completion)
-    }
-
-    public func getFileProviderManager(driveId: Int, userId: Int, completion: @escaping (NSFileProviderManager) -> Void) {
-        let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
-        getFileProviderManager(for: objectId, completion: completion)
-    }
-
-    public func getFileProviderManager(for driveId: String, completion: @escaping (NSFileProviderManager) -> Void) {
-        getFileProviderDomain(for: driveId) { domain in
-            if let domain {
-                completion(NSFileProviderManager(for: domain) ?? .default)
-            } else {
-                completion(.default)
-            }
-        }
     }
 
     @discardableResult
