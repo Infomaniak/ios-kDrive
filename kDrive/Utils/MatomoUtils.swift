@@ -43,7 +43,7 @@ class MatomoUtils {
     enum EventCategory: String {
         case newElement, fileListFileAction, picturesFileAction, fileInfo, shareAndRights, colorFolder, categories, search,
              fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash,
-             dropbox, preview, mediaPlayer, shortcuts
+             dropbox, preview, mediaPlayer, shortcuts, appReview
     }
 
     enum UserAction: String {

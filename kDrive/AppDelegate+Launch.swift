@@ -34,7 +34,7 @@ extension AppDelegate {
         case .mainViewController(let driveFileManager):
             showMainViewController(driveFileManager: driveFileManager)
             showLaunchFloatingPanel()
-            requestAppStoreReview()
+            askForReview()
             askUserToRemovePicturesIfNecessary()
         case .onboarding:
             showOnboarding()
@@ -116,11 +116,28 @@ extension AppDelegate {
 
     // MARK: Misc
 
-    private func requestAppStoreReview() {
-        guard UserDefaults.shared.numberOfConnections == 10 else {
-            return
-        }
+    private func askForReview() {
+        guard let presentingViewController = window?.rootViewController,
+              !Bundle.main.isRunningInTestFlight, UserDefaults.shared.numberOfConnections == 10
+        else { return }
 
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+        let alert = AlertTextViewController(
+            title: appName,
+            message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
+            action: KDriveResourcesStrings.Localizable.buttonYes,
+            hasCancelButton: true,
+            cancelString: KDriveResourcesStrings.Localizable.buttonNo,
+            handler: requestAppStoreReview,
+            cancelHandler: openUserReport
+        )
+
+        presentingViewController.present(alert, animated: true)
+        MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
+    }
+
+    private func requestAppStoreReview() {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "like")
         if #available(iOS 14.0, *) {
             if let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
@@ -129,6 +146,14 @@ extension AppDelegate {
         } else {
             SKStoreReviewController.requestReview()
         }
+    }
+
+    private func openUserReport() {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
+        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
+            return
+        }
+        UIApplication.shared.open(url)
     }
 
     // TODO: Refactor to async
