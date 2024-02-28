@@ -43,6 +43,10 @@ final class ITAppLaunchTest: XCTestCase {
 
         SimpleResolver.register(FactoryService.debugServices)
         let services = [
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            },
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 return InfomaniakNetworkLogin(config: self.loginConfig)
             },

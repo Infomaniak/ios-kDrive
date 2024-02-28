@@ -42,6 +42,10 @@ final class UTRootViewControllerState: XCTestCase {
         SimpleResolver.sharedResolver.removeAll()
 
         let services = [
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            },
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 InfomaniakNetworkLogin(config: self.loginConfig)
             },
