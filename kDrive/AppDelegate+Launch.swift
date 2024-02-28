@@ -149,7 +149,7 @@ extension AppDelegate {
 
     private func openUserReport() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
-        guard let url = URL(string: "http://www.google.com") else {
+        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
             return
         }
         UIApplication.shared.open(url)
