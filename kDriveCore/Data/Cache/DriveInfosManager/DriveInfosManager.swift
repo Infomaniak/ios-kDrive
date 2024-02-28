@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import Realm
@@ -24,15 +23,16 @@ import RealmSwift
 import Sentry
 
 public final class DriveInfosManager {
-    // TODO: use DI
-    public static let instance = DriveInfosManager()
+    private static let dbName = "DrivesInfos.realm"
+
     private static let currentDbVersion: UInt64 = 9
 
     let currentFpStorageVersion = 1
 
     public let realmConfiguration: Realm.Configuration
-    private let dbName = "DrivesInfos.realm"
-    private var fileProviderManagers: [String: NSFileProviderManager] = [:]
+
+    // TODO: use DI
+    public static let instance = DriveInfosManager()
 
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
@@ -45,7 +45,7 @@ public final class DriveInfosManager {
 
     private init() {
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
+            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {

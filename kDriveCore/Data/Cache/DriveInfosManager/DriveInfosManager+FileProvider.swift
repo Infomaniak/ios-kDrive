@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakConcurrency
@@ -41,17 +40,16 @@ public extension DriveInfosManager {
                 }
                 UserDefaults.shared.fpStorageVersion = currentFpStorageVersion
             } catch {
-                // TODO: Sentry
+                Log.driveInfosManager("FileManager issue :\(error)", level: .error)
             }
         }
 
         guard !expiringActivity.shouldTerminate else {
-            // Sentry
+            Log.driveInfosManager("Expiring activity before signalling FileProvider", level: .error)
             expiringActivity.endAll()
             return
         }
 
-        // TODO: Start Activity
         Task {
             let updatedDomains = drives.map {
                 NSFileProviderDomain(
@@ -99,8 +97,7 @@ public extension DriveInfosManager {
                     try await NSFileProviderManager.remove(oldDomain)
                 }
             } catch {
-                DDLogError("Error while updating file provider domains: \(error)")
-                // TODO: add Sentry
+                Log.driveInfosManager("Error while updating file provider domains: \(error)", level: .error)
             }
 
             expiringActivity.endAll()
@@ -110,15 +107,16 @@ public extension DriveInfosManager {
     internal func deleteFileProviderDomains(for userId: Int) {
         NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
             if let error {
-                DDLogError("Error while getting domains: \(error)")
+                Log.driveInfosManager("Error while getting domains: \(error)", level: .error)
             }
 
             let domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
             for domain in domainsForCurrentUser {
                 NSFileProviderManager.remove(domain) { error in
-                    if let error {
-                        DDLogError("Error while removing domain \(domain.displayName): \(error)")
+                    guard let error else {
+                        return
                     }
+                    Log.driveInfosManager("Error while removing domain \(domain.displayName): \(error)", level: .error)
                 }
             }
         }
@@ -126,9 +124,10 @@ public extension DriveInfosManager {
 
     func deleteAllFileProviderDomains() {
         NSFileProviderManager.removeAllDomains { error in
-            if let error {
-                DDLogError("Error while removing domains: \(error)")
+            guard let error else {
+                return
             }
+            Log.driveInfosManager("Error while removing domains: \(error)", level: .error)
         }
     }
 
@@ -154,7 +153,7 @@ public extension DriveInfosManager {
     private func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
         NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
             if let error {
-                DDLogError("Error while getting domains: \(error)")
+                Log.driveInfosManager("Error while getting domains: \(error)", level: .error)
                 completion(nil)
             } else {
                 completion(domains.first { $0.identifier.rawValue == driveId })
@@ -167,16 +166,19 @@ public extension DriveInfosManager {
     /// Signal changes on this Drive to the File Provider Extension
     private func signalChanges(for domain: NSFileProviderDomain) {
         guard let driveId = domain.driveId, let userId = domain.userId else {
-            // Sentry
+            Log.driveInfosManager(
+                "Unable to read: driveId:\(String(describing: domain.driveId)) userId:\(String(describing: domain.userId))",
+                level: .error
+            )
             return
         }
 
         DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
             manager.signalEnumerator(for: .workingSet) { _ in
-                // META: keep SonarCloud happy
+                Log.driveInfosManager("did signal .workingSet")
             }
             manager.signalEnumerator(for: .rootContainer) { _ in
-                // META: keep SonarCloud happy
+                Log.driveInfosManager("did signal .rootContainer")
             }
         }
     }

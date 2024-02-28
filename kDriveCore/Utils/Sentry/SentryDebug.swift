@@ -38,6 +38,8 @@ public enum SentryDebug {
         case realmMigration = "RealmMigration"
         /// Photo library assets
         case PHAsset
+        /// DriveInfosManager, and communication with FileProvider APIs
+        case DriveInfosManager
     }
 
     public enum EventNames {
@@ -136,12 +138,17 @@ public enum SentryDebug {
         message: String,
         context: [String: Any]? = nil,
         contextKey: String? = nil,
+        level: SentryLevel? = nil,
         extras: [String: Any]? = nil
     ) {
         Task {
             SentrySDK.capture(message: message) { scope in
                 if let context, let contextKey {
                     scope.setContext(value: context, key: contextKey)
+                }
+
+                if let level {
+                    scope.setLevel(level)
                 }
 
                 if let extras {
