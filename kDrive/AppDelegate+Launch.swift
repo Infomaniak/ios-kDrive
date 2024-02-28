@@ -117,8 +117,9 @@ extension AppDelegate {
     // MARK: Misc
 
     private func askForReview() {
-        guard let presentingViewController = window?.rootViewController, UserDefaults.shared.numberOfConnections == 10
-            else { return }
+        guard let presentingViewController = window?.rootViewController,
+              !Bundle.main.isRunningInTestFlight, UserDefaults.shared.numberOfConnections == 10
+        else { return }
 
         let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
         let alert = AlertTextViewController(
