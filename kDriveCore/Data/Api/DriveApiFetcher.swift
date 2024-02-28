@@ -118,18 +118,24 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func rootFiles(drive: AbstractDrive, page: Int = 1,
                           sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.rootFiles(drive: drive).paginated(page: page)
-                .sorted(by: [.type, sortType])))
+        let rootFilesEndpoint: Endpoint = .rootFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType])
+        let rootFiles: ValidServerResponse<[File]> = try await perform(request: authenticatedRequest(rootFilesEndpoint))
+
+        return (rootFiles.validApiResponse.data, rootFiles.validApiResponse.responseAt)
     }
 
     public func files(in directory: ProxyFile, page: Int = 1,
                       sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.files(of: directory).paginated(page: page)
-                .sorted(by: [.type, sortType])))
+        let filesEndpoint: Endpoint = .files(of: directory).paginated(page: page).sorted(by: [.type, sortType])
+        let files: ValidServerResponse<[File]> = try await perform(request: authenticatedRequest(filesEndpoint))
+
+        return (files.validApiResponse.data, files.validApiResponse.responseAt)
     }
 
     public func fileInfo(_ file: ProxyFile) async throws -> (data: File, responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.fileInfo(file)))
+        let file: ValidServerResponse<File> = try await perform(request: authenticatedRequest(.fileInfo(file)))
+
+        return (file.validApiResponse.data, file.validApiResponse.responseAt)
     }
 
     public func favorites(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
@@ -294,12 +300,16 @@ public class DriveApiFetcher: ApiFetcher {
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
             .paginated(page: page)
-        return try await perform(request: authenticatedRequest(endpoint))
+        let activities: ValidServerResponse<[FileActivity]> = try await perform(request: authenticatedRequest(endpoint))
+        return (activities.validApiResponse.data, activities.validApiResponse.responseAt)
     }
 
     public func filesActivities(drive: AbstractDrive, files: [ProxyFile],
                                 from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
-        try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
+        let endpoint: Endpoint = .filesActivities(drive: drive, fileIds: files.map(\.id), from: date)
+        let activities: ValidServerResponse<[ActivitiesForFile]> = try await perform(request: authenticatedRequest(endpoint))
+
+        return (activities.validApiResponse.data, activities.validApiResponse.responseAt)
     }
 
     public func favorite(file: ProxyFile) async throws -> Bool {
