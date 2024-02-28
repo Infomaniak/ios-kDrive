@@ -63,10 +63,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     override public func perform<T: Decodable>(request: DataRequest,
-                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> (
-        data: T,
-        responseAt: Int?
-    ) {
+                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {
         do {
             return try await super.perform(request: request)
         } catch InfomaniakError.apiError(let apiError) {
