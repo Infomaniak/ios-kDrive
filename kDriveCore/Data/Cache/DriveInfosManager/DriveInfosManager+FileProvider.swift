@@ -25,9 +25,6 @@ public extension DriveInfosManager {
     private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
 
     internal func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
-        let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
-        expiringActivity.start()
-
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
             do {
@@ -44,13 +41,7 @@ public extension DriveInfosManager {
             }
         }
 
-        guard !expiringActivity.shouldTerminate else {
-            Log.driveInfosManager("Expiring activity before signalling FileProvider", level: .error)
-            expiringActivity.endAll()
-            return
-        }
-
-        updateFileManagerDomains(drives: drives, user: user, expiringActivity: expiringActivity)
+        updateFileManagerDomains(drives: drives, user: user)
     }
 
     internal func deleteFileProviderDomains(for userId: Int) {
@@ -74,6 +65,7 @@ public extension DriveInfosManager {
     func deleteAllFileProviderDomains() {
         NSFileProviderManager.removeAllDomains { error in
             guard let error else {
+                Log.driveInfosManager("Did remove all domains")
                 return
             }
             Log.driveInfosManager("Error while removing domains: \(error)", level: .error)
@@ -113,7 +105,9 @@ public extension DriveInfosManager {
     // MARK: Update FileManager
 
     /// Diffing __NSFileProviderDomain__ for drives of a specified user, and propagate changes to the __NSFileProviderManager__
-    private func updateFileManagerDomains(drives: [Drive], user: InfomaniakCore.UserProfile, expiringActivity: ExpiringActivity) {
+    private func updateFileManagerDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
+        let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
+        expiringActivity.start()
         Task {
             let updatedDomains = drives.map {
                 NSFileProviderDomain(
@@ -123,52 +117,72 @@ public extension DriveInfosManager {
                 )
             }
 
+            Log.driveInfosManager("Updated domains \(updatedDomains.count) for user :\(user.displayName) \(user.id)")
             do {
-                let allDomains = try await NSFileProviderManager.domains()
-                let existingDomainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
-
-                let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
-                    let existingDomain = existingDomainsForCurrentUser.first { $0.identifier == newDomain.identifier }
-                    return (newDomain, existingDomain)
-                }
-
-                try await updatedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { domain in
-                    // Simply add domain if new
-                    let newDomain = domain.new
-                    guard let existingDomain = domain.existing else {
-                        Log.driveInfosManager("Inserting new domain:\(newDomain.identifier)")
-                        try await NSFileProviderManager.add(newDomain)
-                        return
-                    }
-
-                    // Update existing accounts if necessary
-                    if existingDomain.displayName != newDomain.displayName {
-                        Log.driveInfosManager("Updating domain:\(newDomain.identifier)")
-                        try await NSFileProviderManager.remove(existingDomain)
-                        try await NSFileProviderManager.add(newDomain)
-                        self.signalChanges(for: newDomain)
-                    }
-                }
-
-                // Remove domains no longer present for current user
-                let removedDomainsForCurrentUser = updatedDomains.filter { updatedDomain in
-                    guard existingDomainsForCurrentUser.contains(where: { $0.identifier == updatedDomain.identifier }) else {
-                        return true
-                    }
-
-                    return false
-                }
-
-                try await removedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { oldDomain in
-                    Log.driveInfosManager("Removing domain:\(oldDomain.identifier)")
-                    try await NSFileProviderManager.remove(oldDomain)
-                }
+                try await updateDomainsIfNecessary(updatedDomains: updatedDomains, userId: user.id)
+                try await deleteDomainsIfNecessary(updatedDomains: updatedDomains, userId: user.id)
             } catch {
                 Log.driveInfosManager("Error while updating file provider domains: \(error)", level: .error)
             }
 
             expiringActivity.endAll()
         }
+    }
+
+    /// Insert or update Domains if necessary
+    private func updateDomainsIfNecessary(updatedDomains: [NSFileProviderDomain], userId: Int) async throws {
+        let existingDomainsForCurrentUser = try await existingDomains(for: userId)
+
+        let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
+            let existingDomain = existingDomainsForCurrentUser.first { $0.identifier == newDomain.identifier }
+            return (newDomain, existingDomain)
+        }
+
+        try await updatedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { domain in
+            // Simply add domain if new
+            let newDomain = domain.new
+            guard let existingDomain = domain.existing else {
+                Log.driveInfosManager("Inserting new domain:\(newDomain.identifier)")
+                try await NSFileProviderManager.add(newDomain)
+                self.signalChanges(for: newDomain)
+                return
+            }
+
+            // Update existing accounts if necessary
+            if existingDomain.displayName != newDomain.displayName {
+                Log.driveInfosManager("Updating domain:\(newDomain.identifier)")
+                try await NSFileProviderManager.remove(existingDomain)
+                try await NSFileProviderManager.add(newDomain)
+                self.signalChanges(for: newDomain)
+            }
+        }
+    }
+
+    /// Delete Domains if necessary
+    private func deleteDomainsIfNecessary(updatedDomains: [NSFileProviderDomain], userId: Int) async throws {
+        // We need to fetch a fresh copy of the domains after the update
+        let existingDomainsForCurrentUser = try await existingDomains(for: userId)
+
+        // Remove domains no longer present for current user
+        let removedDomainsForCurrentUser = updatedDomains.filter { updatedDomain in
+            guard existingDomainsForCurrentUser.contains(where: { $0.identifier == updatedDomain.identifier }) else {
+                return true
+            }
+
+            return false
+        }
+
+        try await removedDomainsForCurrentUser.concurrentForEach(customConcurrency: 1) { oldDomain in
+            Log.driveInfosManager("Removing domain:\(oldDomain.identifier)")
+            try await NSFileProviderManager.remove(oldDomain)
+        }
+    }
+
+    /// Fetch a fresh list of registered domains for a specified user
+    private func existingDomains(for userId: Int) async throws -> [NSFileProviderDomain] {
+        let allDomains = try await NSFileProviderManager.domains()
+        let existingDomains = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
+        return existingDomains
     }
 
     // MARK: Signal FileManager
@@ -184,11 +198,20 @@ public extension DriveInfosManager {
         }
 
         DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
-            manager.signalEnumerator(for: .workingSet) { _ in
-                Log.driveInfosManager("did signal .workingSet")
+            manager.signalEnumerator(for: .workingSet) { error in
+                guard let error else {
+                    Log.driveInfosManager("did signal .workingSet")
+                    return
+                }
+
+                Log.driveInfosManager("failed to signal .workingSet \(error)", level: .error)
             }
-            manager.signalEnumerator(for: .rootContainer) { _ in
-                Log.driveInfosManager("did signal .rootContainer")
+            manager.signalEnumerator(for: .rootContainer) { error in
+                guard let error else {
+                    Log.driveInfosManager("did signal .rootContainer")
+                    return
+                }
+                Log.driveInfosManager("failed to signal .rootContainer \(error)", level: .error)
             }
         }
     }
