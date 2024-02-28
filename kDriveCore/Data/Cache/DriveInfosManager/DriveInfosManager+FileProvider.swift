@@ -26,6 +26,9 @@ public extension DriveInfosManager {
     private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
 
     internal func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
+        let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
+        expiringActivity.start()
+
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
             do {
@@ -40,6 +43,12 @@ public extension DriveInfosManager {
             } catch {
                 // TODO: Sentry
             }
+        }
+
+        guard !expiringActivity.shouldTerminate else {
+            // Sentry
+            expiringActivity.endAll()
+            return
         }
 
         // TODO: Start Activity
@@ -94,7 +103,7 @@ public extension DriveInfosManager {
                 // TODO: add Sentry
             }
 
-            // TODO: notify for consistency
+            expiringActivity.endAll()
         }
     }
 
@@ -123,17 +132,6 @@ public extension DriveInfosManager {
         }
     }
 
-    internal func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
-            if let error {
-                DDLogError("Error while getting domains: \(error)")
-                completion(nil)
-            } else {
-                completion(domains.first { $0.identifier.rawValue == driveId })
-            }
-        }
-    }
-
     func getFileProviderManager(for drive: Drive, completion: @escaping (NSFileProviderManager) -> Void) {
         getFileProviderManager(for: drive.objectId, completion: completion)
     }
@@ -149,6 +147,17 @@ public extension DriveInfosManager {
                 completion(NSFileProviderManager(for: domain) ?? .default)
             } else {
                 completion(.default)
+            }
+        }
+    }
+
+    private func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
+        NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
+            if let error {
+                DDLogError("Error while getting domains: \(error)")
+                completion(nil)
+            } else {
+                completion(domains.first { $0.identifier.rawValue == driveId })
             }
         }
     }
