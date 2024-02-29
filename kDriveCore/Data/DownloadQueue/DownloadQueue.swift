@@ -22,6 +22,14 @@ import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
 
+// TODO: Move to core
+extension SendableDictionary {
+    var isEmpty: Bool {
+        // swiftlint:disable empty_count
+        count > 0
+    }
+}
+
 public final class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId = UUID().uuidString.hashValue
     @Persisted var isDirectory = false
@@ -63,8 +71,8 @@ public final class DownloadQueue {
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
-    public private(set) var operationsInQueue: [Int: DownloadOperation] = [:]
-    public private(set) var archiveOperationsInQueue: [String: DownloadArchiveOperation] = [:]
+    public private(set) var operationsInQueue = SendableDictionary<Int, DownloadOperation>()
+    public private(set) var archiveOperationsInQueue = SendableDictionary<String, DownloadArchiveOperation>()
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
@@ -206,7 +214,10 @@ public final class DownloadQueue {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    // Lookup O(1) as Dictionary backed
+    /// Check if a file is been uploaded
+    ///
+    /// Thread safe
+    /// Lookup O(1) as Dictionary backed
     public func operation(for fileId: Int) -> DownloadOperation? {
         return operationsInQueue[fileId]
     }
