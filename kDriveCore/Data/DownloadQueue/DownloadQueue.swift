@@ -108,7 +108,7 @@ public final class DownloadQueue {
             guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
-                  !self.hasOperation(for: file) else {
+                  !self.hasOperation(for: file.id) else {
                 return
             }
 
@@ -170,7 +170,7 @@ public final class DownloadQueue {
             guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
-                  !self.hasOperation(for: file) else {
+                  !self.hasOperation(for: file.id) else {
                 return
             }
 
@@ -206,12 +206,13 @@ public final class DownloadQueue {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    public func operation(for file: File) -> DownloadOperation? {
-        return operationsInQueue[file.id]
+    // Lookup O(1) as Dictionary backed
+    public func operation(for fileId: Int) -> DownloadOperation? {
+        return operationsInQueue[fileId]
     }
 
-    public func hasOperation(for file: File) -> Bool {
-        return operation(for: file) != nil
+    public func hasOperation(for fileId: Int) -> Bool {
+        return operation(for: fileId) != nil
     }
 
     // MARK: - Private methods

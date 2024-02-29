@@ -556,11 +556,19 @@ public final class File: Object, Codable {
     }
 
     public var typeIdentifier: String {
-        localUrl.typeIdentifier ?? convertedType.uti.identifier
+        guard !isDirectory else {
+            return UTI.folder.identifier
+        }
+
+        return localUrl.typeIdentifier ?? convertedType.uti.identifier
     }
 
     public var uti: UTI {
-        localUrl.uti ?? convertedType.uti
+        guard !isDirectory else {
+            return UTI.folder
+        }
+
+        return localUrl.uti ?? convertedType.uti
     }
 
     public var tintColor: UIColor? {

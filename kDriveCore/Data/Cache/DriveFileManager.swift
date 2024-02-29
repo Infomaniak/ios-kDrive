@@ -742,7 +742,7 @@ public final class DriveFileManager {
                 file.isAvailableOffline = false
             }
             // Cancel the download
-            DownloadQueue.instance.operation(for: file)?.cancel()
+            DownloadQueue.instance.operation(for: file.id)?.cancel()
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
             try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
             notifyObserversWith(file: file)

@@ -240,7 +240,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         completion: @escaping (Error?) -> Void
     ) async throws {
         // Prevent observing file multiple times
-        guard !DownloadQueue.instance.hasOperation(for: file) else {
+        guard !DownloadQueue.instance.hasOperation(for: file.id) else {
             completion(nil)
             return
         }
@@ -248,7 +248,6 @@ final class FileProviderExtension: NSFileProviderExtension {
         var observationToken: ObservationToken?
         observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
             observationToken?.cancel()
-            item.isDownloading = false
 
             if error != nil {
                 item.isDownloaded = false
