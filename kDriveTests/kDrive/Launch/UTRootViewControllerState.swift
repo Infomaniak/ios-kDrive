@@ -42,6 +42,12 @@ final class UTRootViewControllerState: XCTestCase {
         SimpleResolver.sharedResolver.removeAll()
 
         let services = [
+            Factory(type: KeychainHelper.self) { _, _ in
+                KeychainHelper(accessGroup: AccountManager.accessGroup)
+            },
+            Factory(type: TokenStore.self) { _, _ in
+                TokenStore()
+            },
             Factory(type: AppContextServiceable.self) { _, _ in
                 // We fake the main app context
                 return AppContextService(context: .app)
@@ -77,8 +83,8 @@ final class UTRootViewControllerState: XCTestCase {
                 AppLockHelper()
             }
         ]
-        services.forEach {
-            SimpleResolver.sharedResolver.store(factory: $0)
+        for service in services {
+            SimpleResolver.sharedResolver.store(factory: service)
         }
     }
 
