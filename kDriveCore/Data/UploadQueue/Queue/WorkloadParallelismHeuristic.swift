@@ -26,11 +26,11 @@ protocol ParallelismHeuristicDelegate: AnyObject {
     func parallelismShouldChange(value: Int)
 }
 
-/// Something to maintain a coherent parallelism value for the UploadQueue
+/// Something to maintain a coherent parallelism value for the Upload / Download Queue
 ///
 /// Value can change depending on many factors, including thermal state battery or extension mode.
 /// Scaling is achieved given the number of active cores available.
-final class UploadParallelismHeuristic {
+final class WorkloadParallelismHeuristic {
     /// With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB memory usage.
     private static let reducedParallelism = 2
 
