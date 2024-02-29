@@ -77,7 +77,7 @@ extension AppDelegate {
             return
         }
 
-        KeychainHelper.deleteAllTokens()
+        keychainHelper.deleteAllTokens()
         window.rootViewController = OnboardingViewController.instantiate()
         window.makeKeyAndVisible()
     }

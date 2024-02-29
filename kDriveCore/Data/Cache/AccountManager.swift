@@ -51,7 +51,6 @@ public extension InfomaniakLogin {
 public protocol AccountManageable: AnyObject {
     var currentAccount: Account! { get }
     var accounts: SendableArray<Account> { get }
-    var tokens: [ApiToken] { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
     var drives: [Drive] { get }
@@ -77,16 +76,16 @@ public protocol AccountManageable: AnyObject {
     func saveAccounts()
     func switchAccount(newAccount: Account)
     func setCurrentDriveForCurrentAccount(drive: Drive)
-    func addAccount(account: Account)
+    func addAccount(account: Account, token: ApiToken)
     func removeAccount(toDeleteAccount: Account)
-    func removeTokenAndAccount(token: ApiToken)
+    func removeTokenAndAccount(account: Account)
     func account(for token: ApiToken) -> Account?
     func account(for userId: Int) -> Account?
-    func updateToken(newToken: ApiToken, oldToken: ApiToken)
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
@@ -97,7 +96,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
 
     public var currentAccount: Account!
-    public var tokens = [ApiToken]()
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
 
@@ -162,10 +160,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let newAccounts = loadAccounts()
         accounts.append(contentsOf: newAccounts)
 
-        if !accounts.isEmpty {
-            tokens = KeychainHelper.loadTokens()
-        }
-
         // Also update current account reference to prevent mismatch
         if let account = accounts.first(where: { $0.userId == currentAccount?.userId }) {
             currentAccount = account
@@ -174,15 +168,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         // remove accounts with no user
         for account in accounts where account.user == nil {
             removeAccount(toDeleteAccount: account)
-        }
-
-        for token in tokens {
-            if let account = account(for: token.userId) {
-                account.token = token
-            } else {
-                // Remove token with no account
-                removeTokenAndAccount(token: token)
-            }
         }
     }
 
@@ -193,9 +178,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
-        if let driveFileManager = driveFileManagers[objectId] {
-            return driveFileManager
-        } else if let token = getTokenForUserId(userId),
+        if let mailboxManager = driveFileManagers[objectId] {
+            return mailboxManager
+        } else if account(for: userId) != nil,
+                  let token = tokenStore.tokenFor(userId: userId),
                   let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
             driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
@@ -252,7 +238,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
         SentryDebug.logTokenMigration(newToken: newToken, oldToken: oldToken)
-        updateToken(newToken: newToken, oldToken: oldToken)
+        tokenStore.addToken(newToken: newToken)
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
@@ -260,14 +246,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                        "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
 
-        tokens.removeAll { $0.userId == token.userId }
-        KeychainHelper.deleteToken(for: token.userId)
-        if let account = account(for: token) {
-            account.token = nil
-            if account.userId == currentUserId {
-                delegate?.currentAccountNeedsAuthentication()
-                notificationHelper.sendDisconnectedNotification()
-            }
+        tokenStore.removeTokenFor(userId: token.userId)
+        if let account = account(for: token),
+           account.userId == currentUserId {
+            delegate?.currentAccountNeedsAuthentication()
+            notificationHelper.sendDisconnectedNotification()
         }
     }
 
@@ -290,7 +273,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
-        addAccount(account: newAccount)
+        addAccount(account: newAccount, token: token)
         setCurrentAccount(account: newAccount)
 
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
@@ -308,12 +291,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
-        guard account.isConnected else {
+        guard let token = tokenStore.tokenFor(userId: account.userId) else {
             throw DriveError.unknownToken
         }
 
-        let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
-
+        let apiFetcher = getApiFetcher(for: account.userId, token: token)
         let user = try await apiFetcher.userProfile()
         account.user = user
 
@@ -404,12 +386,12 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         _ = getDriveFileManager(for: drive)
     }
 
-    public func addAccount(account: Account) {
+    public func addAccount(account: Account, token: ApiToken) {
         if accounts.contains(account) {
             removeAccount(toDeleteAccount: account)
         }
         accounts.append(account)
-        KeychainHelper.storeToken(account.token)
+        tokenStore.addToken(newToken: token)
         saveAccounts()
     }
 
@@ -417,24 +399,28 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if currentAccount == toDeleteAccount {
             currentAccount = nil
             currentDriveId = 0
+            currentUserId = 0
         }
         if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
             photoLibraryUploader.disableSync()
         }
         DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
+        DriveInfosManager.instance.removeDrivesFor(userId: toDeleteAccount.userId)
+        driveFileManagers.removeAll()
+        apiFetchers.removeAll()
         accounts.removeAll { account -> Bool in
             account == toDeleteAccount
         }
     }
 
-    public func removeTokenAndAccount(token: ApiToken) {
-        tokens.removeAll { $0.userId == token.userId }
-        KeychainHelper.deleteToken(for: token.userId)
-        if let account = account(for: token) {
-            removeAccount(toDeleteAccount: account)
-        }
-        tokenable.deleteApiToken(token: token) { error in
+    public func removeTokenAndAccount(account: Account) {
+        let removedToken = tokenStore.removeTokenFor(userId: account.userId) ?? account.token
+        removeAccount(toDeleteAccount: account)
+
+        guard let removedToken else { return }
+
+        tokenable.deleteApiToken(token: removedToken) { error in
             DDLogError("Failed to delete api token: \(error.localizedDescription)")
         }
     }
@@ -445,21 +431,5 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func account(for userId: Int) -> Account? {
         return accounts.first { $0.userId == userId }
-    }
-
-    public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
-        KeychainHelper.storeToken(newToken)
-        for account in accounts where oldToken.userId == account.userId {
-            account.token = newToken
-        }
-        tokens.removeAll { $0.userId == oldToken.userId }
-        tokens.append(newToken)
-
-        // Update token for the other drive file manager
-        for driveFileManager in driveFileManagers.values
-            where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?
-            .userId == newToken.userId {
-            driveFileManager.apiFetcher.currentToken = newToken
-        }
     }
 }

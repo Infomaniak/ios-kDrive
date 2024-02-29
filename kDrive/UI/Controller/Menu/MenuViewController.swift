@@ -284,7 +284,7 @@ extension MenuViewController {
                                                     .alertRemoveUserDescription(currentAccount.user.displayName),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
-                self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
+                self.accountManager.removeTokenAndAccount(account: self.accountManager.currentAccount)
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
                     (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(

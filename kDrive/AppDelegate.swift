@@ -52,6 +52,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
 

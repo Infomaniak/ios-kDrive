@@ -342,7 +342,7 @@ public class DriveApiFetcher: ApiFetcher {
             group.enter()
             self.tokenable.refreshToken(token: reloadedToken) { newToken, error in
                 if let newToken {
-                    self.accountManager.updateToken(newToken: newToken, oldToken: reloadedToken)
+                    self.accountManager.didUpdateToken(newToken: newToken, oldToken: reloadedToken)
                     request(newToken, nil)
                 } else {
                     request(nil, error)
@@ -473,6 +473,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var keychainHelper: KeychainHelper
 
     override func refresh(
         _ credential: OAuthAuthenticator.Credential,
@@ -485,7 +486,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             let metadata = (credential as ApiToken).breadcrumbMetadata()
             SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .info, metadata: metadata)
 
-            if !KeychainHelper.isKeychainAccessible {
+            if !self.keychainHelper.isKeychainAccessible {
                 let message = "Refreshing token failed - Keychain unaccessible"
                 SentryDebug.addBreadcrumb(message: message, category: .apiToken, level: .error, metadata: metadata)
 
