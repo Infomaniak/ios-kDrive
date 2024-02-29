@@ -58,7 +58,7 @@ public extension InfomaniakLogin {
 /// Abstract interface on AccountManager
 public protocol AccountManageable: AnyObject {
     var currentAccount: Account! { get }
-    var accounts: [Account] { get }
+    var accounts: SendableArray<Account> { get }
     var tokens: [ApiToken] { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
@@ -105,7 +105,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
 
     public var currentAccount: Account!
-    public var accounts = [Account]()
     public var tokens = [ApiToken]()
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
@@ -138,8 +137,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    private var driveFileManagers = [String: DriveFileManager]()
-    private var apiFetchers = [Int: DriveApiFetcher]()
+    public let accounts = SendableArray<Account>()
+    private let driveFileManagers = SendableDictionary<String, DriveFileManager>()
+    private let apiFetchers = SendableDictionary<Int, DriveApiFetcher>()
     public let mqService = MQService()
 
     public init() {
@@ -166,7 +166,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func reloadTokensAndAccounts() {
-        accounts = loadAccounts()
+        accounts.removeAll()
+        let newAccounts = loadAccounts()
+        accounts.append(contentsOf: newAccounts)
+
         if !accounts.isEmpty {
             tokens = KeychainHelper.loadTokens()
         }
@@ -374,7 +377,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             .containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?
             .appendingPathComponent("preferences/", isDirectory: true) {
             let encoder = JSONEncoder()
-            if let data = try? encoder.encode(accounts) {
+            if let data = try? encoder.encode(accounts.values) {
                 do {
                     try FileManager.default.createDirectory(atPath: groupDirectoryURL.path, withIntermediateDirectories: true)
                     try data.write(to: groupDirectoryURL.appendingPathComponent("accounts.json"))
