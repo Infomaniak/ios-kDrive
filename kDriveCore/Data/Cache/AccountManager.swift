@@ -47,14 +47,6 @@ public extension InfomaniakLogin {
     }
 }
 
-@globalActor actor AccountActor: GlobalActor {
-    static let shared = AccountActor()
-
-    public static func run<T>(resultType: T.Type = T.self, body: @AccountActor @Sendable () throws -> T) async rethrows -> T {
-        try await body()
-    }
-}
-
 /// Abstract interface on AccountManager
 public protocol AccountManageable: AnyObject {
     var currentAccount: Account! { get }
@@ -320,9 +312,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.unknownToken
         }
 
-        let apiFetcher = await AccountActor.run {
-            getApiFetcher(for: account.userId, token: account.token)
-        }
+        let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
+
         let user = try await apiFetcher.userProfile()
         account.user = user
 
