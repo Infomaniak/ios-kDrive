@@ -103,12 +103,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
-    private let tag = "ch.infomaniak.token".data(using: .utf8)!
+
     public var currentAccount: Account!
     public var accounts = [Account]()
     public var tokens = [ApiToken]()
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
-    private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
 
     public var currentUserId: Int {
