@@ -158,7 +158,8 @@ public enum FactoryService {
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
                 (loggerFactory, "AppDelegate"),
-                (loggerFactory, "FileProvider")
+                (loggerFactory, "FileProvider"),
+                (loggerFactory, "DriveInfosManager")
             ]
             return services
         } else {
