@@ -53,6 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
+    @LazyInjectService var reviewManager: ReviewManageable
 
     // MARK: - UIApplicationDelegate
 
@@ -204,6 +205,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
+            UserDefaults.shared.openingUntilReview -= 1
             refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             uploadEditedFiles()
         case .onboarding, .updateRequired: break
