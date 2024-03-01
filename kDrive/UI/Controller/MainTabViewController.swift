@@ -42,7 +42,7 @@ class MainTabViewController: UITabBarController, Restorable {
             driveFileManager: driveFileManager,
             currentDirectory: nil
         )))
-        rootViewControllers.append(UIViewController())
+        rootViewControllers.append(Self.initFakeViewController())
         rootViewControllers.append(Self.initRootViewController(with: FavoritesViewModel(
             driveFileManager: driveFileManager,
             currentDirectory: nil
@@ -117,6 +117,12 @@ class MainTabViewController: UITabBarController, Restorable {
         navigationViewController.tabBarItem.image = placeholder
         navigationViewController.tabBarItem.selectedImage = placeholderSelected
         return navigationViewController
+    }
+
+    private static func initFakeViewController() -> UIViewController {
+        let fakeViewController = UIViewController()
+        fakeViewController.tabBarItem.isEnabled = false
+        return fakeViewController
     }
 
     private static func initRootViewController(with viewModel: FileListViewModel) -> UIViewController {
