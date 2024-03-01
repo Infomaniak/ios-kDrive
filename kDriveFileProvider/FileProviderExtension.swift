@@ -313,7 +313,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 name: item.filename,
                 conflictOption: .version,
                 shouldRemoveAfterUpload: false,
-                initiatedFromFileManager: true
+                ownedByFileProvider: true
             )
 
             var observationToken: ObservationToken?

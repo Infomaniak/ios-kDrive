@@ -73,7 +73,7 @@ public final class UploadFile: Object, UploadFilable {
     @Persisted public var taskCreationDate: Date?
     @Persisted public var progress: Double?
     @Persisted var shouldRemoveAfterUpload = true
-    @Persisted var initiatedFromFileManager = false
+    @Persisted var ownedByFileProvider = false
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
     @Persisted private var rawPriority = 0
     @Persisted var _error: Data?
@@ -181,7 +181,7 @@ public final class UploadFile: Object, UploadFilable {
     ///   - name: the name to be used.
     ///   - conflictOption: How to resolve an upload conflict with the API.
     ///   - shouldRemoveAfterUpload: remove after the upload in finished.
-    ///   - initiatedFromFileManager: true if created from file manager.
+    ///   - ownedByFileProvider: true if uploading in FileProvider context.
     ///   - priority: The relative priority of the upload within the upload queue, defaults to `.high`.
     public init(
         parentDirectoryId: Int,
@@ -192,7 +192,7 @@ public final class UploadFile: Object, UploadFilable {
         name: String? = nil,
         conflictOption: ConflictOption = .rename,
         shouldRemoveAfterUpload: Bool = true,
-        initiatedFromFileManager: Bool = false,
+        ownedByFileProvider: Bool = false,
         priority: Operation.QueuePriority = .high
     ) {
         super.init()
@@ -204,7 +204,7 @@ public final class UploadFile: Object, UploadFilable {
         self.url = url.path
         self.name = name ?? url.lastPathComponent
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
-        self.initiatedFromFileManager = initiatedFromFileManager
+        self.ownedByFileProvider = ownedByFileProvider
         rawType = UploadFileType.file.rawValue
         creationDate = url.creationDate
         modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
