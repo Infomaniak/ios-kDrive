@@ -24,7 +24,7 @@ protocol MainTabBarDelegate: AnyObject {
     func plusButtonPressed()
 }
 
-class MainTabBar: UITabBar {
+final class MainTabBar: UITabBar {
     override var backgroundColor: UIColor? {
         get {
             return fillColor
