@@ -7,11 +7,11 @@ on:
 jobs:
   build:
     name: Build and Test project
-    runs-on: [ self-hosted, iOS ]
+    runs-on: [ self-hosted, test ]
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
       - name: Checkout
@@ -29,4 +29,4 @@ jobs:
       - name: Build
         run: .tuist-bin/tuist build --generate kDrive
       - name: Test
-        run: xcodebuild test -workspace kDrive.xcworkspace -scheme kDrive -destination "platform=iOS Simulator,name=iPhone 13" -only-testing:kDriveTests/DriveApiTests
+        run:  .tuist-bin/tuist test kDrive --test-targets kDriveTests/DriveApiTests
