@@ -26,7 +26,7 @@ import RealmSwift
 extension SendableDictionary {
     var isEmpty: Bool {
         // swiftlint:disable empty_count
-        count > 0
+        count == 0
     }
 }
 
