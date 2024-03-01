@@ -24,10 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-final class MainTabViewController: UITabBarController, Restorable {
-    /// Index of the button hidden behind the center (+) one
-    private static let middleHiddenButtonIndex = 2
-
+class MainTabViewController: UITabBarController, Restorable {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -151,15 +148,7 @@ final class MainTabViewController: UITabBarController, Restorable {
         tabBar.itemSpacing = spacing
         tabBar.itemWidth = itemWidth
         tabBar.itemPositioning = .centered
-
-        guard let items = tabBar.items else {
-            return
-        }
-
-        // Disable hidden button behind the middle + one
-        items[safe: Self.middleHiddenButtonIndex]?.isEnabled = false
-
-        for item in items {
+        for item in tabBar.items ?? [] {
             item.title = ""
             item.imageInsets = inset
         }
