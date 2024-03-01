@@ -35,12 +35,28 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     public var pausedNotificationSent = false
 
     /// A serial queue to lock access to ivars an observations.
-    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
+    let serialQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.upload-sync",
+            qos: .userInitiated,
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
 
     /// A concurrent queue.
-    let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
-                                        qos: .userInitiated,
-                                        attributes: [.concurrent])
+    let concurrentQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(label: "com.infomaniak.drive.upload-async",
+                             qos: .userInitiated,
+                             attributes: [.concurrent],
+                             autoreleaseFrequency: autoreleaseFrequency)
+
+    }()
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
