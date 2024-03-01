@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class MainTabViewController: UITabBarController, Restorable {
+final class MainTabViewController: UITabBarController, Restorable {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
