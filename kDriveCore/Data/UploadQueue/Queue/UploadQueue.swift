@@ -145,21 +145,36 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     public func getUploadingFiles(userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return realm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
+            .filter(
+                "uploadDate = nil AND userId = %d AND driveId = %d AND ownedByFileProvider == %@",
+                userId,
+                driveId,
+                NSNumber(value: ownedByFileProvider)
+            )
             .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return realm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
+            .filter(
+                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
+                userId,
+                driveIds,
+                NSNumber(value: ownedByFileProvider)
+            )
             .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+
+        return realm.objects(UploadFile.self)
+            .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
     }
 
     // MARK: - ParallelismHeuristicDelegate

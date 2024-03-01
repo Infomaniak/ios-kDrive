@@ -312,8 +312,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 url: item.storageUrl,
                 name: item.filename,
                 conflictOption: .version,
-                shouldRemoveAfterUpload: false,
-                ownedByFileProvider: true
+                shouldRemoveAfterUpload: false
             )
 
             var observationToken: ObservationToken?

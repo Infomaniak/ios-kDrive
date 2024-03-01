@@ -19,7 +19,7 @@
 import Foundation
 
 /// All the ways some code can be executed within the __kDrive__ project
-public enum DriveAppContext {
+public enum DriveAppContext: String {
     /// Current execution context is the main app
     case app
 
