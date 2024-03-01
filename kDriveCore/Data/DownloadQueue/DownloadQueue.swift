@@ -62,7 +62,10 @@ public final class DownloadTask: Object {
     }
 }
 
-public final class DownloadQueue {
+public final class DownloadQueue: ParallelismHeuristicDelegate {
+    /// Something to adapt the download parallelism live
+    private var parallelismHeuristic: WorkloadParallelismHeuristic?
+
     // MARK: - Attributes
 
     @LazyInjectService var accountManager: AccountManageable
@@ -77,7 +80,6 @@ public final class DownloadQueue {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
         queue.qualityOfService = .userInitiated
-        queue.maxConcurrentOperationCount = 4
         return queue
     }()
 
@@ -229,7 +231,7 @@ public final class DownloadQueue {
     // MARK: - Private methods
 
     private init() {
-        // META: keep SonarCloud happy
+        parallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
     }
 
     private func publishFileDownloaded(fileId: Int, error: DriveError?) {
@@ -359,5 +361,11 @@ public extension DownloadQueue {
         return ObservationToken { [weak self] in
             self?.observations.didChangeArchiveProgress.removeValue(forKey: key)
         }
+    }
+
+    // MARK: - ParallelismHeuristicDelegate
+
+    func parallelismShouldChange(value: Int) {
+        operationQueue.maxConcurrentOperationCount = value
     }
 }
