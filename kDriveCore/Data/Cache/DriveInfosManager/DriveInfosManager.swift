@@ -126,8 +126,6 @@ public final class DriveInfosManager {
             driveList.append(drive)
         }
 
-        initFileProviderDomains(drives: driveList.filter { !$0.sharedWithMe }, user: user)
-
         let realm = getRealm()
         let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
             .filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
@@ -138,7 +136,18 @@ public final class DriveInfosManager {
             realm.add(driveResponse.users, update: .modified)
             realm.add(driveResponse.teams, update: .modified)
         }
+
+        // driveList is _live_ after the write operation
+        updateFileProvider(withLiveDrives: driveList, user: user)
+
         return driveRemoved
+    }
+
+    private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakCore.UserProfile) {
+        let frozenNotSharedWithMe = liveDrives
+            .filter { !$0.sharedWithMe }
+            .map { $0.freeze() }
+        initFileProviderDomains(frozenDrives: frozenNotSharedWithMe, user: user)
     }
 
     public static func getObjectId(driveId: Int, userId: Int) -> String {

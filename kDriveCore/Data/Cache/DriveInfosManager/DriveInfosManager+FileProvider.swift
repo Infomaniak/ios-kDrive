@@ -24,7 +24,7 @@ import InfomaniakCore
 public extension DriveInfosManager {
     private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
 
-    internal func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
+    internal func initFileProviderDomains(frozenDrives: [Drive], user: InfomaniakCore.UserProfile) {
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
             do {
@@ -41,7 +41,7 @@ public extension DriveInfosManager {
             }
         }
 
-        updateFileManagerDomains(drives: drives, user: user)
+        updateFileManagerDomains(frozenDrives: frozenDrives, user: user)
     }
 
     internal func deleteFileProviderDomains(for userId: Int) {
@@ -105,11 +105,13 @@ public extension DriveInfosManager {
     // MARK: Update FileManager
 
     /// Diffing __NSFileProviderDomain__ for drives of a specified user, and propagate changes to the __NSFileProviderManager__
-    private func updateFileManagerDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
+    ///
+    /// Requires frozen drives as making use of async await
+    private func updateFileManagerDomains(frozenDrives: [Drive], user: InfomaniakCore.UserProfile) {
         let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
         Task {
-            let updatedDomains = drives.map {
+            let updatedDomains = frozenDrives.map {
                 NSFileProviderDomain(
                     identifier: NSFileProviderDomainIdentifier($0.objectId),
                     displayName: "\($0.name) (\(user.email))",
