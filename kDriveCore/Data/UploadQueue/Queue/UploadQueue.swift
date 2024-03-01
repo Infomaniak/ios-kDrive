@@ -45,22 +45,13 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
 
-    var uploadParallelismHeuristic: UploadParallelismHeuristic?
+    /// Something to adapt the upload parallelism live
+    var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
 
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
-
-        // In extension to reduce memory footprint, we reduce drastically parallelism
-        let parallelism: Int
-        if appContextService.isExtension {
-            parallelism = 2 // With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB.
-        } else {
-            parallelism = max(4, ProcessInfo.processInfo.activeProcessorCount)
-        }
-
-        queue.maxConcurrentOperationCount = parallelism
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
@@ -111,7 +102,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
         Log.uploadQueue("Starting up")
 
-        uploadParallelismHeuristic = UploadParallelismHeuristic(delegate: self)
+        uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
 
         concurrentQueue.async {
             // Initialize operation queue with files from Realm, and make sure it restarts
