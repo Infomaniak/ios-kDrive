@@ -132,14 +132,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
 
-        if file.isDirectory {
-            isUploading = false
-            isUploaded = true
-        } else {
-            // TODO: Lookup upload queue form id, for now fake it
-            isUploading = false
-            isUploaded = true
-        }
+        // TODO: Lookup upload queue form id, for now fake it
+        isUploading = false
+        isUploaded = true
 
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
