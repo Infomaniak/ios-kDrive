@@ -142,6 +142,7 @@ extension AppDelegate {
 
     private func requestAppStoreReview() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "like")
+        UserDefaults.shared.appReview = .readyForReview
         reviewManager.requestReview()
     }
 
@@ -150,6 +151,7 @@ extension AppDelegate {
         guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
             return
         }
+        UserDefaults.shared.appReview = .feedback
         UIApplication.shared.open(url)
     }
 

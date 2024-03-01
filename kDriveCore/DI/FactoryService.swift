@@ -137,7 +137,7 @@ public enum FactoryService {
                 BackgroundTasksService()
             },
             Factory(type: ReviewManageable.self) { _, _ in
-                ReviewManager(userDefaults: UserDefaults.shared, openingBeforeReview: 3)
+                ReviewManager(userDefaults: UserDefaults.shared)
             }
         ]
         return services
