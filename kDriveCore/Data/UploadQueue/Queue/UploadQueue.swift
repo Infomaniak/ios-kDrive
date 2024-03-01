@@ -23,6 +23,8 @@ import RealmSwift
 import Sentry
 
 public final class UploadQueue: ParallelismHeuristicDelegate {
+    private var memoryPressure: DispatchSourceMemoryPressure?
+
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
@@ -127,7 +129,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         // Observe network state change
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else {
                 return
             }
@@ -136,6 +138,8 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
         }
+
+        observeMemoryWarnings()
 
         Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
@@ -146,7 +150,12 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
                                   userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter(
+            "parentDirectoryId = %d AND ownedByFileProvider == %@",
+            parentId,
+            NSNumber(value: ownedByFileProvider)
+        )
     }
 
     public func getUploadingFiles(userId: Int,
@@ -182,6 +191,33 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
         return realm.objects(UploadFile.self)
             .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
+    }
+
+    // MARK: - Memory warnings
+
+    /// A critical memory warning in `FileProvider` context will reschedule, in order to transition uploads to Main App.
+    private func observeMemoryWarnings() {
+        guard appContextService.context == .fileProviderExtension else {
+            return
+        }
+
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: .all, queue: .main)
+        memoryPressure = source
+        source.setEventHandler {
+            let event: DispatchSource.MemoryPressureEvent = source.data
+            switch event {
+            case DispatchSource.MemoryPressureEvent.normal:
+                Log.uploadQueue("MemoryPressureEvent normal", level: .info)
+            case DispatchSource.MemoryPressureEvent.warning:
+                Log.uploadQueue("MemoryPressureEvent warning", level: .info)
+            case DispatchSource.MemoryPressureEvent.critical:
+                Log.uploadQueue("MemoryPressureEvent critical", level: .error)
+                self.rescheduleRunningOperations()
+            default:
+                Log.uploadQueue("unknown MemoryPressureEvent \(event)", level: .error)
+            }
+        }
+        source.resume()
     }
 
     // MARK: - ParallelismHeuristicDelegate

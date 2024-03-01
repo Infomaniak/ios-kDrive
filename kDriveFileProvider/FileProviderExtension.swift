@@ -31,7 +31,9 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
 
-    @LazyInjectService var uploadQueue: UploadQueueable
+    /// Restart the dedicated `FileManager` upload queue on init
+    @InjectService var uploadQueue: UploadQueueable
+
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
@@ -335,6 +337,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
             }
 
+            self.uploadQueue.resumeAllOperations()
             _ = self.uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
         }
     }
