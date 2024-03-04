@@ -47,18 +47,10 @@ public extension InfomaniakLogin {
     }
 }
 
-@globalActor actor AccountActor: GlobalActor {
-    static let shared = AccountActor()
-
-    public static func run<T>(resultType: T.Type = T.self, body: @AccountActor @Sendable () throws -> T) async rethrows -> T {
-        try await body()
-    }
-}
-
 /// Abstract interface on AccountManager
 public protocol AccountManageable: AnyObject {
     var currentAccount: Account! { get }
-    var accounts: [Account] { get }
+    var accounts: SendableArray<Account> { get }
     var tokens: [ApiToken] { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
@@ -103,12 +95,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
-    private let tag = "ch.infomaniak.token".data(using: .utf8)!
+
     public var currentAccount: Account!
-    public var accounts = [Account]()
     public var tokens = [ApiToken]()
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
-    private let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
     public weak var delegate: AccountManagerDelegate?
 
     public var currentUserId: Int {
@@ -139,8 +129,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    private var driveFileManagers = [String: DriveFileManager]()
-    private var apiFetchers = [Int: DriveApiFetcher]()
+    public let accounts = SendableArray<Account>()
+    private let driveFileManagers = SendableDictionary<String, DriveFileManager>()
+    private let apiFetchers = SendableDictionary<Int, DriveApiFetcher>()
     public let mqService = MQService()
 
     public init() {
@@ -167,7 +158,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func reloadTokensAndAccounts() {
-        accounts = loadAccounts()
+        accounts.removeAll()
+        let newAccounts = loadAccounts()
+        accounts.append(contentsOf: newAccounts)
+
         if !accounts.isEmpty {
             tokens = KeychainHelper.loadTokens()
         }
@@ -318,9 +312,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.unknownToken
         }
 
-        let apiFetcher = await AccountActor.run {
-            getApiFetcher(for: account.userId, token: account.token)
-        }
+        let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
+
         let user = try await apiFetcher.userProfile()
         account.user = user
 
@@ -375,7 +368,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             .containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?
             .appendingPathComponent("preferences/", isDirectory: true) {
             let encoder = JSONEncoder()
-            if let data = try? encoder.encode(accounts) {
+            if let data = try? encoder.encode(accounts.values) {
                 do {
                     try FileManager.default.createDirectory(atPath: groupDirectoryURL.path, withIntermediateDirectories: true)
                     try data.write(to: groupDirectoryURL.appendingPathComponent("accounts.json"))

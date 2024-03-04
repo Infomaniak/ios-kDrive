@@ -89,7 +89,7 @@ final class ITAppLaunchTest: XCTestCase {
         UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts = [self.fakeAccount]
+            accountManager.accounts.append(self.fakeAccount)
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
                 apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)

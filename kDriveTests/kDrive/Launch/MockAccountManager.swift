@@ -29,7 +29,7 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
         return accounts.first!
     }
 
-    var accounts: [Account] = []
+    var accounts = SendableArray<Account>()
 
     var tokens: [ApiToken] = []
 
