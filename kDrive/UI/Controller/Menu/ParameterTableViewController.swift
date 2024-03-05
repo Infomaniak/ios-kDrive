@@ -203,17 +203,21 @@ class ParameterTableViewController: UITableViewController {
 
 extension ParameterTableViewController: DeleteAccountDelegate {
     func didCompleteDeleteAccount() {
-        accountManager.removeTokenAndAccount(account: accountManager.currentAccount)
+        if let currentAccount = accountManager.currentAccount {
+            accountManager.removeTokenAndAccount(account: currentAccount)
+        }
+
+        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
-            driveFileManager = accountManager.currentDriveFileManager
+            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
         } else {
             SentrySDK.setUser(nil)
-            tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
         }
-        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
         accountManager.saveAccounts()
+        appDelegate?.updateRootViewControllerState()
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 
     func didFailDeleteAccount(error: InfomaniakLoginError) {

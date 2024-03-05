@@ -88,7 +88,33 @@ class PreloadingViewController: UIViewController {
         ])
     }
 
-    func preloadAccountAndDrives() {}
+    func preloadAccountAndDrives() {
+        Task {
+            guard let appDelegate = (UIApplication.shared.delegate as? AppDelegate) else { return }
+            do {
+                let _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+                _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
+
+                if let currentDriveFileManager = accountManager.currentDriveFileManager {
+                    appDelegate.prepareRootViewController(currentState: .mainViewController(currentDriveFileManager))
+                } else {
+                    appDelegate.prepareRootViewController(currentState: .onboarding)
+                }
+            } catch DriveError.NoDriveError.noDrive {
+                let driveErrorViewController = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
+                present(driveErrorViewController, animated: true)
+            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                    drive: drive
+                )
+                driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
+                present(driveErrorNavigationViewController, animated: true)
+            } catch {
+                appDelegate.prepareRootViewController(currentState: .onboarding)
+            }
+        }
+    }
 }
 
 @available(iOS 17, *)

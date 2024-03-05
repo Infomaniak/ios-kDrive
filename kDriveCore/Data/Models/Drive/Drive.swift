@@ -165,6 +165,7 @@ public final class Drive: Object, Codable {
         usedSize = try values.decode(Int64.self, forKey: .usedSize)
         _capabilities = try values.decode(DriveCapabilities.self, forKey: ._capabilities)
         rights = try values.decode(DriveRights.self, forKey: .rights)
+        inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
