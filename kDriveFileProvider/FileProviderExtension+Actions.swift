@@ -51,7 +51,9 @@ extension FileProviderExtension {
                     name: directoryName,
                     onlyForMe: false
                 )
-                completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
+                let item = FileProviderItem(file: directory, domain: self.domain)
+                completionHandler(item, nil)
+                try await self.signalFileProviderDaemon(item: item)
             } catch {
                 completionHandler(nil, error)
             }
@@ -74,9 +76,8 @@ extension FileProviderExtension {
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
                     self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                    try await self.manager.signalEnumerator(for: .workingSet)
-                    try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
+                    try await self.signalFileProviderDaemon(identifier: itemIdentifier)
                 } else {
                     completionHandler(self.nsError(code: .serverUnreachable))
                 }
@@ -119,22 +120,30 @@ extension FileProviderExtension {
                 domain: self.domain
             )
 
+            let outErrorPointer = NSErrorPointer(nil)
             self.fileCoordinator.coordinate(
                 readingItemAt: fileURL,
                 options: .withoutChanges,
                 writingItemAt: storageUrl,
                 options: .forReplacing,
-                error: nil
+                error: outErrorPointer
             ) { readURL, writeURL in
                 do {
                     try FileManager.default.copyItem(at: readURL, to: writeURL)
                 } catch let error as NSError {
-                    print(error.localizedDescription)
+                    Log.fileProvider("importDocument error: \(error.localizedDescription)", level: .error)
                 }
             }
+
+            guard outErrorPointer?.pointee == nil else {
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
+
             if accessingSecurityScopedResource {
                 fileURL.stopAccessingSecurityScopedResource()
             }
+
             let importedItem = FileProviderItem(
                 importedFileUrl: storageUrl,
                 identifier: importedDocumentIdentifier,
@@ -144,8 +153,9 @@ extension FileProviderExtension {
 
             self.backgroundUploadItem(importedItem)
 
-            try await self.manager.signalEnumerator(for: parentItemIdentifier)
             completionHandler(importedItem, nil)
+
+            try await self.asyncSignalFileProviderDaemon(item: importedItem)
         }
     }
 
@@ -159,7 +169,6 @@ extension FileProviderExtension {
             // Doc says we should do network request after renaming local file but we could end up with model desync
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.filename = itemName
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
                 return
             }
@@ -185,7 +194,9 @@ extension FileProviderExtension {
             let proxyFile = file.proxify()
             do {
                 let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                let newItem = FileProviderItem(file: file.freeze(), domain: self.domain)
+                completionHandler(newItem, nil)
+                try await self.signalFileProviderDaemon(item: newItem)
             } catch {
                 completionHandler(nil, error)
             }
@@ -202,8 +213,8 @@ extension FileProviderExtension {
         Task {
             if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
                 item.parentItemIdentifier = parentItemIdentifier
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
+                try await self.asyncSignalFileProviderDaemon(item: item)
                 return
             }
 
@@ -219,7 +230,9 @@ extension FileProviderExtension {
             let proxyParent = parent.proxify()
             do {
                 let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                let newItem = FileProviderItem(file: file.freeze(), domain: self.domain)
+                completionHandler(newItem, nil)
+                try await self.asyncSignalFileProviderDaemon(item: newItem)
             } catch {
                 completionHandler(nil, error)
             }
@@ -245,6 +258,7 @@ extension FileProviderExtension {
             item.favoriteRank = favoriteRank
 
             completionHandler(item, nil)
+            try await self.signalFileProviderDaemon(item: item)
         }
     }
 
@@ -254,10 +268,8 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("setLastUsedDate forItemIdentifier")
-        Task {
-            // kDrive doesn't support this
-            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
-        }
+        // kDrive doesn't support this
+        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
     }
 
     override func setTagData(
@@ -266,10 +278,8 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
-        Task {
-            // kDrive doesn't support this
-            completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
-        }
+        // kDrive doesn't support this
+        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
     }
 
     override func trashItem(
@@ -299,6 +309,7 @@ extension FileProviderExtension {
                 _ = try await self.driveFileManager.delete(file: proxyFile)
                 self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
                 completionHandler(item, nil)
+                try await self.signalFileProviderDaemon(item: item)
             } catch {
                 completionHandler(nil, error)
             }
@@ -336,9 +347,8 @@ extension FileProviderExtension {
                 }
                 item.isTrashed = false
                 self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                try await self.manager.signalEnumerator(for: .workingSet)
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
                 completionHandler(item, nil)
+                try await self.signalFileProviderDaemon(item: item)
             } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))
             }
