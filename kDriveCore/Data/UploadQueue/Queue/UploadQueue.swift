@@ -23,6 +23,8 @@ import RealmSwift
 import Sentry
 
 public final class UploadQueue: ParallelismHeuristicDelegate {
+    private var memoryPressure: DispatchSourceMemoryPressure?
+
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
@@ -35,12 +37,28 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     public var pausedNotificationSent = false
 
     /// A serial queue to lock access to ivars an observations.
-    let serialQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", qos: .userInitiated)
+    let serialQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.upload-sync",
+            qos: .userInitiated,
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
 
     /// A concurrent queue.
-    let concurrentQueue = DispatchQueue(label: "com.infomaniak.drive.upload-async",
-                                        qos: .userInitiated,
-                                        attributes: [.concurrent])
+    let concurrentQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(label: "com.infomaniak.drive.upload-async",
+                             qos: .userInitiated,
+                             attributes: [.concurrent],
+                             autoreleaseFrequency: autoreleaseFrequency)
+
+    }()
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
@@ -111,7 +129,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         // Observe network state change
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else {
                 return
             }
@@ -120,6 +138,8 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
         }
+
+        observeMemoryWarnings()
 
         Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
     }
@@ -130,27 +150,74 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
                                   userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter(
+            "parentDirectoryId = %d AND ownedByFileProvider == %@",
+            parentId,
+            NSNumber(value: ownedByFileProvider)
+        )
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveId: Int,
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return realm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId))
+            .filter(
+                "uploadDate = nil AND userId = %d AND driveId = %d AND ownedByFileProvider == %@",
+                userId,
+                driveId,
+                NSNumber(value: ownedByFileProvider)
+            )
             .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return realm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds))
+            .filter(
+                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
+                userId,
+                driveIds,
+                NSNumber(value: ownedByFileProvider)
+            )
             .sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+
+        return realm.objects(UploadFile.self)
+            .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
+    }
+
+    // MARK: - Memory warnings
+
+    /// A critical memory warning in `FileProvider` context will reschedule, in order to transition uploads to Main App.
+    private func observeMemoryWarnings() {
+        guard appContextService.context == .fileProviderExtension else {
+            return
+        }
+
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: .all, queue: .main)
+        memoryPressure = source
+        source.setEventHandler {
+            let event: DispatchSource.MemoryPressureEvent = source.data
+            switch event {
+            case DispatchSource.MemoryPressureEvent.normal:
+                Log.uploadQueue("MemoryPressureEvent normal", level: .info)
+            case DispatchSource.MemoryPressureEvent.warning:
+                Log.uploadQueue("MemoryPressureEvent warning", level: .info)
+            case DispatchSource.MemoryPressureEvent.critical:
+                Log.uploadQueue("MemoryPressureEvent critical", level: .error)
+                self.rescheduleRunningOperations()
+            default:
+                Log.uploadQueue("unknown MemoryPressureEvent \(event)", level: .error)
+            }
+        }
+        source.resume()
     }
 
     // MARK: - ParallelismHeuristicDelegate

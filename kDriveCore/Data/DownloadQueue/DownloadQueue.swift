@@ -22,6 +22,14 @@ import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
 
+// TODO: Move to core
+extension SendableDictionary {
+    var isEmpty: Bool {
+        // swiftlint:disable empty_count
+        count == 0
+    }
+}
+
 public final class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId = UUID().uuidString.hashValue
     @Persisted var isDirectory = false
@@ -66,8 +74,8 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
-    public private(set) var operationsInQueue: [Int: DownloadOperation] = [:]
-    public private(set) var archiveOperationsInQueue: [String: DownloadArchiveOperation] = [:]
+    public private(set) var operationsInQueue = SendableDictionary<Int, DownloadOperation>()
+    public private(set) var archiveOperationsInQueue = SendableDictionary<String, DownloadArchiveOperation>()
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
@@ -110,7 +118,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
-                  !self.hasOperation(for: file) else {
+                  !self.hasOperation(for: file.id) else {
                 return
             }
 
@@ -172,7 +180,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
-                  !self.hasOperation(for: file) else {
+                  !self.hasOperation(for: file.id) else {
                 return
             }
 
@@ -208,12 +216,16 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    public func operation(for file: File) -> DownloadOperation? {
-        return operationsInQueue[file.id]
+    /// Check if a file is been uploaded
+    ///
+    /// Thread safe
+    /// Lookup O(1) as Dictionary backed
+    public func operation(for fileId: Int) -> DownloadOperation? {
+        return operationsInQueue[fileId]
     }
 
-    public func hasOperation(for file: File) -> Bool {
-        return operation(for: file) != nil
+    public func hasOperation(for fileId: Int) -> Bool {
+        return operation(for: fileId) != nil
     }
 
     // MARK: - Private methods

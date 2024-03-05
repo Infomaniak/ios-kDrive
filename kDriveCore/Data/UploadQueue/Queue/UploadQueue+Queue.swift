@@ -55,6 +55,7 @@ public protocol UploadQueueable {
     /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
     ///
     /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
+    /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
     /// Cancel all running operations, regardless of state
@@ -78,6 +79,32 @@ public protocol UploadQueueable {
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
+    /// A query for the `UploadFiles` in the  __Main app__ context
+    ///
+    /// Not uploaded yet, can retry, not owned by `FileProvider`.
+    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
+
+    /// A query for the `UploadFiles` in the  __FileProvider__ context
+    ///
+    /// Not uploaded yet, can retry, owned by `FileProvider`.
+    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
+
+    /// Query to fetch `UploadFiles` for the current execution context
+    var uploadFileQuery: String? {
+        switch appContextService.context {
+        case .app:
+            return Self.appFilesToUploadQuery
+        case .fileProviderExtension:
+            return Self.fileProviderFilesToUploadQuery
+        case .actionExtension:
+            // not supported in actionExtension
+            return nil
+        case .shareExtension:
+            // not supported in shareExtension
+            return nil
+        }
+    }
+
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         Log.uploadQueue("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
@@ -100,17 +127,16 @@ extension UploadQueue: UploadQueueable {
 
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
-            return
-        }
-
         concurrentQueue.sync {
+            guard let uploadFileQuery else {
+                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
+                return
+            }
+
             var uploadingFileIds = [String]()
             try? self.transactionWithUploadRealm { realm in
-                // Not uploaded yet, And can retry.
                 let uploadingFiles = realm.objects(UploadFile.self)
-                    .filter("uploadDate = nil AND maxRetryCount > 0")
+                    .filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
                 uploadingFileIds = uploadingFiles.map(\.id)
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
@@ -213,7 +239,11 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        for operation in operationQueue.operations.filter(\.isExecuting) {
+        reschedule(operations: operationQueue.operations.filter(\.isExecuting))
+    }
+
+    private func reschedule(operations: [Operation]) {
+        for operation in operations {
             guard let uploadOperation = operation as? UploadOperation else {
                 continue
             }
@@ -361,8 +391,9 @@ extension UploadQueue: UploadQueueable {
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
                 // UploadFile with an error, Or no more retry.
+                let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
                 let failedUploadFiles = realm.objects(UploadFile.self)
-                    .filter("_error != nil OR maxRetryCount <= 0")
+                    .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
                     .filter { file in
                         guard let error = file.error else {
                             return false
@@ -458,8 +489,9 @@ extension UploadQueue: UploadQueueable {
                                                         driveId: driveId,
                                                         using: realm)
             Log.uploadQueue("uploading:\(uploadingFiles.count)")
+            let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
             let failedUploadFiles = uploadingFiles
-                .filter("_error != nil OR maxRetryCount <= 0")
+                .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
             failedFileIds = failedUploadFiles.map(\.id)
             Log.uploadQueue("retying:\(failedFileIds.count)")
         }

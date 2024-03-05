@@ -42,11 +42,6 @@ extension UploadQueue: UploadNotifiable {
 
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
-        guard appContextService.context != .fileProviderExtension else {
-            Log.uploadQueue("\(#function) disabled in FileProviderExtension", level: .error)
-            return
-        }
-
         serialQueue.async { [weak self] in
             guard let self else { return }
             if !pausedNotificationSent {
@@ -63,7 +58,7 @@ extension UploadQueue: UploadNotifiable {
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
                   uploadFile.error != .taskCancelled,
-                  !uploadFile.initiatedFromFileManager else {
+                  !uploadFile.ownedByFileProvider else {
                 return
             }
 

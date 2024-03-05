@@ -41,6 +41,12 @@ public extension NSFileProviderItemIdentifier {
 }
 
 public final class FileProviderItem: NSObject, NSFileProviderItem {
+    // MARK: Private properties
+
+    private var fileId: Int?
+    private var createdBy: Int?
+    private var isDirectory: Bool
+
     // MARK: Required properties
 
     public var itemIdentifier: NSFileProviderItemIdentifier
@@ -53,19 +59,42 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
     public var childItemCount: NSNumber?
     public var documentSize: NSNumber?
-    public var isTrashed = false
+    public var isTrashed: Bool
     public var creationDate: Date?
     public var contentModificationDate: Date?
     public var versionIdentifier: Data?
-    public var isMostRecentVersionDownloaded = true
-    public var isUploading = false
-    public var isUploaded = true
+    public var isMostRecentVersionDownloaded: Bool
+    public var isUploading: Bool
+    public var isUploaded: Bool
     public var uploadingError: Error?
-    public var isDownloading = false
-    public var isDownloaded = true
+    public var isDownloading: Bool {
+        guard !isDirectory else {
+            return false
+        }
+
+        guard let fileId else {
+            return false
+        }
+
+        return DownloadQueue.instance.hasOperation(for: fileId)
+    }
+
+    public var isDownloaded: Bool
     public var downloadingError: Error?
-    public var isShared = false
-    public var isSharedByCurrentUser = false
+    public var isShared: Bool
+    public var isSharedByCurrentUser: Bool {
+        guard isShared else {
+            return false
+        }
+
+        guard let createdBy else {
+            return false
+        }
+
+        @InjectService var accountManager: AccountManageable
+        return createdBy == accountManager.currentUserId
+    }
+
     public var ownerNameComponents: PersonNameComponents?
     public var favoriteRank: NSNumber?
 
@@ -77,58 +106,71 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public init(file: File, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
 
-        @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-
+        fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
         filename = file.name.isEmpty ? "Root" : file.name
         typeIdentifier = file.typeIdentifier
+
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
         capabilities = FileProviderItem.rightsToCapabilities(rights)
+
         // Every file should have a parent, root file parent should not be called
         parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
+
+        isDirectory = file.isDirectory
+        @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
         let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
         childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
+
+        createdBy = file.createdBy
         isTrashed = file.isTrashed
         creationDate = file.createdAt
         contentModificationDate = file.lastModifiedAt
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
-        let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
-        if DownloadQueue.instance.hasOperation(for: file) {
-            isDownloading = true
+
+        // TODO: Lookup upload queue form id, for now fake it
+        isUploading = false
+        isUploaded = true
+
+        if file.isDirectory {
+            // TODO: Enable and allow to download all folder content locally
+            isDownloaded = true
+        } else if DownloadQueue.instance.hasOperation(for: file.id) {
             isDownloaded = false
         } else {
-            isDownloading = false
             isDownloaded = file.isDownloaded
         }
-        if file.users.count > 1 {
-            isShared = true
-            @InjectService var accountManager: AccountManageable
-            isSharedByCurrentUser = file.createdBy == accountManager.currentUserId
-        } else {
-            isShared = false
-            isSharedByCurrentUser = false
-        }
+
+        isShared = file.users.count > 1
+
         if let user = file.creator {
             var nameComponents = PersonNameComponents()
             nameComponents.nickname = user.displayName
             ownerNameComponents = nameComponents
         }
+
+        let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         storageUrl = itemStorageUrl
     }
 
     public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
         Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
-        let resourceValues = try? importedFileUrl
-            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
+
+        fileId = identifier.toFileId()
+        isDirectory = false
+
         itemIdentifier = identifier
         filename = importedFileUrl.lastPathComponent
         typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
         capabilities = .allowsAll
         parentItemIdentifier = parentIdentifier
+
+        let resourceValues = try? importedFileUrl
+            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
         if let totalSize = resourceValues?.totalFileSize {
             documentSize = NSNumber(value: totalSize)
         }
@@ -137,6 +179,10 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         isUploading = true
         isUploaded = false
+        isDownloaded = false
+        isMostRecentVersionDownloaded = false
+        isShared = false
+        isTrashed = false
         storageUrl = importedFileUrl
     }
 

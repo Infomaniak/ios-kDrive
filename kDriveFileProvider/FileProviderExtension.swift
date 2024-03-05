@@ -31,7 +31,9 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
 
-    @LazyInjectService var uploadQueue: UploadQueueable
+    /// Restart the dedicated `FileManager` upload queue on init
+    @InjectService var uploadQueue: UploadQueueable
+
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
@@ -240,7 +242,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         completion: @escaping (Error?) -> Void
     ) async throws {
         // Prevent observing file multiple times
-        guard !DownloadQueue.instance.hasOperation(for: file) else {
+        guard !DownloadQueue.instance.hasOperation(for: file.id) else {
             completion(nil)
             return
         }
@@ -248,7 +250,6 @@ final class FileProviderExtension: NSFileProviderExtension {
         var observationToken: ObservationToken?
         observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
             observationToken?.cancel()
-            item.isDownloading = false
 
             if error != nil {
                 item.isDownloaded = false
@@ -313,8 +314,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 url: item.storageUrl,
                 name: item.filename,
                 conflictOption: .version,
-                shouldRemoveAfterUpload: false,
-                initiatedFromFileManager: true
+                shouldRemoveAfterUpload: false
             )
 
             var observationToken: ObservationToken?
@@ -337,6 +337,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
             }
 
+            self.uploadQueue.resumeAllOperations()
             _ = self.uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
         }
     }
