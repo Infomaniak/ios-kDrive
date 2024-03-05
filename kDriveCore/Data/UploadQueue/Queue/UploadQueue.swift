@@ -193,6 +193,26 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
     }
 
+    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
+    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
+
+        let realm = DriveFileManager.constants.uploadsRealm
+        realm.refresh()
+
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let matchedFile = realm
+            .objects(UploadFile.self)
+            .filter(
+                "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
+                fileProviderItemIdentifier,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .first
+
+        return matchedFile
+    }
+
     // MARK: - Memory warnings
 
     /// A critical memory warning in `FileProvider` context will reschedule, in order to transition uploads to Main App.

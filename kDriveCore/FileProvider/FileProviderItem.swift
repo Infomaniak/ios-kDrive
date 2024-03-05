@@ -64,8 +64,30 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var contentModificationDate: Date?
     public var versionIdentifier: Data?
     public var isMostRecentVersionDownloaded: Bool
-    public var isUploading: Bool
-    public var isUploaded: Bool
+
+    public var isUploading: Bool {
+        guard !isDirectory else {
+            return false
+        }
+
+        @InjectService var uploadQueue: UploadQueue
+        let uploadFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue)
+        return uploadFile != nil
+    }
+
+    public var isUploaded: Bool {
+        guard !isUploading else {
+            return false
+        }
+
+        // HACK: a valid file ID means it exists remotely
+        guard Int(itemIdentifier.rawValue) != nil else {
+            return false
+        }
+
+        return true
+    }
+
     public var uploadingError: Error?
     public var isDownloading: Bool {
         guard !isDirectory else {
@@ -132,10 +154,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
 
-        // TODO: Lookup upload queue form id, for now fake it
-        isUploading = false
-        isUploaded = true
-
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
             isDownloaded = true
@@ -177,8 +195,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         creationDate = resourceValues?.creationDate
         contentModificationDate = resourceValues?.contentModificationDate
         versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        isUploading = true
-        isUploaded = false
+
         isDownloaded = false
         isMostRecentVersionDownloaded = false
         isShared = false

@@ -312,11 +312,9 @@ final class FileProviderExtension: NSFileProviderExtension {
                 }
             }
 
-            item.isUploading = false
             item.alreadyEnumerated = true
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
-                item.isUploaded = false
                 return
             }
 
