@@ -233,7 +233,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
-        return account(for: id)?.token
+        return tokenStore.tokenFor(userId: id)
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
