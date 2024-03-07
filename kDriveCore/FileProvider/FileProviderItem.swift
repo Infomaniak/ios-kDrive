@@ -40,6 +40,7 @@ public extension NSFileProviderItemIdentifier {
     }
 }
 
+/// DTO of the `File` Realm object
 public final class FileProviderItem: NSObject, NSFileProviderItem {
     // MARK: Private properties
 
@@ -157,36 +158,42 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         storageUrl = itemStorageUrl
     }
 
-    public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
-        Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
+    // TODO: Remove
+//    public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier)
+//    {
+//        Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
+//
+//        fileId = identifier.toFileId()
+//        isDirectory = false
+//
+//        itemIdentifier = identifier
+//        filename = importedFileUrl.lastPathComponent
+//        typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
+//        capabilities = .allowsAll
+//        parentItemIdentifier = parentIdentifier
+//
+//        let resourceValues = try? importedFileUrl
+//            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
+//        if let totalSize = resourceValues?.totalFileSize {
+//            documentSize = NSNumber(value: totalSize)
+//        }
+//        creationDate = resourceValues?.creationDate
+//        contentModificationDate = resourceValues?.contentModificationDate
+//        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
+//        isUploading = true
+//        isUploaded = false
+//        isDownloaded = false
+//        isMostRecentVersionDownloaded = false
+//        isShared = false
+//        isTrashed = false
+//        storageUrl = importedFileUrl
+//    }
+}
 
-        fileId = identifier.toFileId()
-        isDirectory = false
-
-        itemIdentifier = identifier
-        filename = importedFileUrl.lastPathComponent
-        typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
-        capabilities = .allowsAll
-        parentItemIdentifier = parentIdentifier
-
-        let resourceValues = try? importedFileUrl
-            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
-        if let totalSize = resourceValues?.totalFileSize {
-            documentSize = NSNumber(value: totalSize)
-        }
-        creationDate = resourceValues?.creationDate
-        contentModificationDate = resourceValues?.contentModificationDate
-        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        isUploading = true
-        isUploaded = false
-        isDownloaded = false
-        isMostRecentVersionDownloaded = false
-        isShared = false
-        isTrashed = false
-        storageUrl = importedFileUrl
-    }
-
-    public func setUploadingError(_ error: DriveError) {
+// TODO: Refactor this part
+public extension FileProviderItem {
+    // TODO: check if used app side and merge
+    func setUploadingError(_ error: DriveError) {
         Log.fileProvider("FileProviderItem setUploadingError:\(error)")
         switch error {
         case .fileNotFound, .objectNotFound:
@@ -212,6 +219,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
       (add file to folder) .allowsAddingSubItems -> rights.moveInto
       (list folder files)  .allowsContentEnumerating -> rights.read
      */
+    // TODO: Abstract and split
     private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
         var capabilities: NSFileProviderItemCapabilities = []
         if rights.canWrite {
@@ -239,7 +247,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         return capabilities
     }
 
-    public class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
+    // TODO: Abstract and split
+    class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
         let rootStorageURL: URL
         if let domain {
             rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
@@ -254,8 +263,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         return NSFileProviderItemIdentifier(identifier)
     }
 
-    public class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
-                                       domain: NSFileProviderDomain?) -> URL {
+    // TODO: Abstract and split
+    class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
+                                domain: NSFileProviderDomain?) -> URL {
         let rootStorageURL: URL
         if let domain {
             rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL

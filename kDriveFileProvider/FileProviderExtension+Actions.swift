@@ -110,8 +110,8 @@ extension FileProviderExtension {
             return
         }
 
-        let id = UUID().uuidString
-        let importedDocumentIdentifier = NSFileProviderItemIdentifier(id)
+        let importedFileUUID = UUID().uuidString
+        let importedDocumentIdentifier = NSFileProviderItemIdentifier(importedFileUUID)
         let storageUrl = FileProviderItem.createStorageUrl(
             identifier: importedDocumentIdentifier,
             filename: fileURL.lastPathComponent,
@@ -134,17 +134,25 @@ extension FileProviderExtension {
         if accessingSecurityScopedResource {
             fileURL.stopAccessingSecurityScopedResource()
         }
-        let importedItem = FileProviderItem(
-            importedFileUrl: storageUrl,
-            identifier: importedDocumentIdentifier,
-            parentIdentifier: parentItemIdentifier
-        )
-        fileProviderState.setImportedDocument(importedItem, forKey: importedDocumentIdentifier)
 
-        backgroundUploadItem(importedItem)
+        guard let parentDirectoryId = parentItemIdentifier.toFileId() else {
+            fatalError("missing parentDirectoryId TODO sentry")
+        }
+
+        let importItem = UploadFileProviderItem(uploadFileUUID: importedFileUUID,
+                                                parentDirectoryId: parentDirectoryId,
+                                                userId: driveFileManager.drive.userId,
+                                                driveId: driveFileManager.drive.id,
+                                                sourceUrl: storageUrl,
+                                                conflictOption: .version,
+                                                shouldRemoveAfterUpload: false /* should be true actually ?*/ )
+
+        // fileProviderState.setImportedDocument(importItem, forKey: importedDocumentIdentifier)
+
+        backgroundUpload(importItem)
 
         manager.signalEnumerator(for: parentItemIdentifier) { _ in
-            completionHandler(importedItem, nil)
+            completionHandler(importItem, nil)
         }
     }
 
@@ -155,13 +163,14 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("renameItem")
         Task {
+            // TODO: Rename while upload
             // Doc says we should do network request after renaming local file but we could end up with model desync
-            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
-                item.filename = itemName
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-                completionHandler(item, nil)
-                return
-            }
+//            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
+//                item.filename = itemName
+//                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
+//                completionHandler(item, nil)
+//                return
+//            }
 
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
@@ -199,12 +208,13 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("reparentItem")
         Task {
-            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
-                item.parentItemIdentifier = parentItemIdentifier
-                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-                completionHandler(item, nil)
-                return
-            }
+            // TODO: reparentItem while uploading
+//            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
+//                item.parentItemIdentifier = parentItemIdentifier
+//                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
+//                completionHandler(item, nil)
+//                return
+//            }
 
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId),
