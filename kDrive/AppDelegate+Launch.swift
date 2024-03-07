@@ -118,34 +118,32 @@ extension AppDelegate {
 
     private func askForReview() {
         guard let presentingViewController = window?.rootViewController,
-              !Bundle.main.isRunningInTestFlight, UserDefaults.shared.numberOfConnections == 10
+              !Bundle.main.isRunningInTestFlight
         else { return }
 
-        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
-        let alert = AlertTextViewController(
-            title: appName,
-            message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
-            action: KDriveResourcesStrings.Localizable.buttonYes,
-            hasCancelButton: true,
-            cancelString: KDriveResourcesStrings.Localizable.buttonNo,
-            handler: requestAppStoreReview,
-            cancelHandler: openUserReport
-        )
+        let shouldRequestReview = reviewManager.shouldRequestReview()
 
-        presentingViewController.present(alert, animated: true)
-        MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
+        if shouldRequestReview {
+            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+            let alert = AlertTextViewController(
+                title: appName,
+                message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
+                action: KDriveResourcesStrings.Localizable.buttonYes,
+                hasCancelButton: true,
+                cancelString: KDriveResourcesStrings.Localizable.buttonNo,
+                handler: requestAppStoreReview,
+                cancelHandler: openUserReport
+            )
+
+            presentingViewController.present(alert, animated: true)
+            MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
+        }
     }
 
     private func requestAppStoreReview() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "like")
-        if #available(iOS 14.0, *) {
-            if let scene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                SKStoreReviewController.requestReview(in: scene)
-            }
-        } else {
-            SKStoreReviewController.requestReview()
-        }
+        UserDefaults.shared.appReview = .readyForReview
+        reviewManager.requestReview()
     }
 
     private func openUserReport() {
@@ -153,6 +151,7 @@ extension AppDelegate {
         guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
             return
         }
+        UserDefaults.shared.appReview = .feedback
         UIApplication.shared.open(url)
     }
 
