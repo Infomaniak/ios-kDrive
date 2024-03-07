@@ -40,7 +40,14 @@ extension AppDelegate {
             showOnboarding()
         case .updateRequired:
             showUpdateRequired()
+        case .preloading(let currentAccount):
+            showPreloading(currentAccount: currentAccount)
         }
+    }
+
+    func updateRootViewControllerState() {
+        let newState = RootViewControllerState.getCurrentState()
+        prepareRootViewController(currentState: newState)
     }
 
     // MARK: Set root VC
@@ -57,6 +64,16 @@ extension AppDelegate {
         }
 
         window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
+        window.makeKeyAndVisible()
+    }
+
+    func showPreloading(currentAccount: Account) {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
+        }
+
+        window.rootViewController = PreloadingViewController(currentAccount: currentAccount)
         window.makeKeyAndVisible()
     }
 

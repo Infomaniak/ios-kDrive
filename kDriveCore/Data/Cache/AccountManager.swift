@@ -49,7 +49,7 @@ public extension InfomaniakLogin {
 
 /// Abstract interface on AccountManager
 public protocol AccountManageable: AnyObject {
-    var currentAccount: Account! { get }
+    var currentAccount: Account? { get }
     var accounts: SendableArray<Account> { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
@@ -95,7 +95,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
 
-    public var currentAccount: Account!
+    public var currentAccount: Account?
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
 
@@ -276,12 +276,12 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         addAccount(account: newAccount, token: token)
         setCurrentAccount(account: newAccount)
 
-        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
-            throw driveResponse.drives.first?.isInTechnicalMaintenance == true ? DriveError.productMaintenance : DriveError
-                .blocked
+            throw driveResponse.drives.first?.isInTechnicalMaintenance == true ?
+                DriveError.productMaintenance : DriveError.blocked
         }
+        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
         saveAccounts()
@@ -300,22 +300,22 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         account.user = user
 
         let driveResponse = try await apiFetcher.userDrives()
-        guard !driveResponse.drives.isEmpty else {
+        guard !driveResponse.drives.isEmpty,
+              let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
             removeAccount(toDeleteAccount: account)
             throw DriveError.NoDriveError.noDrive
         }
 
         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
-        var switchedDrive: Drive?
+
         for driveRemoved in driveRemovedList {
             if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader
                 .settings?.driveId == driveRemoved.id {
                 photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
-                switchedDrive = drives.first
-                setCurrentDriveForCurrentAccount(drive: switchedDrive!)
+                setCurrentDriveForCurrentAccount(drive: firstDrive)
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
         }

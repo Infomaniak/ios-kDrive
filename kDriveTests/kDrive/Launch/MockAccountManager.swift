@@ -25,9 +25,7 @@ import RealmSwift
 class MockAccountManager: AccountManageable, RefreshTokenDelegate {
     var delegate: AccountManagerDelegate?
 
-    var currentAccount: Account! {
-        return accounts.first!
-    }
+    var currentAccount: Account?
 
     var accounts = SendableArray<Account>()
 

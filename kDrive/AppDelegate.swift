@@ -209,8 +209,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             UserDefaults.shared.openingUntilReview -= 1
             refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             uploadEditedFiles()
-        case .onboarding, .updateRequired: break
-            // NOOP
+        case .onboarding, .updateRequired, .preloading: break
         }
 
         // Remove all notifications on App Opening
