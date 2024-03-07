@@ -324,27 +324,23 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // TODO: Remove observation
         var observationToken: ObservationToken?
-        observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
+        observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { [weak self] uploadedFile, _ in
             observationToken?.cancel()
-            defer {
-                self.manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier) { _ in
-                    completion?()
-                }
-            }
 
-            // item.isUploading = false
-            // item.alreadyEnumerated = true
-            if let error = uploadedFile.error {
-                // item.setUploadingError(error)
-                // item.isUploaded = false
+            guard let self else {
                 return
             }
 
-            self.fileProviderState.removeWorkingDocument(forKey: uploadFileProviderItem.itemIdentifier)
+            // Signal change on upload finished
+            manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier) { _ in
+            }
         }
 
         uploadQueue.resumeAllOperations()
         _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
+
+        // Upload started
+        completion?()
     }
 
     // MARK: - Enumeration
