@@ -65,8 +65,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var contentModificationDate: Date?
     public var versionIdentifier: Data?
     public var isMostRecentVersionDownloaded: Bool
-    public var isUploading: Bool
-    public var isUploaded: Bool
+    public var isUploading = false
+    public var isUploaded = true
     public var uploadingError: Error?
     public var isDownloading: Bool {
         guard !isDirectory else {
@@ -138,10 +138,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         versionIdentifier = Data(bytes: &modifiedAtInterval, count: MemoryLayout.size(ofValue: modifiedAtInterval))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
 
-        // TODO: Lookup upload queue form id, for now fake it
-        isUploading = false
-        isUploaded = true
-
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
             isDownloaded = true
@@ -162,37 +158,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         storageUrl = itemStorageUrl
     }
-
-    // TODO: Remove
-//    public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier)
-//    {
-//        Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
-//
-//        fileId = identifier.toFileId()
-//        isDirectory = false
-//
-//        itemIdentifier = identifier
-//        filename = importedFileUrl.lastPathComponent
-//        typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
-//        capabilities = .allowsAll
-//        parentItemIdentifier = parentIdentifier
-//
-//        let resourceValues = try? importedFileUrl
-//            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
-//        if let totalSize = resourceValues?.totalFileSize {
-//            documentSize = NSNumber(value: totalSize)
-//        }
-//        creationDate = resourceValues?.creationDate
-//        contentModificationDate = resourceValues?.contentModificationDate
-//        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-//        isUploading = true
-//        isUploaded = false
-//        isDownloaded = false
-//        isMostRecentVersionDownloaded = false
-//        isShared = false
-//        isTrashed = false
-//        storageUrl = importedFileUrl
-//    }
 }
 
 // TODO: Refactor this part

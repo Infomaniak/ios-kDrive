@@ -147,8 +147,6 @@ extension FileProviderExtension {
                                                 conflictOption: .version,
                                                 shouldRemoveAfterUpload: false /* should be true actually ?*/ )
 
-        // fileProviderState.setImportedDocument(importItem, forKey: importedDocumentIdentifier)
-
         backgroundUpload(importItem)
 
         manager.signalEnumerator(for: parentItemIdentifier) { _ in

@@ -19,6 +19,7 @@
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 /// DTO of the `UploadFile` Realm object
 public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
@@ -29,18 +30,29 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
     var conflictOption: ConflictOption
     var shouldRemoveAfterUpload: Bool
 
-    // MARK: Required properties
+    // MARK: Required NSFileProviderItem properties
 
     public var typeIdentifier: String
     public var capabilities: NSFileProviderItemCapabilities
 
-    // NSFileProviderItem
     public var filename: String {
         sourceUrl.lastPathComponent
     }
 
     public var itemIdentifier: NSFileProviderItemIdentifier
     public var parentItemIdentifier: NSFileProviderItemIdentifier
+
+    // MARK: optional NSFileProviderItem properties
+
+    public var isUploading: Bool {
+        @InjectService var uploadQueue: UploadQueue
+        let uploadFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue)
+        return uploadFile != nil
+    }
+
+    public var isUploaded = false
+
+    // TODO: Map error form UploadFile.error
 
     public init(
         uploadFileUUID: String,

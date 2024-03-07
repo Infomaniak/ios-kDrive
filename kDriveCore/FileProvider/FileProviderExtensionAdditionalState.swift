@@ -31,12 +31,6 @@ public protocol FileProviderExtensionAdditionalStatable {
 
     // MARK: CRUD
 
-    /// Get a File placeholder in an arbitrary folder
-    // func getImportedDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem?
-
-    /// Set a File placeholder in an arbitrary folder
-    // func setImportedDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier)
-
     /// Get a File placeholder in the `Recent Files` folder
     func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem?
 
@@ -81,24 +75,6 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
 
         return identifiers
     }
-
-    // MARK: importedDocuments
-
-//    public func setImportedDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
-//        Log.fileProvider("setImportedDocument key:\(key.rawValue)")
-//        queue.sync {
-//            importedDocuments[key] = item
-//        }
-//    }
-
-//    public func getImportedDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem? {
-//        Log.fileProvider("getImportedDocument key:\(key.rawValue)")
-//        var item: FileProviderItem?
-//        queue.sync {
-//            item = importedDocuments[key]
-//        }
-//        return item
-//    }
 
     // MARK: workingDocuments
 
