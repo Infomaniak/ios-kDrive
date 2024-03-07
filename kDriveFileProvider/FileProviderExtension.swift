@@ -93,20 +93,28 @@ final class FileProviderExtension: NSFileProviderExtension {
         super.init()
     }
 
+    // TODO: Rework to support UploadFileProviderItem
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
         Log.fileProvider("item for identifier")
         try isFileProviderExtensionEnabled()
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
+        // TODO: working set in DB
         if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
             Log.fileProvider("item for identifier - Working Document")
             return item
-        } else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
-            Log.fileProvider("item for identifier - Imported Document")
-            return item
-        } else if let fileId = identifier.toFileId(),
-                  let file = driveFileManager.getCachedFile(id: fileId) {
+        }
+
+        // TODO: Read from upload queue
+//        else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
+//            Log.fileProvider("item for identifier - Imported Document")
+//            return item
+//        }
+
+        // Read DB
+        else if let fileId = identifier.toFileId(),
+                let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
             return FileProviderItem(file: file, domain: domain)
         } else {
@@ -117,10 +125,14 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
         Log.fileProvider("urlForItem(withPersistentIdentifier identifier:)")
-        if let item = fileProviderState.getImportedDocument(forKey: identifier) {
-            return item.storageUrl
-        } else if let fileId = identifier.toFileId(),
-                  let file = driveFileManager.getCachedFile(id: fileId) {
+
+        // TODO: Read from upload queue
+//        if let item = fileProviderState.getImportedDocument(forKey: identifier) {
+//            return item.storageUrl
+//        } else
+
+        if let fileId = identifier.toFileId(),
+           let file = driveFileManager.getCachedFile(id: fileId) {
             return FileProviderItem(file: file, domain: domain).storageUrl
         } else {
             return nil
@@ -158,8 +170,12 @@ final class FileProviderExtension: NSFileProviderExtension {
     override func itemChanged(at url: URL) {
         Log.fileProvider("itemChanged at url:\(url)")
         if let identifier = persistentIdentifierForItem(at: url),
-           let item = try? item(for: identifier) as? FileProviderItem {
-            backgroundUploadItem(item)
+           let uploadItem = try? item(for: identifier) as? UploadFileProviderItem {
+            backgroundUpload(uploadItem)
+        } else {
+            Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
+            // TODO: test
+            fatalError("fixme")
         }
     }
 
@@ -187,21 +203,33 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func stopProvidingItem(at url: URL) {
         Log.fileProvider("stopProvidingItem at url:\(url)")
-        if let identifier = persistentIdentifierForItem(at: url),
-           let item = try? item(for: identifier) as? FileProviderItem {
+
+        guard let identifier = persistentIdentifierForItem(at: url) else {
+            // The document isn't in realm maybe it was recently imported?
+            // TODO: lookup for a `File` matching
+            fatalError("fixme")
+            cleanupAt(url: url)
+        }
+
+        if let item = try? item(for: identifier) as? FileProviderItem {
             if let remoteModificationDate = item.contentModificationDate,
                let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey])
                .contentModificationDate,
                remoteModificationDate > localModificationDate {
-                backgroundUploadItem(item) {
-                    self.cleanupAt(url: url)
-                }
+                // TODO: check behaviour
+//                // re-upload ? Y ?
+//                backgroundUpload(item) {
+//                    self.cleanupAt(url: url)
+//                }
+
             } else {
                 cleanupAt(url: url)
             }
+        } else if let uploadItem = try? item(for: identifier) as? UploadFileProviderItem {
+            // TODO: UploadFile handling, stop upload.
+            fatalError("fixme")
         } else {
-            // The document isn't in realm maybe it was recently imported?
-            cleanupAt(url: url)
+            fatalError("unsupported type")
         }
     }
 
@@ -301,6 +329,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         do {
             try FileManager.default.removeItem(at: url)
         } catch {
+            Log.fileProvider("cleanupAt failed to removeItem:\(error)", level: .error)
             // Handle error
         }
 
@@ -310,43 +339,34 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
-        let fileProviderItemIdentifier = item.itemIdentifier.rawValue
-        Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(fileProviderItemIdentifier)")
+    func backgroundUpload(_ uploadFileProviderItem: UploadFileProviderItem, completion: (() -> Void)? = nil) {
+        Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(uploadFileProviderItem.itemIdentifier.rawValue)")
 
-        let uploadFile = UploadFile(
-            parentDirectoryId: item.parentItemIdentifier.toFileId()!,
-            userId: driveFileManager.drive.userId,
-            driveId: driveFileManager.drive.id,
-            fileProviderItemIdentifier: fileProviderItemIdentifier,
-            url: item.storageUrl,
-            name: item.filename,
-            conflictOption: .version,
-            shouldRemoveAfterUpload: false
-        )
+        let uploadFile = uploadFileProviderItem.toUploadFile
 
+        // TODO: Remove observation
         var observationToken: ObservationToken?
         observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
             observationToken?.cancel()
             defer {
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
+                self.manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier) { _ in
                     completion?()
                 }
             }
 
-            item.isUploading = false
-            item.alreadyEnumerated = true
+            // item.isUploading = false
+            // item.alreadyEnumerated = true
             if let error = uploadedFile.error {
-                item.setUploadingError(error)
-                item.isUploaded = false
+                // item.setUploadingError(error)
+                // item.isUploaded = false
                 return
             }
 
-            self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
+            self.fileProviderState.removeWorkingDocument(forKey: uploadFileProviderItem.itemIdentifier)
         }
 
         uploadQueue.resumeAllOperations()
-        _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
+        _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
     }
 
     // MARK: - Enumeration
