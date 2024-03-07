@@ -203,7 +203,7 @@ class ParameterTableViewController: UITableViewController {
 
 extension ParameterTableViewController: DeleteAccountDelegate {
     func didCompleteDeleteAccount() {
-        accountManager.removeTokenAndAccount(token: accountManager.currentAccount.token)
+        accountManager.removeTokenAndAccount(account: accountManager.currentAccount)
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
