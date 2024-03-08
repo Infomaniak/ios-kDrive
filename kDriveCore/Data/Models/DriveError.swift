@@ -100,10 +100,10 @@ public struct DriveError: Error, Equatable {
         localizedDescription = localizedString
     }
 
-    private convenience init(type: DriveErrorType,
-                             localCode: LocalDriveErrorCode,
-                             localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
-                             underlyingError: Error? = nil) {
+    private init(type: DriveErrorType,
+                 localCode: LocalDriveErrorCode,
+                 localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
+                 underlyingError: Error? = nil) {
         self.init(type: type, code: localCode.rawValue, localizedString: localizedString, underlyingError: underlyingError)
     }
 
