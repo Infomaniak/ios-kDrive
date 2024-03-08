@@ -100,14 +100,28 @@ public struct DriveError: Error, Equatable {
         localizedDescription = localizedString
     }
 
+    private init(type: DriveErrorType,
+                 localCode: LocalCode,
+                 localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
+                 underlyingError: Error? = nil) {
+        self.init(type: type, code: localCode.rawValue, localizedString: localizedString, underlyingError: underlyingError)
+    }
+
     // MARK: - Local
+
+    public enum LocalCode: String {
+        case errorDeviceStorage
+        case photoLibraryWriteAccessDenied
+        case errorDownload
+        case errorCache
+    }
 
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
     public static let localError = DriveError(type: .localError, code: "localError")
     public static let errorDeviceStorage = DriveError(type: .localError,
-                                                      code: "errorDeviceStorage",
+                                                      localCode: .errorDeviceStorage,
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDeviceStorage)
     /// The task is cancelled by the user.
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
@@ -116,14 +130,14 @@ public struct DriveError: Error, Equatable {
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
     public static let photoLibraryWriteAccessDenied = DriveError(type: .localError,
-                                                                 code: "photoLibraryWriteAccessDenied",
+                                                                 localCode: .photoLibraryWriteAccessDenied,
                                                                  localizedString: KDriveResourcesStrings.Localizable
                                                                      .errorPhotoLibraryAccessLimited)
     public static let downloadFailed = DriveError(type: .localError,
-                                                  code: "errorDownload",
+                                                  localCode: .errorDownload,
                                                   localizedString: KDriveResourcesStrings.Localizable.errorDownload)
     public static let cachingFailed = DriveError(type: .localError,
-                                                 code: "errorCache",
+                                                 localCode: .errorCache,
                                                  localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
@@ -243,7 +257,8 @@ public struct DriveError: Error, Equatable {
                                                   uploadError,
                                                   uploadFailedError,
                                                   uploadTokenIsNotValid,
-                                                  fileAlreadyExistsError]
+                                                  fileAlreadyExistsError,
+                                                  errorDeviceStorage]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
@@ -336,6 +351,7 @@ extension DriveError: Codable {
         try container.encode(type, forKey: .type)
         try container.encode(code, forKey: .code)
         try container.encodeIfPresent(userInfo, forKey: .userInfo)
+        // TODO: Underlying error
     }
 
     enum CodingKeys: String, CodingKey {
