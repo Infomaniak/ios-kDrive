@@ -243,7 +243,8 @@ public struct DriveError: Error, Equatable {
                                                   uploadError,
                                                   uploadFailedError,
                                                   uploadTokenIsNotValid,
-                                                  fileAlreadyExistsError]
+                                                  fileAlreadyExistsError,
+                                                  errorDeviceStorage]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
@@ -336,6 +337,7 @@ extension DriveError: Codable {
         try container.encode(type, forKey: .type)
         try container.encode(code, forKey: .code)
         try container.encodeIfPresent(userInfo, forKey: .userInfo)
+        // TODO: Underlying error
     }
 
     enum CodingKeys: String, CodingKey {
