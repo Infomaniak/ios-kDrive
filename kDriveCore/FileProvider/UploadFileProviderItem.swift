@@ -23,6 +23,18 @@ import InfomaniakDI
 
 /// DTO of the `UploadFile` Realm object
 public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
+    override public var description: String {
+        """
+        \(super.description)
+        itemIdentifier:\(itemIdentifier.rawValue)
+        parentDirectoryId:\(parentDirectoryId)
+        userId:\(userId)
+        driveId:\(driveId)
+        sourceUrl:\(sourceUrl)
+        shouldRemoveAfterUpload:\(shouldRemoveAfterUpload)
+        """
+    }
+
     var parentDirectoryId: Int
     var userId: Int
     var driveId: Int

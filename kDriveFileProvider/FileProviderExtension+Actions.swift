@@ -74,9 +74,11 @@ extension FileProviderExtension {
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
                     self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                    completionHandler(nil)
+
+                    // Signal after completionHandler
                     try await self.manager.signalEnumerator(for: .workingSet)
                     try await self.manager.signalEnumerator(for: itemIdentifier)
-                    completionHandler(nil)
                 } else {
                     completionHandler(self.nsError(code: .serverUnreachable))
                 }
@@ -146,10 +148,7 @@ extension FileProviderExtension {
                                                 sourceUrl: storageUrl,
                                                 conflictOption: .version,
                                                 shouldRemoveAfterUpload: false /* should be true actually ?*/ )
-
-        backgroundUpload(importItem)
-
-        manager.signalEnumerator(for: parentItemIdentifier) { _ in
+        backgroundUpload(importItem) {
             completionHandler(importItem, nil)
         }
     }
@@ -161,14 +160,11 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("renameItem")
         Task {
-            // TODO: Rename while upload
-            // Doc says we should do network request after renaming local file but we could end up with model desync
-//            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
-//                item.filename = itemName
-//                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-//                completionHandler(item, nil)
-//                return
-//            }
+            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+                Log.fileProvider("renameItem not supported while uploading", level: .error)
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
 
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
@@ -206,13 +202,11 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("reparentItem")
         Task {
-            // TODO: reparentItem while uploading
-//            if let item = self.fileProviderState.getImportedDocument(forKey: itemIdentifier) {
-//                item.parentItemIdentifier = parentItemIdentifier
-//                try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-//                completionHandler(item, nil)
-//                return
-//            }
+            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+                Log.fileProvider("reparentItem not supported while uploading", level: .error)
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
 
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId),
@@ -239,7 +233,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         let fileId = itemIdentifier.toFileId()
-        Log.fileProvider("setFavoriteRank forItemIdentifier:\(fileId)")
+        Log.fileProvider("setFavoriteRank forItemIdentifier:\(String(describing: fileId))")
         // How should we save favourite rank in database?
         guard let fileId,
               let file = driveFileManager.getCachedFile(id: fileId) else {
@@ -337,9 +331,11 @@ extension FileProviderExtension {
                 }
                 item.isTrashed = false
                 self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                completionHandler(item, nil)
+
+                // Signal after completionHandler
                 try await self.manager.signalEnumerator(for: .workingSet)
                 try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-                completionHandler(item, nil)
             } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))
             }
