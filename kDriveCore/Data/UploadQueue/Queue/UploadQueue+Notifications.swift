@@ -54,7 +54,7 @@ extension UploadQueue: UploadNotifiable {
             fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
             if let error = uploadFile.error {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                if error.code == LocalDriveErrorCode.errorDeviceStorage.rawValue {
+                if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
                     notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
                 } else {
                     notificationHelper.sendGenericUploadError(filename: uploadedFileName,

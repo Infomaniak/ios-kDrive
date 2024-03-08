@@ -101,7 +101,7 @@ public struct DriveError: Error, Equatable {
     }
 
     private init(type: DriveErrorType,
-                 localCode: LocalDriveErrorCode,
+                 localCode: LocalCode,
                  localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric,
                  underlyingError: Error? = nil) {
         self.init(type: type, code: localCode.rawValue, localizedString: localizedString, underlyingError: underlyingError)
@@ -109,7 +109,7 @@ public struct DriveError: Error, Equatable {
 
     // MARK: - Local
 
-    public enum LocalDriveErrorCode: String {
+    public enum LocalCode: String {
         case errorDeviceStorage
         case photoLibraryWriteAccessDenied
         case errorDownload
