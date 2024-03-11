@@ -81,9 +81,12 @@ public class BackgroundRealm {
     }
 
     public func execute(_ block: (Realm) -> Void) {
+        let activity = ExpiringActivity()
+        activity.start()
         queue.sync {
             block(realm)
         }
+        activity.endAll()
     }
 
     /**
@@ -115,6 +118,8 @@ public class BackgroundRealm {
     }
 
     private func writeBuffer() {
+        let activity = ExpiringActivity()
+        activity.start()
         try? realm.safeWrite {
             for write in buffer {
                 realm.add(write.file, update: .all)
@@ -124,5 +129,6 @@ public class BackgroundRealm {
             }
         }
         buffer.removeAll()
+        activity.endAll()
     }
 }
