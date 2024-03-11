@@ -136,6 +136,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
         Task {
             try await driveFileManager.initRoot()
         }

@@ -16,21 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
-import FileProvider
 import Foundation
 import InfomaniakCore
 import Realm
 import RealmSwift
 import Sentry
 
-public class DriveInfosManager {
-    public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 9
-    private let currentFpStorageVersion = 1
+public final class DriveInfosManager {
+    private static let dbName = "DrivesInfos.realm"
+
+    private static let currentDbVersion: UInt64 = 10
+
+    let currentFpStorageVersion = 1
+
     public let realmConfiguration: Realm.Configuration
-    private let dbName = "DrivesInfos.realm"
-    private var fileProviderManagers: [String: NSFileProviderManager] = [:]
+
+    // TODO: use DI
+    public static let instance = DriveInfosManager()
 
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
@@ -43,7 +45,7 @@ public class DriveInfosManager {
 
     private init() {
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
+            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
@@ -93,6 +95,7 @@ public class DriveInfosManager {
                 DriveCapabilities.self,
                 DrivePackCapabilities.self,
                 DriveRights.self,
+                DriveAccount.self,
                 Team.self,
                 Category.self,
                 CategoryRights.self
@@ -116,125 +119,6 @@ public class DriveInfosManager {
         drive.sharedWithMe = sharedWithMe
     }
 
-    private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
-        // Clean file provider storage if needed
-        if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
-            do {
-                let fileURLs = try FileManager.default.contentsOfDirectory(
-                    at: NSFileProviderManager.default.documentStorageURL,
-                    includingPropertiesForKeys: nil
-                )
-                for url in fileURLs {
-                    try FileManager.default.removeItem(at: url)
-                }
-                UserDefaults.shared.fpStorageVersion = currentFpStorageVersion
-            } catch {
-                // Silently handle error
-            }
-        }
-
-        let updatedDomains = drives.map {
-            NSFileProviderDomain(
-                identifier: NSFileProviderDomainIdentifier($0.objectId),
-                displayName: "\($0.name) (\(user.email))",
-                pathRelativeToDocumentStorage: "\($0.objectId)"
-            )
-        }
-        Task {
-            do {
-                let allDomains = try await NSFileProviderManager.domains()
-                var domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
-                await withThrowingTaskGroup(of: Void.self) { group in
-                    for newDomain in updatedDomains {
-                        // Check if domain already added
-                        if let existingDomainIndex = domainsForCurrentUser
-                            .firstIndex(where: { $0.identifier == newDomain.identifier }) {
-                            let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
-                            // Domain exists but its name could have changed
-                            if existingDomain.displayName != newDomain.displayName {
-                                group.addTask {
-                                    try await NSFileProviderManager.remove(existingDomain)
-                                    try await NSFileProviderManager.add(newDomain)
-                                }
-                            }
-                        } else {
-                            // Domain didn't exist we have to add it
-                            group.addTask {
-                                try await NSFileProviderManager.add(newDomain)
-                            }
-                        }
-                    }
-                }
-
-                // Remove left domains
-                await withThrowingTaskGroup(of: Void.self) { group in
-                    for domain in domainsForCurrentUser {
-                        group.addTask {
-                            try await NSFileProviderManager.remove(domain)
-                        }
-                    }
-                }
-            } catch {
-                DDLogError("Error while updating file provider domains: \(error)")
-            }
-        }
-    }
-
-    func deleteFileProviderDomains(for userId: Int) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
-            if let error {
-                DDLogError("Error while getting domains: \(error)")
-            }
-
-            let domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
-            for domain in domainsForCurrentUser {
-                NSFileProviderManager.remove(domain) { error in
-                    if let error {
-                        DDLogError("Error while removing domain \(domain.displayName): \(error)")
-                    }
-                }
-            }
-        }
-    }
-
-    public func deleteAllFileProviderDomains() {
-        NSFileProviderManager.removeAllDomains { error in
-            if let error {
-                DDLogError("Error while removing domains: \(error)")
-            }
-        }
-    }
-
-    func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
-            if let error {
-                DDLogError("Error while getting domains: \(error)")
-                completion(nil)
-            } else {
-                completion(domains.first { $0.identifier.rawValue == driveId })
-            }
-        }
-    }
-
-    public func getFileProviderManager(for drive: Drive, completion: @escaping (NSFileProviderManager) -> Void) {
-        getFileProviderManager(for: drive.objectId, completion: completion)
-    }
-
-    public func getFileProviderManager(driveId: Int, userId: Int, completion: @escaping (NSFileProviderManager) -> Void) {
-        let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
-        getFileProviderManager(for: objectId, completion: completion)
-    }
-
-    public func getFileProviderManager(for driveId: String, completion: @escaping (NSFileProviderManager) -> Void) {
-        getFileProviderDomain(for: driveId) { domain in
-            if let domain {
-                completion(NSFileProviderManager(for: domain) ?? .default)
-            } else {
-                completion(.default)
-            }
-        }
-    }
-
     @discardableResult
     func storeDriveResponse(user: InfomaniakCore.UserProfile, driveResponse: DriveResponse) -> [Drive] {
         var driveList = [Drive]()
@@ -242,8 +126,6 @@ public class DriveInfosManager {
             initDriveForRealm(drive: drive, userId: user.id, sharedWithMe: drive.role == "external")
             driveList.append(drive)
         }
-
-        initFileProviderDomains(drives: driveList.filter { !$0.sharedWithMe }, user: user)
 
         let realm = getRealm()
         let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
@@ -255,7 +137,18 @@ public class DriveInfosManager {
             realm.add(driveResponse.users, update: .modified)
             realm.add(driveResponse.teams, update: .modified)
         }
+
+        // driveList is _live_ after the write operation
+        updateFileProvider(withLiveDrives: driveList, user: user)
+
         return driveRemoved
+    }
+
+    private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakCore.UserProfile) {
+        let frozenNotSharedWithMe = liveDrives
+            .filter { !$0.sharedWithMe }
+            .map { $0.freeze() }
+        initFileProviderDomains(frozenDrives: frozenNotSharedWithMe, user: user)
     }
 
     public static func getObjectId(driveId: Int, userId: Int) -> String {
@@ -325,5 +218,13 @@ public class DriveInfosManager {
             return nil
         }
         return team.freeze()
+    }
+
+    public func removeDrivesFor(userId: Int) {
+        let realm = getRealm()
+        let userDrives = realm.objects(Drive.self).where { $0.userId == userId }
+        try? realm.write {
+            realm.delete(userDrives)
+        }
     }
 }

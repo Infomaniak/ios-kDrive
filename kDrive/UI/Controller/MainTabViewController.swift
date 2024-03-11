@@ -24,7 +24,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class MainTabViewController: UITabBarController, Restorable {
+class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -39,7 +39,7 @@ class MainTabViewController: UITabBarController, Restorable {
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
         rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
-        rootViewControllers.append(UIViewController())
+        rootViewControllers.append(Self.initFakeViewController())
         rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager)))
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
@@ -123,6 +123,12 @@ class MainTabViewController: UITabBarController, Restorable {
         return navigationViewController
     }
 
+    private static func initFakeViewController() -> UIViewController {
+        let fakeViewController = UIViewController()
+        fakeViewController.tabBarItem.isEnabled = false
+        return fakeViewController
+    }
+
     private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
         let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
@@ -192,23 +198,25 @@ class MainTabViewController: UITabBarController, Restorable {
         return (image, selectedImage)
     }
 
-    func getCurrentDirectory() -> (DriveFileManager, File) {
+    func getCurrentDirectory() -> (DriveFileManager, File?) {
         if let filesViewController = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController,
             filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
             return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
-            let file = driveFileManager.getCachedRootFile()
+            let file = driveFileManager.getCachedMyFilesRoot()
             return (driveFileManager, file)
         }
     }
 
-    func enableCenterButton(isEnabled: Bool) {
-        (tabBar as? MainTabBar)?.centerButton?.isEnabled = isEnabled
-    }
-
-    func enableCenterButton(from file: File) {
-        enableCenterButton(isEnabled: file.capabilities.canCreateFile)
+    func updateCenterButton() {
+        let (_, currentDirectory) = getCurrentDirectory()
+        guard let currentDirectory else {
+            (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
+            return
+        }
+        let canCreateFile = currentDirectory.isRoot || currentDirectory.capabilities.canCreateFile
+        (tabBar as? MainTabBar)?.centerButton?.isEnabled = canCreateFile
     }
 }
 
@@ -216,6 +224,8 @@ class MainTabViewController: UITabBarController, Restorable {
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
+        guard let currentDirectory else { return }
+
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let fromFileList = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController != nil
@@ -250,8 +260,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        let (_, currentDirectory) = getCurrentDirectory()
-        (tabBarController as? MainTabViewController)?.enableCenterButton(from: currentDirectory)
+        updateCenterButton()
     }
 }
 

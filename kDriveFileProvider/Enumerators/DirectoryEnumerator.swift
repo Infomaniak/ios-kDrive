@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 
@@ -58,11 +59,12 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             do {
                 let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-                let (listingResult, response) = try await driveFileManager.apiFetcher.files(
+                let response: ValidApiResponse<ListingResult> = try await driveFileManager.apiFetcher.files(
                     in: parentDirectory.proxify(),
                     advancedListingCursor: currentPageCursor,
                     sortType: .nameAZ
-                )
+                ).validApiResponse
+                let files = response.data.files
 
                 let realm = driveFileManager.getRealm()
                 let liveParentDirectory = try driveFileManager.getCachedFile(
@@ -71,12 +73,12 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     using: realm
                 )
 
-                for child in listingResult.files {
+                for child in files {
                     driveFileManager.keepCacheAttributesForFile(newFile: child, keepProperties: [.standard], using: realm)
                 }
 
                 try driveFileManager.writeChildrenToParent(
-                    listingResult.files,
+                    files,
                     liveParent: liveParentDirectory,
                     responseAt: response.responseAt,
                     isInitialCursor: page.isInitialPage,
@@ -87,7 +89,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     if let nextCursor = response.cursor {
                         // Last page can contain BOTH files and actions and cannot be handled this way on file provider.
                         // So we process the files and save the previous cursor to get the actions in the enumerate changes
-                        if !listingResult.actions.isEmpty {
+                        if !response.data.actions.isEmpty {
                             liveParentDirectory.lastCursor = currentPageCursor
                         } else {
                             liveParentDirectory.lastCursor = nextCursor
@@ -97,7 +99,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 }
 
                 observer.didEnumerate(
-                    listingResult.files.map { FileProviderItem(file: $0, domain: self.domain) } +
+                    response.data.files.map { FileProviderItem(file: $0, domain: self.domain) } +
                         [FileProviderItem(file: liveParentDirectory, domain: domain)]
                 )
 
@@ -132,13 +134,13 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             do {
                 let proxyFile = ProxyFile(driveId: driveFileManager.drive.id, id: fileId)
-                let (result, response) = try await driveFileManager.apiFetcher.files(
+                let response = try await driveFileManager.apiFetcher.files(
                     in: proxyFile,
                     advancedListingCursor: cursor,
                     sortType: .nameAZ
-                )
+                ).validApiResponse
 
-                let (updatedFiles, deletedFiles) = handleActions(result.actions, actionsFiles: result.actionsFiles)
+                let (updatedFiles, deletedFiles) = handleActions(response.data.actions, actionsFiles: response.data.actionsFiles)
 
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()

@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,15 +16,30 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FileProvider
 import Foundation
 
-public extension Bundle {
-    /// Indicates whether the app is currently running in a TestFlight environment.
-    var isRunningInTestFlight: Bool {
-        guard let path = appStoreReceiptURL?.path else {
-            return false
+public extension NSFileProviderDomain {
+    private typealias DriveIdAndUserId = (driveId: Int, userId: Int)
+
+    private var userAndDrive: DriveIdAndUserId? {
+        let identifiers = identifier.rawValue.components(separatedBy: "_")
+
+        guard let driveIdString = identifiers[safe: 0],
+              let usedIdString = identifiers[safe: 1],
+              let driveId = Int(driveIdString),
+              let usedId = Int(usedIdString) else {
+            return nil
         }
 
-        return path.contains("sandboxReceipt")
+        return (driveId, usedId)
+    }
+
+    var userId: Int? {
+        userAndDrive?.userId
+    }
+
+    var driveId: Int? {
+        userAndDrive?.driveId
     }
 }

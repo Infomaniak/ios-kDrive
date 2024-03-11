@@ -43,10 +43,11 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         }
 
         let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-        let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+        let response = try await driveFileManager.apiFetcher.rootFiles(
             drive: driveFileManager.drive,
             cursor: currentPageCursor
-        )
+        ).validApiResponse
+        let files = response.data
 
         let realm = driveFileManager.getRealm()
         let liveParentDirectory = try driveFileManager.getCachedFile(
@@ -68,7 +69,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         return (files + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
     }
 
-    func updateAnchor(for parent: File, from response: ApiResponse<[File]>, using realm: Realm) throws {
+    func updateAnchor(for parent: File, from response: ValidApiResponse<[File]>, using realm: Realm) throws {
         try realm.write {
             parent.responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
             parent.lastCursor = response.cursor
@@ -105,10 +106,10 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
 
         Task {
             do {
-                let (files, response) = try await driveFileManager.apiFetcher.rootFiles(
+                let response = try await driveFileManager.apiFetcher.rootFiles(
                     drive: driveFileManager.drive,
                     cursor: cursor
-                )
+                ).validApiResponse
 
                 let realm = driveFileManager.getRealm()
                 guard let liveParentDirectory = try? driveFileManager.getCachedFile(
@@ -127,7 +128,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
 
                 let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
                 try driveFileManager.writeChildrenToParent(
-                    files,
+                    response.data,
                     liveParent: liveParentDirectory,
                     responseAt: response.responseAt,
                     isInitialCursor: false,

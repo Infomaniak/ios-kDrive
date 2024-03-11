@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: en, English
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Fri, 12 Jan 2024 15:27:42 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Fri, 08 Mar 2024 13:47:30 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -362,6 +362,9 @@
 /* loco:61261341bbb2fe14eb477766 */
 "buttonNext" = "Next";
 
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "No";
+
 /* loco:6049df4d5c2c3a04bc397956 */
 "buttonNoDriveAnotherUser" = "Use a different Infomaniak profile";
 
@@ -555,7 +558,7 @@
 "categoryWork" = "Work";
 
 /* loco:6548a6eb63ec2f8b5001ac32 */
-"commonDocumentsDescription" = "This space belongs to %s and centralizes your organization's common files.";
+"commonDocumentsDescription" = "This space belongs to %s and centralizes your organization’s common files.";
 
 /* loco:6049df4d5c2c3a04bc397974 */
 "commonFolderDescription" = "Share this folder with users of kDrive %@";
@@ -741,7 +744,7 @@
 "errorDestinationAlreadyExists" = "Destination already exists";
 
 /* loco:60a693f631a0a90e163445f2 */
-"errorDeviceStorage" = "Insufficient phone storage";
+"errorDeviceStorage" = "Insufficient device storage";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "An error has occurred. Please log in again to continue.";
@@ -1296,7 +1299,7 @@
 "localizedFilenamePrivateSpace" = "My files";
 
 /* loco:65a140c3cdbe107c5a025352 */
-"localizedFilenameTeamSpace" = "Organisation's files";
+"localizedFilenameTeamSpace" = "Organisation’s files";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Locate";
@@ -1565,6 +1568,9 @@
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Restricted sharing link";
 
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "Do you like kDrive?";
+
 /* loco:6049df4d5c2c3a04bc397a2d */
 "saveExternalFileInputFileName" = "Document name";
 
@@ -1781,11 +1787,17 @@
 /* loco:6049df4d5c2c3a04bc397a55 */
 "sortExtension" = "Extension";
 
+/* loco:65e089a9f1203bf18d07e823 */
+"sortLeastRelevant" = "Least relevant";
+
 /* loco:60c095a650430a455a1a1963 */
 "sortMonth" = "Per month";
 
 /* loco:62961cefada5091f29102c32 */
 "sortMostRecentAdded" = "Most recently added";
+
+/* loco:65e0875a2630c8df780f4932 */
+"sortMostRelevant" = "Most relevant";
 
 /* loco:6049df4d5c2c3a04bc397a58 */
 "sortNameAZ" = "Name: from A to Z";
@@ -2107,6 +2119,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Upload suspended";
+
+/* loco:65df0b66eb1209e60f0ff4b5 */
+"urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Invite via email";

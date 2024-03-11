@@ -43,6 +43,16 @@ final class ITAppLaunchTest: XCTestCase {
 
         SimpleResolver.register(FactoryService.debugServices)
         let services = [
+            Factory(type: KeychainHelper.self) { _, _ in
+                KeychainHelper(accessGroup: AccountManager.accessGroup)
+            },
+            Factory(type: TokenStore.self) { _, _ in
+                TokenStore()
+            },
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            },
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 return InfomaniakNetworkLogin(config: self.loginConfig)
             },
@@ -85,7 +95,7 @@ final class ITAppLaunchTest: XCTestCase {
         UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts = [self.fakeAccount]
+            accountManager.accounts.append(self.fakeAccount)
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
                 apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)

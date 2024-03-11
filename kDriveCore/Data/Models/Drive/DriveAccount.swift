@@ -17,22 +17,28 @@
  */
 
 import Foundation
-import InfomaniakDI
-import kDriveCore
-import os.log
+import RealmSwift
 
-/// Something that loads the DI on init
-public struct EarlyDIHook {
-    public init(context: DriveAppContext) {
-        os_log("EarlyDIHook")
+public enum LegalEntityType: String {
+    case individual
+    case publicBody
+    case company
+    case restrict
+    case unknown
+}
 
-        let extraDependencies = [Factory(type: NavigationManageable.self) { _, _ in
-            NavigationManager()
-        }, Factory(type: AppContextServiceable.self) { _, _ in
-            AppContextService(context: context)
-        }]
+public class DriveAccount: EmbeddedObject, Codable {
+    @Persisted public var id: Int
+    @Persisted public var name: String
+    @Persisted private var _legalEntityType: String
 
-        // setup DI ASAP
-        FactoryService.setupDependencyInjection(other: extraDependencies)
+    public var legalEntityType: LegalEntityType {
+        return LegalEntityType(rawValue: _legalEntityType) ?? .unknown
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case _legalEntityType = "legal_entity_type"
     }
 }

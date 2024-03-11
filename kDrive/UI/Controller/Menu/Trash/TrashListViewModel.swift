@@ -61,7 +61,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
             endRefreshing()
         }
 
-        let fetchResponse: (data: [File], response: ApiResponse<[File]>)
+        let fetchResponse: ValidServerResponse<[File]>
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
             fetchResponse = try await driveFileManager.apiFetcher.trashedFiles(
                 drive: driveFileManager.drive,
@@ -76,13 +76,17 @@ class TrashListViewModel: InMemoryFileListViewModel {
             )
         }
 
-        addPage(files: fetchResponse.data, fullyDownloaded: fetchResponse.response.hasMore, cursor: cursor)
+        addPage(
+            files: fetchResponse.validApiResponse.data,
+            fullyDownloaded: fetchResponse.validApiResponse.hasMore,
+            cursor: cursor
+        )
         endRefreshing()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
             currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
         }
-        if let nextCursor = fetchResponse.response.cursor {
+        if let nextCursor = fetchResponse.validApiResponse.cursor {
             try await loadFiles(cursor: nextCursor)
         }
     }

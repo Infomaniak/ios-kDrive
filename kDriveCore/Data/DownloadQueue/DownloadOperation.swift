@@ -36,6 +36,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService var appContextService: AppContextServiceable
 
     private let fileManager = FileManager.default
     private let driveFileManager: DriveFileManager
@@ -116,7 +117,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             return
         }
 
-        if !Bundle.main.isExtension {
+        if !appContextService.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")

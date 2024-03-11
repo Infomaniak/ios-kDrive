@@ -55,6 +55,7 @@ public protocol UploadQueueable {
     /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
     ///
     /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
+    /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
     /// Cancel all running operations, regardless of state
@@ -78,6 +79,32 @@ public protocol UploadQueueable {
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
+    /// A query for the `UploadFiles` in the  __Main app__ context
+    ///
+    /// Not uploaded yet, can retry, not owned by `FileProvider`.
+    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
+
+    /// A query for the `UploadFiles` in the  __FileProvider__ context
+    ///
+    /// Not uploaded yet, can retry, owned by `FileProvider`.
+    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
+
+    /// Query to fetch `UploadFiles` for the current execution context
+    var uploadFileQuery: String? {
+        switch appContextService.context {
+        case .app:
+            return Self.appFilesToUploadQuery
+        case .fileProviderExtension:
+            return Self.fileProviderFilesToUploadQuery
+        case .actionExtension:
+            // not supported in actionExtension
+            return nil
+        case .shareExtension:
+            // not supported in shareExtension
+            return nil
+        }
+    }
+
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         Log.uploadQueue("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
@@ -89,6 +116,11 @@ extension UploadQueue: UploadQueueable {
 
     public func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("getOperation ufid:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return nil
+        }
+
         let operation = operation(uploadFileId: uploadFileId)
         return operation
     }
@@ -96,11 +128,15 @@ extension UploadQueue: UploadQueueable {
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
         concurrentQueue.sync {
+            guard let uploadFileQuery else {
+                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
+                return
+            }
+
             var uploadingFileIds = [String]()
             try? self.transactionWithUploadRealm { realm in
-                // Not uploaded yet, And can retry.
                 let uploadingFiles = realm.objects(UploadFile.self)
-                    .filter("uploadDate = nil AND maxRetryCount > 0")
+                    .filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
                 uploadingFileIds = uploadingFiles.map(\.id)
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
@@ -162,6 +198,11 @@ extension UploadQueue: UploadQueueable {
             return nil
         }
 
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("addToQueue disabled in ShareExtension", level: .error)
+            return nil
+        }
+
         // Process adding a detached file to the uploadQueue
         let uploadOperation = self.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
         expiringActivity.endAll()
@@ -171,19 +212,38 @@ extension UploadQueue: UploadQueueable {
 
     public func suspendAllOperations() {
         Log.uploadQueue("suspendAllOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         forceSuspendQueue = true
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
         Log.uploadQueue("resumeAllOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
     }
 
     public func rescheduleRunningOperations() {
         Log.uploadQueue("rescheduleRunningOperations")
-        for operation in operationQueue.operations.filter(\.isExecuting) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        reschedule(operations: operationQueue.operations.filter(\.isExecuting))
+    }
+
+    private func reschedule(operations: [Operation]) {
+        for operation in operations {
             guard let uploadOperation = operation as? UploadOperation else {
                 continue
             }
@@ -195,12 +255,22 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelRunningOperations() {
         Log.uploadQueue("cancelRunningOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     @discardableResult
     public func cancel(uploadFileId: String) -> Bool {
         Log.uploadQueue("cancel uploadFileId:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return false
+        }
+
         var found = false
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
@@ -218,6 +288,11 @@ extension UploadQueue: UploadQueueable {
 
     public func cancel(uploadFile: UploadFile) {
         Log.uploadQueue("cancel UploadFile ufid:\(uploadFile.id)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         let uploadFileId = uploadFile.id
         let userId = uploadFile.userId
         let parentId = uploadFile.parentDirectoryId
@@ -254,6 +329,11 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         concurrentQueue.async {
             Log.uploadQueue("suspend queue")
             self.suspendAllOperations()
@@ -303,11 +383,17 @@ extension UploadQueue: UploadQueueable {
 
     public func cleanNetworkAndLocalErrorsForAllOperations() {
         Log.uploadQueue("cleanErrorsForAllOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         concurrentQueue.sync {
             try? self.transactionWithUploadRealm { realm in
                 // UploadFile with an error, Or no more retry.
+                let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
                 let failedUploadFiles = realm.objects(UploadFile.self)
-                    .filter("_error != nil OR maxRetryCount <= 0")
+                    .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
                     .filter { file in
                         guard let error = file.error else {
                             return false
@@ -329,6 +415,11 @@ extension UploadQueue: UploadQueueable {
 
     public func retry(_ uploadFileId: String) {
         Log.uploadQueue("retry ufid:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         concurrentQueue.async {
             try? self.transactionWithUploadRealm { realm in
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
@@ -364,6 +455,11 @@ extension UploadQueue: UploadQueueable {
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("retryAllOperations parentId:\(parentId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         concurrentQueue.async {
             let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
             let batches = failedFileIds.chunks(ofCount: 100)
@@ -393,8 +489,9 @@ extension UploadQueue: UploadQueueable {
                                                         driveId: driveId,
                                                         using: realm)
             Log.uploadQueue("uploading:\(uploadingFiles.count)")
+            let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
             let failedUploadFiles = uploadingFiles
-                .filter("_error != nil OR maxRetryCount <= 0")
+                .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
             failedFileIds = failedUploadFiles.map(\.id)
             Log.uploadQueue("retying:\(failedFileIds.count)")
         }
@@ -402,6 +499,11 @@ extension UploadQueue: UploadQueueable {
     }
 
     private func cancelAnyInBatch(_ batch: ArraySlice<String>) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         try? transactionWithUploadRealm { realm in
             for uploadFileId in batch {
                 // Cancel operation if any
@@ -423,6 +525,11 @@ extension UploadQueue: UploadQueueable {
     }
 
     private func enqueueAnyInBatch(_ batch: ArraySlice<String>) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         try? transactionWithUploadRealm { realm in
             for uploadFileId in batch {
                 guard let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId), !file.isInvalidated else {
@@ -437,6 +544,11 @@ extension UploadQueue: UploadQueueable {
 
     private func operation(uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("operation fileId:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return nil
+        }
+
         guard let operation = keyedUploadOperations.getObject(forKey: uploadFileId),
               !operation.isCancelled,
               !operation.isFinished else {
@@ -447,6 +559,11 @@ extension UploadQueue: UploadQueueable {
 
     private func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil,
                                        using realm: Realm) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
         guard !uploadFile.isInvalidated else {
             return
         }
@@ -464,6 +581,11 @@ extension UploadQueue: UploadQueueable {
     @discardableResult
     private func addToQueue(uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return nil
+        }
+
         guard !uploadFile.isInvalidated,
               uploadFile.maxRetryCount > 0,
               keyedUploadOperations.getObject(forKey: uploadFile.id) == nil else {

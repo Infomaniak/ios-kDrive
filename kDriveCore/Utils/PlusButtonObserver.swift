@@ -17,22 +17,7 @@
  */
 
 import Foundation
-import InfomaniakDI
-import kDriveCore
-import os.log
 
-/// Something that loads the DI on init
-public struct EarlyDIHook {
-    public init(context: DriveAppContext) {
-        os_log("EarlyDIHook")
-
-        let extraDependencies = [Factory(type: NavigationManageable.self) { _, _ in
-            NavigationManager()
-        }, Factory(type: AppContextServiceable.self) { _, _ in
-            AppContextService(context: context)
-        }]
-
-        // setup DI ASAP
-        FactoryService.setupDependencyInjection(other: extraDependencies)
-    }
+public protocol PlusButtonObserver {
+    func updateCenterButton()
 }

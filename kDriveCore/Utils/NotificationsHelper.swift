@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
+import InfomaniakDI
 import kDriveResources
 import UserNotifications
 
@@ -31,7 +32,7 @@ public protocol NotificationsHelpable {
     /// Send a notification that we cannot perform an operation, as we do not have enough space
     func sendNotEnoughSpaceForUpload(filename: String)
 
-    func sendUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String)
+    func sendGenericUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String)
 
     func sendUploadDoneNotification(filename: String, parentId: Int)
 
@@ -45,6 +46,8 @@ public protocol NotificationsHelpable {
 }
 
 public struct NotificationsHelper: NotificationsHelpable {
+    @LazyInjectService private var appContextService: AppContextServiceable
+
     public enum CategoryIdentifier {
         public static let general = "com.kdrive.notification.general"
         public static let upload = "com.kdrive.notification.upload"
@@ -127,7 +130,7 @@ public struct NotificationsHelper: NotificationsHelpable {
         sendImmediately(notification: content, id: UUID().uuidString)
     }
 
-    public func sendUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String) {
+    public func sendGenericUploadError(filename: String, parentId: Int, error: DriveError, uploadFileId: String) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
@@ -218,7 +221,7 @@ public struct NotificationsHelper: NotificationsHelpable {
                 return
             }
 
-            let isInBackground = Bundle.main.isExtension || UIApplication.shared.applicationState != .active
+            let isInBackground = appContextService.isExtension || UIApplication.shared.applicationState != .active
 
             if isInBackground {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)

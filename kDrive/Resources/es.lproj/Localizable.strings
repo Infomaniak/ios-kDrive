@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Fri, 12 Jan 2024 15:27:42 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Fri, 08 Mar 2024 13:47:30 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -361,6 +361,9 @@
 
 /* loco:61261341bbb2fe14eb477766 */
 "buttonNext" = "Siguiente";
+
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "No";
 
 /* loco:6049df4d5c2c3a04bc397956 */
 "buttonNoDriveAnotherUser" = "Utilizar otro perfil Infomaniak";
@@ -741,7 +744,7 @@
 "errorDestinationAlreadyExists" = "El destino ya existe";
 
 /* loco:60a693f631a0a90e163445f2 */
-"errorDeviceStorage" = "Insuficiente almacenamiento telefónico disponible";
+"errorDeviceStorage" = "Almacenamiento insuficiente del dispositivo";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "Se ha producido un error. Por favor, conéctese de nuevo para continuar.";
@@ -1565,6 +1568,9 @@
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Enlace de uso compartido restringido";
 
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "¿Te gusta kDrive?";
+
 /* loco:6049df4d5c2c3a04bc397a2d */
 "saveExternalFileInputFileName" = "Nombre del documento";
 
@@ -1781,11 +1787,17 @@
 /* loco:6049df4d5c2c3a04bc397a55 */
 "sortExtension" = "Extensión";
 
+/* loco:65e089a9f1203bf18d07e823 */
+"sortLeastRelevant" = "Menos relevante";
+
 /* loco:60c095a650430a455a1a1963 */
 "sortMonth" = "Por mes";
 
 /* loco:62961cefada5091f29102c32 */
 "sortMostRecentAdded" = "Más recientemente añadidos";
+
+/* loco:65e0875a2630c8df780f4932 */
+"sortMostRelevant" = "Más relevante";
 
 /* loco:6049df4d5c2c3a04bc397a58 */
 "sortNameAZ" = "Nombre: de A a Z";
@@ -2107,6 +2119,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pausa de importación";
+
+/* loco:65df0b66eb1209e60f0ff4b5 */
+"urlUserReportiOS" = "https://feedback.userreport.com/990c4001-bb78-484c-bf1c-47a288d12393/";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Invitar por correo";

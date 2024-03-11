@@ -27,10 +27,15 @@ enum RootViewControllerState {
     case appLock
     case mainViewController(DriveFileManager)
     case updateRequired
+    case preloading(Account)
 
     static func getCurrentState() -> RootViewControllerState {
         @InjectService var accountManager: AccountManageable
         @InjectService var lockHelper: AppLockHelper
+
+        guard let currentAccount = accountManager.currentAccount else {
+            return .onboarding
+        }
 
         if UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty {
             return .onboarding
@@ -39,8 +44,7 @@ enum RootViewControllerState {
         } else if let driveFileManager = accountManager.currentDriveFileManager {
             return .mainViewController(driveFileManager)
         } else {
-            // Default to show onboarding
-            return .onboarding
+            return .preloading(currentAccount)
         }
     }
 }

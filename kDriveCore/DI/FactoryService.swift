@@ -82,6 +82,12 @@ public enum FactoryService {
     /// Misc services
     private static var miscServices: [Factory] {
         let services = [
+            Factory(type: KeychainHelper.self) { _, _ in
+                KeychainHelper(accessGroup: AccountManager.accessGroup)
+            },
+            Factory(type: TokenStore.self) { _, _ in
+                TokenStore()
+            },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },
@@ -135,6 +141,9 @@ public enum FactoryService {
             },
             Factory(type: BackgroundTasksServiceable.self) { _, _ in
                 BackgroundTasksService()
+            },
+            Factory(type: ReviewManageable.self) { _, _ in
+                ReviewManager(userDefaults: UserDefaults.shared)
             }
         ]
         return services
@@ -158,7 +167,8 @@ public enum FactoryService {
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
                 (loggerFactory, "AppDelegate"),
-                (loggerFactory, "FileProvider")
+                (loggerFactory, "FileProvider"),
+                (loggerFactory, "DriveInfosManager")
             ]
             return services
         } else {

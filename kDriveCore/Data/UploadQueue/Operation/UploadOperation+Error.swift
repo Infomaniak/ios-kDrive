@@ -91,7 +91,6 @@ extension UploadOperation {
 
             // Not enough space
             else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
-                self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
                 self.uploadQueue.suspendAllOperations()
                 file.maxRetryCount = 0
                 file.progress = nil
@@ -263,7 +262,7 @@ extension UploadOperation {
         metadata["modificationDate"] = file.modificationDate ?? "nil"
         metadata["taskCreationDate"] = file.taskCreationDate ?? "nil"
         metadata["progress"] = file.progress ?? 0
-        metadata["initiatedFromFileManager"] = file.initiatedFromFileManager
+        metadata["ownedByFileProvider"] = file.ownedByFileProvider
         metadata["maxRetryCount"] = file.maxRetryCount
         metadata["rawPersistedError"] = file._error ?? "nil"
 

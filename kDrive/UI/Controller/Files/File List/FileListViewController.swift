@@ -223,15 +223,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         guard viewModel != nil else { return }
-        #if !ISEXTENSION
-        let plusButtonDirectory: File
-        if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-            plusButtonDirectory = viewModel.currentDirectory
-        } else {
-            plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
-        }
-        (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
-        #endif
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
 
         tryLoadingFilesOrDisplayError()
     }
@@ -587,9 +580,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         headerView.delegate = self
 
         if viewModel.currentDirectory.visibility == .isTeamSpace {
-            let driveName = KDriveResourcesStrings.Localizable.commonDocumentsDescription(viewModel.driveFileManager.drive.name)
+            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
+            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
 
-            headerView.commonDocumentsDescriptionLabel.text = driveName
+            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
             headerView.commonDocumentsDescriptionLabel.isHidden = false
         } else {
             headerView.commonDocumentsDescriptionLabel.isHidden = true

@@ -42,6 +42,16 @@ final class UTRootViewControllerState: XCTestCase {
         SimpleResolver.sharedResolver.removeAll()
 
         let services = [
+            Factory(type: KeychainHelper.self) { _, _ in
+                KeychainHelper(accessGroup: AccountManager.accessGroup)
+            },
+            Factory(type: TokenStore.self) { _, _ in
+                TokenStore()
+            },
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            },
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 InfomaniakNetworkLogin(config: self.loginConfig)
             },
@@ -73,8 +83,8 @@ final class UTRootViewControllerState: XCTestCase {
                 AppLockHelper()
             }
         ]
-        services.forEach {
-            SimpleResolver.sharedResolver.store(factory: $0)
+        for service in services {
+            SimpleResolver.sharedResolver.store(factory: service)
         }
     }
 
@@ -139,7 +149,7 @@ final class UTRootViewControllerState: XCTestCase {
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts = [self.fakeAccount]
+            accountManager.accounts.append(self.fakeAccount)
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
@@ -158,7 +168,7 @@ final class UTRootViewControllerState: XCTestCase {
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts = [self.fakeAccount]
+            accountManager.accounts.append(self.fakeAccount)
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
@@ -177,7 +187,7 @@ final class UTRootViewControllerState: XCTestCase {
 
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts = [self.fakeAccount]
+            accountManager.accounts.append(self.fakeAccount)
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
                 apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)
