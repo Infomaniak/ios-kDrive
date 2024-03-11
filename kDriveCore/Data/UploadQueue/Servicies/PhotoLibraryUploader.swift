@@ -33,6 +33,11 @@ public final class PhotoLibraryUploader {
     /// Predicate to quickly narrow down on uploaded assets
     static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
 
+    enum ErrorDomain: Error {
+        /// System is asking to terminate the operation
+        case importCancelledBySystem
+    }
+
     var _settings: PhotoSyncSettings?
     public var settings: PhotoSyncSettings? {
         _settings

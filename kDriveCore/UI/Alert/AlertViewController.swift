@@ -28,6 +28,7 @@ import UIKit
 open class AlertViewController: UIViewController {
     private let actionString: String
     private let hasCancelButton: Bool
+    private let cancelString: String?
     private let destructive: Bool
     let loading: Bool
     private let handler: (() async -> Void)?
@@ -42,12 +43,14 @@ open class AlertViewController: UIViewController {
     public init(title: String,
                 action: String,
                 hasCancelButton: Bool = true,
+                cancelString: String? = nil,
                 destructive: Bool = false,
                 loading: Bool = false,
                 handler: (() async -> Void)?,
                 cancelHandler: (() -> Void)? = nil) {
         actionString = action
         self.hasCancelButton = hasCancelButton
+        self.cancelString = cancelString
         self.destructive = destructive
         self.loading = loading
         self.handler = handler
@@ -102,7 +105,7 @@ open class AlertViewController: UIViewController {
 
         // Cancel button
         cancelButton = UIButton(type: .system)
-        cancelButton.setTitle(KDriveResourcesStrings.Localizable.buttonCancel, for: .normal)
+        cancelButton.setTitle(cancelString ?? KDriveResourcesStrings.Localizable.buttonCancel, for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: 15))
         cancelButton.sizeToFit()
         cancelButton.addTarget(self, action: #selector(cancel), for: .touchUpInside)

@@ -121,10 +121,11 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     do {
                         let file = try await self.driveFileManager.apiFetcher
                             .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
-                        let children = try await self.driveFileManager.apiFetcher.trashedFiles(
+                        let response = try await self.driveFileManager.apiFetcher.trashedFiles(
                             of: file.proxify(),
                             cursor: cursor
-                        ).data
+                        )
+                        let children = response.validApiResponse.data
                         var containerItems = [FileProviderItem]()
                         for child in children {
                             autoreleasepool {

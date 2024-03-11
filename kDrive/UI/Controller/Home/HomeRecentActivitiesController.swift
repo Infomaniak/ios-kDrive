@@ -57,16 +57,16 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         Task {
             do {
                 let activitiesResponse = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive,
-                                                                                              cursor: nextCursor)
+                                                                                              cursor: nextCursor).validApiResponse
                 self.empty = self.nextCursor == nil && activitiesResponse.data.isEmpty
-                self.moreComing = activitiesResponse.response.hasMore
+                self.moreComing = activitiesResponse.hasMore
 
                 display(activities: activitiesResponse.data)
                 // Update cache
                 if nextCursor == nil {
                     self.driveFileManager.setLocalRecentActivities(activitiesResponse.data)
                 }
-                self.nextCursor = activitiesResponse.response.cursor
+                self.nextCursor = activitiesResponse.cursor
             } catch {
                 let activities = self.driveFileManager.getLocalRecentActivities()
                 self.empty = activities.isEmpty

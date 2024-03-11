@@ -32,9 +32,9 @@ public extension DriveFileManager {
 
         let result = try await apiFetcher.files(in: directory, advancedListingCursor: lastCursor, sortType: sortType)
 
-        let children = result.data.files
-        let nextCursor = result.response.cursor
-        let hasMore = result.response.hasMore
+        let children = result.validApiResponse.data.files
+        let nextCursor = result.validApiResponse.cursor
+        let hasMore = result.validApiResponse.hasMore
 
         let realm = getRealm()
         // Keep cached properties for children
@@ -52,7 +52,12 @@ public extension DriveFileManager {
             }
             managedParent.children.insert(objectsIn: children)
 
-            handleActions(result.data.actions, actionsFiles: result.data.actionsFiles, directory: managedParent, using: realm)
+            handleActions(
+                result.validApiResponse.data.actions,
+                actionsFiles: result.validApiResponse.data.actionsFiles,
+                directory: managedParent,
+                using: realm
+            )
 
             managedParent.lastCursor = nextCursor
             managedParent.versionCode = DriveFileManager.constants.currentVersionCode

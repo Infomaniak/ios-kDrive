@@ -885,6 +885,8 @@ extension FileDetailViewController: FileLocationDelegate {
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
         MatomoUtils.track(eventWithCategory: .comment, name: "like")
+        guard let currentAccount = accountManager.currentAccount else { return }
+
         Task { [proxyFile = file.proxify()] in
             do {
                 let shouldLike = !comment.liked
@@ -897,7 +899,7 @@ extension FileDetailViewController: FileCommentDelegate {
                     let comment = self.comments[index]
                     comment.liked.toggle()
                     if shouldLike {
-                        let driveUser = DriveUser(user: self.accountManager.currentAccount.user)
+                        let driveUser = DriveUser(user: currentAccount.user)
                         if comment.likes == nil {
                             comment.likes = [driveUser]
                         } else {
@@ -905,7 +907,7 @@ extension FileDetailViewController: FileCommentDelegate {
                         }
                         comment.likesCount += 1
                     } else {
-                        comment.likes?.removeAll { $0.id == self.accountManager.currentAccount.user.id }
+                        comment.likes?.removeAll { $0.id == currentAccount.user.id }
                         comment.likesCount -= 1
                     }
                     self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)

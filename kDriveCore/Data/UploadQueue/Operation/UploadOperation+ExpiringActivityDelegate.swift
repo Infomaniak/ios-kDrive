@@ -36,6 +36,9 @@ extension UploadOperation: ExpiringActivityDelegate {
                         "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
                     )
 
+                // Make sure the main app can continue the upload next retry.
+                file.ownedByFileProvider = false
+
                 // Mark all chunks in base with a .taskRescheduled error
                 var iterator = self.uploadTasks.makeIterator()
                 try self.cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
@@ -57,6 +60,7 @@ extension UploadOperation: ExpiringActivityDelegate {
                     }
                 }
 
+                // Sentry
                 let metadata = ["File id": self.uploadFileId,
                                 "File name": file.name,
                                 "File size": file.size,

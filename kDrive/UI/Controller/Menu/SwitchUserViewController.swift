@@ -126,16 +126,6 @@ class SwitchUserViewController: UIViewController {
 extension SwitchUserViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let account = accountManager.accounts[indexPath.row]
-
-        if !account.isConnected {
-            // Ask to reconnect
-            infomaniakLogin.webviewLoginFrom(viewController: self,
-                                             hideCreateAccountButton: true,
-                                             delegate: self)
-            tableView.deselectRow(at: indexPath, animated: true)
-            return
-        }
-
         switchToConnectedAccount(account)
     }
 }

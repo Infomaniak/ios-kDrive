@@ -5,7 +5,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: Philippe Weidmann
- * Exported at: Fri, 12 Jan 2024 15:27:42 +0100
+ * Exported at: Thu, 07 Mar 2024 14:51:12 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -361,6 +361,9 @@
 
 /* loco:61261341bbb2fe14eb477766 */
 "buttonNext" = "Avanti";
+
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "No";
 
 /* loco:6049df4d5c2c3a04bc397956 */
 "buttonNoDriveAnotherUser" = "Utilizza un altro profilo Infomaniak";
@@ -1296,7 +1299,7 @@
 "localizedFilenamePrivateSpace" = "I miei file";
 
 /* loco:65a140c3cdbe107c5a025352 */
-"localizedFilenameTeamSpace" = "File dell'organizzazione";
+"localizedFilenameTeamSpace" = "File dell’organizzazione";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Localizzare";
@@ -1565,6 +1568,9 @@
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Link di condivisione limitato";
 
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "Ti piace kDrive?";
+
 /* loco:6049df4d5c2c3a04bc397a2d */
 "saveExternalFileInputFileName" = "Nome del documento";
 
@@ -1781,11 +1787,17 @@
 /* loco:6049df4d5c2c3a04bc397a55 */
 "sortExtension" = "Estensione";
 
+/* loco:65e089a9f1203bf18d07e823 */
+"sortLeastRelevant" = "Meno rilevante";
+
 /* loco:60c095a650430a455a1a1963 */
 "sortMonth" = "Per mese";
 
 /* loco:62961cefada5091f29102c32 */
 "sortMostRecentAdded" = "Aggiunte più recenti";
+
+/* loco:65e0875a2630c8df780f4932 */
+"sortMostRelevant" = "Più rilevante";
 
 /* loco:6049df4d5c2c3a04bc397a58 */
 "sortNameAZ" = "Nome: dalla A alla Z";
@@ -2107,6 +2119,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pausa importazione";
+
+/* loco:65df0b66eb1209e60f0ff4b5 */
+"urlUserReportiOS" = "https://feedback.userreport.com/b1992919-c53a-4935-bb15-22f8c57c1446/";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Invita tramite e-mail";

@@ -39,13 +39,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
         rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
-        let fakeViewController = UIViewController()
-        rootViewControllers.append(fakeViewController)
+        rootViewControllers.append(Self.initFakeViewController())
         rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager)))
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
-        fakeViewController.tabBarItem.isEnabled = false
     }
 
     @available(*, unavailable)
@@ -123,6 +121,12 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         navigationViewController.tabBarItem.image = placeholder
         navigationViewController.tabBarItem.selectedImage = placeholderSelected
         return navigationViewController
+    }
+
+    private static func initFakeViewController() -> UIViewController {
+        let fakeViewController = UIViewController()
+        fakeViewController.tabBarItem.isEnabled = false
+        return fakeViewController
     }
 
     private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {

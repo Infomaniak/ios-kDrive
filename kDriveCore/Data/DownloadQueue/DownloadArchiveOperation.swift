@@ -26,6 +26,7 @@ public class DownloadArchiveOperation: Operation {
     // MARK: - Attributes
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var appContextService: AppContextServiceable
 
     private let archiveId: String
     private let driveFileManager: DriveFileManager
@@ -85,7 +86,7 @@ public class DownloadArchiveOperation: Operation {
             return
         }
 
-        if !Bundle.main.isExtension {
+        if !appContextService.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 // We don't support task rescheduling for archive download but still need to pass error to differentiate from user

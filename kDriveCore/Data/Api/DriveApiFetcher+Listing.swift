@@ -21,7 +21,7 @@ import InfomaniakCore
 
 public extension DriveApiFetcher {
     func files(in directory: ProxyFile,
-               sortType: SortType = .nameAZ) async throws -> (data: ListingResult, response: ApiResponse<ListingResult>) {
+               sortType: SortType = .nameAZ) async throws -> ValidServerResponse<ListingResult> {
         try await perform(request: authenticatedRequest(
             .fileListing(file: directory)
                 .sorted(by: [.type, sortType]),
@@ -31,7 +31,7 @@ public extension DriveApiFetcher {
 
     func files(in directory: ProxyFile,
                advancedListingCursor: FileCursor,
-               sortType: SortType = .nameAZ) async throws -> (data: ListingResult, response: ApiResponse<ListingResult>) {
+               sortType: SortType = .nameAZ) async throws -> ValidServerResponse<ListingResult> {
         try await perform(request: authenticatedRequest(
             .fileListingContinue(file: directory, cursor: advancedListingCursor)
                 .sorted(by: [.type, sortType]),
@@ -41,7 +41,7 @@ public extension DriveApiFetcher {
 
     func files(in directory: ProxyFile,
                advancedListingCursor: FileCursor?,
-               sortType: SortType = .nameAZ) async throws -> (data: ListingResult, response: ApiResponse<ListingResult>) {
+               sortType: SortType = .nameAZ) async throws -> ValidServerResponse<ListingResult> {
         if let advancedListingCursor {
             return try await files(in: directory, advancedListingCursor: advancedListingCursor, sortType: sortType)
         } else {

@@ -263,7 +263,7 @@ extension UploadOperation {
         metadata["modificationDate"] = file.modificationDate ?? "nil"
         metadata["taskCreationDate"] = file.taskCreationDate ?? "nil"
         metadata["progress"] = file.progress ?? 0
-        metadata["initiatedFromFileManager"] = file.initiatedFromFileManager
+        metadata["ownedByFileProvider"] = file.ownedByFileProvider
         metadata["maxRetryCount"] = file.maxRetryCount
         metadata["rawPersistedError"] = file._error ?? "nil"
 

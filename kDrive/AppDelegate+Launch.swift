@@ -34,13 +34,20 @@ extension AppDelegate {
         case .mainViewController(let driveFileManager):
             showMainViewController(driveFileManager: driveFileManager)
             showLaunchFloatingPanel()
-            requestAppStoreReview()
+            askForReview()
             askUserToRemovePicturesIfNecessary()
         case .onboarding:
             showOnboarding()
         case .updateRequired:
             showUpdateRequired()
+        case .preloading(let currentAccount):
+            showPreloading(currentAccount: currentAccount)
         }
+    }
+
+    func updateRootViewControllerState() {
+        let newState = RootViewControllerState.getCurrentState()
+        prepareRootViewController(currentState: newState)
     }
 
     // MARK: Set root VC
@@ -57,6 +64,16 @@ extension AppDelegate {
         }
 
         window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
+        window.makeKeyAndVisible()
+    }
+
+    func showPreloading(currentAccount: Account) {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
+        }
+
+        window.rootViewController = PreloadingViewController(currentAccount: currentAccount)
         window.makeKeyAndVisible()
     }
 
@@ -77,7 +94,7 @@ extension AppDelegate {
             return
         }
 
-        KeychainHelper.deleteAllTokens()
+        keychainHelper.deleteAllTokens()
         window.rootViewController = OnboardingViewController.instantiate()
         window.makeKeyAndVisible()
     }
@@ -116,19 +133,43 @@ extension AppDelegate {
 
     // MARK: Misc
 
+    private func askForReview() {
+        guard let presentingViewController = window?.rootViewController,
+              !Bundle.main.isRunningInTestFlight
+        else { return }
+
+        let shouldRequestReview = reviewManager.shouldRequestReview()
+
+        if shouldRequestReview {
+            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+            let alert = AlertTextViewController(
+                title: appName,
+                message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
+                action: KDriveResourcesStrings.Localizable.buttonYes,
+                hasCancelButton: true,
+                cancelString: KDriveResourcesStrings.Localizable.buttonNo,
+                handler: requestAppStoreReview,
+                cancelHandler: openUserReport
+            )
+
+            presentingViewController.present(alert, animated: true)
+            MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
+        }
+    }
+
     private func requestAppStoreReview() {
-        guard UserDefaults.shared.numberOfConnections == 10 else {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "like")
+        UserDefaults.shared.appReview = .readyForReview
+        reviewManager.requestReview()
+    }
+
+    private func openUserReport() {
+        MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
+        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
             return
         }
-
-        if #available(iOS 14.0, *) {
-            if let scene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                SKStoreReviewController.requestReview(in: scene)
-            }
-        } else {
-            SKStoreReviewController.requestReview()
-        }
+        UserDefaults.shared.appReview = .feedback
+        UIApplication.shared.open(url)
     }
 
     // TODO: Refactor to async
