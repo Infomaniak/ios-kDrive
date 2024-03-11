@@ -29,6 +29,9 @@ public extension PhotoLibraryUploader {
         public let assets: PHFetchResult<PHAsset>
     }
 
+    typealias UploadFileAssetIdentifier = (uploadFileId: String, assetIdentifierId: String)
+
+    // TODO: Background batch
     func getPicturesToRemove() -> PicturesAssets? {
         Log.photoLibraryUploader("getPicturesToRemove")
         // Check that we have photo sync enabled with the delete option
@@ -37,22 +40,35 @@ public extension PhotoLibraryUploader {
             return nil
         }
 
-        var toRemoveFileIDs = [String]()
-        var toRemoveAssets = PHFetchResult<PHAsset>()
+        var assetsToRemove = [UploadFileAssetIdentifier]()
         BackgroundRealm.uploads.execute { realm in
-            toRemoveFileIDs = uploadQueue
+            let uploadFilesToClean = uploadQueue
                 .getUploadedFiles(using: realm)
                 .filter("rawType = %@", UploadFileType.phAsset.rawValue)
-                .map(\.id)
-            toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFileIDs, options: nil)
+
+            assetsToRemove = uploadFilesToClean.compactMap { uploadFile in
+                guard let assetIdentifier = uploadFile.assetLocalIdentifier else {
+                    return nil
+                }
+
+                return (uploadFile.id, assetIdentifier)
+            }
         }
 
-        guard toRemoveAssets.count >= Self.removeAssetsCountThreshold,
+        let allUploadFileIds = assetsToRemove.map(\.uploadFileId)
+        let allAssetsIds = assetsToRemove.map(\.assetIdentifierId)
+
+        let toRemoveAssetsFetchResult = PHAsset.fetchAssets(
+            withLocalIdentifiers: allAssetsIds,
+            options: nil
+        )
+
+        guard assetsToRemove.count >= Self.removeAssetsCountThreshold,
               uploadQueue.operationQueue.operationCount == 0 else {
             return nil
         }
 
-        return PicturesAssets(filesPrimaryKeys: toRemoveFileIDs, assets: toRemoveAssets)
+        return PicturesAssets(filesPrimaryKeys: allUploadFileIds, assets: toRemoveAssetsFetchResult)
     }
 
     func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
