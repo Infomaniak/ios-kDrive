@@ -20,10 +20,17 @@ import Foundation
 import InfomaniakDI
 import Photos
 
+/// Something that handle the cleaning post upload of pictures in Photo.app
 public protocol PhotoLibraryCleanerServiceable {
-    func hasPicturesToRemove() -> Bool
+    /// Check if some pictures are scheduled for deletion
+    var hasPicturesToRemove: Bool { get }
+
+    /// Async cleanup of pictures scheduled for deletion
     func removePicturesScheduledForDeletion() async
 }
+
+/// Tuple linking an UploadFile id to a PHAssetLocalIdentifier
+typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifier: String)
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     /// Threshold value to trigger cleaning of photo roll if enabled
@@ -36,34 +43,48 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
 
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploader
 
-    typealias UploadFileAssetIdentifier = (uploadFileId: String, assetIdentifierId: String)
-
-    /// Wrapper type to map an "UploadFile" to a "PHAsset"
-    struct PicturesAssets {
-        /// Collection of primary keys of "UploadFile"
-        public let filesPrimaryKeys: [String]
-
-        /// collection of PHAsset
-        public let assets: PHFetchResult<PHAsset>
+    /// `True` if feature setting is ON
+    private var removePictureEnabled: Bool {
+        // Check that we have photo sync enabled with the delete option
+        guard let settings = photoLibraryUploader.settings, settings.deleteAssetsAfterImport else {
+            Log.photoLibraryUploader("remove picture feature disabled")
+            return false
+        }
+        return true
     }
 
-    /// Check if some pictures are scheduled for deletion
-    public func hasPicturesToRemove() -> Bool {
-        var hasPicturesToRemove = false
+    public var hasPicturesToRemove: Bool {
+        guard removePictureEnabled else {
+            Log.photoLibraryUploader("RemovePicture feature not Enabled in settings")
+            return false
+        }
+
+        var picturesToRemoveCount = 0
         BackgroundRealm.uploads.execute { realm in
-            let uploadFilesToCleanCount = uploadQueue
+            picturesToRemoveCount = uploadQueue
                 .getUploadedFiles(using: realm)
                 .filter(Self.photoAssetPredicate)
                 .count
-
-            hasPicturesToRemove = uploadFilesToCleanCount > 0
         }
 
-        return hasPicturesToRemove
+        guard picturesToRemoveCount >= Self.removeAssetsCountThreshold else {
+            Log.photoLibraryUploader("Not enough pictures to delete, skipping")
+            return false
+        }
+
+        guard uploadQueue.operationQueue.operationCount == 0 else {
+            Log.photoLibraryUploader("Uploads underway, skipping")
+            return false
+        }
+
+        return true
     }
 
-    /// Batch cleanup of pictures scheduled for deletion
     public func removePicturesScheduledForDeletion() async {
+        guard removePictureEnabled else {
+            return
+        }
+
         guard let picturesToRemove = getPicturesToRemove() else {
             Log.photoLibraryUploader("no pictures to remove")
             return
@@ -72,13 +93,8 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
         removePicturesFromPhotoLibrary(picturesToRemove)
     }
 
-    private func getPicturesToRemove() -> PicturesAssets? {
+    private func getPicturesToRemove() -> [UploadFileAssetIdentifier]? {
         Log.photoLibraryUploader("getPicturesToRemove")
-        // Check that we have photo sync enabled with the delete option
-        guard let settings = photoLibraryUploader.settings, settings.deleteAssetsAfterImport else {
-            Log.photoLibraryUploader("no settings")
-            return nil
-        }
 
         var assetsToRemove = [UploadFileAssetIdentifier]()
         BackgroundRealm.uploads.execute { realm in
@@ -95,43 +111,42 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             }
         }
 
-        let allUploadFileIds = assetsToRemove.map(\.uploadFileId)
-        let allAssetsIds = assetsToRemove.map(\.assetIdentifierId)
+        return assetsToRemove
+    }
 
-        let toRemoveAssetsFetchResult = PHAsset.fetchAssets(
-            withLocalIdentifiers: allAssetsIds,
+    private func removePicturesFromPhotoLibrary(_ itemsIdentifiers: [UploadFileAssetIdentifier]) {
+        Log.photoLibraryUploader("removePicturesFromPhotoLibrary :\(itemsIdentifiers.count)")
+
+        let allAssetIdentifiers = itemsIdentifiers.map(\.localAssetIdentifier)
+        let allAssetFetchResult = PHAsset.fetchAssets(
+            withLocalIdentifiers: allAssetIdentifiers,
             options: nil
         )
 
-        guard assetsToRemove.count >= Self.removeAssetsCountThreshold,
-              uploadQueue.operationQueue.operationCount == 0 else {
-            return nil
-        }
-
-        return PicturesAssets(filesPrimaryKeys: allUploadFileIds, assets: toRemoveAssetsFetchResult)
-    }
-
-    private func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
-        Log.photoLibraryUploader("removePicturesFromPhotoLibrary toRemoveItems:\(toRemoveItems.filesPrimaryKeys.count)")
         PHPhotoLibrary.shared().performChanges {
-            PHAssetChangeRequest.deleteAssets(toRemoveItems.assets)
-        } completionHandler: { success, _ in
+            PHAssetChangeRequest.deleteAssets(allAssetFetchResult)
+        } completionHandler: { success, error in
             guard success else {
+                Log.photoLibraryUploader(
+                    "removePicturesFromPhotoLibrary performChanges error:\(String(describing: error))",
+                    level: .error
+                )
                 return
             }
 
             BackgroundRealm.uploads.execute { realm in
+                let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
                 do {
                     try realm.write {
                         let filesInContext = realm
                             .objects(UploadFile.self)
-                            .filter("id IN %@", toRemoveItems.filesPrimaryKeys)
+                            .filter("id IN %@", allUploadFileIds)
                             .filter { $0.isInvalidated == false }
                         realm.delete(filesInContext)
                     }
-                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary success", level: .info)
+                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary success")
                 } catch {
-                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary error:\(error)", level: .error)
+                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary BackgroundRealm error:\(error)", level: .error)
                 }
             }
         }

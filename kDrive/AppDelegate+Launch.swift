@@ -262,7 +262,7 @@ extension AppDelegate {
     /// Ask the user to remove pictures if configured
     private func askUserToRemovePicturesIfNecessary() {
         @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
-        guard photoCleaner.hasPicturesToRemove() else {
+        guard photoCleaner.hasPicturesToRemove else {
             Log.appDelegate("No pictures to remove", level: .info)
             return
         }
