@@ -65,13 +65,17 @@ public enum UserPermission: String, Codable, CaseIterable {
 public final class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     @Persisted public var email = ""
-    @Persisted private var _avatar = ""
+    @Persisted private var _avatar: String?
     @Persisted private var _avatarUrl: String?
     @Persisted public var displayName = ""
     public var role: DriveUserRole?
 
     public var avatar: String {
-        return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
+        guard let _avatar, !_avatar.isBlank else {
+            return _avatarUrl ?? ""
+        }
+
+        return _avatar
     }
 
     enum CodingKeys: String, CodingKey {
