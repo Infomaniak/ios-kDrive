@@ -39,6 +39,7 @@ enum FileWith: String, CaseIterable {
     case path
     case shareLink = "sharelink"
     case sortedName = "sorted_name"
+    case supportedBy = "supported_by"
     case users
     case user
     case version
@@ -64,7 +65,8 @@ enum FileWith: String, CaseIterable {
                                           .externalImport,
                                           .isFavorite,
                                           .shareLink,
-                                          .sortedName]
+                                          .sortedName,
+                                          .supportedBy]
     static let fileListingMinimal: [FileWith] = [.files,
                                                  .filesCapabilities,
                                                  .filesCategories,
