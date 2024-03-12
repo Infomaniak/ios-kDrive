@@ -41,7 +41,8 @@ enum RootViewControllerState {
             return .onboarding
         } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
             return .appLock
-        } else if let driveFileManager = accountManager.currentDriveFileManager {
+        } else if let driveFileManager = accountManager.currentDriveFileManager,
+                  driveFileManager.getCachedMyFilesRoot() != nil {
             return .mainViewController(driveFileManager)
         } else {
             return .preloading(currentAccount)

@@ -275,8 +275,6 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     throw DriveError.NoDriveError.noDriveFileManager
                 }
-                // Download root files
-                try await accountManager.currentDriveFileManager?.initRoot()
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 MatomoUtils.connectUser()

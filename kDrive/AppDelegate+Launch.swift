@@ -261,7 +261,9 @@ extension AppDelegate {
 
     /// Ask the user to remove pictures if configured
     private func askUserToRemovePicturesIfNecessary() {
-        guard let toRemoveItems = photoLibraryUploader.getPicturesToRemove() else {
+        @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
+        guard photoCleaner.hasPicturesToRemove else {
+            Log.appDelegate("No pictures to remove", level: .info)
             return
         }
 
@@ -270,8 +272,10 @@ extension AppDelegate {
                                             action: KDriveResourcesStrings.Localizable.buttonDelete,
                                             destructive: true,
                                             loading: false) {
-            // Proceed with removal
-            self.photoLibraryUploader.removePicturesFromPhotoLibrary(toRemoveItems)
+            Task {
+                // Proceed with removal
+                await photoCleaner.removePicturesScheduledForDeletion()
+            }
         }
 
         Task { @MainActor in

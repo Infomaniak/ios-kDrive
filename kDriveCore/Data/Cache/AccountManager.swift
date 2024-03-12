@@ -284,6 +284,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
+        let driveFileManager = getDriveFileManager(for: mainDrive)
+        try await driveFileManager?.initRoot()
+
         saveAccounts()
         mqService.registerForNotifications(with: driveResponse.ips)
 
@@ -319,6 +322,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
         }
+
+        try await currentDriveFileManager?.initRoot()
 
         saveAccounts()
         if registerToken {
@@ -363,7 +368,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func switchAccount(newAccount: Account) {
         setCurrentAccount(account: newAccount)
-        setCurrentDriveForCurrentAccount(drive: drives.first!)
+        if let drive = drives.first {
+            setCurrentDriveForCurrentAccount(drive: drive)
+        }
         saveAccounts()
     }
 
