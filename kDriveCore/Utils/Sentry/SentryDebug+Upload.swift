@@ -92,6 +92,11 @@ extension SentryDebug {
         addBreadcrumb(message: message, category: .uploadOperation, level: .error)
     }
 
+    public static func setFileListViewModelBreadcrumb(id: String, step: String) {
+        let message = "setFileList opId: \(id) step: \(step)"
+        addBreadcrumb(message: message, category: .uploadOperation, level: .error)
+    }
+
     public static func filesObservationBreadcrumb(state: String) {
         let message = "files modified: \(state)"
         addBreadcrumb(message: message, category: .uploadOperation, level: .error)
