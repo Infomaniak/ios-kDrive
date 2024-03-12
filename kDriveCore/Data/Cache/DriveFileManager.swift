@@ -269,9 +269,9 @@ public final class DriveFileManager {
 
     // autorelease frequecy so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
-    public var realmConfiguration: Realm.Configuration
-    public var drive: Drive
-    public private(set) var apiFetcher: DriveApiFetcher
+    public let realmConfiguration: Realm.Configuration
+    public private(set) var drive: Drive
+    public let apiFetcher: DriveApiFetcher
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
 

@@ -21,25 +21,14 @@ import InfomaniakDI
 import UIKit
 
 public protocol UploadNotifiable {
-    /// Notify the user that we have not enough storage to start an upload.
-    func sendNotEnoughSpaceForUpload(filename: String)
-
     /// Send a local notification that the system has paused the upload.
     func sendPausedNotificationIfNeeded()
 
-    /// Send a local notification that n files were uploaded
-    func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult)
+    /// Send a local notification that n files were uploaded, or send a specific error message if in error state
+    func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult)
 }
 
 extension UploadQueue: UploadNotifiable {
-    public func sendNotEnoughSpaceForUpload(filename: String) {
-        Log.uploadQueue("sendNotEnoughSpaceForUpload")
-        serialQueue.async { [weak self] in
-            guard let self else { return }
-            notificationHelper.sendNotEnoughSpaceForUpload(filename: filename)
-        }
-    }
-
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
         serialQueue.async { [weak self] in
@@ -51,8 +40,8 @@ extension UploadQueue: UploadNotifiable {
         }
     }
 
-    public func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        Log.uploadQueue("sendFileUploadedNotificationIfNeeded")
+    public func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult) {
+        Log.uploadQueue("sendFileUploadStateNotificationIfNeeded")
         serialQueue.async { [weak self] in
             guard let self else { return }
             guard let uploadFile = result.uploadFile,
@@ -65,10 +54,15 @@ extension UploadQueue: UploadNotifiable {
             fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
             if let error = uploadFile.error {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                notificationHelper.sendUploadError(filename: uploadedFileName,
-                                                   parentId: uploadFile.parentDirectoryId,
-                                                   error: error,
-                                                   uploadFileId: uploadFile.id)
+                if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
+                    notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
+                } else {
+                    notificationHelper.sendGenericUploadError(filename: uploadedFileName,
+                                                              parentId: uploadFile.parentDirectoryId,
+                                                              error: error,
+                                                              uploadFileId: uploadFile.id)
+                }
+
                 if operationQueue.operationCount == 0 {
                     fileUploadedCount = 0
                 }

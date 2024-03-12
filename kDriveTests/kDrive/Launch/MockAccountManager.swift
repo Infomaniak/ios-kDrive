@@ -25,13 +25,9 @@ import RealmSwift
 class MockAccountManager: AccountManageable, RefreshTokenDelegate {
     var delegate: AccountManagerDelegate?
 
-    var currentAccount: Account! {
-        return accounts.first!
-    }
+    var currentAccount: Account?
 
     var accounts = SendableArray<Account>()
-
-    var tokens: [ApiToken] = []
 
     var currentUserId = 0
 
@@ -79,11 +75,11 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func setCurrentDriveForCurrentAccount(drive: Drive) {}
 
-    func addAccount(account: Account) {}
+    func addAccount(account: Account, token apiToken: ApiToken) {}
 
     func removeAccount(toDeleteAccount: Account) {}
 
-    func removeTokenAndAccount(token: ApiToken) {}
+    func removeTokenAndAccount(account: Account) {}
 
     func account(for token: ApiToken) -> Account? { fatalError("Not implemented") }
 

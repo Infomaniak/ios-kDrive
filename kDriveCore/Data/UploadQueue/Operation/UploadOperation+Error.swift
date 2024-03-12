@@ -91,7 +91,6 @@ extension UploadOperation {
 
             // Not enough space
             else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
-                self.uploadNotifiable.sendNotEnoughSpaceForUpload(filename: file.name)
                 self.uploadQueue.suspendAllOperations()
                 file.maxRetryCount = 0
                 file.progress = nil

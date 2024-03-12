@@ -52,7 +52,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
+    @LazyInjectService var reviewManager: ReviewManageable
 
     // MARK: - UIApplicationDelegate
 
@@ -204,10 +206,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
+            UserDefaults.shared.openingUntilReview -= 1
             refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             uploadEditedFiles()
-        case .onboarding, .updateRequired: break
-            // NOOP
+        case .onboarding, .updateRequired, .preloading: break
         }
 
         // Remove all notifications on App Opening

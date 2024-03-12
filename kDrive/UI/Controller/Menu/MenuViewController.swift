@@ -91,7 +91,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     }
 
     private var sections: [Section] = []
-    private var currentAccount: Account
+    private var currentAccount: Account?
     private var needsContentUpdate = false
 
     init(driveFileManager: DriveFileManager) {
@@ -219,7 +219,9 @@ extension MenuViewController {
         if section == .header {
             let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
             cell.selectionStyle = .none
-            cell.configureCell(with: driveFileManager.drive, and: currentAccount)
+            if let currentAccount {
+                cell.configureCell(with: driveFileManager.drive, and: currentAccount)
+            }
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
@@ -281,21 +283,23 @@ extension MenuViewController {
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle,
                                                 message: KDriveResourcesStrings.Localizable
-                                                    .alertRemoveUserDescription(currentAccount.user.displayName),
+                                                    .alertRemoveUserDescription(currentAccount?.user.displayName ?? ""),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
-                self.accountManager.removeTokenAndAccount(token: self.accountManager.currentAccount.token)
+                if let currentAccount = self.accountManager.currentAccount {
+                    self.accountManager.removeTokenAndAccount(account: currentAccount)
+                }
+
+                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheScanLibraryAndUpload(
-                        preload: true,
-                        isSwitching: true
-                    )
+                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
                 } else {
                     SentrySDK.setUser(nil)
-                    self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
                 }
                 self.accountManager.saveAccounts()
+                appDelegate?.updateRootViewControllerState()
             }
             present(alert, animated: true)
         case .help:

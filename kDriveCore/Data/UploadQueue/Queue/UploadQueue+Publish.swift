@@ -87,7 +87,7 @@ extension UploadQueue: UploadPublishable {
     func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
         logFileUploadedWithSuccess(for: result.uploadFile)
-        sendFileUploadedNotificationIfNeeded(with: result)
+        sendFileUploadStateNotificationIfNeeded(with: result)
         serialQueue.async { [weak self] in
             guard let self else { return }
             observations.didUploadFile.values.forEach { closure in

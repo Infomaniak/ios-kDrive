@@ -218,4 +218,12 @@ public final class DriveInfosManager {
         }
         return team.freeze()
     }
+
+    public func removeDrivesFor(userId: Int) {
+        let realm = getRealm()
+        let userDrives = realm.objects(Drive.self).where { $0.userId == userId }
+        try? realm.write {
+            realm.delete(userDrives)
+        }
+    }
 }
