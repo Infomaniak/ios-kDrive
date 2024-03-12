@@ -369,7 +369,10 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { [weak self] section, layoutEnvironment in
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem()]
+
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, layoutEnvironment in
             guard let self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:
@@ -384,7 +387,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                     )
                 }
             }
-        }
+        }, configuration: configuration)
         return layout
     }
 
@@ -398,17 +401,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             bottom: .fixed(16)
         )
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
-
         let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [header]
         return section
     }
 

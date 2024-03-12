@@ -114,6 +114,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: FilesHeaderView.self, forSupplementaryViewOfKind: .custom("sectionHeader"))
 
         configureDataSource()
 
@@ -163,29 +164,54 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
 
-            let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                view: HomeLargeTitleHeaderView.self,
-                for: indexPath
-            )
-            homeLargeTitleHeaderView.isEnabled = accountManager.drives.count > 1
-            homeLargeTitleHeaderView.text = driveFileManager.drive.name
-            homeLargeTitleHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                guard let self else { return }
-                let drives = accountManager.drives
-                let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
-                    options: drives,
-                    selectedOption: driveFileManager.drive,
-                    headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                    delegate: self
-                )
-                present(floatingPanelViewController, animated: true)
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                return generateHomeLargeTitleHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
+            case "sectionHeader":
+                return generateStickyHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
+            default:
+                fatalError("Unhandled kind \(kind)")
             }
-            headerViewHeight = homeLargeTitleHeaderView.frame.height
-            return homeLargeTitleHeaderView
         }
 
         dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+    }
+
+    func generateStickyHeaderView(collectionView: UICollectionView,
+                                  kind: String,
+                                  indexPath: IndexPath) -> FilesHeaderView {
+        let filesHeaderView = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            view: FilesHeaderView.self,
+            for: indexPath
+        )
+
+        return filesHeaderView
+    }
+
+    func generateHomeLargeTitleHeaderView(collectionView: UICollectionView,
+                                          kind: String,
+                                          indexPath: IndexPath) -> HomeLargeTitleHeaderView {
+        let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            view: HomeLargeTitleHeaderView.self,
+            for: indexPath
+        )
+        homeLargeTitleHeaderView.isEnabled = accountManager.drives.count > 1
+        homeLargeTitleHeaderView.text = driveFileManager.drive.name
+        homeLargeTitleHeaderView.titleButtonPressedHandler = { [weak self] _ in
+            guard let self else { return }
+            let drives = accountManager.drives
+            let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
+                options: drives,
+                selectedOption: driveFileManager.drive,
+                headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
+                delegate: self
+            )
+            present(floatingPanelViewController, animated: true)
+        }
+        headerViewHeight = homeLargeTitleHeaderView.frame.height
+        return homeLargeTitleHeaderView
     }
 
     static func createListLayout() -> UICollectionViewLayout {
@@ -200,16 +226,20 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                 heightDimension: .estimated(40))
-        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
+            elementKind: "sectionHeader",
+            alignment: .top
         )
-        sectionHeader.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+        sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [sectionHeader]
+        section.boundarySupplementaryItems = [sectionHeaderItem]
 
-        let layout = UICollectionViewCompositionalLayout(section: section)
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.boundarySupplementaryItems = [generateHeaderItem()]
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
     }
 
