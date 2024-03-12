@@ -363,7 +363,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func switchAccount(newAccount: Account) {
         setCurrentAccount(account: newAccount)
-        setCurrentDriveForCurrentAccount(drive: drives.first!)
+        if let drive = drives.first {
+            setCurrentDriveForCurrentAccount(drive: drive)
+        }
         saveAccounts()
     }
 
