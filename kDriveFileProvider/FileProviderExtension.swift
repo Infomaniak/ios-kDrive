@@ -50,6 +50,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
+    @LazyInjectService var fileProviderService: FileProviderServiceable
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -111,7 +112,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             Log.fileProvider("item for identifier - Uploading file")
             guard let uploadItem = uploadFile.toUploadFileItemProvider() else {
                 Log.fileProvider("item for identifier - Unable to generate an UploadFileItemProvider", level: .error)
-                throw nsError(code: .noSuchItem)
+                throw NSFileProviderError(.noSuchItem)
             }
             return uploadItem
         }
@@ -125,7 +126,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // did not match anything
         Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
-        throw nsError(code: .noSuchItem)
+        throw NSFileProviderError(.noSuchItem)
     }
 
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
@@ -151,7 +152,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
         Log.fileProvider("persistentIdentifierForItem at url:\(url)")
-        return FileProviderItem.identifier(for: url, domain: domain)
+        return fileProviderService.identifier(for: url, domain: domain)
     }
 
     override func providePlaceholder(at url: URL, completionHandler: @escaping (Error?) -> Void) {
@@ -191,7 +192,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
         Log.fileProvider("startProvidingItem at url:\(url)")
-        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
+        guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
               let file = driveFileManager.getCachedFile(id: fileId) else {
             if FileManager.default.fileExists(atPath: url.path) {
                 completionHandler(nil)

@@ -106,6 +106,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
     public init(file: File, parent: NSFileProviderItemIdentifier? = nil, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
+        @InjectService var fileProviderService: FileProviderServiceable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
@@ -113,7 +114,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         typeIdentifier = file.typeIdentifier
 
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
-        capabilities = FileProviderItem.rightsToCapabilities(rights)
+        capabilities = fileProviderService.rightsToCapabilities(rights)
 
         // Every file should have a parent, root file parent should not be called
         // If provided a different parent eg. WorkingSet
@@ -155,106 +156,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             ownerNameComponents = nameComponents
         }
 
-        let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
+        let itemStorageUrl = fileProviderService.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         storageUrl = itemStorageUrl
-    }
-}
-
-// TODO: Refactor this part
-public extension FileProviderItem {
-    // TODO: check if used app side and merge
-    func setUploadingError(_ error: DriveError) {
-        Log.fileProvider("FileProviderItem setUploadingError:\(error)")
-        switch error {
-        case .fileNotFound, .objectNotFound:
-            uploadingError = NSFileProviderError(.noSuchItem)
-        case .unknownToken:
-            uploadingError = NSFileProviderError(.notAuthenticated)
-        case .quotaExceeded:
-            uploadingError = NSFileProviderError(.insufficientQuota)
-        case .destinationAlreadyExists:
-            uploadingError = NSFileProviderError(.filenameCollision)
-        default:
-            uploadingError = NSFileProviderError(.serverUnreachable)
-        }
-    }
-
-    /*
-      (write)              .allowsWriting -> rights.write
-      (read properties)    .allowsReading -> rights.read
-      (rename)             .allowsRenaming -> rights.rename
-      (trash)              .allowsTrashing -> rights.delete
-      (delete)             .allowsDeleting -> ~= rights.delete
-      (move file/folder)   .allowsReparenting -> rights.move
-      (add file to folder) .allowsAddingSubItems -> rights.moveInto
-      (list folder files)  .allowsContentEnumerating -> rights.read
-     */
-    // TODO: Abstract and split
-    private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
-        var capabilities: NSFileProviderItemCapabilities = []
-        if rights.canWrite {
-            capabilities.insert(.allowsWriting)
-        }
-        if rights.canRead {
-            capabilities.insert(.allowsReading)
-        }
-        if rights.canRename {
-            capabilities.insert(.allowsRenaming)
-        }
-        if rights.canDelete {
-            capabilities.insert(.allowsDeleting)
-            capabilities.insert(.allowsTrashing)
-        }
-        if rights.canMove {
-            capabilities.insert(.allowsReparenting)
-        }
-        if rights.canMoveInto || rights.canCreateDirectory || rights.canCreateFile || rights.canUpload {
-            capabilities.insert(.allowsAddingSubItems)
-        }
-        if rights.canShow {
-            capabilities.insert(.allowsContentEnumerating)
-        }
-        return capabilities
-    }
-
-    // TODO: Abstract and split
-    class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
-        let rootStorageURL: URL
-        if let domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
-                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
-        } else {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL
-        }
-        if itemURL == rootStorageURL {
-            return .rootContainer
-        }
-        let identifier = itemURL.deletingLastPathComponent().lastPathComponent
-        return NSFileProviderItemIdentifier(identifier)
-    }
-
-    // TODO: Abstract and split
-    class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
-                                domain: NSFileProviderDomain?) -> URL {
-        let rootStorageURL: URL
-        if let domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
-                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
-        } else {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL
-        }
-        if identifier == .rootContainer {
-            return rootStorageURL
-        }
-
-        let itemFolderURL = rootStorageURL.appendingPathComponent(identifier.rawValue)
-        if !FileManager.default.fileExists(atPath: itemFolderURL.path) {
-            do {
-                try FileManager.default.createDirectory(at: itemFolderURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print(error)
-            }
-        }
-        return itemFolderURL.appendingPathComponent(filename)
     }
 }

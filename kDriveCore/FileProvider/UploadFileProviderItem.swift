@@ -64,7 +64,7 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
 
     public var isUploaded = false
 
-    // TODO: Map error form UploadFile.error
+    public var uploadingError: (any Error)?
 
     public init(
         uploadFileUUID: String,
@@ -73,8 +73,10 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         driveId: Int,
         sourceUrl: URL,
         conflictOption: ConflictOption,
-        shouldRemoveAfterUpload: Bool
+        shouldRemoveAfterUpload: Bool,
+        driveError: DriveError?
     ) {
+        Log.fileProvider("UploadFileProviderItem init UploadFile:\(uploadFileUUID)")
         self.parentDirectoryId = parentDirectoryId
         parentItemIdentifier = NSFileProviderItemIdentifier(rawValue: "\(parentDirectoryId)")
         self.userId = userId
@@ -86,6 +88,10 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         self.conflictOption = conflictOption
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
 
+        if let driveError {
+            @InjectService var fileProviderService: FileProviderServiceable
+            uploadingError = fileProviderService.fileProviderError(from: driveError)
+        }
         super.init()
     }
 }

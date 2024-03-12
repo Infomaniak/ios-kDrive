@@ -144,6 +144,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
+
+                // FIXME: Query upload queue instead
                 deletedItems += additionalState.deleteAlreadyEnumeratedImportedDocuments(forParent: containerItemIdentifier)
 
                 let realm = driveFileManager.getRealm()

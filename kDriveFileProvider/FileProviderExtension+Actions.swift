@@ -114,7 +114,7 @@ extension FileProviderExtension {
 
         let importedFileUUID = UUID().uuidString
         let importedDocumentIdentifier = NSFileProviderItemIdentifier(importedFileUUID)
-        let storageUrl = FileProviderItem.createStorageUrl(
+        let storageUrl = fileProviderService.createStorageUrl(
             identifier: importedDocumentIdentifier,
             filename: fileURL.lastPathComponent,
             domain: domain
@@ -147,7 +147,8 @@ extension FileProviderExtension {
                                                 driveId: driveFileManager.drive.id,
                                                 sourceUrl: storageUrl,
                                                 conflictOption: .version,
-                                                shouldRemoveAfterUpload: false /* should be true actually ?*/ )
+                                                shouldRemoveAfterUpload: false, /* should be true actually ?*/
+                                                driveError: nil)
         backgroundUpload(importItem) {
             completionHandler(importItem, nil)
         }

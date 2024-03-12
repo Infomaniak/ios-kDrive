@@ -24,8 +24,10 @@ import Foundation
 ///
 /// Concrete implementation `FileProviderExtensionAdditionalState` is ThreadSafe
 public protocol FileProviderExtensionAdditionalStatable {
+    // TODO: Remove, read UploadQueue instead
     func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem]
 
+    // TODO: Remove, read UploadQueue instead
     func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
         -> [NSFileProviderItemIdentifier]
 

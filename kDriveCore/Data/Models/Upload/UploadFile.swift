@@ -350,7 +350,8 @@ public extension UploadFile {
                                           driveId: driveId,
                                           sourceUrl: pathURL,
                                           conflictOption: conflictOption,
-                                          shouldRemoveAfterUpload: shouldRemoveAfterUpload)
+                                          shouldRemoveAfterUpload: shouldRemoveAfterUpload,
+                                          driveError: error)
 
 //        Self.cache.setObject(item, forKey: id as NSString)
 //        print("item:\(item)")

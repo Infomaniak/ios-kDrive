@@ -74,6 +74,9 @@ public enum FactoryService {
             },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
+            },
+            Factory(type: FileProviderServiceable.self) { _, _ in
+                FileProviderService()
             }
         ]
         return services

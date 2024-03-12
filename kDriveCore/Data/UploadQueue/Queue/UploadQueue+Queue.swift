@@ -173,6 +173,9 @@ extension UploadQueue: UploadQueueable {
                             addToQueue: Bool = true) -> UploadOperationable? {
         let expiringActivity = ExpiringActivity()
         expiringActivity.start()
+        defer {
+            expiringActivity.endAll()
+        }
 
         Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
 
@@ -199,7 +202,6 @@ extension UploadQueue: UploadQueueable {
         }
 
         guard addToQueue else {
-            expiringActivity.endAll()
             return nil
         }
 
@@ -210,7 +212,6 @@ extension UploadQueue: UploadQueueable {
 
         // Process adding a detached file to the uploadQueue
         let uploadOperation = self.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
-        expiringActivity.endAll()
 
         return uploadOperation
     }
