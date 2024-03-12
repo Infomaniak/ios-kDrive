@@ -428,9 +428,6 @@ public final class DriveFileManager {
                 realm.add(rootFile)
             }
         }
-        Task {
-            try await initRoot()
-        }
     }
 
     public func sharedWithMeInstance() -> DriveFileManager {

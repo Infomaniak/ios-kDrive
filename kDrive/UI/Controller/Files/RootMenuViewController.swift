@@ -138,9 +138,6 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         super.viewWillAppear(animated)
 
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
-        Task {
-            try await driveFileManager.initRoot()
-        }
     }
 
     @objc func presentSearch() {

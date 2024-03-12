@@ -34,17 +34,13 @@ extension SelectSwitchDriveDelegate {
             @InjectService var accountManager: AccountManageable
             accountManager.setCurrentDriveForCurrentAccount(drive: drive)
             accountManager.saveAccounts()
-            // Download root file
+
             guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                 return
             }
 
-            Task {
-                // Download root files
-                try await currentDriveFileManager.initRoot()
-                let newMainTabViewController = MainTabViewController(driveFileManager: currentDriveFileManager)
-                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
-            }
+            let newMainTabViewController = MainTabViewController(driveFileManager: currentDriveFileManager)
+            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
         }
     }
 }
