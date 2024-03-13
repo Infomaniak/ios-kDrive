@@ -127,11 +127,30 @@ class FileListViewModel: SelectDelegate {
             _frozenFiles
         }
         set {
+            let setIdentifier = UUID().uuidString
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "entry point")
+
             // On change of observed files, we force to restart the realm observation to prevent a loss of sync
             realmObservationToken?.invalidate()
             realmObservationToken = nil
+
+            // Set an internal frozen representation
             _frozenFiles = newValue.freezeIfNeeded()
+
+            // Execute the first update, if linked to a view controller.
+            // This may not be handled by observation alone
+            if let onFileListUpdated {
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre onFileListUpdated set")
+                onFileListUpdated([], [], [], [], _frozenFiles.isEmpty, true)
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post onFileListUpdated set")
+            } else {
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "onFileListUpdated nil")
+            }
+
+            // Restart observation
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre setup observation")
             updateRealmObservation()
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post setup observation")
         }
     }
 
