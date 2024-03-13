@@ -91,7 +91,7 @@ class AboutTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.accessoryImageView.isHidden = true
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutAppVersionTitle
-            cell.detailLabel.text = Constants.appVersion()
+            cell.detailLabel.text = Constants.appVersionLabel()
             return cell
         }
     }

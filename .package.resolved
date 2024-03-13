@@ -1,4 +1,5 @@
 {
+  "originHash" : "d81ee597f6e2e3e011f0e5090442c35217e272df05fbe9ebd9a9d91bd809c2da",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -86,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "7647060325dd2d4cba6cebd108c8715133dcd20b",
-        "version" : "7.4.0"
+        "revision" : "173cd0ec124d50f690f1445595554134a79c6122",
+        "version" : "7.5.1"
       }
     },
     {
@@ -196,6 +197,15 @@
       "state" : {
         "revision" : "267b83ab5690d463ff00585a4fd6dc54b698e1d2",
         "version" : "2.11.0"
+      }
+    },
+    {
+      "identity" : "osinfo",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MarcoEidinger/OSInfo.git",
+      "state" : {
+        "revision" : "54fd6673923ef5966268918152235b0e15ed057c",
+        "version" : "1.0.1"
       }
     },
     {
@@ -343,5 +353,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import kDriveResources
 import UIKit
 
@@ -170,14 +171,8 @@ public enum Constants {
         }
     }
 
-    public static func appVersion() -> String {
-        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String? ?? "kDrive"
-        let release = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String? ?? "x.x"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String? ?? "x"
-        let betaRelease = Bundle.main.isRunningInTestFlight ? "beta" : ""
-        var systemName = "iOS"
-
-        return "\(appName) \(systemName) version \(release)-\(betaRelease)\(build)"
+    public static func appVersionLabel() -> String {
+        return CorePlatform.appVersionLabel(fallbackAppName: "Mail")
     }
 }
 
