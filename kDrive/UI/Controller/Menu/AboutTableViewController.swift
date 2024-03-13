@@ -41,9 +41,6 @@ class AboutTableViewController: UITableViewController {
     private let rows = AboutRow.allCases
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     private let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
-    private let maxCount = 10
-
-    private var counter = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,7 +91,7 @@ class AboutTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.accessoryImageView.isHidden = true
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutAppVersionTitle
-            cell.detailLabel.text = "v\(appVersion ?? "1.0.0")" + (counter == maxCount ? " (\(buildNumber ?? "--"))" : "")
+            cell.detailLabel.text = Constants.appVersion()
             return cell
         }
     }
@@ -107,13 +104,7 @@ class AboutTableViewController: UITableViewController {
             if let url = row.url {
                 UIApplication.shared.open(url)
             }
-        case .version:
-            if counter < maxCount {
-                counter += 1
-                if counter == maxCount {
-                    tableView.reloadRows(at: [indexPath], with: .fade)
-                }
-            }
+        case .version: break
         }
     }
 }
