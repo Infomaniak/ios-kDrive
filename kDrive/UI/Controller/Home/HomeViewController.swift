@@ -193,6 +193,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
@@ -402,6 +403,17 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
+
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: RootMenuHeaderView.kind.rawValue,
+            alignment: .top
+        )
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+
+        section.boundarySupplementaryItems = [sectionHeaderItem]
         return section
     }
 
@@ -533,6 +545,15 @@ extension HomeViewController {
                 headerView.titleLabel.text = recentActivitiesController?.title ?? ""
                 return headerView
             }
+        } else if kind == RootMenuHeaderView.kind.rawValue {
+            let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: RootMenuHeaderView.self,
+                for: indexPath
+            )
+
+            headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
+            return headerView
         } else {
             return UICollectionReusableView()
         }
