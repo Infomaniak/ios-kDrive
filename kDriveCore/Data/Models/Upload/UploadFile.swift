@@ -47,8 +47,6 @@ public protocol UploadFilable {
 }
 
 public final class UploadFile: Object, UploadFilable {
-    public static let cache = NSCache<NSString, UploadFileProviderItem>()
-
     /// As a number of chunks can fail in one UploadRequest, the retryCount is slightly higher now
     public static let defaultMaxRetryCount = 5
 
@@ -70,7 +68,13 @@ public final class UploadFile: Object, UploadFilable {
     @Persisted public var parentDirectoryId = 1
     @Persisted public var userId = 0
     @Persisted public var driveId = 0
+
+    /// The date at which the upload succeeded
     @Persisted public var uploadDate: Date?
+
+    /// The id of the remote File uploaded
+    @Persisted public var remoteFileId: Int?
+
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?
     @Persisted public var taskCreationDate: Date?
@@ -333,16 +337,12 @@ public extension UploadFile {
 }
 
 public extension UploadFile {
-    /// Centralise error cleaning
+    /// DTO of an UploadFile used by the FileProvider
+    /// Represents an `UploadFile` in the UploadQueue been uploaded
     func toUploadFileItemProvider() -> UploadFileProviderItem? {
         guard let pathURL else {
             return nil
         }
-
-//        if let cached = Self.cache.object(forKey: id as NSString) {
-//            print("cache hit \(cached)")
-//            return cached
-//        }
 
         let item = UploadFileProviderItem(uploadFileUUID: id,
                                           parentDirectoryId: parentDirectoryId,
@@ -353,8 +353,6 @@ public extension UploadFile {
                                           shouldRemoveAfterUpload: shouldRemoveAfterUpload,
                                           driveError: error)
 
-//        Self.cache.setObject(item, forKey: id as NSString)
-//        print("item:\(item)")
         return item
     }
 }

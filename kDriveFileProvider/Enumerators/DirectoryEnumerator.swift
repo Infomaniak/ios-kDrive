@@ -23,6 +23,7 @@ import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
     @LazyInjectService var additionalState: FileProviderExtensionAdditionalStatable
+    @LazyInjectService var uploadQueue: UploadQueueable
 
     let containerItemIdentifier: NSFileProviderItemIdentifier
     let driveFileManager: DriveFileManager
@@ -42,7 +43,13 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
+        let uid = "\(Int.random(in: 0 ... 999))"
+        Log.fileProvider("\(uid) enumerateItems \(String(decoding: page.rawValue, as: UTF8.self))")
         Task { [weak self] in
+            Log.fileProvider("\(uid) enumerateItems start")
+            defer {
+                Log.fileProvider("\(uid) enumerateItems end")
+            }
             guard let self else {
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                 return
@@ -50,9 +57,27 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
 
+            // Add uploading files within the first page
+            var uploadFilesItems = [UploadFileProviderItem]()
+            if page.isInitialPage {
+                let uploadingFiles = uploadQueue.getUploadingFiles(withParent: parentDirectory.id,
+                                                                   userId: driveFileManager.drive.userId,
+                                                                   driveId: driveFileManager.drive.id)
+                for uploadFile in uploadingFiles {
+                    guard let uploadFileItem = uploadFile.toUploadFileItemProvider() else {
+                        continue
+                    }
+                    uploadFilesItems.append(uploadFileItem)
+                }
+                Log.fileProvider("\(uid) files uploading in progress: \(uploadFilesItems.count) INITIAL")
+            } else {
+                Log.fileProvider("\(uid) skip upload queue, not first page")
+            }
+
             guard !parentDirectory.fullyDownloaded else {
                 let files = Array(parentDirectory.children) + [parentDirectory]
-                observer.didEnumerate(files.map { FileProviderItem(file: $0, domain: self.domain) })
+                let filesItems = files.map { FileProviderItem(file: $0, domain: self.domain) }
+                observer.didEnumerate(uploadFilesItems + filesItems)
                 observer.finishEnumerating(upTo: nil)
                 return
             }
@@ -98,10 +123,13 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 }
 
-                observer.didEnumerate(
-                    response.data.files.map { FileProviderItem(file: $0, domain: self.domain) } +
-                        [FileProviderItem(file: liveParentDirectory, domain: domain)]
-                )
+                let pageItems: [NSFileProviderItemProtocol] = uploadFilesItems
+                    + response.data.files.map { FileProviderItem(file: $0, domain: self.domain) }
+                    + [FileProviderItem(file: liveParentDirectory, domain: domain)]
+
+                Log.fileProvider("\(uid) didEnumerate \(pageItems.count) items")
+
+                observer.didEnumerate(pageItems)
 
                 if response.hasMore,
                    let nextCursor = response.cursor {
@@ -112,13 +140,14 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             } catch let error as NSFileProviderError {
                 observer.finishEnumeratingWithError(error)
             } catch {
-                Log.fileProvider("DirectoryEnumerator - Error in enumerateItems \(error)", level: .error)
+                Log.fileProvider("\(uid) DirectoryEnumerator - Error in enumerateItems \(error)", level: .error)
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
     }
 
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from syncAnchor: NSFileProviderSyncAnchor) {
+        Log.fileProvider("enumerateChanges \(String(decoding: syncAnchor.rawValue, as: UTF8.self))")
         Task { [weak self] in
             guard let self else {
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))

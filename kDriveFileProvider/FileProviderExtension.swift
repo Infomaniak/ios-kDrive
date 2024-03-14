@@ -107,17 +107,28 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
 
         // Read from upload queue
-        // TODO: try with a cache to see if identity of object is used a well as identifier.
-        else if let uploadFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+        else if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
-            guard let uploadItem = uploadFile.toUploadFileItemProvider() else {
-                Log.fileProvider("item for identifier - Unable to generate an UploadFileItemProvider", level: .error)
+            guard let uploadingItem = uploadingFile.toUploadFileItemProvider() else {
+                Log.fileProvider("item for identifier - Unable to generate an uploading UploadFileItemProvider", level: .error)
                 throw NSFileProviderError(.noSuchItem)
             }
-            return uploadItem
+            return uploadingItem
         }
 
-        // Read DB
+        // Read form uploaded UploadFiles
+        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue),
+                let remoteFileId = uploadedFile.remoteFileId {
+            guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
+                Log.fileProvider("Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
+                throw NSFileProviderError(.noSuchItem)
+            }
+
+            Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
+            return FileProviderItem(file: file, domain: domain)
+        }
+
+        // Read Files DB
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
@@ -138,7 +149,20 @@ final class FileProviderExtension: NSFileProviderExtension {
             return item.pathURL
         }
 
-        // Read form DB
+        // Read from uploaded UploadFile
+        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue) {
+            Log.fileProvider("urlForItem - Uploaded file")
+            if let remoteFileId = uploadedFile.remoteFileId {
+                guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
+                    Log.fileProvider("urlForItem - Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
+                    return nil
+                }
+
+                return FileProviderItem(file: file, domain: domain).storageUrl
+            }
+        }
+
+        // Read form Files DB
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("urlForItem - in database")
@@ -369,6 +393,12 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         uploadQueue.resumeAllOperations()
         _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
+
+//        Task {
+//            // Signal change when the upload has started
+//            try await self.manager.signalEnumerator(for: .workingSet)
+//            try await self.manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier)
+//        }
     }
 
     // MARK: - Enumeration

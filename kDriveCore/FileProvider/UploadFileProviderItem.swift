@@ -62,7 +62,8 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         return uploadFile != nil
     }
 
-    public var isUploaded = false
+    /// Always false as describes an upload in progress
+    public let isUploaded = false
 
     public var uploadingError: (any Error)?
 

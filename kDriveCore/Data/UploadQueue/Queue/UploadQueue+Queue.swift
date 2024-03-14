@@ -30,6 +30,13 @@ public protocol UploadQueueable {
     /// - Returns:Matching UploadFile if any
     func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
 
+    /// Fetch all uploading item for a given parent folder, userId, driveId
+    func getUploadingFiles(withParent parentId: Int,
+                           userId: Int,
+                           driveId: Int) -> Results<UploadFile>
+
+    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
+
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
 

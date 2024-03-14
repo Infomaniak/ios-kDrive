@@ -425,7 +425,6 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
-    public var userId: Int?
     public var isFirstInCollection = false
     public var isLastInCollection = false
 

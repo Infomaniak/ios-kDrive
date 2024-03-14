@@ -477,7 +477,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
     }
 
-    /// Propagate the newly uploaded DriveFile into the specialized Realm
+    /// Propagate the newly uploaded DriveFile / File into the specialized Realms
     func handleDriveFilePostUpload(_ driveFile: File) throws {
         var driveId: Int?
         var userId: Int?
@@ -485,6 +485,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         var parentDirectoryId: Int?
         try transactionWithFile { file in
             file.uploadDate = Date()
+            file.remoteFileId = driveFile.id
             file.uploadingSession = nil // For the sake of keeping the Realm small
             file.error = nil
             driveId = file.driveId
@@ -501,15 +502,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             return
         }
 
-        // File is already here or has parent in DB let's update it
-        let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
-        queue.execute { realm in
-            if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil
-                || relativePath.isEmpty {
-                let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
-                queue.bufferedWrite(in: parent, file: driveFile)
-                self.result.driveFile = File(value: driveFile)
-            }
+        // Add/Update the new remote `File` in database immediately
+        let driveFileManagerRealm = driveFileManager.getRealm()
+        driveFileManagerRealm.refresh()
+        try driveFileManagerRealm.safeWrite {
+            driveFileManagerRealm.add(driveFile, update: .modified)
         }
+
+        result.driveFile = File(value: driveFile)
     }
 }
