@@ -137,10 +137,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     enum HomeTopRow: Differentiable {
-        case offline
         case search
         case insufficientStorage
-        case uploadsInProgress
     }
 
     enum RecentFileRow: Differentiable {
@@ -152,7 +150,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private var uploadCountManager: UploadCountManager!
     var driveFileManager: DriveFileManager {
         didSet {
-            observeUploadCount()
             observeFileUpdated()
         }
     }
@@ -229,7 +226,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     func observeFileUpdated() {
-        guard driveFileManager != nil else { return }
         filesObserver?.cancel()
         filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [weak self] file in
             guard let self else { return }
@@ -237,56 +233,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         }
     }
 
-    private func observeUploadCount() {
-        guard driveFileManager != nil else { return }
-
-        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self else { return }
-
-            guard let cell = getUploadsInProgressTableViewCell(),
-                  uploadCountManager.uploadCount > 0 else {
-                // Delete / Add cell
-                reloadTopRows()
-                return
-            }
-
-            // Update cell
-            cell.setUploadCount(uploadCountManager.uploadCount)
-        }
-    }
-
-    private func getUploadsInProgressTableViewCell() -> UploadsInProgressTableViewCell? {
-        guard let index = viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }) else {
-            return nil
-        }
-
-        guard let wrapperCell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell
-        else {
-            return nil
-        }
-
-        guard let cell = wrapperCell.wrappedCell as? UploadsInProgressTableViewCell else {
-            return nil
-        }
-
-        return cell
-    }
-
     private func getTopRows() -> [HomeTopRow] {
-        var topRows: [HomeTopRow]
-        if ReachabilityListener.instance.currentStatus == .offline {
-            topRows = [.offline, .search]
-        } else {
-            topRows = [.search]
-        }
+        var topRows: [HomeTopRow] = [.search]
 
-        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
-            topRows.append(.uploadsInProgress)
-        }
-
-        guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
+        guard driveFileManager.drive.size > 0 else {
             return topRows
         }
+
         let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
         if (storagePercentage > UIConstants.insufficientStorageMinimumPercentage) && showInsufficientStorage {
             topRows.append(.insufficientStorage)
@@ -404,14 +357,14 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
             elementKind: RootMenuHeaderView.kind.rawValue,
-            alignment: .top
+            alignment: .bottom
         )
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 
         section.boundarySupplementaryItems = [sectionHeaderItem]
         return section
@@ -451,10 +404,6 @@ extension HomeViewController {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
-            case .offline:
-                let cell = collectionView.dequeueReusableCell(type: HomeOfflineCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                return cell
             case .search:
                 let cell = collectionView.dequeueReusableCell(type: HomeFileSearchCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
@@ -476,16 +425,6 @@ extension HomeViewController {
                                                      isLoading: viewModel.isLoading)
                     reload(newViewModel: newViewModel)
                 }
-                return cell
-            case .uploadsInProgress:
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "WrapperCollectionViewCell",
-                    for: indexPath
-                ) as! WrapperCollectionViewCell
-                let tableCell = cell.reuse(withCellType: UploadsInProgressTableViewCell.self)
-                tableCell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                tableCell.progressView.enableIndeterminate()
-                tableCell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
             }
         case .recentFiles:
@@ -566,15 +505,11 @@ extension HomeViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
-            switch viewModel.topRows[indexPath.row] {
-            case .offline, .insufficientStorage:
-                return
-            case .uploadsInProgress:
-                let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
-                navigationController?.pushViewController(uploadViewController, animated: true)
-            case .search:
+            switch viewModel.topRows[indexPath.row] { case .search:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
                 present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+            default:
+                return
             }
         case .recentFiles:
             if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1), !viewModel.recentFilesEmpty {
