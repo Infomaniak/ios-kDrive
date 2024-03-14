@@ -593,37 +593,6 @@ extension HomeViewController {
     }
 }
 
-// MARK: - FileCellDelegate
-
-extension HomeViewController: FileCellDelegate {
-    func didTapMoreButton(_ cell: FileCollectionViewCell) {
-        guard let indexPath = collectionView.indexPath(for: cell) else {
-            return
-        }
-
-        if case .file(let files) = viewModel.recentFiles {
-            showQuickActionsPanel(file: files[indexPath.row])
-        }
-    }
-
-    private func showQuickActionsPanel(file: File) {
-        if fileInformationsViewController == nil {
-            fileInformationsViewController = FileActionsFloatingPanelViewController()
-            fileInformationsViewController.presentingParent = self
-            fileInformationsViewController.normalFolderHierarchy = true
-            floatingPanelViewController = DriveFloatingPanelController()
-            floatingPanelViewController?.isRemovalInteractionEnabled = true
-            floatingPanelViewController?.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
-            floatingPanelViewController?.set(contentViewController: fileInformationsViewController)
-            floatingPanelViewController?.track(scrollView: fileInformationsViewController.collectionView)
-        }
-        fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
-        if let floatingPanelViewController {
-            present(floatingPanelViewController, animated: true)
-        }
-    }
-}
-
 // MARK: - RecentActivityDelegate
 
 extension HomeViewController: RecentActivityDelegate {
