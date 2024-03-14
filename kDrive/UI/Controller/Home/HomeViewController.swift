@@ -150,7 +150,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     private var uploadCountManager: UploadCountManager!
-    var driveFileManager: DriveFileManager! {
+    var driveFileManager: DriveFileManager {
         didSet {
             observeUploadCount()
             observeFileUpdated()
@@ -511,26 +511,19 @@ extension HomeViewController {
         if kind == UICollectionView.elementKindSectionHeader {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
-                let driveHeaderView = collectionView.dequeueReusableSupplementaryView(
+                let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
                     view: HomeLargeTitleHeaderView.self,
                     for: indexPath
                 )
-                driveHeaderView.isEnabled = accountManager.drives.count > 1
-                driveHeaderView.text = driveFileManager.drive.name
-                driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                    guard let self else { return }
-                    let drives = accountManager.drives
-                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
-                        options: drives,
-                        selectedOption: driveFileManager.drive,
-                        headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                        delegate: self
-                    )
-                    present(floatingPanelViewController, animated: true)
-                }
-                headerViewHeight = driveHeaderView.frame.height
-                return driveHeaderView
+                homeLargeTitleHeaderView.configureForDriveSwitch(
+                    accountManager: accountManager,
+                    driveFileManager: driveFileManager,
+                    presenter: self
+                )
+
+                headerViewHeight = homeLargeTitleHeaderView.frame.height
+                return homeLargeTitleHeaderView
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,

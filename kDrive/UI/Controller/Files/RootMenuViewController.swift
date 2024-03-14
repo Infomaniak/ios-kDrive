@@ -166,7 +166,19 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
             switch kind {
             case UICollectionView.elementKindSectionHeader:
-                return generateHomeLargeTitleHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
+                let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: HomeLargeTitleHeaderView.self,
+                    for: indexPath
+                )
+                homeLargeTitleHeaderView.configureForDriveSwitch(
+                    accountManager: accountManager,
+                    driveFileManager: driveFileManager,
+                    presenter: self
+                )
+
+                headerViewHeight = homeLargeTitleHeaderView.frame.height
+                return homeLargeTitleHeaderView
             case RootMenuHeaderView.kind.rawValue:
                 return generateStickyHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
             default:
@@ -194,31 +206,6 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager)
         return headerView
-    }
-
-    func generateHomeLargeTitleHeaderView(collectionView: UICollectionView,
-                                          kind: String,
-                                          indexPath: IndexPath) -> HomeLargeTitleHeaderView {
-        let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            view: HomeLargeTitleHeaderView.self,
-            for: indexPath
-        )
-        homeLargeTitleHeaderView.isEnabled = accountManager.drives.count > 1
-        homeLargeTitleHeaderView.text = driveFileManager.drive.name
-        homeLargeTitleHeaderView.titleButtonPressedHandler = { [weak self] _ in
-            guard let self else { return }
-            let drives = accountManager.drives
-            let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
-                options: drives,
-                selectedOption: driveFileManager.drive,
-                headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                delegate: self
-            )
-            present(floatingPanelViewController, animated: true)
-        }
-        headerViewHeight = homeLargeTitleHeaderView.frame.height
-        return homeLargeTitleHeaderView
     }
 
     static func createListLayout() -> UICollectionViewLayout {
