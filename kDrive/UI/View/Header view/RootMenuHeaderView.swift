@@ -57,10 +57,19 @@ class RootMenuHeaderView: UICollectionReusableView {
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
     }
 
-    func configureInCollectionView(_ collectionView: UICollectionView, driveFileManager: DriveFileManager) {
+    func configureInCollectionView(
+        _ collectionView: UICollectionView,
+        driveFileManager: DriveFileManager,
+        presenter: UIViewController
+    ) {
         self.collectionView = collectionView
         observeNetworkChange()
         observeUploadCount(driveFileManager: driveFileManager)
+
+        onUploadCardViewTapped = {
+            let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+            presenter.navigationController?.pushViewController(uploadViewController, animated: true)
+        }
     }
 
     private func hideIfNeeded() {

@@ -171,6 +171,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                     view: HomeLargeTitleHeaderView.self,
                     for: indexPath
                 )
+
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
@@ -180,32 +181,20 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
             case RootMenuHeaderView.kind.rawValue:
-                return generateStickyHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
+                let headerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: RootMenuHeaderView.self,
+                    for: indexPath
+                )
+
+                headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
+                return headerView
             default:
                 fatalError("Unhandled kind \(kind)")
             }
         }
 
         dataSource?.apply(itemsSnapshot, animatingDifferences: false)
-    }
-
-    func generateStickyHeaderView(collectionView: UICollectionView,
-                                  kind: String,
-                                  indexPath: IndexPath) -> RootMenuHeaderView {
-        let headerView = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            view: RootMenuHeaderView.self,
-            for: indexPath
-        )
-
-        headerView.onUploadCardViewTapped = { [weak self] in
-            guard let self else { return }
-            let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
-            navigationController?.pushViewController(uploadViewController, animated: true)
-        }
-
-        headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager)
-        return headerView
     }
 
     static func createListLayout() -> UICollectionViewLayout {
