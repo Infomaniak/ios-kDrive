@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
@@ -114,8 +115,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
-        collectionView.register(supplementaryView: FilesHeaderView.self, forSupplementaryViewOfKind: .custom("sectionHeader"))
-
+        collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
         configureDataSource()
 
         let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
@@ -167,7 +167,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             switch kind {
             case UICollectionView.elementKindSectionHeader:
                 return generateHomeLargeTitleHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
-            case "sectionHeader":
+            case RootMenuHeaderView.kind.rawValue:
                 return generateStickyHeaderView(collectionView: collectionView, kind: kind, indexPath: indexPath)
             default:
                 fatalError("Unhandled kind \(kind)")
@@ -179,14 +179,21 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
     func generateStickyHeaderView(collectionView: UICollectionView,
                                   kind: String,
-                                  indexPath: IndexPath) -> FilesHeaderView {
-        let filesHeaderView = collectionView.dequeueReusableSupplementaryView(
+                                  indexPath: IndexPath) -> RootMenuHeaderView {
+        let headerView = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
-            view: FilesHeaderView.self,
+            view: RootMenuHeaderView.self,
             for: indexPath
         )
 
-        return filesHeaderView
+        headerView.onUploadCardViewTapped = { [weak self] in
+            guard let self else { return }
+            let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+            navigationController?.pushViewController(uploadViewController, animated: true)
+        }
+
+        headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager)
+        return headerView
     }
 
     func generateHomeLargeTitleHeaderView(collectionView: UICollectionView,
@@ -225,13 +232,14 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                                                        subitems: [item])
 
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                heightDimension: .estimated(40))
+                                                heightDimension: .estimated(0))
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: "sectionHeader",
+            elementKind: RootMenuHeaderView.kind.rawValue,
             alignment: .top
         )
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
         sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
