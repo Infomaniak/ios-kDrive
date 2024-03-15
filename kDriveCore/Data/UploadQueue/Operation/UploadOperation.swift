@@ -479,34 +479,38 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     /// Propagate the newly uploaded DriveFile / File into the specialized Realms
     func handleDriveFilePostUpload(_ driveFile: File) throws {
-        var driveId: Int?
-        var userId: Int?
-        var relativePath: String?
-        var parentDirectoryId: Int?
+        let readOnlyFile = try readOnlyFile()
+        let driveId = readOnlyFile.driveId
+        let userId = readOnlyFile.userId
+
+        let driveFileManagerContext: DriveFileManagerContext
+        @InjectService var appContext: AppContextServiceable
+        switch appContext.context {
+        case .fileProviderExtension:
+            driveFileManagerContext = .fileProvider
+        case .app, .shareExtension, .actionExtension:
+            // TODO: fix for `shared with me`
+            driveFileManagerContext = .drive
+        }
+
+        // Add/Update the new remote `File` in database immediately
+        if let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
+            .instanceWith(context: driveFileManagerContext) {
+            let driveFileManagerRealm = driveFileManager.getRealm()
+
+            driveFileManagerRealm.refresh()
+            try driveFileManagerRealm.safeWrite {
+                driveFileManagerRealm.add(driveFile, update: .modified)
+            }
+        }
+
+        // Update the UploadFile to reflect the upload is finished
+        // This will generate events threw observation
         try transactionWithFile { file in
             file.uploadDate = Date()
             file.remoteFileId = driveFile.id
             file.uploadingSession = nil // For the sake of keeping the Realm small
             file.error = nil
-            driveId = file.driveId
-            userId = file.userId
-            relativePath = file.relativePath
-            parentDirectoryId = file.parentDirectoryId
-        }
-
-        guard let driveId,
-              let userId,
-              let relativePath,
-              let parentDirectoryId,
-              let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-            return
-        }
-
-        // Add/Update the new remote `File` in database immediately
-        let driveFileManagerRealm = driveFileManager.getRealm()
-        driveFileManagerRealm.refresh()
-        try driveFileManagerRealm.safeWrite {
-            driveFileManagerRealm.add(driveFile, update: .modified)
         }
 
         result.driveFile = File(value: driveFile)

@@ -76,7 +76,11 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             guard !parentDirectory.fullyDownloaded else {
                 let files = Array(parentDirectory.children) + [parentDirectory]
-                let filesItems = files.map { FileProviderItem(file: $0, domain: self.domain) }
+                let filesItems = files.map { item in
+                    autoreleasepool {
+                        return FileProviderItem(file: item, domain: self.domain)
+                    }
+                }
                 observer.didEnumerate(uploadFilesItems + filesItems)
                 observer.finishEnumerating(upTo: nil)
                 return
@@ -124,8 +128,11 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 }
 
                 let pageItems: [NSFileProviderItemProtocol] = uploadFilesItems
-                    + response.data.files.map { FileProviderItem(file: $0, domain: self.domain) }
-                    + [FileProviderItem(file: liveParentDirectory, domain: domain)]
+                    + response.data.files.map { item in
+                        autoreleasepool {
+                            return FileProviderItem(file: item, domain: self.domain)
+                        }
+                    }
 
                 Log.fileProvider("\(uid) didEnumerate \(pageItems.count) items")
 

@@ -120,19 +120,21 @@ final class FileProviderExtension: NSFileProviderExtension {
         else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue),
                 let remoteFileId = uploadedFile.remoteFileId {
             guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
-                Log.fileProvider("Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
+                Log.fileProvider("Unable to bridge UploadFile \(uploadedFile.id) to File \(remoteFileId)", level: .error)
                 throw NSFileProviderError(.noSuchItem)
             }
 
             Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
-            return FileProviderItem(file: file, domain: domain)
+            let item = FileProviderItem(file: file, domain: domain)
+            return item
         }
 
         // Read Files DB
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
-            return FileProviderItem(file: file, domain: domain)
+            let item = FileProviderItem(file: file, domain: domain)
+            return item
         }
 
         // did not match anything
@@ -393,12 +395,6 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         uploadQueue.resumeAllOperations()
         _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
-
-//        Task {
-//            // Signal change when the upload has started
-//            try await self.manager.signalEnumerator(for: .workingSet)
-//            try await self.manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier)
-//        }
     }
 
     // MARK: - Enumeration
