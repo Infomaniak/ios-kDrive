@@ -116,6 +116,9 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+
         configureDataSource()
 
         let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
@@ -145,6 +148,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
         present(searchViewController, animated: true)
+    }
+
+    @objc func forceRefresh() {
+        Task {
+            try? await driveFileManager.initRoot()
+            refreshControl.endRefreshing()
+        }
     }
 
     func configureDataSource() {
