@@ -246,7 +246,9 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self, !self.currentDirectory.isInvalidated else {
+                guard let self,
+                      !self.currentDirectory.isInvalidated,
+                      let liveCurrentDirectory = currentDirectory.thaw() else {
                     return
                 }
 
@@ -260,11 +262,13 @@ class FileListViewModel: SelectDelegate {
                 switch change {
                 case .initial(let results):
                     // update observed realm objects directly
+                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     // update observed realm objects directly
+                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated(
