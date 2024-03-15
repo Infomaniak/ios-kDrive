@@ -709,9 +709,9 @@ public final class DriveFileManager {
         }
         if let date {
             searchResults = searchResults.filter(NSPredicate(
-                format: "lastModifiedAt >= %d && lastModifiedAt <= %d",
-                Int(date.start.timeIntervalSince1970),
-                Int(date.end.timeIntervalSince1970)
+                format: "lastModifiedAt >= %@ && lastModifiedAt <= %@",
+                date.start as NSDate,
+                date.end as NSDate
             ))
         }
         if let fileType {
