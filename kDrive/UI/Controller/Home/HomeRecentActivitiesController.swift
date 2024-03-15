@@ -39,7 +39,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
 
     override func restoreCachedPages() {
         invalidated = false
-        homeViewController?.reloadWith(fetchedFiles: .fileActivity(mergedActivities), isEmpty: empty)
+        homeViewController?.reloadWith(fetchedFiles: mergedActivities, isEmpty: empty)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -87,7 +87,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                 return
             }
             Task { [activities = self.mergedActivities] in
-                self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(activities), isEmpty: self.empty)
+                self.homeViewController?.reloadWith(fetchedFiles: activities, isEmpty: self.empty)
                 self.loading = false
             }
         }

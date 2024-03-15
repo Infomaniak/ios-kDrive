@@ -48,8 +48,6 @@ class HomeRecentFilesController {
     var moreComing = true
     var invalidated = false
 
-    private var files = [File]()
-
     init(
         driveFileManager: DriveFileManager,
         homeViewController: HomeViewController,
@@ -76,9 +74,7 @@ class HomeRecentFilesController {
     }
 
     func restoreCachedPages() {
-        invalidated = false
-        homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: empty)
-        refreshIfNeeded()
+        fatalError(#function + " needs to be overwritten")
     }
 
     func refreshIfNeeded() {
@@ -87,56 +83,19 @@ class HomeRecentFilesController {
         }
     }
 
-    func refreshIfNeeded(with file: File) {
-        if filesContain(file) {
-            forceRefresh()
-        }
-    }
-
-    func filesContain(_ file: File) -> Bool {
-        return files.contains { $0.id == file.id }
-    }
-
     func forceRefresh() {
         lastUpdate = Date()
         loadNextPage(forceRefresh: true)
     }
 
     func resetController() {
-        files = []
         nextCursor = nil
         loading = false
         moreComing = true
     }
 
     func loadNextPage(forceRefresh: Bool = false) {
-        if forceRefresh {
-            resetController()
-        }
-
-        invalidated = false
-        guard !loading && moreComing else {
-            return
-        }
-
-        loading = true
-        Task {
-            do {
-                let fetchedFiles = try await getFiles()
-                self.files.append(contentsOf: fetchedFiles.files)
-                self.empty = self.nextCursor == nil && fetchedFiles.files.isEmpty
-                self.moreComing = fetchedFiles.nextCursor == nil
-                self.nextCursor = fetchedFiles.nextCursor
-
-                guard !self.invalidated else {
-                    return
-                }
-                self.homeViewController?.reloadWith(fetchedFiles: .file(self.files), isEmpty: self.empty)
-            } catch {
-                UIConstants.showSnackBarIfNeeded(error: error)
-            }
-            self.loading = false
-        }
+        fatalError(#function + " needs to be overwritten")
     }
 
     func getEmptyLayout() -> NSCollectionLayoutSection {
