@@ -101,7 +101,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     enum HomeTopRow: Differentiable {
-        case search
         case insufficientStorage
     }
 
@@ -148,7 +147,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
-        collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
         collectionView.register(cellView: FileCollectionViewCell.self)
@@ -166,6 +164,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         navigationItem.hideBackButtonText()
 
+        let searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonPressed))
+        navigationItem.rightBarButtonItems = [searchButton]
+
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
@@ -182,8 +183,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         MatomoUtils.track(view: ["Home"])
     }
 
+    @objc func searchButtonPressed() {
+        let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+        present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
+    }
+
     private func getTopRows() -> [HomeTopRow] {
-        var topRows: [HomeTopRow] = [.search]
+        var topRows: [HomeTopRow] = []
 
         guard driveFileManager.drive.size > 0 else {
             return topRows
@@ -352,10 +358,6 @@ extension HomeViewController {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
-            case .search:
-                let cell = collectionView.dequeueReusableCell(type: HomeFileSearchCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                return cell
             case .insufficientStorage:
                 let cell = collectionView.dequeueReusableCell(type: InsufficientStorageCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
@@ -443,20 +445,6 @@ extension HomeViewController {
 // MARK: - UICollectionViewDelegate
 
 extension HomeViewController {
-    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        switch HomeSection.allCases[indexPath.section] {
-        case .top:
-            switch viewModel.topRows[indexPath.row] { case .search:
-                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-                present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
-            default:
-                return
-            }
-        case .recentFiles:
-            break
-        }
-    }
-
     override func collectionView(
         _ collectionView: UICollectionView,
         willDisplay cell: UICollectionViewCell,
