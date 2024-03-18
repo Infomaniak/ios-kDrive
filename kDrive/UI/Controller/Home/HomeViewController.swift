@@ -147,14 +147,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
-        collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
-        collectionView.register(cellView: FileCollectionViewCell.self)
-        collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
-        collectionView.register(cellView: FileHomeCollectionViewCell.self)
         collectionView.register(cellView: RecentActivityCollectionViewCell.self)
-        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
