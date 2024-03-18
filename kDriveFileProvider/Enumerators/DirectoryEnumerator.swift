@@ -81,7 +81,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         return FileProviderItem(file: item, domain: self.domain)
                     }
                 }
-                observer.didEnumerate(uploadFilesItems + filesItems)
+
+                let objectsToEnumerate: [NSFileProviderItemProtocol] = uploadFilesItems + filesItems
+                observer.didEnumerate(objectsToEnumerate)
                 observer.finishEnumerating(upTo: nil)
                 return
             }

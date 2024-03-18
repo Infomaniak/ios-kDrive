@@ -122,9 +122,11 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         isDirectory = file.isDirectory
         @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
+        // TODO: Remove
         let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
         if file.isDirectory && file.fullyDownloaded {
-            childItemCount = NSNumber(value: file.children.count + tmpChildren.count)
+            let totalCount = file.children.count + tmpChildren.count
+            childItemCount = NSNumber(value: totalCount)
         }
 
         if let size = file.size {
@@ -158,5 +160,30 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         let itemStorageUrl = fileProviderService.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         storageUrl = itemStorageUrl
+    }
+
+    override public var description: String {
+        """
+        \(super.description)
+        fileId:\(String(describing: fileId))
+        itemIdentifier:\(itemIdentifier)
+        filename:\(filename)
+        typeIdentifier:\(typeIdentifier)
+        capabilities:\(capabilities)
+        parentItemIdentifier:\(parentItemIdentifier)
+        isDirectory:\(isDirectory)
+        childItemCount:\(String(describing: childItemCount))
+        documentSize:\(String(describing: documentSize))
+        createdBy:\(String(describing: createdBy))
+        isTrashed:\(isTrashed)
+        creationDate:\(String(describing: creationDate))
+        contentModificationDate:\(String(describing: contentModificationDate))
+        versionIdentifier:\(String(describing: versionIdentifier))
+        isMostRecentVersionDownloaded:\(isMostRecentVersionDownloaded)
+        isDownloaded:\(isDownloaded)
+        isShared:\(isShared)
+        ownerNameComponents:\(String(describing: ownerNameComponents))
+        storageUrl:\(storageUrl)
+        """
     }
 }

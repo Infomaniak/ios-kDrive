@@ -188,6 +188,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                                            directoryPath: uploadFile.relativePath,
                                                                            fileData: Data())
 
+        // Make sure the parent of the `File` is transferred from the `UploadFile`
+        driveFile.parentId = uploadFile.parentDirectoryId
+
         try handleDriveFilePostUpload(driveFile)
 
         Log.uploadOperation("Empty file uploaded finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
@@ -497,10 +500,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
             .instanceWith(context: driveFileManagerContext) {
             let driveFileManagerRealm = driveFileManager.getRealm()
-
             driveFileManagerRealm.refresh()
+
+            let parentFolder = driveFileManagerRealm.objects(File.self)
+                .filter("id == %@", driveFile.parentId)
+                .first
+
             try driveFileManagerRealm.safeWrite {
                 driveFileManagerRealm.add(driveFile, update: .modified)
+
+                // Make sure the parent folder state is consistent, if available
+                parentFolder?.children.insert(driveFile)
             }
         }
 
