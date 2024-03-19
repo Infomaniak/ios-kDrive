@@ -17,4 +17,53 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FileProvider
 import Foundation
+
+/// Something to standardise the bridge from Realm Objects to `FileProvider` DTOs
+protocol FileProviderItemProvider {
+    /// Anything  _to_ FileProvider DTO
+    func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                            domain: NSFileProviderDomain?) -> NSFileProviderItem
+
+    func toFileProviderItem() -> NSFileProviderItem
+}
+
+extension FileProviderItemProvider {
+    func toFileProviderItem() -> NSFileProviderItem {
+        toFileProviderItem(parent: nil, domain: nil)
+    }
+}
+
+/// Something to hide implementation details form the FileProviderExtension
+public extension NSFileProviderItem {
+    func trashModifier(newValue: Bool) {
+        if let item = self as? FileProviderItem {
+            item.isTrashed = newValue
+        } else if let item = self as? UploadFileProviderItem {
+            item.isTrashed = newValue
+        }
+
+        fatalError("unsupported type")
+    }
+
+    func downloadedModifier(newValue: Bool) {
+        if let item = self as? FileProviderItem {
+            item.isDownloaded = newValue
+        } else if let item = self as? UploadFileProviderItem {
+            item.isDownloaded = newValue
+        }
+
+        fatalError("unsupported type")
+    }
+
+    func favoriteRankModifier(newValue: NSNumber?) {
+        if let item = self as? FileProviderItem {
+            item.favoriteRank = newValue
+        } else if let item = self as? UploadFileProviderItem {
+            item.favoriteRank = newValue
+        }
+
+        fatalError("unsupported type")
+    }
+}
