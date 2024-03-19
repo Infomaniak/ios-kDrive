@@ -21,6 +21,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import SafariServices
 import StoreKit
 import UIKit
 
@@ -165,11 +166,12 @@ extension AppDelegate {
 
     private func openUserReport() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
-        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
+        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS),
+              let presentingViewController = window?.rootViewController else {
             return
         }
         UserDefaults.shared.appReview = .feedback
-        UIApplication.shared.open(url)
+        presentingViewController.present(SFSafariViewController(url: url), animated: true)
     }
 
     // TODO: Refactor to async
