@@ -44,7 +44,8 @@ extension FileProviderExtension {
                 continue
             }
 
-            guard file.supportedBy.contains(.thumbnail) else {
+            // If we do not have `supportedBy` info, we try to load avatars anyway
+            if !file.supportedBy.isEmpty, file.supportedBy.contains(.thumbnail) {
                 perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
                 progress.completedUnitCount += 1
                 if progress.isFinished {
