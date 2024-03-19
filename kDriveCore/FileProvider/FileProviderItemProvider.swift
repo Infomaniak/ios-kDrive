@@ -47,16 +47,6 @@ public extension NSFileProviderItem {
         }
     }
 
-    func downloadedModifier(newValue: Bool) {
-        if let item = self as? FileProviderItem {
-            item.isDownloaded = newValue
-        } else if let item = self as? UploadFileProviderItem {
-            item.isDownloaded = newValue
-        } else {
-            fatalError("unsupported type")
-        }
-    }
-
     func favoriteRankModifier(newValue: NSNumber?) {
         if let item = self as? FileProviderItem {
             item.favoriteRank = newValue

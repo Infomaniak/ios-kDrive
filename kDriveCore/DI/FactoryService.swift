@@ -170,6 +170,7 @@ public enum FactoryService {
                 (loggerFactory, "UploadOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
+                (loggerFactory, "DownloadQueue"),
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
                 (loggerFactory, "AppDelegate"),
