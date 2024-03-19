@@ -42,9 +42,9 @@ public extension NSFileProviderItem {
             item.isTrashed = newValue
         } else if let item = self as? UploadFileProviderItem {
             item.isTrashed = newValue
+        } else {
+            fatalError("unsupported type")
         }
-
-        fatalError("unsupported type")
     }
 
     func downloadedModifier(newValue: Bool) {
@@ -52,9 +52,9 @@ public extension NSFileProviderItem {
             item.isDownloaded = newValue
         } else if let item = self as? UploadFileProviderItem {
             item.isDownloaded = newValue
+        } else {
+            fatalError("unsupported type")
         }
-
-        fatalError("unsupported type")
     }
 
     func favoriteRankModifier(newValue: NSNumber?) {
@@ -62,8 +62,8 @@ public extension NSFileProviderItem {
             item.favoriteRank = newValue
         } else if let item = self as? UploadFileProviderItem {
             item.favoriteRank = newValue
+        } else {
+            fatalError("unsupported type")
         }
-
-        fatalError("unsupported type")
     }
 }
