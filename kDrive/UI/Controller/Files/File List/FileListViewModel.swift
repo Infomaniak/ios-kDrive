@@ -141,7 +141,7 @@ class FileListViewModel: SelectDelegate {
             // This may not be handled by observation alone
             if let onFileListUpdated {
                 SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre onFileListUpdated set")
-                onFileListUpdated([], [], [], [], _frozenFiles.isEmpty, true)
+                onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && _frozenFiles.isEmpty, true)
                 SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post onFileListUpdated set")
             } else {
                 SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "onFileListUpdated nil")
@@ -362,7 +362,8 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && files.isEmpty, false)
+        let liveCurrentDirectory = currentDirectory.thaw() ?? currentDirectory
+        onFileListUpdated?([], [], [], [], liveCurrentDirectory.fullyDownloaded && files.isEmpty, false)
     }
 
     func loadActivities() async throws {
