@@ -67,6 +67,12 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
 
     public var uploadingError: (any Error)?
 
+    public var isTrashed = false
+
+    public var isDownloaded = false
+
+    public var favoriteRank: NSNumber?
+
     public init(
         uploadFileUUID: String,
         parentDirectoryId: Int,
@@ -97,8 +103,8 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
     }
 }
 
-// TODO: Share protocol btwn UploadFileProviderItem / UploadFile
 public extension UploadFileProviderItem {
+    /// FileProvider DTO to DB
     var toUploadFile: UploadFile {
         UploadFile(
             parentDirectoryId: parentDirectoryId,

@@ -58,15 +58,13 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
 
             // Add uploading files within the first page
-            var uploadFilesItems = [UploadFileProviderItem]()
+            var uploadFilesItems = [NSFileProviderItem]()
             if page.isInitialPage {
                 let uploadingFiles = uploadQueue.getUploadingFiles(withParent: parentDirectory.id,
                                                                    userId: driveFileManager.drive.userId,
                                                                    driveId: driveFileManager.drive.id)
                 for uploadFile in uploadingFiles {
-                    guard let uploadFileItem = uploadFile.toUploadFileItemProvider() else {
-                        continue
-                    }
+                    let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, domain: domain)
                     uploadFilesItems.append(uploadFileItem)
                 }
                 Log.fileProvider("\(uid) files uploading in progress: \(uploadFilesItems.count) INITIAL")
@@ -78,7 +76,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let files = Array(parentDirectory.children) + [parentDirectory]
                 let filesItems = files.map { item in
                     autoreleasepool {
-                        return FileProviderItem(file: item, domain: self.domain)
+                        return item.toFileProviderItem(parent: nil, domain: domain)
                     }
                 }
 
@@ -132,7 +130,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let pageItems: [NSFileProviderItemProtocol] = uploadFilesItems
                     + response.data.files.map { item in
                         autoreleasepool {
-                            return FileProviderItem(file: item, domain: self.domain)
+                            return item.toFileProviderItem(parent: nil, domain: self.domain)
                         }
                     }
 
@@ -212,7 +210,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     parentDirectory.lastCursor = response.cursor
                 }
 
-                observer.didUpdate(updatedItems.map { FileProviderItem(file: $0, domain: domain) })
+                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(parent: nil, domain: domain) })
                 observer.didDeleteItems(withIdentifiers: deletedItems)
 
                 guard let newLastCursor = response.cursor,

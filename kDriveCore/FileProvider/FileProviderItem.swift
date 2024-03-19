@@ -104,13 +104,30 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var storageUrl: URL
     public var alreadyEnumerated = false
 
-    public init(file: File, parent: NSFileProviderItemIdentifier? = nil, domain: NSFileProviderDomain?) {
+    // MARK: Static
+
+    public static func getFileName(file: File) -> String {
+        file.name.isEmpty ? "Root" : file.name
+    }
+
+    public static func getStorageUrl(file: File, domain: NSFileProviderDomain?) -> URL {
+        @InjectService var fileProviderService: FileProviderServiceable
+        let identifier = NSFileProviderItemIdentifier(file.id)
+        let fileName = getFileName(file: file)
+        let storageUrl = fileProviderService.createStorageUrl(identifier: identifier, filename: fileName, domain: domain)
+        return storageUrl
+    }
+
+    /// Init a `FileProviderItem` DTO
+    ///
+    /// Prefer using `FileProviderItemProvider` than calling init directly
+    init(file: File, parent: NSFileProviderItemIdentifier? = nil, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
         @InjectService var fileProviderService: FileProviderServiceable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        filename = file.name.isEmpty ? "Root" : file.name
+        filename = Self.getFileName(file: file)
         typeIdentifier = file.typeIdentifier
 
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
@@ -158,8 +175,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             ownerNameComponents = nameComponents
         }
 
-        let itemStorageUrl = fileProviderService.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
-        storageUrl = itemStorageUrl
+        storageUrl = Self.getStorageUrl(file: file, domain: domain)
     }
 
     override public var description: String {

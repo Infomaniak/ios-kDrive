@@ -336,19 +336,18 @@ public extension UploadFile {
     }
 }
 
-public extension UploadFile {
+extension UploadFile: FileProviderItemProvider {
     /// DTO of an UploadFile used by the FileProvider
     /// Represents an `UploadFile` in the UploadQueue been uploaded
-    func toUploadFileItemProvider() -> UploadFileProviderItem? {
-        guard let pathURL else {
-            return nil
-        }
+    public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   domain: NSFileProviderDomain?) -> NSFileProviderItem {
+        // TODO: override parent and domain for future working set support.
 
         let item = UploadFileProviderItem(uploadFileUUID: id,
                                           parentDirectoryId: parentDirectoryId,
                                           userId: userId,
                                           driveId: driveId,
-                                          sourceUrl: pathURL,
+                                          sourceUrl: pathURL ?? URL(fileURLWithPath: "about:blank"),
                                           conflictOption: conflictOption,
                                           shouldRemoveAfterUpload: shouldRemoveAfterUpload,
                                           driveError: error)

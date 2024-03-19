@@ -35,11 +35,11 @@ extension FileProviderExtension {
 
             // Call completion handler with error if the file name already exists
             let itemsWithSameParent = file.children
-                .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
+                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + self.fileProviderState
                 .importedDocuments(forParent: parentItemIdentifier)
             let newItemFileName = directoryName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-               !collidingItem.isTrashed {
+               !(collidingItem.isTrashed ?? false) {
                 completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
                 return
             }
@@ -51,7 +51,7 @@ extension FileProviderExtension {
                     name: directoryName,
                     onlyForMe: false
                 )
-                completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
+                completionHandler(directory.toFileProviderItem(parent: nil, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
             }
@@ -103,11 +103,11 @@ extension FileProviderExtension {
             return
         }
         let itemsWithSameParent = file.children
-            .map { FileProviderItem(file: $0, domain: self.domain) } + fileProviderState
+            .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + fileProviderState
             .importedDocuments(forParent: parentItemIdentifier)
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !collidingItem.isTrashed {
+           !(collidingItem.isTrashed ?? false) {
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
@@ -174,13 +174,13 @@ extension FileProviderExtension {
             }
 
             // Check if file name already exists
-            let item = FileProviderItem(file: file, domain: self.domain)
+            let item = file.toFileProviderItem(parent: nil, domain: self.domain)
             let itemsWithSameParent = file.parent!.children
-                .map { FileProviderItem(file: $0, domain: self.domain) } + self.fileProviderState
+                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + self.fileProviderState
                 .importedDocuments(forParent: item.parentItemIdentifier)
             let newItemFileName = itemName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-               !collidingItem.isTrashed {
+               !(collidingItem.isTrashed ?? false) {
                 completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
                 return
             }
@@ -188,7 +188,9 @@ extension FileProviderExtension {
             let proxyFile = file.proxify()
             do {
                 let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                completionHandler(
+                    file.freeze().toFileProviderItem(parent: nil, domain: self.domain), nil
+                )
             } catch {
                 completionHandler(nil, error)
             }
@@ -221,7 +223,9 @@ extension FileProviderExtension {
             let proxyParent = parent.proxify()
             do {
                 let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                completionHandler(
+                    file.freeze().toFileProviderItem(parent: nil, domain: self.domain), nil
+                )
             } catch {
                 completionHandler(nil, error)
             }
@@ -242,8 +246,8 @@ extension FileProviderExtension {
             return
         }
 
-        let item = FileProviderItem(file: file, domain: domain)
-        item.favoriteRank = favoriteRank
+        let item = file.toFileProviderItem(parent: nil, domain: domain)
+        item.favoriteRankModifier(newValue: favoriteRank)
 
         completionHandler(item, nil)
     }
@@ -287,11 +291,16 @@ extension FileProviderExtension {
 
             // Make deleted file copy
             let deletedFile = file.detached()
-            let item = FileProviderItem(file: deletedFile, domain: self.domain)
-            item.isTrashed = true
+            let item = deletedFile.toFileProviderItem(parent: nil, domain: self.domain)
+            item.trashModifier(newValue: true)
+
             let proxyFile = file.proxify()
 
             do {
+                guard let item = item as? FileProviderItem else {
+                    return
+                }
+
                 _ = try await self.driveFileManager.delete(file: proxyFile)
                 self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
                 completionHandler(item, nil)
@@ -326,11 +335,9 @@ extension FileProviderExtension {
                 }
                 // Restore in given parent
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
-                let item = FileProviderItem(file: file, domain: self.domain)
-                if let parentItemIdentifier {
-                    item.parentItemIdentifier = parentItemIdentifier
-                }
-                item.isTrashed = false
+                let item = file.toFileProviderItem(parent: parentItemIdentifier, domain: self.domain)
+                item.trashModifier(newValue: false)
+
                 self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
                 completionHandler(item, nil)
 

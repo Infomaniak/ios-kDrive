@@ -81,7 +81,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         Task {
             do {
                 let (files, nextCursor) = try await self.fetchRoot(page: page)
-                observer.didEnumerate(files.map { FileProviderItem(file: $0, parent: .rootContainer, domain: domain) })
+                observer.didEnumerate(files.map { $0.toFileProviderItem(parent: .rootContainer, domain: domain) })
 
                 // there should never be more cursors but still implement next page logic just in case
                 if let nextCursor {
@@ -141,7 +141,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
                 let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
 
                 let updatedFiles = liveParentDirectory.children + [liveParentDirectory]
-                observer.didUpdate(updatedFiles.map { FileProviderItem(file: $0, parent: .rootContainer, domain: domain) })
+                observer.didUpdate(updatedFiles.map { $0.toFileProviderItem(parent: .rootContainer, domain: domain) })
                 observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
                 observer.finishEnumeratingChanges(
                     upTo: syncAnchor,

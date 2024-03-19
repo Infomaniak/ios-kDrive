@@ -109,10 +109,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Read from upload queue
         else if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
-            guard let uploadingItem = uploadingFile.toUploadFileItemProvider() else {
-                Log.fileProvider("item for identifier - Unable to generate an uploading UploadFileItemProvider", level: .error)
-                throw NSFileProviderError(.noSuchItem)
-            }
+            let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, domain: domain)
             return uploadingItem
         }
 
@@ -125,7 +122,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
-            let item = FileProviderItem(file: file, domain: domain)
+            let item = file.toFileProviderItem(parent: nil, domain: domain)
             return item
         }
 
@@ -133,7 +130,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
-            let item = FileProviderItem(file: file, domain: domain)
+            let item = file.toFileProviderItem(parent: nil, domain: domain)
             return item
         }
 
@@ -160,7 +157,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                     return nil
                 }
 
-                return FileProviderItem(file: file, domain: domain).storageUrl
+                return FileProviderItem.getStorageUrl(file: file, domain: domain)
             }
         }
 
@@ -168,7 +165,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("urlForItem - in database")
-            return FileProviderItem(file: file, domain: domain).storageUrl
+            return FileProviderItem.getStorageUrl(file: file, domain: domain)
         }
 
         // Did not match
@@ -228,7 +225,10 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
-        let item = FileProviderItem(file: file, domain: domain)
+        guard let item = file.toFileProviderItem(parent: nil, domain: domain) as? FileProviderItem else {
+            completionHandler(NSFileProviderError(.noSuchItem))
+            return
+        }
 
         if fileStorageIsCurrent(item: item, file: file) {
             // File is in the file provider and is the same, nothing to do...
@@ -326,7 +326,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             observationToken?.cancel()
 
             if error != nil {
-                item.isDownloaded = false
+                item.downloadedModifier(newValue: false)
                 completion(NSFileProviderError(.serverUnreachable))
                 self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             } else {
