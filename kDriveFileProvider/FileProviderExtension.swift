@@ -379,7 +379,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         let uploadFile = uploadFileProviderItem.toUploadFile
 
-        // TODO: Can we remove observation ?
+        // Observe queue for upload completion
         var observationToken: ObservationToken?
         observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
             observationToken?.cancel()

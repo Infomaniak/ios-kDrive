@@ -147,7 +147,6 @@ extension FileProviderExtension {
                                                 driveId: driveFileManager.drive.id,
                                                 sourceUrl: storageUrl,
                                                 conflictOption: .version,
-                                                shouldRemoveAfterUpload: false, /* should be true actually ?*/
                                                 driveError: nil)
         backgroundUpload(importItem) {
             completionHandler(importItem, nil)

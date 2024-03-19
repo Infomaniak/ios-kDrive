@@ -31,7 +31,6 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         userId:\(userId)
         driveId:\(driveId)
         sourceUrl:\(sourceUrl)
-        shouldRemoveAfterUpload:\(shouldRemoveAfterUpload)
         """
     }
 
@@ -40,7 +39,6 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
     var driveId: Int
     var sourceUrl: URL
     var conflictOption: ConflictOption
-    var shouldRemoveAfterUpload: Bool
 
     // MARK: Required NSFileProviderItem properties
 
@@ -80,7 +78,6 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         driveId: Int,
         sourceUrl: URL,
         conflictOption: ConflictOption,
-        shouldRemoveAfterUpload: Bool,
         driveError: DriveError?
     ) {
         Log.fileProvider("UploadFileProviderItem init UploadFile:\(uploadFileUUID)")
@@ -93,7 +90,6 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         typeIdentifier = sourceUrl.typeIdentifier ?? UTI.item.identifier
         capabilities = .allowsAll
         self.conflictOption = conflictOption
-        self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
 
         if let driveError {
             @InjectService var fileProviderService: FileProviderServiceable
@@ -113,8 +109,7 @@ public extension UploadFileProviderItem {
             fileProviderItemIdentifier: itemIdentifier.rawValue,
             url: sourceUrl,
             name: filename,
-            conflictOption: conflictOption,
-            shouldRemoveAfterUpload: shouldRemoveAfterUpload
+            conflictOption: conflictOption
         )
     }
 }

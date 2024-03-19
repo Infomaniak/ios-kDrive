@@ -349,7 +349,6 @@ extension UploadFile: FileProviderItemProvider {
                                           driveId: driveId,
                                           sourceUrl: pathURL ?? URL(fileURLWithPath: "about:blank"),
                                           conflictOption: conflictOption,
-                                          shouldRemoveAfterUpload: shouldRemoveAfterUpload,
                                           driveError: error)
 
         return item
