@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import kDriveResources
 import UIKit
 
@@ -168,6 +169,10 @@ public enum Constants {
         if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
             UIApplication.shared.open(settingsUrl)
         }
+    }
+
+    public static func appVersionLabel() -> String {
+        return CorePlatform.appVersionLabel(fallbackAppName: "Mail")
     }
 }
 

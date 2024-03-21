@@ -740,7 +740,7 @@ public final class File: Object, Codable {
     }
 
     public static func uid(driveId: Int, fileId: Int) -> String {
-        "\(fileId)\(driveId)"
+        "\(fileId)_\(driveId)"
     }
 
     public convenience init(from decoder: Decoder) throws {

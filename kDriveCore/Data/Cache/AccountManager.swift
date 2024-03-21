@@ -184,7 +184,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                   let token = tokenStore.tokenFor(userId: userId),
                   let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
-            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
+            driveFileManagers[objectId] = DriveFileManager(
+                drive: drive,
+                apiFetcher: apiFetcher,
+                context: drive.sharedWithMe ? .sharedWithMe : .drive
+            )
             return driveFileManagers[objectId]
         } else {
             return nil

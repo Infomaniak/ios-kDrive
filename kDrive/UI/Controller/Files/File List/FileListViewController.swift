@@ -396,9 +396,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
             }
             SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates end")
-        } completion: { _ in
-            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates completion")
+        } completion: { success in
+            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates completion :\(success)")
         }
+
         // Reload corners (outside of batch to prevent incompatible operations)
         reloadFileCorners(insertions: insertions, deletions: deletions)
     }
@@ -720,9 +721,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         case .grid:
             cellType = FileGridCollectionViewCell.self
         }
-        let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
-        let file = viewModel.getFile(at: indexPath)!
+        let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
+        guard let file = viewModel.getFile(at: indexPath) else {
+            assertionFailure("Did not match a File at \(indexPath)")
+            cell.setEnabled(false)
+            return cell
+        }
+
         cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.files.count - 1)
         cell.configureWith(
             driveFileManager: viewModel.driveFileManager,
@@ -735,6 +741,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         } else {
             cell.setEnabled(true)
         }
+
         if viewModel.configuration.fromActivities {
             cell.moreButton.isHidden = true
         }
