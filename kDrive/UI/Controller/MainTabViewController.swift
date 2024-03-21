@@ -135,8 +135,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
-        navigationViewController.tabBarItem.image = KDriveResourcesAsset.gallery.image
-        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.galleryFill.image
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.mediaInline.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.mediaBold.image
         return navigationViewController
     }
 
@@ -294,7 +294,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,
-                            driveId: documentPicker.importDrive.id,
+                            driveId: documentPicker.importDriveDirectory.driveId,
                             url: targetURL,
                             name: url.lastPathComponent
                         )

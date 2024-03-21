@@ -31,38 +31,24 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var navigationManager: NavigationManageable
 
-    enum HomeFileType {
-        case file([File])
-        case fileActivity([FileActivity])
-    }
-
     struct HomeViewModel {
         let topRows: [HomeTopRow]
-        let recentFiles: HomeFileType
-        let recentFilesEmpty: Bool
+        let recentFiles: [FileActivity]
         let isLoading: Bool
 
         var recentFilesCount: Int {
-            switch recentFiles {
-            case .file(let files):
-                return files.count
-            case .fileActivity(let activities):
-                return activities.count
-            }
+            recentFiles.count
         }
 
-        init(topRows: [HomeViewController.HomeTopRow], recentFiles: HomeFileType, recentFilesEmpty: Bool, isLoading: Bool) {
+        init(topRows: [HomeViewController.HomeTopRow], recentFiles: [FileActivity], isLoading: Bool) {
             self.topRows = topRows
             self.recentFiles = recentFiles
-            self.recentFilesEmpty = recentFilesEmpty
             self.isLoading = isLoading
         }
 
         init(changeSet: [ArraySection<HomeSection, AnyDifferentiable>]) {
             var topRows = [HomeTopRow]()
-            var recentFiles = [File]()
             var recentActivities = [FileActivity]()
-            var recentFilesEmpty = false
             var isLoading = false
 
             for section in changeSet {
@@ -72,13 +58,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                 case .recentFiles:
                     for element in section.elements {
                         if let recentFileRow = element.base as? RecentFileRow {
-                            if recentFileRow == .empty {
-                                recentFilesEmpty = true
-                            } else if recentFileRow == .loading {
+                            if recentFileRow == .loading {
                                 isLoading = true
                             }
-                        } else if let recentFileRow = element.base as? File {
-                            recentFiles.append(recentFileRow)
                         } else if let recentActivityRow = element.base as? FileActivity {
                             recentActivities.append(recentActivityRow)
                         } else {
@@ -88,45 +70,27 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                 }
             }
 
-            if recentFiles.isEmpty {
-                self.init(
-                    topRows: topRows,
-                    recentFiles: .fileActivity(recentActivities),
-                    recentFilesEmpty: recentFilesEmpty,
-                    isLoading: isLoading
-                )
-            } else {
-                self.init(
-                    topRows: topRows,
-                    recentFiles: .file(recentFiles),
-                    recentFilesEmpty: recentFilesEmpty,
-                    isLoading: isLoading
-                )
-            }
+            self.init(
+                topRows: topRows,
+                recentFiles: recentActivities,
+                isLoading: isLoading
+            )
         }
 
         lazy var changeSet: [ArraySection<HomeSection, AnyDifferentiable>] = {
             var sections = [
                 ArraySection(model: HomeSection.top, elements: topRows.map { AnyDifferentiable($0) })
             ]
-            if recentFilesEmpty {
-                sections.append(ArraySection(model: HomeSection.recentFiles, elements: [AnyDifferentiable(RecentFileRow.empty)]))
-            } else {
-                var anyRecentFiles = [AnyDifferentiable]()
-                switch recentFiles {
-                case .file(let files):
-                    anyRecentFiles = files.map { AnyDifferentiable($0) }
-                case .fileActivity(let activities):
-                    anyRecentFiles = activities.map { AnyDifferentiable($0) }
-                }
 
-                if isLoading {
-                    anyRecentFiles
-                        .append(contentsOf: [AnyDifferentiable](repeating: AnyDifferentiable(RecentFileRow.loading),
-                                                                count: HomeViewController.loadingCellCount))
-                }
-                sections.append(ArraySection(model: HomeSection.recentFiles, elements: anyRecentFiles))
+            var anyRecentFiles: [AnyDifferentiable] = recentFiles.map { AnyDifferentiable($0) }
+
+            if isLoading {
+                anyRecentFiles
+                    .append(contentsOf: [AnyDifferentiable](repeating: AnyDifferentiable(RecentFileRow.loading),
+                                                            count: HomeViewController.loadingCellCount))
             }
+            sections.append(ArraySection(model: HomeSection.recentFiles, elements: anyRecentFiles))
+
             return sections
         }()
     }
@@ -137,25 +101,15 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     enum HomeTopRow: Differentiable {
-        case offline
-        case search
         case insufficientStorage
-        case uploadsInProgress
     }
 
     enum RecentFileRow: Differentiable {
         case file
         case loading
-        case empty
     }
 
-    private var uploadCountManager: UploadCountManager!
-    var driveFileManager: DriveFileManager! {
-        didSet {
-            observeUploadCount()
-            observeFileUpdated()
-        }
-    }
+    var driveFileManager: DriveFileManager
 
     private var floatingPanelViewController: DriveFloatingPanelController?
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
@@ -166,8 +120,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private let reloadQueue = DispatchQueue(label: "com.infomaniak.drive.reloadQueue", qos: .userInitiated)
     private lazy var viewModel = HomeViewModel(
         topRows: getTopRows(),
-        recentFiles: .file([]),
-        recentFilesEmpty: false,
+        recentFiles: [],
         isLoading: false
     )
     private var showInsufficientStorage = true
@@ -193,15 +146,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
-        collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
-        collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
+        collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
-        collectionView.register(cellView: FileCollectionViewCell.self)
-        collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
-        collectionView.register(cellView: FileHomeCollectionViewCell.self)
         collectionView.register(cellView: RecentActivityCollectionViewCell.self)
-        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
@@ -210,6 +157,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.refreshControl = refreshControl
 
         navigationItem.hideBackButtonText()
+
+        let searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonPressed))
+        navigationItem.rightBarButtonItems = [searchButton]
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
@@ -227,65 +177,18 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         MatomoUtils.track(view: ["Home"])
     }
 
-    func observeFileUpdated() {
-        guard driveFileManager != nil else { return }
-        filesObserver?.cancel()
-        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [weak self] file in
-            guard let self else { return }
-            recentActivitiesController?.refreshIfNeeded(with: file)
-        }
-    }
-
-    private func observeUploadCount() {
-        guard driveFileManager != nil else { return }
-
-        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self else { return }
-
-            guard let cell = getUploadsInProgressTableViewCell(),
-                  uploadCountManager.uploadCount > 0 else {
-                // Delete / Add cell
-                reloadTopRows()
-                return
-            }
-
-            // Update cell
-            cell.setUploadCount(uploadCountManager.uploadCount)
-        }
-    }
-
-    private func getUploadsInProgressTableViewCell() -> UploadsInProgressTableViewCell? {
-        guard let index = viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }) else {
-            return nil
-        }
-
-        guard let wrapperCell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell
-        else {
-            return nil
-        }
-
-        guard let cell = wrapperCell.wrappedCell as? UploadsInProgressTableViewCell else {
-            return nil
-        }
-
-        return cell
+    @objc func searchButtonPressed() {
+        let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+        present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
     }
 
     private func getTopRows() -> [HomeTopRow] {
-        var topRows: [HomeTopRow]
-        if ReachabilityListener.instance.currentStatus == .offline {
-            topRows = [.offline, .search]
-        } else {
-            topRows = [.search]
-        }
+        var topRows: [HomeTopRow] = []
 
-        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
-            topRows.append(.uploadsInProgress)
-        }
-
-        guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
+        guard driveFileManager.drive.size > 0 else {
             return topRows
         }
+
         let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
         if (storagePercentage > UIConstants.insufficientStorageMinimumPercentage) && showInsufficientStorage {
             topRows.append(.insufficientStorage)
@@ -296,16 +199,14 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     func reloadTopRows() {
         let newViewModel = HomeViewModel(topRows: getTopRows(),
                                          recentFiles: viewModel.recentFiles,
-                                         recentFilesEmpty: viewModel.recentFilesEmpty,
                                          isLoading: viewModel.isLoading)
         reload(newViewModel: newViewModel)
     }
 
-    func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
+    func reloadWith(fetchedFiles: [FileActivity], isEmpty: Bool) {
         refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
-                                         recentFilesEmpty: isEmpty,
                                          isLoading: false)
         reload(newViewModel: newViewModel)
     }
@@ -327,7 +228,11 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     @objc func forceRefresh() {
         recentActivitiesController?.invalidated = true
-        let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
+        let viewModel = HomeViewModel(
+            topRows: getTopRows(),
+            recentFiles: [],
+            isLoading: true
+        )
         reload(newViewModel: viewModel)
         initRecentActivitiesController()
     }
@@ -335,8 +240,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private func initRecentActivitiesController() {
         let emptyViewModel = HomeViewModel(
             topRows: viewModel.topRows,
-            recentFiles: .file([]),
-            recentFilesEmpty: false,
+            recentFiles: [],
             isLoading: false
         )
         reload(newViewModel: emptyViewModel)
@@ -355,21 +259,22 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         if recentActivitiesController.nextCursor == nil {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
-                                               recentFiles: .file([]),
-                                               recentFilesEmpty: false,
+                                               recentFiles: [],
                                                isLoading: true))
             recentActivitiesController.loadNextPage()
         } else {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
-                                               recentFiles: .file([]),
-                                               recentFilesEmpty: false,
+                                               recentFiles: [],
                                                isLoading: false))
             recentActivitiesController.restoreCachedPages()
         }
     }
 
     private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { [weak self] section, layoutEnvironment in
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem()]
+
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, layoutEnvironment in
             guard let self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:
@@ -384,7 +289,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                     )
                 }
             }
-        }
+        }, configuration: configuration)
         return layout
     }
 
@@ -398,17 +303,18 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             bottom: .fixed(16)
         )
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
-
         let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [header]
+
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: RootMenuHeaderView.kind.rawValue,
+            alignment: .bottom
+        )
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+
+        section.boundarySupplementaryItems = [sectionHeaderItem]
         return section
     }
 
@@ -446,14 +352,6 @@ extension HomeViewController {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
-            case .offline:
-                let cell = collectionView.dequeueReusableCell(type: HomeOfflineCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                return cell
-            case .search:
-                let cell = collectionView.dequeueReusableCell(type: HomeFileSearchCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                return cell
             case .insufficientStorage:
                 let cell = collectionView.dequeueReusableCell(type: InsufficientStorageCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
@@ -467,41 +365,24 @@ extension HomeViewController {
                     showInsufficientStorage = false
                     let newViewModel = HomeViewModel(topRows: getTopRows(),
                                                      recentFiles: viewModel.recentFiles,
-                                                     recentFilesEmpty: viewModel.recentFilesEmpty,
                                                      isLoading: viewModel.isLoading)
                     reload(newViewModel: newViewModel)
                 }
                 return cell
-            case .uploadsInProgress:
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "WrapperCollectionViewCell",
-                    for: indexPath
-                ) as! WrapperCollectionViewCell
-                let tableCell = cell.reuse(withCellType: UploadsInProgressTableViewCell.self)
-                tableCell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                tableCell.progressView.enableIndeterminate()
-                tableCell.setUploadCount(uploadCountManager.uploadCount)
-                return cell
             }
         case .recentFiles:
-            if viewModel.recentFilesEmpty {
-                let cell = collectionView.dequeueReusableCell(type: HomeEmptyFilesCollectionViewCell.self, for: indexPath)
-                recentActivitiesController?.configureEmptyCell(cell)
-                return cell
-            } else if let cellType = recentActivitiesController?.listCellType,
-                      let cell = collectionView.dequeueReusableCell(
-                          type: cellType,
-                          for: indexPath
-                      ) as? RecentActivityCollectionViewCell {
+            if let cellType = recentActivitiesController?.listCellType,
+               let cell = collectionView.dequeueReusableCell(
+                   type: cellType,
+                   for: indexPath
+               ) as? RecentActivityCollectionViewCell {
                 cell.initWithPositionAndShadow()
                 if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
                     cell.configureLoading()
                 } else {
-                    if case .fileActivity(let activities) = viewModel.recentFiles {
-                        let activity = activities[indexPath.row]
-                        cell.configureWith(recentActivity: activity)
-                        cell.delegate = self
-                    }
+                    let activity = viewModel.recentFiles[indexPath.row]
+                    cell.configureWith(recentActivity: activity)
+                    cell.delegate = self
                 }
                 return cell
             } else {
@@ -518,26 +399,19 @@ extension HomeViewController {
         if kind == UICollectionView.elementKindSectionHeader {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
-                let driveHeaderView = collectionView.dequeueReusableSupplementaryView(
+                let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
                     view: HomeLargeTitleHeaderView.self,
                     for: indexPath
                 )
-                driveHeaderView.isEnabled = accountManager.drives.count > 1
-                driveHeaderView.text = driveFileManager.drive.name
-                driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                    guard let self else { return }
-                    let drives = accountManager.drives
-                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
-                        options: drives,
-                        selectedOption: driveFileManager.drive,
-                        headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                        delegate: self
-                    )
-                    present(floatingPanelViewController, animated: true)
-                }
-                headerViewHeight = driveHeaderView.frame.height
-                return driveHeaderView
+                homeLargeTitleHeaderView.configureForDriveSwitch(
+                    accountManager: accountManager,
+                    driveFileManager: driveFileManager,
+                    presenter: self
+                )
+
+                headerViewHeight = homeLargeTitleHeaderView.frame.height
+                return homeLargeTitleHeaderView
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -547,6 +421,15 @@ extension HomeViewController {
                 headerView.titleLabel.text = recentActivitiesController?.title ?? ""
                 return headerView
             }
+        } else if kind == RootMenuHeaderView.kind.rawValue {
+            let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: RootMenuHeaderView.self,
+                for: indexPath
+            )
+
+            headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
+            return headerView
         } else {
             return UICollectionReusableView()
         }
@@ -556,36 +439,6 @@ extension HomeViewController {
 // MARK: - UICollectionViewDelegate
 
 extension HomeViewController {
-    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        switch HomeSection.allCases[indexPath.section] {
-        case .top:
-            switch viewModel.topRows[indexPath.row] {
-            case .offline, .insufficientStorage:
-                return
-            case .uploadsInProgress:
-                let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
-                navigationController?.pushViewController(uploadViewController, animated: true)
-            case .search:
-                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-                present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
-            }
-        case .recentFiles:
-            if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1), !viewModel.recentFilesEmpty {
-                switch viewModel.recentFiles {
-                case .file(let files):
-                    filePresenter.present(
-                        for: files[indexPath.row],
-                        files: files,
-                        driveFileManager: driveFileManager,
-                        normalFolderHierarchy: false
-                    )
-                case .fileActivity:
-                    break
-                }
-            }
-        }
-    }
-
     override func collectionView(
         _ collectionView: UICollectionView,
         willDisplay cell: UICollectionViewCell,
@@ -599,41 +452,9 @@ extension HomeViewController {
                 recentActivitiesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                    recentFiles: viewModel.recentFiles,
-                                                   recentFilesEmpty: false,
                                                    isLoading: true))
                 recentActivitiesController.loadNextPage()
             }
-        }
-    }
-}
-
-// MARK: - FileCellDelegate
-
-extension HomeViewController: FileCellDelegate {
-    func didTapMoreButton(_ cell: FileCollectionViewCell) {
-        guard let indexPath = collectionView.indexPath(for: cell) else {
-            return
-        }
-
-        if case .file(let files) = viewModel.recentFiles {
-            showQuickActionsPanel(file: files[indexPath.row])
-        }
-    }
-
-    private func showQuickActionsPanel(file: File) {
-        if fileInformationsViewController == nil {
-            fileInformationsViewController = FileActionsFloatingPanelViewController()
-            fileInformationsViewController.presentingParent = self
-            fileInformationsViewController.normalFolderHierarchy = true
-            floatingPanelViewController = DriveFloatingPanelController()
-            floatingPanelViewController?.isRemovalInteractionEnabled = true
-            floatingPanelViewController?.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
-            floatingPanelViewController?.set(contentViewController: fileInformationsViewController)
-            floatingPanelViewController?.track(scrollView: fileInformationsViewController.collectionView)
-        }
-        fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
-        if let floatingPanelViewController {
-            present(floatingPanelViewController, animated: true)
         }
     }
 }

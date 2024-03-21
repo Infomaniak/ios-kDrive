@@ -54,7 +54,7 @@ protocol FileCellDelegate: AnyObject {
 
     var title: String {
         guard !file.isInvalidated else { return "" }
-        return file.name
+        return file.formattedLocalizedName()
     }
 
     var icon: UIImage {

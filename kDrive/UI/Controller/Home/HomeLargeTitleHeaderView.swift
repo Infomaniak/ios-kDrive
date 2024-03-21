@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomeLargeTitleHeaderView: UICollectionReusableView {
@@ -45,5 +46,25 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
 
     @IBAction func titleButtonPressed(_ sender: UIButton) {
         titleButtonPressedHandler?(sender)
+    }
+
+    func configureForDriveSwitch(
+        accountManager: AccountManageable,
+        driveFileManager: DriveFileManager,
+        presenter: SelectSwitchDriveDelegate
+    ) {
+        isEnabled = accountManager.drives.count > 1
+        text = driveFileManager.drive.name
+        titleButtonPressedHandler = { [weak self] _ in
+            guard let self else { return }
+            let drives = accountManager.drives
+            let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
+                options: drives,
+                selectedOption: driveFileManager.drive,
+                headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
+                delegate: presenter
+            )
+            presenter.present(floatingPanelViewController, animated: true)
+        }
     }
 }

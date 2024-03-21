@@ -70,12 +70,8 @@ public final class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted public var displayName = ""
     public var role: DriveUserRole?
 
-    public var avatar: String {
-        guard let _avatar, !_avatar.isBlank else {
-            return _avatarUrl ?? ""
-        }
-
-        return _avatar
+    public var avatar: String? {
+        _avatarUrl
     }
 
     enum CodingKeys: String, CodingKey {
