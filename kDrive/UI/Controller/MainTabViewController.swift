@@ -294,7 +294,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,
-                            driveId: documentPicker.importDrive.id,
+                            driveId: documentPicker.importDriveDirectory.driveId,
                             url: targetURL,
                             name: url.lastPathComponent
                         )

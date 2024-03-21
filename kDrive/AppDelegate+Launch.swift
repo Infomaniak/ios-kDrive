@@ -220,7 +220,7 @@ extension AppDelegate {
                 // Copy and upload file
                 let uploadFile = UploadFile(parentDirectoryId: file.parentId,
                                             userId: accountManager.currentUserId,
-                                            driveId: driveId,
+                                            driveId: file.driveId,
                                             url: fileURL,
                                             name: file.name,
                                             conflictOption: .version,
