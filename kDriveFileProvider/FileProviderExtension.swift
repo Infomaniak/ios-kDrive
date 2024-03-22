@@ -208,8 +208,6 @@ final class FileProviderExtension: NSFileProviderExtension {
             backgroundUpload(uploadItem)
         } else {
             Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
-            // TODO: test
-            fatalError("fixme")
         }
     }
 
@@ -241,33 +239,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     override func stopProvidingItem(at url: URL) {
         Log.fileProvider("stopProvidingItem at url:\(url)")
 
-        guard let identifier = persistentIdentifierForItem(at: url) else {
-            // The document isn't in realm maybe it was recently imported?
-            // TODO: lookup for a `File` matching
-            fatalError("fixme")
-            cleanupAt(url: url)
-        }
-
-        if let item = try? item(for: identifier) as? FileProviderItem {
-            if let remoteModificationDate = item.contentModificationDate,
-               let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey])
-               .contentModificationDate,
-               remoteModificationDate > localModificationDate {
-                // TODO: check behaviour
-//                // re-upload ? Y ?
-//                backgroundUpload(item) {
-//                    self.cleanupAt(url: url)
-//                }
-
-            } else {
-                cleanupAt(url: url)
-            }
-        } else if let uploadItem = try? item(for: identifier) as? UploadFileProviderItem {
-            // TODO: UploadFile handling, stop upload.
-            fatalError("fixme")
-        } else {
-            fatalError("unsupported type")
-        }
+        cleanupAt(url: url)
     }
 
     // MARK: - Private
