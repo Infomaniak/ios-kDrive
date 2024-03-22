@@ -69,15 +69,29 @@ public extension FileImportHelper {
         switch scanType {
         case .pdf:
             let pdfDocument = PDFDocument()
+
+            // TODO: parallel task mapper
             for i in 0 ..< scan.pageCount {
                 let pageImage = scan.imageOfPage(at: i)
                 // Compress page image before adding it to the PDF
-                if let pageData = pageImage.jpegData(compressionQuality: imageCompression),
-                   let compressedPageImage = UIImage(data: pageData),
-                   let pdfPage = PDFPage(image: compressedPageImage) {
-                    pdfDocument.insert(pdfPage, at: i)
+                guard let pageData = pageImage.jpegData(compressionQuality: imageCompression),
+                      let compressedPageImage = UIImage(data: pageData) else {
+                    continue
                 }
+
+                let pdfPage: PDFPage?
+                pdfPage = PDFPage(image: compressedPageImage)
+
+                guard let pdfPage else {
+                    continue
+                }
+
+                // Set page size to something printable
+                pdfPage.setBounds(pdfPageRect, for: .mediaBox)
+
+                pdfDocument.insert(pdfPage, at: i)
             }
+
             data = pdfDocument.dataRepresentation()
         case .image:
             let image = scan.imageOfPage(at: 0)
@@ -87,6 +101,27 @@ public extension FileImportHelper {
             throw ImportError.emptyImageData
         }
         try upload(data: data, name: name, uti: scanType.uti, drive: drive, directory: directory)
+    }
+
+    /// Get a standard printable page size
+    private var pdfPageRect: CGRect {
+        let locale = NSLocale.current
+        let isMetric = locale.usesMetricSystem
+
+        // Size is expressed in PostScript points
+        let pageSize: CGSize
+        if isMetric {
+            // Using A4
+            let metricPageSize = CGSize(width: 595.28, height: 841.89)
+            pageSize = metricPageSize
+        } else {
+            // Using LETTER
+            let freedomPageSize = CGSize(width: 612.00, height: 792.00)
+            pageSize = freedomPageSize
+        }
+
+        let pageRect = CGRect(origin: CGPoint(x: 0, y: 0), size: pageSize)
+        return pageRect
     }
 
     func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive) throws {

@@ -24,7 +24,7 @@ import VisionKit
 
 final class SaveScanViewController: SaveFileViewController {
     var scan: VNDocumentCameraScan!
-    var scanType = ScanFileFormat(rawValue: 0)!
+    var scanType = ScanFileFormat.pdf
     var worker: SaveScanWorker?
 
     override func viewDidLoad() {
@@ -48,7 +48,11 @@ final class SaveScanViewController: SaveFileViewController {
         case .fileType:
             let cell = tableView.dequeueReusableCell(type: ScanTypeTableViewCell.self, for: indexPath)
             cell.didSelectIndex = { [weak self] index in
-                self?.scanType = ScanFileFormat(rawValue: index)!
+                guard let self,
+                      let scanType = ScanFileFormat(rawValue: index) else {
+                    return
+                }
+                self.scanType = scanType
             }
             cell.configureWith(scan: scan)
             return cell
