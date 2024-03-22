@@ -90,15 +90,20 @@ class RootMenuHeaderView: UICollectionReusableView {
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self else { return }
 
-            guard let count = uploadCountManager?.uploadCount else { return }
-            let shouldHideUploadCardView = count == 0
+            guard let uploadCountManager else {
+                return
+            }
+
+            let uploadCount = uploadCountManager.uploadCount
+            let countIsEmpty = uploadCount == 0
+            let shouldHideUploadCardView = countIsEmpty
 
             if uploadCardView.isHidden != shouldHideUploadCardView {
                 uploadCardView.isHidden = shouldHideUploadCardView
                 reloadHeader()
             }
 
-            uploadCardView.setUploadCount(count)
+            uploadCardView.setUploadCount(uploadCount)
         }
     }
 

@@ -171,7 +171,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    // TODO: Refactor init to explicit DriveContext
     public func getDriveFileManager(for drive: Drive) -> DriveFileManager? {
         return getDriveFileManager(for: drive.id, userId: drive.userId)
     }

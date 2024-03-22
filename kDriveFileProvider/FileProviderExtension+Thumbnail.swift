@@ -44,16 +44,16 @@ extension FileProviderExtension {
                 continue
             }
 
-            // TODO: should we just remove this ?
             // If we do not have `supportedBy` info, we try to load avatars anyway
-//            if !file.supportedBy.isEmpty, file.supportedBy.contains(.thumbnail) {
-//                perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
-//                progress.completedUnitCount += 1
-//                if progress.isFinished {
-//                    completionHandler(nil)
-//                }
-//                continue
-//            }
+            // Note: An freshly uploaded file will not have a .thumbnail before re-navigating to the parent folder
+            guard file.supportedBy.contains(.thumbnail) else {
+                perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
+                progress.completedUnitCount += 1
+                if progress.isFinished {
+                    completionHandler(nil)
+                }
+                continue
+            }
 
             var request = URLRequest(url: file.thumbnailURL)
             request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
