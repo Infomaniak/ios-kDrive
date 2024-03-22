@@ -36,6 +36,18 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         navigationItem.hideBackButtonText()
     }
 
+    static func generateHeaderItem() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let headerItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                    heightDimension: .estimated(40))
+        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerItemSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+        headerItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+        return headerItem
+    }
+
     private func updateNavigationBarAppearance() {
         if let title = navigationItem.title {
             originalTitle = title

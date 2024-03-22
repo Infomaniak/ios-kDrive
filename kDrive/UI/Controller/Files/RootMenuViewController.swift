@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
@@ -114,6 +115,9 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         configureDataSource()
 
@@ -146,6 +150,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         present(searchViewController, animated: true)
     }
 
+    @objc func forceRefresh() {
+        Task {
+            try? await driveFileManager.initRoot()
+            refreshControl.endRefreshing()
+        }
+    }
+
     func configureDataSource() {
         dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
             guard let rootMenuCell = collectionView.dequeueReusableCell(
@@ -163,26 +174,34 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
 
-            let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                view: HomeLargeTitleHeaderView.self,
-                for: indexPath
-            )
-            homeLargeTitleHeaderView.isEnabled = accountManager.drives.count > 1
-            homeLargeTitleHeaderView.text = driveFileManager.drive.name
-            homeLargeTitleHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                guard let self else { return }
-                let drives = accountManager.drives
-                let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
-                    options: drives,
-                    selectedOption: driveFileManager.drive,
-                    headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,
-                    delegate: self
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: HomeLargeTitleHeaderView.self,
+                    for: indexPath
                 )
-                present(floatingPanelViewController, animated: true)
+
+                homeLargeTitleHeaderView.configureForDriveSwitch(
+                    accountManager: accountManager,
+                    driveFileManager: driveFileManager,
+                    presenter: self
+                )
+
+                headerViewHeight = homeLargeTitleHeaderView.frame.height
+                return homeLargeTitleHeaderView
+            case RootMenuHeaderView.kind.rawValue:
+                let headerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: RootMenuHeaderView.self,
+                    for: indexPath
+                )
+
+                headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
+                return headerView
+            default:
+                fatalError("Unhandled kind \(kind)")
             }
-            headerViewHeight = homeLargeTitleHeaderView.frame.height
-            return homeLargeTitleHeaderView
         }
 
         dataSource?.apply(itemsSnapshot, animatingDifferences: false)
@@ -198,18 +217,22 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
                                                        subitems: [item])
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                heightDimension: .estimated(40))
-        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
+            elementKind: RootMenuHeaderView.kind.rawValue,
+            alignment: .top
         )
-        sectionHeader.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [sectionHeader]
+        section.boundarySupplementaryItems = [sectionHeaderItem]
 
-        let layout = UICollectionViewCompositionalLayout(section: section)
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.boundarySupplementaryItems = [generateHeaderItem()]
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
     }
 

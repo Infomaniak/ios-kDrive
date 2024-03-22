@@ -89,6 +89,9 @@ public final class FileImportHelper {
 
         /// an async error was raised
         case asyncIssue(wrapping: Error)
+
+        /// The type needs dedicated handling
+        case unsupportedUnderlyingType
     }
 
     // MARK: - Public methods
@@ -220,6 +223,9 @@ public final class FileImportHelper {
 
                     case .none:
                         return .failure(ErrorDomain.UTINotFound)
+
+                    default:
+                        return .failure(ErrorDomain.unsupportedUnderlyingType)
                     }
                 }
 

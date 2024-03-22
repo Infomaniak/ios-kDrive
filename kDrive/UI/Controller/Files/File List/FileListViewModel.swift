@@ -127,11 +127,30 @@ class FileListViewModel: SelectDelegate {
             _frozenFiles
         }
         set {
+            let setIdentifier = UUID().uuidString
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "entry point")
+
             // On change of observed files, we force to restart the realm observation to prevent a loss of sync
             realmObservationToken?.invalidate()
             realmObservationToken = nil
+
+            // Set an internal frozen representation
             _frozenFiles = newValue.freezeIfNeeded()
+
+            // Execute the first update, if linked to a view controller.
+            // This may not be handled by observation alone
+            if let onFileListUpdated {
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre onFileListUpdated set")
+                onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && _frozenFiles.isEmpty, true)
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post onFileListUpdated set")
+            } else {
+                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "onFileListUpdated nil")
+            }
+
+            // Restart observation
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre setup observation")
             updateRealmObservation()
+            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post setup observation")
         }
     }
 
@@ -227,7 +246,9 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self, !self.currentDirectory.isInvalidated else {
+                guard let self,
+                      !self.currentDirectory.isInvalidated,
+                      let liveCurrentDirectory = currentDirectory.thaw() else {
                     return
                 }
 
@@ -241,11 +262,13 @@ class FileListViewModel: SelectDelegate {
                 switch change {
                 case .initial(let results):
                     // update observed realm objects directly
+                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     // update observed realm objects directly
+                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated(
@@ -339,7 +362,8 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && files.isEmpty, false)
+        let liveCurrentDirectory = currentDirectory.thaw() ?? currentDirectory
+        onFileListUpdated?([], [], [], [], liveCurrentDirectory.fullyDownloaded && files.isEmpty, false)
     }
 
     func loadActivities() async throws {
