@@ -69,37 +69,42 @@ public extension FileImportHelper {
         switch scanType {
         case .pdf:
             let pdfDocument = PDFDocument()
+            let pageIndexesToGenerate = 0 ..< scan.pageCount
 
-            // TODO: parallel task mapper
-            for i in 0 ..< scan.pageCount {
-                let pageImage = scan.imageOfPage(at: i)
-                // Compress page image before adding it to the PDF
-                guard let pageData = pageImage.jpegData(compressionQuality: imageCompression),
-                      let compressedPageImage = UIImage(data: pageData) else {
-                    continue
+            let pages: [PDFPage] = await pageIndexesToGenerate.concurrentCompactMap { i in
+                autoreleasepool {
+                    let pageImage = scan.imageOfPage(at: i)
+                    // Compress page image before adding it to the PDF
+                    guard let pageData = pageImage.jpegData(compressionQuality: Self.imageCompression),
+                          let compressedPageImage = UIImage(data: pageData) else {
+                        return nil
+                    }
+
+                    guard let pdfPage = PDFPage(image: compressedPageImage) else {
+                        return nil
+                    }
+
+                    // Set page size to something printable
+                    pdfPage.setBounds(self.pdfPageRect, for: .mediaBox)
+
+                    return pdfPage
                 }
+            }
 
-                let pdfPage: PDFPage?
-                pdfPage = PDFPage(image: compressedPageImage)
-
-                guard let pdfPage else {
-                    continue
-                }
-
-                // Set page size to something printable
-                pdfPage.setBounds(pdfPageRect, for: .mediaBox)
-
-                pdfDocument.insert(pdfPage, at: i)
+            for (index, page) in pages.enumerated() {
+                pdfDocument.insert(page, at: index)
             }
 
             data = pdfDocument.dataRepresentation()
         case .image:
             let image = scan.imageOfPage(at: 0)
-            data = image.jpegData(compressionQuality: imageCompression)
+            data = image.jpegData(compressionQuality: Self.imageCompression)
         }
+
         guard let data else {
             throw ImportError.emptyImageData
         }
+
         try upload(data: data, name: name, uti: scanType.uti, drive: drive, directory: directory)
     }
 
@@ -115,7 +120,7 @@ public extension FileImportHelper {
             let metricPageSize = CGSize(width: 595.28, height: 841.89)
             pageSize = metricPageSize
         } else {
-            // Using LETTER
+            // Using LETTER US
             let freedomPageSize = CGSize(width: 612.00, height: 792.00)
             pageSize = freedomPageSize
         }
@@ -133,9 +138,9 @@ public extension FileImportHelper {
         let data: Data?
         switch format {
         case .jpg:
-            data = photo.jpegData(compressionQuality: imageCompression)
+            data = photo.jpegData(compressionQuality: Self.imageCompression)
         case .heic:
-            data = photo.heicData(compressionQuality: imageCompression)
+            data = photo.heicData(compressionQuality: Self.imageCompression)
         case .png:
             var photo = photo
             if photo.imageOrientation != .up {
