@@ -139,10 +139,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         isDirectory = file.isDirectory
         @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-        // TODO: Remove
-        let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
         if file.isDirectory && file.fullyDownloaded {
-            let totalCount = file.children.count + tmpChildren.count
+            let totalCount = file.children.count
             childItemCount = NSNumber(value: totalCount)
         }
 

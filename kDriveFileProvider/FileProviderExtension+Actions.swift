@@ -35,8 +35,7 @@ extension FileProviderExtension {
 
             // Call completion handler with error if the file name already exists
             let itemsWithSameParent = file.children
-                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + self.fileProviderState
-                .importedDocuments(forParent: parentItemIdentifier)
+                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
             let newItemFileName = directoryName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
                !(collidingItem.isTrashed ?? false) {
@@ -103,8 +102,7 @@ extension FileProviderExtension {
             return
         }
         let itemsWithSameParent = file.children
-            .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + fileProviderState
-            .importedDocuments(forParent: parentItemIdentifier)
+            .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
            !(collidingItem.isTrashed ?? false) {
@@ -175,8 +173,7 @@ extension FileProviderExtension {
             // Check if file name already exists
             let item = file.toFileProviderItem(parent: nil, domain: self.domain)
             let itemsWithSameParent = file.parent!.children
-                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) } + self.fileProviderState
-                .importedDocuments(forParent: item.parentItemIdentifier)
+                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
             let newItemFileName = itemName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
                !(collidingItem.isTrashed ?? false) {

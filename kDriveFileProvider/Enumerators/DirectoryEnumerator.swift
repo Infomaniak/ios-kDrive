@@ -22,7 +22,6 @@ import InfomaniakDI
 import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService var additionalState: FileProviderExtensionAdditionalStatable
     @LazyInjectService var uploadQueue: UploadQueueable
 
     let containerItemIdentifier: NSFileProviderItemIdentifier
@@ -180,9 +179,6 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
-
-                // FIXME: Query upload queue instead
-                deletedItems += additionalState.deleteAlreadyEnumeratedImportedDocuments(forParent: containerItemIdentifier)
 
                 let realm = driveFileManager.getRealm()
                 let parentDirectory = try driveFileManager.getCachedFile(

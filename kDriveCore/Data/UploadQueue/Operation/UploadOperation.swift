@@ -490,7 +490,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Get a DriveFileManager specific to current context
         let driveFileManager: DriveFileManager?
         if appContext.context == .fileProviderExtension {
-            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)
+            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
                 .instanceWith(context: .fileProvider)
         } else {
             driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)

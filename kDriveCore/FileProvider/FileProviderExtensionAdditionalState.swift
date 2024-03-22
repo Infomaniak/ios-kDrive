@@ -24,13 +24,6 @@ import Foundation
 ///
 /// Concrete implementation `FileProviderExtensionAdditionalState` is ThreadSafe
 public protocol FileProviderExtensionAdditionalStatable {
-    // TODO: Remove, read UploadQueue instead
-    func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem]
-
-    // TODO: Remove, read UploadQueue instead
-    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
-        -> [NSFileProviderItemIdentifier]
-
     // MARK: CRUD
 
     /// Get a File placeholder in the `Recent Files` folder
@@ -47,36 +40,11 @@ public protocol FileProviderExtensionAdditionalStatable {
 }
 
 public final class FileProviderExtensionAdditionalState: FileProviderExtensionAdditionalStatable {
-    /// Any file upload in progress
-    private var importedDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
-
     /// Recent Files
     private var workingDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
 
     /// A serial queue to lock access to ivars.
     let queue = DispatchQueue(label: "com.infomaniak.fileProviderExtensionState.sync", qos: .default)
-
-    public func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        Log.fileProvider("importedDocuments parent:\(parentItemIdentifier.rawValue)")
-        var documents = [FileProviderItem]()
-        queue.sync {
-            documents = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier }
-        }
-        return documents
-    }
-
-    public func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
-        -> [NSFileProviderItemIdentifier] {
-        Log.fileProvider("deleteAlreadyEnumeratedImportedDocuments parent:\(parentItemIdentifier.rawValue)")
-        var identifiers = [NSFileProviderItemIdentifier]()
-        queue.sync {
-            let children = importedDocuments.values
-                .filter { $0.parentItemIdentifier == parentItemIdentifier && $0.alreadyEnumerated }
-            identifiers = children.compactMap { importedDocuments.removeValue(forKey: $0.itemIdentifier)?.itemIdentifier }
-        }
-
-        return identifiers
-    }
 
     // MARK: workingDocuments
 
