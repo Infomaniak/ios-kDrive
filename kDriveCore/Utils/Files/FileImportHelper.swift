@@ -74,7 +74,7 @@ public final class FileImportHelper {
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService var appContextService: AppContextServiceable
 
-    let imageCompression = 0.8
+    static let imageCompression = 0.8
 
     /// Domain specific errors
     public enum ErrorDomain: Error {
