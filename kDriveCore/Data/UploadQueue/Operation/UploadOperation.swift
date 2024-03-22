@@ -485,20 +485,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         let readOnlyFile = try readOnlyFile()
         let driveId = readOnlyFile.driveId
         let userId = readOnlyFile.userId
-
-        let driveFileManagerContext: DriveFileManagerContext
         @InjectService var appContext: AppContextServiceable
-        switch appContext.context {
-        case .fileProviderExtension:
-            driveFileManagerContext = .fileProvider
-        case .app, .shareExtension, .actionExtension:
-            // TODO: fix for `shared with me`
-            driveFileManagerContext = .drive
+
+        // Get a DriveFileManager specific to current context
+        let driveFileManager: DriveFileManager?
+        if appContext.context == .fileProviderExtension {
+            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)
+                .instanceWith(context: .fileProvider)
+        } else {
+            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)
         }
 
         // Add/Update the new remote `File` in database immediately
-        if let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
-            .instanceWith(context: driveFileManagerContext) {
+        if let driveFileManager {
             let driveFileManagerRealm = driveFileManager.getRealm()
             driveFileManagerRealm.refresh()
 
