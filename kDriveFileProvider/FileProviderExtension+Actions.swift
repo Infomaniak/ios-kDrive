@@ -171,7 +171,6 @@ extension FileProviderExtension {
             }
 
             // Check if file name already exists
-            let item = file.toFileProviderItem(parent: nil, domain: self.domain)
             let itemsWithSameParent = file.parent!.children
                 .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
             let newItemFileName = itemName.lowercased()
