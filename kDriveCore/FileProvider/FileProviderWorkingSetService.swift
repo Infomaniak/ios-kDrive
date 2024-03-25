@@ -19,11 +19,10 @@
 import CoreServices
 import FileProvider
 import Foundation
+import InfomaniakDI
 
-/// Something to maintain a coherent placeholder file datasource for Files.app while we upload and fetch a real File entity.
-///
-/// Concrete implementation `FileProviderExtensionAdditionalState` is ThreadSafe
-public protocol FileProviderExtensionAdditionalStatable {
+/// Something to access and mutate the Working set
+public protocol FileProviderWorkingSetServiceable {
     // MARK: CRUD
 
     /// Get a File placeholder in the `Recent Files` folder
@@ -39,12 +38,29 @@ public protocol FileProviderExtensionAdditionalStatable {
     func removeWorkingDocument(forKey key: NSFileProviderItemIdentifier)
 }
 
-public final class FileProviderExtensionAdditionalState: FileProviderExtensionAdditionalStatable {
+public final class FileProviderWorkingSetService: FileProviderWorkingSetServiceable {
     /// Recent Files
-    private var workingDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
+//    private var workingDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
 
     /// A serial queue to lock access to ivars.
-    let queue = DispatchQueue(label: "com.infomaniak.fileProviderExtensionState.sync", qos: .default)
+    let queue = DispatchQueue(
+        label: "com.infomaniak.fileProviderExtensionState.sync",
+        qos: .default,
+        autoreleaseFrequency: .workItem
+    )
+
+    let workingSetDriveFileManager: DriveFileManager
+
+    init?(driveId: Int, userId: Int) {
+        @InjectService var accountManager: AccountManageable
+        guard let workingSetFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
+            .instanceWith(context: .fileProviderWorkingSet) else {
+            Log.fileProvider("FileProviderWorkingSetService unable to init", level: .error)
+            return nil
+        }
+
+        workingSetDriveFileManager = workingSetFileManager
+    }
 
     // MARK: workingDocuments
 
@@ -52,7 +68,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
         Log.fileProvider("getWorkingDocument key:\(key.rawValue)")
         var value: FileProviderItem?
         queue.sync {
-            value = workingDocuments[key]
+//            value = workingDocuments[key]
         }
         return value
     }
@@ -61,7 +77,7 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
         Log.fileProvider("getWorkingDocumentValues")
         var values = [FileProviderItem]()
         queue.sync {
-            values = [FileProviderItem](workingDocuments.values)
+//            values = [FileProviderItem](workingDocuments.values)
         }
         return values
     }
@@ -69,14 +85,14 @@ public final class FileProviderExtensionAdditionalState: FileProviderExtensionAd
     public func setWorkingDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
         Log.fileProvider("setWorkingDocument key:\(key.rawValue)")
         queue.sync {
-            workingDocuments[key] = item
+//            workingDocuments[key] = item
         }
     }
 
     public func removeWorkingDocument(forKey key: NSFileProviderItemIdentifier) {
         Log.fileProvider("removeWorkingDocument key:\(key.rawValue)")
         queue.sync {
-            workingDocuments.removeValue(forKey: key)
+//            workingDocuments.removeValue(forKey: key)
         }
     }
 }

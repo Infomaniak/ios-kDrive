@@ -130,8 +130,18 @@ public enum FactoryService {
             Factory(type: NotificationsHelpable.self) { _, _ in
                 NotificationsHelper()
             },
-            Factory(type: FileProviderExtensionAdditionalStatable.self) { _, _ in
-                FileProviderExtensionAdditionalState()
+            Factory(type: FileProviderWorkingSetServiceable.self) { metadata, _ in
+                guard let metadata,
+                      let driveId = metadata["driveId"] as? Int,
+                      let userId = metadata["userId"] as? Int else {
+                    fatalError("Expecting a driveId and userId parameter to resolve")
+                }
+
+                guard let fileProvider = FileProviderWorkingSetService(driveId: driveId, userId: userId) else {
+                    fatalError("Unable to get a FileProvider for driveId:\(driveId) userId:\(userId)")
+                }
+
+                return fileProvider
             },
             Factory(type: AppGroupPathProvidable.self) { _, _ in
                 guard let provider = AppGroupPathProvider(realmRootPath: realmRootPath, appGroupIdentifier: appGroupName) else {

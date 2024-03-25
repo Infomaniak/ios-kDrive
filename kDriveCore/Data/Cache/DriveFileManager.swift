@@ -26,8 +26,15 @@ import RealmSwift
 import SwiftRegex
 
 public enum DriveFileManagerContext {
+    /// Main app dataset
     case drive
+
+    /// Dedicated dataset to store the state of files in the FileProvider
     case fileProvider
+
+    /// Dedicated dataset to store the state of files in the working set within the FileProvider
+    case fileProviderWorkingSet
+
     case sharedWithMe
 
     func realmURL(using drive: Drive) -> URL {
@@ -38,6 +45,8 @@ public enum DriveFileManagerContext {
             return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
         case .fileProvider:
             return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
+        case .fileProviderWorkingSet:
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp-ws.realm")
         }
     }
 }
