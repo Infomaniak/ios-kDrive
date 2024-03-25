@@ -1,3 +1,4 @@
+//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2023 Infomaniak Network SA
@@ -17,13 +18,25 @@
  */
 
 import Foundation
+import kDriveCore
 
-public struct FileAction: Codable {
-    public let action: FileActivityType
-    public let fileId: Int
+extension NSFileProviderSyncAnchor {
+    init?(_ cursor: FileCursor?) {
+        guard let cursor else {
+            return nil
+        }
+        guard let cursorData = cursor.data(using: .utf8) else {
+            return nil
+        }
 
-    enum CodingKeys: String, CodingKey {
-        case action
-        case fileId = "file_id"
+        self.init(cursorData)
+    }
+
+    var toCursor: FileCursor? {
+        guard let cursor = String(data: rawValue, encoding: .utf8) else {
+            return nil
+        }
+
+        return cursor
     }
 }

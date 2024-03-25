@@ -30,57 +30,71 @@ extension FileProviderExtension {
         let urlSession = URLSession(configuration: URLSessionConfiguration.default)
         let progress = Progress(totalUnitCount: Int64(itemIdentifiers.count))
 
+        guard let token = driveFileManager.apiFetcher.currentToken else {
+            return Progress(totalUnitCount: 0)
+        }
+
         for identifier in itemIdentifiers {
-            if let fileId = identifier.toFileId(),
-               let file = driveFileManager.getCachedFile(id: fileId),
-               let token = driveFileManager.apiFetcher.currentToken {
-                var request = URLRequest(url: file.thumbnailURL)
-                request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-
-                // Download the thumbnail to disk
-                // For simplicity, this sample downloads each thumbnail separately;
-                // however, if possible, you should batch download all the thumbnails at once.
-                let downloadTask = urlSession.downloadTask(with: request) { tempURL, _, error in
-
-                    guard progress.isCancelled != true else {
-                        return
-                    }
-
-                    var myErrorOrNil = error
-                    var mappedDataOrNil: Data?
-
-                    // If the download succeeds, map a data object to the file
-                    if let fileURL = tempURL {
-                        do {
-                            mappedDataOrNil = try Data(contentsOf: fileURL, options: .alwaysMapped)
-                        } catch let mappingError {
-                            myErrorOrNil = mappingError
-                        }
-                    }
-
-                    // Call the per thumbnail completion handler for each thumbnail requested.
-                    perThumbnailCompletionHandler(identifier, mappedDataOrNil, myErrorOrNil)
-
-                    Task { @MainActor in
-                        if progress.isFinished {
-                            // Call this completion handler once all thumbnails are complete
-                            completionHandler(nil)
-                        }
-                    }
-                }
-
-                // Add the download task's progress as a child to the overall progress.
-                progress.addChild(downloadTask.progress, withPendingUnitCount: 1)
-
-                // Start the download task.
-                downloadTask.resume()
-            } else {
-                perThumbnailCompletionHandler(identifier, nil, nsError(code: .noSuchItem))
+            guard let file = try? driveFileManager.getCachedFile(itemIdentifier: identifier) else {
+                perThumbnailCompletionHandler(identifier, nil, NSFileProviderError(.noSuchItem))
                 progress.completedUnitCount += 1
                 if progress.isFinished {
                     completionHandler(nil)
                 }
+                continue
             }
+
+            // If we do not have `supportedBy` info, we try to load avatars anyway
+            // Note: An freshly uploaded file will not have a .thumbnail before re-navigating to the parent folder
+            guard file.supportedBy.contains(.thumbnail) else {
+                perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
+                progress.completedUnitCount += 1
+                if progress.isFinished {
+                    completionHandler(nil)
+                }
+                continue
+            }
+
+            var request = URLRequest(url: file.thumbnailURL)
+            request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+
+            // Download the thumbnail to disk
+            // For simplicity, this sample downloads each thumbnail separately;
+            // however, if possible, you should batch download all the thumbnails at once.
+            let downloadTask = urlSession.downloadTask(with: request) { tempURL, _, error in
+
+                guard progress.isCancelled != true else {
+                    return
+                }
+
+                var myErrorOrNil = error
+                var mappedDataOrNil: Data?
+
+                // If the download succeeds, map a data object to the file
+                if let fileURL = tempURL {
+                    do {
+                        mappedDataOrNil = try Data(contentsOf: fileURL, options: .alwaysMapped)
+                    } catch let mappingError {
+                        myErrorOrNil = mappingError
+                    }
+                }
+
+                // Call the per thumbnail completion handler for each thumbnail requested.
+                perThumbnailCompletionHandler(identifier, mappedDataOrNil, myErrorOrNil)
+
+                Task { @MainActor in
+                    if progress.isFinished {
+                        // Call this completion handler once all thumbnails are complete
+                        completionHandler(nil)
+                    }
+                }
+            }
+
+            // Add the download task's progress as a child to the overall progress.
+            progress.addChild(downloadTask.progress, withPendingUnitCount: 1)
+
+            // Start the download task.
+            downloadTask.resume()
         }
 
         return progress

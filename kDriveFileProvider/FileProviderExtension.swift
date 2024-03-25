@@ -24,6 +24,23 @@ import InfomaniakLogin
 import kDriveCore
 import RealmSwift
 
+extension NSError {
+    static let featureUnsupported = NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError)
+}
+
+extension DriveFileManager {
+    func getCachedFile(itemIdentifier: NSFileProviderItemIdentifier,
+                       freeze: Bool = true,
+                       using realm: Realm? = nil) throws -> File {
+        guard let fileId = itemIdentifier.toFileId(),
+              let file = getCachedFile(id: fileId, freeze: freeze, using: realm) else {
+            throw NSFileProviderError(.noSuchItem)
+        }
+
+        return file
+    }
+}
+
 final class FileProviderExtension: NSFileProviderExtension {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .fileProviderExtension)
@@ -33,6 +50,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
+    @LazyInjectService var fileProviderService: FileProviderServiceable
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -50,13 +68,18 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     private func setDriveFileManager() -> DriveFileManager? {
+        var currentDriveFileManager: DriveFileManager?
         if let objectId = domain?.identifier.rawValue,
            let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
            let driveFileManager = accountManager.getDriveFileManager(for: drive) {
-            return driveFileManager
+            currentDriveFileManager = driveFileManager
         } else {
-            return accountManager.currentDriveFileManager
+            currentDriveFileManager = accountManager.currentDriveFileManager
         }
+
+        guard let currentDriveFileManager else { return nil }
+
+        return currentDriveFileManager.instanceWith(context: .fileProvider)
     }
 
     // MARK: - NSFileProviderExtension Override
@@ -77,37 +100,82 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
+        // TODO: working set in DB
         if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
             Log.fileProvider("item for identifier - Working Document")
             return item
-        } else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
-            Log.fileProvider("item for identifier - Imported Document")
-            return item
-        } else if let fileId = identifier.toFileId(),
-                  let file = driveFileManager.getCachedFile(id: fileId) {
-            Log.fileProvider("item for identifier - File:\(fileId)")
-            return FileProviderItem(file: file, domain: domain)
-        } else {
-            Log.fileProvider("item for identifier - nsError(code: .noSuchItem)")
-            throw nsError(code: .noSuchItem)
         }
+
+        // Read from upload queue
+        else if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+            Log.fileProvider("item for identifier - Uploading file")
+            let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, domain: domain)
+            return uploadingItem
+        }
+
+        // Read form uploaded UploadFiles
+        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue),
+                let remoteFileId = uploadedFile.remoteFileId {
+            guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
+                Log.fileProvider("Unable to bridge UploadFile \(uploadedFile.id) to File \(remoteFileId)", level: .error)
+                throw NSFileProviderError(.noSuchItem)
+            }
+
+            Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
+            let item = file.toFileProviderItem(parent: nil, domain: domain)
+            return item
+        }
+
+        // Read Files DB
+        else if let fileId = identifier.toFileId(),
+                let file = driveFileManager.getCachedFile(id: fileId) {
+            Log.fileProvider("item for identifier - File:\(fileId)")
+            let item = file.toFileProviderItem(parent: nil, domain: domain)
+            return item
+        }
+
+        // did not match anything
+        Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
+        throw NSFileProviderError(.noSuchItem)
     }
 
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
         Log.fileProvider("urlForItem(withPersistentIdentifier identifier:)")
-        if let item = fileProviderState.getImportedDocument(forKey: identifier) {
-            return item.storageUrl
-        } else if let fileId = identifier.toFileId(),
-                  let file = driveFileManager.getCachedFile(id: fileId) {
-            return FileProviderItem(file: file, domain: domain).storageUrl
-        } else {
-            return nil
+
+        // Read from upload queue
+        if let item = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+            Log.fileProvider("urlForItem - Uploading file")
+            return item.pathURL
         }
+
+        // Read from uploaded UploadFile
+        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue) {
+            Log.fileProvider("urlForItem - Uploaded file")
+            if let remoteFileId = uploadedFile.remoteFileId {
+                guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
+                    Log.fileProvider("urlForItem - Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
+                    return nil
+                }
+
+                return FileProviderItem.getStorageUrl(file: file, domain: domain)
+            }
+        }
+
+        // Read form Files DB
+        else if let fileId = identifier.toFileId(),
+                let file = driveFileManager.getCachedFile(id: fileId) {
+            Log.fileProvider("urlForItem - in database")
+            return FileProviderItem.getStorageUrl(file: file, domain: domain)
+        }
+
+        // Did not match
+        Log.fileProvider("urlForItem - no match", level: .error)
+        return nil
     }
 
     override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
         Log.fileProvider("persistentIdentifierForItem at url:\(url)")
-        return FileProviderItem.identifier(for: url, domain: domain)
+        return fileProviderService.identifier(for: url, domain: domain)
     }
 
     override func providePlaceholder(at url: URL, completionHandler: @escaping (Error?) -> Void) {
@@ -136,24 +204,29 @@ final class FileProviderExtension: NSFileProviderExtension {
     override func itemChanged(at url: URL) {
         Log.fileProvider("itemChanged at url:\(url)")
         if let identifier = persistentIdentifierForItem(at: url),
-           let item = try? item(for: identifier) as? FileProviderItem {
-            backgroundUploadItem(item)
+           let uploadItem = try? item(for: identifier) as? UploadFileProviderItem {
+            backgroundUpload(uploadItem)
+        } else {
+            Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
         }
     }
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
         Log.fileProvider("startProvidingItem at url:\(url)")
-        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
+        guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
               let file = driveFileManager.getCachedFile(id: fileId) else {
             if FileManager.default.fileExists(atPath: url.path) {
                 completionHandler(nil)
             } else {
-                completionHandler(nsError(code: .noSuchItem))
+                completionHandler(NSFileProviderError(.noSuchItem))
             }
             return
         }
 
-        let item = FileProviderItem(file: file, domain: domain)
+        guard let item = file.toFileProviderItem(parent: nil, domain: domain) as? FileProviderItem else {
+            completionHandler(NSFileProviderError(.noSuchItem))
+            return
+        }
 
         if fileStorageIsCurrent(item: item, file: file) {
             // File is in the file provider and is the same, nothing to do...
@@ -165,22 +238,8 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func stopProvidingItem(at url: URL) {
         Log.fileProvider("stopProvidingItem at url:\(url)")
-        if let identifier = persistentIdentifierForItem(at: url),
-           let item = try? item(for: identifier) as? FileProviderItem {
-            if let remoteModificationDate = item.contentModificationDate,
-               let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey])
-               .contentModificationDate,
-               remoteModificationDate > localModificationDate {
-                backgroundUploadItem(item) {
-                    self.cleanupAt(url: url)
-                }
-            } else {
-                cleanupAt(url: url)
-            }
-        } else {
-            // The document isn't in realm maybe it was recently imported?
-            cleanupAt(url: url)
-        }
+
+        cleanupAt(url: url)
     }
 
     // MARK: - Private
@@ -188,7 +247,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     private func isFileProviderExtensionEnabled() throws {
         Log.fileProvider("isFileProviderExtensionEnabled")
         guard UserDefaults.shared.isFileProviderExtensionEnabled else {
-            throw nsError(code: .notAuthenticated)
+            throw NSFileProviderError(.notAuthenticated)
         }
     }
 
@@ -199,7 +258,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             driveFileManager = setDriveFileManager()
         }
         guard driveFileManager != nil else {
-            throw nsError(code: .notAuthenticated)
+            throw NSFileProviderError(.notAuthenticated)
         }
     }
 
@@ -213,8 +272,8 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     private func downloadRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         Log.fileProvider("downloadRemoteFile file:\(file.id)")
-        // LocalVersion is OlderThanRemote
-        if file.isLocalVersionOlderThanRemote {
+        // Local copy exists OR LocalVersion is OlderThanRemote
+        if !file.fullyDownloaded || file.isLocalVersionOlderThanRemote {
             downloadFreshRemoteFile(file, for: item, completion: completion)
         }
         // LocalVersion is _not_ OlderThanRemote
@@ -228,8 +287,10 @@ final class FileProviderExtension: NSFileProviderExtension {
         for item: FileProviderItem,
         completion: @escaping (Error?) -> Void
     ) {
+        Log.fileProvider("downloadFreshRemoteFile file:\(file.id)")
         // Prevent observing file multiple times
         guard !DownloadQueue.instance.hasOperation(for: file.id) else {
+            Log.fileProvider("downloadFreshRemoteFile in queue, skip", level: .error)
             completion(nil)
             return
         }
@@ -237,37 +298,44 @@ final class FileProviderExtension: NSFileProviderExtension {
         var observationToken: ObservationToken?
         observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
             observationToken?.cancel()
+            observationToken = nil
 
-            if error != nil {
-                item.isDownloaded = false
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                    completion(NSFileProviderError(.serverUnreachable))
-                }
-            } else {
-                do {
-                    try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                    item.isDownloaded = true
-                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                        completion(nil)
-                    }
-                } catch {
-                    completion(error)
-                }
+            defer {
+                self.manager.signalEnumerator(for: .workingSet) { _ in }
+                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            }
+
+            guard error == nil else {
+                completion(NSFileProviderError(.serverUnreachable))
+                return
+            }
+
+            do {
+                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                Log.fileProvider("downloadRemoteFile completion")
+                completion(nil)
+            } catch {
+                Log.fileProvider("downloadRemoteFile error:\(error)", level: .error)
+                completion(error)
             }
         }
+
         DownloadQueue.instance.addToQueue(
             file: file,
             userId: driveFileManager.drive.userId,
             itemIdentifier: item.itemIdentifier
         )
-
-        manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
     }
 
     private func saveFreshLocalFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
+        Log.fileProvider("saveFreshLocalFile file:\(file.id)")
+        defer {
+            manager.signalEnumerator(for: .workingSet) { _ in }
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+        }
+
         do {
             try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completion(nil)
         } catch {
             completion(error)
@@ -279,6 +347,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         do {
             try FileManager.default.removeItem(at: url)
         } catch {
+            Log.fileProvider("cleanupAt failed to removeItem:\(error)", level: .error)
             // Handle error
         }
 
@@ -288,43 +357,27 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
-        let fileProviderItemIdentifier = item.itemIdentifier.rawValue
-        Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(fileProviderItemIdentifier)")
+    func backgroundUpload(_ uploadFileProviderItem: UploadFileProviderItem, completion: (() -> Void)? = nil) {
+        Log.fileProvider("backgroundUploadItem fileProviderItemIdentifier:\(uploadFileProviderItem.itemIdentifier.rawValue)")
 
-        let uploadFile = UploadFile(
-            parentDirectoryId: item.parentItemIdentifier.toFileId()!,
-            userId: driveFileManager.drive.userId,
-            driveId: driveFileManager.drive.id,
-            fileProviderItemIdentifier: fileProviderItemIdentifier,
-            url: item.storageUrl,
-            name: item.filename,
-            conflictOption: .version,
-            shouldRemoveAfterUpload: false
-        )
+        let uploadFile = uploadFileProviderItem.toUploadFile
 
+        // Observe queue for upload completion
         var observationToken: ObservationToken?
         observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
             observationToken?.cancel()
-            defer {
-                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in
-                    completion?()
-                }
-            }
+            observationToken = nil
 
-            item.isUploading = false
-            item.alreadyEnumerated = true
-            if let error = uploadedFile.error {
-                item.setUploadingError(error)
-                item.isUploaded = false
-                return
+            Task {
+                completion?()
+                // Signal change on upload finished, after completion
+                try await self.manager.signalEnumerator(for: .workingSet)
+                try await self.manager.signalEnumerator(for: uploadFileProviderItem.parentItemIdentifier)
             }
-
-            self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
         }
 
         uploadQueue.resumeAllOperations()
-        _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: item.itemIdentifier, addToQueue: true)
+        _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
     }
 
     // MARK: - Enumeration
@@ -336,14 +389,25 @@ final class FileProviderExtension: NSFileProviderExtension {
         try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
-            return FileProviderEnumerator(
-                containerItemIdentifier: .workingSet,
+            return WorkingSetEnumerator(driveFileManager: driveFileManager, domain: domain)
+        } else if containerItemIdentifier == .rootContainer {
+            return RootEnumerator(driveFileManager: driveFileManager, domain: domain)
+        }
+
+        guard let fileId = containerItemIdentifier.toFileId(),
+              let file = driveFileManager.getCachedFile(id: fileId) else {
+            throw NSFileProviderError(.noSuchItem)
+        }
+
+        if file.isDirectory {
+            return DirectoryEnumerator(
+                containerItemIdentifier: containerItemIdentifier,
                 driveFileManager: driveFileManager,
                 domain: domain
             )
         }
-        let item = try item(for: containerItemIdentifier)
-        return FileProviderEnumerator(containerItem: item, driveFileManager: driveFileManager, domain: domain)
+
+        throw NSError.featureUnsupported
     }
 
     // MARK: - Validation
@@ -353,16 +417,5 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("supportedServiceSources for :\(itemIdentifier.rawValue)")
         let validationService = FileProviderValidationServiceSource(fileProviderExtension: self, itemIdentifier: itemIdentifier)!
         return [validationService]
-    }
-}
-
-// MARK: - Convenient methods
-
-extension FileProviderExtension {
-    // Create an NSError based on the file provider error code
-    func nsError(domain: String = NSFileProviderErrorDomain,
-                 code: NSFileProviderError.Code,
-                 userInfo dict: [String: Any]? = nil) -> NSError {
-        return NSError(domain: NSFileProviderErrorDomain, code: code.rawValue, userInfo: dict)
     }
 }

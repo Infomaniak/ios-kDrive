@@ -425,7 +425,6 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
-    public var userId: Int?
     public var isFirstInCollection = false
     public var isLastInCollection = false
 
@@ -520,9 +519,15 @@ public final class File: Object, Codable {
     }
 
     public var isDownloaded: Bool {
+        let localPath = localUrl.path
+        guard fileManager.fileExists(atPath: localPath) else {
+            DDLogError("[File] no local copy to read from")
+            return false
+        }
+
         // Check that size on disk matches, if available
         do {
-            let attributes = try fileManager.attributesOfItem(atPath: localUrl.path)
+            let attributes = try fileManager.attributesOfItem(atPath: localPath)
             if let remoteSize = size,
                let metadataSize = attributes[FileAttributeKey.size] as? NSNumber,
                metadataSize.intValue != remoteSize {
@@ -532,7 +537,7 @@ public final class File: Object, Codable {
             DDLogError("[File] unable to read metadata on disk: \(error)")
         }
 
-        return fileManager.fileExists(atPath: localUrl.path)
+        return true
     }
 
     public var isMostRecentDownloaded: Bool {
@@ -822,5 +827,17 @@ extension File: Differentiable {
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color
         }
+    }
+}
+
+extension File: FileProviderItemProvider {
+    /// DTO of a File used by the FileProvider
+    /// Represents a `File` in database
+    public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   domain: NSFileProviderDomain?) -> NSFileProviderItem {
+        // TODO: override parent and domain for future working set support.
+
+        let item = FileProviderItem(file: self, domain: domain)
+        return item
     }
 }

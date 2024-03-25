@@ -24,18 +24,7 @@ import Foundation
 ///
 /// Concrete implementation `FileProviderExtensionAdditionalState` is ThreadSafe
 public protocol FileProviderExtensionAdditionalStatable {
-    func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem]
-
-    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
-        -> [NSFileProviderItemIdentifier]
-
     // MARK: CRUD
-
-    /// Get a File placeholder in an arbitrary folder
-    func getImportedDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem?
-
-    /// Set a File placeholder in an arbitrary folder
-    func setImportedDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier)
 
     /// Get a File placeholder in the `Recent Files` folder
     func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem?
@@ -51,54 +40,11 @@ public protocol FileProviderExtensionAdditionalStatable {
 }
 
 public final class FileProviderExtensionAdditionalState: FileProviderExtensionAdditionalStatable {
-    /// Any file upload in progress
-    private var importedDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
-
     /// Recent Files
     private var workingDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
 
     /// A serial queue to lock access to ivars.
     let queue = DispatchQueue(label: "com.infomaniak.fileProviderExtensionState.sync", qos: .default)
-
-    public func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
-        Log.fileProvider("importedDocuments parent:\(parentItemIdentifier.rawValue)")
-        var documents = [FileProviderItem]()
-        queue.sync {
-            documents = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier }
-        }
-        return documents
-    }
-
-    public func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier)
-        -> [NSFileProviderItemIdentifier] {
-        Log.fileProvider("deleteAlreadyEnumeratedImportedDocuments parent:\(parentItemIdentifier.rawValue)")
-        var identifiers = [NSFileProviderItemIdentifier]()
-        queue.sync {
-            let children = importedDocuments.values
-                .filter { $0.parentItemIdentifier == parentItemIdentifier && $0.alreadyEnumerated }
-            identifiers = children.compactMap { importedDocuments.removeValue(forKey: $0.itemIdentifier)?.itemIdentifier }
-        }
-
-        return identifiers
-    }
-
-    // MARK: importedDocuments
-
-    public func setImportedDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
-        Log.fileProvider("setImportedDocument key:\(key.rawValue)")
-        queue.sync {
-            importedDocuments[key] = item
-        }
-    }
-
-    public func getImportedDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem? {
-        Log.fileProvider("getImportedDocument key:\(key.rawValue)")
-        var item: FileProviderItem?
-        queue.sync {
-            item = importedDocuments[key]
-        }
-        return item
-    }
 
     // MARK: workingDocuments
 

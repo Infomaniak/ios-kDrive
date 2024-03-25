@@ -1,3 +1,4 @@
+//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2023 Infomaniak Network SA
@@ -17,13 +18,28 @@
  */
 
 import Foundation
+import kDriveCore
 
-public struct FileAction: Codable {
-    public let action: FileActivityType
-    public let fileId: Int
+extension NSFileProviderPage {
+    init(_ integer: Int) {
+        self.init(withUnsafeBytes(of: integer.littleEndian) { Data($0) })
+    }
 
-    enum CodingKeys: String, CodingKey {
-        case action
-        case fileId = "file_id"
+    init?(_ cursor: FileCursor) {
+        guard let cursorData = cursor.data(using: .utf8) else { return nil }
+        self.init(cursorData)
+    }
+
+    var toCursor: FileCursor? {
+        return String(data: rawValue, encoding: .utf8)
+    }
+
+    var toInt: Int {
+        return rawValue.withUnsafeBytes { $0.load(as: Int.self) }.littleEndian
+    }
+
+    var isInitialPage: Bool {
+        return self == NSFileProviderPage.initialPageSortedByDate as NSFileProviderPage || self == NSFileProviderPage
+            .initialPageSortedByName as NSFileProviderPage
     }
 }

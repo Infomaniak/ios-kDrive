@@ -246,7 +246,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         case DriveFileManager.lastModificationsRootFile.id:
             destinationViewModel = LastModificationsViewModel(driveFileManager: driveFileManager)
         case DriveFileManager.sharedWithMeRootFile.id:
-            let sharedWithMeDriveFileManager = driveFileManager.sharedWithMeInstance()
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
             destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
         case DriveFileManager.offlineRoot.id:
             destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)

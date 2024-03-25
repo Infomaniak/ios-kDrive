@@ -272,26 +272,30 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
     private func end(sessionUrl: URL?) {
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
+
+        defer {
+            progressObservation?.invalidate()
+            if backgroundTaskIdentifier != .invalid {
+                UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+            }
+            _executing = false
+            _finished = true
+        }
+
         // Delete download task
-        if error != .taskRescheduled,
-           let sessionUrl {
-            BackgroundRealm.uploads.execute { realm in
-                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(
-                    format: "sessionUrl = %@",
-                    sessionUrl.absoluteString
-                )).first {
-                    try? realm.safeWrite {
-                        realm.delete(task)
-                    }
+        guard error != .taskRescheduled, let sessionUrl else {
+            return
+        }
+
+        assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
+
+        BackgroundRealm.uploads.execute { realm in
+            if let task = realm.objects(DownloadTask.self)
+                .filter("sessionUrl = %@", sessionUrl.absoluteString).first {
+                try? realm.safeWrite {
+                    realm.delete(task)
                 }
             }
         }
-
-        progressObservation?.invalidate()
-        if backgroundTaskIdentifier != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-        }
-        _executing = false
-        _finished = true
     }
 }

@@ -74,6 +74,9 @@ public enum FactoryService {
             },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
+            },
+            Factory(type: FileProviderServiceable.self) { _, _ in
+                FileProviderService()
             }
         ]
         return services
@@ -167,6 +170,7 @@ public enum FactoryService {
                 (loggerFactory, "UploadOperation"),
                 (loggerFactory, "BackgroundSessionManager"),
                 (loggerFactory, "UploadQueue"),
+                (loggerFactory, "DownloadQueue"),
                 (loggerFactory, "BGTaskScheduling"),
                 (loggerFactory, "PhotoLibraryUploader"),
                 (loggerFactory, "AppDelegate"),

@@ -149,6 +149,25 @@ public enum Log {
                           tag: tag)
     }
 
+    /// shorthand for ABLog, with "DownloadQueue" category
+    public static func downloadQueue(_ message: @autoclosure () -> Any,
+                                     level: AbstractLogLevel = .debug,
+                                     context: Int = 0,
+                                     file: StaticString = #file,
+                                     function: StaticString = #function,
+                                     line: UInt = #line,
+                                     tag: Any? = nil) {
+        let category = "DownloadQueue"
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
+    }
+
     /// shorthand for ABLog, with "UploadOperation" category
     public static func uploadOperation(_ message: @autoclosure () -> Any,
                                        level: AbstractLogLevel = .debug,
