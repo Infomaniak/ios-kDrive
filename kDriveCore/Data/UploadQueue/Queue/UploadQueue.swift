@@ -148,8 +148,19 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
     public func getUploadingFiles(withParent parentId: Int,
                                   userId: Int,
+                                  driveId: Int) -> Results<UploadFile> {
+        return getUploadingFiles(
+            withParent: parentId,
+            userId: userId,
+            driveId: driveId,
+            using: DriveFileManager.constants.uploadsRealm
+        )
+    }
+
+    public func getUploadingFiles(withParent parentId: Int,
+                                  userId: Int,
                                   driveId: Int,
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+                                  using realm: Realm) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter(
             "parentDirectoryId = %d AND ownedByFileProvider == %@",
@@ -191,6 +202,46 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
 
         return realm.objects(UploadFile.self)
             .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
+    }
+
+    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
+    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
+
+        let realm = DriveFileManager.constants.uploadsRealm
+        realm.refresh()
+
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let matchedFile = realm
+            .objects(UploadFile.self)
+            .filter(
+                "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
+                fileProviderItemIdentifier,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .first
+
+        return matchedFile
+    }
+
+    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploaded within an execution context
+    public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
+
+        let realm = DriveFileManager.constants.uploadsRealm
+        realm.refresh()
+
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let matchedFile = realm
+            .objects(UploadFile.self)
+            .filter(
+                "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
+                fileProviderItemIdentifier,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .first
+
+        return matchedFile
     }
 
     // MARK: - Memory warnings

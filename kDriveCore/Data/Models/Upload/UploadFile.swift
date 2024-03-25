@@ -68,7 +68,13 @@ public final class UploadFile: Object, UploadFilable {
     @Persisted public var parentDirectoryId = 1
     @Persisted public var userId = 0
     @Persisted public var driveId = 0
+
+    /// The date at which the upload succeeded
     @Persisted public var uploadDate: Date?
+
+    /// The id of the remote File uploaded
+    @Persisted public var remoteFileId: Int?
+
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?
     @Persisted public var taskCreationDate: Date?
@@ -327,6 +333,25 @@ public extension UploadFile {
         error = nil
         // Reset retry count to default
         maxRetryCount = UploadFile.defaultMaxRetryCount
+    }
+}
+
+extension UploadFile: FileProviderItemProvider {
+    /// DTO of an UploadFile used by the FileProvider
+    /// Represents an `UploadFile` in the UploadQueue been uploaded
+    public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   domain: NSFileProviderDomain?) -> NSFileProviderItem {
+        // TODO: override parent and domain for future working set support.
+
+        let item = UploadFileProviderItem(uploadFileUUID: id,
+                                          parentDirectoryId: parentDirectoryId,
+                                          userId: userId,
+                                          driveId: driveId,
+                                          sourceUrl: pathURL ?? URL(fileURLWithPath: "about:blank"),
+                                          conflictOption: conflictOption,
+                                          driveError: error)
+
+        return item
     }
 }
 

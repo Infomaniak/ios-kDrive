@@ -35,10 +35,10 @@ final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         let workingSetFiles = driveFileManager.getWorkingSet()
-        var containerItems = [FileProviderItem]()
+        var containerItems = [NSFileProviderItem]()
         for file in workingSetFiles {
             autoreleasepool {
-                containerItems.append(FileProviderItem(file: file, parent: .workingSet, domain: self.domain))
+                containerItems.append(file.toFileProviderItem(parent: .workingSet, domain: self.domain))
             }
         }
         containerItems += additionalState.getWorkingDocumentValues()
