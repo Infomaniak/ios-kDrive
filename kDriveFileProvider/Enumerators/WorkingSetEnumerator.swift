@@ -21,20 +21,26 @@ import InfomaniakDI
 import kDriveCore
 
 final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService var workingSetService: FileProviderWorkingSetServiceable
-
     let driveFileManager: DriveFileManager
+    let workingSetService: FileProviderWorkingSetServiceable
     let domain: NSFileProviderDomain?
 
     init(driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
         self.driveFileManager = driveFileManager
+        let userId = driveFileManager.drive.userId
+        let driveId = driveFileManager.drive.id
+        let metadata = ["driveId": driveId, "userId": userId]
+        @InjectService(factoryParameters: metadata) var workingSetService: FileProviderWorkingSetServiceable
+        self.workingSetService = workingSetService
         self.domain = domain
     }
 
     func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
+        Log.fileProvider("•• WorkingSet enumerate")
         let workingSetFiles = driveFileManager.getWorkingSet()
+
         var containerItems = [NSFileProviderItem]()
         for file in workingSetFiles {
             autoreleasepool {

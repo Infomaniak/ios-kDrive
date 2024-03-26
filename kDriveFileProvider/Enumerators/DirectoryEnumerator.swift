@@ -188,7 +188,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 try realm.write {
                     for updatedChild in updatedFiles {
-                        driveFileManager.keepCacheAttributesForFile(
+                        self.driveFileManager.keepCacheAttributesForFile(
                             newFile: updatedChild,
                             keepProperties: [.standard],
                             using: realm
@@ -198,14 +198,21 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         updatedItems.append(updatedChild)
                     }
                     for deletedChild in deletedFiles {
-                        guard let existingDeletedFile: File = realm.getObject(id: deletedChild.id) else { continue }
-                        deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
+                        let deletedFilePrimaryKey = deletedChild.uid
+                        guard let existingDeletedFile: File = realm.getObject(id: deletedFilePrimaryKey) else {
+                            continue
+                        }
+
+                        let existingDeletedFileId = existingDeletedFile.id
+                        let existingDeletedFileIdentifier = NSFileProviderItemIdentifier(existingDeletedFileId)
+
+                        deletedItems.append(existingDeletedFileIdentifier)
                         realm.delete(existingDeletedFile)
                     }
                     parentDirectory.lastCursor = response.cursor
                 }
 
-                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(parent: nil, domain: domain) })
+                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(parent: nil, domain: self.domain) })
                 observer.didDeleteItems(withIdentifiers: deletedItems)
 
                 guard let newLastCursor = response.cursor,

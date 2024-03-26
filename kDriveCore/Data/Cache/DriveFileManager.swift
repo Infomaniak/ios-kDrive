@@ -25,32 +25,6 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
-public enum DriveFileManagerContext {
-    /// Main app dataset
-    case drive
-
-    /// Dedicated dataset to store the state of files in the FileProvider
-    case fileProvider
-
-    /// Dedicated dataset to store the state of files in the working set within the FileProvider
-    case fileProviderWorkingSet
-
-    case sharedWithMe
-
-    func realmURL(using drive: Drive) -> URL {
-        switch self {
-        case .drive:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
-        case .sharedWithMe:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
-        case .fileProvider:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
-        case .fileProviderWorkingSet:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp-ws.realm")
-        }
-    }
-}
-
 public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
@@ -305,10 +279,10 @@ public final class DriveFileManager {
     }
 
     public func getCachedMyFilesRoot() -> File? {
-        return getRealm().objects(File.self).filter(NSPredicate(
-            format: "rawVisibility == %@",
+        return getRealm().objects(File.self).filter(
+            "rawVisibility == %@",
             FileVisibility.isPrivateSpace.rawValue
-        )).first?.freeze()
+        ).first?.freeze()
     }
 
     // autorelease frequecy so cleaner serialized realm base
@@ -441,28 +415,6 @@ public final class DriveFileManager {
 
     public func instanceWith(context: DriveFileManagerContext) -> DriveFileManager {
         return DriveFileManager(drive: drive, apiFetcher: apiFetcher, context: context)
-    }
-
-    public func getRealm() -> Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "file cache realm" from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try realmURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-            DDLogInfo("realmURL : \(realmURL)")
-        }
-
-        do {
-            return try Realm(configuration: realmConfiguration)
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
     }
 
     /// Delete all drive data cache for a user
@@ -1099,11 +1051,23 @@ public final class DriveFileManager {
     public func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
         // -3600).timeIntervalSince1970))
-        let files = getRealm().objects(File.self).sorted(by: \.lastModifiedAt, ascending: false)
+        let files = getRealm().objects(File.self)
+            .sorted(by: \.lastModifiedAt, ascending: false)
+
         var result = [File]()
         for i in 0 ..< min(20, files.count) {
-            result.append(files[i])
+            let file = files[i]
+
+            // File must exist locally for WorkingSet (apple doc), so we check on File System
+            guard file.isDownloaded else {
+                continue
+            }
+
+            result.append(file)
         }
+
+        print("•• working set - got \(files.count) files")
+
         return result
     }
 

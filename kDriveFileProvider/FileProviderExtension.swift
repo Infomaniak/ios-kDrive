@@ -49,7 +49,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     @InjectService var uploadQueue: UploadQueueable
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
-    @LazyInjectService var fileProviderState: FileProviderWorkingSetServiceable
     @LazyInjectService var fileProviderService: FileProviderServiceable
 
     lazy var fileCoordinator: NSFileCoordinator = {
@@ -59,7 +58,11 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     @LazyInjectService var accountManager: AccountManageable
-    lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
+
+    // TODO: Fix force unwrap
+    lazy var driveFileManager: DriveFileManager! = getFileProviderDriveFileManager()
+    lazy var workingSet: FileProviderWorkingSetServiceable? = getWorkingSetService()
+
     lazy var manager: NSFileProviderManager = {
         if let domain {
             return NSFileProviderManager(for: domain) ?? .default
@@ -67,7 +70,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         return .default
     }()
 
-    private func setDriveFileManager() -> DriveFileManager? {
+    private func getFileProviderDriveFileManager() -> DriveFileManager? {
         var currentDriveFileManager: DriveFileManager?
         if let objectId = domain?.identifier.rawValue,
            let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
@@ -77,9 +80,24 @@ final class FileProviderExtension: NSFileProviderExtension {
             currentDriveFileManager = accountManager.currentDriveFileManager
         }
 
-        guard let currentDriveFileManager else { return nil }
+        guard let currentDriveFileManager else {
+            return nil
+        }
 
         return currentDriveFileManager.instanceWith(context: .fileProvider)
+    }
+
+    private func getWorkingSetService() -> FileProviderWorkingSetServiceable? {
+        guard let driveFileManager else {
+            return nil
+        }
+
+        let userId = driveFileManager.drive.userId
+        let driveId = driveFileManager.drive.id
+        let metadata = ["driveId": driveId, "userId": userId]
+        @InjectService(factoryParameters: metadata) var workingSet: FileProviderWorkingSetServiceable
+
+        return workingSet
     }
 
     // MARK: - NSFileProviderExtension Override
@@ -100,15 +118,8 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
-        // TODO: working set in DB
-
-        if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
-            Log.fileProvider("item for identifier - Working Document")
-            return item
-        }
-
         // Read from upload queue
-        else if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+        if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
             let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, domain: domain)
             return uploadingItem
@@ -256,7 +267,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("updateDriveFileManager")
         if driveFileManager == nil {
             accountManager.forceReload()
-            driveFileManager = setDriveFileManager()
+            driveFileManager = getFileProviderDriveFileManager()
         }
         guard driveFileManager != nil else {
             throw NSFileProviderError(.notAuthenticated)
@@ -313,6 +324,10 @@ final class FileProviderExtension: NSFileProviderExtension {
 
             do {
                 try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+
+                let detachedFile = file.detached()
+                self.workingSet?.setWorkingDocument(detachedFile: detachedFile)
+
                 Log.fileProvider("downloadRemoteFile completion")
                 completion(nil)
             } catch {

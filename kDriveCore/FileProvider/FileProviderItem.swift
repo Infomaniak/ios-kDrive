@@ -139,9 +139,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         isDirectory = file.isDirectory
 
-        // TODO: pass user ID
-        let metadata = ["driveId": file.driveId, "userId": Int(1337)]
-        @InjectService(factoryParameters: metadata) var fileProviderState: FileProviderWorkingSetServiceable
         if file.isDirectory && file.fullyDownloaded {
             let totalCount = file.children.count
             childItemCount = NSNumber(value: totalCount)

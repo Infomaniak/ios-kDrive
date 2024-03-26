@@ -21,34 +21,26 @@ import FileProvider
 import Foundation
 import InfomaniakDI
 
-/// Something to access and mutate the Working set
+/// Something to access and mutate the WorkingSet
 public protocol FileProviderWorkingSetServiceable {
-    // MARK: CRUD
+    /// Get a File within the WorkingSet from indentifier
+    func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> NSFileProviderItem?
 
-    /// Get a File placeholder in the `Recent Files` folder
-    func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem?
+    /// Get all the files within the WorkingSet
+    func getWorkingDocumentValues() -> [NSFileProviderItem]
 
-    /// Get Files placeholder in the `Recent Files` folder
-    func getWorkingDocumentValues() -> [FileProviderItem]
+    /// Set a File in the WorkingSet DB
+    func setWorkingDocument(detachedFile: File)
 
-    /// Set a File placeholder in the `Recent Files` folder
-    func setWorkingDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier)
-
-    /// Remove a File placeholder in the `Recent Files` folder
+    /// Remove a File from the WorkingSet, given a `NSFileProviderItemIdentifier`
     func removeWorkingDocument(forKey key: NSFileProviderItemIdentifier)
+
+    /// Remove a File from the WorkingSet, given a `fileId`
+    func removeWorkingDocument(forFileId fileId: Int)
 }
 
 public final class FileProviderWorkingSetService: FileProviderWorkingSetServiceable {
-    /// Recent Files
-//    private var workingDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
-
-    /// A serial queue to lock access to ivars.
-    let queue = DispatchQueue(
-        label: "com.infomaniak.fileProviderExtensionState.sync",
-        qos: .default,
-        autoreleaseFrequency: .workItem
-    )
-
+    /// Internal drive file manager
     let workingSetDriveFileManager: DriveFileManager
 
     init?(driveId: Int, userId: Int) {
@@ -62,37 +54,80 @@ public final class FileProviderWorkingSetService: FileProviderWorkingSetServicea
         workingSetDriveFileManager = workingSetFileManager
     }
 
-    // MARK: workingDocuments
-
-    public func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> FileProviderItem? {
+    public func getWorkingDocument(forKey key: NSFileProviderItemIdentifier) -> NSFileProviderItem? {
         Log.fileProvider("getWorkingDocument key:\(key.rawValue)")
-        var value: FileProviderItem?
-        queue.sync {
-//            value = workingDocuments[key]
+        guard let fileId = key.toFileId() else {
+            Log.fileProvider("getWorkingDocument unable to get fileId for key:\(key.rawValue)", level: .error)
+            return nil
         }
-        return value
+
+        let realm = workingSetDriveFileManager.getRealm()
+        guard let file = realm.objects(File.self)
+            .filter("id == %@", NSNumber(value: fileId))
+            .first(where: \.isDownloaded) /* File must exist locally for WorkingSet (apple doc) */ else {
+            return nil
+        }
+
+        let fileProviderItem = FileProviderItem(file: file, domain: nil)
+        return fileProviderItem
     }
 
-    public func getWorkingDocumentValues() -> [FileProviderItem] {
+    public func getWorkingDocumentValues() -> [NSFileProviderItem] {
         Log.fileProvider("getWorkingDocumentValues")
-        var values = [FileProviderItem]()
-        queue.sync {
-//            values = [FileProviderItem](workingDocuments.values)
+
+        let realm = workingSetDriveFileManager.getRealm()
+
+        // File must exist locally for WorkingSet (apple doc), so we check on File System
+        let realmFiles = Array(realm.objects(File.self).filter(\.isDownloaded))
+
+        let files = realmFiles.map { file in
+            autoreleasepool {
+                return file.toFileProviderItem()
+            }
         }
-        return values
+
+        Log.fileProvider("getWorkingDocument count:\(files.count)")
+
+        return files
     }
 
-    public func setWorkingDocument(_ item: FileProviderItem, forKey key: NSFileProviderItemIdentifier) {
-        Log.fileProvider("setWorkingDocument key:\(key.rawValue)")
-        queue.sync {
-//            workingDocuments[key] = item
+    public func setWorkingDocument(detachedFile: File) {
+        Log.fileProvider("setWorkingDocument fid:\(detachedFile.id)")
+        assert(detachedFile.realm == nil, "expecting a file not linked to a realm to be able to add it")
+
+        do {
+            try workingSetDriveFileManager.transaction { realm in
+                realm.add(detachedFile, update: .modified)
+            }
+        } catch {
+            Log.fileProvider("setWorkingDocument transaction error: \(error)", level: .error)
         }
     }
 
     public func removeWorkingDocument(forKey key: NSFileProviderItemIdentifier) {
         Log.fileProvider("removeWorkingDocument key:\(key.rawValue)")
-        queue.sync {
-//            workingDocuments.removeValue(forKey: key)
+
+        guard let fileId = key.toFileId() else {
+            Log.fileProvider("removeWorkingDocument unable to get fileId for key:\(key.rawValue)", level: .error)
+            return
+        }
+
+        removeWorkingDocument(forFileId: fileId)
+    }
+
+    public func removeWorkingDocument(forFileId fileId: Int) {
+        do {
+            try workingSetDriveFileManager.transaction { realm in
+                guard let fileToRemove = realm.objects(File.self)
+                    .filter("id == %@", NSNumber(value: fileId))
+                    .first(where: \.isDownloaded) /* File must exist locally for WorkingSet (apple doc) */ else {
+                    return
+                }
+
+                realm.delete(fileToRemove)
+            }
+        } catch {
+            Log.fileProvider("removeWorkingDocument transaction error: \(error)", level: .error)
         }
     }
 }
