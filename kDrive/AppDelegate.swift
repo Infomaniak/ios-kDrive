@@ -286,18 +286,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
         let rootViewController = window?.rootViewController as? UpdateAccountDelegate
 
-        if preload {
-            availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-        } else {
-            var token: ObservationToken?
-            token = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
-                // Remove observer after 1 pass
-                token?.cancel()
-                DispatchQueue.global(qos: .utility).async {
-                    self?.availableOfflineManager.updateAvailableOfflineFiles(status: status)
-                }
-            }
-        }
+        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
 
         Task {
             do {

@@ -397,6 +397,11 @@ public extension Endpoint {
 
     // MARK: File/directory
 
+    static func file(_ file: AbstractFile) -> Endpoint {
+        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)",
+                                                                         queryItems: [FileWith.fileExtra.toQueryItem()])
+    }
+
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
         return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)",
                                                                          queryItems: [FileWith.fileExtra.toQueryItem()])

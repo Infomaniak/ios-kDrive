@@ -17,10 +17,13 @@
  */
 
 import Foundation
+import RealmSwift
 
 public extension DriveFileManager {
     func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let offlineFiles = getRealm().objects(File.self)
+        let realm = getRealm()
+        realm.refresh()
+        let offlineFiles = realm.objects(File.self)
             .filter(NSPredicate(format: "isAvailableOffline = true"))
             .sorted(by: [sortType.value.sortDescriptor]).freeze()
 
@@ -30,46 +33,81 @@ public extension DriveFileManager {
     func updateAvailableOfflineFiles() async throws {
         let offlineFiles = getAvailableOfflineFiles()
         guard !offlineFiles.isEmpty else { return }
-        let date = Date(timeIntervalSince1970: TimeInterval(UserDefaults.shared.lastSyncDateOfflineFiles))
-        // Get activities
-        let filesActivities = try await filesActivities(files: offlineFiles, from: date)
-        for activities in filesActivities {
-            guard let file = offlineFiles.first(where: { $0.id == activities.id }) else {
-                continue
-            }
 
-            if activities.result {
-                try applyActivities(activities, offlineFile: file)
-            } else if let message = activities.message {
-                handleError(message: message, offlineFile: file)
-            }
+        let updatedFileResult = try await getUpdatedAvailableOffline()
+
+        let realm = getRealm()
+        for updatedFile in updatedFileResult.updatedFiles {
+            updateFile(updatedFile: updatedFile, realm: realm)
+        }
+
+        for deletedFileUid in updatedFileResult.deletedFileUids {
+            deleteOfflineFile(uid: deletedFileUid, realm: realm)
+        }
+
+        // After metadata update, download real files if needed
+        let updatedOfflineFiles = getAvailableOfflineFiles()
+        for updateOfflineFile in updatedOfflineFiles where updateOfflineFile.isLocalVersionOlderThanRemote {
+            DownloadQueue.instance.addToQueue(file: updateOfflineFile, userId: drive.userId)
         }
     }
 
-    func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
-        let response = try await apiFetcher.filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
-        // Update last sync date
-        if let responseAt = response.validApiResponse.responseAt {
-            UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
-        }
-        return response.validApiResponse.data
+    private func updateFile(updatedFile: File, realm: Realm) {
+        let oldFile = realm.object(ofType: File.self, forPrimaryKey: updatedFile.uid)?.freeze()
+        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.standard, .extras], using: realm)
+        _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, using: realm)
     }
 
-    private func applyActivities(_ activities: ActivitiesForFile, offlineFile file: File) throws {
-        // Update file in Realm & rename if needed
-        if let newFile = activities.file {
-            let realm = getRealm()
-            keepCacheAttributesForFile(newFile: newFile, keepProperties: [.standard, .extras], using: realm)
-            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
-        }
-        // Apply activities to file
-        var handledActivities = Set<FileActivityType>()
-        for activity in activities.activities where activity.action != nil && !handledActivities.contains(activity.action!) {
-            if activity.action == .fileUpdate {
-                // Download new version
-                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+    private func deleteOfflineFile(uid: String, realm: Realm) {
+        removeFileInDatabase(fileUid: uid, cascade: false, withTransaction: true, using: realm)
+    }
+}
+
+// FIXME: This part should be deleted once we get a better api
+extension DriveFileManager {
+    enum OfflineFileUpdate {
+        case updated(File)
+        case deleted(String)
+        case error(Error)
+    }
+
+    typealias UpdatedFileResult = (updatedFiles: [File], deletedFileUids: [String])
+
+    func getUpdatedAvailableOffline() async throws -> UpdatedFileResult {
+        let offlineFiles = getAvailableOfflineFiles()
+
+        return await withTaskGroup(of: OfflineFileUpdate.self, returning: UpdatedFileResult.self) { group in
+            for file in offlineFiles {
+                group.addTask { [self] in
+                    do {
+                        let updatedFile = try await apiFetcher.file(file)
+                        if updatedFile.isTrashed {
+                            return .deleted(file.uid)
+                        } else {
+                            return .updated(updatedFile)
+                        }
+                    } catch let error as DriveError where error == .objectNotFound {
+                        return .deleted(file.uid)
+                    } catch {
+                        return .error(error)
+                    }
+                }
             }
-            handledActivities.insert(activity.action!)
+
+            var updatedFiles = [File]()
+            var deletedFiles = [String]()
+            for await result in group {
+                switch result {
+                case .updated(let file):
+                    updatedFiles.append(file)
+                case .deleted(let fileUid):
+                    deletedFiles.append(fileUid)
+                case .error:
+                    break
+                }
+            }
+
+            return (updatedFiles, deletedFiles)
         }
     }
 }

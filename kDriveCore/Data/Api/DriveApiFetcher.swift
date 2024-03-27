@@ -493,6 +493,10 @@ public class DriveApiFetcher: ApiFetcher {
     public func cancelImport(drive: AbstractDrive, id: Int) async throws -> Bool {
         try await perform(request: authenticatedRequest(.cancelImport(drive: drive, id: id), method: .put))
     }
+
+    public func file(_ file: AbstractFile) async throws -> File {
+        try await perform(request: authenticatedRequest(.file(file)))
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
