@@ -247,8 +247,7 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
                 guard let self,
-                      !self.currentDirectory.isInvalidated,
-                      let liveCurrentDirectory = currentDirectory.thaw() else {
+                      !self.currentDirectory.isInvalidated else {
                     return
                 }
 
@@ -262,13 +261,13 @@ class FileListViewModel: SelectDelegate {
                 switch change {
                 case .initial(let results):
                     // update observed realm objects directly
-                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
+                    currentDirectory = getRefreshedCurrentDirectory()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
                     onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     // update observed realm objects directly
-                    currentDirectory = liveCurrentDirectory.freezeIfNeeded()
+                    currentDirectory = getRefreshedCurrentDirectory()
                     _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                     onFileListUpdated(
@@ -362,7 +361,7 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        let liveCurrentDirectory = currentDirectory.thaw() ?? currentDirectory
+        let liveCurrentDirectory = getRefreshedCurrentDirectory()
         onFileListUpdated?([], [], [], [], liveCurrentDirectory.fullyDownloaded && files.isEmpty, false)
     }
 
@@ -415,6 +414,14 @@ class FileListViewModel: SelectDelegate {
                 break
             }
         }
+    }
+
+    func getRefreshedCurrentDirectory() -> File {
+        // Directory is not managed by realm so there is no concept of "refresh"
+        guard currentDirectory.isManagedByRealm else { return currentDirectory }
+
+        // Directory is managed by realm get live version if it still exists
+        return currentDirectory.thaw()?.freeze() ?? currentDirectory
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
