@@ -60,6 +60,15 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
         }
         return cell
     }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let footerView = SelectPhotoFormatFooterView.instantiate()
+        return footerView
+    }
 }
 
 // MARK: - UITableViewDelegate
