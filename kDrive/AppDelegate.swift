@@ -55,6 +55,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
+    @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
 
     // MARK: - UIApplicationDelegate
 
@@ -286,14 +287,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         let rootViewController = window?.rootViewController as? UpdateAccountDelegate
 
         if preload {
-            updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+            availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         } else {
             var token: ObservationToken?
             token = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
                 // Remove observer after 1 pass
                 token?.cancel()
                 DispatchQueue.global(qos: .utility).async {
-                    self?.updateAvailableOfflineFiles(status: status)
+                    self?.availableOfflineManager.updateAvailableOfflineFiles(status: status)
                 }
             }
         }
@@ -347,32 +348,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
             @InjectService var uploadQueue: UploadQueue
             uploadQueue.rebuildUploadQueueFromObjectsInRealm()
-        }
-    }
-
-    func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
-        Log.appDelegate("updateAvailableOfflineFiles")
-
-        guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
-            return
-        }
-
-        for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
-            guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
-                continue
-            }
-
-            Task {
-                do {
-                    try await driveFileManager.updateAvailableOfflineFiles()
-                } catch {
-                    // Silently handle error
-                    Log.appDelegate(
-                        "Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)",
-                        level: .error
-                    )
-                }
-            }
         }
     }
 

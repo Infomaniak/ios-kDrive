@@ -150,6 +150,9 @@ public enum FactoryService {
             },
             Factory(type: ReviewManageable.self) { _, _ in
                 ReviewManager(userDefaults: UserDefaults.shared)
+            },
+            Factory(type: AvailableOfflineManageable.self) { _, _ in
+                AvailableOfflineManager()
             }
         ]
         return services

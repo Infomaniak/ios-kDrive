@@ -433,8 +433,6 @@ public final class FileActionsHelper {
         viewController.present(navigationManageCategoriesViewController, animated: true)
     }
 
-    #if !ISEXTENSION
-
     @discardableResult
     public static func offline(files: [File], driveFileManager: DriveFileManager, group: DispatchGroup? = nil,
                                filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
@@ -443,8 +441,8 @@ public final class FileActionsHelper {
         if makeFilesAvailableOffline {
             filesNotAvailable?()
             // Update offline files before setting new file to synchronize them
-            (UIApplication.shared.delegate as? AppDelegate)?
-                .updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+            @InjectService var offlineManager: AvailableOfflineManageable
+            offlineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         }
 
         for file in files where !file.isDirectory && file.isAvailableOffline == areAvailableOffline {
@@ -458,6 +456,7 @@ public final class FileActionsHelper {
         return makeFilesAvailableOffline
     }
 
+    #if !ISEXTENSION
     public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
                                    presentingParent: UIViewController?, group: DispatchGroup? = nil,
                                    completion: @escaping (Bool) -> Void) {

@@ -637,14 +637,6 @@ public final class DriveFileManager {
                         forceRefresh: forceRefresh)
     }
 
-    public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let offlineFiles = getRealm().objects(File.self)
-            .filter(NSPredicate(format: "isAvailableOffline = true"))
-            .sorted(by: [sortType.value.sortDescriptor]).freeze()
-
-        return offlineFiles.map { $0.freeze() }
-    }
-
     public func removeSearchChildren() {
         let realm = getRealm()
         let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, using: realm)
@@ -1028,53 +1020,7 @@ public final class DriveFileManager {
         )
     }
 
-    public func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
-        let response = try await apiFetcher.filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
-        // Update last sync date
-        if let responseAt = response.validApiResponse.responseAt {
-            UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
-        }
-        return response.validApiResponse.data
-    }
-
-    public func updateAvailableOfflineFiles() async throws {
-        let offlineFiles = getAvailableOfflineFiles()
-        guard !offlineFiles.isEmpty else { return }
-        let date = Date(timeIntervalSince1970: TimeInterval(UserDefaults.shared.lastSyncDateOfflineFiles))
-        // Get activities
-        let filesActivities = try await filesActivities(files: offlineFiles, from: date)
-        for activities in filesActivities {
-            guard let file = offlineFiles.first(where: { $0.id == activities.id }) else {
-                continue
-            }
-
-            if activities.result {
-                try applyActivities(activities, offlineFile: file)
-            } else if let message = activities.message {
-                handleError(message: message, offlineFile: file)
-            }
-        }
-    }
-
-    private func applyActivities(_ activities: ActivitiesForFile, offlineFile file: File) throws {
-        // Update file in Realm & rename if needed
-        if let newFile = activities.file {
-            let realm = getRealm()
-            keepCacheAttributesForFile(newFile: newFile, keepProperties: [.standard, .extras], using: realm)
-            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
-        }
-        // Apply activities to file
-        var handledActivities = Set<FileActivityType>()
-        for activity in activities.activities where activity.action != nil && !handledActivities.contains(activity.action!) {
-            if activity.action == .fileUpdate {
-                // Download new version
-                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
-            }
-            handledActivities.insert(activity.action!)
-        }
-    }
-
-    private func handleError(message: String, offlineFile file: File) {
+    func handleError(message: String, offlineFile file: File) {
         if message == DriveError.objectNotFound.code {
             // File has been deleted -- remove it from offline files
             setFileAvailableOffline(file: file, available: false) { _ in
@@ -1517,7 +1463,7 @@ public final class DriveFileManager {
         }
     }
 
-    private func updateFileInDatabase(updatedFile: File, oldFile: File? = nil, using realm: Realm? = nil) throws -> File {
+    func updateFileInDatabase(updatedFile: File, oldFile: File? = nil, using realm: Realm? = nil) throws -> File {
         let realm = realm ?? getRealm()
         realm.refresh()
 
