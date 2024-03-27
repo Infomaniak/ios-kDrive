@@ -64,6 +64,8 @@ class InMemoryFileListViewModel: FileListViewModel {
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.
     final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, page: Int) {
+        guard let liveCurrentDirectory = realm.object(ofType: File.self, forPrimaryKey: currentDirectory.id) else { return }
+
         try? realm.write {
             var children = [File]()
             if copyInRealm {
@@ -76,11 +78,11 @@ class InMemoryFileListViewModel: FileListViewModel {
             }
 
             if page == 1 {
-                currentDirectory.children.removeAll()
+                liveCurrentDirectory.children.removeAll()
             }
-            currentDirectory.children.insert(objectsIn: children)
+            liveCurrentDirectory.children.insert(objectsIn: children)
 
-            currentDirectory.fullyDownloaded = fullyDownloaded
+            liveCurrentDirectory.fullyDownloaded = fullyDownloaded
         }
     }
 
