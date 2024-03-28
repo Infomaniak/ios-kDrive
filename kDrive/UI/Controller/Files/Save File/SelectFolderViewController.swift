@@ -142,7 +142,10 @@ class SelectFolderViewController: FileListViewController {
     }
 
     @IBAction func selectButtonPressed(_ sender: UIButton) {
-        let frozenSelectedDirectory = viewModel.currentDirectory.freezeIfNeeded()
+        var frozenSelectedDirectory = viewModel.currentDirectory.freezeIfNeeded()
+        if !frozenSelectedDirectory.isDirectory, let parent = frozenSelectedDirectory.parent {
+            frozenSelectedDirectory = parent.freezeIfNeeded()
+        }
         delegate?.didSelectFolder(frozenSelectedDirectory)
         selectHandler?(frozenSelectedDirectory)
         // We are only selecting files we can dismiss

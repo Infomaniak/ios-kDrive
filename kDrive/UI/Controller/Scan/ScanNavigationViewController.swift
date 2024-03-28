@@ -21,7 +21,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class ScanNavigationViewController: UINavigationController {
+final class ScanNavigationViewController: UINavigationController {
     var currentDriveFileManager: DriveFileManager?
     var currentDirectory: File?
 

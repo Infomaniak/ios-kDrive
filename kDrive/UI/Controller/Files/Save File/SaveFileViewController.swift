@@ -41,7 +41,8 @@ class SaveFileViewController: UIViewController {
     }
 
     var lastSelectedDirectory: File? {
-        selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+        guard UserDefaults.shared.lastSelectedDrive == selectedDriveFileManager?.drive.id else { return nil }
+        return selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
     }
 
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
