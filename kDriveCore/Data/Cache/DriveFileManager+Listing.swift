@@ -61,6 +61,7 @@ public extension DriveFileManager {
 
             managedParent.lastCursor = nextCursor
             managedParent.versionCode = DriveFileManager.constants.currentVersionCode
+            managedParent.fullyDownloaded = !hasMore
         }
 
         return (
