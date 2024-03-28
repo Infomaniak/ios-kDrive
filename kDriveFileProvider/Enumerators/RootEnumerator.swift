@@ -22,7 +22,7 @@ import InfomaniakDI
 import kDriveCore
 import RealmSwift
 
-class RootEnumerator: NSObject, NSFileProviderEnumerator {
+final class RootEnumerator: NSObject, NSFileProviderEnumerator {
     private let driveFileManager: DriveFileManager
     private let domain: NSFileProviderDomain?
 

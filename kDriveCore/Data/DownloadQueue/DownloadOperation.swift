@@ -287,8 +287,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             return
         }
 
-        assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
-
+        // DownloadTask might be canceled / in error at this point
         BackgroundRealm.uploads.execute { realm in
             if let task = realm.objects(DownloadTask.self)
                 .filter("sessionUrl = %@", sessionUrl.absoluteString).first {

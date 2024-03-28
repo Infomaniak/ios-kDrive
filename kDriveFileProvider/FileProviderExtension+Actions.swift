@@ -72,7 +72,7 @@ extension FileProviderExtension {
                 let response = try await self.driveFileManager.apiFetcher
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
-                    self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                    self.workingSet?.removeWorkingDocument(forKey: itemIdentifier)
                     completionHandler(nil)
 
                     // Signal after completionHandler
@@ -297,7 +297,8 @@ extension FileProviderExtension {
                 }
 
                 _ = try await self.driveFileManager.delete(file: proxyFile)
-                self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
+                self.workingSet?.removeWorkingDocument(forFileId: proxyFile.id)
+
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)
@@ -333,7 +334,9 @@ extension FileProviderExtension {
                 let item = file.toFileProviderItem(parent: parentItemIdentifier, domain: self.domain)
                 item.trashModifier(newValue: false)
 
-                self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
+                let detachedFile = file.detached()
+                self.workingSet?.setWorkingDocument(detachedFile: detachedFile)
+
                 completionHandler(item, nil)
 
                 // Signal after completionHandler
