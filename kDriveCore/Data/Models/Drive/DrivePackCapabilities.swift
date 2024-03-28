@@ -30,17 +30,4 @@ public class DrivePackCapabilities: EmbeddedObject, Codable {
     @Persisted public var canSetSharelinkPassword = false
     @Persisted public var canSetSharelinkExpiration = false
     @Persisted public var canSetSharelinkCustomUrl = false
-
-    enum CodingKeys: String, CodingKey {
-        case useVault = "use_vault"
-        case useManageRight = "use_manage_right"
-        case canSetTrashDuration = "can_set_trash_duration"
-        case useDropbox = "use_dropbox"
-        case canRewind = "can_rewind"
-        case useFolderCustomColor = "use_folder_custom_color"
-        case canAccessDashboard = "can_access_dashboard"
-        case canSetSharelinkPassword = "can_set_sharelink_password"
-        case canSetSharelinkExpiration = "can_set_sharelink_expiration"
-        case canSetSharelinkCustomUrl = "can_set_sharelink_custom_url"
-    }
 }

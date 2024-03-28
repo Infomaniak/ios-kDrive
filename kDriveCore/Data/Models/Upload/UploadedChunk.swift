@@ -39,7 +39,7 @@ public final class UploadedChunk: Object, Decodable {
     enum CodingKeys: String, CodingKey {
         case number
         case status
-        case createdAt = "created_at"
+        case createdAt
         case size
         case chunkHash = "hash"
     }

@@ -29,9 +29,4 @@ public class CancelableResponse: Codable {
         id = ""
         validUntil = 0
     }
-
-    enum CodingKeys: String, CodingKey {
-        case id = "cancel_id"
-        case validUntil = "valid_until"
-    }
 }

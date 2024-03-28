@@ -22,41 +22,41 @@ import RealmSwift
 import UIKit
 
 public enum FileActivityType: String, Codable, CaseIterable {
-    case fileAccess = "file_access"
-    case fileCreate = "file_create"
-    case fileRename = "file_rename"
+    case fileAccess
+    case fileCreate
+    case fileRename
     case fileMoveIn = "file_move"
-    case fileMoveOut = "file_move_out"
-    case fileTrash = "file_trash"
-    case fileRestore = "file_restore"
-    case fileDelete = "file_delete"
-    case fileUpdate = "file_update"
-    case fileCategorize = "file_categorize"
-    case fileUncategorize = "file_uncategorize"
-    case fileFavoriteCreate = "file_favorite_create"
-    case fileFavoriteRemove = "file_favorite_remove"
-    case fileShareCreate = "file_share_create"
-    case fileShareUpdate = "file_share_update"
-    case fileShareDelete = "file_share_delete"
-    case shareLinkCreate = "share_link_create"
-    case shareLinkUpdate = "share_link_update"
-    case shareLinkDelete = "share_link_delete"
-    case shareLinkShow = "share_link_show"
-    case commentCreate = "comment_create"
-    case commentUpdate = "comment_update"
-    case commentDelete = "comment_delete"
-    case commentLike = "comment_like"
-    case commentUnlike = "comment_unlike"
-    case commentResolve = "comment_resolve"
-    case collaborativeFolderAccess = "collaborative_folder_access"
-    case collaborativeFolderCreate = "collaborative_folder_create"
-    case collaborativeFolderUpdate = "collaborative_folder_update"
-    case collaborativeFolderDelete = "collaborative_folder_delete"
-    case collaborativeUserAccess = "collaborative_user_access"
-    case collaborativeUserCreate = "collaborative_user_create"
-    case collaborativeUserDelete = "collaborative_user_delete"
-    case fileColorUpdate = "file_color_update"
-    case fileColorDelete = "file_color_delete"
+    case fileMoveOut
+    case fileTrash
+    case fileRestore
+    case fileDelete
+    case fileUpdate
+    case fileCategorize
+    case fileUncategorize
+    case fileFavoriteCreate
+    case fileFavoriteRemove
+    case fileShareCreate
+    case fileShareUpdate
+    case fileShareDelete
+    case shareLinkCreate
+    case shareLinkUpdate
+    case shareLinkDelete
+    case shareLinkShow
+    case commentCreate
+    case commentUpdate
+    case commentDelete
+    case commentLike
+    case commentUnlike
+    case commentResolve
+    case collaborativeFolderAccess
+    case collaborativeFolderCreate
+    case collaborativeFolderUpdate
+    case collaborativeFolderDelete
+    case collaborativeUserAccess
+    case collaborativeUserCreate
+    case collaborativeUserDelete
+    case fileColorUpdate
+    case fileColorDelete
 
     public static let fileActivities: [FileActivityType] = [
         .fileCreate,
@@ -144,11 +144,11 @@ public class FileActivity: Object, Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case id
-        case createdAt = "created_at"
+        case createdAt
         case action
-        case newPath = "new_path"
-        case oldPath = "old_path"
-        case fileId = "file_id"
+        case newPath
+        case oldPath
+        case fileId
         case user
         case file
     }

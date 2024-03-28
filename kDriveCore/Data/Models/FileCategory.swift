@@ -52,10 +52,10 @@ public class FileCategory: EmbeddedObject, Codable, ContentEquatable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case categoryId = "category_id"
-        case isGeneratedByAI = "is_generated_by_ai"
-        case userValidation = "user_validation"
-        case userId = "user_id"
-        case addedAt = "added_at"
+        case categoryId
+        case isGeneratedByAI = "isGeneratedByAi"
+        case userValidation
+        case userId
+        case addedAt
     }
 }

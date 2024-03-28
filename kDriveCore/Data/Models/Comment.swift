@@ -32,19 +32,4 @@ public class Comment: Codable {
     public var responses: [Comment]?
     public var likes: [DriveUser]?
     public var isResponse = false
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case parentId = "parent_id"
-        case body
-        case isResolved = "is_resolved"
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-        case liked
-        case likesCount = "likes_count"
-        case responsesCount = "responses_count"
-        case user
-        case responses
-        case likes
-    }
 }

@@ -56,25 +56,6 @@ public class Rights: EmbeddedObject, Codable {
     /// Right to use convert directory into dropbox
     @Persisted public var canBecomeDropbox: Bool
 
-    enum CodingKeys: String, CodingKey {
-        case canShow = "can_show"
-        case canRead = "can_read"
-        case canWrite = "can_write"
-        case canShare = "can_share"
-        case canLeave = "can_leave"
-        case canDelete = "can_delete"
-        case canRename = "can_rename"
-        case canMove = "can_move"
-        case canBecomeSharelink = "can_become_sharelink"
-        case canUseFavorite = "can_use_favorite"
-        case canUseTeam = "can_use_team"
-        case canCreateDirectory = "can_create_directory"
-        case canCreateFile = "can_create_file"
-        case canUpload = "can_upload"
-        case canMoveInto = "can_move_into"
-        case canBecomeDropbox = "can_become_dropbox"
-    }
-
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         canShow = try container.decode(Bool.self, forKey: .canShow)

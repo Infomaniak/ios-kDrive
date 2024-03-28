@@ -50,12 +50,12 @@ public final class UploadSession: EmbeddedObject, Decodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case directoryId = "directory_id"
-        case directoryPath = "directory_path"
+        case directoryId
+        case directoryPath
         case file
-        case fileName = "file_name"
+        case fileName
         case result
         case token
-        case uploadHost = "upload_url"
+        case uploadHost = "uploadUrl"
     }
 }
