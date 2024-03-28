@@ -605,7 +605,11 @@ public extension Endpoint {
     // MARK: Trash
 
     static func trash(drive: AbstractDrive) -> Endpoint {
-        return .driveInfoV2(drive: drive).appending(path: "/trash", queryItems: [FileWith.fileMinimal.toQueryItem()])
+        return .driveInfo(drive: drive).appending(path: "/trash", queryItems: [FileWith.fileMinimal.toQueryItem()])
+    }
+
+    static func emptyTrash(drive: AbstractDrive) -> Endpoint {
+        return .driveInfoV2(drive: drive).appending(path: "/trash")
     }
 
     static func trashCount(drive: AbstractDrive) -> Endpoint {
