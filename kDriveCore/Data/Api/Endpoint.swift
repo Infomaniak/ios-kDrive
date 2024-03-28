@@ -167,7 +167,7 @@ public extension Endpoint {
     // MARK: Action
 
     static func undoAction(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/cancel")
+        return .driveInfoV2(drive: drive).appending(path: "/cancel")
     }
 
     // MARK: Listing
