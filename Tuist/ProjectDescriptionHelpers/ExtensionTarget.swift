@@ -51,7 +51,8 @@ public extension Target {
             "kDrive/**/*.xcassets",
             "kDrive/**/Localizable.strings",
             "kDrive/**/*.stringsdict",
-            "kDrive/**/*.json"
+            "kDrive/**/*.json",
+            "kDrive/**/PrivacyInfo.xcprivacy"
         ]
         resources.append(contentsOf: additionalResources)
 
