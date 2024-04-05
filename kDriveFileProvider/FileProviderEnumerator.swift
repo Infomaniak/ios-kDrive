@@ -28,8 +28,6 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     private let driveFileManager: DriveFileManager
     private static let syncAnchorExpireTime = TimeInterval(60 * 60 * 24 * 7) // One week
 
-    @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-
     /// Something to enqueue async await tasks in a serial manner.
     let asyncAwaitQueue = TaskQueue()
 
@@ -77,7 +75,6 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     }
                 }
-                containerItems += self.fileProviderState.getWorkingDocumentValues()
                 observer.didEnumerate(containerItems)
                 observer.finishEnumerating(upTo: nil)
             }
@@ -181,9 +178,7 @@ final class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
 
                     // We remove placeholder files only on upload success / failure.
                     // We do not change anything during an enumeration
-                    var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
-                    deletedItems += self.fileProviderState
-                        .deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    let deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
                     observer.didDeleteItems(withIdentifiers: deletedItems)
 
                     observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)

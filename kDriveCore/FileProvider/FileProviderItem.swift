@@ -118,9 +118,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
 
         isDirectory = file.isDirectory
-        @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
-        let tmpChildren = fileProviderState.importedDocuments(forParent: itemIdentifier)
-        childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
+        childItemCount = file.isDirectory ? NSNumber(value: file.children.count) : nil
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
