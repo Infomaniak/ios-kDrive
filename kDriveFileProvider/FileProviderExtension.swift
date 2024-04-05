@@ -308,7 +308,6 @@ final class FileProviderExtension: NSFileProviderExtension {
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
                 item.isUploaded = false
-                return
             }
         }
 
