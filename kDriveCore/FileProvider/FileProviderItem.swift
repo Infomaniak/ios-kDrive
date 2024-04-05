@@ -138,7 +138,6 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parent?.id ?? 1)
 
         isDirectory = file.isDirectory
-        @InjectService var fileProviderState: FileProviderExtensionAdditionalStatable
         if file.isDirectory && file.fullyDownloaded {
             let totalCount = file.children.count
             childItemCount = NSNumber(value: totalCount)

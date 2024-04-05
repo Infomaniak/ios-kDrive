@@ -49,7 +49,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     @InjectService var uploadQueue: UploadQueueable
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
-    @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
     @LazyInjectService var fileProviderService: FileProviderServiceable
 
     lazy var fileCoordinator: NSFileCoordinator = {
@@ -100,14 +99,8 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
-        // TODO: working set in DB
-        if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
-            Log.fileProvider("item for identifier - Working Document")
-            return item
-        }
-
         // Read from upload queue
-        else if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+        if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
             let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, domain: domain)
             return uploadingItem
