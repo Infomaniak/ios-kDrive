@@ -262,15 +262,18 @@ public final class DriveFileManager {
         return offlineRoot
     }
 
-    public func getCachedRootFile(freeze: Bool = true, using realm: Realm? = nil) -> File {
-        if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
-            if root.name != drive.name {
-                let realm = realm ?? getRealm()
-                realm.refresh()
+    public func getCachedRootFile(freeze: Bool = true) -> File {
+        var file: File!
+        try? writeTransaction { writableRealm in
+            file = getCachedRootFile(freeze: freeze, writableRealm: writableRealm)
+        }
+        return file
+    }
 
-                try? realm.safeWrite {
-                    root.name = drive.name
-                }
+    public func getCachedRootFile(freeze: Bool = true, writableRealm: Realm) -> File {
+        if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: writableRealm) {
+            if root.name != drive.name {
+                root.name = drive.name
             }
             return freeze ? root.freeze() : root
         } else {
@@ -279,10 +282,15 @@ public final class DriveFileManager {
     }
 
     public func getCachedMyFilesRoot() -> File? {
-        return getRealm().objects(File.self).filter(NSPredicate(
-            format: "rawVisibility == %@",
-            FileVisibility.isPrivateSpace.rawValue
-        )).first?.freeze()
+        var file: File?
+        readOnlyTransaction { realm in
+            file = realm
+                .objects(File.self)
+                .filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
+                .first?
+                .freeze()
+        }
+        return file
     }
 
     // autorelease frequecy so cleaner serialized realm base
@@ -405,9 +413,9 @@ public final class DriveFileManager {
 
         // Init root file
         let realm = getRealm()
-        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
-            let rootFile = getCachedRootFile(using: realm)
-            try? realm.safeWrite {
+        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) == nil {
+            try? writeTransaction { writableRealm in
+                let rootFile = getCachedRootFile(writableRealm: writableRealm)
                 realm.add(rootFile)
             }
         }
@@ -436,10 +444,15 @@ public final class DriveFileManager {
         }
     }
 
-    public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm? = nil) -> File? {
-        let realm = realm ?? getRealm()
-        realm.refresh()
+    public func getCachedFile(id: Int, freeze: Bool = true) -> File? {
+        var file: File?
+        readOnlyTransaction { realm in
+            file = getCachedFile(id: id, freeze: freeze, using: realm)
+        }
+        return file
+    }
 
+    public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
         guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
             return nil

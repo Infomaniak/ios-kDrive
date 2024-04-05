@@ -47,7 +47,7 @@ public extension DriveFileManager {
     /// Common way to do a transaction with the current Realm of the DriveFileManager
     ///
     /// Protected from sudden termination
-    func transaction(withRealm realmClosure: (Realm) -> Void) throws {
+    func writeTransaction(withRealm realmClosure: (Realm) -> Void) throws {
         let expiringActivity = ExpiringActivity()
         expiringActivity.start()
         defer {
@@ -60,10 +60,27 @@ public extension DriveFileManager {
         }
     }
 
+    /// Common way to do a readonly transaction with the current Realm of the DriveFileManager
+    ///
+    /// Protected from sudden termination
+    ///
+    /// NSException thrown if mutating realm elements
+    func readOnlyTransaction(withRealm realmClosure: (Realm) -> Void) {
+        let expiringActivity = ExpiringActivity()
+        expiringActivity.start()
+        defer {
+            expiringActivity.endAll()
+        }
+
+        let realm = getRealm()
+        realmClosure(realm)
+    }
+
+    // TODO: This should be private
     /// Get an up to date realm for current DriveFileManager
     ///
     /// This is _not_ protected from sudden termination, prefer `transaction(withRealm:)` method
-    func getRealm() -> Realm {
+    /* private */ func getRealm() -> Realm {
         // Change file metadata after creation of the realm file.
         defer {
             // Exclude "file cache realm" from system backup.

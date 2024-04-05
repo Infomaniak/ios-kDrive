@@ -252,8 +252,10 @@ final class ManageCategoriesViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
-        let realm = driveFileManager.getRealm()
-        files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        driveFileManager.readOnlyTransaction { realm in
+            files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        }
+
         // Reload view
         updateTitle()
         updateNavigationItem()
