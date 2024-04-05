@@ -34,8 +34,12 @@ class LastModificationsViewModel: FileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
-        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
-            .filter(NSPredicate(format: "rawType != \"dir\"")))
+
+        driveFileManager.readOnlyTransaction { realm in
+            files = AnyRealmCollection(realm
+                .objects(File.self)
+                .filter("rawType != \"dir\""))
+        }
     }
 
     override func startObservation() {
