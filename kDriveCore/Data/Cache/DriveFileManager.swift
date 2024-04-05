@@ -25,23 +25,6 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
-public enum DriveFileManagerContext {
-    case drive
-    case fileProvider
-    case sharedWithMe
-
-    func realmURL(using drive: Drive) -> URL {
-        switch self {
-        case .drive:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
-        case .sharedWithMe:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
-        case .fileProvider:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
-        }
-    }
-}
-
 public final class DriveFileManager {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
@@ -432,28 +415,6 @@ public final class DriveFileManager {
 
     public func instanceWith(context: DriveFileManagerContext) -> DriveFileManager {
         return DriveFileManager(drive: drive, apiFetcher: apiFetcher, context: context)
-    }
-
-    public func getRealm() -> Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "file cache realm" from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try realmURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-            DDLogInfo("realmURL : \(realmURL)")
-        }
-
-        do {
-            return try Realm(configuration: realmConfiguration)
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
     }
 
     /// Delete all drive data cache for a user
