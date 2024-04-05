@@ -27,7 +27,6 @@ extension UserDefaults.Keys {
     static let recentSearches = UserDefaults.Keys(rawValue: "recentSearches")
     static let numberOfConnection = UserDefaults.Keys(rawValue: "numberOfConnection")
     static let appLock = UserDefaults.Keys(rawValue: "appLock")
-    static let updateLater = UserDefaults.Keys(rawValue: "updateLater")
     static let migrated = UserDefaults.Keys(rawValue: "migrated")
     static let migrationPhotoSyncEnabled = UserDefaults.Keys(rawValue: "migrationPhotoSyncEnabled")
     static let notificationsEnabled = UserDefaults.Keys(rawValue: "notificationsEnabled")
@@ -123,15 +122,6 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.appLock))
-        }
-    }
-
-    var updateLater: Bool {
-        get {
-            return bool(forKey: key(.updateLater))
-        }
-        set {
-            set(newValue, forKey: key(.updateLater))
         }
     }
 

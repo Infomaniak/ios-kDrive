@@ -49,23 +49,6 @@ struct LaunchPanel: Comparable {
 
 class LaunchPanelsController {
     private var panels: [LaunchPanel] = [
-        // Update available
-        LaunchPanel(
-            makePanelController: {
-                let driveFloatingPanelController = UpdateFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController
-                    .contentViewController as? UpdateFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { _ in
-                    // If app was downloaded in TestFlight, open TestFlight. Else, open App Store
-                    let url: URLConstants = Bundle.main.isRunningInTestFlight ? .testFlight : .appStore
-                    UserDefaults.shared.updateLater = false
-                    UIApplication.shared.open(url.url)
-                }
-                return driveFloatingPanelController
-            },
-            displayCondition: AppVersion.showUpdateFloatingPanel(),
-            priority: 4
-        ),
         // Photo sync activation
         LaunchPanel(
             makePanelController: {
