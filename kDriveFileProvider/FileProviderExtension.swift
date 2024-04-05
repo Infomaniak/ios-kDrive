@@ -32,6 +32,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     @InjectService var uploadQueue: UploadQueueable
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
+    @LazyInjectService var fileProviderState: FileProviderExtensionAdditionalStatable
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -76,8 +77,14 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Try to reload account if user logged in
         try updateDriveFileManager()
 
-        if let fileId = identifier.toFileId(),
-           let file = driveFileManager.getCachedFile(id: fileId) {
+        if let item = fileProviderState.getWorkingDocument(forKey: identifier) {
+            Log.fileProvider("item for identifier - Working Document")
+            return item
+        } else if let item = fileProviderState.getImportedDocument(forKey: identifier) {
+            Log.fileProvider("item for identifier - Imported Document")
+            return item
+        } else if let fileId = identifier.toFileId(),
+                  let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
             return FileProviderItem(file: file, domain: domain)
         } else {
@@ -88,8 +95,10 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
         Log.fileProvider("urlForItem(withPersistentIdentifier identifier:)")
-        if let fileId = identifier.toFileId(),
-           let file = driveFileManager.getCachedFile(id: fileId) {
+        if let item = fileProviderState.getImportedDocument(forKey: identifier) {
+            return item.storageUrl
+        } else if let fileId = identifier.toFileId(),
+                  let file = driveFileManager.getCachedFile(id: fileId) {
             return FileProviderItem(file: file, domain: domain).storageUrl
         } else {
             return nil
@@ -310,6 +319,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 item.isUploaded = false
                 return
             }
+
+            self.fileProviderState.removeWorkingDocument(forKey: item.itemIdentifier)
         }
 
         uploadQueue.resumeAllOperations()
