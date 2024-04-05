@@ -35,7 +35,6 @@ public struct URLConstants {
     public static let kDriveWeb = URLConstants(urlString: "https://kdrive.infomaniak.com")
     public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
     public static let shop = URLConstants(urlString: "https://shop.infomaniak.com/order/drive")
-    public static let appVersion = URLConstants(urlString: "https://itunes.apple.com/lookup?bundleId=com.infomaniak.drive")
     public static let appStore = URLConstants(urlString: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676")
     public static let testFlight = URLConstants(urlString: "https://testflight.apple.com/join/qZHSGy5B")
     public static let rgpd = URLConstants(urlString: "https://infomaniak.com/gtl/rgpd")
