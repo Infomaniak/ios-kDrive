@@ -54,7 +54,8 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
         let activityId = coder.decodeInteger(forKey: "ActivityId")
         let fileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
 
-        driveFileManager.readOnlyTransaction { realm in
+        // TODO: fixme with proper fetch transaction + pred
+        try? driveFileManager.writeTransaction { realm in
             activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
             let cachedFiles = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }.map { $0.detached() }
             addPage(files: cachedFiles, fullyDownloaded: true, cursor: nil)

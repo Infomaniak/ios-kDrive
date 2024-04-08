@@ -252,7 +252,9 @@ final class ManageCategoriesViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
-        driveFileManager.readOnlyTransaction { realm in
+
+        // TODO: fixme with proper fetch transaction + pred
+        try? driveFileManager.writeTransaction { realm in
             files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
         }
 

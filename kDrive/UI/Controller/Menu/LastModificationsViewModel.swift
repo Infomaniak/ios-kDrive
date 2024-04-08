@@ -35,11 +35,13 @@ class LastModificationsViewModel: FileListViewModel {
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
 
-        driveFileManager.readOnlyTransaction { realm in
-            files = AnyRealmCollection(realm
+        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
+            return realm
                 .objects(File.self)
-                .filter("rawType != \"dir\""))
+                .filter("rawType != \"dir\"")
         }
+
+        files = AnyRealmCollection(fetchedFiles)
     }
 
     override func startObservation() {
