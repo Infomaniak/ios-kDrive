@@ -42,12 +42,11 @@ extension DriveFileManager {
 
     func getCachedFile(itemIdentifier: NSFileProviderItemIdentifier,
                        freeze: Bool = true) throws -> File {
-        var file: File?
-        readOnlyTransaction { realm in
-            file = try? getCachedFile(itemIdentifier: itemIdentifier, freeze: freeze, using: realm)
+        let file = try? fetchObject(ofType: File.self) { realm in
+            return try? getCachedFile(itemIdentifier: itemIdentifier, freeze: freeze, using: realm)
         }
 
-        guard let file else {
+        guard let file, !file.isInvalidated else {
             throw NSFileProviderError(.noSuchItem)
         }
 

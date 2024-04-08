@@ -44,36 +44,60 @@ public enum DriveFileManagerContext {
 }
 
 public extension DriveFileManager {
-    /// Common way to do a transaction with the current Realm of the DriveFileManager
+    /// Common way to do a __write__ transaction with the current Realm of the DriveFileManager
     ///
     /// Protected from sudden termination
-    func writeTransaction(withRealm realmClosure: (Realm) -> Void) throws {
-        let expiringActivity = ExpiringActivity()
-        expiringActivity.start()
-        defer {
-            expiringActivity.endAll()
-        }
+    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
+        try autoreleasepool {
+            let expiringActivity = ExpiringActivity()
+            expiringActivity.start()
+            defer {
+                expiringActivity.endAll()
+            }
 
-        let realm = getRealm()
-        try realm.safeWrite {
-            realmClosure(realm)
+            let realm = getRealm()
+            try realm.safeWrite {
+                try realmClosure(realm)
+            }
         }
     }
 
-    /// Common way to do a readonly transaction with the current Realm of the DriveFileManager
+    /// Common way to do a read transaction, to fetch one entity, with the current Realm of the DriveFileManager
     ///
     /// Protected from sudden termination
     ///
     /// NSException thrown if mutating realm elements
-    func readOnlyTransaction(withRealm realmClosure: (Realm) -> Void) {
-        let expiringActivity = ExpiringActivity()
-        expiringActivity.start()
-        defer {
-            expiringActivity.endAll()
-        }
+    func fetchObject<Element: Object>(ofType type: Element.Type,
+                                      withRealm realmClosure: (Realm) throws -> Element?) throws -> Element? {
+        try autoreleasepool {
+            let expiringActivity = ExpiringActivity()
+            expiringActivity.start()
+            defer {
+                expiringActivity.endAll()
+            }
 
-        let realm = getRealm()
-        realmClosure(realm)
+            let realm = getRealm()
+            return try realmClosure(realm)
+        }
+    }
+
+    /// Common way to do a read transaction, to fetch a collection, with the current Realm of the DriveFileManager
+    ///
+    /// Protected from sudden termination
+    ///
+    /// NSException thrown if mutating realm elements
+    func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
+                                               withRealm realmClosure: (Realm) -> Results<Element>) -> Results<Element> {
+        autoreleasepool {
+            let expiringActivity = ExpiringActivity()
+            expiringActivity.start()
+            defer {
+                expiringActivity.endAll()
+            }
+
+            let realm = getRealm()
+            return realmClosure(realm)
+        }
     }
 
     // TODO: This should be private

@@ -610,7 +610,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         self.driveFileManager = driveFileManager
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
 
-        driveFileManager.readOnlyTransaction { realm in
+        // TODO: fixme with proper fetch transaction + pred
+        try? driveFileManager.writeTransaction { realm in
             previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
         }
 
