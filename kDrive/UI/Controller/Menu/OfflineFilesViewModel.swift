@@ -35,7 +35,11 @@ class OfflineFilesViewModel: FileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.offlineRoot
         )
-        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
-            .filter(NSPredicate(format: "isAvailableOffline = true")))
+
+        let results = driveFileManager.fetchResults(ofType: File.self) { realm in
+            return realm.objects(File.self).filter("isAvailableOffline = true")
+        }
+
+        files = AnyRealmCollection(results)
     }
 }
