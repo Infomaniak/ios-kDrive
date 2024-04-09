@@ -125,9 +125,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             let rootFileUid = File.uid(driveId: self.driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
             return realm.object(ofType: File.self, forPrimaryKey: rootFileUid)
         }
-        let rootChildren = root?.children
 
-        rootChildrenObservationToken = rootChildren?.observe { [weak self] changes in
+        guard let root, !root.isInvalidated else {
+            return
+        }
+
+        let rootChildren = root.children
+        rootChildrenObservationToken = rootChildren.observe { [weak self] changes in
             guard let self else { return }
             switch changes {
             case .initial(let children):

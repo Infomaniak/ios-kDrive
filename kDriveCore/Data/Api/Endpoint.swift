@@ -139,7 +139,7 @@ public struct ProxyFile: AbstractFile, Sendable {
             try resolve(using: realm)
         }
 
-        guard let file else {
+        guard let file, !file.isInvalidated else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [:])
         }
 
