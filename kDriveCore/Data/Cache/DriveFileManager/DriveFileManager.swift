@@ -283,12 +283,16 @@ public final class DriveFileManager {
 
     public func getCachedMyFilesRoot() -> File? {
         let file = try? fetchObject(ofType: File.self) { realm in
-            realm
-                .objects(File.self)
+            realm.objects(File.self)
                 .filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()
         }
+
+        guard let file, !file.isInvalidated else {
+            return nil
+        }
+
         return file
     }
 
