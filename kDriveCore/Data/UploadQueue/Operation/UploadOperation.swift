@@ -498,15 +498,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Add/Update the new remote `File` in database immediately
         if let driveFileManager {
-            let driveFileManagerRealm = driveFileManager.getRealm()
-            driveFileManagerRealm.refresh()
+            try? driveFileManager.writeTransaction { writableRealm in
+                let parentFolder = writableRealm.objects(File.self)
+                    .filter("id == %@", driveFile.parentId)
+                    .first
 
-            let parentFolder = driveFileManagerRealm.objects(File.self)
-                .filter("id == %@", driveFile.parentId)
-                .first
-
-            try driveFileManagerRealm.safeWrite {
-                driveFileManagerRealm.add(driveFile, update: .modified)
+                writableRealm.add(driveFile, update: .modified)
 
                 // Make sure the parent folder state is consistent, if available
                 parentFolder?.children.insert(driveFile)

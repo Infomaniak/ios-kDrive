@@ -1419,23 +1419,24 @@ public final class DriveFileManager {
     }
 
     func updateExternalImport(id: Int, action: ExternalImportAction) {
-        let realm = getRealm()
-        guard let file = realm.objects(File.self).where({ $0.externalImport.id == id }).first else {
-            // No file corresponding to external import, ignore it
-            return
-        }
+        try? writeTransaction { writableRealm in
+            let file = writableRealm.objects(File.self)
+                .where { $0.externalImport.id == id }
+                .first
 
-        switch action {
-        case .importFinish:
-            try? realm.write {
+            guard let file else {
+                // No file corresponding to external import, ignore it
+                return
+            }
+
+            switch action {
+            case .importFinish:
                 file.externalImport?.status = .done
-            }
-        case .cancel:
-            try? realm.write {
+            case .cancel:
                 file.externalImport?.status = .failed
+            default:
+                break
             }
-        default:
-            break
         }
     }
 
@@ -1507,14 +1508,14 @@ public final class DriveFileManager {
         writableRealm.delete(orphanFiles)
     }
 
-    private func updateFileProperty(fileUid: String, using realm: Realm? = nil, _ block: (File) -> Void) {
-        let realm = realm ?? getRealm()
-        realm.refresh()
-
-        if let file = realm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
-            try? realm.write {
-                block(file)
+    private func updateFileProperty(fileUid: String, _ block: (File) -> Void) {
+        try? writeTransaction { writableRealm in
+            guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid),
+                  !file.isInvalidated else {
+                return
             }
+
+            block(file)
             notifyObserversWith(file: file)
         }
     }
@@ -1623,11 +1624,12 @@ public final class DriveFileManager {
     ///   - file: source file
     /// - Returns: A realm managed file
     public func getManagedFile(from file: File) -> File {
-        var file: File!
+        // TODO: Refactor
+        var fetchedFile: File!
         try? writeTransaction { writableRealm in
-            file = getManagedFile(from: file, writableRealm: writableRealm)
+            fetchedFile = getManagedFile(from: file, writableRealm: writableRealm)
         }
-        return file
+        return fetchedFile
     }
 
     /// Get a live version for the given file (if the file is not cached in realm it is added and then returned)

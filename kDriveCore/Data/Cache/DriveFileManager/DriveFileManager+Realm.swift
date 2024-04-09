@@ -100,11 +100,10 @@ public extension DriveFileManager {
         }
     }
 
-    // TODO: This should be private
     /// Get an up to date realm for current DriveFileManager
     ///
     /// This is _not_ protected from sudden termination, prefer `transaction(withRealm:)` method
-    /* private */ func getRealm() -> Realm {
+    private func getRealm() -> Realm {
         // Change file metadata after creation of the realm file.
         defer {
             // Exclude "file cache realm" from system backup.
