@@ -28,7 +28,7 @@ public extension DriveFileManager {
             return try await files(in: directory, cursor: nil, sortType: sortType, forceRefresh: forceRefresh)
         }
 
-        let lastCursor = forceRefresh ? nil : try directory.resolve(using: getRealm()).lastCursor
+        let lastCursor = forceRefresh ? nil : try directory.resolve(within: self).lastCursor
 
         let result = try await apiFetcher.files(in: directory, advancedListingCursor: lastCursor, sortType: sortType)
 
