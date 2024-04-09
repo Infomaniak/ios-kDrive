@@ -65,7 +65,8 @@ public protocol AccountManageable: AnyObject {
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
+    func getDrive(for accountId: Int, driveId: Int) -> Drive?
+    func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
     func didFailRefreshToken(_ token: ApiToken)
@@ -113,7 +114,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public var drives: [Drive] {
-        return DriveInfosManager.instance.getDrives(for: currentUserId)
+        return Array(DriveInfosManager.instance.getDrives(for: currentUserId))
     }
 
     public var currentDriveFileManager: DriveFileManager? {
@@ -232,7 +233,15 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm? = nil) -> Drive? {
+    // TODO: Move to DriveInfosManager
+    public func getDrive(for accountId: Int, driveId: Int) -> Drive? {
+        return try? DriveInfosManager.instance.fetchObject(ofType: Drive.self) { realm in
+            self.getDrive(for: accountId, driveId: driveId, using: realm)
+        }
+    }
+
+    // TODO: Move to DriveInfosManager
+    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive? {
         return DriveInfosManager.instance.getDrive(id: driveId, userId: accountId, using: realm)
     }
 

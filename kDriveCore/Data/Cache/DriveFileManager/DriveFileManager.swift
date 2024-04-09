@@ -740,30 +740,38 @@ public final class DriveFileManager: Transactionable {
     public func createCategory(name: String, color: String) async throws -> Category {
         let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
         // Add category to drive
-        let realm = DriveInfosManager.instance.getRealm()
-        let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realm)
-        try? realm.write {
-            drive?.categories.append(category)
-        }
-        if let drive {
+
+        try? DriveInfosManager.instance.writeTransaction { writableRealm in
+            let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            guard let drive else {
+                return
+            }
+
+            drive.categories.append(category)
             self.drive = drive.freeze()
         }
+
         return category.freeze()
     }
 
     public func edit(category: Category, name: String?, color: String) async throws -> Category {
         let categoryId = category.id
         let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
+
         // Update category on drive
-        let realm = DriveInfosManager.instance.getRealm()
-        if let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realm) {
-            try? realm.write {
-                if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
-                    drive.categories[index] = category
-                }
+        try? DriveInfosManager.instance.writeTransaction { writableRealm in
+            guard let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            else {
+                return
             }
+
+            if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
+                drive.categories[index] = category
+            }
+
             self.drive = drive.freeze()
         }
+
         return category
     }
 
@@ -776,13 +784,16 @@ public final class DriveFileManager: Transactionable {
         }
 
         // Delete category from drive
-        let realmDrive = DriveInfosManager.instance.getRealm()
-        if let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realmDrive) {
-            try? realmDrive.write {
-                if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
-                    drive.categories.remove(at: index)
-                }
+        try? DriveInfosManager.instance.writeTransaction { writableRealm in
+            guard let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            else {
+                return
             }
+
+            if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
+                drive.categories.remove(at: index)
+            }
+
             self.drive = drive.freeze()
         }
 

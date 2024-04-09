@@ -22,6 +22,18 @@ import Realm
 import RealmSwift
 import Sentry
 
+// TODO: Move to core db / + tests
+public extension RealmCollection where Element: KeypathSortable {
+    /// Apply a filter only for non nil predicate parameters, noop otherwise
+    func filter(optionalPredicate predicate: NSPredicate?) -> Results<Element> {
+        guard let predicate else {
+            return filter("")
+        }
+
+        return filter(predicate)
+    }
+}
+
 public final class DriveInfosManager {
     private static let dbName = "DrivesInfos.realm"
 
@@ -103,17 +115,6 @@ public final class DriveInfosManager {
         )
     }
 
-    public func getRealm() -> Realm {
-        do {
-            let realm = try Realm(configuration: realmConfiguration)
-            realm.refresh()
-            return realm
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
-    }
-
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
         drive.userId = userId
         drive.sharedWithMe = sharedWithMe
@@ -127,15 +128,17 @@ public final class DriveInfosManager {
             driveList.append(drive)
         }
 
-        let realm = getRealm()
-        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
-            .filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
-        let driveRemovedIds = driveRemoved.map(\.objectId)
-        try? realm.write {
-            realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
-            realm.add(driveList, update: .modified)
-            realm.add(driveResponse.users, update: .modified)
-            realm.add(driveResponse.teams, update: .modified)
+        var driveRemoved = [Drive]()
+        try? writeTransaction { writableRealm in
+            driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: writableRealm)
+                .filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
+            let driveRemovedIds = driveRemoved.map(\.objectId)
+
+            let drivesToDelete = writableRealm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds)
+            writableRealm.delete(drivesToDelete)
+            writableRealm.add(driveList, update: .modified)
+            writableRealm.add(driveResponse.users, update: .modified)
+            writableRealm.add(driveResponse.teams, update: .modified)
         }
 
         // driveList is _live_ after the write operation
@@ -155,37 +158,67 @@ public final class DriveInfosManager {
         return "\(driveId)_\(userId)"
     }
 
-    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm? = nil) -> [Drive] {
-        let realm = realm ?? getRealm()
-        var realmDriveList = realm.objects(Drive.self)
-            .sorted(byKeyPath: "name", ascending: true)
-            .sorted(byKeyPath: "sharedWithMe", ascending: true)
-        if let userId {
-            let filterPredicate: NSPredicate
-            if let sharedWithMe {
-                filterPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
-            } else {
-                filterPredicate = NSPredicate(format: "userId = %d", userId)
-            }
-            realmDriveList = realmDriveList.filter(filterPredicate)
+    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false) -> Results<Drive> {
+        return fetchResults(ofType: Drive.self) { realm in
+            getDrives(for: userId, sharedWithMe: sharedWithMe, using: realm)
         }
-        return Array(realmDriveList.map { $0.freeze() })
     }
 
-    public func getDrive(id: Int, userId: Int, using realm: Realm? = nil) -> Drive? {
+    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm) -> Results<Drive> {
+        let userIdPredicate: NSPredicate?
+        if let userId {
+            if let sharedWithMe {
+                userIdPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
+            } else {
+                userIdPredicate = NSPredicate(format: "userId = %d", userId)
+            }
+        } else {
+            userIdPredicate = nil
+        }
+
+        let realmDriveList = realm.objects(Drive.self)
+            .filter(optionalPredicate: userIdPredicate)
+            .sorted(byKeyPath: "name", ascending: true)
+            .sorted(byKeyPath: "sharedWithMe", ascending: true)
+
+        return realmDriveList
+    }
+
+    public func getDrive(id: Int, userId: Int) -> Drive? {
+        return try? fetchObject(ofType: Drive.self) { realm in
+            getDrive(id: id, userId: userId, using: realm)
+        }
+    }
+
+    public func getDrive(id: Int, userId: Int, using realm: Realm) -> Drive? {
         return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
     }
 
-    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
-        let realm = realm ?? getRealm()
+    public func getDrive(objectId: String, freeze: Bool = true) -> Drive? {
+        return try? fetchObject(ofType: Drive.self) { realm in
+            return getDrive(objectId: objectId, freeze: freeze, using: realm)
+        }
+    }
+
+    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm) -> Drive? {
         guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
             return nil
         }
         return freeze ? drive.freeze() : drive
     }
 
-    public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
-        let realm = realm ?? getRealm()
+    public func getUsers(for driveId: Int, userId: Int) -> [DriveUser] {
+        var users = [DriveUser]()
+
+        // TODO: rework for fetchObject
+        try? writeTransaction { realm in
+            users = getUsers(for: driveId, userId: userId, using: realm)
+        }
+
+        return users
+    }
+
+    public func getUsers(for driveId: Int, userId: Int, using realm: Realm) -> [DriveUser] {
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
         if let drive {
@@ -194,16 +227,31 @@ public final class DriveInfosManager {
         return []
     }
 
-    public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
-        let realm = realm ?? getRealm()
+    public func getUser(id: Int) -> DriveUser? {
+        return try? fetchObject(ofType: DriveUser.self) { realm in
+            getUser(id: id, using: realm)
+        }
+    }
+
+    public func getUser(id: Int, using realm: Realm) -> DriveUser? {
         guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id), !user.isInvalidated else {
             return nil
         }
         return user.freeze()
     }
 
-    public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
-        let realm = realm ?? getRealm()
+    public func getTeams(for driveId: Int, userId: Int) -> [Team] {
+        var teams = [Team]()
+
+        // TODO: rework for fetchObject
+        try? writeTransaction { realm in
+            teams = getTeams(for: driveId, userId: userId, using: realm)
+        }
+
+        return teams
+    }
+
+    public func getTeams(for driveId: Int, userId: Int, using realm: Realm) -> [Team] {
         let drive = getDrive(id: driveId, userId: userId, using: realm)
         let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
         if let drive {
@@ -212,8 +260,13 @@ public final class DriveInfosManager {
         return []
     }
 
-    public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
-        let realm = realm ?? getRealm()
+    public func getTeam(id: Int) -> Team? {
+        return try? fetchObject(ofType: Team.self) { realm in
+            getTeam(id: id, using: realm)
+        }
+    }
+
+    public func getTeam(id: Int, using realm: Realm) -> Team? {
         guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
             return nil
         }
@@ -221,10 +274,9 @@ public final class DriveInfosManager {
     }
 
     public func removeDrivesFor(userId: Int) {
-        let realm = getRealm()
-        let userDrives = realm.objects(Drive.self).where { $0.userId == userId }
-        try? realm.write {
-            realm.delete(userDrives)
+        try? writeTransaction { writableRealm in
+            let userDrives = writableRealm.objects(Drive.self).where { $0.userId == userId }
+            writableRealm.delete(userDrives)
         }
     }
 }

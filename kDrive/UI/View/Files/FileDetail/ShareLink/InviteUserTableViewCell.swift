@@ -47,14 +47,17 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     var drive: Drive! {
         didSet {
-            guard drive != nil else { return }
-            let realm = DriveInfosManager.instance.getRealm()
-            let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId, using: realm)
+            guard drive != nil else {
+                return
+            }
+
+            let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId)
             shareables = users.sorted { $0.displayName < $1.displayName }
             if canUseTeam {
-                let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
+                let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId)
                 shareables = teams.sorted() + shareables
             }
+
             results = shareables.filter { shareable in
                 !ignoredShareables.contains { $0.id == shareable.id }
             }
