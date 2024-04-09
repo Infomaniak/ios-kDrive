@@ -610,10 +610,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         self.driveFileManager = driveFileManager
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
 
-        // TODO: fixme with proper fetch transaction + pred
-        try? driveFileManager.writeTransaction { realm in
-            previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
+            realm.objects(File.self)
+                .filter("id IN %@", previewFileIds)
         }
+
+        previewFiles = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }
 
         let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
         if decodedIndex >= previewFiles.count {
