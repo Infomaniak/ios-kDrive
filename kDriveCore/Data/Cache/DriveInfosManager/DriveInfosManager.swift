@@ -34,7 +34,7 @@ public extension RealmCollection where Element: KeypathSortable {
     }
 }
 
-public final class DriveInfosManager {
+public final class DriveInfosManager: DriveInfosManagerQueryable {
     private static let dbName = "DrivesInfos.realm"
 
     private static let currentDbVersion: UInt64 = 11
@@ -160,126 +160,5 @@ public final class DriveInfosManager {
 
     public static func getObjectId(driveId: Int, userId: Int) -> String {
         return "\(driveId)_\(userId)"
-    }
-
-    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false) -> Results<Drive> {
-        return fetchResults(ofType: Drive.self) { realm in
-            getDrives(for: userId, sharedWithMe: sharedWithMe, using: realm)
-        }
-    }
-
-    private func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm) -> Results<Drive> {
-        let userIdPredicate: NSPredicate?
-        if let userId {
-            if let sharedWithMe {
-                userIdPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
-            } else {
-                userIdPredicate = NSPredicate(format: "userId = %d", userId)
-            }
-        } else {
-            userIdPredicate = nil
-        }
-
-        let realmDriveList = realm.objects(Drive.self)
-            .filter(optionalPredicate: userIdPredicate)
-            .sorted(byKeyPath: "name", ascending: true)
-            .sorted(byKeyPath: "sharedWithMe", ascending: true)
-
-        return realmDriveList
-    }
-
-    public func getDrive(id: Int, userId: Int) -> Drive? {
-        return try? fetchObject(ofType: Drive.self) { realm in
-            getDrive(id: id, userId: userId, using: realm)
-        }
-    }
-
-    public func getDrive(id: Int, userId: Int, using realm: Realm) -> Drive? {
-        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
-    }
-
-    public func getDrive(objectId: String, freeze: Bool = true) -> Drive? {
-        return try? fetchObject(ofType: Drive.self) { realm in
-            return getDrive(objectId: objectId, freeze: freeze, using: realm)
-        }
-    }
-
-    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm) -> Drive? {
-        guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
-            return nil
-        }
-        return freeze ? drive.freeze() : drive
-    }
-
-    public func getUsers(for driveId: Int, userId: Int) -> Results<DriveUser> {
-        return fetchResults(ofType: DriveUser.self) { realm in
-            getUsers(for: driveId, userId: userId, using: realm)
-        }
-    }
-
-    private func getUsers(for driveId: Int, userId: Int, using realm: Realm) -> Results<DriveUser> {
-        guard let drive = getDrive(id: driveId, userId: userId, using: realm) else {
-            return realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
-        }
-
-        let users = Array(drive.users.drive)
-        let realmUserList = realm.objects(DriveUser.self)
-            .sorted(byKeyPath: "id", ascending: true)
-            .filter("id IN %@", users)
-
-        return realmUserList
-    }
-
-    public func getUser(id: Int) -> DriveUser? {
-        return try? fetchObject(ofType: DriveUser.self) { realm in
-            getUser(id: id, using: realm)
-        }
-    }
-
-    private func getUser(id: Int, using realm: Realm) -> DriveUser? {
-        guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id),
-              !user.isInvalidated else {
-            return nil
-        }
-        return user.freeze()
-    }
-
-    public func getTeams(for driveId: Int, userId: Int) -> Results<Team> {
-        return fetchResults(ofType: Team.self) { realm in
-            getTeams(for: driveId, userId: userId, using: realm)
-        }
-    }
-
-    private func getTeams(for driveId: Int, userId: Int, using realm: Realm) -> Results<Team> {
-        guard let drive = getDrive(id: driveId, userId: userId, using: realm) else {
-            return realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
-        }
-
-        let teamAccounts = Array(drive.teams.account)
-        let realmTeamList = realm.objects(Team.self)
-            .sorted(byKeyPath: "id", ascending: true)
-            .filter("id IN %@", teamAccounts)
-
-        return realmTeamList
-    }
-
-    public func getTeam(id: Int) -> Team? {
-        return try? fetchObject(ofType: Team.self) { realm in
-            getTeam(id: id, using: realm)
-        }
-    }
-
-    private func getTeam(id: Int, using realm: Realm) -> Team? {
-        guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
-            return nil
-        }
-        return team.freeze()
-    }
-
-    public func removeDrivesFor(userId: Int) {
-        try? writeTransaction { writableRealm in
-            let userDrives = writableRealm.objects(Drive.self).where { $0.userId == userId }
-            writableRealm.delete(userDrives)
-        }
     }
 }
