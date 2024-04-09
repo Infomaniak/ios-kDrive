@@ -28,7 +28,7 @@ public extension DriveFileManager {
                 .freeze()
         }
 
-        return Array(frozenFiles)
+        return frozenFiles.compactMap { !$0.isInvalidated ? $0 : nil }
     }
 
     func updateAvailableOfflineFiles() async throws {

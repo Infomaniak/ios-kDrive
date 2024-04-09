@@ -253,10 +253,12 @@ final class ManageCategoriesViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
 
-        // TODO: fixme with proper fetch transaction + pred
-        try? driveFileManager.writeTransaction { realm in
-            files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
+            realm.objects(File.self)
+                .filter("id IN %@", filesId)
         }
+
+        files = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }
 
         // Reload view
         updateTitle()
