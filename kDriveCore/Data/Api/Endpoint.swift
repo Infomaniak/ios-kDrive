@@ -135,22 +135,32 @@ public struct ProxyFile: AbstractFile, Sendable {
 
     /// Resolve an abstract file within a `DriveFileManager`.
     func resolve(within driveFileManager: DriveFileManager) throws -> File {
-        let file = try driveFileManager.fetchObject(ofType: File.self) { realm in
-            try resolve(using: realm)
+        let file = driveFileManager.fetchObject(ofType: File.self) { realm in
+            fetch(using: realm)
         }
 
         guard let file, !file.isInvalidated else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [:])
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
 
         return file
     }
 
-    /// Resolve an abstract file within a `realm`.
-    func resolve(using realm: Realm) throws -> File {
+    /// Internal query an object from a realm
+    private func fetch(using realm: Realm) -> File? {
         guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
+            return nil
+        }
+
+        return file
+    }
+
+    /// Resolve an abstract file within a `realm`. Throws if not found.
+    func resolve(using realm: Realm) throws -> File {
+        guard let file = fetch(using: realm) else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
+
         return file
     }
 }
