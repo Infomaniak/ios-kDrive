@@ -34,7 +34,7 @@ public extension RealmCollection where Element: KeypathSortable {
     }
 }
 
-public final class DriveInfosManager: DriveInfosManagerQueryable {
+public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryable {
     private static let dbName = "DrivesInfos.realm"
 
     private static let currentDbVersion: UInt64 = 11

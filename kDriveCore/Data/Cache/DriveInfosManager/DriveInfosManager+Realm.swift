@@ -44,8 +44,8 @@ public extension DriveInfosManager {
     ///
     /// NSException thrown if mutating realm elements
     func fetchObject<Element: Object>(ofType type: Element.Type,
-                                      withRealm realmClosure: (Realm) throws -> Element?) throws -> Element? {
-        try autoreleasepool {
+                                      withRealm realmClosure: (Realm) -> Element?) -> Element? {
+        autoreleasepool {
             let expiringActivity = ExpiringActivity()
             expiringActivity.start()
             defer {
@@ -53,7 +53,7 @@ public extension DriveInfosManager {
             }
 
             let realm = getRealm()
-            return try realmClosure(realm)
+            return realmClosure(realm)
         }
     }
 

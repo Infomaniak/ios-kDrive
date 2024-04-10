@@ -19,19 +19,39 @@
 import Foundation
 import RealmSwift
 
-// TODO: Document
 ///  DriveInfosManager database API
 public protocol DriveInfosManagerQueryable {
+    /// Get faulted drive list for a given user id
     func getDrives(for userId: Int?, sharedWithMe: Bool?) -> Results<Drive>
+
+    /// Get faulted drive list for a given user id and realm
     func getDrives(for userId: Int?, sharedWithMe: Bool?, using realm: Realm) -> Results<Drive>
+
+    /// Get drive for a given driveId
     func getDrive(id: Int, userId: Int) -> Drive?
+
+    /// Get drive for a given driveId and realm
     func getDrive(id: Int, userId: Int, using realm: Realm) -> Drive?
+
+    /// Get drive for a given primary key
     func getDrive(objectId: String, freeze: Bool) -> Drive?
+
+    /// Get drive list for a given primary key and realm
     func getDrive(objectId: String, freeze: Bool, using realm: Realm) -> Drive?
+
+    /// Get faulted DriveUser list for a given user id
     func getUsers(for driveId: Int, userId: Int) -> Results<DriveUser>
+
+    /// Get DriveUser for a given primary key
     func getUser(id: Int) -> DriveUser?
+
+    /// Get DriveUser for a given primary key and realm
     func getTeams(for driveId: Int, userId: Int) -> Results<Team>
+
+    /// Get Team for a given primary key
     func getTeam(id: Int) -> Team?
+
+    /// Remove all drives linked to a user id
     func removeDrivesFor(userId: Int)
 }
 
