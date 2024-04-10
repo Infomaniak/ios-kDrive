@@ -26,7 +26,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
                           .package(
                               url: "https://github.com/Infomaniak/ios-core",
-                              .revision("c44c0968a5caef41f006b54fdd928e1da2184416")
+                              .revision("271b3570d05332f83499fc30fdf328674dfa817d")
                           ),
                           .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "7.0.0")),
                           .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "6.0.1")),

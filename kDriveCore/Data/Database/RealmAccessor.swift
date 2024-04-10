@@ -22,21 +22,6 @@ import Foundation
 import InfomaniakCoreDB
 import RealmSwift
 
-// TODO: Move to coreDB
-public extension Realm {
-    func safeWrite(_ block: () throws -> Void) throws {
-        if isInWriteTransaction {
-            try block()
-        } else {
-            try write(block)
-        }
-    }
-
-    func getObject<RealmObject: Object, KeyType>(id: KeyType) -> RealmObject? {
-        object(ofType: RealmObject.self, forPrimaryKey: id)
-    }
-}
-
 /// Internal structure that can fetch a realm
 final class RealmAccessor: RealmAccessible {
     var realmURL: URL
