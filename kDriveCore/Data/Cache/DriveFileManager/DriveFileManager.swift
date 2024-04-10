@@ -27,201 +27,6 @@ import RealmSwift
 import SwiftRegex
 
 public final class DriveFileManager: Transactionable {
-    /// Something to centralize schema versioning
-    enum RealmSchemaVersion {
-        /// Current version of the Upload Realm
-        static let upload: UInt64 = 21
-
-        /// Current version of the Drive Realm
-        static let drive: UInt64 = 10
-    }
-
-    public class DriveFileManagerConstants {
-        public let driveObjectTypes = [
-            File.self,
-            Rights.self,
-            FileActivity.self,
-            FileCategory.self,
-            FileConversion.self,
-            FileVersion.self,
-            FileExternalImport.self,
-            ShareLink.self,
-            ShareLinkCapabilities.self,
-            DropBox.self,
-            DropBoxCapabilities.self,
-            DropBoxSize.self,
-            DropBoxValidity.self
-        ]
-        private let fileManager = FileManager.default
-        public let rootDocumentsURL: URL
-        public let importDirectoryURL: URL
-        public let groupDirectoryURL: URL
-        public var cacheDirectoryURL: URL
-        public var tmpDirectoryURL: URL
-        public let openInPlaceDirectoryURL: URL?
-        public let rootID = 1
-        public let currentVersionCode = 1
-        public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
-            let currentUploadSchemaVersion = RealmSchemaVersion.upload
-
-            // Log migration on Sentry
-            SentryDebug.realmMigrationStartedBreadcrumb(
-                form: oldSchemaVersion,
-                to: currentUploadSchemaVersion,
-                realmName: "Upload"
-            )
-            defer {
-                SentryDebug.realmMigrationEndedBreadcrumb(
-                    form: oldSchemaVersion,
-                    to: currentUploadSchemaVersion,
-                    realmName: "Upload"
-                )
-            }
-
-            // Sanity check
-            guard oldSchemaVersion < currentUploadSchemaVersion else {
-                return
-            }
-
-            // Migration from version 2 to version 3
-            if oldSchemaVersion < 3 {
-                migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                    newObject!["maxRetryCount"] = 3
-                }
-            }
-            // Migration to version 4 -> 7 is not needed
-            // Migration from version 7 to version 9
-            if oldSchemaVersion < 9 {
-                migration.deleteData(forType: DownloadTask.className())
-            }
-
-            // Migration from version 9 to version 10
-            if oldSchemaVersion < 10 {
-                migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                    newObject!["conflictOption"] = ConflictOption.version.rawValue
-                }
-            }
-
-            if oldSchemaVersion < 12 {
-                migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
-                    newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
-                }
-            }
-
-            // Migration for Upload With Chunks
-            if oldSchemaVersion < 14 {
-                migration.deleteData(forType: UploadFile.className())
-            }
-
-            // Migration for UploadFile With dedicated fileProviderItemIdentifier and assetLocalIdentifier fields
-            if oldSchemaVersion < 15 {
-                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
-                    guard let newObject else {
-                        return
-                    }
-
-                    // Try to migrate the assetLocalIdentifier if possible
-                    let type: String? = oldObject?["rawType"] as? String ?? nil
-
-                    switch type {
-                    case UploadFileType.phAsset.rawValue:
-                        // The object was from a phAsset source, the id has to be the `LocalIdentifier`
-                        let oldAssetIdentifier: String? = oldObject?["id"] as? String ?? nil
-
-                        newObject["assetLocalIdentifier"] = oldAssetIdentifier
-                        newObject["fileProviderItemIdentifier"] = nil
-
-                        // Making sure the ID is unique, and not a PHAsset identifier
-                        newObject["id"] = UUID().uuidString
-
-                    default:
-                        // We cannot infer anything, all to nil
-                        newObject["assetLocalIdentifier"] = nil
-                        newObject["fileProviderItemIdentifier"] = nil
-                    }
-                }
-            }
-
-            // Migration for UploadFile renamed initiatedFromFileManager into ownedByFileProvider
-            if oldSchemaVersion < 19 {
-                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
-                    guard let newObject else {
-                        return
-                    }
-
-                    // Try to migrate the initiatedFromFileManager if possible
-                    let initiatedFromFileManager: Bool? = oldObject?["initiatedFromFileManager"] as? Bool ?? false
-                    newObject["ownedByFileProvider"] = initiatedFromFileManager
-                }
-            }
-
-            // Migration for APIV3
-            if oldSchemaVersion < 20 {
-                migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
-                    guard let newObject else {
-                        return
-                    }
-
-                    newObject["uploadingSession"] = nil
-                }
-            }
-        }
-
-        /// Path of the upload DB
-        public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
-
-        public lazy var uploadsRealmConfiguration = Realm.Configuration(
-            fileURL: uploadsRealmURL,
-            schemaVersion: RealmSchemaVersion.upload,
-            migrationBlock: migrationBlock,
-            objectTypes: [DownloadTask.self,
-                          PhotoSyncSettings.self,
-                          UploadSession.self,
-                          UploadFile.self,
-                          UploadingChunkTask.self,
-                          UploadedChunk.self,
-                          UploadingSessionTask.self]
-        )
-
-        /// realm db used for file upload
-        public var uploadsRealm: Realm {
-            // Change file metadata after creation of the realm file.
-            defer {
-                // Exclude "upload file realm" and custom cache from system backup.
-                var metadata = URLResourceValues()
-                metadata.isExcludedFromBackup = true
-                do {
-                    try uploadsRealmURL.setResourceValues(metadata)
-                    try cacheDirectoryURL.setResourceValues(metadata)
-                } catch {
-                    DDLogError(error)
-                }
-            }
-
-            do {
-                return try Realm(configuration: uploadsRealmConfiguration)
-            } catch {
-                // We can't recover from this error but at least we report it correctly on Sentry
-                Logging.reportRealmOpeningError(error, realmConfiguration: uploadsRealmConfiguration)
-            }
-        }
-
-        init() {
-            @InjectService var pathProvider: AppGroupPathProvidable
-            groupDirectoryURL = pathProvider.groupDirectoryURL
-            rootDocumentsURL = pathProvider.realmRootURL
-            importDirectoryURL = pathProvider.importDirectoryURL
-            tmpDirectoryURL = pathProvider.tmpDirectoryURL
-            cacheDirectoryURL = pathProvider.cacheDirectoryURL
-            openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
-
-            DDLogInfo(
-                "App working path is: \(fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? "")"
-            )
-            DDLogInfo("Group container path is: \(groupDirectoryURL.absoluteString)")
-        }
-    }
-
     public static let constants = DriveFileManagerConstants()
 
     private let fileManager = FileManager.default
@@ -263,7 +68,7 @@ public final class DriveFileManager: Transactionable {
         return offlineRoot
     }
 
-    // autorelease frequecy so cleaner serialized realm base
+    // autorelease frequency so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public let realmConfiguration: Realm.Configuration
     public private(set) var drive: Drive
@@ -271,15 +76,13 @@ public final class DriveFileManager: Transactionable {
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
 
-    /// Path of the main Realm DB
-    var realmURL: URL
-
+    /// Something to centralize transaction style access to the DB
     let transactionExecutor: Transactionable
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = context.realmURL(using: drive)
+        let realmURL = context.realmURL(using: drive)
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
@@ -1473,58 +1276,62 @@ public final class DriveFileManager: Transactionable {
         }
     }
 
-    // TODO: notify outside transaction
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        try? writeTransaction { writableRealm in
-            guard let file = getCachedFile(id: file.id, freeze: false, using: writableRealm) else {
-                completion(DriveError.fileNotFound)
-                return
+        guard let liveFile = getCachedFile(id: file.id, freeze: false) else {
+            completion(DriveError.fileNotFound)
+            return
+        }
+
+        let oldUrl = liveFile.localUrl
+        let isLocalVersionOlderThanRemote = liveFile.isLocalVersionOlderThanRemote
+        if available {
+            updateFileProperty(fileUid: liveFile.uid) { writableFile in
+                writableFile.isAvailableOffline = true
             }
-            let oldUrl = file.localUrl
-            let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
-            if available {
-                file.isAvailableOffline = true
 
-                if !isLocalVersionOlderThanRemote {
-                    do {
-                        try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-                        try fileManager.moveItem(at: oldUrl, to: file.localUrl)
-                        notifyObserversWith(file: file)
-                        completion(nil)
-                    } catch {
-                        file.isAvailableOffline = false
+            if !isLocalVersionOlderThanRemote {
+                do {
+                    try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                    try fileManager.moveItem(at: oldUrl, to: liveFile.localUrl)
+                    notifyObserversWith(file: liveFile)
+                    completion(nil)
+                } catch {
+                    updateFileProperty(fileUid: liveFile.uid) { writableFile in
+                        writableFile.isAvailableOffline = false
+                    }
 
-                        completion(error)
-                    }
-                } else {
-                    let safeFile = file.freeze()
-                    var token: ObservationToken?
-                    token = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
-                        token?.cancel()
-                        if error != nil && error != .taskRescheduled {
-                            // Mark it as not available offline
-                            self.updateFileProperty(fileUid: safeFile.uid) { file in
-                                file.isAvailableOffline = false
-                            }
-                        }
-                        self.notifyObserversWith(file: safeFile)
-                        Task { @MainActor in
-                            completion(error)
-                        }
-                    }
-                    DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+                    completion(error)
                 }
             } else {
-                file.isAvailableOffline = false
-
-                // Cancel the download
-                DownloadQueue.instance.operation(for: file.id)?.cancel()
-                try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-                try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
-                notifyObserversWith(file: file)
-                try? fileManager.removeItem(at: oldUrl)
-                completion(nil)
+                let safeFile = liveFile.freeze()
+                var token: ObservationToken?
+                token = DownloadQueue.instance.observeFileDownloaded(self, fileId: safeFile.id) { _, error in
+                    token?.cancel()
+                    if error != nil && error != .taskRescheduled {
+                        // Mark it as not available offline
+                        self.updateFileProperty(fileUid: safeFile.uid) { writableFile in
+                            writableFile.isAvailableOffline = false
+                        }
+                    }
+                    self.notifyObserversWith(file: safeFile)
+                    Task { @MainActor in
+                        completion(error)
+                    }
+                }
+                DownloadQueue.instance.addToQueue(file: safeFile, userId: drive.userId)
             }
+        } else {
+            updateFileProperty(fileUid: liveFile.uid) { writableFile in
+                writableFile.isAvailableOffline = false
+            }
+
+            // Cancel the download
+            DownloadQueue.instance.operation(for: file.id)?.cancel()
+            try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
+            notifyObserversWith(file: file)
+            try? fileManager.removeItem(at: oldUrl)
+            completion(nil)
         }
     }
 
