@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import Realm
 import RealmSwift
 import Sentry
@@ -54,6 +55,8 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
             }
         }
     }
+
+    let transactionExecutor: Transactionable
 
     private init() {
         realmConfiguration = Realm.Configuration(
@@ -113,6 +116,9 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
                 CategoryRights.self
             ]
         )
+
+        let realmAccessible = RealmAccessor(realmURL: nil, realmConfiguration: realmConfiguration, excludeFromBackup: false)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessible)
     }
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {

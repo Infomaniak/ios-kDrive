@@ -186,7 +186,7 @@ public final class DriveFileManager: Transactionable {
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
 
-        let realmAccessor = RealmAccessor(realmURL: realmURL, realmConfiguration: realmConfiguration)
+        let realmAccessor = RealmAccessor(realmURL: realmURL, realmConfiguration: realmConfiguration, excludeFromBackup: true)
         transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
 
         // Init root file
