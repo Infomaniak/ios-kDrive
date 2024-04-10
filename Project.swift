@@ -24,7 +24,10 @@ let project = Project(name: "kDrive",
                       packages: [
                           .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
                           .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
-                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "9.0.1")),
+                          .package(
+                              url: "https://github.com/Infomaniak/ios-core",
+                              .revision("c44c0968a5caef41f006b54fdd928e1da2184416")
+                          ),
                           .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "7.0.0")),
                           .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "6.0.1")),
                           .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.0")),
