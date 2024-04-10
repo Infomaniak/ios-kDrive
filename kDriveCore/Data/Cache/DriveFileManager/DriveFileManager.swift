@@ -20,6 +20,7 @@ import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 import RealmSwift
@@ -262,40 +263,6 @@ public final class DriveFileManager: Transactionable {
         return offlineRoot
     }
 
-    public func getCachedRootFile(freeze: Bool = true) -> File {
-        var file: File!
-        try? writeTransaction { writableRealm in
-            file = getCachedRootFile(freeze: freeze, writableRealm: writableRealm)
-        }
-        return file
-    }
-
-    public func getCachedRootFile(freeze: Bool = true, writableRealm: Realm) -> File {
-        if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: writableRealm) {
-            if root.name != drive.name {
-                root.name = drive.name
-            }
-            return freeze ? root.freeze() : root
-        } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name, driveId: drive.id)
-        }
-    }
-
-    public func getCachedMyFilesRoot() -> File? {
-        let file = try? fetchObject(ofType: File.self) { realm in
-            realm.objects(File.self)
-                .filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
-                .first?
-                .freeze()
-        }
-
-        guard let file, !file.isInvalidated else {
-            return nil
-        }
-
-        return file
-    }
-
     // autorelease frequecy so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public let realmConfiguration: Realm.Configuration
@@ -306,6 +273,8 @@ public final class DriveFileManager: Transactionable {
 
     /// Path of the main Realm DB
     var realmURL: URL
+
+    let transactionExecutor: Transactionable
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
@@ -414,6 +383,9 @@ public final class DriveFileManager: Transactionable {
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
 
+        let realmAccessor = RealmAccessor(realmURL: realmURL, realmConfiguration: realmConfiguration)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
+
         // Init root file
         try? writeTransaction { writableRealm in
             if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: writableRealm) == nil {
@@ -444,20 +416,6 @@ public final class DriveFileManager: Transactionable {
                 }
             }
         }
-    }
-
-    public func getCachedFile(id: Int, freeze: Bool = true) -> File? {
-        return try? fetchObject(ofType: File.self) { realm in
-            return getCachedFile(id: id, freeze: freeze, using: realm)
-        }
-    }
-
-    public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm) -> File? {
-        let uid = File.uid(driveId: drive.id, fileId: id)
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
-            return nil
-        }
-        return freeze ? file.freeze() : file
     }
 
     public func initRoot() async throws {
@@ -611,15 +569,6 @@ public final class DriveFileManager: Transactionable {
                         forceRefresh: forceRefresh)
     }
 
-    public func removeSearchChildren() {
-        try? writeTransaction { writableRealm in
-            let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, writableRealm: writableRealm)
-
-            searchRoot.fullyDownloaded = false
-            searchRoot.children.removeAll()
-        }
-    }
-
     public func searchFile(query: String? = nil,
                            date: DateInterval? = nil,
                            fileType: ConvertedType? = nil,
@@ -699,61 +648,6 @@ public final class DriveFileManager: Transactionable {
         return results
     }
 
-    // TODO: notify outside transaction
-    public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        try? writeTransaction { writableRealm in
-            guard let file = getCachedFile(id: file.id, freeze: false, using: writableRealm) else {
-                completion(DriveError.fileNotFound)
-                return
-            }
-            let oldUrl = file.localUrl
-            let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
-            if available {
-                file.isAvailableOffline = true
-
-                if !isLocalVersionOlderThanRemote {
-                    do {
-                        try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-                        try fileManager.moveItem(at: oldUrl, to: file.localUrl)
-                        notifyObserversWith(file: file)
-                        completion(nil)
-                    } catch {
-                        file.isAvailableOffline = false
-
-                        completion(error)
-                    }
-                } else {
-                    let safeFile = file.freeze()
-                    var token: ObservationToken?
-                    token = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
-                        token?.cancel()
-                        if error != nil && error != .taskRescheduled {
-                            // Mark it as not available offline
-                            self.updateFileProperty(fileUid: safeFile.uid) { file in
-                                file.isAvailableOffline = false
-                            }
-                        }
-                        self.notifyObserversWith(file: safeFile)
-                        Task { @MainActor in
-                            completion(error)
-                        }
-                    }
-                    DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
-                }
-            } else {
-                file.isAvailableOffline = false
-
-                // Cancel the download
-                DownloadQueue.instance.operation(for: file.id)?.cancel()
-                try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-                try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
-                notifyObserversWith(file: file)
-                try? fileManager.removeItem(at: oldUrl)
-                completion(nil)
-            }
-        }
-    }
-
     public func setFileShareLink(file: ProxyFile, shareLink: ShareLink?) {
         updateFileProperty(fileUid: file.uid) { file in
             file.sharelink = shareLink
@@ -765,46 +659,6 @@ public final class DriveFileManager: Transactionable {
         updateFileProperty(fileUid: file.uid) { file in
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
-        }
-    }
-
-    public func getLocalRecentActivities() -> [FileActivity] {
-        let frozenFileActivities = fetchResults(ofType: FileActivity.self) { realm in
-            realm.objects(FileActivity.self).sorted(by: \.createdAt, ascending: false).freeze()
-        }
-        return Array(frozenFileActivities)
-    }
-
-    public func setLocalRecentActivities(_ activities: [FileActivity]) {
-        backgroundQueue.async { [self] in
-            try? writeTransaction { writableRealm in
-                let homeRootFile = DriveFileManager.homeRootFile
-                var activitiesSafe = [FileActivity]()
-                for activity in activities {
-                    guard !activity.isInvalidated else {
-                        continue
-                    }
-
-                    let safeActivity = FileActivity(value: activity)
-                    if let file = activity.file {
-                        let safeFile = file.detached()
-                        keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
-                        homeRootFile.children.insert(safeFile)
-                        safeActivity.file = safeFile
-                    }
-                    activitiesSafe.append(safeActivity)
-                }
-
-                writableRealm.delete(writableRealm.objects(FileActivity.self))
-                writableRealm.add(activitiesSafe, update: .modified)
-                writableRealm.add(homeRootFile, update: .modified)
-
-                deleteOrphanFiles(
-                    root: DriveFileManager.homeRootFile,
-                    newFiles: Array(homeRootFile.children),
-                    writableRealm: writableRealm
-                )
-            }
         }
     }
 
@@ -1032,20 +886,6 @@ public final class DriveFileManager: Transactionable {
         }
         // Silently handle error
         DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
-    }
-
-    public func getWorkingSet() -> [File] {
-        // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
-        // -3600).timeIntervalSince1970))
-        let files = fetchResults(ofType: File.self) { realm in
-            realm.objects(File.self).sorted(by: \.lastModifiedAt, ascending: false)
-        }
-
-        var result = [File]()
-        for i in 0 ..< min(20, files.count) {
-            result.append(files[i])
-        }
-        return result
     }
 
     public func add(category: Category, to file: ProxyFile) async throws {
@@ -1609,40 +1449,6 @@ public final class DriveFileManager: Transactionable {
         }
     }
 
-    /// Get a live version for the given file (if the file is not cached in realm it is added and then returned)
-    /// - Parameters:
-    ///   - file: source file
-    /// - Returns: A realm managed file
-    public func getManagedFile(from file: File) -> File {
-        // TODO: Refactor
-        var fetchedFile: File!
-        try? writeTransaction { writableRealm in
-            fetchedFile = getManagedFile(from: file, writableRealm: writableRealm)
-        }
-        return fetchedFile
-    }
-
-    /// Get a live version for the given file (if the file is not cached in realm it is added and then returned)
-    /// - Parameters:
-    ///   - file: source file
-    ///   - writableRealm: A realm _within_ a write operation
-    /// - Returns: A realm managed file
-    public func getManagedFile(from file: File, writableRealm: Realm) -> File {
-        if let cachedFile = getCachedFile(id: file.id, freeze: false, using: writableRealm) {
-            return cachedFile
-        } else {
-            if file.isRoot {
-                file.driveId = drive.id
-                file.uid = File.uid(driveId: file.driveId, fileId: file.id)
-            }
-
-            keepCacheAttributesForFile(newFile: file, keepProperties: [.all], writableRealm: writableRealm)
-
-            writableRealm.add(file, update: .all)
-            return file
-        }
-    }
-
     public func undoAction(cancelId: String) async throws {
         try await apiFetcher.undoAction(drive: drive, cancelId: cancelId)
     }
@@ -1657,19 +1463,102 @@ public final class DriveFileManager: Transactionable {
         }
         return result
     }
-}
 
-public extension Realm {
-    func safeWrite(_ block: () throws -> Void) throws {
-        if isInWriteTransaction {
-            try block()
-        } else {
-            try write(block)
+    public func removeSearchChildren() {
+        try? writeTransaction { writableRealm in
+            let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, writableRealm: writableRealm)
+
+            searchRoot.fullyDownloaded = false
+            searchRoot.children.removeAll()
         }
     }
 
-    func getObject<RealmObject: Object, KeyType>(id: KeyType) -> RealmObject? {
-        object(ofType: RealmObject.self, forPrimaryKey: id)
+    // TODO: notify outside transaction
+    public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
+        try? writeTransaction { writableRealm in
+            guard let file = getCachedFile(id: file.id, freeze: false, using: writableRealm) else {
+                completion(DriveError.fileNotFound)
+                return
+            }
+            let oldUrl = file.localUrl
+            let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
+            if available {
+                file.isAvailableOffline = true
+
+                if !isLocalVersionOlderThanRemote {
+                    do {
+                        try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+                        try fileManager.moveItem(at: oldUrl, to: file.localUrl)
+                        notifyObserversWith(file: file)
+                        completion(nil)
+                    } catch {
+                        file.isAvailableOffline = false
+
+                        completion(error)
+                    }
+                } else {
+                    let safeFile = file.freeze()
+                    var token: ObservationToken?
+                    token = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                        token?.cancel()
+                        if error != nil && error != .taskRescheduled {
+                            // Mark it as not available offline
+                            self.updateFileProperty(fileUid: safeFile.uid) { file in
+                                file.isAvailableOffline = false
+                            }
+                        }
+                        self.notifyObserversWith(file: safeFile)
+                        Task { @MainActor in
+                            completion(error)
+                        }
+                    }
+                    DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+                }
+            } else {
+                file.isAvailableOffline = false
+
+                // Cancel the download
+                DownloadQueue.instance.operation(for: file.id)?.cancel()
+                try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+                try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
+                notifyObserversWith(file: file)
+                try? fileManager.removeItem(at: oldUrl)
+                completion(nil)
+            }
+        }
+    }
+
+    public func setLocalRecentActivities(_ activities: [FileActivity]) {
+        backgroundQueue.async { [self] in
+            try? writeTransaction { writableRealm in
+                let homeRootFile = DriveFileManager.homeRootFile
+                var activitiesSafe = [FileActivity]()
+                for activity in activities {
+                    guard !activity.isInvalidated else {
+                        continue
+                    }
+
+                    let safeActivity = FileActivity(value: activity)
+                    if let file = activity.file {
+                        let safeFile = file.detached()
+                        keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
+                        homeRootFile.children.insert(safeFile)
+                        safeActivity.file = safeFile
+                    }
+                    activitiesSafe.append(safeActivity)
+                }
+
+                writableRealm.delete(writableRealm.objects(FileActivity.self))
+                writableRealm.add(activitiesSafe, update: .modified)
+                writableRealm.add(homeRootFile, update: .modified)
+
+                deleteOrphanFiles(
+                    root: DriveFileManager.homeRootFile,
+                    newFiles: Array(homeRootFile.children),
+                    writableRealm: writableRealm
+                )
+            }
+        }
     }
 }
 
