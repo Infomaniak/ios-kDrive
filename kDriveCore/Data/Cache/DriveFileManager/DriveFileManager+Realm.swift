@@ -20,6 +20,57 @@ import CocoaLumberjackSwift
 import Foundation
 import RealmSwift
 
+// TODO: Move to Core DB
+/// Something that can access a realm
+///
+/// For compatibility only, prefer { RealmConfigurable + Transactionable } conformance in your app
+///
+public protocol RealmAccessible {
+    /// Fetches an up to date realm for a given configuration, or fail in a controlled manner
+    func getRealm() -> Realm
+}
+
+// TODO: Move to Core DB
+/// Something that can access a realm configuration
+public protocol RealmConfigurable {
+    /// Configuration for a given realm
+    var realmConfiguration: Realm.Configuration { get }
+
+    /// Set `isExcludedFromBackup = true`  to the folder where realm is located to exclude a realm cache from an iCloud backup
+    /// - Important: Avoid calling this method too often as this can be expensive, prefer calling it once at init time
+    func excludeRealmFromBackup()
+}
+
+// TODO: Move to Core DB
+/// Something that standardises the transactions API, on a specific realm.
+public protocol Transactionable {
+    /// Provides a writable realm within a closure. Forwards swift errors.
+    /// - Parameter realmClosure: The closure to put the transaction into
+    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws
+
+    /// Fetches one object form a realm. Closure style can adapt to existing code.
+    ///
+    /// The realm is never writable, will throw if mutation occurs within `realmClosure`
+    ///
+    /// - Parameters:
+    ///   - type: The type of the object queried. Defines the return type.
+    ///   - realmClosure:  The closure to put the fetch, filter, sort operations
+    /// - Returns: A matched entity if any
+    func fetchObject<Element: Object>(ofType type: Element.Type,
+                                      withRealm realmClosure: (Realm) -> Element?) -> Element?
+
+    /// Fetches a faulted realm collection. Closure style can adapt to existing code.
+    ///
+    /// The realm is never writable, will throw if mutation occurs within `realmClosure`
+    ///
+    /// - Parameters:
+    ///   - type: The type of the object queried. Defines the return type.
+    ///   - realmClosure: The closure to put the fetch, filter, sort operations
+    /// - Returns: A faulted realm collection.
+    func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
+                                               withRealm realmClosure: (Realm) -> Results<Element>) -> Results<Element>
+}
+
 /// Wrapping the DriveFileManager context and the linked Realm DB together
 public enum DriveFileManagerContext {
     /// Main app dataset
@@ -68,8 +119,8 @@ public extension DriveFileManager {
     ///
     /// NSException thrown if mutating realm elements
     func fetchObject<Element: Object>(ofType type: Element.Type,
-                                      withRealm realmClosure: (Realm) throws -> Element?) throws -> Element? {
-        try autoreleasepool {
+                                      withRealm realmClosure: (Realm) -> Element?) -> Element? {
+        autoreleasepool {
             let expiringActivity = ExpiringActivity()
             expiringActivity.start()
             defer {
@@ -77,7 +128,7 @@ public extension DriveFileManager {
             }
 
             let realm = getRealm()
-            return try realmClosure(realm)
+            return realmClosure(realm)
         }
     }
 
