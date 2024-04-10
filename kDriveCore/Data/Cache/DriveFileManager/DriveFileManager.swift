@@ -25,7 +25,7 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
-public final class DriveFileManager {
+public final class DriveFileManager: Transactionable {
     /// Something to centralize schema versioning
     enum RealmSchemaVersion {
         /// Current version of the Upload Realm
@@ -877,14 +877,7 @@ public final class DriveFileManager {
     public func fileActivities(file: ProxyFile,
                                from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
         // Get all pages and assemble
-        let fetchedFile = try fetchObject(ofType: File.self) { realm in
-            return try file.resolve(using: realm).freeze()
-        }
-
-        guard let fetchedFile else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [:])
-        }
-
+        let fetchedFile = try file.resolve(within: self).freeze()
         let timestamp = TimeInterval(timestamp ?? fetchedFile.responseAt)
         var page = 1
         var moreComing = true
@@ -1233,14 +1226,7 @@ public final class DriveFileManager {
     public func rename(file: ProxyFile, newName: String) async throws -> File {
         _ = try await apiFetcher.rename(file: file, newName: newName)
 
-        let fetchedFile = try fetchObject(ofType: File.self) { realm in
-            return try file.resolve(using: realm)
-        }
-
-        guard let fetchedFile else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
-        }
-
+        let fetchedFile = try file.resolve(within: self)
         let newFile = fetchedFile.detached()
 
         try writeTransaction { writableRealm in
