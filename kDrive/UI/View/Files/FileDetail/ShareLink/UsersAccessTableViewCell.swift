@@ -24,6 +24,8 @@ import Kingfisher
 import UIKit
 
 class UsersAccessTableViewCell: InsetTableViewCell {
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+
     @IBOutlet weak var rightsStackView: UIStackView!
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var detailLabel: UILabel!
@@ -70,7 +72,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             externalUserView.isHidden = true
         } else if let team = element as? TeamFileAccess {
             titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
-            if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id),
+            if let savedTeam = driveInfosManager.getTeam(id: team.id),
                let usersCount = savedTeam.usersCount {
                 detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(usersCount)
             } else {

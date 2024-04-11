@@ -153,6 +153,9 @@ public enum FactoryService {
             },
             Factory(type: AvailableOfflineManageable.self) { _, _ in
                 AvailableOfflineManager()
+            },
+            Factory(type: DriveInfosManager.self) { _, _ in
+                DriveInfosManager()
             }
         ]
         return services

@@ -44,9 +44,6 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
 
     public let realmConfiguration: Realm.Configuration
 
-    // TODO: use DI
-    public static let instance = DriveInfosManager()
-
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
             guard let newObject, let objectId = oldObject?["objectId"] as? String else { return }
@@ -58,7 +55,7 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
 
     let transactionExecutor: Transactionable
 
-    private init() {
+    init() {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,

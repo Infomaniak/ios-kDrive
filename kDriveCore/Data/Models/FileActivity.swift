@@ -18,6 +18,7 @@
 
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 import UIKit
 
@@ -89,6 +90,8 @@ public enum FileActivityType: String, Codable, CaseIterable {
 }
 
 public class FileActivity: Object, Decodable {
+    @LazyInjectService var driveInfosManager: DriveInfosManager
+
     @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     /// Date Activity File was created at
     @Persisted public var createdAt: Date
@@ -114,7 +117,7 @@ public class FileActivity: Object, Decodable {
 
     public var user: DriveUser? {
         if let id = userId {
-            return DriveInfosManager.instance.getUser(id: id)
+            return driveInfosManager.getUser(id: id)
         } else {
             return nil
         }

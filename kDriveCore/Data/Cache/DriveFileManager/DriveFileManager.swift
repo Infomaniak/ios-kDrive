@@ -27,6 +27,8 @@ import RealmSwift
 import SwiftRegex
 
 public final class DriveFileManager: Transactionable {
+    @LazyInjectService var driveInfosManager: DriveInfosManager
+
     public static let constants = DriveFileManagerConstants()
 
     private let fileManager = FileManager.default
@@ -741,8 +743,8 @@ public final class DriveFileManager: Transactionable {
         let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
         // Add category to drive
 
-        try? DriveInfosManager.instance.writeTransaction { writableRealm in
-            let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+        try? driveInfosManager.writeTransaction { writableRealm in
+            let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
             guard let drive else {
                 return
             }
@@ -759,8 +761,8 @@ public final class DriveFileManager: Transactionable {
         let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
 
         // Update category on drive
-        try? DriveInfosManager.instance.writeTransaction { writableRealm in
-            guard let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+        try? driveInfosManager.writeTransaction { writableRealm in
+            guard let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
             }
@@ -784,8 +786,8 @@ public final class DriveFileManager: Transactionable {
         }
 
         // Delete category from drive
-        try? DriveInfosManager.instance.writeTransaction { writableRealm in
-            guard let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+        try? driveInfosManager.writeTransaction { writableRealm in
+            guard let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
             }

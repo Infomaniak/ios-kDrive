@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveResources
 import UIKit
 
@@ -131,13 +132,15 @@ public class TeamFileAccess: FileAccessElement {
     }
 
     public var shareable: Shareable? {
-        return DriveInfosManager.instance.getTeam(id: id)
+        @InjectService var driveInfosManager: DriveInfosManager
+        return driveInfosManager.getTeam(id: id)
     }
 
     public var icon: UIImage {
         get async {
             // Improve this
-            DriveInfosManager.instance.getTeam(id: id)?.icon ?? UIImage()
+            @InjectService var driveInfosManager: DriveInfosManager
+            return driveInfosManager.getTeam(id: id)?.icon ?? UIImage()
         }
     }
 }
