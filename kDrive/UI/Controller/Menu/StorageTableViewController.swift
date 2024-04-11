@@ -21,49 +21,18 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class StorageTableViewController: UITableViewController {
+final class StorageTableViewController: UITableViewController {
+    private let cleanActions = CleanSpaceActions()
+
     private enum Section: CaseIterable {
         case header, directories, files
     }
 
-    private struct File {
-        let path: String
-        let size: UInt64
-
-        var name: String {
-            return (path as NSString).lastPathComponent
-        }
-
-        var isDirectory: Bool {
-            var isDir: ObjCBool = false
-            let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
-            return exists && isDir.boolValue
-        }
-
-        var directoryTitle: String {
-            switch name {
-            case "drives":
-                return KDriveResourcesStrings.Localizable.drivesDirectory
-            case "Documents":
-                return KDriveResourcesStrings.Localizable.documentsDirectory
-            case "import":
-                return KDriveResourcesStrings.Localizable.importDirectory
-            case "tmp":
-                return KDriveResourcesStrings.Localizable.tempDirectory
-            case "Caches":
-                return KDriveResourcesStrings.Localizable.cacheDirectory
-            default:
-                return name.capitalized
-            }
-        }
-    }
-
-    private let fileManager = FileManager.default
     private let sections = Section.allCases
 
     private var totalSize: UInt64 = 0
-    private var directories = [File]()
-    private var files = [File]()
+    private var directories = [StorageFile]()
+    private var files = [StorageFile]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,87 +57,21 @@ class StorageTableViewController: UITableViewController {
         var paths = [DriveFileManager.constants.rootDocumentsURL,
                      NSFileProviderManager.default.documentStorageURL,
                      DriveFileManager.constants.importDirectoryURL,
-                     fileManager.temporaryDirectory,
+                     FileManager.default.temporaryDirectory,
                      DriveFileManager.constants.cacheDirectoryURL]
+
         // Append document directory if it exists
-        if let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+        if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
+                                                            in: .userDomainMask).first {
             paths.insert(documentDirectory, at: 1)
         }
-        directories = paths.compactMap { getFile(at: $0.path) }
+
+        directories = paths.compactMap { self.cleanActions.getFile(at: $0.path) }
         // Get total size
         totalSize = directories.reduce(0) { $0 + $1.size }
         // Get files
-        files = exploreDirectory(at: DriveFileManager.constants.cacheDirectoryURL.path) ?? []
+        files = cleanActions.exploreDirectory(at: DriveFileManager.constants.cacheDirectoryURL.path) ?? []
         files.removeAll { $0.path.contains("logs") } // Exclude log files
-    }
-
-    private func exploreDirectory(at path: String) -> [File]? {
-        // File exists
-        var isDir: ObjCBool = false
-        guard fileManager.fileExists(atPath: path, isDirectory: &isDir) else {
-            return nil
-        }
-        // Get size
-        let size = getFileSize(at: path)
-        // Get children
-        if isDir.boolValue {
-            let childrenPath = try? fileManager.contentsOfDirectory(atPath: path)
-            return childrenPath?.flatMap { exploreDirectory(at: (path as NSString).appendingPathComponent($0)) ?? [] }
-        } else {
-            return [File(path: path, size: size)]
-        }
-    }
-
-    private func getFile(at path: String) -> File? {
-        // File exists
-        var isDir: ObjCBool = false
-        guard fileManager.fileExists(atPath: path, isDirectory: &isDir) else {
-            return nil
-        }
-        // Get size
-        var size = getFileSize(at: path)
-        // Explore children
-        if isDir.boolValue {
-            let children = try? fileManager.contentsOfDirectory(atPath: path)
-            for child in children ?? [] {
-                size += getFile(at: (path as NSString).appendingPathComponent(child))?.size ?? 0
-            }
-        }
-        return File(path: path, size: size)
-    }
-
-    private func getFileSize(at path: String) -> UInt64 {
-        var size: UInt64 = 0
-        do {
-            let attributes = try fileManager.attributesOfItem(atPath: path)
-            if let sizeAttribute = attributes[.size] as? NSNumber {
-                size = sizeAttribute.uint64Value
-            } else {
-                DDLogError("Failed to get a size attribute from path: \(path)")
-            }
-        } catch {
-            DDLogError("Failed to get file attributes for path: \(path) with error: \(error)")
-        }
-        return size
-    }
-
-    private func delete(file: File) {
-        let isDirectory = file.isDirectory
-        do {
-            try fileManager.removeItem(atPath: file.path)
-            if isDirectory {
-                // Recreate directory to avoid any issue
-                try fileManager.createDirectory(atPath: file.path, withIntermediateDirectories: true)
-            }
-        } catch {
-            DDLogError("Failed to remove item for path: \(file.path) with error: \(error)")
-        }
-
-        // Reload data
-        reload()
-        Task { @MainActor [weak self] in
-            self?.tableView.reloadData()
-        }
     }
 
     // MARK: - Table view data source
@@ -234,8 +137,9 @@ class StorageTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let section = sections[indexPath.section]
-        let file: File
+        let file: StorageFile
         let message: String
+
         switch section {
         case .header:
             return
@@ -247,6 +151,7 @@ class StorageTableViewController: UITableViewController {
             file = files[indexPath.row]
             message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(file.name)
         }
+
         let alertViewController = AlertTextViewController(
             title: KDriveResourcesStrings.Localizable.modalClearCacheTitle,
             message: message,
@@ -254,7 +159,15 @@ class StorageTableViewController: UITableViewController {
             destructive: true
         ) { [weak self] in
             DispatchQueue.global(qos: .utility).async {
-                self?.delete(file: file)
+                guard let self else {
+                    return
+                }
+                self.cleanActions.delete(file: file)
+                self.reload()
+                // Reload data
+                Task { @MainActor [weak self] in
+                    self?.tableView.reloadData()
+                }
             }
         }
         present(alertViewController, animated: true)
