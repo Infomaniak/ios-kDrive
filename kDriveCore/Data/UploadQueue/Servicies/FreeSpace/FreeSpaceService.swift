@@ -62,6 +62,31 @@ public struct FreeSpaceService {
         }
     }
 
+    /// On devices with low free space, we clear the temporaryDirectory on exit
+    public func cleanCacheIfAlmostFull() {
+        let freeSpaceInTemporaryDirectory: Int64
+        do {
+            freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
+        } catch {
+            Log.uploadOperation("unable to read available space \(error)", level: .error)
+            return
+        }
+
+        // Only clean if reaching the minimum space required for upload
+        guard freeSpaceInTemporaryDirectory < minimalSpaceRequiredForChunkUpload * 2 else {
+            return
+        }
+
+        Log.uploadOperation("Almost not enough space for chunk upload, clearing temporary files")
+        let cleanActions = CleanSpaceActions()
+
+        // Clean temp files we are absolutely sure will not end up with a data loss.
+        let temporaryDirectory = FileManager.default.temporaryDirectory.path
+        let size = cleanActions.getFileSize(at: temporaryDirectory)
+        let temporaryStorageCache = StorageFile(path: temporaryDirectory, size: size)
+        cleanActions.delete(file: temporaryStorageCache)
+    }
+
     // MARK: - private
 
     private func freeSpace(url: URL) throws -> Int64 {
