@@ -30,6 +30,51 @@ final class MenuViewControllerTests: XCTestCase {
         super.tearDown()
     }
 
+    override func setUp() {
+        SimpleResolver.sharedResolver.removeAll()
+        SimpleResolver.register(FactoryService.debugServices)
+        let services = [
+            Factory(type: KeychainHelper.self) { _, _ in
+                KeychainHelper(accessGroup: AccountManager.accessGroup)
+            },
+            Factory(type: TokenStore.self) { _, _ in
+                TokenStore()
+            },
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            },
+            Factory(type: UploadQueue.self) { _, _ in
+                UploadQueue()
+            },
+            Factory(type: UploadQueueable.self) { _, resolver in
+                try resolver.resolve(type: UploadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
+                try resolver.resolve(type: InfomaniakNetworkLogin.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: InfomaniakTokenable.self) { _, resolver in
+                try resolver.resolve(type: InfomaniakLoginable.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: PhotoLibraryUploader.self) { _, _ in
+                PhotoLibraryUploader()
+            },
+            Factory(type: DriveInfosManager.self) { _, _ in
+                DriveInfosManager()
+            }
+        ]
+        SimpleResolver.register(services)
+    }
+
     // MARK: - Upload observation
 
     func testObserveUploads() {
@@ -48,9 +93,6 @@ final class MenuViewControllerTests: XCTestCase {
             manager.currentAccount = mockAccount
             return manager
         }
-
-        SimpleResolver.sharedResolver.removeAll()
-        MockingHelper.registerConcreteTypes()
         SimpleResolver.register([accountManagerFactory])
 
         let driveApiFetcher = DriveApiFetcher()

@@ -16,11 +16,26 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@testable import InfomaniakDI
 @testable import kDriveCore
 import XCTest
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
+    override func tearDown() {
+        SimpleResolver.sharedResolver.removeAll()
+    }
+
+    override func setUp() {
+        SimpleResolver.sharedResolver.removeAll()
+        SimpleResolver.register([
+            Factory(type: AppContextServiceable.self) { _, _ in
+                // We fake the main app context
+                return AppContextService(context: .app)
+            }
+        ])
+    }
+
     // MARK: - readFileByteSize
 
     // covered by IT
