@@ -26,7 +26,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
                           .package(
                               url: "https://github.com/Infomaniak/ios-core",
-                              .revision("271b3570d05332f83499fc30fdf328674dfa817d")
+                              .revision("382cf3ed863f6d2840991323805be8b08a05a08d")
                           ),
                           .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "7.0.0")),
                           .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "6.0.1")),
@@ -163,6 +163,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "Atlantis"),
                                      .package(product: "MQTTNIO"),
                                      .package(product: "InfomaniakCore"),
+                                     .package(product: "InfomaniakCoreDB"),
                                      .package(product: "InfomaniakCoreUI"),
                                      .package(product: "InfomaniakLogin"),
                                      .package(product: "InfomaniakDI"),
