@@ -35,10 +35,8 @@ class LastModificationsViewModel: FileListViewModel {
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
 
-        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
-            return realm
-                .objects(File.self)
-                .filter("rawType != \"dir\"")
+        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("rawType != \"dir\"")
         }
 
         files = AnyRealmCollection(fetchedFiles)

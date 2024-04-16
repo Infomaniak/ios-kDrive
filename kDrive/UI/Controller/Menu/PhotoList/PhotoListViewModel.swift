@@ -72,10 +72,8 @@ class PhotoListViewModel: FileListViewModel {
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
 
-        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
-            return realm
-                .objects(File.self)
-                .filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
                 .sorted(by: [SortType.newer.value.sortDescriptor])
         }
 
