@@ -121,12 +121,9 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         configureDataSource()
 
-        let root = try? driveFileManager.fetchObject(ofType: File.self) { realm in
-            let rootFileUid = File.uid(driveId: self.driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
-            return realm.object(ofType: File.self, forPrimaryKey: rootFileUid)
-        }
-
-        guard let root, !root.isInvalidated else {
+        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+        guard let root = driveFileManager.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid),
+              !root.isInvalidated else {
             return
         }
 

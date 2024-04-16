@@ -21,9 +21,8 @@ import RealmSwift
 
 public extension DriveFileManager {
     func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let frozenFiles = fetchResults(ofType: File.self) { realm in
-            return realm.objects(File.self)
-                .filter("isAvailableOffline = true")
+        let frozenFiles = fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("isAvailableOffline = true")
                 .sorted(by: [sortType.value.sortDescriptor])
                 .freeze()
         }

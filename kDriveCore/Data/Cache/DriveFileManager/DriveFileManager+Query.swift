@@ -40,9 +40,8 @@ public extension DriveFileManager {
     }
 
     func getCachedMyFilesRoot() -> File? {
-        let file = try? fetchObject(ofType: File.self) { realm in
-            realm.objects(File.self)
-                .filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
+        let file = try? fetchObject(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()
         }
@@ -55,9 +54,11 @@ public extension DriveFileManager {
     }
 
     func getCachedFile(id: Int, freeze: Bool = true) -> File? {
-        return try? fetchObject(ofType: File.self) { realm in
-            return getCachedFile(id: id, freeze: freeze, using: realm)
+        let uid = File.uid(driveId: drive.id, fileId: id)
+        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
+            return nil
         }
+        return freeze ? file.freeze() : file
     }
 
     func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm) -> File? {
@@ -69,8 +70,8 @@ public extension DriveFileManager {
     }
 
     func getLocalRecentActivities() -> [FileActivity] {
-        let frozenFileActivities = fetchResults(ofType: FileActivity.self) { realm in
-            realm.objects(FileActivity.self).sorted(by: \.createdAt, ascending: false).freeze()
+        let frozenFileActivities = fetchResults(ofType: FileActivity.self) { faultedCollection in
+            faultedCollection.sorted(by: \.createdAt, ascending: false).freeze()
         }
         return Array(frozenFileActivities)
     }
@@ -78,8 +79,8 @@ public extension DriveFileManager {
     func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
         // -3600).timeIntervalSince1970))
-        let files = fetchResults(ofType: File.self) { realm in
-            realm.objects(File.self).sorted(by: \.lastModifiedAt, ascending: false)
+        let files = fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.sorted(by: \.lastModifiedAt, ascending: false)
         }
 
         var result = [File]()

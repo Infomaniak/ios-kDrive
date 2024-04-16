@@ -45,17 +45,22 @@ public enum DriveFileManagerContext {
 // MARK: - Transactionable
 
 public extension DriveFileManager {
-    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
-        try transactionExecutor.writeTransaction(withRealm: realmClosure)
+    func fetchObject<Element: Object, KeyType>(ofType type: Element.Type,
+                                               forPrimaryKey key: KeyType) -> Element? {
+        return transactionExecutor.fetchObject(ofType: type, forPrimaryKey: key)
     }
 
-    func fetchObject<Element: Object>(ofType type: Element.Type,
-                                      withRealm realmClosure: (Realm) -> Element?) -> Element? {
-        return transactionExecutor.fetchObject(ofType: type, withRealm: realmClosure)
+    func fetchObject<Element: RealmFetchable>(ofType type: Element.Type,
+                                              filtering: (Results<Element>) -> Element?) -> Element? {
+        return transactionExecutor.fetchObject(ofType: type, filtering: filtering)
     }
 
     func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
-                                               withRealm realmClosure: (Realm) -> Results<Element>) -> Results<Element> {
-        return transactionExecutor.fetchResults(ofType: type, withRealm: realmClosure)
+                                               filtering: (Results<Element>) -> Results<Element>) -> Results<Element> {
+        return transactionExecutor.fetchResults(ofType: type, filtering: filtering)
+    }
+
+    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
+        try transactionExecutor.writeTransaction(withRealm: realmClosure)
     }
 }

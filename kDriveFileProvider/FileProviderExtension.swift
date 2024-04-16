@@ -33,7 +33,8 @@ extension DriveFileManager {
                        freeze: Bool = true,
                        using realm: Realm) throws -> File {
         guard let fileId = itemIdentifier.toFileId(),
-              let file = getCachedFile(id: fileId, freeze: freeze, using: realm) else {
+              let file = getCachedFile(id: fileId, freeze: freeze, using: realm),
+              !file.isInvalidated else {
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -42,11 +43,9 @@ extension DriveFileManager {
 
     func getCachedFile(itemIdentifier: NSFileProviderItemIdentifier,
                        freeze: Bool = true) throws -> File {
-        let file = try? fetchObject(ofType: File.self) { realm in
-            return try? getCachedFile(itemIdentifier: itemIdentifier, freeze: freeze, using: realm)
-        }
-
-        guard let file, !file.isInvalidated else {
+        guard let fileId = itemIdentifier.toFileId(),
+              let file = getCachedFile(id: fileId, freeze: freeze),
+              !file.isInvalidated else {
             throw NSFileProviderError(.noSuchItem)
         }
 

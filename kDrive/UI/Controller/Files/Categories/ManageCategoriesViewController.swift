@@ -253,9 +253,8 @@ final class ManageCategoriesViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
 
-        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
-            realm.objects(File.self)
-                .filter("id IN %@", filesId)
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("id IN %@", filesId)
         }
 
         files = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }

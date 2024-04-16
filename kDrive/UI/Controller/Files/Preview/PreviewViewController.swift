@@ -610,9 +610,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         self.driveFileManager = driveFileManager
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
 
-        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { realm in
-            realm.objects(File.self)
-                .filter("id IN %@", previewFileIds)
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("id IN %@", previewFileIds)
         }
 
         previewFiles = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }

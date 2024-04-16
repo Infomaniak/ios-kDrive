@@ -412,8 +412,8 @@ public final class DriveFileManager: Transactionable {
                               categories: [Category],
                               belongToAllCategories: Bool,
                               sortType: SortType = .nameAZ) -> Results<File> {
-        let results = fetchResults(ofType: File.self) { realm in
-            var searchResults = realm.objects(File.self).filter("id > 0")
+        let results = fetchResults(ofType: File.self) { faultedCollection in
+            var searchResults = faultedCollection.filter("id > 0")
             if let query, !query.isBlank {
                 searchResults = searchResults.filter("name CONTAINS[cd] %@", query)
             }
