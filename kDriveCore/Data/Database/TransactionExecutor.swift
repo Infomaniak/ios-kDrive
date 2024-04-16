@@ -42,12 +42,6 @@ struct TransactionExecutor: Transactionable {
     func fetchObject<Element: Object>(ofType type: Element.Type,
                                       withRealm realmClosure: (Realm) -> Element?) -> Element? {
         autoreleasepool {
-            let expiringActivity = ExpiringActivity()
-            expiringActivity.start()
-            defer {
-                expiringActivity.endAll()
-            }
-
             let realm = realmAccessible.getRealm()
             return realmClosure(realm)
         }
@@ -56,12 +50,6 @@ struct TransactionExecutor: Transactionable {
     func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
                                                withRealm realmClosure: (Realm) -> Results<Element>) -> Results<Element> {
         autoreleasepool {
-            let expiringActivity = ExpiringActivity()
-            expiringActivity.start()
-            defer {
-                expiringActivity.endAll()
-            }
-
             let realm = realmAccessible.getRealm()
             return realmClosure(realm)
         }
