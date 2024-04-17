@@ -222,8 +222,8 @@ class InviteUserViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
 
-        shareables = restoredUserIds.compactMap { driveInfosManager.getUser(id: $0) }
-            + restoredTeamIds.compactMap { driveInfosManager.getTeam(id: $0) }
+        shareables = restoredUserIds.compactMap { driveInfosManager.getUser(primaryKey: $0) }
+            + restoredTeamIds.compactMap { driveInfosManager.getTeam(primaryKey: $0) }
 
         // Update UI
         setTitle()

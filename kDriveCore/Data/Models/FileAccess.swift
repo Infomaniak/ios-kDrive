@@ -133,14 +133,14 @@ public class TeamFileAccess: FileAccessElement {
 
     public var shareable: Shareable? {
         @InjectService var driveInfosManager: DriveInfosManager
-        return driveInfosManager.getTeam(id: id)
+        return driveInfosManager.getTeam(primaryKey: id)
     }
 
     public var icon: UIImage {
         get async {
             // Improve this
             @InjectService var driveInfosManager: DriveInfosManager
-            return driveInfosManager.getTeam(id: id)?.icon ?? UIImage()
+            return driveInfosManager.getTeam(primaryKey: id)?.icon ?? UIImage()
         }
     }
 }

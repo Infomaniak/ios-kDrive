@@ -467,7 +467,7 @@ public final class File: Object, Codable {
 
     public var creator: DriveUser? {
         if let createdBy {
-            return driveInfosManager.getUser(id: createdBy)
+            return driveInfosManager.getUser(primaryKey: createdBy)
         }
         return nil
     }

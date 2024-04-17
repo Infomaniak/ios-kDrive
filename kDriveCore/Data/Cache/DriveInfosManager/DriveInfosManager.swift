@@ -24,11 +24,11 @@ import RealmSwift
 import Sentry
 
 // TODO: Move to core db / + tests
-public extension RealmCollection where Element: KeypathSortable {
+public extension Results where Element: KeypathSortable {
     /// Apply a filter only for non nil predicate parameters, noop otherwise
     func filter(optionalPredicate predicate: NSPredicate?) -> Results<Element> {
         guard let predicate else {
-            return filter("")
+            return self
         }
 
         return filter(predicate)
@@ -131,16 +131,15 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
             driveList.append(drive)
         }
 
-        var driveRemoved = [Drive]()
-        try? writeTransaction { writableRealm in
-            driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: writableRealm)
-                .filter { currentDrive in
-                    !driveList.contains { newDrive in
-                        newDrive.objectId == currentDrive.objectId
-                    }
+        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil)
+            .filter { currentDrive in
+                !driveList.contains { newDrive in
+                    newDrive.objectId == currentDrive.objectId
                 }
-            let driveRemovedIds = driveRemoved.map(\.objectId)
+            }
+        let driveRemovedIds = Array(driveRemoved.map(\.objectId))
 
+        try? writeTransaction { writableRealm in
             let drivesToDelete = writableRealm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds)
             writableRealm.delete(drivesToDelete)
             writableRealm.add(driveList, update: .modified)
@@ -151,7 +150,7 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
         // driveList is _live_ after the write operation
         updateFileProvider(withLiveDrives: driveList, user: user)
 
-        return driveRemoved
+        return Array(driveRemoved)
     }
 
     private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakCore.UserProfile) {

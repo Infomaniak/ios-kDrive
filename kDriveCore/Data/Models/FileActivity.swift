@@ -117,7 +117,7 @@ public class FileActivity: Object, Decodable {
 
     public var user: DriveUser? {
         if let id = userId {
-            return driveInfosManager.getUser(id: id)
+            return driveInfosManager.getUser(primaryKey: id)
         } else {
             return nil
         }

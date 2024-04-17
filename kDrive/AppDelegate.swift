@@ -296,7 +296,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 rootViewController?.didUpdateCurrentAccountInformations(account)
 
                 if let oldDriveId,
-                   let newDrive = driveInfosManager.getDrive(objectId: oldDriveId),
+                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
                    !newDrive.inMaintenance {
                     // The current drive is still usable, do not switch
                     scanLibraryAndRestartUpload()

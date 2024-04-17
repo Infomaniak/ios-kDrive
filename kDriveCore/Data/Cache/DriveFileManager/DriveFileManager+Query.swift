@@ -40,7 +40,7 @@ public extension DriveFileManager {
     }
 
     func getCachedMyFilesRoot() -> File? {
-        let file = try? fetchObject(ofType: File.self) { faultedCollection in
+        let file = fetchObject(ofType: File.self) { faultedCollection in
             faultedCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()
@@ -55,7 +55,8 @@ public extension DriveFileManager {
 
     func getCachedFile(id: Int, freeze: Bool = true) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
-        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
+        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid),
+              !file.isInvalidated else {
             return nil
         }
         return freeze ? file.freeze() : file
@@ -63,7 +64,8 @@ public extension DriveFileManager {
 
     func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid),
+              !file.isInvalidated else {
             return nil
         }
         return freeze ? file.freeze() : file

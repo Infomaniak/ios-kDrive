@@ -744,7 +744,7 @@ public final class DriveFileManager: Transactionable {
         // Add category to drive
 
         try? driveInfosManager.writeTransaction { writableRealm in
-            let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             guard let drive else {
                 return
             }
@@ -762,7 +762,7 @@ public final class DriveFileManager: Transactionable {
 
         // Update category on drive
         try? driveInfosManager.writeTransaction { writableRealm in
-            guard let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            guard let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
             }
@@ -787,7 +787,7 @@ public final class DriveFileManager: Transactionable {
 
         // Delete category from drive
         try? driveInfosManager.writeTransaction { writableRealm in
-            guard let drive = driveInfosManager.getDrive(objectId: drive.objectId, freeze: false, using: writableRealm)
+            guard let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
             }

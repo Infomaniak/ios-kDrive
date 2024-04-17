@@ -72,7 +72,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             externalUserView.isHidden = true
         } else if let team = element as? TeamFileAccess {
             titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
-            if let savedTeam = driveInfosManager.getTeam(id: team.id),
+            if let savedTeam = driveInfosManager.getTeam(primaryKey: team.id),
                let usersCount = savedTeam.usersCount {
                 detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(usersCount)
             } else {
