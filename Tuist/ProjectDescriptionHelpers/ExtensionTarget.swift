@@ -29,6 +29,7 @@ public extension Target {
         var resources: [ResourceFileElement] = [
             "\(name)/**/*.storyboard",
             "kDrive/UI/Controller/Files/**/*.storyboard",
+            "kDrive/UI/Controller/Files/**/*.xib",
             "kDrive/UI/Controller/Floating Panel Information/*.storyboard",
             "kDrive/UI/Controller/NewFolder/*.storyboard",
             "kDrive/UI/View/EmptyTableView/**/*.xib",
