@@ -207,7 +207,7 @@ final class FilePresenter {
                 completion?(true)
             } else {
                 let message = "Tried to present unsupported scheme"
-                let metadata = ["URL": url.absoluteString]
+                let metadata = ["URL": url.scheme ?? "No scheme"]
                 SentryDebug.capture(message: message, context: metadata, contextKey: "Details")
 
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
