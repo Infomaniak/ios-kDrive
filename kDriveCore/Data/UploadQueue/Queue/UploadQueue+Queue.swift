@@ -282,6 +282,11 @@ extension UploadQueue: UploadQueueable {
                                                             userId: userId,
                                                             driveId: driveId,
                                                             using: realm)
+
+                for file in uploadingFiles {
+                    file.cleanSourceFileIfNeeded()
+                }
+
                 Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
                 uploadingFilesIds = uploadingFiles.map(\.id)
                 Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
