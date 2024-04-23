@@ -60,9 +60,6 @@ public protocol UploadQueueable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
-    /// Cancel all running operations, regardless of state
-    func cancelRunningOperations()
-
     /// Cancel an upload from an UploadFile. The UploadFile is removed and a matching operation is removed.
     /// - Parameter file: the upload file id to cancel.
     func cancel(uploadFile: UploadFile)
