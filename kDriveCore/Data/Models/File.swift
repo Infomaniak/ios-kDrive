@@ -425,8 +425,6 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
-    public var isFirstInCollection = false
-    public var isLastInCollection = false
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -818,8 +816,6 @@ extension File: Differentiable {
                 && sortedName == source.sortedName
                 && isFavorite == source.isFavorite
                 && isAvailableOffline == source.isAvailableOffline
-                && isFirstInCollection == source.isFirstInCollection
-                && isLastInCollection == source.isLastInCollection
                 && visibility == source.visibility
                 && hasSharelink == source.hasSharelink
                 && isDropbox == source.isDropbox
