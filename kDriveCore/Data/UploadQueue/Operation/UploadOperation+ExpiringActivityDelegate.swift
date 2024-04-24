@@ -62,7 +62,6 @@ extension UploadOperation: ExpiringActivityDelegate {
 
                 // Sentry
                 let metadata = ["File id": self.uploadFileId,
-                                "File name": file.name,
                                 "File size": file.size,
                                 "File type": file.type.rawValue]
                 SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)

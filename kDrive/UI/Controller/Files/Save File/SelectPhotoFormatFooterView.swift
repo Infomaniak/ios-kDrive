@@ -20,6 +20,7 @@ import UIKit
 
 class SelectPhotoFormatFooterView: UIView {
     class func instantiate() -> SelectPhotoFormatFooterView {
-        return Bundle.main.loadNibNamed("SelectPhotoFormatFooterView", owner: nil, options: nil)![0] as! SelectPhotoFormatFooterView
+        return Bundle.main
+            .loadNibNamed("SelectPhotoFormatFooterView", owner: nil, options: nil)![0] as! SelectPhotoFormatFooterView
     }
 }

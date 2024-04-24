@@ -161,7 +161,11 @@ public extension Endpoint {
     }
 
     static var initData: Endpoint {
-        return .driveV2.appending(path: "/init", queryItems: [DriveInitWith.allCases.toQueryItem()])
+        let queryItems = [
+            noAvatarDefault(),
+            DriveInitWith.allCases.toQueryItem()
+        ]
+        return .driveV2.appending(path: "/init", queryItems: queryItems)
     }
 
     // MARK: Action
@@ -185,6 +189,7 @@ public extension Endpoint {
 
     static func recentActivity(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/activities", queryItems: [
+            noAvatarDefault(),
             (FileWith.fileActivities + [.user]).toQueryItem(),
             URLQueryItem(name: "depth", value: "unlimited"),
             URLQueryItem(name: "actions[]", value: "file_create"),
@@ -205,6 +210,7 @@ public extension Endpoint {
 
     static func filesActivities(drive: AbstractDrive, fileIds: [Int], from date: Date) -> Endpoint {
         return .recentActivity(drive: drive).appending(path: "/batch", queryItems: [
+            noAvatarDefault(),
             FileWith.fileActivities.toQueryItem(),
             URLQueryItem(name: "actions[]", value: "file_rename"),
             URLQueryItem(name: "actions[]", value: "file_update"),
@@ -249,13 +255,15 @@ public extension Endpoint {
 
     static func comments(file: AbstractFile) -> Endpoint {
         return .fileInfoV2(file).appending(path: "/comments", queryItems: [
-            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes")
+            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes"),
+            noAvatarDefault()
         ])
     }
 
     static func comment(file: AbstractFile, comment: Comment) -> Endpoint {
         return .comments(file: file).appending(path: "/\(comment.id)", queryItems: [
-            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes")
+            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes"),
+            noAvatarDefault()
         ])
     }
 
@@ -319,7 +327,8 @@ public extension Endpoint {
 
     static func access(file: AbstractFile) -> Endpoint {
         return .fileInfoV2(file).appending(path: "/access", queryItems: [
-            URLQueryItem(name: "with", value: "user")
+            URLQueryItem(name: "with", value: "user"),
+            noAvatarDefault()
         ])
     }
 
@@ -403,8 +412,10 @@ public extension Endpoint {
     }
 
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
-        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)",
-                                                                         queryItems: [FileWith.fileExtra.toQueryItem()])
+        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(
+            path: "/files/\(file.id)",
+            queryItems: [FileWith.fileExtra.toQueryItem(), noAvatarDefault()]
+        )
     }
 
     static func fileInfoV2(_ file: AbstractFile) -> Endpoint {
@@ -546,8 +557,10 @@ public extension Endpoint {
     }
 
     static func mySharedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/my_shared",
-                                                  queryItems: [(FileWith.fileMinimal + [.users]).toQueryItem()])
+        return .driveInfo(drive: drive).appending(
+            path: "/files/my_shared",
+            queryItems: [(FileWith.fileMinimal + [.users]).toQueryItem(), noAvatarDefault()]
+        )
     }
 
     static func sharedWithMeFiles(drive: AbstractDrive) -> Endpoint {
@@ -617,8 +630,10 @@ public extension Endpoint {
     }
 
     static func trashedInfo(file: AbstractFile) -> Endpoint {
-        return .trash(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)",
-                                                                     queryItems: [FileWith.fileExtra.toQueryItem()])
+        return .trash(drive: ProxyDrive(id: file.driveId)).appending(
+            path: "/\(file.id)",
+            queryItems: [FileWith.fileExtra.toQueryItem(), noAvatarDefault()]
+        )
     }
 
     static func trashedFiles(of directory: AbstractFile) -> Endpoint {

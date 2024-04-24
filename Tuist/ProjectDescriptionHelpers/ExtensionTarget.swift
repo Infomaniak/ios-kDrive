@@ -29,6 +29,7 @@ public extension Target {
         var resources: [ResourceFileElement] = [
             "\(name)/**/*.storyboard",
             "kDrive/UI/Controller/Files/**/*.storyboard",
+            "kDrive/UI/Controller/Files/**/*.xib",
             "kDrive/UI/Controller/Floating Panel Information/*.storyboard",
             "kDrive/UI/Controller/NewFolder/*.storyboard",
             "kDrive/UI/View/EmptyTableView/**/*.xib",
@@ -51,7 +52,8 @@ public extension Target {
             "kDrive/**/*.xcassets",
             "kDrive/**/Localizable.strings",
             "kDrive/**/*.stringsdict",
-            "kDrive/**/*.json"
+            "kDrive/**/*.json",
+            "kDrive/**/PrivacyInfo.xcprivacy"
         ]
         resources.append(contentsOf: additionalResources)
 

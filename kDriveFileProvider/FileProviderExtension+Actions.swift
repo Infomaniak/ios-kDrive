@@ -72,12 +72,9 @@ extension FileProviderExtension {
                 let response = try await self.driveFileManager.apiFetcher
                     .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
                 if response {
-                    self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
-                    completionHandler(nil)
-
-                    // Signal after completionHandler
                     try await self.manager.signalEnumerator(for: .workingSet)
                     try await self.manager.signalEnumerator(for: itemIdentifier)
+                    completionHandler(nil)
                 } else {
                     completionHandler(NSFileProviderError(.serverUnreachable))
                 }
@@ -276,7 +273,7 @@ extension FileProviderExtension {
         Log.fileProvider("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
         Task {
             // Cancel upload if any matching
-            self.uploadQueue.cancel(uploadFileId: uploadFileId)
+            _ = self.uploadQueue.cancel(uploadFileId: uploadFileId)
 
             guard let fileId,
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
@@ -297,7 +294,6 @@ extension FileProviderExtension {
                 }
 
                 _ = try await self.driveFileManager.delete(file: proxyFile)
-                self.fileProviderState.setWorkingDocument(item, forKey: itemIdentifier)
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)
@@ -333,7 +329,6 @@ extension FileProviderExtension {
                 let item = file.toFileProviderItem(parent: parentItemIdentifier, domain: self.domain)
                 item.trashModifier(newValue: false)
 
-                self.fileProviderState.removeWorkingDocument(forKey: itemIdentifier)
                 completionHandler(item, nil)
 
                 // Signal after completionHandler

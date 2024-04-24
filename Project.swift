@@ -24,7 +24,7 @@ let project = Project(name: "kDrive",
                       packages: [
                           .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
                           .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
-                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "9.0.0")),
+                          .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "9.0.1")),
                           .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "7.0.0")),
                           .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "6.0.1")),
                           .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.0")),
@@ -64,7 +64,8 @@ let project = Project(name: "kDrive",
                                      "kDrive/**/*.xib",
                                      "kDrive/**/*.json",
                                      "kDrive/IAP/ProductIds.plist",
-                                     "kDriveCore/GoogleService-Info.plist"
+                                     "kDriveCore/GoogleService-Info.plist",
+                                     "kDrive/**/PrivacyInfo.xcprivacy"
                                  ],
                                  entitlements: "kDrive/Resources/kDrive.entitlements",
                                  scripts: [Constants.swiftlintScript],
@@ -178,7 +179,13 @@ let project = Project(name: "kDrive",
                                  bundleId: "com.infomaniak.drive.FileProvider",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
-                                 sources: ["kDriveFileProvider/**", "kDrive/Utils/AppFactoryService.swift", "kDrive/Utils/NavigationManager.swift"],
+                                 sources: [
+                                    "kDriveFileProvider/**", 
+                                    "kDrive/Utils/AppFactoryService.swift", 
+                                    "kDrive/Utils/NavigationManager.swift"],
+                                 resources: [
+                                    "kDrive/**/PrivacyInfo.xcprivacy"
+                                 ],
                                  headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",
                                  dependencies: [

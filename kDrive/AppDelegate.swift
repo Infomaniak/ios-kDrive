@@ -152,6 +152,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         // Await on upload queue to terminate gracefully, if time allows for it.
         let group = TolerantDispatchGroup()
         uploadQueue.waitForCompletion {
+            // Clean temp files once the upload queue is stoped if needed
+            @LazyInjectService var freeSpaceService: FreeSpaceService
+            freeSpaceService.cleanCacheIfAlmostFull()
+
             group.leave()
         }
 
