@@ -275,7 +275,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func createAndSetCurrentAccount(token: ApiToken) async throws -> Account {
         let apiFetcher = DriveApiFetcher(token: token, delegate: self)
-        let user = try await apiFetcher.userProfile()
+        let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
@@ -313,7 +313,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         let apiFetcher = getApiFetcher(for: account.userId, token: token)
-        let user = try await apiFetcher.userProfile()
+        let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
         let driveResponse = try await apiFetcher.userDrives()

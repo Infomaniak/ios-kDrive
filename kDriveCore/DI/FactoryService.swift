@@ -130,9 +130,6 @@ public enum FactoryService {
             Factory(type: NotificationsHelpable.self) { _, _ in
                 NotificationsHelper()
             },
-            Factory(type: FileProviderExtensionAdditionalStatable.self) { _, _ in
-                FileProviderExtensionAdditionalState()
-            },
             Factory(type: AppGroupPathProvidable.self) { _, _ in
                 guard let provider = AppGroupPathProvider(realmRootPath: realmRootPath, appGroupIdentifier: appGroupName) else {
                     fatalError("unable to initialise AppGroupPathProvider securely")

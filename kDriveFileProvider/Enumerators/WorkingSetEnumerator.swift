@@ -21,8 +21,6 @@ import InfomaniakDI
 import kDriveCore
 
 final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService var additionalState: FileProviderExtensionAdditionalStatable
-
     let driveFileManager: DriveFileManager
     let domain: NSFileProviderDomain?
 
@@ -41,7 +39,6 @@ final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
                 containerItems.append(file.toFileProviderItem(parent: .workingSet, domain: self.domain))
             }
         }
-        containerItems += additionalState.getWorkingDocumentValues()
         observer.didEnumerate(containerItems)
         observer.finishEnumerating(upTo: nil)
     }

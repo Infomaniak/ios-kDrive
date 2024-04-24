@@ -67,7 +67,8 @@ let project = Project(name: "kDrive",
                                      "kDrive/**/*.xib",
                                      "kDrive/**/*.json",
                                      "kDrive/IAP/ProductIds.plist",
-                                     "kDriveCore/GoogleService-Info.plist"
+                                     "kDriveCore/GoogleService-Info.plist",
+                                     "kDrive/**/PrivacyInfo.xcprivacy"
                                  ],
                                  entitlements: "kDrive/Resources/kDrive.entitlements",
                                  scripts: [Constants.swiftlintScript],
@@ -182,7 +183,13 @@ let project = Project(name: "kDrive",
                                  bundleId: "com.infomaniak.drive.FileProvider",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
-                                 sources: ["kDriveFileProvider/**", "kDrive/Utils/AppFactoryService.swift", "kDrive/Utils/NavigationManager.swift"],
+                                 sources: [
+                                    "kDriveFileProvider/**", 
+                                    "kDrive/Utils/AppFactoryService.swift", 
+                                    "kDrive/Utils/NavigationManager.swift"],
+                                 resources: [
+                                    "kDrive/**/PrivacyInfo.xcprivacy"
+                                 ],
                                  headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",
                                  dependencies: [
