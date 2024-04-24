@@ -287,16 +287,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 )
             }
 
-            if file.uploadDate != nil {
-                Log.uploadOperation("Remove local file at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)")
-                if file.cleanSourceFileIfNeeded() {
-                    Log.uploadOperation(
-                        "File removed after upload at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)"
-                    )
-                }
+            if let path = file.pathURL,
+               file.shouldRemoveAfterUpload && file.uploadDate != nil {
+                Log.uploadOperation("Remove local file at path:\(path) ufid:\(self.uploadFileId)")
+                try? self.fileManager.removeItem(at: path)
+
             } else {
                 Log.uploadOperation(
-                    "Not removing local file as not uploaded yet, shouldRemove:\(file.shouldRemoveAfterUpload)  at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)",
+                    "Not removing local file, shouldRemove:\(file.shouldRemoveAfterUpload)  at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)",
                     level: .warning
                 )
             }
