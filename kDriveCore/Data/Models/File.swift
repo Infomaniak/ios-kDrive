@@ -173,6 +173,7 @@ public enum SortType: String {
     case olderDelete
     case newerDelete
     case type
+    case relevance
 
     public struct SortTypeValue {
         public let apiValue: String
@@ -252,6 +253,13 @@ public enum SortType: String {
             )
         case .type:
             return SortTypeValue(apiValue: "type", order: "asc", translation: "", realmKeyPath: \.type)
+        case .relevance:
+            return SortTypeValue(
+                apiValue: "relevance",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortMostRelevant,
+                realmKeyPath: \.relevanceOrder
+            )
         }
     }
 }
@@ -425,6 +433,8 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
+    /// A custom value to order by relevance
+    @Persisted public var relevanceOrder: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
