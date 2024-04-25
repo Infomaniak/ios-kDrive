@@ -132,6 +132,12 @@ class SearchFilesViewModel: FileListViewModel {
             try await loadFiles(cursor: nextCursor)
         }
     }
+    
+    nonisolated func cancelSearch() {
+        Task {
+            await currentTask?.cancel()
+        }
+    }
 
     private func searchOffline() {
         files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,

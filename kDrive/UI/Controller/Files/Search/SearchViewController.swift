@@ -47,6 +47,10 @@ class SearchViewController: FileListViewController {
         return viewModel as? SearchFilesViewModel
     }
 
+    deinit {
+        searchViewModel.cancelSearch()
+    }
+
     // MARK: - View controller lifecycle
 
     override func viewDidLoad() {
