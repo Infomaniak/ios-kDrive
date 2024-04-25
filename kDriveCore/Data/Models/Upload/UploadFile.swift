@@ -320,6 +320,7 @@ public extension UploadFile {
     }
 }
 
+/// Cleaning
 public extension UploadFile {
     /// Centralise error cleaning
     func clearErrorsForRetry() {
@@ -327,6 +328,25 @@ public extension UploadFile {
         error = nil
         // Reset retry count to default
         maxRetryCount = UploadFile.defaultMaxRetryCount
+    }
+
+    /// Centralise source file cleaning
+    @discardableResult
+    func cleanSourceFileIfNeeded() -> Bool {
+        guard let path = pathURL,
+              shouldRemoveAfterUpload else {
+            return false
+        }
+
+        do {
+            try FileManager.default.removeItem(at: path)
+            assert(!FileManager.default.fileExists(atPath: path.path), "expecting the file to be removed")
+
+            return true
+
+        } catch {
+            return false
+        }
     }
 }
 

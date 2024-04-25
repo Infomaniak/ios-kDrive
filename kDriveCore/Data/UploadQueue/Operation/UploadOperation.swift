@@ -267,10 +267,18 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 Log.uploadOperation("end file ufid:\(self.uploadFileId)")
             }
 
-            if let path = file.pathURL,
-               file.shouldRemoveAfterUpload && file.uploadDate != nil {
-                Log.uploadOperation("Remove local file at path:\(path) ufid:\(self.uploadFileId)")
-                try? self.fileManager.removeItem(at: path)
+            // Remove source file if uploaded with success and required.
+            if file.uploadDate != nil {
+                if file.cleanSourceFileIfNeeded() {
+                    Log.uploadOperation(
+                        "Removed local file at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)"
+                    )
+                }
+            } else {
+                Log.uploadOperation(
+                    "Not removing local file, shouldRemove:\(file.shouldRemoveAfterUpload)  at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)",
+                    level: .warning
+                )
             }
 
             // If task is cancelled, remove it from list
