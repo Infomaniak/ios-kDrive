@@ -532,6 +532,7 @@ public final class DriveFileManager {
             liveParent: managedParent,
             responseAt: response.validApiResponse.responseAt,
             isInitialCursor: isInitialCursor,
+            sortType: sortType,
             using: realm
         )
 
@@ -716,7 +717,11 @@ public final class DriveFileManager {
             searchResults = searchResults.filter(predicate)
         }
 
-        return searchResults.sorted(by: [sortType.value.sortDescriptor])
+        if sortType == .relevance {
+            return searchResults.sorted(by: [SortType.nameAZ.value.sortDescriptor])
+        } else {
+            return searchResults.sorted(by: [sortType.value.sortDescriptor])
+        }
     }
 
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
@@ -1387,6 +1392,7 @@ public final class DriveFileManager {
         liveParent: File,
         responseAt: Int?,
         isInitialCursor: Bool,
+        sortType: SortType? = nil,
         using realm: Realm
     ) throws {
         try realm.write {
@@ -1395,6 +1401,15 @@ public final class DriveFileManager {
                 liveParent.versionCode = DriveFileManager.constants.currentVersionCode
                 liveParent.fullyDownloaded = true
             }
+
+            if let sortType,
+               sortType == .relevance {
+                let currentTimestamp = Int(Date().timeIntervalSince1970)
+                for (index, child) in children.enumerated() {
+                    child.relevanceOrder = Int("\(currentTimestamp)\(index)") ?? 0
+                }
+            }
+
             realm.add(children, update: .modified)
             // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with
             // the first page will result in an undefined behavior.

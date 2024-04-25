@@ -77,11 +77,12 @@ class SearchFilesViewModel: FileListViewModel {
                                           emptyViewType: .noSearchResults,
                                           leftBarButtons: [.cancel],
                                           rightBarButtons: [.searchFilters],
+                                          sortingOptions: [.newer, .older, .relevance],
                                           matomoViewPath: [MatomoUtils.Views.search.displayName])
         filters = Filters()
         let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
-        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
+        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).sorted(by: [sortType.value.sortDescriptor]))
     }
 
     override func startObservation() {
@@ -104,6 +105,8 @@ class SearchFilesViewModel: FileListViewModel {
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline()
         } else {
+            startRefreshing(cursor: cursor)
+
             do {
                 (_, nextCursor) = try await driveFileManager.searchFile(query: currentSearchText,
                                                                         date: filters.date?.dateInterval,
@@ -112,27 +115,22 @@ class SearchFilesViewModel: FileListViewModel {
                                                                         belongToAllCategories: filters.belongToAllCategories,
                                                                         cursor: cursor,
                                                                         sortType: sortType)
-            } catch {
-                if let error = error as? DriveError,
-                   error == .networkError {
-                    // Maybe warn the user that the search will be incomplete ?
-                    searchOffline()
-                } else {
-                    throw error
+                endRefreshing()
+
+                if let nextCursor {
+                    try await loadFiles(cursor: nextCursor)
                 }
+            } catch let error as DriveError where error == .networkError {
+                searchOffline()
+                endRefreshing()
             }
         }
 
         guard isDisplayingSearchResults else {
             throw DriveError.searchCancelled
         }
-
-        endRefreshing()
-        if let nextCursor {
-            try await loadFiles(cursor: nextCursor)
-        }
     }
-    
+
     nonisolated func cancelSearch() {
         Task {
             await currentTask?.cancel()
@@ -172,6 +170,11 @@ class SearchFilesViewModel: FileListViewModel {
         // Restore observation behavior
         listStyle = listStyle == .grid ? .list : .grid
         FileListOptions.instance.currentStyle = listStyle
+    }
+
+    override func sortingChanged() {
+        driveFileManager.removeSearchChildren()
+        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
     private func search() {
