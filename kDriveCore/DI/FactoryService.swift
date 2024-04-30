@@ -91,8 +91,20 @@ public enum FactoryService {
             Factory(type: TokenStore.self) { _, _ in
                 TokenStore()
             },
-            Factory(type: UploadQueue.self) { _, _ in
-                UploadQueue()
+            Factory(type: UploadQueue.self) { _, resolver in
+                // TODO: Remove
+                guard let freeSpaceService = try? resolver.resolve(
+                    type: FreeSpaceService.self,
+                    forCustomTypeIdentifier: nil,
+                    factoryParameters: nil,
+                    resolver: resolver
+                ) else {
+                    fatalError("woops")
+                }
+
+                freeSpaceService.auditCache()
+
+                return UploadQueue()
             },
             Factory(type: UploadQueueable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
