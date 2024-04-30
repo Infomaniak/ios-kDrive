@@ -1143,8 +1143,7 @@ public final class DriveFileManager: Transactionable {
 
     private func updateFileProperty(fileUid: String, _ block: (File) -> Void) {
         try? writeTransaction { writableRealm in
-            guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid),
-                  !file.isInvalidated else {
+            guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid) else {
                 return
             }
 
