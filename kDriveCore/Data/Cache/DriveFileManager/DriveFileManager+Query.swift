@@ -46,7 +46,7 @@ public extension DriveFileManager {
                 .freeze()
         }
 
-        guard let file, !file.isInvalidated else {
+        guard let file else {
             return nil
         }
 
@@ -55,8 +55,7 @@ public extension DriveFileManager {
 
     func getCachedFile(id: Int, freeze: Bool = true) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
-        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid),
-              !file.isInvalidated else {
+        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid) else {
             return nil
         }
         return freeze ? file.freeze() : file

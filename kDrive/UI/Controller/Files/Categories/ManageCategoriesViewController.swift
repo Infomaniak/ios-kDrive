@@ -257,7 +257,7 @@ final class ManageCategoriesViewController: UITableViewController {
             faultedCollection.filter("id IN %@", filesId)
         }
 
-        files = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }
+        files = Array(matchedFiles)
 
         // Reload view
         updateTitle()

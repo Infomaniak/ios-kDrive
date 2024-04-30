@@ -44,8 +44,7 @@ extension DriveFileManager {
     func getCachedFile(itemIdentifier: NSFileProviderItemIdentifier,
                        freeze: Bool = true) throws -> File {
         guard let fileId = itemIdentifier.toFileId(),
-              let file = getCachedFile(id: fileId, freeze: freeze),
-              !file.isInvalidated else {
+              let file = getCachedFile(id: fileId, freeze: freeze) else {
             throw NSFileProviderError(.noSuchItem)
         }
 
