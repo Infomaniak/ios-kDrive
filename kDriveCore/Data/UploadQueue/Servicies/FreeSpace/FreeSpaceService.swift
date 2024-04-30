@@ -71,17 +71,17 @@ public struct FreeSpaceService {
         cleanCacheIfAlmostFull()
     }
 
-    /// Check for orphan file in the import folder, clean if file is not tracked in DB.
+    /// Check for orphan files in the import folder, clean if file is not tracked in DB.
     private func cleanOrphanFiles() {
         // Lookup on FS files
         let fileManager = FileManager.default
         do {
-            // Read content of import directory folder
+            // Read content of import folder
             let cachedFiles = try fileManager.contentsOfDirectory(atPath: Self.importDirectoryURL.path)
             Log.uploadOperation("found \(cachedFiles.count) in the import directory")
 
             // TODO: Migrate to Transactionable
-            // Get uploading files in DB
+            // Get uploading in progress tracked in DB
             var uploadingFiles = [UploadFile]()
             BackgroundRealm.uploads.execute { realm in
                 let fetchResult = realm.objects(UploadFile.self)
@@ -90,7 +90,7 @@ public struct FreeSpaceService {
                 uploadingFiles = Array(fetchResult)
             }
 
-            // Match against uploading files, delete if not matched
+            // Match files on SSD against DB, delete if not matched.
             let filesToClean = cachedFiles.filter { cachedFileName in
                 let cachedFileIsUploading = uploadingFiles.contains { uploadFile in
                     guard let uploadFileUrl = uploadFile.url else {
@@ -104,12 +104,11 @@ public struct FreeSpaceService {
 
             Log.uploadOperation("cleanning \(filesToClean.count) files in import folder", level: .info)
             for fileToClean in filesToClean {
-                let fileToCleanURL = Self.temporaryDirectoryURL.appending(path: fileToClean)
-                try fileManager.removeItem(at: fileToCleanURL)
+                let fileToCleanURL = Self.importDirectoryURL.appendingPathComponent(fileToClean)
+                try? fileManager.removeItem(at: fileToCleanURL)
             }
         } catch {
             Log.uploadOperation("Unexpected error working with import folder:\(error)", level: .error)
-            assertionFailure("Unexpected error working with import folder:\(error)")
         }
     }
 
