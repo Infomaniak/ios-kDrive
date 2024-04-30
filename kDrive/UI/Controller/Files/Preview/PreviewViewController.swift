@@ -614,7 +614,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             faultedCollection.filter("id IN %@", previewFileIds)
         }
 
-        previewFiles = matchedFiles.compactMap { !$0.isInvalidated ? $0 : nil }
+        previewFiles = Array(matchedFiles)
 
         let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
         if decodedIndex >= previewFiles.count {
