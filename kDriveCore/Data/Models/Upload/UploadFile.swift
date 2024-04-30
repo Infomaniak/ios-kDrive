@@ -63,7 +63,7 @@ public final class UploadFile: Object, UploadFilable {
     @Persisted(primaryKey: true) public var id = UUID().uuidString
     @Persisted public var name = ""
     @Persisted var relativePath = ""
-    @Persisted private var url: String?
+    @Persisted var url: String?
     @Persisted private var rawType = "file"
     @Persisted public var parentDirectoryId = 1
     @Persisted public var userId = 0

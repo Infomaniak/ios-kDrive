@@ -153,7 +153,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         uploadQueue.waitForCompletion {
             // Clean temp files once the upload queue is stoped if needed
             @LazyInjectService var freeSpaceService: FreeSpaceService
-            freeSpaceService.cleanCacheIfAlmostFull()
+            freeSpaceService.auditCache()
 
             group.leave()
         }
