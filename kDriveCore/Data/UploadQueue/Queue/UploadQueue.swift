@@ -183,6 +183,15 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             .sorted(byKeyPath: "taskCreationDate")
     }
 
+    /// Returns all the UploadFiles currently uploading regardless of execution context
+    public func getAllUploadingFilesFrozen() -> Results<UploadFile> {
+        // TODO: Refactor for Transactionable
+        let realm = DriveFileManager.constants.uploadsRealm
+        return realm.objects(UploadFile.self)
+            .filter("uploadDate = nil")
+            .freeze()
+    }
+
     public func getUploadingFiles(userId: Int,
                                   driveIds: [Int],
                                   using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
