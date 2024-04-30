@@ -17,10 +17,13 @@
  */
 
 import Foundation
+import InfomaniakDI
 import RealmSwift
 
 /// Something to monitor storage space
 public struct FreeSpaceService {
+    @LazyInjectService var uploadQueue: UploadQueue
+
     public init() {
         // Required
     }
@@ -73,22 +76,14 @@ public struct FreeSpaceService {
 
     /// Check for orphan files in the import folder, clean if file is not tracked in DB.
     private func cleanOrphanFiles() {
-        // Lookup on FS files
         let fileManager = FileManager.default
         do {
             // Read content of import folder
             let cachedFiles = try fileManager.contentsOfDirectory(atPath: Self.importDirectoryURL.path)
             Log.uploadOperation("found \(cachedFiles.count) in the import directory")
 
-            // TODO: Migrate to Transactionable
             // Get uploading in progress tracked in DB
-            var uploadingFiles = [UploadFile]()
-            BackgroundRealm.uploads.execute { realm in
-                let fetchResult = realm.objects(UploadFile.self)
-                    .filter("uploadDate == nil")
-                    .freeze()
-                uploadingFiles = Array(fetchResult)
-            }
+            let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
 
             // Match files on SSD against DB, delete if not matched.
             let filesToClean = cachedFiles.filter { cachedFileName in
