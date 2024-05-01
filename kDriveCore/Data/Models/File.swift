@@ -173,6 +173,7 @@ public enum SortType: String {
     case olderDelete
     case newerDelete
     case type
+    case relevance
 
     public struct SortTypeValue {
         public let apiValue: String
@@ -252,6 +253,13 @@ public enum SortType: String {
             )
         case .type:
             return SortTypeValue(apiValue: "type", order: "asc", translation: "", realmKeyPath: \.type)
+        case .relevance:
+            return SortTypeValue(
+                apiValue: "relevance",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortMostRelevant,
+                realmKeyPath: \.sortedName
+            )
         }
     }
 }
@@ -425,9 +433,6 @@ public final class File: Object, Codable {
     @Persisted public var versionCode: Int
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
-
-    public var isFirstInCollection = false
-    public var isLastInCollection = false
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -820,8 +825,6 @@ extension File: Differentiable {
                 && sortedName == source.sortedName
                 && isFavorite == source.isFavorite
                 && isAvailableOffline == source.isAvailableOffline
-                && isFirstInCollection == source.isFirstInCollection
-                && isLastInCollection == source.isLastInCollection
                 && visibility == source.visibility
                 && hasSharelink == source.hasSharelink
                 && isDropbox == source.isDropbox

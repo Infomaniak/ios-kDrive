@@ -24,221 +24,6 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-extension String: Differentiable {}
-
-// MARK: - RecentSearchesViewModel
-
-@MainActor
-class RecentSearchesViewModel {
-    private let maxRecentSearch = 5
-
-    var onReloadWithChangeset: ((StagedChangeset<[String]>, ([String]) -> Void) -> Void)?
-
-    private(set) var recentSearches = UserDefaults.shared.recentSearches {
-        didSet {
-            UserDefaults.shared.recentSearches = recentSearches
-        }
-    }
-
-    func add(searchTerm: String) {
-        guard !searchTerm.isEmpty else { return }
-        var newRecentSearches = recentSearches
-        newRecentSearches.removeAll { $0 == searchTerm }
-        newRecentSearches.insert(searchTerm, at: 0)
-        if newRecentSearches.count > maxRecentSearch {
-            newRecentSearches.removeLast()
-        }
-        update(newRecentSearches: newRecentSearches)
-    }
-
-    func remove(searchTerm: String) {
-        guard let index = recentSearches.firstIndex(where: { $0 == searchTerm }) else { return }
-        var newRecentSearches = recentSearches
-        newRecentSearches.remove(at: index)
-        update(newRecentSearches: newRecentSearches)
-    }
-
-    private func update(newRecentSearches: [String]) {
-        let stagedChangeset = StagedChangeset(source: recentSearches, target: newRecentSearches)
-        onReloadWithChangeset?(stagedChangeset) { data in
-            recentSearches = data
-        }
-    }
-}
-
-// MARK: - SearchFilesViewModel
-
-class SearchFilesViewModel: FileListViewModel {
-    typealias SearchCompletedCallback = (String?) -> Void
-    typealias Callback = () -> Void
-
-    private let minSearchCount = 1
-
-    var onSearchCompleted: SearchCompletedCallback?
-    var onFiltersChanged: Callback?
-    var onContentTypeChanged: Callback?
-
-    var currentSearchText: String? {
-        didSet {
-            search()
-        }
-    }
-
-    var filters: Filters {
-        didSet {
-            search()
-        }
-    }
-
-    var isDisplayingSearchResults: Bool {
-        let displayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
-        _isDisplayingSearchResults = displayingSearchResults
-        return displayingSearchResults
-    }
-
-    /// Detect flip/flop of displayed content type
-    var _isDisplayingSearchResults = true {
-        willSet {
-            guard newValue != _isDisplayingSearchResults else {
-                return
-            }
-
-            onContentTypeChanged?()
-        }
-    }
-
-    private var currentTask: Task<Void, Never>?
-
-    convenience init(driveFileManager: DriveFileManager, filters: Filters = Filters()) {
-        self.init(driveFileManager: driveFileManager, currentDirectory: nil)
-        self.filters = filters
-    }
-
-    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let configuration = Configuration(normalFolderHierarchy: false,
-                                          showUploadingFiles: false,
-                                          isMultipleSelectionEnabled: false,
-                                          rootTitle: KDriveResourcesStrings.Localizable.searchTitle,
-                                          emptyViewType: .noSearchResults,
-                                          leftBarButtons: [.cancel],
-                                          rightBarButtons: [.searchFilters],
-                                          matomoViewPath: [MatomoUtils.Views.search.displayName])
-        filters = Filters()
-        let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
-        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
-    }
-
-    override func startObservation() {
-        super.startObservation()
-        // Overriding default behavior to change list style in recent searches
-        listStyleObservation?.cancel()
-        listStyleObservation = nil
-        listStyle = .list
-        // Custom sort type
-        sortTypeObservation?.cancel()
-        sortTypeObservation = nil
-        sortType = .newer
-        sortingChanged()
-    }
-
-    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
-        guard isDisplayingSearchResults else { return }
-
-        var nextCursor: String?
-        if ReachabilityListener.instance.currentStatus == .offline {
-            searchOffline()
-        } else {
-            do {
-                (_, nextCursor) = try await driveFileManager.searchFile(query: currentSearchText,
-                                                                        date: filters.date?.dateInterval,
-                                                                        fileType: filters.fileType,
-                                                                        categories: Array(filters.categories),
-                                                                        belongToAllCategories: filters.belongToAllCategories,
-                                                                        cursor: cursor,
-                                                                        sortType: sortType)
-            } catch {
-                if let error = error as? DriveError,
-                   error == .networkError {
-                    // Maybe warn the user that the search will be incomplete ?
-                    searchOffline()
-                } else {
-                    throw error
-                }
-            }
-        }
-
-        guard isDisplayingSearchResults else {
-            throw DriveError.searchCancelled
-        }
-
-        endRefreshing()
-        if let nextCursor {
-            try await loadFiles(cursor: nextCursor)
-        }
-    }
-
-    private func searchOffline() {
-        files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
-                                                                  date: filters.date?.dateInterval,
-                                                                  fileType: filters.fileType,
-                                                                  categories: Array(filters.categories),
-                                                                  belongToAllCategories: filters.belongToAllCategories,
-                                                                  sortType: sortType))
-        startObservation()
-    }
-
-    override func barButtonPressed(type: FileListBarButtonType) {
-        if type == .searchFilters {
-            let navigationController = SearchFiltersViewController
-                .instantiateInNavigationController(driveFileManager: driveFileManager)
-            let searchFiltersViewController = navigationController.topViewController as? SearchFiltersViewController
-            searchFiltersViewController?.filters = filters
-            searchFiltersViewController?.delegate = self
-            onPresentViewController?(.modal, navigationController, true)
-        } else {
-            super.barButtonPressed(type: type)
-        }
-    }
-
-    override func didSelect(option: Selectable) {
-        guard let type = option as? SortType else { return }
-        sortType = type
-        sortingChanged()
-    }
-
-    override func listStyleButtonPressed() {
-        // Restore observation behavior
-        listStyle = listStyle == .grid ? .list : .grid
-        FileListOptions.instance.currentStyle = listStyle
-    }
-
-    private func search() {
-        onFiltersChanged?()
-        currentTask?.cancel()
-        let newListStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
-        if listStyle != newListStyle {
-            listStyle = newListStyle
-        }
-        if currentSearchText?.isEmpty != false {
-            driveFileManager.removeSearchChildren()
-        }
-        if isDisplayingSearchResults {
-            currentTask = Task {
-                try? await loadFiles(cursor: nil, forceRefresh: true)
-            }
-        }
-    }
-}
-
-// MARK: Search filters delegate
-
-extension SearchFilesViewModel: SearchFiltersDelegate {
-    func didUpdateFilters(_ filters: Filters) {
-        self.filters = filters
-    }
-}
-
 // MARK: - SearchViewController
 
 class SearchViewController: FileListViewController {
@@ -260,6 +45,10 @@ class SearchViewController: FileListViewController {
 
     private var searchViewModel: SearchFilesViewModel! {
         return viewModel as? SearchFilesViewModel
+    }
+
+    deinit {
+        searchViewModel.cancelSearch()
     }
 
     // MARK: - View controller lifecycle
@@ -318,6 +107,16 @@ class SearchViewController: FileListViewController {
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let scrollPosition = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
+        if scrollPosition > contentHeight {
+            Task {
+                try await searchViewModel.loadNextPageIfNeeded()
+            }
+        }
     }
 
     // MARK: - Private methods
