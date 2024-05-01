@@ -17,25 +17,7 @@
  */
 
 import Foundation
-import RealmSwift
 
-public extension DriveInfosManager {
-    func fetchObject<Element: Object, KeyType>(ofType type: Element.Type,
-                                               forPrimaryKey key: KeyType) -> Element? {
-        return transactionExecutor.fetchObject(ofType: type, forPrimaryKey: key)
-    }
+// MARK: - Transactionable
 
-    func fetchObject<Element: RealmFetchable>(ofType type: Element.Type,
-                                              filtering: (Results<Element>) -> Element?) -> Element? {
-        return transactionExecutor.fetchObject(ofType: type, filtering: filtering)
-    }
-
-    func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
-                                               filtering: (Results<Element>) -> Results<Element>) -> Results<Element> {
-        return transactionExecutor.fetchResults(ofType: type, filtering: filtering)
-    }
-
-    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
-        try transactionExecutor.writeTransaction(withRealm: realmClosure)
-    }
-}
+extension DriveInfosManager: TransactionablePassthrough {}
