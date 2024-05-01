@@ -17,9 +17,13 @@
  */
 
 import Foundation
+import InfomaniakDI
+import RealmSwift
 
 /// Something to monitor storage space
 public struct FreeSpaceService {
+    @LazyInjectService var uploadQueue: UploadQueue
+
     public init() {
         // Required
     }
@@ -34,6 +38,8 @@ public struct FreeSpaceService {
     }
 
     private static let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+
+    private static let importDirectoryURL = DriveFileManager.constants.importDirectoryURL
 
     ///  The minimum available space required to start uploading with chunks
     ///
@@ -62,8 +68,47 @@ public struct FreeSpaceService {
         }
     }
 
+    /// Run cache consistency checks
+    public func auditCache() {
+        cleanOrphanFiles()
+        cleanCacheIfAlmostFull()
+    }
+
+    /// Check for orphan files in the import folder, clean if file is not tracked in DB.
+    private func cleanOrphanFiles() {
+        let fileManager = FileManager.default
+        do {
+            // Read content of import folder
+            let cachedFiles = try fileManager.contentsOfDirectory(atPath: Self.importDirectoryURL.path)
+            Log.uploadOperation("found \(cachedFiles.count) in the import directory")
+
+            // Get uploading in progress tracked in DB
+            let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
+
+            // Match files on SSD against DB, delete if not matched.
+            let filesToClean = cachedFiles.filter { cachedFileName in
+                let cachedFileIsUploading = uploadingFiles.contains { uploadFile in
+                    guard let uploadFileUrl = uploadFile.url else {
+                        return false
+                    }
+                    return uploadFileUrl.hasSuffix(cachedFileName)
+                }
+
+                return !cachedFileIsUploading
+            }
+
+            Log.uploadOperation("cleanning \(filesToClean.count) files in import folder", level: .info)
+            for fileToClean in filesToClean {
+                let fileToCleanURL = Self.importDirectoryURL.appendingPathComponent(fileToClean)
+                try? fileManager.removeItem(at: fileToCleanURL)
+            }
+        } catch {
+            Log.uploadOperation("Unexpected error working with import folder:\(error)", level: .error)
+        }
+    }
+
     /// On devices with low free space, we clear the temporaryDirectory on exit
-    public func cleanCacheIfAlmostFull() {
+    private func cleanCacheIfAlmostFull() {
         let freeSpaceInTemporaryDirectory: Int64
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
