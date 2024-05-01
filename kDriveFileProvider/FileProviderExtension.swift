@@ -53,6 +53,8 @@ extension DriveFileManager {
 }
 
 final class FileProviderExtension: NSFileProviderExtension {
+    @LazyInjectService var driveInfosManager: DriveInfosManager
+
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .fileProviderExtension)
 
@@ -80,7 +82,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     private func setDriveFileManager() -> DriveFileManager? {
         var currentDriveFileManager: DriveFileManager?
         if let objectId = domain?.identifier.rawValue,
-           let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
+           let drive = driveInfosManager.getDrive(primaryKey: objectId),
            let driveFileManager = accountManager.getDriveFileManager(for: drive) {
             currentDriveFileManager = driveFileManager
         } else {

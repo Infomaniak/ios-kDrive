@@ -158,7 +158,6 @@ public struct ProxyFile: AbstractFile, Sendable {
         guard let file = fetch(using: realm) else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
-
         return file
     }
 }

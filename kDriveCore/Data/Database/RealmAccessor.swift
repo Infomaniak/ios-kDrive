@@ -23,26 +23,20 @@ import RealmSwift
 
 /// Internal structure that can fetch a realm
 final class RealmAccessor: RealmAccessible {
-    var realmURL: URL
+    var realmURL: URL?
     let realmConfiguration: Realm.Configuration
+    let excludeFromBackup: Bool
 
-    init(realmURL: URL, realmConfiguration: Realm.Configuration) {
+    init(realmURL: URL?, realmConfiguration: Realm.Configuration, excludeFromBackup: Bool) {
         self.realmURL = realmURL
         self.realmConfiguration = realmConfiguration
+        self.excludeFromBackup = excludeFromBackup
     }
 
     func getRealm() -> RealmSwift.Realm {
-        // Change file metadata after creation of the realm file.
         defer {
-            // Exclude "file cache realm" from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try realmURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-            DDLogInfo("realmURL : \(realmURL)")
+            // Change file metadata after creation of the realm file.
+            excludeFromBackupIfNeeded()
         }
 
         do {
@@ -53,5 +47,27 @@ final class RealmAccessor: RealmAccessible {
             // We can't recover from this error but at least we report it correctly on Sentry
             Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
         }
+    }
+
+    private func excludeFromBackupIfNeeded() {
+        guard excludeFromBackup else {
+            return
+        }
+
+        guard var realmURL else {
+            DDLogError("not realmURL to work with")
+            return
+        }
+
+        // Exclude "file cache realm" from system backup.
+        var metadata = URLResourceValues()
+        metadata.isExcludedFromBackup = true
+
+        do {
+            try realmURL.setResourceValues(metadata)
+        } catch {
+            DDLogError(error)
+        }
+        DDLogInfo("realmURL : \(realmURL)")
     }
 }

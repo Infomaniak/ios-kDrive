@@ -40,7 +40,7 @@ public extension DriveFileManager {
     }
 
     func getCachedMyFilesRoot() -> File? {
-        let file = try? fetchObject(ofType: File.self) { faultedCollection in
+        let file = fetchObject(ofType: File.self) { faultedCollection in
             faultedCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()

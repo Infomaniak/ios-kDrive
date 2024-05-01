@@ -20,6 +20,7 @@ import FileProvider
 import Foundation
 import InfomaniakConcurrency
 import InfomaniakCore
+import InfomaniakDI
 
 public extension DriveInfosManager {
     private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
@@ -199,7 +200,7 @@ public extension DriveInfosManager {
             return
         }
 
-        DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
+        getFileProviderManager(driveId: driveId, userId: userId) { manager in
             manager.signalEnumerator(for: .workingSet) { error in
                 guard let error else {
                     Log.driveInfosManager("did signal .workingSet")
