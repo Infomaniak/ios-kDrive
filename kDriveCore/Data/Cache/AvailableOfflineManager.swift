@@ -26,6 +26,7 @@ public protocol AvailableOfflineManageable {
 
 public class AvailableOfflineManager: AvailableOfflineManageable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     public init() {}
 
@@ -36,7 +37,7 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
             return
         }
 
-        for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
+        for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
             }

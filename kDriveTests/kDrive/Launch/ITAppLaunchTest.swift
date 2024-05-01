@@ -85,6 +85,9 @@ final class ITAppLaunchTest: XCTestCase {
             },
             Factory(type: PhotoLibraryUploader.self) { _, _ in
                 PhotoLibraryUploader()
+            },
+            Factory(type: DriveInfosManager.self) { _, _ in
+                DriveInfosManager()
             }
         ]
         SimpleResolver.register(services)
@@ -112,7 +115,7 @@ final class ITAppLaunchTest: XCTestCase {
         let rootViewController = (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController
         XCTAssertNotNil(
             rootViewController as? MainTabViewController,
-            "View controller should be MainTabViewController after unlock"
+            "View controller should be MainTabViewController after unlock, got \(rootViewController)"
         )
     }
 }

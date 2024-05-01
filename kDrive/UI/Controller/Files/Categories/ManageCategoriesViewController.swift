@@ -252,8 +252,13 @@ final class ManageCategoriesViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
-        let realm = driveFileManager.getRealm()
-        files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("id IN %@", filesId)
+        }
+
+        files = Array(matchedFiles)
+
         // Reload view
         updateTitle()
         updateNavigationItem()

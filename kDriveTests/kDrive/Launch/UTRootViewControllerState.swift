@@ -158,7 +158,7 @@ final class UTRootViewControllerState: XCTestCase {
         let currentState = RootViewControllerState.getCurrentState()
 
         // THEN
-        XCTAssertEqual(currentState, .appLock, "State should be applock")
+        XCTAssertEqual(currentState, .appLock, "State should be applock, got \(currentState)")
     }
 
     func testNoDriveFileManagerState() throws {

@@ -48,7 +48,7 @@ final class ITDrive: XCTestCase {
             XCTAssertTrue(drive.isFreePack, "We expect this drive to be free pack")
             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.free, "We expect this drive to be a free pack")
         } catch {
-            XCTFail("Unexpected Error")
+            XCTFail("Unexpected Error \(error)")
         }
     }
 
@@ -69,7 +69,7 @@ final class ITDrive: XCTestCase {
             XCTAssertFalse(drive.isFreePack, "We expect this drive to be a paid pack")
             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.team, "We expect this drive to be a team pack")
         } catch {
-            XCTFail("Unexpected Error")
+            XCTFail("Unexpected Error \(error)")
         }
     }
 }

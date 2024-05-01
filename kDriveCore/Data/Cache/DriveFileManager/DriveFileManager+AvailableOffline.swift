@@ -21,13 +21,14 @@ import RealmSwift
 
 public extension DriveFileManager {
     func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let realm = getRealm()
-        realm.refresh()
-        let offlineFiles = realm.objects(File.self)
-            .filter(NSPredicate(format: "isAvailableOffline = true"))
-            .sorted(by: [sortType.value.sortDescriptor]).freeze()
+        let frozenFiles = fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection
+                .filter("isAvailableOffline = true")
+                .sorted(by: [sortType.value.sortDescriptor])
+                .freeze()
+        }
 
-        return offlineFiles.map { $0.freeze() }
+        return Array(frozenFiles)
     }
 
     func updateAvailableOfflineFiles() async throws {
@@ -36,30 +37,31 @@ public extension DriveFileManager {
 
         let updatedFileResult = try await getUpdatedAvailableOffline()
 
-        let realm = getRealm()
-        for updatedFile in updatedFileResult.updatedFiles {
-            updateFile(updatedFile: updatedFile, realm: realm)
-        }
+        try writeTransaction { writableRealm in
+            for updatedFile in updatedFileResult.updatedFiles {
+                updateFile(updatedFile: updatedFile, writableRealm: writableRealm)
+            }
 
-        for deletedFileUid in updatedFileResult.deletedFileUids {
-            deleteOfflineFile(uid: deletedFileUid, realm: realm)
-        }
+            for deletedFileUid in updatedFileResult.deletedFileUids {
+                deleteOfflineFile(uid: deletedFileUid, writableRealm: writableRealm)
+            }
 
-        // After metadata update, download real files if needed
-        let updatedOfflineFiles = getAvailableOfflineFiles()
-        for updateOfflineFile in updatedOfflineFiles where updateOfflineFile.isLocalVersionOlderThanRemote {
-            DownloadQueue.instance.addToQueue(file: updateOfflineFile, userId: drive.userId)
+            // After metadata update, download real files if needed
+            let updatedOfflineFiles = getAvailableOfflineFiles()
+            for updateOfflineFile in updatedOfflineFiles where updateOfflineFile.isLocalVersionOlderThanRemote {
+                DownloadQueue.instance.addToQueue(file: updateOfflineFile, userId: drive.userId)
+            }
         }
     }
 
-    private func updateFile(updatedFile: File, realm: Realm) {
-        let oldFile = realm.object(ofType: File.self, forPrimaryKey: updatedFile.uid)?.freeze()
-        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.standard, .extras], using: realm)
-        _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, using: realm)
+    private func updateFile(updatedFile: File, writableRealm: Realm) {
+        let oldFile = writableRealm.object(ofType: File.self, forPrimaryKey: updatedFile.uid)?.freeze()
+        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.standard, .extras], writableRealm: writableRealm)
+        _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, writableRealm: writableRealm)
     }
 
-    private func deleteOfflineFile(uid: String, realm: Realm) {
-        removeFileInDatabase(fileUid: uid, cascade: false, withTransaction: true, using: realm)
+    private func deleteOfflineFile(uid: String, writableRealm: Realm) {
+        removeFileInDatabase(fileUid: uid, cascade: false, writableRealm: writableRealm)
     }
 }
 

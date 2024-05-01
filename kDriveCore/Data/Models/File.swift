@@ -258,7 +258,7 @@ public enum SortType: String {
                 apiValue: "relevance",
                 order: "asc",
                 translation: KDriveResourcesStrings.Localizable.sortMostRelevant,
-                realmKeyPath: \.relevanceOrder
+                realmKeyPath: \.sortedName
             )
         }
     }
@@ -359,6 +359,7 @@ public final class File: Object, Codable {
     private let fileManager = FileManager.default
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     @Persisted(primaryKey: true) public var uid = UUID().uuidString
     @Persisted public var id: Int
@@ -433,9 +434,6 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
-    /// A custom value to order by relevance
-    @Persisted public var relevanceOrder: Int?
-
     private enum CodingKeys: String, CodingKey {
         case id
         case parentId = "parent_id"
@@ -474,7 +472,7 @@ public final class File: Object, Codable {
 
     public var creator: DriveUser? {
         if let createdBy {
-            return DriveInfosManager.instance.getUser(id: createdBy)
+            return driveInfosManager.getUser(primaryKey: createdBy)
         }
         return nil
     }
@@ -738,7 +736,8 @@ public final class File: Object, Codable {
         } else {
             identifier = .rootContainer
         }
-        DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
+
+        driveInfosManager.getFileProviderManager(driveId: driveId, userId: userId) { manager in
             manager.signalEnumerator(for: .workingSet) { _ in
                 // META: keep SonarCloud happy
             }

@@ -86,7 +86,7 @@ extension AppDelegate {
 
         defer {
             // Clean File Provider domains on first launch in case we had some dangling
-            DriveInfosManager.instance.deleteAllFileProviderDomains()
+            driveInfosManager.deleteAllFileProviderDomains()
         }
 
         // Check if presenting onboarding
@@ -190,7 +190,7 @@ extension AppDelegate {
             // Read drive folder
             let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
             guard let driveId = Int(driveFolder),
-                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
+                  let drive = driveInfosManager.getDrive(id: driveId, userId: accountManager.currentUserId),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
                 Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
