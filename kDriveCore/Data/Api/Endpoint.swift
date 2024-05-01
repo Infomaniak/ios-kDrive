@@ -144,13 +144,20 @@ public struct ProxyFile: AbstractFile, Sendable {
         return liveFile
     }
 
-    /// Resolve an abstract file within a `realm`. Throws if not found.
-    func resolve(using realm: Realm) throws -> File {
-        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid),
-              !file.isInvalidated else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
+    /// Internal query an object from a realm
+    private func fetch(using realm: Realm) -> File? {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {
+            return nil
         }
 
+        return file
+    }
+
+    /// Resolve an abstract file within a `realm`. Throws if not found.
+    func resolve(using realm: Realm) throws -> File {
+        guard let file = fetch(using: realm) else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
+        }
         return file
     }
 }
