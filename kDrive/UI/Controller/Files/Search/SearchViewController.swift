@@ -109,6 +109,16 @@ class SearchViewController: FileListViewController {
         return navigationController
     }
 
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let scrollPosition = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
+        if scrollPosition > contentHeight {
+            Task {
+                try await searchViewModel.loadNextPageIfNeeded()
+            }
+        }
+    }
+
     // MARK: - Private methods
 
     private func bindSearchViewModel() {

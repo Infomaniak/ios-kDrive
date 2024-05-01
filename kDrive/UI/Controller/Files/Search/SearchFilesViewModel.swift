@@ -64,6 +64,8 @@ class SearchFilesViewModel: FileListViewModel {
 
     private var currentTask: Task<Void, Never>?
 
+    private var nextCursor: String?
+
     convenience init(driveFileManager: DriveFileManager, filters: Filters = Filters()) {
         self.init(driveFileManager: driveFileManager, currentDirectory: nil)
         self.filters = filters
@@ -101,7 +103,6 @@ class SearchFilesViewModel: FileListViewModel {
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         guard isDisplayingSearchResults else { return }
 
-        var nextCursor: String?
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline()
         } else {
@@ -124,6 +125,14 @@ class SearchFilesViewModel: FileListViewModel {
 
         guard isDisplayingSearchResults else {
             throw DriveError.searchCancelled
+        }
+    }
+
+    func loadNextPageIfNeeded() async throws {
+        guard isDisplayingSearchResults && !isLoading else { return }
+
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
