@@ -116,10 +116,6 @@ class SearchFilesViewModel: FileListViewModel {
                                                                         cursor: cursor,
                                                                         sortType: sortType)
                 endRefreshing()
-
-                if let nextCursor {
-                    try await loadFiles(cursor: nextCursor)
-                }
             } catch let error as DriveError where error == .networkError {
                 searchOffline()
                 endRefreshing()
@@ -175,6 +171,7 @@ class SearchFilesViewModel: FileListViewModel {
     override func sortingChanged() {
         driveFileManager.removeSearchChildren()
         files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        search()
     }
 
     private func search() {
