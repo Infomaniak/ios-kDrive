@@ -28,7 +28,7 @@ public extension DriveFileManager {
             return try await files(in: directory, cursor: nil, sortType: sortType, forceRefresh: forceRefresh)
         }
 
-        let lastCursor = forceRefresh ? nil : try directory.resolve(using: getRealm()).lastCursor
+        let lastCursor = forceRefresh ? nil : try directory.resolve(within: self).lastCursor
 
         let result = try await apiFetcher.files(in: directory, advancedListingCursor: lastCursor, sortType: sortType)
 
@@ -36,16 +36,17 @@ public extension DriveFileManager {
         let nextCursor = result.validApiResponse.cursor
         let hasMore = result.validApiResponse.hasMore
 
-        let realm = getRealm()
-        // Keep cached properties for children
-        for child in children {
-            keepCacheAttributesForFile(newFile: child, keepProperties: [.standard, .extras], using: realm)
-        }
+        var managedParentDirectory: File?
+        try writeTransaction { writableRealm in
+            // Keep cached properties for children
+            for child in children {
+                keepCacheAttributesForFile(newFile: child, keepProperties: [.standard, .extras], writableRealm: writableRealm)
+            }
 
-        let managedParent = try directory.resolve(using: realm)
+            let managedParent = try directory.resolve(using: writableRealm)
+            managedParentDirectory = managedParent
 
-        try realm.write {
-            realm.add(children, update: .modified)
+            writableRealm.add(children, update: .modified)
 
             if lastCursor == nil {
                 managedParent.children.removeAll()
@@ -56,7 +57,7 @@ public extension DriveFileManager {
                 result.validApiResponse.data.actions,
                 actionsFiles: result.validApiResponse.data.actionsFiles,
                 directory: managedParent,
-                using: realm
+                writableRealm: writableRealm
             )
 
             managedParent.lastCursor = nextCursor
@@ -64,13 +65,16 @@ public extension DriveFileManager {
             managedParent.fullyDownloaded = !hasMore
         }
 
-        return (
-            getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType),
-            hasMore ? nextCursor : nil
-        )
+        guard let managedParentDirectory else {
+            throw DriveError.fileNotFound
+        }
+
+        let resultCursor = hasMore ? nextCursor : nil
+        let resultFiles = getLocalSortedDirectoryFiles(directory: managedParentDirectory, sortType: sortType)
+        return (resultFiles, resultCursor)
     }
 
-    func handleActions(_ actions: [FileAction], actionsFiles: [File], directory: File, using realm: Realm) {
+    func handleActions(_ actions: [FileAction], actionsFiles: [File], directory: File, writableRealm: Realm) {
         let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
         var alreadyHandledActionIds = Set<Int>()
 
@@ -84,18 +88,22 @@ public extension DriveFileManager {
 
             switch fileAction.action {
             case .fileDelete, .fileTrash:
-                removeFileInDatabase(fileUid: fileUid, cascade: true, withTransaction: false, using: realm)
+                removeFileInDatabase(fileUid: fileUid, cascade: true, writableRealm: writableRealm)
 
             case .fileMoveOut:
-                guard let movedOutFile: File = realm.getObject(id: fileUid),
+                guard let movedOutFile: File = writableRealm.getObject(id: fileUid),
                       let oldParent = movedOutFile.parent else { continue }
 
                 oldParent.children.remove(movedOutFile)
             case .fileMoveIn, .fileRestore, .fileCreate:
-                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
-                realm.add(actionFile, update: .modified)
+                keepCacheAttributesForFile(
+                    newFile: actionFile,
+                    keepProperties: [.standard, .extras],
+                    writableRealm: writableRealm
+                )
+                writableRealm.add(actionFile, update: .modified)
 
-                if let existingFile: File = realm.getObject(id: fileUid),
+                if let existingFile: File = writableRealm.getObject(id: fileUid),
                    let oldParent = existingFile.parent {
                     oldParent.children.remove(existingFile)
                 }
@@ -108,13 +116,17 @@ public extension DriveFileManager {
                  .fileColorUpdate, .fileColorDelete,
                  .fileCategorize, .fileUncategorize:
 
-                if let oldFile: File = realm.getObject(id: fileUid),
+                if let oldFile: File = writableRealm.getObject(id: fileUid),
                    oldFile.name != actionFile.name {
                     try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
                 }
 
-                keepCacheAttributesForFile(newFile: actionFile, keepProperties: [.standard, .extras], using: realm)
-                realm.add(actionFile, update: .modified)
+                keepCacheAttributesForFile(
+                    newFile: actionFile,
+                    keepProperties: [.standard, .extras],
+                    writableRealm: writableRealm
+                )
+                writableRealm.add(actionFile, update: .modified)
                 directory.children.insert(actionFile)
                 actionFile.applyLastModifiedDateToLocalFile()
             default:

@@ -35,7 +35,8 @@ final class DriveFileManagerTests: XCTestCase {
         // prepare mocking solver
         MockingHelper.registerConcreteTypes()
 
-        guard let drive = DriveInfosManager.instance.getDrive(id: Env.driveId, userId: Env.userId) else {
+        @InjectService var driveInfosManager: DriveInfosManager
+        guard let drive = driveInfosManager.getDrive(id: Env.driveId, userId: Env.userId) else {
             fatalError("John Appleseed is missing")
         }
         @InjectService var mckAccountManager: AccountManageable

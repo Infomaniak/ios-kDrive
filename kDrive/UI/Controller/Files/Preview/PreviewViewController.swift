@@ -609,8 +609,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         self.driveFileManager = driveFileManager
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-        let realm = driveFileManager.getRealm()
-        previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+
+        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("id IN %@", previewFileIds)
+        }
+
+        previewFiles = Array(matchedFiles)
 
         let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
         if decodedIndex >= previewFiles.count {

@@ -49,32 +49,43 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         ).validApiResponse
         let files = response.data
 
-        let realm = driveFileManager.getRealm()
-        let liveParentDirectory = try driveFileManager.getCachedFile(
-            itemIdentifier: containerItemIdentifier,
-            freeze: false,
-            using: realm
-        )
+        var liveParent: File?
+        try driveFileManager.writeTransaction { writableRealm in
+            let liveParentDirectory = try driveFileManager.getCachedFile(
+                itemIdentifier: containerItemIdentifier,
+                freeze: false,
+                using: writableRealm
+            )
+            liveParent = liveParentDirectory
 
-        try driveFileManager.writeChildrenToParent(
-            files,
-            liveParent: liveParentDirectory,
-            responseAt: response.responseAt,
-            isInitialCursor: page.isInitialPage,
-            using: realm
-        )
+            try driveFileManager.writeChildrenToParent(
+                files,
+                liveParent: liveParentDirectory,
+                responseAt: response.responseAt,
+                isInitialCursor: page.isInitialPage,
+                writableRealm: writableRealm
+            )
 
-        try updateAnchor(for: liveParentDirectory, from: response, using: realm)
+            try updateAnchor(for: liveParentDirectory, from: response, writableRealm: writableRealm)
+        }
 
-        return (files + [liveParentDirectory.freezeIfNeeded()], response.hasMore ? response.cursor : nil)
+        let nextCursor = response.hasMore ? response.cursor : nil
+        guard let liveParent else {
+            return (files, nextCursor)
+        }
+
+        return (files + [liveParent.freezeIfNeeded()], nextCursor)
     }
 
-    func updateAnchor(for parent: File, from response: ValidApiResponse<[File]>, using realm: Realm) throws {
-        try realm.write {
-            parent.responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
-            parent.lastCursor = response.cursor
-            parent.fullyDownloaded = response.hasMore
-        }
+    /// Update anchor for parent
+    /// - Parameters:
+    ///   - parent: Parent file
+    ///   - response: API response
+    ///   - writableRealm: A realm __within__ a save transaction
+    func updateAnchor(for parent: File, from response: ValidApiResponse<[File]>, writableRealm: Realm) throws {
+        parent.responseAt = response.responseAt ?? Int(Date().timeIntervalSince1970)
+        parent.lastCursor = response.cursor
+        parent.fullyDownloaded = response.hasMore
     }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
@@ -111,30 +122,39 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
                     cursor: cursor
                 ).validApiResponse
 
-                let realm = driveFileManager.getRealm()
-                guard let liveParentDirectory = try? driveFileManager.getCachedFile(
-                    itemIdentifier: containerItemIdentifier,
-                    freeze: false,
-                    using: realm
-                ) else {
-                    observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
-                    return
-                }
-
                 guard let syncAnchor = NSFileProviderSyncAnchor(response.cursor) else {
                     observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
                     return
                 }
 
-                let childIdsBeforeUpdate = Set(liveParentDirectory.children.map { $0.id })
-                try driveFileManager.writeChildrenToParent(
-                    response.data,
-                    liveParent: liveParentDirectory,
-                    responseAt: response.responseAt,
-                    isInitialCursor: false,
-                    using: realm
-                )
+                var childIdsBeforeUpdate = Set<Int>()
+                var liveParentDirectory: File?
+                try self.driveFileManager.writeTransaction { writableRealm in
+                    guard let fetchedParentDirectory = try? self.driveFileManager.getCachedFile(
+                        itemIdentifier: self.containerItemIdentifier,
+                        freeze: false,
+                        using: writableRealm
+                    ) else {
+                        return
+                    }
 
+                    liveParentDirectory = fetchedParentDirectory
+
+                    childIdsBeforeUpdate = Set(fetchedParentDirectory.children.map { $0.id })
+                    try driveFileManager.writeChildrenToParent(
+                        response.data,
+                        liveParent: fetchedParentDirectory,
+                        responseAt: response.responseAt,
+                        isInitialCursor: false,
+                        writableRealm: writableRealm
+                    )
+                }
+
+                guard let liveParentDirectory else {
+                    throw NSFileProviderError(.noSuchItem)
+                }
+
+                // Notify after transaction
                 let childIdsAfterUpdate = Set(liveParentDirectory.children.map { $0.id })
 
                 // Manual diffing since we don't have activities for root
@@ -147,6 +167,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
                     upTo: syncAnchor,
                     moreComing: response.hasMore
                 )
+
             } catch let error as NSFileProviderError {
                 observer.finishEnumeratingWithError(error)
             } catch {

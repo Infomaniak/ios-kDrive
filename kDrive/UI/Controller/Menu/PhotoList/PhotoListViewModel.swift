@@ -71,10 +71,13 @@ class PhotoListViewModel: FileListViewModel {
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
-        files = AnyRealmCollection(driveFileManager.getRealm()
-            .objects(File.self)
-            .filter(NSPredicate(format: "extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue]))
-            .sorted(by: [SortType.newer.value.sortDescriptor]))
+
+        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+                .sorted(by: [SortType.newer.value.sortDescriptor])
+        }
+
+        files = AnyRealmCollection(fetchedFiles)
     }
 
     func loadNextPageIfNeeded() async throws {

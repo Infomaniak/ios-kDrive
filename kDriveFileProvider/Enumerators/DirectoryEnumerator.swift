@@ -93,26 +93,29 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 ).validApiResponse
                 let files = response.data.files
 
-                let realm = driveFileManager.getRealm()
-                let liveParentDirectory = try driveFileManager.getCachedFile(
-                    itemIdentifier: containerItemIdentifier,
-                    freeze: false,
-                    using: realm
-                )
+                try driveFileManager.writeTransaction { writableRealm in
+                    let liveParentDirectory = try self.driveFileManager.getCachedFile(
+                        itemIdentifier: self.containerItemIdentifier,
+                        freeze: false,
+                        using: writableRealm
+                    )
 
-                for child in files {
-                    driveFileManager.keepCacheAttributesForFile(newFile: child, keepProperties: [.standard], using: realm)
-                }
+                    for child in files {
+                        self.driveFileManager.keepCacheAttributesForFile(
+                            newFile: child,
+                            keepProperties: [.standard],
+                            writableRealm: writableRealm
+                        )
+                    }
 
-                try driveFileManager.writeChildrenToParent(
-                    files,
-                    liveParent: liveParentDirectory,
-                    responseAt: response.responseAt,
-                    isInitialCursor: page.isInitialPage,
-                    using: realm
-                )
+                    try self.driveFileManager.writeChildrenToParent(
+                        files,
+                        liveParent: liveParentDirectory,
+                        responseAt: response.responseAt,
+                        isInitialCursor: page.isInitialPage,
+                        writableRealm: writableRealm
+                    )
 
-                try realm.write {
                     if let nextCursor = response.cursor {
                         // Last page can contain BOTH files and actions and cannot be handled this way on file provider.
                         // So we process the files and save the previous cursor to get the actions in the enumerate changes
@@ -179,29 +182,33 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
 
-                let realm = driveFileManager.getRealm()
-                let parentDirectory = try driveFileManager.getCachedFile(
-                    itemIdentifier: containerItemIdentifier,
-                    freeze: false,
-                    using: realm
-                )
+                try driveFileManager.writeTransaction { writableRealm in
+                    let parentDirectory = try driveFileManager.getCachedFile(
+                        itemIdentifier: containerItemIdentifier,
+                        freeze: false,
+                        using: writableRealm
+                    )
 
-                try realm.write {
                     for updatedChild in updatedFiles {
                         driveFileManager.keepCacheAttributesForFile(
                             newFile: updatedChild,
                             keepProperties: [.standard],
-                            using: realm
+                            writableRealm: writableRealm
                         )
-                        realm.add(updatedChild, update: .all)
+                        writableRealm.add(updatedChild, update: .all)
                         parentDirectory.children.insert(updatedChild)
                         updatedItems.append(updatedChild)
                     }
+
                     for deletedChild in deletedFiles {
-                        guard let existingDeletedFile: File = realm.getObject(id: deletedChild.id) else { continue }
+                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.id) else {
+                            continue
+                        }
+
                         deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
-                        realm.delete(existingDeletedFile)
+                        writableRealm.delete(existingDeletedFile)
                     }
+
                     parentDirectory.lastCursor = response.cursor
                 }
 

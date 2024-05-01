@@ -26,6 +26,7 @@ class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     var file: File!
     var fileAccess: FileAccess!
@@ -220,9 +221,10 @@ class InviteUserViewController: UIViewController {
         }
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
-        let realm = DriveInfosManager.instance.getRealm()
-        shareables = restoredUserIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
-            + restoredTeamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
+
+        shareables = restoredUserIds.compactMap { driveInfosManager.getUser(primaryKey: $0) }
+            + restoredTeamIds.compactMap { driveInfosManager.getTeam(primaryKey: $0) }
+
         // Update UI
         setTitle()
         reloadInvited()

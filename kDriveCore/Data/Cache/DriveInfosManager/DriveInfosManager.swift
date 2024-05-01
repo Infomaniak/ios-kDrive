@@ -18,11 +18,24 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import Realm
 import RealmSwift
 import Sentry
 
-public final class DriveInfosManager {
+// TODO: Move to core db / + tests
+public extension Results where Element: KeypathSortable {
+    /// Apply a filter only for non nil predicate parameters, noop otherwise
+    func filter(optionalPredicate predicate: NSPredicate?) -> Results<Element> {
+        guard let predicate else {
+            return self
+        }
+
+        return filter(predicate)
+    }
+}
+
+public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryable {
     private static let dbName = "DrivesInfos.realm"
 
     private static let currentDbVersion: UInt64 = 11
@@ -30,9 +43,6 @@ public final class DriveInfosManager {
     let currentFpStorageVersion = 1
 
     public let realmConfiguration: Realm.Configuration
-
-    // TODO: use DI
-    public static let instance = DriveInfosManager()
 
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
@@ -43,7 +53,9 @@ public final class DriveInfosManager {
         }
     }
 
-    private init() {
+    let transactionExecutor: Transactionable
+
+    init() {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
@@ -101,17 +113,9 @@ public final class DriveInfosManager {
                 CategoryRights.self
             ]
         )
-    }
 
-    public func getRealm() -> Realm {
-        do {
-            let realm = try Realm(configuration: realmConfiguration)
-            realm.refresh()
-            return realm
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
-        }
+        let realmAccessible = RealmAccessor(realmURL: nil, realmConfiguration: realmConfiguration, excludeFromBackup: false)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessible)
     }
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
@@ -127,21 +131,26 @@ public final class DriveInfosManager {
             driveList.append(drive)
         }
 
-        let realm = getRealm()
-        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm)
-            .filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
-        let driveRemovedIds = driveRemoved.map(\.objectId)
-        try? realm.write {
-            realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
-            realm.add(driveList, update: .modified)
-            realm.add(driveResponse.users, update: .modified)
-            realm.add(driveResponse.teams, update: .modified)
+        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil)
+            .filter { currentDrive in
+                !driveList.contains { newDrive in
+                    newDrive.objectId == currentDrive.objectId
+                }
+            }
+        let driveRemovedIds = Array(driveRemoved.map(\.objectId))
+
+        try? writeTransaction { writableRealm in
+            let drivesToDelete = writableRealm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds)
+            writableRealm.delete(drivesToDelete)
+            writableRealm.add(driveList, update: .modified)
+            writableRealm.add(driveResponse.users, update: .modified)
+            writableRealm.add(driveResponse.teams, update: .modified)
         }
 
         // driveList is _live_ after the write operation
         updateFileProvider(withLiveDrives: driveList, user: user)
 
-        return driveRemoved
+        return Array(driveRemoved)
     }
 
     private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakCore.UserProfile) {
@@ -153,78 +162,5 @@ public final class DriveInfosManager {
 
     public static func getObjectId(driveId: Int, userId: Int) -> String {
         return "\(driveId)_\(userId)"
-    }
-
-    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm? = nil) -> [Drive] {
-        let realm = realm ?? getRealm()
-        var realmDriveList = realm.objects(Drive.self)
-            .sorted(byKeyPath: "name", ascending: true)
-            .sorted(byKeyPath: "sharedWithMe", ascending: true)
-        if let userId {
-            let filterPredicate: NSPredicate
-            if let sharedWithMe {
-                filterPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
-            } else {
-                filterPredicate = NSPredicate(format: "userId = %d", userId)
-            }
-            realmDriveList = realmDriveList.filter(filterPredicate)
-        }
-        return Array(realmDriveList.map { $0.freeze() })
-    }
-
-    public func getDrive(id: Int, userId: Int, using realm: Realm? = nil) -> Drive? {
-        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
-    }
-
-    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
-        let realm = realm ?? getRealm()
-        guard let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId), !drive.isInvalidated else {
-            return nil
-        }
-        return freeze ? drive.freeze() : drive
-    }
-
-    public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
-        let realm = realm ?? getRealm()
-        let drive = getDrive(id: driveId, userId: userId, using: realm)
-        let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive {
-            return realmUserList.filter { drive.users.drive.contains($0.id) }
-        }
-        return []
-    }
-
-    public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
-        let realm = realm ?? getRealm()
-        guard let user = realm.object(ofType: DriveUser.self, forPrimaryKey: id), !user.isInvalidated else {
-            return nil
-        }
-        return user.freeze()
-    }
-
-    public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
-        let realm = realm ?? getRealm()
-        let drive = getDrive(id: driveId, userId: userId, using: realm)
-        let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
-        if let drive {
-            return realmTeamList.filter { drive.teams.account.contains($0.id) }
-        }
-        return []
-    }
-
-    public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
-        let realm = realm ?? getRealm()
-        guard let team = realm.object(ofType: Team.self, forPrimaryKey: id), !team.isInvalidated else {
-            return nil
-        }
-        return team.freeze()
-    }
-
-    public func removeDrivesFor(userId: Int) {
-        let realm = getRealm()
-        let userDrives = realm.objects(Drive.self).where { $0.userId == userId }
-        try? realm.write {
-            realm.delete(userDrives)
-        }
     }
 }

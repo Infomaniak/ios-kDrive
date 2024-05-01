@@ -34,8 +34,12 @@ class LastModificationsViewModel: FileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
-        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
-            .filter(NSPredicate(format: "rawType != \"dir\"")))
+
+        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+            faultedCollection.filter("rawType != \"dir\"")
+        }
+
+        files = AnyRealmCollection(fetchedFiles)
     }
 
     override func startObservation() {
