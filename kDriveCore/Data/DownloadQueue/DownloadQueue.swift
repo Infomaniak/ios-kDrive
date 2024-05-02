@@ -70,6 +70,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
@@ -118,7 +119,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         let file = file.freezeIfNeeded()
 
         dispatchQueue.async {
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: file.driveId) else {
+            guard let drive = self.driveInfosManager.getDrive(id: file.driveId, userId: userId) else {
                 Log.downloadQueue("Unable to get a drive", level: .error)
                 return
             }
@@ -156,7 +157,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
         Log.downloadQueue("addToQueue archiveId:\(archiveId)")
         dispatchQueue.async {
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId),
+            guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
                 return
             }
@@ -190,7 +191,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             fileId = file.id,
             isManagedByRealm = file.isManagedByRealm
         ] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId),
+            guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file.id) else {
