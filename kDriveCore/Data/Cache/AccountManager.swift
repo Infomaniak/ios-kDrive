@@ -65,8 +65,6 @@ public protocol AccountManageable: AnyObject {
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
-    func getDrive(for accountId: Int, driveId: Int) -> Drive?
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
     func didFailRefreshToken(_ token: ApiToken)
@@ -232,18 +230,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             apiFetchers[userId] = apiFetcher
             return apiFetcher
         }
-    }
-
-    // TODO: Move to DriveInfosManager
-    public func getDrive(for accountId: Int, driveId: Int) -> Drive? {
-        return try? driveInfosManager.fetchObject(ofType: Drive.self) { realm in
-            self.getDrive(for: accountId, driveId: driveId, using: realm)
-        }
-    }
-
-    // TODO: Move to DriveInfosManager
-    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive? {
-        return driveInfosManager.getDrive(id: driveId, userId: accountId, using: realm)
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
