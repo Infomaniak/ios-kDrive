@@ -178,6 +178,7 @@ public class DriveFileManagerConstants {
                       UploadingSessionTask.self]
     )
 
+    // TODO: Remove me, as should remove the possibility to access realm directly
     /// realm db used for file upload
     public var uploadsRealm: Realm {
         // Change file metadata after creation of the realm file.

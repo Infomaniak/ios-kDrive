@@ -18,8 +18,13 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
+import InfomaniakCoreDB
 import RealmSwift
 import Sentry
+
+/// So we can directly call Transactionable API on top of UploadOperation
+extension BackgroundRealm: TransactionablePassthrough {}
 
 // TODO: Remove
 public final class BackgroundRealm {
@@ -41,19 +46,13 @@ public final class BackgroundRealm {
         }
     }
 
-    private static let writeBufferSize = 20
-    private static let writeBufferExpiration = 1.0
+    public static let uploads = instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
+    private static var instances = SendableDictionary<String, BackgroundRealm>()
 
-    // TODO: Remove
-    public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
-    private static var instances: [String: BackgroundRealm] = [:]
+    /// Something to centralize transaction style access to the DB
+    let transactionExecutor: Transactionable
 
-    private let realm: Realm
-    private let queue: DispatchQueue
-    private var buffer = Set<WriteOperation>()
-    private var debouncedBufferWrite: DispatchWorkItem?
-
-    public class func getQueue(for configuration: Realm.Configuration) -> BackgroundRealm {
+    public class func instanceOfBackgroundRealm(for configuration: Realm.Configuration) -> BackgroundRealm {
         guard let fileURL = configuration.fileURL else {
             fatalError("Realm configurations without file URL not supported")
         }
@@ -61,76 +60,23 @@ public final class BackgroundRealm {
         if let instance = instances[fileURL.absoluteString] {
             return instance
         } else {
-            let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)", autoreleaseFrequency: .workItem)
-            var realm: Realm!
-            queue.sync {
-                do {
-                    realm = try Realm(configuration: configuration, queue: queue)
-                } catch {
-                    // We can't recover from this error but at least we report it correctly on Sentry
-                    Logging.reportRealmOpeningError(error, realmConfiguration: configuration)
-                }
-            }
-            let instance = BackgroundRealm(realm: realm, queue: queue)
+            let instance = BackgroundRealm(realmConfiguration: configuration)
             instances[fileURL.absoluteString] = instance
             return instance
         }
     }
 
-    private init(realm: Realm, queue: DispatchQueue) {
-        self.realm = realm
-        self.queue = queue
+    private init(realmConfiguration: Realm.Configuration) {
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
     }
 
     public func execute(_ block: (Realm) -> Void) {
-        let activity = ExpiringActivity()
-        activity.start()
-        queue.sync {
-            block(realm)
+        // No need to use queue.sync as a new realm is used every time
+        try? writeTransaction { writableRealm in
+            block(writableRealm)
         }
-        activity.endAll()
-    }
-
-    /**
-     Differ File write in realm for bulk write.
-
-     - Parameter parent: Parent of the file, the file is inserted as a child
-     - Parameter file: The file to write in realm
-
-     Writes in realm are differed until either the buffer grows to 20 write operations or 1 second passes.
-     - Warning: As the buffer is kept in memory, writes can be lost if the app is terminated eg. case of crash
-
-     */
-    public func bufferedWrite(in parent: File?, file: File) {
-        buffer.insert(WriteOperation(parent: parent, file: file))
-        if buffer.count > BackgroundRealm.writeBufferSize {
-            debouncedBufferWrite?.cancel()
-            debouncedBufferWrite = nil
-            writeBuffer()
-        }
-
-        if debouncedBufferWrite == nil {
-            let debouncedWorkItem = DispatchWorkItem { [weak self] in
-                self?.writeBuffer()
-                self?.debouncedBufferWrite = nil
-            }
-            queue.asyncAfter(deadline: .now() + BackgroundRealm.writeBufferExpiration, execute: debouncedWorkItem)
-            debouncedBufferWrite = debouncedWorkItem
-        }
-    }
-
-    private func writeBuffer() {
-        let activity = ExpiringActivity()
-        activity.start()
-        try? realm.safeWrite {
-            for write in buffer {
-                realm.add(write.file, update: .all)
-                if write.parent?.isInvalidated == false {
-                    write.parent?.children.insert(write.file)
-                }
-            }
-        }
-        buffer.removeAll()
-        activity.endAll()
     }
 }

@@ -26,7 +26,9 @@ public extension PhotoLibraryUploader {
     @discardableResult
     func scheduleNewPicturesForUpload() -> Int {
         var newAssetsCount = 0
-        BackgroundRealm.uploads.execute { realm in
+
+        // TODO: Use transactionable directly
+        BackgroundRealm.uploads.execute { writableRealm in
             Log.photoLibraryUploader("scheduleNewPicturesForUpload")
             guard let settings = self.settings,
                   PHPhotoLibrary.authorizationStatus() == .authorized else {
@@ -50,10 +52,10 @@ public extension PhotoLibraryUploader {
                 try addImageAssetsToUploadQueue(
                     assetsFetchResult: assetsFetchResult,
                     initial: settings.lastSync.timeIntervalSince1970 == 0,
-                    using: realm
+                    writableRealm: writableRealm
                 )
 
-                updateLastSyncDate(syncDate, using: realm)
+                updateLastSyncDate(syncDate, writableRealm: writableRealm)
 
                 newAssetsCount = assetsFetchResult.count
                 Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
@@ -68,13 +70,12 @@ public extension PhotoLibraryUploader {
 
     // MARK: - Private
 
-    private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        if let settings = realm.objects(PhotoSyncSettings.self).first {
-            try? realm.safeWrite {
-                if !settings.isInvalidated {
-                    settings.lastSync = date
-                }
+    private func updateLastSyncDate(_ date: Date, writableRealm: Realm) {
+        if let settings = writableRealm.objects(PhotoSyncSettings.self).first {
+            if !settings.isInvalidated {
+                settings.lastSync = date
             }
+
             if settings.isInvalidated {
                 _settings = nil
             } else {
@@ -85,7 +86,7 @@ public extension PhotoLibraryUploader {
 
     private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
                                              initial: Bool,
-                                             using realm: Realm = DriveFileManager.constants.uploadsRealm) throws {
+                                             writableRealm: Realm) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
@@ -96,18 +97,18 @@ public extension PhotoLibraryUploader {
         autoreleasepool {
             var burstIdentifier: String?
             var burstCount = 0
-            realm.beginWrite()
+
             assetsFetchResult.enumerateObjects { [self] asset, idx, stop in
                 guard !expiringActivity.shouldTerminate else {
                     Log.photoLibraryUploader("system is asking to terminate")
-                    realm.cancelWrite()
+                    writableRealm.cancelWrite()
                     stop.pointee = true
                     return
                 }
 
                 guard let settings else {
                     Log.photoLibraryUploader("no settings")
-                    realm.cancelWrite()
+                    writableRealm.cancelWrite()
                     stop.pointee = true
                     return
                 }
@@ -152,7 +153,7 @@ public extension PhotoLibraryUploader {
                 guard !assetAlreadyUploaded(assetName: finalName,
                                             localIdentifier: asset.localIdentifier,
                                             bestResourceSHA256: bestResourceSHA256,
-                                            realm: realm) else {
+                                            writableRealm: writableRealm) else {
                     Log.photoLibraryUploader("Asset ignored because it was uploaded before")
                     return
                 }
@@ -178,21 +179,20 @@ public extension PhotoLibraryUploader {
                 }
 
                 // DB insertion
-                realm.add(uploadFile, update: .modified)
+                writableRealm.add(uploadFile, update: .modified)
 
                 // Batching writes
                 if idx < assetsFetchResult.count - 1 && idx % 99 == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
-                    // Commit write every 100 assets if it's not the last
-                    try? realm.commitWrite()
                     if let creationDate = asset.creationDate {
-                        updateLastSyncDate(creationDate, using: realm)
+                        updateLastSyncDate(creationDate, writableRealm: writableRealm)
                     }
 
-                    realm.beginWrite()
+                    // Commit write every 100 assets if it's not the last
+                    try? writableRealm.commitWrite()
+                    writableRealm.beginWrite()
                 }
             }
-            try? realm.commitWrite()
         }
 
         guard !expiringActivity.shouldTerminate else {
@@ -251,14 +251,14 @@ public extension PhotoLibraryUploader {
     ///   - assetName: The stable name of a file
     ///   - localIdentifier: The PHAsset local identifier
     ///   - bestResourceSHA256: A hash to identify the current resource with changes if any
-    ///   - realm: the realm context
+    ///   - writableRealm: the realm context within a write transaction
     /// - Returns: True if already uploaded for a specific version of the file
     private func assetAlreadyUploaded(assetName: String,
                                       localIdentifier: String,
                                       bestResourceSHA256: String?,
-                                      realm: Realm) -> Bool {
+                                      writableRealm: Realm) -> Bool {
         // Roughly 10x faster than '.first(where:'
-        let uploadedPictures = realm
+        let uploadedPictures = writableRealm
             .objects(UploadFile.self)
             .filter(Self.uploadedAssetPredicate)
 

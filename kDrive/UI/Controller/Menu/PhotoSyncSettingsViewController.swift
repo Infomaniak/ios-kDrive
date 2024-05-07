@@ -216,7 +216,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings() {
-        BackgroundRealm.uploads.execute { _ in
+        BackgroundRealm.uploads.execute { writableRealm in
             if photoSyncEnabled {
                 guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
                 else { return }
@@ -240,9 +240,9 @@ class PhotoSyncSettingsViewController: UIViewController {
                         newSyncSettings.lastSync = newSyncSettings.fromDate
                     }
                 }
-                photoLibraryUploader.enableSync(with: newSyncSettings)
+                photoLibraryUploader.enableSync(with: newSyncSettings, writableRealm: writableRealm)
             } else {
-                photoLibraryUploader.disableSync()
+                photoLibraryUploader.disableSync(writableRealm: writableRealm)
             }
         }
     }

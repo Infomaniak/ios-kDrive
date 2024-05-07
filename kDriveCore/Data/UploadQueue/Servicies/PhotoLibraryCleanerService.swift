@@ -59,10 +59,11 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             return false
         }
 
+        // TODO: Use transactionable directly
         var picturesToRemoveCount = 0
-        BackgroundRealm.uploads.execute { realm in
+        BackgroundRealm.uploads.execute { writableRealm in
             picturesToRemoveCount = uploadQueue
-                .getUploadedFiles(using: realm)
+                .getUploadedFiles(using: writableRealm)
                 .filter(Self.photoAssetPredicate)
                 .count
         }
@@ -96,10 +97,11 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     private func getPicturesToRemove() -> [UploadFileAssetIdentifier]? {
         Log.photoLibraryUploader("getPicturesToRemove")
 
+        // TODO: Use transactionable directly
         var assetsToRemove = [UploadFileAssetIdentifier]()
-        BackgroundRealm.uploads.execute { realm in
+        BackgroundRealm.uploads.execute { writableRealm in
             let uploadFilesToClean = uploadQueue
-                .getUploadedFiles(using: realm)
+                .getUploadedFiles(using: writableRealm)
                 .filter(Self.photoAssetPredicate)
 
             assetsToRemove = uploadFilesToClean.compactMap { uploadFile in
@@ -134,19 +136,19 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
                 return
             }
 
-            BackgroundRealm.uploads.execute { realm in
+            // TODO: Use transactionable directly
+            BackgroundRealm.uploads.execute { writableRealm in
                 let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
                 do {
-                    try realm.write {
-                        let filesInContext = realm
-                            .objects(UploadFile.self)
-                            .filter("id IN %@", allUploadFileIds)
-                            .filter { $0.isInvalidated == false }
-                        realm.delete(filesInContext)
-                    }
+                    let filesInContext = writableRealm
+                        .objects(UploadFile.self)
+                        .filter("id IN %@", allUploadFileIds)
+                        .filter { $0.isInvalidated == false }
+                    writableRealm.delete(filesInContext)
                     Log.photoLibraryUploader("removePicturesFromPhotoLibrary success")
                 } catch {
-                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary BackgroundRealm error:\(error)", level: .error)
+                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary BackgroundRealm error:\(error)",
+                                             level: .error)
                 }
             }
         }

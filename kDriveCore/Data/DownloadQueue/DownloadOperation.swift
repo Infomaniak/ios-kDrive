@@ -135,10 +135,8 @@ public class DownloadOperation: Operation, DownloadOperationable {
                         sessionId: rescheduledSessionId,
                         sessionUrl: sessionUrl
                     )
-                    BackgroundRealm.uploads.execute { realm in
-                        try? realm.safeWrite {
-                            realm.add(downloadTask, update: .modified)
-                        }
+                    BackgroundRealm.uploads.execute { writableRealm in
+                        writableRealm.add(downloadTask, update: .modified)
                     }
                 } else {
                     // We couldn't reschedule the download
@@ -182,10 +180,9 @@ public class DownloadOperation: Operation, DownloadOperationable {
             sessionId: urlSession.identifier,
             sessionUrl: url.absoluteString
         )
-        BackgroundRealm.uploads.execute { realm in
-            try? realm.safeWrite {
-                realm.add(downloadTask, update: .modified)
-            }
+
+        BackgroundRealm.uploads.execute { writableRealm in
+            writableRealm.add(downloadTask, update: .modified)
         }
 
         if let token = getToken() {
@@ -290,13 +287,14 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
         assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
 
-        BackgroundRealm.uploads.execute { realm in
-            if let task = realm.objects(DownloadTask.self)
-                .filter("sessionUrl = %@", sessionUrl.absoluteString).first {
-                try? realm.safeWrite {
-                    realm.delete(task)
-                }
+        BackgroundRealm.uploads.execute { writableRealm in
+            guard let task = writableRealm.objects(DownloadTask.self)
+                .filter("sessionUrl = %@", sessionUrl.absoluteString)
+                .first else {
+                return
             }
+
+            writableRealm.delete(task)
         }
     }
 }
