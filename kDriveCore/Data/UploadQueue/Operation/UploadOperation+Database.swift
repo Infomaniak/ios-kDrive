@@ -119,4 +119,15 @@ extension UploadOperation {
 
         return file.detached()
     }
+
+    /// Delete the UploadFile entity from database from forPrimaryKey of the current UploadOperation
+    func deleteUploadFile() async throws {
+        try writeTransaction { writableRealm in
+            guard let uploadFile = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
+                return
+            }
+
+            writableRealm.delete(uploadFile)
+        }
+    }
 }

@@ -303,13 +303,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if shouldCleanUploadFile {
             Log.uploadOperation("Delete file ufid:\(uploadFileId)")
             // Delete UploadFile as canceled by the user
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                   !toDelete.isInvalidated {
-                    try? uploadsRealm.safeWrite {
-                        uploadsRealm.delete(toDelete)
-                    }
-                }
+            Task {
+                try await deleteUploadFile()
             }
         }
     }

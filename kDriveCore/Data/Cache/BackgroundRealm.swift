@@ -21,7 +21,8 @@ import Foundation
 import RealmSwift
 import Sentry
 
-public class BackgroundRealm {
+// TODO: Remove
+public final class BackgroundRealm {
     private struct WriteOperation: Equatable, Hashable {
         let parent: File?
         let file: File
@@ -43,6 +44,7 @@ public class BackgroundRealm {
     private static let writeBufferSize = 20
     private static let writeBufferExpiration = 1.0
 
+    // TODO: Remove
     public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
     private static var instances: [String: BackgroundRealm] = [:]
 
