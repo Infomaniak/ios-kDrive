@@ -71,6 +71,19 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
 
+    /// The number of chunks we try to keep ready to upload in one UploadOperation
+    private static let parallelism = 2
+
+    /// An Activity to prevent the system from interrupting it without been notified beforehand
+    private var expiringActivity: ExpiringActivityable?
+
+    /// Local tracking of running network tasks
+    /// The key used is the and absolute identifier of the task.
+    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
+
+    /// The url session used to upload chunks
+    let urlSession: URLSession
+
     override public var debugDescription: String {
         """
         <\(type(of: self)):\(super.debugDescription)
@@ -80,21 +93,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
     }
 
-    /// The number of chunks we try to keep ready to upload in one UploadOperation
-    private static let parallelism = 2
-
     /// The id of the entity in base representing the upload task
     public let uploadFileId: String
-
-    /// Local tracking of running network tasks
-    /// The key used is the and absolute identifier of the task.
-    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
-
-    /// An Activity to prevent the system from interrupting it without been notified beforehand
-    private var expiringActivity: ExpiringActivityable?
-
-    /// The url session used to upload chunks
-    let urlSession: URLSession
 
     /// Object used to pass a completion state beyond to the OperationQueue
     public var result: UploadCompletionResult
