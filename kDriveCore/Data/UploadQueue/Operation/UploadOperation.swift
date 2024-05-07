@@ -20,6 +20,7 @@ import Alamofire
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
@@ -84,6 +85,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// The url session used to upload chunks
     let urlSession: URLSession
 
+    /// Something to centralize transaction style access to the DB
+    let transactionExecutor: Transactionable
+
     override public var debugDescription: String {
         """
         <\(type(of: self)):\(super.debugDescription)
@@ -105,6 +109,12 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         Log.uploadOperation("init ufid:\(uploadFileId)")
         self.uploadFileId = uploadFileId
         self.urlSession = urlSession
+
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
         result = UploadCompletionResult()
 
         super.init()

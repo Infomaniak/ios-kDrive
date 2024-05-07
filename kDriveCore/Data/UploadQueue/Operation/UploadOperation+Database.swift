@@ -19,6 +19,9 @@
 import Foundation
 import RealmSwift
 
+/// So we can directly call Transactionable API on top of UploadOperation
+extension UploadOperation: TransactionablePassthrough {}
+
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
     ///
@@ -34,22 +37,14 @@ extension UploadOperation {
             throw ErrorDomain.operationFinished
         }
 
-        try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-            uploadsRealm.refresh()
-
-            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                  !file.isInvalidated else {
+        try writeTransaction { writableRealm in
+            guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
 
-            try uploadsRealm.safeWrite {
-                guard !file.isInvalidated else {
-                    throw ErrorDomain.databaseUploadFileNotFound
-                }
-                try task(file)
-                uploadsRealm.add(file, update: .modified)
-            }
+            try task(file)
+
+            writableRealm.add(file, update: .modified)
         }
     }
 
@@ -118,16 +113,10 @@ extension UploadOperation {
     /// Throws if any DB access issues
     /// Does not check upload.finished state of the upload operation
     func readOnlyFile() throws -> UploadFile {
-        return try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-            uploadsRealm.refresh()
-
-            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                  !file.isInvalidated else {
-                throw ErrorDomain.databaseUploadFileNotFound
-            }
-
-            return file.detached()
+        guard let file = fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            throw ErrorDomain.databaseUploadFileNotFound
         }
+
+        return file.detached()
     }
 }
