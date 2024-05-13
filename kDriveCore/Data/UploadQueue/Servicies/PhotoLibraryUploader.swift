@@ -38,22 +38,24 @@ public final class PhotoLibraryUploader {
         case importCancelledBySystem
     }
 
-    var _settings: PhotoSyncSettings?
-    public var settings: PhotoSyncSettings? {
-        _settings
+    public var frozenSettings: PhotoSyncSettings? {
+        let backgroundRealm = BackgroundRealm.instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
+        let settings = backgroundRealm.fetchObject(ofType: PhotoSyncSettings.self) { partial in
+            partial.first
+        }
+
+        return settings?.freeze()
     }
 
     public var isSyncEnabled: Bool {
-        return settings != nil
+        return frozenSettings != nil
     }
 
     public init() {
-        if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
-            _settings = PhotoSyncSettings(value: settings)
-        }
+        // META: SonarClound happy
     }
 
     func getUrl(for asset: PHAsset) async -> URL? {
-        return await asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg)
+        return await asset.getUrl(preferJPEGFormat: frozenSettings?.photoFormat == .jpg)
     }
 }

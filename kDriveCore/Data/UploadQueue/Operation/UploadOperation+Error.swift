@@ -205,8 +205,8 @@ extension UploadOperation {
                                                      userId: file.userId,
                                                      driveId: file.driveId)
 
-                if self.photoLibraryUploader.isSyncEnabled
-                    && self.photoLibraryUploader.settings?.parentDirectoryId == file.parentDirectoryId {
+                if self.photoLibraryUploader.isSyncEnabled,
+                   self.photoLibraryUploader.frozenSettings?.parentDirectoryId == file.parentDirectoryId {
                     self.photoLibraryUploader.disableSync()
                     self.notificationHelper.sendPhotoSyncErrorNotification()
                 }

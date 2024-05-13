@@ -81,11 +81,12 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     public func reconnectBackgroundTasks() {
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
-            let realm = DriveFileManager.constants.uploadsRealm
+            let uploadsTransactionable = BackgroundRealm.uploads
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?
-                   .fileId {
+                   let fileId = uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                       return partial.filter("sessionUrl = %@", sessionUrl).first
+                   })?.fileId {
                     self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
                         \.fractionCompleted,
                         options: .new
@@ -153,12 +154,15 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
+        let backgroundRealm = BackgroundRealm.instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
+
         let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
-                  .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
+                  let downloadTask = backgroundRealm.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                      return partial.filter("sessionUrl = %@", sessionUrl).first
+                  }),
                   let driveFileManager = accountManager.getDriveFileManager(
                       for: downloadTask.driveId,
                       userId: downloadTask.userId

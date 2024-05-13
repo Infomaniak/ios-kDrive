@@ -25,33 +25,33 @@ import RealmSwift
 public extension PhotoLibraryUploader {
     @discardableResult
     func scheduleNewPicturesForUpload() -> Int {
+        Log.photoLibraryUploader("scheduleNewPicturesForUpload")
+        guard let frozenSettings,
+              PHPhotoLibrary.authorizationStatus() == .authorized else {
+            Log.photoLibraryUploader("0 new assets")
+            return 0
+        }
+
         var newAssetsCount = 0
+
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+
+        let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
+        let datePredicate = getDatePredicate(with: frozenSettings)
+        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+
+        Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+        let assetsFetchResult = PHAsset.fetchAssets(with: options)
+        let syncDate = Date()
 
         // TODO: Use transactionable directly
         BackgroundRealm.uploads.execute { writableRealm in
-            Log.photoLibraryUploader("scheduleNewPicturesForUpload")
-            guard let settings = self.settings,
-                  PHPhotoLibrary.authorizationStatus() == .authorized else {
-                Log.photoLibraryUploader("0 new assets")
-                return
-            }
-
-            let options = PHFetchOptions()
-            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-
-            let typesPredicates = self.getAssetPredicates(forSettings: settings)
-            let datePredicate = getDatePredicate(with: settings)
-            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-
-            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assetsFetchResult = PHAsset.fetchAssets(with: options)
-            let syncDate = Date()
-
             do {
                 try addImageAssetsToUploadQueue(
                     assetsFetchResult: assetsFetchResult,
-                    initial: settings.lastSync.timeIntervalSince1970 == 0,
+                    initial: frozenSettings.lastSync.timeIntervalSince1970 == 0,
                     writableRealm: writableRealm
                 )
 
@@ -71,16 +71,9 @@ public extension PhotoLibraryUploader {
     // MARK: - Private
 
     private func updateLastSyncDate(_ date: Date, writableRealm: Realm) {
-        if let settings = writableRealm.objects(PhotoSyncSettings.self).first {
-            if !settings.isInvalidated {
-                settings.lastSync = date
-            }
-
-            if settings.isInvalidated {
-                _settings = nil
-            } else {
-                _settings = PhotoSyncSettings(value: settings)
-            }
+        if let settings = writableRealm.objects(PhotoSyncSettings.self).first,
+           !settings.isInvalidated {
+            settings.lastSync = date
         }
     }
 
@@ -106,7 +99,7 @@ public extension PhotoLibraryUploader {
                     return
                 }
 
-                guard let settings else {
+                guard let frozenSettings else {
                     Log.photoLibraryUploader("no settings")
                     writableRealm.cancelWrite()
                     stop.pointee = true
@@ -128,6 +121,8 @@ public extension PhotoLibraryUploader {
                         return
                     }
                 }
+
+                let settings = frozenSettings
 
                 // Get a unique file identifier while taking care of the burst state
                 let finalName = getPhotoLibraryName(

@@ -178,30 +178,6 @@ public class DriveFileManagerConstants {
                       UploadingSessionTask.self]
     )
 
-    // TODO: Remove me, as should remove the possibility to access realm directly
-    /// realm db used for file upload
-    public var uploadsRealm: Realm {
-        // Change file metadata after creation of the realm file.
-        defer {
-            // Exclude "upload file realm" and custom cache from system backup.
-            var metadata = URLResourceValues()
-            metadata.isExcludedFromBackup = true
-            do {
-                try uploadsRealmURL.setResourceValues(metadata)
-                try cacheDirectoryURL.setResourceValues(metadata)
-            } catch {
-                DDLogError(error)
-            }
-        }
-
-        do {
-            return try Realm(configuration: uploadsRealmConfiguration)
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: uploadsRealmConfiguration)
-        }
-    }
-
     init() {
         @InjectService var pathProvider: AppGroupPathProvidable
         groupDirectoryURL = pathProvider.groupDirectoryURL

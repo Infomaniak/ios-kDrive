@@ -351,20 +351,24 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("suspend queue")
             self.suspendAllOperations()
 
-            var uploadingFilesIds = [String]()
-            try? self.transactionWithUploadRealm { realm in
-                let uploadingFiles = self.getUploadingFiles(withParent: parentId,
-                                                            userId: userId,
-                                                            driveId: driveId,
-                                                            using: realm)
-                Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
-                uploadingFilesIds = uploadingFiles.map(\.id)
-                Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
+                                                        userId: userId,
+                                                        driveId: driveId)
 
+            let uploadingFilesIds = uploadingFiles.map(\.id)
+            Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
+            Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+
+            try? self.transactionWithUploadRealm { realm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 try? realm.safeWrite {
                     Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-                    realm.delete(uploadingFiles)
+                    for fileId in uploadingFilesIds {
+                        guard let objectToDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) else {
+                            continue
+                        }
+                        realm.delete(objectToDelete)
+                    }
                 }
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
@@ -495,19 +499,19 @@ extension UploadQueue: UploadQueueable {
 
     private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
         var failedFileIds = [String]()
-        try? transactionWithUploadRealm { realm in
-            Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
-            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
-                                                        userId: userId,
-                                                        driveId: driveId,
-                                                        using: realm)
-            Log.uploadQueue("uploading:\(uploadingFiles.count)")
-            let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
-            let failedUploadFiles = uploadingFiles
-                .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
-            failedFileIds = failedUploadFiles.map(\.id)
-            Log.uploadQueue("retying:\(failedFileIds.count)")
-        }
+
+        Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
+        let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
+        let uploadingFiles = getUploadingFiles(withParent: parentId,
+                                               userId: userId,
+                                               driveId: driveId)
+
+        Log.uploadQueue("uploading:\(uploadingFiles.count)")
+        let failedUploadFiles = uploadingFiles
+            .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
+        failedFileIds = failedUploadFiles.map(\.id)
+        Log.uploadQueue("retying:\(failedFileIds.count)")
+
         return failedFileIds
     }
 

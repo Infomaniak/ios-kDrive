@@ -33,6 +33,18 @@ public extension Results where Element: KeypathSortable {
 
         return filter(predicate)
     }
+
+    /// Apply a collection of filters
+    func filter(optionalPredicates predicates: [NSPredicate]) -> Results<Element> {
+        var predicates = predicates
+        guard let predicate = predicates.popLast() else {
+            return self
+        }
+
+        let partial = filter(predicate)
+        let result = partial.filter(optionalPredicates: predicates)
+        return result
+    }
 }
 
 public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryable {

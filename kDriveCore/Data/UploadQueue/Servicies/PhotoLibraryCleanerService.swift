@@ -46,7 +46,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     /// `True` if feature setting is ON
     private var removePictureEnabled: Bool {
         // Check that we have photo sync enabled with the delete option
-        guard let settings = photoLibraryUploader.settings, settings.deleteAssetsAfterImport else {
+        guard let settings = photoLibraryUploader.frozenSettings, settings.deleteAssetsAfterImport else {
             Log.photoLibraryUploader("remove picture feature disabled")
             return false
         }
@@ -59,14 +59,9 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             return false
         }
 
-        // TODO: Use transactionable directly
-        var picturesToRemoveCount = 0
-        BackgroundRealm.uploads.execute { writableRealm in
-            picturesToRemoveCount = uploadQueue
-                .getUploadedFiles(using: writableRealm)
-                .filter(Self.photoAssetPredicate)
-                .count
-        }
+        let picturesToRemoveCount = uploadQueue
+            .getUploadedFiles(optionalPredicate: Self.photoAssetPredicate)
+            .count
 
         guard picturesToRemoveCount >= Self.removeAssetsCountThreshold else {
             Log.photoLibraryUploader("Not enough pictures to delete, skipping")
@@ -101,8 +96,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
         var assetsToRemove = [UploadFileAssetIdentifier]()
         BackgroundRealm.uploads.execute { writableRealm in
             let uploadFilesToClean = uploadQueue
-                .getUploadedFiles(using: writableRealm)
-                .filter(Self.photoAssetPredicate)
+                .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
             assetsToRemove = uploadFilesToClean.compactMap { uploadFile in
                 guard let assetIdentifier = uploadFile.assetLocalIdentifier else {

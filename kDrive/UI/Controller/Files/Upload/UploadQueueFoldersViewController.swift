@@ -22,14 +22,12 @@ import kDriveCore
 import RealmSwift
 import UIKit
 
-class UploadQueueFoldersViewController: UITableViewController {
+final class UploadQueueFoldersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var uploadQueue: UploadQueue
-
-    private let realm = DriveFileManager.constants.uploadsRealm
 
     private var userId: Int {
         return driveFileManager.drive.userId
@@ -62,8 +60,9 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
+
         // Observe uploading files
-        notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
+        notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds)
             .distinct(by: [\.parentDirectoryId])
             .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 guard let self else {

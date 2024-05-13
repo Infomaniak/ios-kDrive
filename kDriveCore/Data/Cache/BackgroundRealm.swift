@@ -73,6 +73,7 @@ public final class BackgroundRealm {
         transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
     }
 
+    // TODO: remove for transactionable
     public func execute(_ block: (Realm) -> Void) {
         // No need to use queue.sync as a new realm is used every time
         try? writeTransaction { writableRealm in

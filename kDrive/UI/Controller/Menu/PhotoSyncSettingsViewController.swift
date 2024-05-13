@@ -68,8 +68,9 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     private var newSyncSettings: PhotoSyncSettings = {
         @InjectService var photoUploader: PhotoLibraryUploader
-        if photoUploader.settings != nil {
-            return PhotoSyncSettings(value: photoUploader.settings as Any)
+
+        if let settings = photoUploader.frozenSettings {
+            return PhotoSyncSettings(value: settings as Any)
         } else {
             return PhotoSyncSettings()
         }
@@ -204,7 +205,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func updateSaveButtonState() {
-        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?
+        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.frozenSettings?
             .isContentEqual(to: newSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
@@ -216,6 +217,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings() {
+        let currentSyncSettings = photoLibraryUploader.frozenSettings
         BackgroundRealm.uploads.execute { writableRealm in
             if photoSyncEnabled {
                 guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
@@ -224,13 +226,14 @@ class PhotoSyncSettingsViewController: UIViewController {
                 case .new:
                     newSyncSettings.lastSync = Date()
                 case .all:
-                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
+                    if let currentSyncSettings,
+                       currentSyncSettings.syncMode == .all {
                         newSyncSettings.lastSync = currentSyncSettings.lastSync
                     } else {
                         newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
                     }
                 case .fromDate:
-                    if let currentSyncSettings = photoLibraryUploader.settings,
+                    if let currentSyncSettings = photoLibraryUploader.frozenSettings,
                        currentSyncSettings
                        .syncMode == .all ||
                        (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate

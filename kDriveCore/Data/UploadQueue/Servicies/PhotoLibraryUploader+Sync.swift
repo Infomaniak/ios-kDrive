@@ -23,21 +23,16 @@ public extension PhotoLibraryUploader {
     func enableSync(with newSettings: PhotoSyncSettings, writableRealm: Realm) {
         writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         writableRealm.add(newSettings)
-
-        _settings = PhotoSyncSettings(value: newSettings)
     }
 
     func disableSync(writableRealm: Realm) {
         writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
-        _settings = nil
     }
 
     func disableSync() {
-        let backgroundRealm = BackgroundRealm.instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
-        backgroundRealm.execute { writableRealm in
+        let uploadsTransactionable = BackgroundRealm.uploads
+        try? uploadsTransactionable.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
-
-        _settings = nil
     }
 }

@@ -18,12 +18,19 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import RealmSwift
 import Sentry
 
+/// So we can directly call Transactionable API on top of UploadOperation
+extension UploadQueue: TransactionablePassthrough {}
+
 public final class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
+
+    /// Something to centralize transaction style access to the DB
+    let transactionExecutor: Transactionable
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -113,6 +120,12 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     )
 
     public init() {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
+
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
             return
@@ -142,106 +155,6 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         observeMemoryWarnings()
 
         Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
-    }
-
-    // MARK: - Public methods
-
-    public func getUploadingFiles(withParent parentId: Int,
-                                  userId: Int,
-                                  driveId: Int) -> Results<UploadFile> {
-        return getUploadingFiles(
-            withParent: parentId,
-            userId: userId,
-            driveId: driveId,
-            using: DriveFileManager.constants.uploadsRealm
-        )
-    }
-
-    public func getUploadingFiles(withParent parentId: Int,
-                                  userId: Int,
-                                  driveId: Int,
-                                  using realm: Realm) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter(
-            "parentDirectoryId = %d AND ownedByFileProvider == %@",
-            parentId,
-            NSNumber(value: ownedByFileProvider)
-        )
-    }
-
-    public func getUploadingFiles(userId: Int,
-                                  driveId: Int,
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return realm.objects(UploadFile.self)
-            .filter(
-                "uploadDate = nil AND userId = %d AND driveId = %d AND ownedByFileProvider == %@",
-                userId,
-                driveId,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .sorted(byKeyPath: "taskCreationDate")
-    }
-
-    public func getUploadingFiles(userId: Int,
-                                  driveIds: [Int],
-                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return realm.objects(UploadFile.self)
-            .filter(
-                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
-                userId,
-                driveIds,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .sorted(byKeyPath: "taskCreationDate")
-    }
-
-    public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-
-        return realm.objects(UploadFile.self)
-            .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
-    }
-
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
-    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
-
-        let realm = DriveFileManager.constants.uploadsRealm
-        realm.refresh()
-
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = realm
-            .objects(UploadFile.self)
-            .filter(
-                "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
-                fileProviderItemIdentifier,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .first
-
-        return matchedFile
-    }
-
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploaded within an execution context
-    public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
-
-        let realm = DriveFileManager.constants.uploadsRealm
-        realm.refresh()
-
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = realm
-            .objects(UploadFile.self)
-            .filter(
-                "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
-                fileProviderItemIdentifier,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .first
-
-        return matchedFile
     }
 
     // MARK: - Memory warnings
