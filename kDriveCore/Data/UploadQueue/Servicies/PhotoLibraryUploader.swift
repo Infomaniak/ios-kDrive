@@ -39,8 +39,8 @@ public final class PhotoLibraryUploader {
     }
 
     public var frozenSettings: PhotoSyncSettings? {
-        let backgroundRealm = BackgroundRealm.instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
-        let settings = backgroundRealm.fetchObject(ofType: PhotoSyncSettings.self) { partial in
+        let uploadsTransactionable = BackgroundRealm.uploads
+        let settings = uploadsTransactionable.fetchObject(ofType: PhotoSyncSettings.self) { partial in
             partial.first
         }
 

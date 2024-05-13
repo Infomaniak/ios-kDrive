@@ -52,7 +52,7 @@ public final class BackgroundRealm {
     /// Something to centralize transaction style access to the DB
     let transactionExecutor: Transactionable
 
-    public class func instanceOfBackgroundRealm(for configuration: Realm.Configuration) -> BackgroundRealm {
+    private class func instanceOfBackgroundRealm(for configuration: Realm.Configuration) -> BackgroundRealm {
         guard let fileURL = configuration.fileURL else {
             fatalError("Realm configurations without file URL not supported")
         }
@@ -71,13 +71,5 @@ public final class BackgroundRealm {
                                           realmConfiguration: realmConfiguration,
                                           excludeFromBackup: true)
         transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
-    }
-
-    // TODO: remove for transactionable
-    public func execute(_ block: (Realm) -> Void) {
-        // No need to use queue.sync as a new realm is used every time
-        try? writeTransaction { writableRealm in
-            block(writableRealm)
-        }
     }
 }

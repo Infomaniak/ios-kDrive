@@ -92,9 +92,8 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     private func getPicturesToRemove() -> [UploadFileAssetIdentifier]? {
         Log.photoLibraryUploader("getPicturesToRemove")
 
-        // TODO: Use transactionable directly
         var assetsToRemove = [UploadFileAssetIdentifier]()
-        BackgroundRealm.uploads.execute { writableRealm in
+        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
             let uploadFilesToClean = uploadQueue
                 .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
@@ -130,8 +129,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
                 return
             }
 
-            // TODO: Use transactionable directly
-            BackgroundRealm.uploads.execute { writableRealm in
+            try? BackgroundRealm.uploads.writeTransaction { writableRealm in
                 let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
                 do {
                     let filesInContext = writableRealm

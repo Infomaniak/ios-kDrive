@@ -217,36 +217,42 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings() {
+        guard photoSyncEnabled else {
+            photoLibraryUploader.disableSync()
+            return
+        }
+
         let currentSyncSettings = photoLibraryUploader.frozenSettings
-        BackgroundRealm.uploads.execute { writableRealm in
-            if photoSyncEnabled {
-                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
-                else { return }
-                switch newSyncSettings.syncMode {
-                case .new:
-                    newSyncSettings.lastSync = Date()
-                case .all:
-                    if let currentSyncSettings,
-                       currentSyncSettings.syncMode == .all {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
-                    } else {
-                        newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
-                    }
-                case .fromDate:
-                    if let currentSyncSettings = photoLibraryUploader.frozenSettings,
-                       currentSyncSettings
-                       .syncMode == .all ||
-                       (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                           .compare(newSyncSettings.fromDate) == .orderedAscending) {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
-                    } else {
-                        newSyncSettings.lastSync = newSyncSettings.fromDate
-                    }
-                }
-                photoLibraryUploader.enableSync(with: newSyncSettings, writableRealm: writableRealm)
-            } else {
-                photoLibraryUploader.disableSync(writableRealm: writableRealm)
+        let uploadsTransactionable = BackgroundRealm.uploads
+        try? uploadsTransactionable.writeTransaction { writableRealm in
+            guard newSyncSettings.userId != -1,
+                  newSyncSettings.driveId != -1,
+                  newSyncSettings.parentDirectoryId != -1 else {
+                return
             }
+
+            switch newSyncSettings.syncMode {
+            case .new:
+                newSyncSettings.lastSync = Date()
+            case .all:
+                if let currentSyncSettings,
+                   currentSyncSettings.syncMode == .all {
+                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                }
+            case .fromDate:
+                if let currentSyncSettings = photoLibraryUploader.frozenSettings,
+                   currentSyncSettings
+                   .syncMode == .all ||
+                   (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
+                       .compare(newSyncSettings.fromDate) == .orderedAscending) {
+                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    newSyncSettings.lastSync = newSyncSettings.fromDate
+                }
+            }
+            photoLibraryUploader.enableSync(with: newSyncSettings, writableRealm: writableRealm)
         }
     }
 

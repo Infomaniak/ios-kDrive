@@ -154,13 +154,12 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
-        let backgroundRealm = BackgroundRealm.instanceOfBackgroundRealm(for: DriveFileManager.constants.uploadsRealmConfiguration)
-
+        let uploadsTransactionable = BackgroundRealm.uploads
         let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = backgroundRealm.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                  let downloadTask = uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
                       return partial.filter("sessionUrl = %@", sessionUrl).first
                   }),
                   let driveFileManager = accountManager.getDriveFileManager(

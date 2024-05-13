@@ -135,7 +135,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
                         sessionId: rescheduledSessionId,
                         sessionUrl: sessionUrl
                     )
-                    BackgroundRealm.uploads.execute { writableRealm in
+                    try? BackgroundRealm.uploads.writeTransaction { writableRealm in
                         writableRealm.add(downloadTask, update: .modified)
                     }
                 } else {
@@ -181,7 +181,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             sessionUrl: url.absoluteString
         )
 
-        BackgroundRealm.uploads.execute { writableRealm in
+        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
             writableRealm.add(downloadTask, update: .modified)
         }
 
@@ -287,7 +287,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
         assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
 
-        BackgroundRealm.uploads.execute { writableRealm in
+        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)
                 .filter("sessionUrl = %@", sessionUrl.absoluteString)
                 .first else {
