@@ -68,6 +68,5 @@ final class RealmAccessor: RealmAccessible {
         } catch {
             DDLogError(error)
         }
-        DDLogInfo("realmURL : \(realmURL)")
     }
 }
