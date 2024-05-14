@@ -52,7 +52,6 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     FileDownloadSession {
     @LazyInjectService var accountManager: AccountManageable
 
-    /// Something to centralize transaction style access to the DB
     private var uploadsTransactionable: Transactionable = {
         let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
         let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,

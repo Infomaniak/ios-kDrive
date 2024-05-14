@@ -48,3 +48,31 @@ extension TransactionablePassthrough {
         try transactionExecutor.writeTransaction(withRealm: realmClosure)
     }
 }
+
+/// Something that can use an underlying `uploadsTransactionable`
+///
+/// This wrapping type is intended to reduce boilerplate only
+protocol UploadsTransactionablePassthrough: Transactionable {
+    var uploadsTransactionable: Transactionable { get }
+}
+
+extension UploadsTransactionablePassthrough {
+    public func fetchObject<Element: Object, KeyType>(ofType type: Element.Type,
+                                                      forPrimaryKey key: KeyType) -> Element? {
+        return uploadsTransactionable.fetchObject(ofType: type, forPrimaryKey: key)
+    }
+
+    public func fetchObject<Element: RealmFetchable>(ofType type: Element.Type,
+                                                     filtering: (Results<Element>) -> Element?) -> Element? {
+        return uploadsTransactionable.fetchObject(ofType: type, filtering: filtering)
+    }
+
+    public func fetchResults<Element: RealmFetchable>(ofType type: Element.Type,
+                                                      filtering: (Results<Element>) -> Results<Element>) -> Results<Element> {
+        return uploadsTransactionable.fetchResults(ofType: type, filtering: filtering)
+    }
+
+    public func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
+        try uploadsTransactionable.writeTransaction(withRealm: realmClosure)
+    }
+}

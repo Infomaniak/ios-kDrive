@@ -24,13 +24,18 @@ import RealmSwift
 import Sentry
 
 /// So we can directly call Transactionable API on top of UploadOperation
-extension UploadQueue: TransactionablePassthrough {}
+extension UploadQueue: UploadsTransactionablePassthrough {}
 
 public final class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
 
-    /// Something to centralize transaction style access to the DB
-    let transactionExecutor: Transactionable
+    var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -120,12 +125,6 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
     )
 
     public init() {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
-
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
             return

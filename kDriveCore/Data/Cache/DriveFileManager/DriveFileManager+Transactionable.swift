@@ -40,7 +40,3 @@ public enum DriveFileManagerContext {
         }
     }
 }
-
-// MARK: - Transactionable
-
-extension DriveFileManager: TransactionablePassthrough {}

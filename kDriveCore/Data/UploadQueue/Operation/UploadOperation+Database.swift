@@ -20,7 +20,7 @@ import Foundation
 import RealmSwift
 
 /// So we can directly call Transactionable API on top of UploadOperation
-extension UploadOperation: TransactionablePassthrough {}
+extension UploadOperation: UploadsTransactionablePassthrough {}
 
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation

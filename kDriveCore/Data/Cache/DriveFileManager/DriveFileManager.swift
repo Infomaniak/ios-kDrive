@@ -26,6 +26,10 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+// MARK: - Transactionable
+
+extension DriveFileManager: TransactionablePassthrough {}
+
 public final class DriveFileManager: Transactionable {
     @LazyInjectService var driveInfosManager: DriveInfosManager
 

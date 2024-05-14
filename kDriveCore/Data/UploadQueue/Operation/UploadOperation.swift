@@ -85,8 +85,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// The url session used to upload chunks
     let urlSession: URLSession
 
-    /// Something to centralize transaction style access to the DB
-    let transactionExecutor: Transactionable
+    var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     override public var debugDescription: String {
         """
@@ -109,12 +114,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         Log.uploadOperation("init ufid:\(uploadFileId)")
         self.uploadFileId = uploadFileId
         self.urlSession = urlSession
-
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
         result = UploadCompletionResult()
 
         super.init()
