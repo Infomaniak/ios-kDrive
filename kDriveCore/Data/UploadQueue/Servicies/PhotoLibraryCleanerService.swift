@@ -34,13 +34,7 @@ public protocol PhotoLibraryCleanerServiceable {
 typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifier: String)
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
-    private var uploadsTransactionable: Transactionable = {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        return TransactionExecutor(realmAccessible: realmAccessor)
-    }()
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10

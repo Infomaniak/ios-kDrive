@@ -71,6 +71,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsTransactionable: Transactionable
 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
@@ -84,14 +85,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     /// The url session used to upload chunks
     let urlSession: URLSession
-
-    var uploadsTransactionable: Transactionable = {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        return TransactionExecutor(realmAccessible: realmAccessor)
-    }()
 
     override public var debugDescription: String {
         """

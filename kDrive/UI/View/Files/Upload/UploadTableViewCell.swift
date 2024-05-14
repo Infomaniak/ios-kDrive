@@ -31,14 +31,7 @@ final class UploadTableViewCell: InsetTableViewCell {
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
     private var progressObservation: NotificationToken?
-    private var uploadsTransactionable: Transactionable = {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        return TransactionExecutor(realmAccessible: realmAccessor)
-    }()
-
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
     @LazyInjectService var uploadQueue: UploadQueue
 
     override func awakeFromNib() {

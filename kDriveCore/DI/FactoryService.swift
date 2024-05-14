@@ -19,6 +19,7 @@
 import BackgroundTasks
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
@@ -34,7 +35,8 @@ private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9
 /// Something that setups the service factories
 public enum FactoryService {
     public static func setupDependencyInjection(other: [Factory] = []) {
-        SimpleResolver.register(debugServices)
+        let factoriesWithIdentifier = debugServices + transactionableServices
+        SimpleResolver.register(factoriesWithIdentifier)
         let factories = networkingServices + miscServices + other
         SimpleResolver.register(factories)
     }
@@ -184,6 +186,32 @@ public enum FactoryService {
         } else {
             return []
         }
+    }
+
+    /// DB Transactions
+    static var transactionableServices: [FactoryWithIdentifier] {
+        let uploadsTransactionable = Factory(type: Transactionable.self) { _, _ in
+            let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+            let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                              realmConfiguration: realmConfiguration,
+                                              excludeFromBackup: true)
+            return TransactionExecutor(realmAccessible: realmAccessor)
+        }
+
+        let driveInfoTransactionable = Factory(type: Transactionable.self) { _, _ in
+            let realmConfiguration = DriveInfosManager.realmConfiguration
+            let realmAccessible = RealmAccessor(realmURL: nil,
+                                                realmConfiguration: realmConfiguration,
+                                                excludeFromBackup: false)
+            return TransactionExecutor(realmAccessible: realmAccessible)
+        }
+
+        let services = [
+            (uploadsTransactionable, kDriveDBID.uploads),
+            (driveInfoTransactionable, kDriveDBID.driveInfo),
+        ]
+
+        return services
     }
 }
 

@@ -29,14 +29,7 @@ extension UploadQueue: UploadsTransactionablePassthrough {}
 public final class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
 
-    var uploadsTransactionable: Transactionable = {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        return TransactionExecutor(realmAccessible: realmAccessor)
-    }()
-
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsTransactionable: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable

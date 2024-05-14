@@ -35,24 +35,19 @@ public protocol DownloadOperationable: Operationable {
 public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
-    @LazyInjectService var appContextService: AppContextServiceable
-
     private let fileManager = FileManager.default
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
-    private var uploadsTransactionable: Transactionable = {
-        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
-        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
-                                          realmConfiguration: realmConfiguration,
-                                          excludeFromBackup: true)
-        return TransactionExecutor(realmAccessible: realmAccessor)
-    }()
+
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService var appContextService: AppContextServiceable
 
     public let file: File
     public var task: URLSessionDownloadTask?

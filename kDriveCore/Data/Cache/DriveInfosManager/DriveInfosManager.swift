@@ -19,6 +19,7 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreDB
+import InfomaniakDI
 import Realm
 import RealmSwift
 import Sentry
@@ -54,7 +55,63 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
 
     let currentFpStorageVersion = 1
 
-    public let realmConfiguration: Realm.Configuration
+    public static let realmConfiguration = Realm.Configuration(
+        fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
+        schemaVersion: DriveInfosManager.currentDbVersion,
+        migrationBlock: { migration, oldSchemaVersion in
+            if oldSchemaVersion < DriveInfosManager.currentDbVersion {
+                // No migration needed from 0 to 1 & from 2 to 3
+                if oldSchemaVersion < 2 {
+                    // Remove tags
+                    migration.deleteData(forType: Tag.className())
+                }
+                // No migration needed for versions 3 & 4
+                if oldSchemaVersion < 5 {
+                    // Get drive ids
+                    var driveIds = Set<String>()
+                    migration.enumerateObjects(ofType: Drive.className()) { oldObject, _ in
+                        if let objectId = oldObject?["objectId"] as? String {
+                            driveIds.insert(objectId)
+                        }
+                    }
+                    // Remove dangling objects
+                    DriveInfosManager.removeDanglingObjects(
+                        ofType: DrivePreferences.self,
+                        migration: migration,
+                        ids: driveIds
+                    )
+                    DriveInfosManager.removeDanglingObjects(
+                        ofType: DriveUsersCategories.self,
+                        migration: migration,
+                        ids: driveIds
+                    )
+                    DriveInfosManager.removeDanglingObjects(
+                        ofType: DriveTeamsCategories.self,
+                        migration: migration,
+                        ids: driveIds
+                    )
+                    DriveInfosManager.removeDanglingObjects(ofType: Category.self, migration: migration, ids: driveIds)
+                    // Delete team details & category rights for migration
+                    migration.deleteData(forType: CategoryRights.className())
+                }
+            }
+        },
+        objectTypes: [
+            Drive.self,
+            DrivePreferences.self,
+            DriveUsersCategories.self,
+            DriveTeamsCategories.self,
+            DriveUser.self,
+            DrivePack.self,
+            DriveCapabilities.self,
+            DrivePackCapabilities.self,
+            DriveRights.self,
+            DriveAccount.self,
+            Team.self,
+            Category.self,
+            CategoryRights.self
+        ]
+    )
 
     private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
@@ -65,69 +122,10 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
         }
     }
 
-    let transactionExecutor: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) var transactionExecutor: Transactionable
 
     init() {
-        realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
-            schemaVersion: DriveInfosManager.currentDbVersion,
-            migrationBlock: { migration, oldSchemaVersion in
-                if oldSchemaVersion < DriveInfosManager.currentDbVersion {
-                    // No migration needed from 0 to 1 & from 2 to 3
-                    if oldSchemaVersion < 2 {
-                        // Remove tags
-                        migration.deleteData(forType: Tag.className())
-                    }
-                    // No migration needed for versions 3 & 4
-                    if oldSchemaVersion < 5 {
-                        // Get drive ids
-                        var driveIds = Set<String>()
-                        migration.enumerateObjects(ofType: Drive.className()) { oldObject, _ in
-                            if let objectId = oldObject?["objectId"] as? String {
-                                driveIds.insert(objectId)
-                            }
-                        }
-                        // Remove dangling objects
-                        DriveInfosManager.removeDanglingObjects(
-                            ofType: DrivePreferences.self,
-                            migration: migration,
-                            ids: driveIds
-                        )
-                        DriveInfosManager.removeDanglingObjects(
-                            ofType: DriveUsersCategories.self,
-                            migration: migration,
-                            ids: driveIds
-                        )
-                        DriveInfosManager.removeDanglingObjects(
-                            ofType: DriveTeamsCategories.self,
-                            migration: migration,
-                            ids: driveIds
-                        )
-                        DriveInfosManager.removeDanglingObjects(ofType: Category.self, migration: migration, ids: driveIds)
-                        // Delete team details & category rights for migration
-                        migration.deleteData(forType: CategoryRights.className())
-                    }
-                }
-            },
-            objectTypes: [
-                Drive.self,
-                DrivePreferences.self,
-                DriveUsersCategories.self,
-                DriveTeamsCategories.self,
-                DriveUser.self,
-                DrivePack.self,
-                DriveCapabilities.self,
-                DrivePackCapabilities.self,
-                DriveRights.self,
-                DriveAccount.self,
-                Team.self,
-                Category.self,
-                CategoryRights.self
-            ]
-        )
-
-        let realmAccessible = RealmAccessor(realmURL: nil, realmConfiguration: realmConfiguration, excludeFromBackup: false)
-        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessible)
+        // META: Keep SonarCloud happy
     }
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
