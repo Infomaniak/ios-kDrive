@@ -29,14 +29,14 @@ public enum DriveFileManagerContext {
     /// Dedicated dataset to store shared with me
     case sharedWithMe
 
-    func realmURL(using drive: Drive) -> URL {
+    func realmURL(driveId: Int, driveUserId: Int) -> URL {
         switch self {
         case .drive:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-\(driveId).realm")
         case .sharedWithMe:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-shared.realm")
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-shared.realm")
         case .fileProvider:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id)-fp.realm")
+            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-\(driveId)-fp.realm")
         }
     }
 }

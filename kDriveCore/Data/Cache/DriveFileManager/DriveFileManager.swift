@@ -85,12 +85,10 @@ public final class DriveFileManager: Transactionable {
     /// Something to centralize transaction style access to the DB
     let transactionExecutor: Transactionable
 
-    init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
-        self.drive = drive
-        self.apiFetcher = apiFetcher
-        let realmURL = context.realmURL(using: drive)
-
-        realmConfiguration = Realm.Configuration(
+    /// Build a realm configuration for a specific Drive
+    public static func configuration(context: DriveFileManagerContext, driveId: Int, driveUserId: Int) -> Realm.Configuration {
+        let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
+        return Realm.Configuration(
             fileURL: realmURL,
             schemaVersion: RealmSchemaVersion.drive,
             migrationBlock: { migration, oldSchemaVersion in
@@ -191,7 +189,14 @@ public final class DriveFileManager: Transactionable {
             },
             objectTypes: DriveFileManager.constants.driveObjectTypes
         )
+    }
 
+    init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
+        self.drive = drive
+        self.apiFetcher = apiFetcher
+        realmConfiguration = Self.configuration(context: context, driveId: drive.id, driveUserId: drive.userId)
+
+        let realmURL = context.realmURL(driveId: drive.id, driveUserId: drive.userId)
         let realmAccessor = RealmAccessor(realmURL: realmURL, realmConfiguration: realmConfiguration, excludeFromBackup: true)
         transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
 
