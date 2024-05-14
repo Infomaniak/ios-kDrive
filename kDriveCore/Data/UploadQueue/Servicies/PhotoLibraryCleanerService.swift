@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 
@@ -33,6 +34,14 @@ public protocol PhotoLibraryCleanerServiceable {
 typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifier: String)
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
+    private var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
+
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
@@ -93,7 +102,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
         Log.photoLibraryUploader("getPicturesToRemove")
 
         var assetsToRemove = [UploadFileAssetIdentifier]()
-        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
+        try? uploadsTransactionable.writeTransaction { writableRealm in
             let uploadFilesToClean = uploadQueue
                 .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
@@ -129,19 +138,20 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
                 return
             }
 
-            try? BackgroundRealm.uploads.writeTransaction { writableRealm in
-                let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
-                do {
+            do {
+                try uploadsTransactionable.writeTransaction { writableRealm in
+                    let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
+
                     let filesInContext = writableRealm
                         .objects(UploadFile.self)
                         .filter("id IN %@", allUploadFileIds)
                         .filter { $0.isInvalidated == false }
                     writableRealm.delete(filesInContext)
                     Log.photoLibraryUploader("removePicturesFromPhotoLibrary success")
-                } catch {
-                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary BackgroundRealm error:\(error)",
-                                             level: .error)
                 }
+            } catch {
+                Log.photoLibraryUploader("removePicturesFromPhotoLibrary error:\(error)",
+                                         level: .error)
             }
         }
     }

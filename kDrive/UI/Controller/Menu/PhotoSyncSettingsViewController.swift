@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -24,11 +25,19 @@ import Photos
 import RealmSwift
 import UIKit
 
-class PhotoSyncSettingsViewController: UIViewController {
+final class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+
+    private var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -223,7 +232,6 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
 
         let currentSyncSettings = photoLibraryUploader.frozenSettings
-        let uploadsTransactionable = BackgroundRealm.uploads
         try? uploadsTransactionable.writeTransaction { writableRealm in
             guard newSyncSettings.userId != -1,
                   newSyncSettings.driveId != -1,

@@ -26,7 +26,6 @@ public extension PhotoLibraryUploader {
     }
 
     func disableSync() {
-        let uploadsTransactionable = BackgroundRealm.uploads
         try? uploadsTransactionable.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }

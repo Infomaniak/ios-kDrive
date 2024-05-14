@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCoreDB
 import InfomaniakDI
 
 protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
@@ -51,6 +52,15 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     FileDownloadSession {
     @LazyInjectService var accountManager: AccountManageable
 
+    /// Something to centralize transaction style access to the DB
+    private var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
+
     public var identifier: String {
         return backgroundSession.identifier
     }
@@ -81,10 +91,9 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     public func reconnectBackgroundTasks() {
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
-            let uploadsTransactionable = BackgroundRealm.uploads
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                   let fileId = self.uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
                        return partial.filter("sessionUrl = %@", sessionUrl).first
                    })?.fileId {
                     self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
@@ -154,7 +163,6 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
-        let uploadsTransactionable = BackgroundRealm.uploads
         let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler

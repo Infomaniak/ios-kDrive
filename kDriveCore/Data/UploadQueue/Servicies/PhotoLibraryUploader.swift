@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
@@ -26,6 +27,14 @@ import Sentry
 
 public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
+
+    var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
@@ -39,7 +48,6 @@ public final class PhotoLibraryUploader {
     }
 
     public var frozenSettings: PhotoSyncSettings? {
-        let uploadsTransactionable = BackgroundRealm.uploads
         let settings = uploadsTransactionable.fetchObject(ofType: PhotoSyncSettings.self) { partial in
             partial.first
         }

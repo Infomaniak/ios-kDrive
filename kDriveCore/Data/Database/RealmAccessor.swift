@@ -22,18 +22,18 @@ import InfomaniakCoreDB
 import RealmSwift
 
 /// Internal structure that can fetch a realm
-final class RealmAccessor: RealmAccessible {
+public final class RealmAccessor: RealmAccessible {
     var realmURL: URL?
     let realmConfiguration: Realm.Configuration
     let excludeFromBackup: Bool
 
-    init(realmURL: URL?, realmConfiguration: Realm.Configuration, excludeFromBackup: Bool) {
+    public init(realmURL: URL?, realmConfiguration: Realm.Configuration, excludeFromBackup: Bool) {
         self.realmURL = realmURL
         self.realmConfiguration = realmConfiguration
         self.excludeFromBackup = excludeFromBackup
     }
 
-    func getRealm() -> RealmSwift.Realm {
+    public func getRealm() -> RealmSwift.Realm {
         defer {
             // Change file metadata after creation of the realm file.
             excludeFromBackupIfNeeded()

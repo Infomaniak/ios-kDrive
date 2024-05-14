@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 
@@ -45,6 +46,13 @@ public class DownloadOperation: Operation, DownloadOperationable {
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    private var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     public let file: File
     public var task: URLSessionDownloadTask?
@@ -135,7 +143,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
                         sessionId: rescheduledSessionId,
                         sessionUrl: sessionUrl
                     )
-                    try? BackgroundRealm.uploads.writeTransaction { writableRealm in
+                    try? self.uploadsTransactionable.writeTransaction { writableRealm in
                         writableRealm.add(downloadTask, update: .modified)
                     }
                 } else {
@@ -181,7 +189,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             sessionUrl: url.absoluteString
         )
 
-        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
+        try? uploadsTransactionable.writeTransaction { writableRealm in
             writableRealm.add(downloadTask, update: .modified)
         }
 
@@ -287,7 +295,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
         assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
 
-        try? BackgroundRealm.uploads.writeTransaction { writableRealm in
+        try? uploadsTransactionable.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)
                 .filter("sessionUrl = %@", sessionUrl.absoluteString)
                 .first else {

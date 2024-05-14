@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
@@ -24,12 +25,19 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class UploadTableViewCell: InsetTableViewCell {
+final class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
     private var progressObservation: NotificationToken?
+    private var uploadsTransactionable: Transactionable = {
+        let realmConfiguration = DriveFileManager.constants.uploadsRealmConfiguration
+        let realmAccessor = RealmAccessor(realmURL: realmConfiguration.fileURL,
+                                          realmConfiguration: realmConfiguration,
+                                          excludeFromBackup: true)
+        return TransactionExecutor(realmAccessible: realmAccessor)
+    }()
 
     @LazyInjectService var uploadQueue: UploadQueue
 
@@ -151,8 +159,7 @@ class UploadTableViewCell: InsetTableViewCell {
                 return
             }
 
-            let uploadsTransactionable = BackgroundRealm.uploads
-            guard let file = uploadsTransactionable.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            guard let file = self.uploadsTransactionable.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
                 return
             }
 
