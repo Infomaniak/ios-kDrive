@@ -34,7 +34,7 @@ public enum kDriveDBID {
 final class RealmAccessor: RealmAccessible {
     var realmURL: URL?
     let realmConfiguration: Realm.Configuration
-    let excludeFromBackup: Bool
+    var excludeFromBackup: Bool
 
     init(realmURL: URL?, realmConfiguration: Realm.Configuration, excludeFromBackup: Bool) {
         self.realmURL = realmURL
@@ -63,6 +63,9 @@ final class RealmAccessor: RealmAccessible {
             return
         }
 
+        // Only perform the exclusion once, after we are sure the realm file exists on the FS.
+        excludeFromBackup = false
+
         guard var realmURL else {
             DDLogError("not realmURL to work with")
             return
@@ -74,6 +77,7 @@ final class RealmAccessor: RealmAccessible {
 
         do {
             try realmURL.setResourceValues(metadata)
+            DDLogInfo("Excluding realm URL from backup: \(realmURL)")
         } catch {
             DDLogError(error)
         }
