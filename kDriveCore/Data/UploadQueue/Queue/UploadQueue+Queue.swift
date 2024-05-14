@@ -145,14 +145,12 @@ extension UploadQueue: UploadQueueable {
                 return
             }
 
-            var uploadingFileIds = [String]()
-            try? self.transactionWithUploadRealm { writableRealm in
-                let uploadingFiles = writableRealm.objects(UploadFile.self)
-                    .filter(uploadFileQuery)
+            let uploadingFiles = fetchResults(ofType: UploadFile.self) { partial in
+                return partial.filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
-                uploadingFileIds = uploadingFiles.map(\.id)
-                Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
             }
+            let uploadingFileIds = uploadingFiles.map(\.id)
+            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
 
             let batches = uploadingFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batched count:\(batches.count)")
@@ -197,7 +195,7 @@ extension UploadQueue: UploadQueueable {
 
         // Keep a detached file for processing it later
         let detachedFile = uploadFile.detached()
-        try? transactionWithUploadRealm { writableRealm in
+        try? writeTransaction { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
             writableRealm.add(uploadFile, update: .modified)
             Log.uploadQueue("did save ufid:\(uploadFile.id)")
@@ -281,16 +279,15 @@ extension UploadQueue: UploadQueueable {
 
         var found = false
         concurrentQueue.sync {
-            try? self.transactionWithUploadRealm { writableRealm in
-                guard let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !toDelete.isInvalidated else {
-                    return
-                }
-                found = true
-                let fileToDelete = toDelete.detached()
-                self.cancel(uploadFile: fileToDelete)
+            guard let toDeleteLive = fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+                return
             }
+
+            found = true
+            let fileToDelete = toDeleteLive.detached()
+            self.cancel(uploadFile: fileToDelete)
         }
+
         return found
     }
 
@@ -316,7 +313,7 @@ extension UploadQueue: UploadQueueable {
             }
             self.keyedUploadOperations.removeObject(forKey: uploadFileId)
 
-            try? self.transactionWithUploadRealm { writableRealm in
+            try? self.writeTransaction { writableRealm in
                 if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                    !toDelete.isInvalidated {
                     Log.uploadQueue("find UploadFile to delete :\(uploadFileId)")
@@ -353,7 +350,7 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
             Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
 
-            try? self.transactionWithUploadRealm { writableRealm in
+            try? self.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 for fileId in uploadingFilesIds {
@@ -379,12 +376,9 @@ extension UploadQueue: UploadQueueable {
                 }
             }
 
-            // TODO: Why transaction here ?
-            try? self.transactionWithUploadRealm { _ in
-                self.publishUploadCount(withParent: parentId,
-                                        userId: userId,
-                                        driveId: driveId)
-            }
+            self.publishUploadCount(withParent: parentId,
+                                    userId: userId,
+                                    driveId: driveId)
 
             Log.uploadQueue("cancelAllOperations finished")
             self.resumeAllOperations()
@@ -399,7 +393,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         concurrentQueue.sync {
-            try? self.transactionWithUploadRealm { writableRealm in
+            try? self.writeTransaction { writableRealm in
                 // UploadFile with an error, Or no more retry.
                 let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
                 let failedUploadFiles = writableRealm.objects(UploadFile.self)
@@ -429,7 +423,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         concurrentQueue.async {
-            try? self.transactionWithUploadRealm { writableRealm in
+            try? self.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
                     Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
@@ -447,7 +441,7 @@ extension UploadQueue: UploadQueueable {
             }
 
             // re-enqueue UploadOperation
-            try? self.transactionWithUploadRealm { writableRealm in
+            try? self.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
                     Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
@@ -512,7 +506,7 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        try? transactionWithUploadRealm { writableRealm in
+        try? writeTransaction { writableRealm in
             for uploadFileId in batch {
                 // Cancel operation if any
                 if let operation = self.operation(uploadFileId: uploadFileId) {
