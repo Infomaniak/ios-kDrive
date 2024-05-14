@@ -156,11 +156,12 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("batched count:\(batches.count)")
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
-                for fileId in batch {
-                    guard let file = fetchObject(ofType: UploadFile.self, forPrimaryKey: fileId) else {
-                        continue
-                    }
-                    self.addToQueueIfNecessary(uploadFile: file)
+                let batchArray = Array(batch)
+                let matchedFrozenFiles = fetchResults(ofType: UploadFile.self) { partial in
+                    partial.filter("id IN %@", batchArray).freezeIfNeeded()
+                }
+                for file in matchedFrozenFiles {
+                    addToQueueIfNecessary(uploadFile: file)
                 }
                 self.resumeAllOperations()
             }
@@ -346,19 +347,16 @@ extension UploadQueue: UploadQueueable {
                                                         userId: userId,
                                                         driveId: driveId)
 
-            let uploadingFilesIds = uploadingFiles.map(\.id)
+            let uploadingFilesIds = Array(uploadingFiles.map(\.id))
             Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
             Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
 
             try? self.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-                for fileId in uploadingFilesIds {
-                    guard let objectToDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: fileId) else {
-                        continue
-                    }
-                    writableRealm.delete(objectToDelete)
-                }
+                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
+
+                writableRealm.delete(objectsToDelete)
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
 
@@ -441,17 +439,15 @@ extension UploadQueue: UploadQueueable {
             }
 
             // re-enqueue UploadOperation
-            try? self.writeTransaction { writableRealm in
-                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !file.isInvalidated else {
-                    Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
-                    return
-                }
-
-                self.addToQueue(uploadFile: file)
+            defer {
+                self.resumeAllOperations()
             }
 
-            self.resumeAllOperations()
+            guard let frozenFile = self.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?.freeze() else {
+                return
+            }
+
+            self.addToQueue(uploadFile: frozenFile)
         }
     }
 
