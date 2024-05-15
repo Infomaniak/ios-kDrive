@@ -21,7 +21,7 @@ import RealmSwift
 
 public extension DriveFileManager {
     func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
-        let frozenFiles = fetchResults(ofType: File.self) { faultedCollection in
+        let frozenFiles = database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection
                 .filter("isAvailableOffline = true")
                 .sorted(by: [sortType.value.sortDescriptor])
@@ -37,7 +37,7 @@ public extension DriveFileManager {
 
         let updatedFileResult = try await getUpdatedAvailableOffline()
 
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             for updatedFile in updatedFileResult.updatedFiles {
                 updateFile(updatedFile: updatedFile, writableRealm: writableRealm)
             }

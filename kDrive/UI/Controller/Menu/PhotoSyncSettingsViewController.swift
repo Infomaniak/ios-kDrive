@@ -28,7 +28,7 @@ import UIKit
 final class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
@@ -225,7 +225,7 @@ final class PhotoSyncSettingsViewController: UIViewController {
         }
 
         let currentSyncSettings = photoLibraryUploader.frozenSettings
-        try? uploadsTransactionable.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             guard newSyncSettings.userId != -1,
                   newSyncSettings.driveId != -1,
                   newSyncSettings.parentDirectoryId != -1 else {

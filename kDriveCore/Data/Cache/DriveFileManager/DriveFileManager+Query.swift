@@ -22,7 +22,7 @@ import RealmSwift
 public extension DriveFileManager {
     func getCachedRootFile(freeze: Bool = true) -> File {
         var file: File!
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             file = getCachedRootFile(freeze: freeze, writableRealm: writableRealm)
         }
         return file
@@ -40,7 +40,7 @@ public extension DriveFileManager {
     }
 
     func getCachedMyFilesRoot() -> File? {
-        let file = fetchObject(ofType: File.self) { faultedCollection in
+        let file = database.fetchObject(ofType: File.self) { faultedCollection in
             faultedCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()
@@ -55,7 +55,7 @@ public extension DriveFileManager {
 
     func getCachedFile(id: Int, freeze: Bool = true) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
-        guard let file = fetchObject(ofType: File.self, forPrimaryKey: uid) else {
+        guard let file = database.fetchObject(ofType: File.self, forPrimaryKey: uid) else {
             return nil
         }
         return freeze ? file.freeze() : file
@@ -70,7 +70,7 @@ public extension DriveFileManager {
     }
 
     func getLocalRecentActivities() -> [FileActivity] {
-        let frozenFileActivities = fetchResults(ofType: FileActivity.self) { faultedCollection in
+        let frozenFileActivities = database.fetchResults(ofType: FileActivity.self) { faultedCollection in
             faultedCollection.sorted(by: \.createdAt, ascending: false).freeze()
         }
         return Array(frozenFileActivities)
@@ -79,7 +79,7 @@ public extension DriveFileManager {
     func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
         // -3600).timeIntervalSince1970))
-        let files = fetchResults(ofType: File.self) { faultedCollection in
+        let files = database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection.sorted(by: \.lastModifiedAt, ascending: false)
         }
 
@@ -97,7 +97,7 @@ public extension DriveFileManager {
     func getManagedFile(from file: File) -> File {
         // TODO: Refactor
         var fetchedFile: File!
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             fetchedFile = getManagedFile(from: file, writableRealm: writableRealm)
         }
         return fetchedFile

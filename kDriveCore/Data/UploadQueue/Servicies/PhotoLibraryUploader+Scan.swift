@@ -46,7 +46,7 @@ public extension PhotoLibraryUploader {
         let assetsFetchResult = PHAsset.fetchAssets(with: options)
         let syncDate = Date()
 
-        try? uploadsTransactionable.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             do {
                 try addImageAssetsToUploadQueue(
                     assetsFetchResult: assetsFetchResult,

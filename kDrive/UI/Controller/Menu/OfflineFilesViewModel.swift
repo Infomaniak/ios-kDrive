@@ -36,7 +36,7 @@ class OfflineFilesViewModel: FileListViewModel {
             currentDirectory: DriveFileManager.offlineRoot
         )
 
-        let results = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+        let results = driveFileManager.database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection.filter("isAvailableOffline = true")
         }
 

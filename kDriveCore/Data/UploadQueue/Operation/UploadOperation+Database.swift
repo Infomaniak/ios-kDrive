@@ -19,9 +19,6 @@
 import Foundation
 import RealmSwift
 
-/// So we can directly call Transactionable API on top of UploadOperation
-extension UploadOperation: UploadsTransactionablePassthrough {}
-
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
     ///
@@ -37,7 +34,7 @@ extension UploadOperation {
             throw ErrorDomain.operationFinished
         }
 
-        try writeTransaction { writableRealm in
+        try uploadsDatabase.writeTransaction { writableRealm in
             guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
@@ -113,7 +110,7 @@ extension UploadOperation {
     /// Throws if any DB access issues
     /// Does not check upload.finished state of the upload operation
     func readOnlyFile() throws -> UploadFile {
-        guard let file = fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+        guard let file = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
             throw ErrorDomain.databaseUploadFileNotFound
         }
 
@@ -122,7 +119,7 @@ extension UploadOperation {
 
     /// Delete the UploadFile entity from database from forPrimaryKey of the current UploadOperation
     func deleteUploadFile() async throws {
-        try writeTransaction { writableRealm in
+        try uploadsDatabase.writeTransaction { writableRealm in
             guard let uploadFile = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 return
             }

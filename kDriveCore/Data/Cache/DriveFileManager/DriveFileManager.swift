@@ -28,9 +28,7 @@ import SwiftRegex
 
 // MARK: - Transactionable
 
-extension DriveFileManager: TransactionablePassthrough {}
-
-public final class DriveFileManager: Transactionable {
+public final class DriveFileManager {
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
     public static let constants = DriveFileManagerConstants()
@@ -82,8 +80,8 @@ public final class DriveFileManager: Transactionable {
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
 
-    /// Something to centralize transaction style access to the DB
-    let transactionExecutor: Transactionable
+    /// Fetch and write into DB with this object
+    public let database: Transactionable
 
     /// Build a realm configuration for a specific Drive
     public static func configuration(context: DriveFileManagerContext, driveId: Int, driveUserId: Int) -> Realm.Configuration {
@@ -198,10 +196,10 @@ public final class DriveFileManager: Transactionable {
 
         let realmURL = context.realmURL(driveId: drive.id, driveUserId: drive.userId)
         let realmAccessor = RealmAccessor(realmURL: realmURL, realmConfiguration: realmConfiguration, excludeFromBackup: true)
-        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessor)
+        database = TransactionExecutor(realmAccessible: realmAccessor)
 
         // Init root file
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: writableRealm) == nil {
                 let rootFile = getCachedRootFile(writableRealm: writableRealm)
                 writableRealm.add(rootFile)
@@ -269,7 +267,7 @@ public final class DriveFileManager: Transactionable {
         var fetchedFiles: [File] = []
 
         // Keep cached properties for children
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             for child in children {
                 keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, writableRealm: writableRealm)
             }
@@ -323,7 +321,7 @@ public final class DriveFileManager: Transactionable {
             let response = try await apiFetcher.fileInfo(ProxyFile(driveId: drive.id, id: id))
             let file = response.validApiResponse.data
 
-            try? writeTransaction { writableRealm in
+            try? database.writeTransaction { writableRealm in
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], writableRealm: writableRealm)
 
                 writableRealm.add(file, update: .modified)
@@ -423,7 +421,7 @@ public final class DriveFileManager: Transactionable {
                               categories: [Category],
                               belongToAllCategories: Bool,
                               sortType: SortType = .nameAZ) -> Results<File> {
-        let results = fetchResults(ofType: File.self) { faultedCollection in
+        let results = database.fetchResults(ofType: File.self) { faultedCollection in
             var searchResults = faultedCollection.filter("id > 0")
             if let query, !query.isBlank {
                 searchResults = searchResults.filter("name CONTAINS[cd] %@", query)
@@ -477,7 +475,7 @@ public final class DriveFileManager: Transactionable {
     }
 
     public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             for file in files {
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.standard, .extras], writableRealm: writableRealm)
                 root.children.insert(file)
@@ -566,7 +564,7 @@ public final class DriveFileManager: Transactionable {
             page += 1
             responseAt = response.validApiResponse.responseAt ?? Int(Date().timeIntervalSince1970)
 
-            try writeTransaction { writableRealm in
+            try database.writeTransaction { writableRealm in
                 let cachedFile = try file.resolve(using: writableRealm)
 
                 // Apply activities to file
@@ -752,7 +750,7 @@ public final class DriveFileManager: Transactionable {
         let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
         // Add category to drive
 
-        try? driveInfosManager.writeTransaction { writableRealm in
+        try? driveInfosManager.driveInfoDatabase.writeTransaction { writableRealm in
             let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             guard let drive else {
                 return
@@ -770,7 +768,7 @@ public final class DriveFileManager: Transactionable {
         let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
 
         // Update category on drive
-        try? driveInfosManager.writeTransaction { writableRealm in
+        try? driveInfosManager.driveInfoDatabase.writeTransaction { writableRealm in
             guard let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
@@ -795,7 +793,7 @@ public final class DriveFileManager: Transactionable {
         }
 
         // Delete category from drive
-        try? driveInfosManager.writeTransaction { writableRealm in
+        try? driveInfosManager.driveInfoDatabase.writeTransaction { writableRealm in
             guard let drive = driveInfosManager.getDrive(primaryKey: drive.objectId, freeze: false, using: writableRealm)
             else {
                 return
@@ -809,7 +807,7 @@ public final class DriveFileManager: Transactionable {
         }
 
         // Delete category from files
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let fetchedFiles = writableRealm.objects(File.self).filter("ANY categories.categoryId = %d", categoryId)
             for file in fetchedFiles {
                 writableRealm.delete(file.categories.filter("categoryId = %d", categoryId))
@@ -836,7 +834,7 @@ public final class DriveFileManager: Transactionable {
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
         let response = try await apiFetcher.delete(file: file)
         backgroundQueue.async { [self] in
-            try? writeTransaction { writableRealm in
+            try? database.writeTransaction { writableRealm in
                 let savedFile = try? file.resolve(using: writableRealm).freeze()
                 removeFileInDatabase(fileUid: file.uid, cascade: true, writableRealm: writableRealm)
 
@@ -862,7 +860,7 @@ public final class DriveFileManager: Transactionable {
 
         // Add the moved file to Realm
         var updatedFile: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let liveFile = try file.resolve(using: writableRealm)
             let newParent = try destination.resolve(using: writableRealm)
             let oldParent = liveFile.parent
@@ -894,7 +892,7 @@ public final class DriveFileManager: Transactionable {
         let fetchedFile = try file.resolve(within: self)
         let newFile = fetchedFile.detached()
 
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             newFile.name = newName
             _ = try updateFileInDatabase(updatedFile: newFile, oldFile: fetchedFile, writableRealm: writableRealm)
             newFile.signalChanges(userId: drive.userId)
@@ -908,7 +906,7 @@ public final class DriveFileManager: Transactionable {
         let duplicatedFile = try await apiFetcher.duplicate(file: file, duplicateName: duplicateName)
 
         var duplicateFile: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let newFile = try updateFileInDatabase(updatedFile: duplicatedFile, writableRealm: writableRealm)
             duplicateFile = newFile
 
@@ -933,7 +931,7 @@ public final class DriveFileManager: Transactionable {
         let directory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
 
         var createdDirectory: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let newDirectory = try updateFileInDatabase(updatedFile: directory, writableRealm: writableRealm)
             createdDirectory = newDirectory
 
@@ -972,7 +970,7 @@ public final class DriveFileManager: Transactionable {
         let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory.proxify(), settings: settings)
 
         var liveDirectory: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let directory = try updateFileInDatabase(updatedFile: createdDirectory, writableRealm: writableRealm)
 
             let parent = try? parentDirectory.resolve(using: writableRealm)
@@ -1008,7 +1006,7 @@ public final class DriveFileManager: Transactionable {
         let file = try await apiFetcher.createFile(in: parentDirectory, name: name, type: type)
 
         var liveFile: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             let createdFile = try updateFileInDatabase(updatedFile: file, writableRealm: writableRealm)
             // Add file to parent
             let parent = try? parentDirectory.resolve(using: writableRealm)
@@ -1074,7 +1072,7 @@ public final class DriveFileManager: Transactionable {
     }
 
     func updateExternalImport(id: Int, action: ExternalImportAction) {
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             let file = writableRealm.objects(File.self)
                 .where { $0.externalImport.id == id }
                 .first
@@ -1164,7 +1162,7 @@ public final class DriveFileManager: Transactionable {
     }
 
     private func updateFileProperty(fileUid: String, _ block: (File) -> Void) {
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid) else {
                 return
             }
@@ -1176,7 +1174,7 @@ public final class DriveFileManager: Transactionable {
 
     func updateFileInDatabase(updatedFile: File, oldFile: File? = nil) throws -> File {
         var file: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             file = try updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, writableRealm: writableRealm)
         }
 
@@ -1234,7 +1232,7 @@ public final class DriveFileManager: Transactionable {
     }
 
     public func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions) {
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             keepCacheAttributesForFile(newFile: newFile, keepProperties: keepProperties, writableRealm: writableRealm)
         }
     }
@@ -1289,7 +1287,7 @@ public final class DriveFileManager: Transactionable {
     }
 
     public func removeSearchChildren() {
-        try? writeTransaction { writableRealm in
+        try? database.writeTransaction { writableRealm in
             let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, writableRealm: writableRealm)
 
             searchRoot.fullyDownloaded = false
@@ -1358,7 +1356,7 @@ public final class DriveFileManager: Transactionable {
 
     public func setLocalRecentActivities(_ activities: [FileActivity]) {
         backgroundQueue.async { [self] in
-            try? writeTransaction { writableRealm in
+            try? database.writeTransaction { writableRealm in
                 let homeRootFile = DriveFileManager.homeRootFile
                 var activitiesSafe = [FileActivity]()
                 for activity in activities {

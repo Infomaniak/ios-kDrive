@@ -37,7 +37,7 @@ public extension DriveFileManager {
         let hasMore = result.validApiResponse.hasMore
 
         var managedParentDirectory: File?
-        try writeTransaction { writableRealm in
+        try database.writeTransaction { writableRealm in
             // Keep cached properties for children
             for child in children {
                 keepCacheAttributesForFile(newFile: child, keepProperties: [.standard, .extras], writableRealm: writableRealm)

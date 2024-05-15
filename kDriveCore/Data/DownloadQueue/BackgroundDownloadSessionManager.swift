@@ -50,7 +50,7 @@ extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate,
     FileDownloadSession {
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
 
     public var identifier: String {
@@ -85,7 +85,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = self.uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                   let fileId = self.uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { partial in
                        return partial.filter("sessionUrl = %@", sessionUrl).first
                    })?.fileId {
                     self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
@@ -159,7 +159,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = uploadsTransactionable.fetchObject(ofType: DownloadTask.self, filtering: { partial in
+                  let downloadTask = uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { partial in
                       return partial.filter("sessionUrl = %@", sessionUrl).first
                   }),
                   let driveFileManager = accountManager.getDriveFileManager(

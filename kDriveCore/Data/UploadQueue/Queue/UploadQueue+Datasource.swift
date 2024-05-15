@@ -34,7 +34,7 @@ public extension UploadQueue {
                            driveId: Int,
                            optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return fetchResults(ofType: UploadFile.self) { partial in
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
             partial.filter(
                 "uploadDate = nil AND userId = %d AND driveId = %d AND ownedByFileProvider == %@",
                 userId,
@@ -49,7 +49,7 @@ public extension UploadQueue {
     func getUploadingFiles(userId: Int,
                            driveIds: [Int]) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return fetchResults(ofType: UploadFile.self) { partial in
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
             partial.filter(
                 "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
                 userId,
@@ -62,7 +62,7 @@ public extension UploadQueue {
 
     func getUploadedFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return fetchResults(ofType: UploadFile.self) { partial in
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
             partial
                 .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
                 .filter(optionalPredicate: optionalPredicate)
@@ -81,7 +81,7 @@ public extension UploadQueue {
         Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
 
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = fetchObject(ofType: UploadFile.self) { partial in
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { partial in
             partial.filter(
                 "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
                 fileProviderItemIdentifier,
@@ -98,7 +98,7 @@ public extension UploadQueue {
         Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
 
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = fetchObject(ofType: UploadFile.self) { partial in
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { partial in
             partial.filter(
                 "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
                 fileProviderItemIdentifier,

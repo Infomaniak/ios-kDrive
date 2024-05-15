@@ -34,7 +34,7 @@ public protocol PhotoLibraryCleanerServiceable {
 typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifier: String)
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
@@ -96,7 +96,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
         Log.photoLibraryUploader("getPicturesToRemove")
 
         var assetsToRemove = [UploadFileAssetIdentifier]()
-        try? uploadsTransactionable.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             let uploadFilesToClean = uploadQueue
                 .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
@@ -133,7 +133,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             }
 
             do {
-                try uploadsTransactionable.writeTransaction { writableRealm in
+                try uploadsDatabase.writeTransaction { writableRealm in
                     let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
 
                     let filesInContext = writableRealm

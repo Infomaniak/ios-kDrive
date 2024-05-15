@@ -145,7 +145,7 @@ extension UploadQueue: UploadQueueable {
                 return
             }
 
-            let uploadingFiles = fetchResults(ofType: UploadFile.self) { partial in
+            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
                 return partial.filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
             }
@@ -157,7 +157,7 @@ extension UploadQueue: UploadQueueable {
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
                 let batchArray = Array(batch)
-                let matchedFrozenFiles = fetchResults(ofType: UploadFile.self) { partial in
+                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
                     partial.filter("id IN %@", batchArray).freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
@@ -196,7 +196,7 @@ extension UploadQueue: UploadQueueable {
 
         // Keep a detached file for processing it later
         let detachedFile = uploadFile.detached()
-        try? writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
             writableRealm.add(uploadFile, update: .modified)
             Log.uploadQueue("did save ufid:\(uploadFile.id)")
@@ -280,7 +280,7 @@ extension UploadQueue: UploadQueueable {
 
         var found = false
         concurrentQueue.sync {
-            guard let toDeleteLive = fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            guard let toDeleteLive = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
                 return
             }
 
@@ -314,7 +314,7 @@ extension UploadQueue: UploadQueueable {
             }
             self.keyedUploadOperations.removeObject(forKey: uploadFileId)
 
-            try? self.writeTransaction { writableRealm in
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                    !toDelete.isInvalidated {
                     Log.uploadQueue("find UploadFile to delete :\(uploadFileId)")
@@ -351,7 +351,7 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
             Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
 
-            try? self.writeTransaction { writableRealm in
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
@@ -391,7 +391,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         concurrentQueue.sync {
-            try? self.writeTransaction { writableRealm in
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 // UploadFile with an error, Or no more retry.
                 let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
                 let failedUploadFiles = writableRealm.objects(UploadFile.self)
@@ -421,7 +421,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         concurrentQueue.async {
-            try? self.writeTransaction { writableRealm in
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
                     Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
@@ -443,7 +443,8 @@ extension UploadQueue: UploadQueueable {
                 self.resumeAllOperations()
             }
 
-            guard let frozenFile = self.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?.freeze() else {
+            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
+                .freeze() else {
                 return
             }
 
@@ -502,7 +503,7 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        try? writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
                 // Cancel operation if any
                 if let operation = self.operation(uploadFileId: uploadFileId) {
@@ -529,7 +530,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         for uploadFileId in batch {
-            guard let file = fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            guard let file = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
                 Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
                 continue
             }

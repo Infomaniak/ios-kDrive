@@ -48,7 +48,7 @@ public extension Results where Element: KeypathSortable {
     }
 }
 
-public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryable {
+public final class DriveInfosManager: DriveInfosManagerQueryable {
     private static let dbName = "DrivesInfos.realm"
 
     private static let currentDbVersion: UInt64 = 11
@@ -122,7 +122,8 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
         }
     }
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) var transactionExecutor: Transactionable
+    /// Fetch and write into DB with this object
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) var driveInfoDatabase: Transactionable
 
     init() {
         // META: Keep SonarCloud happy
@@ -149,7 +150,7 @@ public final class DriveInfosManager: Transactionable, DriveInfosManagerQueryabl
             }
         let driveRemovedIds = Array(driveRemoved.map(\.objectId))
 
-        try? writeTransaction { writableRealm in
+        try? driveInfoDatabase.writeTransaction { writableRealm in
             let drivesToDelete = writableRealm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds)
             writableRealm.delete(drivesToDelete)
             writableRealm.add(driveList, update: .modified)

@@ -93,7 +93,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 ).validApiResponse
                 let files = response.data.files
 
-                try driveFileManager.writeTransaction { writableRealm in
+                try driveFileManager.database.writeTransaction { writableRealm in
                     let liveParentDirectory = try self.driveFileManager.getCachedFile(
                         itemIdentifier: self.containerItemIdentifier,
                         freeze: false,
@@ -182,7 +182,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
 
-                try driveFileManager.writeTransaction { writableRealm in
+                try driveFileManager.database.writeTransaction { writableRealm in
                     let parentDirectory = try driveFileManager.getCachedFile(
                         itemIdentifier: containerItemIdentifier,
                         freeze: false,

@@ -610,7 +610,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         self.driveFileManager = driveFileManager
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
 
-        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+        let matchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection.filter("id IN %@", previewFileIds)
         }
 

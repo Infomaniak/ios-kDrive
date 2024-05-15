@@ -27,7 +27,7 @@ import Sentry
 
 public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
@@ -41,7 +41,7 @@ public final class PhotoLibraryUploader {
     }
 
     public var frozenSettings: PhotoSyncSettings? {
-        let settings = uploadsTransactionable.fetchObject(ofType: PhotoSyncSettings.self) { partial in
+        let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { partial in
             partial.first
         }
 

@@ -42,7 +42,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
@@ -138,7 +138,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
                         sessionId: rescheduledSessionId,
                         sessionUrl: sessionUrl
                     )
-                    try? self.uploadsTransactionable.writeTransaction { writableRealm in
+                    try? self.uploadsDatabase.writeTransaction { writableRealm in
                         writableRealm.add(downloadTask, update: .modified)
                     }
                 } else {
@@ -184,7 +184,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
             sessionUrl: url.absoluteString
         )
 
-        try? uploadsTransactionable.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.add(downloadTask, update: .modified)
         }
 
@@ -290,7 +290,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
         assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
 
-        try? uploadsTransactionable.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)
                 .filter("sessionUrl = %@", sessionUrl.absoluteString)
                 .first else {

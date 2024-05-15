@@ -253,7 +253,7 @@ final class ManageCategoriesViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
 
-        let matchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+        let matchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection.filter("id IN %@", filesId)
         }
 

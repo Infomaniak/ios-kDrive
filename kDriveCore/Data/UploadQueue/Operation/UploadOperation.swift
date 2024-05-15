@@ -71,7 +71,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
@@ -495,7 +495,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Add/Update the new remote `File` in database immediately
         if let driveFileManager {
-            try? driveFileManager.writeTransaction { writableRealm in
+            try? driveFileManager.database.writeTransaction { writableRealm in
                 let parentFolder = writableRealm.objects(File.self)
                     .filter("id == %@", driveFile.parentId)
                     .first

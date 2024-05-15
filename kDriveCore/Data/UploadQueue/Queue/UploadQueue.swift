@@ -23,13 +23,10 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-/// So we can directly call Transactionable API on top of UploadOperation
-extension UploadQueue: UploadsTransactionablePassthrough {}
-
 public final class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsTransactionable: Transactionable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable

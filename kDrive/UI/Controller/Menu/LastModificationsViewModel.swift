@@ -35,7 +35,7 @@ class LastModificationsViewModel: FileListViewModel {
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
 
-        let fetchedFiles = driveFileManager.fetchResults(ofType: File.self) { faultedCollection in
+        let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { faultedCollection in
             faultedCollection.filter("rawType != \"dir\"")
         }
 
