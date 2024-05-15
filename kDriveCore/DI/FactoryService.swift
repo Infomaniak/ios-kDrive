@@ -208,7 +208,7 @@ public enum FactoryService {
 
         let services = [
             (uploadsTransactionable, kDriveDBID.uploads),
-            (driveInfoTransactionable, kDriveDBID.driveInfo),
+            (driveInfoTransactionable, kDriveDBID.driveInfo)
         ]
 
         return services
