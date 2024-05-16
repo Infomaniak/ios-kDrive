@@ -65,8 +65,8 @@ public extension DriveInfosManager {
             userIdPredicate = nil
         }
 
-        return fetchResults(ofType: Drive.self) { faultedCollection in
-            faultedCollection
+        return driveInfoDatabase.fetchResults(ofType: Drive.self) { lazyCollection in
+            lazyCollection
                 .filter(optionalPredicate: userIdPredicate)
                 .sorted(byKeyPath: "name", ascending: true)
                 .sorted(byKeyPath: "sharedWithMe", ascending: true)
@@ -84,7 +84,7 @@ public extension DriveInfosManager {
     }
 
     func getDrive(primaryKey: String, freeze: Bool = true) -> Drive? {
-        guard let fetchedDrive = fetchObject(ofType: Drive.self, forPrimaryKey: primaryKey),
+        guard let fetchedDrive = driveInfoDatabase.fetchObject(ofType: Drive.self, forPrimaryKey: primaryKey),
               !fetchedDrive.isInvalidated else {
             return nil
         }
@@ -101,21 +101,21 @@ public extension DriveInfosManager {
 
     func getUsers(for driveId: Int, userId: Int) -> Results<DriveUser> {
         guard let drive = getDrive(id: driveId, userId: userId) else {
-            return fetchResults(ofType: DriveUser.self) { faultedCollection in
-                faultedCollection.sorted(byKeyPath: "id", ascending: true)
+            return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { lazyCollection in
+                lazyCollection.sorted(byKeyPath: "id", ascending: true)
             }
         }
 
-        return fetchResults(ofType: DriveUser.self) { faultedCollection in
+        return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { lazyCollection in
             let users = Array(drive.users.drive)
-            return faultedCollection
+            return lazyCollection
                 .sorted(byKeyPath: "id", ascending: true)
                 .filter("id IN %@", users)
         }
     }
 
     func getUser(primaryKey: Int) -> DriveUser? {
-        guard let user = fetchObject(ofType: DriveUser.self, forPrimaryKey: primaryKey),
+        guard let user = driveInfoDatabase.fetchObject(ofType: DriveUser.self, forPrimaryKey: primaryKey),
               !user.isInvalidated else {
             return nil
         }
@@ -124,21 +124,21 @@ public extension DriveInfosManager {
 
     func getTeams(for driveId: Int, userId: Int) -> Results<Team> {
         guard let drive = getDrive(id: driveId, userId: userId) else {
-            return fetchResults(ofType: Team.self) { faultedCollection in
-                faultedCollection.sorted(byKeyPath: "id", ascending: true)
+            return driveInfoDatabase.fetchResults(ofType: Team.self) { lazyCollection in
+                lazyCollection.sorted(byKeyPath: "id", ascending: true)
             }
         }
 
-        return fetchResults(ofType: Team.self) { faultedCollection in
+        return driveInfoDatabase.fetchResults(ofType: Team.self) { lazyCollection in
             let teamAccounts = Array(drive.teams.account)
-            return faultedCollection
+            return lazyCollection
                 .sorted(byKeyPath: "id", ascending: true)
                 .filter("id IN %@", teamAccounts)
         }
     }
 
     func getTeam(primaryKey: Int) -> Team? {
-        guard let team = fetchObject(ofType: Team.self, forPrimaryKey: primaryKey),
+        guard let team = driveInfoDatabase.fetchObject(ofType: Team.self, forPrimaryKey: primaryKey),
               !team.isInvalidated else {
             return nil
         }
@@ -155,7 +155,7 @@ public extension DriveInfosManager {
     }
 
     func removeDrivesFor(userId: Int) {
-        try? writeTransaction { writableRealm in
+        try? driveInfoDatabase.writeTransaction { writableRealm in
             let userDrives = writableRealm.objects(Drive.self).where { $0.userId == userId }
             writableRealm.delete(userDrives)
         }

@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 
@@ -33,6 +34,8 @@ public protocol PhotoLibraryCleanerServiceable {
 typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifier: String)
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
+
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
@@ -46,7 +49,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     /// `True` if feature setting is ON
     private var removePictureEnabled: Bool {
         // Check that we have photo sync enabled with the delete option
-        guard let settings = photoLibraryUploader.settings, settings.deleteAssetsAfterImport else {
+        guard let settings = photoLibraryUploader.frozenSettings, settings.deleteAssetsAfterImport else {
             Log.photoLibraryUploader("remove picture feature disabled")
             return false
         }
@@ -59,13 +62,9 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             return false
         }
 
-        var picturesToRemoveCount = 0
-        BackgroundRealm.uploads.execute { realm in
-            picturesToRemoveCount = uploadQueue
-                .getUploadedFiles(using: realm)
-                .filter(Self.photoAssetPredicate)
-                .count
-        }
+        let picturesToRemoveCount = uploadQueue
+            .getUploadedFiles(optionalPredicate: Self.photoAssetPredicate)
+            .count
 
         guard picturesToRemoveCount >= Self.removeAssetsCountThreshold else {
             Log.photoLibraryUploader("Not enough pictures to delete, skipping")
@@ -97,10 +96,9 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
         Log.photoLibraryUploader("getPicturesToRemove")
 
         var assetsToRemove = [UploadFileAssetIdentifier]()
-        BackgroundRealm.uploads.execute { realm in
+        try? uploadsDatabase.writeTransaction { writableRealm in
             let uploadFilesToClean = uploadQueue
-                .getUploadedFiles(using: realm)
-                .filter(Self.photoAssetPredicate)
+                .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
             assetsToRemove = uploadFilesToClean.compactMap { uploadFile in
                 guard let assetIdentifier = uploadFile.assetLocalIdentifier else {
@@ -134,20 +132,20 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
                 return
             }
 
-            BackgroundRealm.uploads.execute { realm in
-                let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
-                do {
-                    try realm.write {
-                        let filesInContext = realm
-                            .objects(UploadFile.self)
-                            .filter("id IN %@", allUploadFileIds)
-                            .filter { $0.isInvalidated == false }
-                        realm.delete(filesInContext)
-                    }
+            do {
+                try uploadsDatabase.writeTransaction { writableRealm in
+                    let allUploadFileIds = itemsIdentifiers.map(\.uploadFileId)
+
+                    let filesInContext = writableRealm
+                        .objects(UploadFile.self)
+                        .filter("id IN %@", allUploadFileIds)
+                        .filter { $0.isInvalidated == false }
+                    writableRealm.delete(filesInContext)
                     Log.photoLibraryUploader("removePicturesFromPhotoLibrary success")
-                } catch {
-                    Log.photoLibraryUploader("removePicturesFromPhotoLibrary BackgroundRealm error:\(error)", level: .error)
                 }
+            } catch {
+                Log.photoLibraryUploader("removePicturesFromPhotoLibrary error:\(error)",
+                                         level: .error)
             }
         }
     }

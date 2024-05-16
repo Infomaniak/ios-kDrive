@@ -20,18 +20,14 @@ import Foundation
 import RealmSwift
 
 public extension PhotoLibraryUploader {
-    func enableSync(with newSettings: PhotoSyncSettings, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        try? realm.write {
-            realm.delete(realm.objects(PhotoSyncSettings.self))
-            realm.add(newSettings)
-        }
-        _settings = PhotoSyncSettings(value: newSettings)
+    func enableSync(with newSettings: PhotoSyncSettings, writableRealm: Realm) {
+        writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
+        writableRealm.add(newSettings)
     }
 
-    func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        try? realm.safeWrite {
-            realm.delete(realm.objects(PhotoSyncSettings.self))
+    func disableSync() {
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
-        _settings = nil
     }
 }

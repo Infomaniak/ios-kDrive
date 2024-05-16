@@ -50,7 +50,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         let files = response.data
 
         var liveParent: File?
-        try driveFileManager.writeTransaction { writableRealm in
+        try driveFileManager.database.writeTransaction { writableRealm in
             let liveParentDirectory = try driveFileManager.getCachedFile(
                 itemIdentifier: containerItemIdentifier,
                 freeze: false,
@@ -129,7 +129,7 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
 
                 var childIdsBeforeUpdate = Set<Int>()
                 var liveParentDirectory: File?
-                try self.driveFileManager.writeTransaction { writableRealm in
+                try self.driveFileManager.database.writeTransaction { writableRealm in
                     guard let fetchedParentDirectory = try? self.driveFileManager.getCachedFile(
                         itemIdentifier: self.containerItemIdentifier,
                         freeze: false,

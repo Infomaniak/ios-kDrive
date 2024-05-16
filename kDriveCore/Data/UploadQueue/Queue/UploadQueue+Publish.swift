@@ -56,13 +56,11 @@ extension UploadQueue: UploadPublishable {
         Log.uploadQueue("publishUploadCountInParent")
         serialQueue.async { [weak self] in
             guard let self else { return }
-            try? transactionWithUploadRealm { realm in
-                let uploadCount = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm)
-                    .count
-                self.observations.didChangeUploadCountInParent.values.forEach { closure in
-                    Task { @MainActor in
-                        closure(parentId, uploadCount)
-                    }
+
+            let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId).count
+            for closure in observations.didChangeUploadCountInParent.values {
+                Task { @MainActor in
+                    closure(parentId, uploadCount)
                 }
             }
         }
@@ -73,12 +71,10 @@ extension UploadQueue: UploadPublishable {
         Log.uploadQueue("publishUploadCountInDrive")
         serialQueue.async { [weak self] in
             guard let self else { return }
-            try? transactionWithUploadRealm { realm in
-                let uploadCount = self.getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
-                self.observations.didChangeUploadCountInDrive.values.forEach { closure in
-                    Task { @MainActor in
-                        closure(driveId, uploadCount)
-                    }
+            let uploadCount = getUploadingFiles(userId: userId, driveId: driveId).count
+            for closure in observations.didChangeUploadCountInDrive.values {
+                Task { @MainActor in
+                    closure(driveId, uploadCount)
                 }
             }
         }
@@ -90,9 +86,9 @@ extension UploadQueue: UploadPublishable {
         sendFileUploadStateNotificationIfNeeded(with: result)
         serialQueue.async { [weak self] in
             guard let self else { return }
-            observations.didUploadFile.values.forEach { closure in
+            for closure in observations.didUploadFile.values {
                 guard let uploadFile = result.uploadFile, !uploadFile.isInvalidated else {
-                    return
+                    continue
                 }
 
                 Task { @MainActor in

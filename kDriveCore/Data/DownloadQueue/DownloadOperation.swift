@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 
@@ -34,17 +35,19 @@ public protocol DownloadOperationable: Operationable {
 public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
-    @LazyInjectService var appContextService: AppContextServiceable
-
     private let fileManager = FileManager.default
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
+
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService var appContextService: AppContextServiceable
 
     public let file: File
     public var task: URLSessionDownloadTask?
@@ -135,10 +138,8 @@ public class DownloadOperation: Operation, DownloadOperationable {
                         sessionId: rescheduledSessionId,
                         sessionUrl: sessionUrl
                     )
-                    BackgroundRealm.uploads.execute { realm in
-                        try? realm.safeWrite {
-                            realm.add(downloadTask, update: .modified)
-                        }
+                    try? self.uploadsDatabase.writeTransaction { writableRealm in
+                        writableRealm.add(downloadTask, update: .modified)
                     }
                 } else {
                     // We couldn't reschedule the download
@@ -182,10 +183,9 @@ public class DownloadOperation: Operation, DownloadOperationable {
             sessionId: urlSession.identifier,
             sessionUrl: url.absoluteString
         )
-        BackgroundRealm.uploads.execute { realm in
-            try? realm.safeWrite {
-                realm.add(downloadTask, update: .modified)
-            }
+
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            writableRealm.add(downloadTask, update: .modified)
         }
 
         if let token = getToken() {
@@ -290,13 +290,14 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
         assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
 
-        BackgroundRealm.uploads.execute { realm in
-            if let task = realm.objects(DownloadTask.self)
-                .filter("sessionUrl = %@", sessionUrl.absoluteString).first {
-                try? realm.safeWrite {
-                    realm.delete(task)
-                }
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            guard let task = writableRealm.objects(DownloadTask.self)
+                .filter("sessionUrl = %@", sessionUrl.absoluteString)
+                .first else {
+                return
             }
+
+            writableRealm.delete(task)
         }
     }
 }

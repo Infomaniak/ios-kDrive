@@ -32,7 +32,8 @@ final class MenuViewControllerTests: XCTestCase {
 
     override func setUp() {
         SimpleResolver.sharedResolver.removeAll()
-        SimpleResolver.register(FactoryService.debugServices)
+        let factoriesWithIdentifier = FactoryService.debugServices + FactoryService.transactionableServices
+        SimpleResolver.register(factoriesWithIdentifier)
         let services = [
             Factory(type: KeychainHelper.self) { _, _ in
                 KeychainHelper(accessGroup: AccountManager.accessGroup)

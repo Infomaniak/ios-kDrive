@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
@@ -26,6 +27,7 @@ import Sentry
 
 public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
@@ -38,22 +40,23 @@ public final class PhotoLibraryUploader {
         case importCancelledBySystem
     }
 
-    var _settings: PhotoSyncSettings?
-    public var settings: PhotoSyncSettings? {
-        _settings
+    public var frozenSettings: PhotoSyncSettings? {
+        let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
+            lazyCollection.first
+        }
+
+        return settings?.freeze()
     }
 
     public var isSyncEnabled: Bool {
-        return settings != nil
+        return frozenSettings != nil
     }
 
     public init() {
-        if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
-            _settings = PhotoSyncSettings(value: settings)
-        }
+        // META: SonarClound happy
     }
 
     func getUrl(for asset: PHAsset) async -> URL? {
-        return await asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg)
+        return await asset.getUrl(preferJPEGFormat: frozenSettings?.photoFormat == .jpg)
     }
 }

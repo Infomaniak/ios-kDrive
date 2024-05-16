@@ -36,8 +36,6 @@ final class UploadQueueViewController: UIViewController {
     private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
     private var notificationToken: NotificationToken?
 
-    private let realm = DriveFileManager.constants.uploadsRealm
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -74,8 +72,7 @@ final class UploadQueueViewController: UIViewController {
         notificationToken?.invalidate()
         notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
                                                           userId: accountManager.currentUserId,
-                                                          driveId: currentDirectory.driveId,
-                                                          using: realm)
+                                                          driveId: currentDirectory.driveId)
             .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
                 guard let self else {
                     return

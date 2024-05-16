@@ -21,11 +21,20 @@ import Foundation
 import InfomaniakCoreDB
 import RealmSwift
 
+/// Something to identify specific instances of Transactionable
+public enum kDriveDBID {
+    /// Identifier of the Transactionable object that manages UploadFiles
+    public static let uploads = "uploads"
+
+    /// Identifier of the Transactionable object that manages Drive
+    public static let driveInfo = "driveInfo"
+}
+
 /// Internal structure that can fetch a realm
 final class RealmAccessor: RealmAccessible {
     var realmURL: URL?
     let realmConfiguration: Realm.Configuration
-    let excludeFromBackup: Bool
+    var excludeFromBackup: Bool
 
     init(realmURL: URL?, realmConfiguration: Realm.Configuration, excludeFromBackup: Bool) {
         self.realmURL = realmURL
@@ -54,6 +63,9 @@ final class RealmAccessor: RealmAccessible {
             return
         }
 
+        // Only perform the exclusion once, after we are sure the realm file exists on the FS.
+        excludeFromBackup = false
+
         guard var realmURL else {
             DDLogError("not realmURL to work with")
             return
@@ -65,9 +77,9 @@ final class RealmAccessor: RealmAccessible {
 
         do {
             try realmURL.setResourceValues(metadata)
+            DDLogInfo("Excluding realm URL from backup: \(realmURL)")
         } catch {
             DDLogError(error)
         }
-        DDLogInfo("realmURL : \(realmURL)")
     }
 }

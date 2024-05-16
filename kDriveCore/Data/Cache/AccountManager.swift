@@ -313,8 +313,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         clearDriveFileManagers()
 
         for driveRemoved in driveRemovedList {
-            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader
-                .settings?.driveId == driveRemoved.id {
+            let frozenSettings = photoLibraryUploader.frozenSettings
+            if photoLibraryUploader.isSyncEnabled,
+               frozenSettings?.userId == user.id,
+               frozenSettings?.driveId == driveRemoved.id {
                 photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
@@ -408,7 +410,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentDriveId = 0
             currentUserId = 0
         }
-        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == toDeleteAccount.userId {
             photoLibraryUploader.disableSync()
         }
         driveInfosManager.deleteFileProviderDomains(for: toDeleteAccount.userId)

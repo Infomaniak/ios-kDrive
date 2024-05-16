@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCoreDB
 import InfomaniakDI
 
 protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
@@ -49,6 +50,7 @@ extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloadSessionManagable, URLSessionDownloadDelegate,
     FileDownloadSession {
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
 
     public var identifier: String {
@@ -81,11 +83,11 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     public func reconnectBackgroundTasks() {
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
-            let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?
-                   .fileId {
+                   let fileId = self.uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { lazyCollection in
+                       return lazyCollection.filter("sessionUrl = %@", sessionUrl).first
+                   })?.fileId {
                     self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
                         \.fractionCompleted,
                         options: .new
@@ -157,8 +159,9 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
-                  .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
+                  let downloadTask = uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { lazyCollection in
+                      lazyCollection.filter("sessionUrl = %@", sessionUrl).first
+                  }),
                   let driveFileManager = accountManager.getDriveFileManager(
                       for: downloadTask.driveId,
                       userId: downloadTask.userId

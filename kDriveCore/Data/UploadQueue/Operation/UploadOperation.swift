@@ -20,6 +20,7 @@ import Alamofire
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
@@ -70,6 +71,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+
+    /// The number of chunks we try to keep ready to upload in one UploadOperation
+    private static let parallelism = 2
+
+    /// An Activity to prevent the system from interrupting it without been notified beforehand
+    private var expiringActivity: ExpiringActivityable?
+
+    /// Local tracking of running network tasks
+    /// The key used is the and absolute identifier of the task.
+    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
+
+    /// The url session used to upload chunks
+    let urlSession: URLSession
 
     override public var debugDescription: String {
         """
@@ -80,21 +95,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
     }
 
-    /// The number of chunks we try to keep ready to upload in one UploadOperation
-    private static let parallelism = 2
-
     /// The id of the entity in base representing the upload task
     public let uploadFileId: String
-
-    /// Local tracking of running network tasks
-    /// The key used is the and absolute identifier of the task.
-    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
-
-    /// An Activity to prevent the system from interrupting it without been notified beforehand
-    private var expiringActivity: ExpiringActivityable?
-
-    /// The url session used to upload chunks
-    let urlSession: URLSession
 
     /// Object used to pass a completion state beyond to the OperationQueue
     public var result: UploadCompletionResult
@@ -293,13 +295,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if shouldCleanUploadFile {
             Log.uploadOperation("Delete file ufid:\(uploadFileId)")
             // Delete UploadFile as canceled by the user
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                   !toDelete.isInvalidated {
-                    try? uploadsRealm.safeWrite {
-                        uploadsRealm.delete(toDelete)
-                    }
-                }
+            Task {
+                try await deleteUploadFile()
             }
         }
     }
@@ -498,7 +495,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Add/Update the new remote `File` in database immediately
         if let driveFileManager {
-            try? driveFileManager.writeTransaction { writableRealm in
+            try? driveFileManager.database.writeTransaction { writableRealm in
                 let parentFolder = writableRealm.objects(File.self)
                     .filter("id == %@", driveFile.parentId)
                     .first
