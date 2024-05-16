@@ -85,8 +85,8 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = self.uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { partial in
-                       return partial.filter("sessionUrl = %@", sessionUrl).first
+                   let fileId = self.uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { lazyCollection in
+                       return lazyCollection.filter("sessionUrl = %@", sessionUrl).first
                    })?.fileId {
                     self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(
                         \.fractionCompleted,
@@ -159,8 +159,8 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                  let downloadTask = uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { partial in
-                      return partial.filter("sessionUrl = %@", sessionUrl).first
+                  let downloadTask = uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { lazyCollection in
+                      lazyCollection.filter("sessionUrl = %@", sessionUrl).first
                   }),
                   let driveFileManager = accountManager.getDriveFileManager(
                       for: downloadTask.driveId,

@@ -41,8 +41,8 @@ public final class PhotoLibraryUploader {
     }
 
     public var frozenSettings: PhotoSyncSettings? {
-        let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { partial in
-            partial.first
+        let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
+            lazyCollection.first
         }
 
         return settings?.freeze()

@@ -42,8 +42,8 @@ public extension Results where Element: KeypathSortable {
             return self
         }
 
-        let partial = filter(predicate)
-        let result = partial.filter(optionalPredicates: predicates)
+        let lazyCollection = filter(predicate)
+        let result = lazyCollection.filter(optionalPredicates: predicates)
         return result
     }
 }

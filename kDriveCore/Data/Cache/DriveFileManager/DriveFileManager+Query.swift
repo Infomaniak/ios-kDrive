@@ -40,8 +40,8 @@ public extension DriveFileManager {
     }
 
     func getCachedMyFilesRoot() -> File? {
-        let file = database.fetchObject(ofType: File.self) { faultedCollection in
-            faultedCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
+        let file = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection.filter("rawVisibility == %@", FileVisibility.isPrivateSpace.rawValue)
                 .first?
                 .freeze()
         }
@@ -70,8 +70,8 @@ public extension DriveFileManager {
     }
 
     func getLocalRecentActivities() -> [FileActivity] {
-        let frozenFileActivities = database.fetchResults(ofType: FileActivity.self) { faultedCollection in
-            faultedCollection.sorted(by: \.createdAt, ascending: false).freeze()
+        let frozenFileActivities = database.fetchResults(ofType: FileActivity.self) { lazyCollection in
+            lazyCollection.sorted(by: \.createdAt, ascending: false).freeze()
         }
         return Array(frozenFileActivities)
     }
@@ -79,8 +79,8 @@ public extension DriveFileManager {
     func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow:
         // -3600).timeIntervalSince1970))
-        let files = database.fetchResults(ofType: File.self) { faultedCollection in
-            faultedCollection.sorted(by: \.lastModifiedAt, ascending: false)
+        let files = database.fetchResults(ofType: File.self) { lazyCollection in
+            lazyCollection.sorted(by: \.lastModifiedAt, ascending: false)
         }
 
         var result = [File]()

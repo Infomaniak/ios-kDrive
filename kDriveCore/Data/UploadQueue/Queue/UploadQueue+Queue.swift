@@ -145,8 +145,8 @@ extension UploadQueue: UploadQueueable {
                 return
             }
 
-            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
-                return partial.filter(uploadFileQuery)
+            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                return lazyCollection.filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
             }
             let uploadingFileIds = uploadingFiles.map(\.id)
@@ -157,8 +157,8 @@ extension UploadQueue: UploadQueueable {
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
                 let batchArray = Array(batch)
-                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
-                    partial.filter("id IN %@", batchArray).freezeIfNeeded()
+                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
                     addToQueueIfNecessary(uploadFile: file)

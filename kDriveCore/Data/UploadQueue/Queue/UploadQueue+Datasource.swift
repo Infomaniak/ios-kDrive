@@ -34,8 +34,8 @@ public extension UploadQueue {
                            driveId: Int,
                            optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
-            partial.filter(
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
                 "uploadDate = nil AND userId = %d AND driveId = %d AND ownedByFileProvider == %@",
                 userId,
                 driveId,
@@ -49,8 +49,8 @@ public extension UploadQueue {
     func getUploadingFiles(userId: Int,
                            driveIds: [Int]) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
-            partial.filter(
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
                 "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
                 userId,
                 driveIds,
@@ -62,8 +62,8 @@ public extension UploadQueue {
 
     func getUploadedFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { partial in
-            partial
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection
                 .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
                 .filter(optionalPredicate: optionalPredicate)
         }
@@ -81,8 +81,8 @@ public extension UploadQueue {
         Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
 
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { partial in
-            partial.filter(
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
                 "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
                 fileProviderItemIdentifier,
                 NSNumber(value: ownedByFileProvider)
@@ -98,8 +98,8 @@ public extension UploadQueue {
         Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
 
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { partial in
-            partial.filter(
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
                 "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
                 fileProviderItemIdentifier,
                 NSNumber(value: ownedByFileProvider)

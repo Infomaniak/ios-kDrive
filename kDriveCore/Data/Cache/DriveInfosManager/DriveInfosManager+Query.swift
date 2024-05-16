@@ -65,8 +65,8 @@ public extension DriveInfosManager {
             userIdPredicate = nil
         }
 
-        return driveInfoDatabase.fetchResults(ofType: Drive.self) { faultedCollection in
-            faultedCollection
+        return driveInfoDatabase.fetchResults(ofType: Drive.self) { lazyCollection in
+            lazyCollection
                 .filter(optionalPredicate: userIdPredicate)
                 .sorted(byKeyPath: "name", ascending: true)
                 .sorted(byKeyPath: "sharedWithMe", ascending: true)
@@ -101,14 +101,14 @@ public extension DriveInfosManager {
 
     func getUsers(for driveId: Int, userId: Int) -> Results<DriveUser> {
         guard let drive = getDrive(id: driveId, userId: userId) else {
-            return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { faultedCollection in
-                faultedCollection.sorted(byKeyPath: "id", ascending: true)
+            return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { lazyCollection in
+                lazyCollection.sorted(byKeyPath: "id", ascending: true)
             }
         }
 
-        return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { faultedCollection in
+        return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { lazyCollection in
             let users = Array(drive.users.drive)
-            return faultedCollection
+            return lazyCollection
                 .sorted(byKeyPath: "id", ascending: true)
                 .filter("id IN %@", users)
         }
@@ -124,14 +124,14 @@ public extension DriveInfosManager {
 
     func getTeams(for driveId: Int, userId: Int) -> Results<Team> {
         guard let drive = getDrive(id: driveId, userId: userId) else {
-            return driveInfoDatabase.fetchResults(ofType: Team.self) { faultedCollection in
-                faultedCollection.sorted(byKeyPath: "id", ascending: true)
+            return driveInfoDatabase.fetchResults(ofType: Team.self) { lazyCollection in
+                lazyCollection.sorted(byKeyPath: "id", ascending: true)
             }
         }
 
-        return driveInfoDatabase.fetchResults(ofType: Team.self) { faultedCollection in
+        return driveInfoDatabase.fetchResults(ofType: Team.self) { lazyCollection in
             let teamAccounts = Array(drive.teams.account)
-            return faultedCollection
+            return lazyCollection
                 .sorted(byKeyPath: "id", ascending: true)
                 .filter("id IN %@", teamAccounts)
         }

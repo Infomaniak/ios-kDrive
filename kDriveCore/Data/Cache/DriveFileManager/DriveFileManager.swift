@@ -421,8 +421,8 @@ public final class DriveFileManager {
                               categories: [Category],
                               belongToAllCategories: Bool,
                               sortType: SortType = .nameAZ) -> Results<File> {
-        let results = database.fetchResults(ofType: File.self) { faultedCollection in
-            var searchResults = faultedCollection.filter("id > 0")
+        let results = database.fetchResults(ofType: File.self) { lazyCollection in
+            var searchResults = lazyCollection.filter("id > 0")
             if let query, !query.isBlank {
                 searchResults = searchResults.filter("name CONTAINS[cd] %@", query)
             }
