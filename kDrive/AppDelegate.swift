@@ -39,8 +39,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 4
-    private static let appStateVersionKey = "appStateVersionKey"
     private var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
@@ -57,6 +55,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
     @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
+    @LazyInjectService var appRestorationService: AppRestorationService
 
     // MARK: - UIApplicationDelegate
 
@@ -432,22 +431,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-        Log.appDelegate("application shouldSaveApplicationState")
-
-        coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
-        return true
+        return appRestorationService.shouldSaveApplicationState(coder: coder)
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        // App Restore disabled until we rework it
-        return false
-
-        /*
-         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
-
-         return AppDelegate
-             .currentStateVersion == encodedVersion &&
-             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)*/
+        return appRestorationService.shouldRestoreApplicationState(coder: coder)
     }
 
     // MARK: - User activity
