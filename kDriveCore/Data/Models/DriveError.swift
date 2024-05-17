@@ -182,7 +182,7 @@ public struct DriveError: Error, Equatable {
     public static let lock = DriveError(type: .serverError,
                                         code: "lock_error",
                                         localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
-    public static let donwloadPermission = DriveError(type: .serverError,
+    public static let downloadPermission = DriveError(type: .serverError,
                                                       code: "you_must_add_at_least_one_file",
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError,
@@ -245,7 +245,7 @@ public struct DriveError: Error, Equatable {
                                                   productMaintenance,
                                                   driveMaintenance,
                                                   lock,
-                                                  donwloadPermission,
+                                                  downloadPermission,
                                                   categoryAlreadyExists,
                                                   stillUploadingError,
                                                   uploadNotTerminated,
