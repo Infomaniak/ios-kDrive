@@ -1,11 +1,10 @@
 /*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
- * Release: Working copy
  * Locale: de, German
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Wed, 13 Mar 2024 11:10:26 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Tue, 21 May 2024 09:34:00 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -763,6 +762,9 @@
 
 /* loco:60e2d1ed77622d4af14f5a72 */
 "errorFileLocked" = "Diese Datei ist bereits von einem Benutzer geöffnet und kann nicht verändert werden";
+
+/* loco:664c499b09f1290486001cb2 */
+"errorFilesLimitExceeded" = "Limit der Dateien im Ordner erreicht";
 
 /* loco:605b1b5f49d7ff61223fcfe2 */
 "errorGeneric" = "Ein Fehler ist aufgetreten";
@@ -1563,7 +1565,7 @@
 "recentActivitySeeMore" = "Mehr neue Dateien anzeigen";
 
 /* loco:6049df4d5c2c3a04bc397a2c */
-"refreshTokenError" = "Sie wurden aufgrund eines Problems getrennt. Bitte verbinden Sie sich erneut.";
+"refreshTokenError" = "Ihre Verbindung wurde unterbrochen";
 
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Eingeschränkter Freigabelink";
