@@ -264,9 +264,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        print(
-            "didSelect viewController: UIViewController:\(viewController) tabBarController.selectedIndex:\(tabBarController.selectedIndex)"
-        )
+        UserDefaults.shared.lastSelectedTab = tabBarController.selectedIndex
         updateCenterButton()
     }
 }

@@ -90,22 +90,17 @@ public final class AppRestorationService {
             return
         }
 
-        // WIP: Dynamically guess … not working ATM
-//        if var topController = UIApplication.shared.keyWindow?.rootViewController {
-//            while let presentedViewController = topController.presentedViewController {
-//                print("•• iterating:\(presentedViewController)")
-//                topController = presentedViewController
-//            }
-//
-//            print("•• found: topController:\(topController)")
-//            // topController should now be your topmost view controller
-//        }
-
-        // TODO: Use NSUserActivity instead.
-
-        // TODO: Read the last tab selected in order to properly respring.
-        let newMainTabViewController = MainTabViewController(driveFileManager: currentDriveFileManager)
+        // Read the last tab selected in order to properly respring.
+        // This should be migrated to NSUserActivity at some point
+        let lastSelectedTab = UserDefaults.shared.lastSelectedTab
+        let newMainTabViewController = MainTabViewController(
+            driveFileManager: currentDriveFileManager,
+            selectedIndex: lastSelectedTab
+        )
         (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+
+        // cleanup
+        UserDefaults.shared.lastSelectedTab = nil
     }
 }
 
