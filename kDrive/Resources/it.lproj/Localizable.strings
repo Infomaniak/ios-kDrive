@@ -4,7 +4,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Tue, 21 May 2024 09:34:01 +0200
+ * Exported at: Tue, 21 May 2024 11:46:19 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1190,7 +1190,7 @@
 "filePermissionTitle" = "Seleziona il diritto";
 
 /* loco:610bd30a99648743be1f0a13 */
-"fileProviderExtensionDescription" = "Se questa opzione è disattivata, kDrive non sarà più disponibile nell'applicazione Files e nelle applicazioni di terzi.";
+"fileProviderExtensionDescription" = "Se questa opzione è disattivata, kDrive non sarà più disponibile nell’applicazione Files e nelle applicazioni di terzi.";
 
 /* loco:610a903379317f32214437b4 */
 "fileProviderExtensionTitle" = "Vedi in File";
@@ -1322,7 +1322,7 @@
 "manageDropboxTitle" = "Gestisci il deposito file %@";
 
 /* loco:614c861005fa88548e40ee83 */
-"manageStorageTitle" = "Gestire l'archiviazione locale";
+"manageStorageTitle" = "Gestire l’archiviazione locale";
 
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Menu";
@@ -1415,7 +1415,7 @@
 "newFolderTitle" = "Cosa vuoi aggiungere?";
 
 /* loco:60ad169bd79aa2487c624742 */
-"noAccountDescription" = "Nessun conto disponibile. Lancia l'applicazione per accedere.";
+"noAccountDescription" = "Nessun conto disponibile. Lancia l’applicazione per accedere.";
 
 /* loco:6049df4d5c2c3a04bc397a09 */
 "noDriveDescription" = "Prova kDrive gratuitamente o accedi con un altro account utente.";
@@ -1745,7 +1745,7 @@
 "snackBarCategoryDeleted" = "Categoria eliminata con successo";
 
 /* loco:629f1b5bfc67572038545e23 */
-"snackBarErrorAccountDeletion" = "Errore durante l'eliminazione dell'account";
+"snackBarErrorAccountDeletion" = "Errore durante l’eliminazione dell’account";
 
 /* loco:62a8409e5803ef33d9677572 */
 "snackBarImageVideoSaved" = "%d file salvati nella libreria fotografica";
@@ -1775,7 +1775,7 @@
 "snackbarMoveTrashConfirmation" = "%@ spostato nel cestino";
 
 /* loco:60db1a607e10290db82d6d72 */
-"snackbarProcessingUploads" = "Elaborazione dell'importazione";
+"snackbarProcessingUploads" = "Elaborazione dell’importazione";
 
 /* loco:6049df4d5c2c3a04bc397a51 */
 "snackbarVideoSavedConfirmation" = "Video salvato";
@@ -1826,7 +1826,7 @@
 "sortYear" = "Per anno";
 
 /* loco:6141c2e0746dd37e5a318583 */
-"storeAccessDeniedDescription" = "Non disponi dei diritti necessari per modificare l'offerta di questo kDrive. Contatta il tuo amministratore.";
+"storeAccessDeniedDescription" = "Non disponi dei diritti necessari per modificare l’offerta di questo kDrive. Contatta il tuo amministratore.";
 
 /* loco:6141c2b723cae070d728bce2 */
 "storeAccessDeniedTitle" = "Accesso negato";
@@ -1859,7 +1859,7 @@
 "storeOfferTeamDescription" = "6 utenti inclusi e al massimo\n3 TB di spazio di archiviazione";
 
 /* loco:6127435a684d0a521f2972b2 */
-"storeOfferTeamFeature1" = "Tutto ciò che incude l'offerta Solo";
+"storeOfferTeamFeature1" = "Tutto ciò che incude l’offerta Solo";
 
 /* loco:612743756936aa666738a542 */
 "storeOfferTeamFeature2" = "Lavora in collaborazione con più utenti";
@@ -1895,7 +1895,7 @@
 "storeRetrieving" = "Recupero…";
 
 /* loco:6126137b32c58504e96a36f3 */
-"storeSuccessDescription" = "Stiamo concludendo l'ordine, sarai avvisato tramite e-mail non appena il tuo kDrive sarà disponibile.";
+"storeSuccessDescription" = "Stiamo concludendo l’ordine, sarai avvisato tramite e-mail non appena il tuo kDrive sarà disponibile.";
 
 /* loco:6126135a6c5d5a0c28679842 */
 "storeSuccessTitle" = "Ringraziando per la fiducia, siamo molto lieti di poter lavorare insieme!";
