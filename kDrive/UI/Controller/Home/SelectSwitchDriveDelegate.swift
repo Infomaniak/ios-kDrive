@@ -31,16 +31,9 @@ extension SelectSwitchDriveDelegate {
             present(driveFloatingPanelController, animated: true)
         } else {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")
-            @InjectService var accountManager: AccountManageable
-            accountManager.setCurrentDriveForCurrentAccount(drive: drive)
-            accountManager.saveAccounts()
 
-            guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-                return
-            }
-
-            let newMainTabViewController = MainTabViewController(driveFileManager: currentDriveFileManager)
-            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+            @InjectService var appRestorationService: AppRestorationService
+            appRestorationService.respring(drive: drive)
         }
     }
 }

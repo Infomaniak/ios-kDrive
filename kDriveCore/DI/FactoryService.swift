@@ -155,9 +155,6 @@ public enum FactoryService {
             },
             Factory(type: DriveInfosManager.self) { _, _ in
                 DriveInfosManager()
-            },
-            Factory(type: AppRestorationService.self) { _, _ in
-                AppRestorationService()
             }
         ]
         return services
