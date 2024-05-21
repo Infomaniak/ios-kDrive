@@ -680,6 +680,7 @@ public final class DriveFileManager {
         if let query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
         }
+
         if let date {
             searchResults = searchResults.filter(NSPredicate(
                 format: "lastModifiedAt >= %d && lastModifiedAt <= %d",
@@ -687,13 +688,15 @@ public final class DriveFileManager {
                 Int(date.end.timeIntervalSince1970)
             ))
         }
+
         if let fileType {
             if fileType == .folder {
                 searchResults = searchResults.filter(NSPredicate(format: "rawType == \"dir\""))
             } else {
-                searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType.rawValue))
+                searchResults = searchResults.filter(NSPredicate(format: "extensionType == %@", fileType.rawValue))
             }
         }
+
         if !categories.isEmpty {
             let predicate: NSPredicate
             if belongToAllCategories {
