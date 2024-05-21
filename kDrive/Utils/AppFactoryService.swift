@@ -82,7 +82,6 @@ public final class AppRestorationService {
     }
 
     public func reloadAppUI(for drive: Drive) {
-        @InjectService var accountManager: AccountManageable
         accountManager.setCurrentDriveForCurrentAccount(drive: drive)
         accountManager.saveAccounts()
 
