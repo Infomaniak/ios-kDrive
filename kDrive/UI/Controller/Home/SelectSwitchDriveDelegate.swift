@@ -33,7 +33,7 @@ extension SelectSwitchDriveDelegate {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")
 
             @InjectService var appRestorationService: AppRestorationService
-            appRestorationService.respring(drive: drive)
+            appRestorationService.reloadAppUI(for: drive)
         }
     }
 }

@@ -81,7 +81,7 @@ public final class AppRestorationService {
         return shouldRestoreApplicationState
     }
 
-    public func respring(drive: Drive) {
+    public func reloadAppUI(for drive: Drive) {
         @InjectService var accountManager: AccountManageable
         accountManager.setCurrentDriveForCurrentAccount(drive: drive)
         accountManager.saveAccounts()
@@ -90,7 +90,7 @@ public final class AppRestorationService {
             return
         }
 
-        // Read the last tab selected in order to properly respring.
+        // Read the last tab selected in order to properly reload the App's UI.
         // This should be migrated to NSUserActivity at some point
         let lastSelectedTab = UserDefaults.shared.lastSelectedTab
         let newMainTabViewController = MainTabViewController(
@@ -119,7 +119,7 @@ public final class AppRestorationService {
         false
     }
 
-    public func respring(drive: Drive) {
+    public func reloadAppUI(for drive: Drive) {
         // NOOP
     }
 }
