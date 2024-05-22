@@ -34,7 +34,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     let driveFileManager: DriveFileManager
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
         self.driveFileManager = driveFileManager
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
@@ -44,6 +44,10 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
+
+        if let selectedIndex {
+            self.selectedIndex = selectedIndex
+        }
     }
 
     @available(*, unavailable)
@@ -260,6 +264,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        UserDefaults.shared.lastSelectedTab = tabBarController.selectedIndex
         updateCenterButton()
     }
 }

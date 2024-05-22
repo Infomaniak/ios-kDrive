@@ -38,6 +38,7 @@ extension UserDefaults.Keys {
     static let lastSelectedUser = UserDefaults.Keys(rawValue: "lastSelectedUser")
     static let lastSelectedDrive = UserDefaults.Keys(rawValue: "lastSelectedDrive")
     static let lastSelectedDirectory = UserDefaults.Keys(rawValue: "lastSelectedDirectory")
+    static let lastSelectedTab = UserDefaults.Keys(rawValue: "lastSelectedTab")
     static let theme = UserDefaults.Keys(rawValue: "theme")
     static let photoSortMode = UserDefaults.Keys(rawValue: "photoSortMode")
     static let betaInviteDisplayed = UserDefaults.Keys(rawValue: "betaInviteDisplayed")
@@ -236,6 +237,15 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.lastSelectedDirectory))
+        }
+    }
+
+    var lastSelectedTab: Int? {
+        get {
+            return integer(forKey: key(.lastSelectedTab))
+        }
+        set {
+            set(newValue, forKey: key(.lastSelectedTab))
         }
     }
 
