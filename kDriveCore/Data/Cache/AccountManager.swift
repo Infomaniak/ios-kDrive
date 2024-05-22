@@ -370,6 +370,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func switchAccount(newAccount: Account) {
         setCurrentAccount(account: newAccount)
+        UserDefaults.shared.lastSelectedTab = nil
         if let drive = drives.first {
             setCurrentDriveForCurrentAccount(drive: drive)
         }
@@ -396,6 +397,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func addAccount(account: Account, token: ApiToken) {
+        UserDefaults.shared.lastSelectedTab = nil
+
         if accounts.contains(account) {
             removeAccount(toDeleteAccount: account)
         }
@@ -405,6 +408,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func removeAccount(toDeleteAccount: Account) {
+        UserDefaults.shared.lastSelectedTab = nil
+
         if currentAccount == toDeleteAccount {
             currentAccount = nil
             currentDriveId = 0

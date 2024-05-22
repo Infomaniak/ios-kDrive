@@ -72,8 +72,5 @@ public final class AppRestorationService {
             selectedIndex: lastSelectedTab
         )
         (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
-
-        // cleanup
-        UserDefaults.shared.lastSelectedTab = nil
     }
 }
