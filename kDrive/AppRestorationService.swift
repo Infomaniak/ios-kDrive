@@ -49,11 +49,13 @@ public final class AppRestorationService {
     }
 
     public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
-        let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
-            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
-        Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-        return shouldRestoreApplicationState
+        return false
+        /* TODO: Rework app restoration before re-enabling
+         let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
+         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+         return shouldRestoreApplicationState*/
     }
 
     public func reloadAppUI(for drive: Drive) {
