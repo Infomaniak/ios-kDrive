@@ -28,109 +28,111 @@ import UIKit
 extension AppDelegate {
     // MARK: Launch
 
-    func prepareRootViewController(currentState: RootViewControllerState) {
-        switch currentState {
-        case .appLock:
-            showAppLock()
-        case .mainViewController(let driveFileManager):
-            showMainViewController(driveFileManager: driveFileManager)
-            showLaunchFloatingPanel()
-            askForReview()
-            askUserToRemovePicturesIfNecessary()
-        case .onboarding:
-            showOnboarding()
-        case .updateRequired:
-            showUpdateRequired()
-        case .preloading(let currentAccount):
-            showPreloading(currentAccount: currentAccount)
-        }
-    }
+//    func prepareRootViewController(currentState: RootViewControllerState) {
+//        switch currentState {
+//        case .appLock:
+//            showAppLock()
+//        case .mainViewController(let driveFileManager):
+//            showMainViewController(driveFileManager: driveFileManager)
+//            showLaunchFloatingPanel()
+//            askForReview()
+//            askUserToRemovePicturesIfNecessary()
+//        case .onboarding:
+//            showOnboarding()
+//        case .updateRequired:
+//            showUpdateRequired()
+//        case .preloading(let currentAccount):
+//            showPreloading(currentAccount: currentAccount)
+//        }
+//    }
 
-    func updateRootViewControllerState() {
-        let newState = RootViewControllerState.getCurrentState()
-        prepareRootViewController(currentState: newState)
-    }
+//    func updateRootViewControllerState() {
+//        let newState = RootViewControllerState.getCurrentState()
+//        prepareRootViewController(currentState: newState)
+//    }
 
     // MARK: Set root VC
 
-    func showMainViewController(driveFileManager: DriveFileManager) {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+    /*
+     func showMainViewController(driveFileManager: DriveFileManager) {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
-        guard currentDriveObjectId != driveFileManager.drive.objectId else {
-            return
-        }
+         let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+         guard currentDriveObjectId != driveFileManager.drive.objectId else {
+             return
+         }
 
-        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
-        window.makeKeyAndVisible()
-    }
+         window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
+         window.makeKeyAndVisible()
+     }
 
-    func showPreloading(currentAccount: Account) {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+     func showPreloading(currentAccount: Account) {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        window.rootViewController = PreloadingViewController(currentAccount: currentAccount)
-        window.makeKeyAndVisible()
-    }
+         window.rootViewController = PreloadingViewController(currentAccount: currentAccount)
+         window.makeKeyAndVisible()
+     }
 
-    private func showOnboarding() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+     private func showOnboarding() {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        defer {
-            // Clean File Provider domains on first launch in case we had some dangling
-            driveInfosManager.deleteAllFileProviderDomains()
-        }
+         defer {
+             // Clean File Provider domains on first launch in case we had some dangling
+             driveInfosManager.deleteAllFileProviderDomains()
+         }
 
-        // Check if presenting onboarding
-        let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
-        guard isNotPresentingOnboarding else {
-            return
-        }
+         // Check if presenting onboarding
+         let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
+         guard isNotPresentingOnboarding else {
+             return
+         }
 
-        keychainHelper.deleteAllTokens()
-        window.rootViewController = OnboardingViewController.instantiate()
-        window.makeKeyAndVisible()
-    }
+         keychainHelper.deleteAllTokens()
+         window.rootViewController = OnboardingViewController.instantiate()
+         window.makeKeyAndVisible()
+     }
 
-    private func showAppLock() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+     private func showAppLock() {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        window.rootViewController = LockedAppViewController.instantiate()
-        window.makeKeyAndVisible()
-    }
+         window.rootViewController = LockedAppViewController.instantiate()
+         window.makeKeyAndVisible()
+     }
 
-    private func showLaunchFloatingPanel() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+     private func showLaunchFloatingPanel() {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        let launchPanelsController = LaunchPanelsController()
-        if let viewController = window.rootViewController {
-            launchPanelsController.pickAndDisplayPanel(viewController: viewController)
-        }
-    }
+         let launchPanelsController = LaunchPanelsController()
+         if let viewController = window.rootViewController {
+             launchPanelsController.pickAndDisplayPanel(viewController: viewController)
+         }
+     }
 
-    private func showUpdateRequired() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
+     private func showUpdateRequired() {
+         guard let window else {
+             SentryDebug.captureNoWindow()
+             return
+         }
 
-        window.rootViewController = DriveUpdateRequiredViewController()
-        window.makeKeyAndVisible()
-    }
+         window.rootViewController = DriveUpdateRequiredViewController()
+         window.makeKeyAndVisible()
+     }
+     */
 
     // MARK: Misc
 

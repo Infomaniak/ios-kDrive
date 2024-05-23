@@ -96,9 +96,11 @@ class PreloadingViewController: UIViewController {
                 _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
 
                 if let currentDriveFileManager = accountManager.currentDriveFileManager {
-                    appDelegate.prepareRootViewController(currentState: .mainViewController(currentDriveFileManager))
+                    // TODO: Fixme
+//                    appDelegate.prepareRootViewController(currentState: .mainViewController(currentDriveFileManager))
                 } else {
-                    appDelegate.prepareRootViewController(currentState: .onboarding)
+                    // TODO: Fixme
+//                    appDelegate.prepareRootViewController(currentState: .onboarding)
                 }
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorViewController = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
@@ -111,7 +113,8 @@ class PreloadingViewController: UIViewController {
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
-                appDelegate.prepareRootViewController(currentState: .onboarding)
+                // TODO: Fixme
+//                appDelegate.prepareRootViewController(currentState: .onboarding)
             }
         }
     }

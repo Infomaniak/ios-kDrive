@@ -233,12 +233,14 @@ extension MenuViewController {
 
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                    // TODO: FIXME
+//                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
                 } else {
                     SentrySDK.setUser(nil)
                 }
                 self.accountManager.saveAccounts()
-                appDelegate?.updateRootViewControllerState()
+                // TODO: Fixme
+//                appDelegate?.updateRootViewControllerState()
             }
             present(alert, animated: true)
         case .help:

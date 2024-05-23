@@ -83,12 +83,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         notificationHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
 
-        window = UIWindow()
+        // TODO: Cleanup
+        // no longer setting up window here
+//        window = UIWindow()
         setGlobalTint()
 
         let state = UIApplication.shared.applicationState
         if state != .background {
-            appWillBePresentedToTheUser()
+            // TODO: Fixme
+//            appWillBePresentedToTheUser()
         }
 
         accountManager.delegate = self
@@ -173,15 +176,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        Log.appDelegate("applicationDidEnterBackground")
-        backgroundTasksService.scheduleBackgroundRefresh()
-
-        if UserDefaults.shared.isAppLockEnabled,
-           !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
-            lockHelper.setTime()
-        }
-    }
+    // Migrated to sceneDidEnterBackground
+    // func applicationDidEnterBackground(_ application: UIApplication) { }
 
     func application(
         _ application: UIApplication,
@@ -197,35 +193,34 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         return DeeplinkParser().parse(url: url)
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        Log.appDelegate("applicationWillEnterForeground")
-        appWillBePresentedToTheUser()
-    }
+    // Migrated to sceneWillEnterForeground
+    // func applicationWillEnterForeground(_ application: UIApplication) { }
 
-    private func appWillBePresentedToTheUser() {
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.pausedNotificationSent = false
-
-        let currentState = RootViewControllerState.getCurrentState()
-        prepareRootViewController(currentState: currentState)
-        switch currentState {
-        case .mainViewController, .appLock:
-            UserDefaults.shared.numberOfConnections += 1
-            UserDefaults.shared.openingUntilReview -= 1
-            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
-            uploadEditedFiles()
-        case .onboarding, .updateRequired, .preloading: break
-        }
-
-        // Remove all notifications on App Opening
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-
-        Task {
-            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
-                prepareRootViewController(currentState: .updateRequired)
-            }
-        }
-    }
+    // TODO: Remove
+//    private func appWillBePresentedToTheUser() {
+//        @InjectService var uploadQueue: UploadQueue
+//        uploadQueue.pausedNotificationSent = false
+//
+//        let currentState = RootViewControllerState.getCurrentState()
+//        prepareRootViewController(currentState: currentState)
+//        switch currentState {
+//        case .mainViewController, .appLock:
+//            UserDefaults.shared.numberOfConnections += 1
+//            UserDefaults.shared.openingUntilReview -= 1
+//            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+//            uploadEditedFiles()
+//        case .onboarding, .updateRequired, .preloading: break
+//        }
+//
+//        // Remove all notifications on App Opening
+//        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+//
+//        Task {
+//            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
+//                prepareRootViewController(currentState: .updateRequired)
+//            }
+//        }
+//    }
 
     /// Set global tint color
     private func setGlobalTint() {
@@ -237,97 +232,57 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        if let shortcutItem = shortcutItemToProcess {
-            guard let rootViewController = window?.rootViewController as? MainTabViewController else {
-                return
-            }
+    // Migrated to sceneDidBecomeActive
+    // func applicationDidBecomeActive(_ application: UIApplication) { }
 
-            // Dismiss all view controllers presented
-            rootViewController.dismiss(animated: false)
-
-            guard let navController = rootViewController.selectedViewController as? UINavigationController,
-                  let viewController = navController.topViewController,
-                  let driveFileManager = accountManager.currentDriveFileManager else {
-                return
-            }
-
-            switch shortcutItem.type {
-            case Constants.applicationShortcutScan:
-                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-                openMediaHelper.openScan(rootViewController, false)
-                MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
-            case Constants.applicationShortcutSearch:
-                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-                viewController.present(
-                    SearchViewController.instantiateInNavigationController(viewModel: viewModel),
-                    animated: true
-                )
-                MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
-            case Constants.applicationShortcutUpload:
-                let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-                openMediaHelper.openMedia(rootViewController, .library)
-                MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
-            case Constants.applicationShortcutSupport:
-                UIApplication.shared.open(URLConstants.support.url)
-                MatomoUtils.track(eventWithCategory: .shortcuts, name: "support")
-            default:
-                break
-            }
-
-            // reset the shortcut item
-            shortcutItemToProcess = nil
-        }
-    }
-
-    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
-        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
-
-        guard let currentAccount = accountManager.currentAccount else {
-            Log.appDelegate("No account to refresh", level: .error)
-            return
-        }
-
-        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
-
-        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-
-        Task {
-            do {
-                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
-                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                rootViewController?.didUpdateCurrentAccountInformations(account)
-
-                if let oldDriveId,
-                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
-                   !newDrive.inMaintenance {
-                    // The current drive is still usable, do not switch
-                    scanLibraryAndRestartUpload()
-                    return
-                }
-
-                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-                accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
-                showMainViewController(driveFileManager: driveFileManager)
-                scanLibraryAndRestartUpload()
-            } catch DriveError.NoDriveError.noDrive {
-                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                    errorType: .noDrive,
-                    drive: nil
-                )
-                setRootViewController(driveErrorNavigationViewController)
-            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
-                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
-                    drive: drive
-                )
-                setRootViewController(driveErrorNavigationViewController)
-            } catch {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                Log.appDelegate("Error while updating user account: \(error)", level: .error)
-            }
-        }
-    }
+//    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
+//        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
+//
+//        guard let currentAccount = accountManager.currentAccount else {
+//            Log.appDelegate("No account to refresh", level: .error)
+//            return
+//        }
+//
+//        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
+//
+//        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+//
+//        Task {
+//            do {
+//                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
+//                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+//                rootViewController?.didUpdateCurrentAccountInformations(account)
+//
+//                if let oldDriveId,
+//                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
+//                   !newDrive.inMaintenance {
+//                    // The current drive is still usable, do not switch
+//                    scanLibraryAndRestartUpload()
+//                    return
+//                }
+//
+//                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+//                accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
+//                showMainViewController(driveFileManager: driveFileManager)
+//                scanLibraryAndRestartUpload()
+//            } catch DriveError.NoDriveError.noDrive {
+//                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+//                    errorType: .noDrive,
+//                    drive: nil
+//                )
+//                setRootViewController(driveErrorNavigationViewController)
+//            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+//                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+//                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+//                    drive: drive
+//                )
+//                setRootViewController(driveErrorNavigationViewController)
+//            } catch {
+//                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+//                Log.appDelegate("Error while updating user account: \(error)", level: .error)
+//            }
+//        }
+//    }
 
     private func scanLibraryAndRestartUpload() {
         // Resolving an upload queue will restart it if this is the first time
@@ -354,6 +309,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     func setRootViewController(_ vc: UIViewController,
                                animated: Bool = true) {
+        fatalError("Woops")
         guard let window else {
             return
         }
@@ -416,7 +372,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     @objc func reloadDrive(_ notification: Notification) {
         Task { @MainActor in
-            self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            // TODO: Fixme
+            // self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
         }
     }
 
@@ -426,16 +383,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         Task { @MainActor in
             setRootViewController(SwitchUserViewController.instantiateInNavigationController())
         }
-    }
-
-    // MARK: - State restoration
-
-    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-        return appRestorationService.shouldSaveApplicationState(coder: coder)
-    }
-
-    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return appRestorationService.shouldRestoreApplicationState(coder: coder)
     }
 
     // MARK: - User activity

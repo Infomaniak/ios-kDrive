@@ -211,12 +211,14 @@ extension ParameterTableViewController: DeleteAccountDelegate {
 
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            // TODO: Fixme
+//            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
         } else {
             SentrySDK.setUser(nil)
         }
         accountManager.saveAccounts()
-        appDelegate?.updateRootViewControllerState()
+        // TODO: Fixme
+//        appDelegate?.updateRootViewControllerState()
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 

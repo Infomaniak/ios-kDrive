@@ -41,7 +41,8 @@ class LockedAppViewController: UIViewController {
 
     func unlockApp() {
         appLockHelper.setTime()
-        (UIApplication.shared.delegate as? AppDelegate)?.updateRootViewControllerState()
+        // TODO: Fixme
+//        (UIApplication.shared.delegate as? AppDelegate)?.updateRootViewControllerState()
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {
