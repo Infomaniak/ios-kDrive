@@ -23,6 +23,8 @@ import UIKit
 
 // TODO: Refactor with Scenes / NSUserActivity
 public final class AppRestorationService {
+    @LazyInjectService var appNavigable: AppNavigable
+
     /// Path where the state restoration state is saved
     private static let statePath = FileManager.default
         .urls(for: .libraryDirectory, in: .userDomainMask)
@@ -73,6 +75,7 @@ public final class AppRestorationService {
             driveFileManager: currentDriveFileManager,
             selectedIndex: lastSelectedTab
         )
-        (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+
+        appNavigable.setRootViewController(newMainTabViewController, animated: true)
     }
 }

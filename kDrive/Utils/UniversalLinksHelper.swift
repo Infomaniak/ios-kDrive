@@ -87,7 +87,8 @@ enum UniversalLinksHelper {
         Task {
             do {
                 let file = try await driveFileManager.file(id: id)
-                await appDelegate.present(file: file, driveFileManager: driveFileManager, office: office)
+                @InjectService var appNavigable: AppNavigable
+                await appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
                 DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
                 await UIConstants.showSnackBarIfNeeded(error: error)

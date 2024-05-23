@@ -21,17 +21,18 @@ import kDriveCore
 import UIKit
 
 extension AppDelegate {
-    func application(_ application: UIApplication,
-                     handleEventsForBackgroundURLSession identifier: String,
-                     completionHandler: @escaping () -> Void) {
-        Log.bgSessionManager("background session relaunched identifier:\(identifier)")
-        if identifier == DownloadQueue.backgroundIdentifier {
-            backgroundDownloadSessionManager.backgroundCompletionHandler = completionHandler
-        } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            backgroundUploadSessionManager.handleEventsForBackgroundURLSession(identifier: identifier,
-                                                                               completionHandler: completionHandler)
-        } else {
-            completionHandler()
-        }
-    }
+    /* Deprecating usage of BackgroundURLSessions
+     func application(_ application: UIApplication,
+                      handleEventsForBackgroundURLSession identifier: String,
+                      completionHandler: @escaping () -> Void) {
+         Log.bgSessionManager("background session relaunched identifier:\(identifier)")
+         if identifier == DownloadQueue.backgroundIdentifier {
+             backgroundDownloadSessionManager.backgroundCompletionHandler = completionHandler
+         } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
+             backgroundUploadSessionManager.handleEventsForBackgroundURLSession(identifier: identifier,
+                                                                                completionHandler: completionHandler)
+         } else {
+             completionHandler()
+         }
+     }*/
 }

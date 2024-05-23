@@ -63,8 +63,9 @@ class SelectThemeTableViewController: UITableViewController {
         let theme = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
         UserDefaults.shared.theme = theme
-        (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme
-            .interfaceStyle
-        navigationController?.popViewController(animated: true)
+        // TODO: Fixme, try to hide window access
+//        (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme
+//            .interfaceStyle
+//        navigationController?.popViewController(animated: true)
     }
 }

@@ -34,20 +34,21 @@ import UserNotifications
 import VersionChecker
 
 @main
-final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
     private var shortcutItemToProcess: UIApplicationShortcutItem?
 
-    var window: UIWindow?
+//    var window: UIWindow?
 
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appRestorationService: AppRestorationService
+    @LazyInjectService private var appNavigable: AppNavigable
 
     // MARK: - UIApplicationDelegate
 
@@ -78,7 +79,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         // TODO: Cleanup
         // no longer setting up window here
 //        window = UIWindow()
-        setGlobalTint()
+//        setGlobalTint()
 
         let state = UIApplication.shared.applicationState
         if state != .background {
@@ -86,13 +87,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 //            appWillBePresentedToTheUser()
         }
 
-        accountManager.delegate = self
-
         if CommandLine.arguments.contains("testing") {
             UIView.setAnimationsEnabled(false)
         }
-
-        window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
 
         // Attach an observer to the payment queue.
         SKPaymentQueue.default().add(StoreObserver.shared)
@@ -103,7 +100,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
             name: .locateUploadActionTapped,
             object: nil
         )
-        NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
         return true
     }
@@ -188,16 +184,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // Migrated to sceneWillEnterForeground
     // func applicationWillEnterForeground(_ application: UIApplication) { }
 
-    /// Set global tint color
-    private func setGlobalTint() {
-        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
-        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
-        // Migration from old UserDefaults
-        if UserDefaults.shared.legacyIsFirstLaunch {
-            UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
-        }
-    }
-
     // Migrated to sceneDidBecomeActive
     // func applicationDidBecomeActive(_ application: UIApplication) { }
 
@@ -209,81 +195,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         return infomaniakLogin.handleRedirectUri(url: url)
     }
 
-    func setRootViewController(_ vc: UIViewController,
-                               animated: Bool = true) {
-        fatalError("Woops")
-        guard let window else {
-            return
-        }
-
-        window.rootViewController = vc
-        window.makeKeyAndVisible()
-
-        guard animated else {
-            return
-        }
-
-        UIView.transition(with: window, duration: 0.3,
-                          options: .transitionCrossDissolve,
-                          animations: nil,
-                          completion: nil)
-    }
-
-    func present(file: File, driveFileManager: DriveFileManager, office: Bool = false) {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
-            return
-        }
-
-        // Dismiss all view controllers presented
-        rootViewController.dismiss(animated: false) {
-            // Select Files tab
-            rootViewController.selectedIndex = 1
-
-            guard let navController = rootViewController.selectedViewController as? UINavigationController,
-                  let viewController = navController.topViewController as? FileListViewController else {
-                return
-            }
-
-            if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
-                // Pop to root
-                navController.popToRootViewController(animated: false)
-                // Present file
-                guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
-                if office {
-                    OnlyOfficeViewController.open(driveFileManager: driveFileManager,
-                                                  file: file,
-                                                  viewController: fileListViewController)
-                } else {
-                    let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(for: file,
-                                          files: [file],
-                                          driveFileManager: driveFileManager,
-                                          normalFolderHierarchy: false)
-                }
-            }
-        }
-    }
-
     @objc func handleLocateUploadNotification(_ notification: Notification) {
         if let parentId = notification.userInfo?["parentId"] as? Int,
            let driveFileManager = accountManager.currentDriveFileManager,
            let folder = driveFileManager.getCachedFile(id: parentId) {
-            present(file: folder, driveFileManager: driveFileManager)
-        }
-    }
-
-    @objc func reloadDrive(_ notification: Notification) {
-        Task { @MainActor in
-            // TODO: Fixme
-            // self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
-        }
-    }
-
-    // MARK: - Account manager delegate
-
-    func currentAccountNeedsAuthentication() {
-        Task { @MainActor in
-            setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+            appNavigable.present(file: folder, driveFileManager: driveFileManager)
         }
     }
 
@@ -337,7 +253,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     if let parentId,
                        let driveFileManager = accountManager.currentDriveFileManager,
                        let folder = driveFileManager.getCachedFile(id: parentId) {
-                        present(file: folder, driveFileManager: driveFileManager)
+                        appNavigable.present(file: folder, driveFileManager: driveFileManager)
                     }
                 default:
                     break
@@ -345,22 +261,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
                 .photoSyncError {
                 // Show photo sync settings
-                guard let rootViewController = window?.rootViewController as? MainTabViewController else {
-                    return
-                }
-
-                // Dismiss all view controllers presented
-                rootViewController.dismiss(animated: false)
-                // Select Menu tab
-                rootViewController.selectedIndex = 4
-
-                guard let navController = rootViewController.selectedViewController as? UINavigationController else {
-                    return
-                }
-
-                let photoSyncSettingsViewController = PhotoSyncSettingsViewController.instantiate()
-                navController.popToRootViewController(animated: false)
-                navController.pushViewController(photoSyncSettingsViewController, animated: true)
+                appNavigable.showPhotoSyncSettings()
             } else {
                 // Handle other notification types...
             }
@@ -382,17 +283,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 //        }
 //
 //        Messaging.messaging().appDidReceiveMessage(userInfo)
-    }
-}
-
-// MARK: - Navigation
-
-extension AppDelegate {
-    var topMostViewController: UIViewController? {
-        var topViewController = window?.rootViewController
-        while let presentedViewController = topViewController?.presentedViewController {
-            topViewController = presentedViewController
-        }
-        return topViewController
     }
 }

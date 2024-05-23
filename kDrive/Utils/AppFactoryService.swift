@@ -37,9 +37,14 @@ public struct EarlyDIHook {
 
         #if !ISEXTENSION
         // AppRestorationService only available for main app, not extensions
-        extraDependencies += [Factory(type: AppRestorationService.self) { _, _ in
-            AppRestorationService()
-        }]
+        extraDependencies += [
+            Factory(type: AppRestorationService.self) { _, _ in
+                AppRestorationService()
+            },
+            Factory(type: AppNavigable.self) { _, _ in
+                AppRouter()
+            }
+        ]
         #endif
 
         // setup DI ASAP

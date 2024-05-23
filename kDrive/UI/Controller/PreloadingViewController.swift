@@ -24,6 +24,7 @@ import UIKit
 
 class PreloadingViewController: UIViewController {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var appNavigable: AppNavigable
 
     private let currentAccount: Account
 
@@ -95,12 +96,11 @@ class PreloadingViewController: UIViewController {
                 let _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
 
-                if let currentDriveFileManager = accountManager.currentDriveFileManager {
-                    // TODO: Fixme
-//                    appDelegate.prepareRootViewController(currentState: .mainViewController(currentDriveFileManager))
+                if let currentDriveFileManager = self.accountManager.currentDriveFileManager {
+                    let state = RootViewControllerState.mainViewController(currentDriveFileManager)
+                    self.appNavigable.prepareRootViewController(currentState: state)
                 } else {
-                    // TODO: Fixme
-//                    appDelegate.prepareRootViewController(currentState: .onboarding)
+                    self.appNavigable.prepareRootViewController(currentState: .onboarding)
                 }
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorViewController = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
@@ -113,8 +113,7 @@ class PreloadingViewController: UIViewController {
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
-                // TODO: Fixme
-//                appDelegate.prepareRootViewController(currentState: .onboarding)
+                self.appNavigable.prepareRootViewController(currentState: .onboarding)
             }
         }
     }

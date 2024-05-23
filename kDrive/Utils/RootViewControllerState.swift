@@ -22,7 +22,7 @@ import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
 
-enum RootViewControllerState {
+public enum RootViewControllerState {
     case onboarding
     case appLock
     case mainViewController(DriveFileManager)

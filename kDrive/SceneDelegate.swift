@@ -25,15 +25,15 @@ import SafariServices
 import UIKit
 import VersionChecker
 
-final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
     @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
+    @LazyInjectService var appNavigable: AppNavigable
 
     // TODO: Fixme
     private var shortcutItemToProcess: UIApplicationShortcutItem?
@@ -68,6 +68,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         /// 5. Set the window and call makeKeyAndVisible()
         self.window = window
         window.makeKeyAndVisible()
+        setGlobalWindowTint()
+        window.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
+
+        // Setup accountManager delegation after the window setup like previously in app delegate
+        accountManager.delegate = self
+
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
     }
 
     func configure(window: UIWindow?, session: UISceneSession, with activity: NSUserActivity) -> Bool {
@@ -101,7 +108,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         uploadQueue.pausedNotificationSent = false
 
         let currentState = RootViewControllerState.getCurrentState()
-        prepareRootViewController(currentState: currentState)
+        appNavigable.prepareRootViewController(currentState: currentState)
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
@@ -116,7 +123,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         Task {
             if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
-                prepareRootViewController(currentState: .updateRequired)
+                appNavigable.prepareRootViewController(currentState: .updateRequired)
             }
         }
     }
@@ -206,6 +213,23 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
         print(" scene didFailToContinueUserActivityWithType")
     }
+
+    // MARK: - Account manager delegate
+
+    func currentAccountNeedsAuthentication() {
+        Task { @MainActor in
+            let switchUser = SwitchUserViewController.instantiateInNavigationController()
+            appNavigable.setRootViewController(switchUser, animated: true)
+        }
+    }
+
+    // MARK: - Reload drive notification
+
+    @objc func reloadDrive(_ notification: Notification) {
+        Task { @MainActor in
+            self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+        }
+    }
 }
 
 // TODO: Refactor with router like pattern and split code away from this class
@@ -238,43 +262,24 @@ extension SceneDelegate {
 
                 let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
                 accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
-                showMainViewController(driveFileManager: driveFileManager)
+                appNavigable.showMainViewController(driveFileManager: driveFileManager)
                 scanLibraryAndRestartUpload()
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                     errorType: .noDrive,
                     drive: nil
                 )
-                setRootViewController(driveErrorNavigationViewController)
+                appNavigable.setRootViewController(driveErrorNavigationViewController, animated: true)
             } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
                 let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                     errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
                     drive: drive
                 )
-                setRootViewController(driveErrorNavigationViewController)
+                appNavigable.setRootViewController(driveErrorNavigationViewController, animated: true)
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 Log.appDelegate("Error while updating user account: \(error)", level: .error)
             }
-        }
-    }
-
-    func prepareRootViewController(currentState: RootViewControllerState) {
-        print(" prepareRootViewController:\(currentState)")
-        switch currentState {
-        case .appLock:
-            showAppLock()
-        case .mainViewController(let driveFileManager):
-            showMainViewController(driveFileManager: driveFileManager)
-            showLaunchFloatingPanel()
-            askForReview()
-            askUserToRemovePicturesIfNecessary()
-        case .onboarding:
-            showOnboarding()
-        case .updateRequired:
-            showUpdateRequired()
-        case .preloading(let currentAccount):
-            showPreloading(currentAccount: currentAccount)
         }
     }
 
@@ -364,72 +369,6 @@ extension SceneDelegate {
         }
     }
 
-    // MARK: Actions
-
-    private func askForReview() {
-        guard let presentingViewController = window?.rootViewController,
-              !Bundle.main.isRunningInTestFlight
-        else { return }
-
-        let shouldRequestReview = reviewManager.shouldRequestReview()
-
-        if shouldRequestReview {
-            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
-            let alert = AlertTextViewController(
-                title: appName,
-                message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
-                action: KDriveResourcesStrings.Localizable.buttonYes,
-                hasCancelButton: true,
-                cancelString: KDriveResourcesStrings.Localizable.buttonNo,
-                handler: requestAppStoreReview,
-                cancelHandler: openUserReport
-            )
-
-            presentingViewController.present(alert, animated: true)
-            MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
-        }
-    }
-
-    private func requestAppStoreReview() {
-        MatomoUtils.track(eventWithCategory: .appReview, name: "like")
-        UserDefaults.shared.appReview = .readyForReview
-        reviewManager.requestReview()
-    }
-
-    private func openUserReport() {
-        MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
-        guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS),
-              let presentingViewController = window?.rootViewController else {
-            return
-        }
-        UserDefaults.shared.appReview = .feedback
-        presentingViewController.present(SFSafariViewController(url: url), animated: true)
-    }
-
-    /// Ask the user to remove pictures if configured
-    private func askUserToRemovePicturesIfNecessary() {
-        @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
-        guard photoCleaner.hasPicturesToRemove else {
-            Log.appDelegate("No pictures to remove", level: .info)
-            return
-        }
-
-        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
-                                            message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
-                                            action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                            destructive: true,
-                                            loading: false) {
-            Task {
-                // Proceed with removal
-                await photoCleaner.removePicturesScheduledForDeletion()
-            }
-        }
-
-        Task { @MainActor in
-            self.window?.rootViewController?.present(alert, animated: true)
-        }
-    }
-
     // MARK: Photo library
 
     private func scanLibraryAndRestartUpload() {
@@ -447,103 +386,13 @@ extension SceneDelegate {
         }
     }
 
-    // MARK: Show
-
-    func setRootViewController(_ vc: UIViewController,
-                               animated: Bool = true) {
-        guard let window else {
-            return
+    /// Set global tint color
+    private func setGlobalWindowTint() {
+        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
+        // Migration from old UserDefaults
+        if UserDefaults.shared.legacyIsFirstLaunch {
+            UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
         }
-
-        window.rootViewController = vc
-        window.makeKeyAndVisible()
-
-        guard animated else {
-            return
-        }
-
-        UIView.transition(with: window, duration: 0.3,
-                          options: .transitionCrossDissolve,
-                          animations: nil,
-                          completion: nil)
-    }
-
-    func showMainViewController(driveFileManager: DriveFileManager) {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
-        guard currentDriveObjectId != driveFileManager.drive.objectId else {
-            return
-        }
-
-        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
-        window.makeKeyAndVisible()
-    }
-
-    func showPreloading(currentAccount: Account) {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        window.rootViewController = PreloadingViewController(currentAccount: currentAccount)
-        window.makeKeyAndVisible()
-    }
-
-    private func showOnboarding() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        defer {
-            // Clean File Provider domains on first launch in case we had some dangling
-            driveInfosManager.deleteAllFileProviderDomains()
-        }
-
-        // Check if presenting onboarding
-        let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
-        guard isNotPresentingOnboarding else {
-            return
-        }
-
-        keychainHelper.deleteAllTokens()
-        window.rootViewController = OnboardingViewController.instantiate()
-        window.makeKeyAndVisible()
-    }
-
-    private func showAppLock() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        window.rootViewController = LockedAppViewController.instantiate()
-        window.makeKeyAndVisible()
-    }
-
-    private func showLaunchFloatingPanel() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        let launchPanelsController = LaunchPanelsController()
-        if let viewController = window.rootViewController {
-            launchPanelsController.pickAndDisplayPanel(viewController: viewController)
-        }
-    }
-
-    private func showUpdateRequired() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        window.rootViewController = DriveUpdateRequiredViewController()
-        window.makeKeyAndVisible()
     }
 }

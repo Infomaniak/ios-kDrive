@@ -42,6 +42,7 @@ class OnboardingViewController: UIViewController {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     var addUser = false
     var slides: [Slide] = []
@@ -147,7 +148,7 @@ class OnboardingViewController: UIViewController {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
         let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabViewController, animated: true)
+        appNavigable.setRootViewController(mainTabViewController, animated: true)
     }
 
     private func updateButtonsState() {
