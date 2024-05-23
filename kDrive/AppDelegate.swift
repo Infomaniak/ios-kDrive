@@ -43,18 +43,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     var window: UIWindow?
 
-    @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
-    @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-    @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
-    @LazyInjectService var reviewManager: ReviewManageable
-    @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService var appRestorationService: AppRestorationService
 
     // MARK: - UIApplicationDelegate
@@ -196,32 +188,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // Migrated to sceneWillEnterForeground
     // func applicationWillEnterForeground(_ application: UIApplication) { }
 
-    // TODO: Remove
-//    private func appWillBePresentedToTheUser() {
-//        @InjectService var uploadQueue: UploadQueue
-//        uploadQueue.pausedNotificationSent = false
-//
-//        let currentState = RootViewControllerState.getCurrentState()
-//        prepareRootViewController(currentState: currentState)
-//        switch currentState {
-//        case .mainViewController, .appLock:
-//            UserDefaults.shared.numberOfConnections += 1
-//            UserDefaults.shared.openingUntilReview -= 1
-//            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
-//            uploadEditedFiles()
-//        case .onboarding, .updateRequired, .preloading: break
-//        }
-//
-//        // Remove all notifications on App Opening
-//        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-//
-//        Task {
-//            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
-//                prepareRootViewController(currentState: .updateRequired)
-//            }
-//        }
-//    }
-
     /// Set global tint color
     private func setGlobalTint() {
         window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
@@ -234,70 +200,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
 
     // Migrated to sceneDidBecomeActive
     // func applicationDidBecomeActive(_ application: UIApplication) { }
-
-//    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
-//        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
-//
-//        guard let currentAccount = accountManager.currentAccount else {
-//            Log.appDelegate("No account to refresh", level: .error)
-//            return
-//        }
-//
-//        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
-//
-//        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-//
-//        Task {
-//            do {
-//                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
-//                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-//                rootViewController?.didUpdateCurrentAccountInformations(account)
-//
-//                if let oldDriveId,
-//                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
-//                   !newDrive.inMaintenance {
-//                    // The current drive is still usable, do not switch
-//                    scanLibraryAndRestartUpload()
-//                    return
-//                }
-//
-//                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-//                accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
-//                showMainViewController(driveFileManager: driveFileManager)
-//                scanLibraryAndRestartUpload()
-//            } catch DriveError.NoDriveError.noDrive {
-//                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-//                    errorType: .noDrive,
-//                    drive: nil
-//                )
-//                setRootViewController(driveErrorNavigationViewController)
-//            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
-//                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-//                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
-//                    drive: drive
-//                )
-//                setRootViewController(driveErrorNavigationViewController)
-//            } catch {
-//                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-//                Log.appDelegate("Error while updating user account: \(error)", level: .error)
-//            }
-//        }
-//    }
-
-    private func scanLibraryAndRestartUpload() {
-        // Resolving an upload queue will restart it if this is the first time
-        @InjectService var uploadQueue: UploadQueue
-
-        backgroundUploadSessionManager.reconnectBackgroundTasks()
-        DispatchQueue.global(qos: .utility).async {
-            Log.appDelegate("Restart queue")
-            @InjectService var photoUploader: PhotoLibraryUploader
-            _ = photoUploader.scheduleNewPicturesForUpload()
-
-            @InjectService var uploadQueue: UploadQueue
-            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
-        }
-    }
 
     func application(_ application: UIApplication,
                      open url: URL,

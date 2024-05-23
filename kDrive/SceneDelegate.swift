@@ -25,21 +25,15 @@ import SafariServices
 import UIKit
 import VersionChecker
 
-@available(iOS 13.0, *)
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
-//    @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-//    @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
-//    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-//    @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
     @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
-//    @LazyInjectService var appRestorationService: AppRestorationService
 
     // TODO: Fixme
     private var shortcutItemToProcess: UIApplicationShortcutItem?
