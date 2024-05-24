@@ -23,6 +23,7 @@ import UIKit
 
 class LockedAppViewController: UIViewController {
     @LazyInjectService private var appLockHelper: AppLockHelper
+    @LazyInjectService private var appNavigable: AppNavigable
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -41,8 +42,7 @@ class LockedAppViewController: UIViewController {
 
     func unlockApp() {
         appLockHelper.setTime()
-        // TODO: Fixme
-//        (UIApplication.shared.delegate as? AppDelegate)?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {

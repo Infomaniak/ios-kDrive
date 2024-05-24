@@ -56,6 +56,9 @@ public protocol RouterRootNavigable {
                                           animated: Bool)
 
     @MainActor func prepareRootViewController(currentState: RootViewControllerState)
+
+    /// Set the main theme color
+    @MainActor func updateTheme()
 }
 
 public protocol TopmostViewControllerFetchable {
@@ -149,6 +152,15 @@ public struct AppRouter: AppNavigable {
         case .preloading(let currentAccount):
             showPreloading(currentAccount: currentAccount)
         }
+    }
+
+    @MainActor public func updateTheme() {
+        guard let window else {
+            SentryDebug.captureNoWindow()
+            return
+        }
+
+        window.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
     }
 
     // MARK: RouterAppNavigable

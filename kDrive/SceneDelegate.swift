@@ -66,12 +66,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         self.window = window
         window.makeKeyAndVisible()
         setGlobalWindowTint()
-        window.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
+
+        appNavigable.updateTheme()
 
         // Setup accountManager delegation after the window setup like previously in app delegate
         accountManager.delegate = self
 
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLocateUploadNotification),
+            name: .locateUploadActionTapped,
+            object: nil
+        )
     }
 
     func configure(window: UIWindow?, session: UISceneSession, with activity: NSUserActivity) -> Bool {
@@ -227,6 +235,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @objc func reloadDrive(_ notification: Notification) {
         Task {
             await self.appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+        }
+    }
+
+    @objc func handleLocateUploadNotification(_ notification: Notification) {
+        if let parentId = notification.userInfo?["parentId"] as? Int,
+           let driveFileManager = accountManager.currentDriveFileManager,
+           let folder = driveFileManager.getCachedFile(id: parentId) {
+            appNavigable.present(file: folder, driveFileManager: driveFileManager)
         }
     }
 }

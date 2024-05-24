@@ -41,8 +41,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private var reachabilityListener: ReachabilityListener!
     private var shortcutItemToProcess: UIApplicationShortcutItem?
 
-//    var window: UIWindow?
-
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
@@ -76,30 +74,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         notificationHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
 
-        // TODO: Cleanup
-        // no longer setting up window here
-//        window = UIWindow()
-//        setGlobalTint()
-
-        let state = UIApplication.shared.applicationState
-        if state != .background {
-            // TODO: Fixme
-//            appWillBePresentedToTheUser()
-        }
-
         if CommandLine.arguments.contains("testing") {
             UIView.setAnimationsEnabled(false)
         }
 
         // Attach an observer to the payment queue.
         SKPaymentQueue.default().add(StoreObserver.shared)
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleLocateUploadNotification),
-            name: .locateUploadActionTapped,
-            object: nil
-        )
 
         return true
     }
@@ -193,14 +173,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                      annotation: Any) -> Bool {
         Log.appDelegate("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
-    }
-
-    @objc func handleLocateUploadNotification(_ notification: Notification) {
-        if let parentId = notification.userInfo?["parentId"] as? Int,
-           let driveFileManager = accountManager.currentDriveFileManager,
-           let folder = driveFileManager.getCachedFile(id: parentId) {
-            appNavigable.present(file: folder, driveFileManager: driveFileManager)
-        }
     }
 
     // MARK: - User activity
