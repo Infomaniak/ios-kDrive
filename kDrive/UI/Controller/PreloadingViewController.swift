@@ -91,7 +91,6 @@ class PreloadingViewController: UIViewController {
 
     func preloadAccountAndDrives() {
         Task {
-            guard let appDelegate = (UIApplication.shared.delegate as? AppDelegate) else { return }
             do {
                 let _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)

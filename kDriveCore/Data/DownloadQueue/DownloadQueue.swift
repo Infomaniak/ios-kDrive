@@ -124,7 +124,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                 return
             }
 
-            guard let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
+            guard let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
                 Log.downloadQueue("Unable to get a driveFileManager", level: .error)
                 return
             }
@@ -158,7 +158,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         Log.downloadQueue("addToQueue archiveId:\(archiveId)")
         dispatchQueue.async {
             guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
                 return
             }
 
@@ -192,7 +192,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             isManagedByRealm = file.isManagedByRealm
         ] in
             guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file.id) else {
                 return

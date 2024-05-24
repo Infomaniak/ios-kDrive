@@ -27,46 +27,49 @@ import VersionChecker
 
 /// Something that can navigate to specific places of the kDrive app
 public protocol RouterAppNavigable {
-    func showMainViewController(driveFileManager: DriveFileManager)
+    @MainActor func showMainViewController(driveFileManager: DriveFileManager)
 
-    func showPreloading(currentAccount: Account)
+    @MainActor func showPreloading(currentAccount: Account)
 
-    func showOnboarding()
+    @MainActor func showOnboarding()
 
-    func showAppLock()
+    @MainActor func showAppLock()
 
-    func showLaunchFloatingPanel()
+    @MainActor func showLaunchFloatingPanel()
 
-    func showUpdateRequired()
+    @MainActor func showUpdateRequired()
 
-    func showPhotoSyncSettings()
+    @MainActor func showPhotoSyncSettings()
 }
 
 /// Something that can present a File within the app
 public protocol RouterFileNavigable {
-    func present(file: File, driveFileManager: DriveFileManager)
+    @MainActor func present(file: File, driveFileManager: DriveFileManager)
 
-    func present(file: File, driveFileManager: DriveFileManager, office: Bool)
-}
-
-public protocol RouterActionable {
-    func askForReview()
-
-    /// Ask the user to remove pictures if configured
-    func askUserToRemovePicturesIfNecessary()
+    @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 }
 
 /// Something that can set an arbitrary RootView controller
 public protocol RouterRootNavigable {
     /// Something that can set an arbitrary RootView controller
-    func setRootViewController(_ viewController: UIViewController,
-                               animated: Bool)
+    @MainActor func setRootViewController(_ viewController: UIViewController,
+                                          animated: Bool)
 
-    func prepareRootViewController(currentState: RootViewControllerState)
+    @MainActor func prepareRootViewController(currentState: RootViewControllerState)
 }
 
 public protocol TopmostViewControllerFetchable {
-    var topMostViewController: UIViewController? { get }
+    @MainActor var topMostViewController: UIViewController? { get }
+}
+
+/// Actions performed by router, `async` by design
+public protocol RouterActionable {
+    func askForReview() async
+
+    /// Ask the user to remove pictures if configured
+    func askUserToRemovePicturesIfNecessary() async
+
+    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
 }
 
 /// Something that can navigate within the kDrive app
@@ -80,9 +83,11 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var keychainHelper: KeychainHelper
     @LazyInjectService private var reviewManager: ReviewManageable
+    @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
+    @LazyInjectService private var backgroundUploadSessionManager: BackgroundUploadSessionManager
 
     // Get the current window from the app scene
-    private var window: UIWindow? {
+    @MainActor private var window: UIWindow? {
         // This is a hack, as the app has only one scene for now.
         // TODO: Support for scene by identifier
         guard let scene = UIApplication.shared.connectedScenes.first,
@@ -96,7 +101,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: TopmostViewControllerFetchable
 
-    public var topMostViewController: UIViewController? {
+    @MainActor public var topMostViewController: UIViewController? {
         var topViewController = window?.rootViewController
         while let presentedViewController = topViewController?.presentedViewController {
             topViewController = presentedViewController
@@ -106,8 +111,8 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterRootNavigable
 
-    public func setRootViewController(_ viewController: UIViewController,
-                                      animated: Bool) {
+    @MainActor public func setRootViewController(_ viewController: UIViewController,
+                                                 animated: Bool) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -126,15 +131,17 @@ public struct AppRouter: AppNavigable {
                           completion: nil)
     }
 
-    public func prepareRootViewController(currentState: RootViewControllerState) {
+    @MainActor public func prepareRootViewController(currentState: RootViewControllerState) {
         switch currentState {
         case .appLock:
             showAppLock()
         case .mainViewController(let driveFileManager):
             showMainViewController(driveFileManager: driveFileManager)
             showLaunchFloatingPanel()
-            askForReview()
-            askUserToRemovePicturesIfNecessary()
+            Task {
+                await askForReview()
+                await askUserToRemovePicturesIfNecessary()
+            }
         case .onboarding:
             showOnboarding()
         case .updateRequired:
@@ -146,7 +153,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterAppNavigable
 
-    public func showMainViewController(driveFileManager: DriveFileManager) {
+    @MainActor public func showMainViewController(driveFileManager: DriveFileManager) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -161,7 +168,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    public func showPreloading(currentAccount: Account) {
+    @MainActor public func showPreloading(currentAccount: Account) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -171,7 +178,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    public func showOnboarding() {
+    @MainActor public func showOnboarding() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -193,7 +200,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    public func showAppLock() {
+    @MainActor public func showAppLock() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -203,7 +210,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    public func showLaunchFloatingPanel() {
+    @MainActor public func showLaunchFloatingPanel() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -215,7 +222,7 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    public func showUpdateRequired() {
+    @MainActor public func showUpdateRequired() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -225,7 +232,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    public func showPhotoSyncSettings() {
+    @MainActor public func showPhotoSyncSettings() {
         guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }
@@ -246,39 +253,43 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterActionable
 
-    public func askUserToRemovePicturesIfNecessary() {
+    public func askUserToRemovePicturesIfNecessary() async {
         @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
         guard photoCleaner.hasPicturesToRemove else {
             Log.appDelegate("No pictures to remove", level: .info)
             return
         }
 
-        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
-                                            message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
-                                            action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                            destructive: true,
-                                            loading: false) {
-            Task {
-                // Proceed with removal
-                @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
-                await photoCleaner.removePicturesScheduledForDeletion()
-            }
-        }
-
         Task { @MainActor in
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
+                                                message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
+                                                action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                destructive: true,
+                                                loading: false) {
+                Task {
+                    // Proceed with removal
+                    @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
+                    await photoCleaner.removePicturesScheduledForDeletion()
+                }
+            }
+
             window?.rootViewController?.present(alert, animated: true)
         }
     }
 
-    public func askForReview() {
-        guard let presentingViewController = window?.rootViewController,
-              !Bundle.main.isRunningInTestFlight
-        else { return }
+    public func askForReview() async {
+        guard let presentingViewController = await window?.rootViewController,
+              !Bundle.main.isRunningInTestFlight else {
+            return
+        }
 
-        let shouldRequestReview = reviewManager.shouldRequestReview()
+        guard reviewManager.shouldRequestReview() else {
+            return
+        }
 
-        if shouldRequestReview {
-            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
+
+        Task { @MainActor in
             let alert = AlertTextViewController(
                 title: appName,
                 message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
@@ -290,17 +301,17 @@ public struct AppRouter: AppNavigable {
             )
 
             presentingViewController.present(alert, animated: true)
-            MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
         }
+        MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
     }
 
-    private func requestAppStoreReview() {
+    @MainActor private func requestAppStoreReview() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "like")
         UserDefaults.shared.appReview = .readyForReview
         reviewManager.requestReview()
     }
 
-    private func openUserReport() {
+    @MainActor private func openUserReport() {
         MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
         guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS),
               let presentingViewController = window?.rootViewController else {
@@ -310,13 +321,77 @@ public struct AppRouter: AppNavigable {
         presentingViewController.present(SFSafariViewController(url: url), animated: true)
     }
 
+    public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
+        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
+
+        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+
+        do {
+            // TODO: accountManager migrate to Transactionable (not tracking live objects)
+            await Task { @MainActor in
+                @InjectService var accountManager: AccountManageable
+                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
+
+                guard let currentAccount = accountManager.currentAccount else {
+                    Log.appDelegate("No account to refresh", level: .error)
+                    return
+                }
+
+                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+                let rootViewController = await window?.rootViewController as? UpdateAccountDelegate
+                await rootViewController?.didUpdateCurrentAccountInformations(account)
+
+                if let oldDriveId,
+                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
+                   !newDrive.inMaintenance {
+                    // The current drive is still usable, do not switch
+                    await scanLibraryAndRestartUpload()
+                    return
+                }
+
+                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+                let drive = driveFileManager.drive
+                accountManager.setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
+                showMainViewController(driveFileManager: driveFileManager)
+            }
+            await scanLibraryAndRestartUpload()
+        } catch DriveError.NoDriveError.noDrive {
+            let driveErrorNavigationViewController = await DriveErrorViewController.instantiateInNavigationController(
+                errorType: .noDrive,
+                drive: nil
+            )
+            await setRootViewController(driveErrorNavigationViewController, animated: true)
+        } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
+            let driveErrorNavigationViewController = await DriveErrorViewController.instantiateInNavigationController(
+                errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
+                drive: drive
+            )
+            await setRootViewController(driveErrorNavigationViewController, animated: true)
+        } catch {
+            await UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            Log.appDelegate("Error while updating user account: \(error)", level: .error)
+        }
+    }
+
+    private func scanLibraryAndRestartUpload() async {
+        backgroundUploadSessionManager.reconnectBackgroundTasks()
+
+        Log.appDelegate("Restart queue")
+        @InjectService var photoUploader: PhotoLibraryUploader
+        photoUploader.scheduleNewPicturesForUpload()
+
+        // Resolving an upload queue will restart it if this is the first time
+        @InjectService var uploadQueue: UploadQueue
+        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+    }
+
     // MARK: RouterFileNavigable
 
-    public func present(file: File, driveFileManager: DriveFileManager) {
+    @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
         present(file: file, driveFileManager: driveFileManager, office: false)
     }
 
-    public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
+    @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
         guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }

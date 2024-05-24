@@ -21,8 +21,16 @@ import InfomaniakDI
 import kDriveCore
 import UIKit
 
-// TODO: Refactor with Scenes / NSUserActivity
-public final class AppRestorationService {
+/// Something that centralize the App Restoration logic
+public protocol AppRestorationServiceable {
+    func shouldSaveApplicationState(coder: NSCoder) -> Bool
+
+    func shouldRestoreApplicationState(coder: NSCoder) -> Bool
+
+    func reloadAppUI(for driveId: Int, userId: Int) async
+}
+
+public final class AppRestorationService: AppRestorationServiceable {
     @LazyInjectService var appNavigable: AppNavigable
 
     /// Path where the state restoration state is saved
@@ -60,8 +68,8 @@ public final class AppRestorationService {
          return shouldRestoreApplicationState*/
     }
 
-    public func reloadAppUI(for drive: Drive) {
-        accountManager.setCurrentDriveForCurrentAccount(drive: drive)
+    public func reloadAppUI(for driveId: Int, userId: Int) async {
+        accountManager.setCurrentDriveForCurrentAccount(for: driveId, userId: userId)
         accountManager.saveAccounts()
 
         guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
@@ -71,11 +79,11 @@ public final class AppRestorationService {
         // Read the last tab selected in order to properly reload the App's UI.
         // This should be migrated to NSUserActivity at some point
         let lastSelectedTab = UserDefaults.shared.lastSelectedTab
-        let newMainTabViewController = MainTabViewController(
+        let newMainTabViewController = await MainTabViewController(
             driveFileManager: currentDriveFileManager,
             selectedIndex: lastSelectedTab
         )
 
-        appNavigable.setRootViewController(newMainTabViewController, animated: true)
+        await appNavigable.setRootViewController(newMainTabViewController, animated: true)
     }
 }

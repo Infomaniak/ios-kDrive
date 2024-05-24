@@ -501,7 +501,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        driveFileManager = accountManager.getDriveFileManager(for: drive)
+        driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)

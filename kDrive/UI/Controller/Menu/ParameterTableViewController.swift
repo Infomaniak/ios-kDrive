@@ -26,6 +26,7 @@ import UIKit
 class ParameterTableViewController: UITableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var appNavigable: AppNavigable
 
     var driveFileManager: DriveFileManager!
 
@@ -207,18 +208,16 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             accountManager.removeTokenAndAccount(account: currentAccount)
         }
 
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            // TODO: Fixme
-//            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            }
         } else {
             SentrySDK.setUser(nil)
         }
         accountManager.saveAccounts()
-        // TODO: Fixme
-//        appDelegate?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 

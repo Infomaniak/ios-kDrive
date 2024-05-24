@@ -47,7 +47,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
-    @LazyInjectService var appRestorationService: AppRestorationService
+    @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var appNavigable: AppNavigable
 
     // MARK: - UIApplicationDelegate

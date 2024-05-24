@@ -27,12 +27,9 @@ import VersionChecker
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
-    @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
-    @LazyInjectService var reviewManager: ReviewManageable
-    @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService var appNavigable: AppNavigable
 
     // TODO: Fixme
@@ -113,7 +110,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
             UserDefaults.shared.openingUntilReview -= 1
-            refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            }
             uploadEditedFiles()
         case .onboarding, .updateRequired, .preloading: break
         }
@@ -226,63 +225,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     // MARK: - Reload drive notification
 
     @objc func reloadDrive(_ notification: Notification) {
-        Task { @MainActor in
-            self.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+        Task {
+            await self.appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
         }
     }
 }
 
 // TODO: Refactor with router like pattern and split code away from this class
 extension SceneDelegate {
-    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) {
-        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
-
-        guard let currentAccount = accountManager.currentAccount else {
-            Log.appDelegate("No account to refresh", level: .error)
-            return
-        }
-
-        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
-
-        availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-
-        Task {
-            do {
-                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
-                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                rootViewController?.didUpdateCurrentAccountInformations(account)
-
-                if let oldDriveId,
-                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
-                   !newDrive.inMaintenance {
-                    // The current drive is still usable, do not switch
-                    scanLibraryAndRestartUpload()
-                    return
-                }
-
-                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-                accountManager.setCurrentDriveForCurrentAccount(drive: driveFileManager.drive)
-                appNavigable.showMainViewController(driveFileManager: driveFileManager)
-                scanLibraryAndRestartUpload()
-            } catch DriveError.NoDriveError.noDrive {
-                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                    errorType: .noDrive,
-                    drive: nil
-                )
-                appNavigable.setRootViewController(driveErrorNavigationViewController, animated: true)
-            } catch DriveError.NoDriveError.blocked(let drive), DriveError.NoDriveError.maintenance(let drive) {
-                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
-                    errorType: drive.isInTechnicalMaintenance ? .maintenance : .blocked,
-                    drive: drive
-                )
-                appNavigable.setRootViewController(driveErrorNavigationViewController, animated: true)
-            } catch {
-                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                Log.appDelegate("Error while updating user account: \(error)", level: .error)
-            }
-        }
-    }
-
     func uploadEditedFiles() {
         Log.appDelegate("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
@@ -308,7 +258,7 @@ extension SceneDelegate {
                 // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
                 guard let fileId = Int(fileFolder),
-                      let driveFileManager = accountManager.getDriveFileManager(for: drive),
+                      let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                       let file = driveFileManager.getCachedFile(id: fileId) else {
                     Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
@@ -366,23 +316,6 @@ extension SceneDelegate {
                 Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
                 try? FileManager.default.removeItem(at: folderURL)
             }
-        }
-    }
-
-    // MARK: Photo library
-
-    private func scanLibraryAndRestartUpload() {
-        // Resolving an upload queue will restart it if this is the first time
-        @InjectService var uploadQueue: UploadQueue
-
-        backgroundUploadSessionManager.reconnectBackgroundTasks()
-        DispatchQueue.global(qos: .utility).async {
-            Log.appDelegate("Restart queue")
-            @InjectService var photoUploader: PhotoLibraryUploader
-            _ = photoUploader.scheduleNewPicturesForUpload()
-
-            @InjectService var uploadQueue: UploadQueue
-            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 

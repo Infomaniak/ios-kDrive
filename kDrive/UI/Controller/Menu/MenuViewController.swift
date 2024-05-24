@@ -25,6 +25,7 @@ import UIKit
 
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService var appNavigable: AppNavigable
 
     private let driveFileManager: DriveFileManager
     var uploadCountManager: UploadCountManager?
@@ -229,18 +230,16 @@ extension MenuViewController {
                     self.accountManager.removeTokenAndAccount(account: currentAccount)
                 }
 
-                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    // TODO: FIXME
-//                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                    Task {
+                        await self.appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                    }
                 } else {
                     SentrySDK.setUser(nil)
                 }
                 self.accountManager.saveAccounts()
-                // TODO: Fixme
-//                appDelegate?.updateRootViewControllerState()
+                self.appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
             }
             present(alert, animated: true)
         case .help:
@@ -275,7 +274,7 @@ extension MenuViewController {
 }
 
 extension MenuViewController: UpdateAccountDelegate {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
         needsContentUpdate = true
     }

@@ -25,7 +25,7 @@ import RealmSwift
 import Sentry
 
 public protocol UpdateAccountDelegate: AnyObject {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account)
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account)
 }
 
 public protocol AccountManagerDelegate: AnyObject {
@@ -61,7 +61,6 @@ public protocol AccountManageable: AnyObject {
 
     func forceReload()
     func reloadTokensAndAccounts()
-    func getDriveFileManager(for drive: Drive) -> DriveFileManager?
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
@@ -74,7 +73,7 @@ public protocol AccountManageable: AnyObject {
     func loadAccounts() -> [Account]
     func saveAccounts()
     func switchAccount(newAccount: Account)
-    func setCurrentDriveForCurrentAccount(drive: Drive)
+    func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(account: Account, token: ApiToken)
     func removeAccount(toDeleteAccount: Account)
     func removeTokenAndAccount(account: Account)
@@ -120,8 +119,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
             return currentDriveFileManager
         } else if let newCurrentDrive = drives.first {
-            setCurrentDriveForCurrentAccount(drive: newCurrentDrive)
-            return getDriveFileManager(for: newCurrentDrive)
+            setCurrentDriveForCurrentAccount(for: newCurrentDrive.id, userId: newCurrentDrive.userId)
+            return getDriveFileManager(for: newCurrentDrive.id, userId: newCurrentDrive.userId)
         } else {
             return nil
         }
@@ -150,7 +149,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             setCurrentAccount(account: account)
 
             if let currentDrive = driveInfosManager.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
-                setCurrentDriveForCurrentAccount(drive: currentDrive)
+                setCurrentDriveForCurrentAccount(for: currentDrive.id, userId: currentDrive.userId)
             }
         }
     }
@@ -171,10 +170,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    public func getDriveFileManager(for drive: Drive) -> DriveFileManager? {
-        return getDriveFileManager(for: drive.id, userId: drive.userId)
-    }
-
+    @discardableResult
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
@@ -210,7 +206,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive) else {
+        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive.id, userId: firstAvailableDrive.userId) else {
             // We should always have a driveFileManager here
             throw DriveError.NoDriveError.noDriveFileManager
         }
@@ -283,8 +279,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
         driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
 
-        setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
-        let driveFileManager = getDriveFileManager(for: mainDrive)
+        let frozenDrive = mainDrive.freeze()
+        setCurrentDriveForCurrentAccount(for: frozenDrive.id, userId: frozenDrive.userId)
+        let driveFileManager = getDriveFileManager(for: mainDrive.id, userId: mainDrive.userId)
         try await driveFileManager?.initRoot()
 
         saveAccounts()
@@ -320,7 +317,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
-                setCurrentDriveForCurrentAccount(drive: firstDrive)
+                setCurrentDriveForCurrentAccount(for: firstDrive.id, userId: firstDrive.userId)
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
         }
@@ -372,7 +369,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentAccount(account: newAccount)
         UserDefaults.shared.lastSelectedTab = nil
         if let drive = drives.first {
-            setCurrentDriveForCurrentAccount(drive: drive)
+            setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
         saveAccounts()
     }
@@ -391,9 +388,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         SentrySDK.setUser(user)
     }
 
-    public func setCurrentDriveForCurrentAccount(drive: Drive) {
-        currentDriveId = drive.id
-        _ = getDriveFileManager(for: drive)
+    public func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {
+        currentDriveId = driveId
+        getDriveFileManager(for: driveId, userId: userId)
     }
 
     public func addAccount(account: Account, token: ApiToken) {

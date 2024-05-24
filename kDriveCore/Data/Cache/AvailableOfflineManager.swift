@@ -38,7 +38,7 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
         }
 
         for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
-            guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
+            guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
                 continue
             }
 
