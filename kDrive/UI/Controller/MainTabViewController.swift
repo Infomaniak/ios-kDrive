@@ -264,8 +264,33 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        UserDefaults.shared.lastSelectedTab = tabBarController.selectedIndex
+        let selectedIndex = tabBarController.selectedIndex
+
+        // Save tab for drive change
+        UserDefaults.shared.lastSelectedTab = selectedIndex
+
+        // Save tab for UIScene
+        saveSelectedTab(selectedIndex)
+
         updateCenterButton()
+    }
+
+    private var currentUserActivity: NSUserActivity {
+        let activity: NSUserActivity
+        if let currentUserActivity = view.window?.windowScene?.userActivity {
+            activity = currentUserActivity
+        } else {
+            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
+        }
+        return activity
+    }
+
+    private func saveSelectedTab(_ index: Int) {
+        let currentUserActivity = currentUserActivity
+        let metadata = ["selectedIndex": index]
+        currentUserActivity.addUserInfoEntries(from: metadata as [AnyHashable: Any])
+
+        view.window?.windowScene?.userActivity = currentUserActivity
     }
 }
 

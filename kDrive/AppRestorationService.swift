@@ -27,6 +27,8 @@ public protocol AppRestorationServiceable {
 
     func shouldRestoreApplicationState(coder: NSCoder) -> Bool
 
+    var shouldRestoreApplicationState: Bool { get }
+
     func reloadAppUI(for driveId: Int, userId: Int) async
 }
 
@@ -64,6 +66,19 @@ public final class AppRestorationService: AppRestorationServiceable {
             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
         return shouldRestoreApplicationState
+    }
+
+    public var shouldRestoreApplicationState: Bool {
+        return true
+
+        // TODO: Use user defaults
+        /*
+         let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
+         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+         return shouldRestoreApplicationState
+          */
     }
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {

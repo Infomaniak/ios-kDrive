@@ -31,6 +31,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService var appRestorationService: AppRestorationServiceable
 
     // TODO: Abstract away from AppDelegate
     private var shortcutItemToProcess: UIApplicationShortcutItem? {
@@ -74,10 +75,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         )
 
         // Determine the user activity from a new connection or from a session's state restoration.
-        guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else { return }
 
         let isRestoration: Bool = session.stateRestorationActivity != nil
         print(" user activity isRestoration:\(isRestoration) :\(userActivity)")
+
+        guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else {
+            print(" no user activity")
+            return
+        }
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
@@ -130,6 +135,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
+        // Set root view here
         let currentState = RootViewControllerState.getCurrentState()
         appNavigable.prepareRootViewController(currentState: currentState)
         switch currentState {
@@ -364,4 +370,41 @@ extension SceneDelegate {
             UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
         }
     }
+}
+
+/// Main Scene
+extension SceneDelegate {
+    /** This is the NSUserActivity that you use to restore state when the Scene reconnects.
+        It can be the same activity that you use for handoff or spotlight, or it can be a separate activity
+        with a different activity type and/or userInfo.
+
+        This object must be lightweight. You should store the key information about what the user was doing last.
+
+        After the system calls this function, and before it saves the activity in the restoration file, if the returned NSUserActivity has a
+        delegate (NSUserActivityDelegate), the function userActivityWillSave calls that delegate. Additionally, if any UIResponders have the activity
+        set as their userActivity property, the system calls the UIResponder updateUserActivityState function to update the activity.
+        This happens synchronously and ensures that the system has filled in all the information for the activity before saving it.
+     */
+    func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
+        print(" stateRestorationActivity for:\(scene)")
+
+        // check if restoration is enabled
+        guard appRestorationService.shouldRestoreApplicationState else {
+            return nil
+        }
+
+        // Offer the user activity for this scene.
+        return scene.userActivity
+    }
+
+    // Activity type for restoring this scene (loaded from the plist).
+    static let MainSceneActivityType: String = {
+        // Load the activity type from the Info.plist.
+        let activityTypes = Bundle.main.infoDictionary?["NSUserActivityTypes"] as? [String]
+        guard let activity = activityTypes?.first else {
+            fatalError("Unable to read NSUserActivity config from app plist")
+        }
+
+        return activity
+    }()
 }

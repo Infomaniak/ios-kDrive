@@ -91,6 +91,10 @@
 	<string>To be able to record movies you must allow the use of the microphone</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save picture</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).mainActivity</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
