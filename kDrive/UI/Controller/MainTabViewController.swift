@@ -45,8 +45,20 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
 
+        // Use selectedIndex argument if any
         if let selectedIndex {
             self.selectedIndex = selectedIndex
+        }
+
+        // TODO: Abstract
+        // try to read the tab from the current scene
+        // View must be attached to window for this to work, so one run loop
+        Task {
+            if let scene = view.window?.windowScene,
+               let userInfo = scene.userActivity?.userInfo,
+               let index = userInfo["selectedIndex"] as? Int {
+                self.selectedIndex = index
+            }
         }
     }
 
@@ -270,7 +282,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
         UserDefaults.shared.lastSelectedTab = selectedIndex
 
         // Save tab for UIScene
-        saveSelectedTab(selectedIndex)
+        saveSelectedTabUserActivity(selectedIndex)
 
         updateCenterButton()
     }
@@ -285,7 +297,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
         return activity
     }
 
-    private func saveSelectedTab(_ index: Int) {
+    private func saveSelectedTabUserActivity(_ index: Int) {
         let currentUserActivity = currentUserActivity
         let metadata = ["selectedIndex": index]
         currentUserActivity.addUserInfoEntries(from: metadata as [AnyHashable: Any])

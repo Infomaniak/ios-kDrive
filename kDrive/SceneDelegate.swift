@@ -77,12 +77,31 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         // Determine the user activity from a new connection or from a session's state restoration.
 
         let isRestoration: Bool = session.stateRestorationActivity != nil
-        print(" user activity isRestoration:\(isRestoration) :\(userActivity)")
+        print(" user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
 
         guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else {
             print(" no user activity")
             return
         }
+
+        guard userActivity.activityType == SceneDelegate.MainSceneActivityType else {
+            print(" unsupported user activity type:\(userActivity.activityType)")
+            return
+        }
+
+        // Save activity to new scene
+        scene.userActivity = userActivity
+
+        guard let userInfo = userActivity.userInfo else {
+            print(" activity has no metadata to process")
+            return
+        }
+
+        print(" restore from \(userActivity.activityType)")
+
+        let selectedIndex = userInfo["selectedIndex"]
+
+        print("selectedIndex:\(selectedIndex)")
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
