@@ -56,7 +56,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
          The recommended approach is for the SceneDelegate to retain the scene's window.
      */
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        print(" scene session options")
+        Log.sceneDelegate("scene session options")
         /// 1. Capture the scene
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
@@ -77,15 +77,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         // Determine the user activity from a new connection or from a session's state restoration.
 
         let isRestoration: Bool = session.stateRestorationActivity != nil
-        print(" user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
+        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
 
         guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else {
-            print(" no user activity")
+            Log.sceneDelegate("no user activity")
             return
         }
 
         guard userActivity.activityType == SceneDelegate.MainSceneActivityType else {
-            print(" unsupported user activity type:\(userActivity.activityType)")
+            Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
             return
         }
 
@@ -93,15 +93,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         scene.userActivity = userActivity
 
         guard let userInfo = userActivity.userInfo else {
-            print(" activity has no metadata to process")
+            Log.sceneDelegate("activity has no metadata to process")
             return
         }
 
-        print(" restore from \(userActivity.activityType)")
-
-        let selectedIndex = userInfo["selectedIndex"]
-
-        print("selectedIndex:\(selectedIndex)")
+        Log.sceneDelegate("restore from \(userActivity.activityType)")
+        Log.sceneDelegate("selectedIndex:\(userInfo["selectedIndex"])")
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
@@ -125,7 +122,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     func configure(window: UIWindow?, session: UISceneSession, with activity: NSUserActivity) -> Bool {
-        print(" configure session with")
+        Log.sceneDelegate("configure session with")
         return true
     }
 
@@ -136,21 +133,21 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
          so don't delete any user data or state permanently.
      */
     func sceneDidDisconnect(_ scene: UIScene) {
-        print(" sceneDidDisconnect \(scene)")
+        Log.sceneDelegate("sceneDidDisconnect \(scene)")
     }
 
     /** Use this delegate when the scene moves from an active state to an inactive state, on window close, or in iOS enter background.
          This may occur due to temporary interruptions (for example, an incoming phone call).
      */
     func sceneWillResignActive(_ scene: UIScene) {
-        print(" sceneWillResignActive \(scene)")
+        Log.sceneDelegate("sceneWillResignActive \(scene)")
     }
 
     /** Use this delegate as the scene transitions from the background to the foreground, on window open, or in iOS resume.
          Use it to undo the changes made on entering the background.
      */
     func sceneWillEnterForeground(_ scene: UIScene) {
-        print(" sceneWillEnterForeground \(scene) \(window)")
+        Log.sceneDelegate("sceneWillEnterForeground \(scene) \(window)")
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
@@ -183,7 +180,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
          The system calls this delegate every time a scene becomes active so set up your scene UI here.
      */
     func sceneDidBecomeActive(_ scene: UIScene) {
-        print(" sceneDidBecomeActive \(scene)")
+        Log.sceneDelegate("sceneDidBecomeActive \(scene)")
         guard let shortcutItem = shortcutItemToProcess else {
             return
         }
@@ -233,7 +230,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         to restore the scene to its current state.
      */
     func sceneDidEnterBackground(_ scene: UIScene) {
-        print(" sceneDidEnterBackground \(scene)")
+        Log.sceneDelegate("sceneDidEnterBackground \(scene)")
         backgroundTasksService.scheduleBackgroundRefresh()
 
         if UserDefaults.shared.isAppLockEnabled,
@@ -249,21 +246,21 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
                      didUpdate previousCoordinateSpace: UICoordinateSpace,
                      interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
                      traitCollection previousTraitCollection: UITraitCollection) {
-        print(" windowScene didUpdate")
+        Log.sceneDelegate("windowScene didUpdate")
     }
 
     // MARK: - Handoff support
 
     func scene(_ scene: UIScene, willContinueUserActivityWithType userActivityType: String) {
-        print(" scene willContinueUserActivityWithType")
+        Log.sceneDelegate("scene willContinueUserActivityWithType")
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        print(" scene continue userActivity")
+        Log.sceneDelegate("scene continue userActivity")
     }
 
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-        print(" scene didFailToContinueUserActivityWithType")
+        Log.sceneDelegate("scene didFailToContinueUserActivityWithType")
     }
 
     // MARK: - Account manager delegate
@@ -295,7 +292,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 // TODO: Refactor with router like pattern and split code away from this class
 extension SceneDelegate {
     func uploadEditedFiles() {
-        Log.appDelegate("uploadEditedFiles")
+        Log.sceneDelegate("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
               FileManager.default.fileExists(atPath: folderURL.path) else {
             return
@@ -311,7 +308,7 @@ extension SceneDelegate {
             guard let driveId = Int(driveFolder),
                   let drive = driveInfosManager.getDrive(id: driveId, userId: accountManager.currentUserId),
                   let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
-                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
+                Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
 
@@ -321,7 +318,7 @@ extension SceneDelegate {
                 guard let fileId = Int(fileFolder),
                       let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                       let file = driveFileManager.getCachedFile(id: fileId) else {
-                    Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
+                    Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
 
@@ -355,7 +352,7 @@ extension SceneDelegate {
                         observationToken?.cancel()
                         if let error = uploadFile.error {
                             shouldCleanFolder = false
-                            Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
+                            Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)", level: .error)
                         } else {
                             // Update file to get the new modification date
                             Task {
@@ -374,7 +371,7 @@ extension SceneDelegate {
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
-                Log.appDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
+                Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
                 try? FileManager.default.removeItem(at: folderURL)
             }
         }
@@ -405,7 +402,7 @@ extension SceneDelegate {
         This happens synchronously and ensures that the system has filled in all the information for the activity before saving it.
      */
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-        print(" stateRestorationActivity for:\(scene)")
+        Log.sceneDelegate("stateRestorationActivity for:\(scene)")
 
         // check if restoration is enabled
         guard appRestorationService.shouldRestoreApplicationState else {

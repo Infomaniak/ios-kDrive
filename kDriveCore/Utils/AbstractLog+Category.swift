@@ -64,6 +64,28 @@ public enum Log {
                           tag: tag)
     }
 
+    /// shorthand for ABLog, with "SceneDelegate" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
+    ///
+    public static func sceneDelegate(_ message: @autoclosure () -> Any,
+                                     level: AbstractLogLevel = .debug,
+                                     context: Int = 0,
+                                     file: StaticString = #file,
+                                     function: StaticString = #function,
+                                     line: UInt = #line,
+                                     tag: Any? = nil) {
+        let category = "SceneDelegate"
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
+    }
+
     /// shorthand for ABLog, with "PhotoLibraryUploader" category
     ///
     /// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
