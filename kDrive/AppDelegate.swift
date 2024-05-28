@@ -39,7 +39,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
-    private var shortcutItemToProcess: UIApplicationShortcutItem?
 
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -47,6 +46,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var appNavigable: AppNavigable
+
+    // TODO: Abstract from AppDelegate
+    var shortcutItemToProcess: UIApplicationShortcutItem?
 
     // MARK: - UIApplicationDelegate
 

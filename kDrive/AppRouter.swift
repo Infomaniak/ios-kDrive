@@ -339,33 +339,7 @@ public struct AppRouter: AppNavigable {
         availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
 
         do {
-            // TODO: accountManager migrate to Transactionable (not tracking live objects)
-            await Task { @MainActor in
-                @InjectService var accountManager: AccountManageable
-                let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
-
-                guard let currentAccount = accountManager.currentAccount else {
-                    Log.appDelegate("No account to refresh", level: .error)
-                    return
-                }
-
-                let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                let rootViewController = await window?.rootViewController as? UpdateAccountDelegate
-                await rootViewController?.didUpdateCurrentAccountInformations(account)
-
-                if let oldDriveId,
-                   let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
-                   !newDrive.inMaintenance {
-                    // The current drive is still usable, do not switch
-                    await scanLibraryAndRestartUpload()
-                    return
-                }
-
-                let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-                let drive = driveFileManager.drive
-                accountManager.setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
-                showMainViewController(driveFileManager: driveFileManager)
-            }
+            try await refreshAccountAndShowMainView()
             await scanLibraryAndRestartUpload()
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = await DriveErrorViewController.instantiateInNavigationController(
@@ -383,6 +357,33 @@ public struct AppRouter: AppNavigable {
             await UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             Log.appDelegate("Error while updating user account: \(error)", level: .error)
         }
+    }
+
+    @MainActor private func refreshAccountAndShowMainView() async throws {
+        @InjectService var accountManager: AccountManageable
+        let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
+
+        guard let currentAccount = accountManager.currentAccount else {
+            Log.appDelegate("No account to refresh", level: .error)
+            return
+        }
+
+        let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
+        rootViewController?.didUpdateCurrentAccountInformations(account)
+
+        if let oldDriveId,
+           let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
+           !newDrive.inMaintenance {
+            // The current drive is still usable, do not switch
+            await scanLibraryAndRestartUpload()
+            return
+        }
+
+        let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+        let drive = driveFileManager.drive
+        accountManager.setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
+        showMainViewController(driveFileManager: driveFileManager)
     }
 
     private func scanLibraryAndRestartUpload() async {
