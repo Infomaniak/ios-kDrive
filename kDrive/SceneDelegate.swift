@@ -52,22 +52,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         /// 1. Capture the scene
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        /// 2. Create a new UIWindow using the windowScene constructor which takes in a window scene.
-        let window = UIWindow(windowScene: windowScene)
-
-        /// 3. Create a view hierarchy programmatically
-//        let viewController = ArticleListViewController()
-//        let navigation = UINavigationController(rootViewController: viewController)
-
-        /// 4. Set the root view controller of the window with your view controller
-//        window.rootViewController = navigation
-
-        /// 5. Set the window and call makeKeyAndVisible()
-        self.window = window
-        window.makeKeyAndVisible()
-        setGlobalWindowTint()
-
-        appNavigable.updateTheme()
+        prepareWindowScene(windowScene)
 
         // Setup accountManager delegation after the window setup like previously in app delegate
         accountManager.delegate = self
@@ -80,6 +65,32 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             name: .locateUploadActionTapped,
             object: nil
         )
+
+        // Determine the user activity from a new connection or from a session's state restoration.
+        guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else { return }
+
+        let isRestoration: Bool = session.stateRestorationActivity != nil
+        print(" user activity isRestoration:\(isRestoration) :\(userActivity)")
+    }
+
+    private func prepareWindowScene(_ windowScene: UIWindowScene) {
+        // Create a new UIWindow using the windowScene constructor which takes in a window scene.
+        let window = UIWindow(windowScene: windowScene)
+
+        // Create a view hierarchy programmatically
+//        let viewController = ArticleListViewController()
+//        let navigation = UINavigationController(rootViewController: viewController)
+
+        // Set the root view controller of the window with your view controller
+//        window.rootViewController = navigation
+
+        // Set the window and call makeKeyAndVisible()
+        self.window = window
+        window.makeKeyAndVisible()
+
+        // Update tint
+        setGlobalWindowTint()
+        appNavigable.updateTheme()
     }
 
     func configure(window: UIWindow?, session: UISceneSession, with activity: NSUserActivity) -> Bool {
