@@ -26,7 +26,7 @@ class LockedAppViewController: UIViewController {
     @LazyInjectService private var appLockHelper: AppLockHelper
 
     @IBOutlet weak var unlockAppButton: IKLargeButton!
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tryToUnlock()

@@ -49,13 +49,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var notificationHelper: NotificationsHelpable
-    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var keychainHelper: KeychainHelper
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var reviewManager: ReviewManageable
     @LazyInjectService var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService var appRestorationService: AppRestorationService
+
+    // Not lazy to force init of the object early, and set a userID in Sentry
+    @InjectService var accountManager: AccountManageable
 
     // MARK: - UIApplicationDelegate
 
