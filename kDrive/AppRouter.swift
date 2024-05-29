@@ -91,10 +91,16 @@ public struct AppRouter: AppNavigable {
 
     // Get the current window from the app scene
     @MainActor private var window: UIWindow? {
-        // This is a hack, as the app has only one scene for now.
-        // TODO: Support for scene by identifier
-        guard let scene = UIApplication.shared.connectedScenes.first,
-              let sceneDelegate = scene.delegate as? SceneDelegate,
+        let scene = UIApplication.shared.connectedScenes.first { scene in
+            guard let delegate = scene.delegate,
+                  delegate as? SceneDelegate != nil else {
+                return false
+            }
+
+            return true
+        }
+
+        guard let sceneDelegate = scene?.delegate as? SceneDelegate,
               let window = sceneDelegate.window else {
             return nil
         }
