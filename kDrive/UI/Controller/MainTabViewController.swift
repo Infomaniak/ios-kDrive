@@ -49,17 +49,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         if let selectedIndex {
             self.selectedIndex = selectedIndex
         }
-
-        // TODO: Abstract
-        // try to read the tab from the current scene
-        // View must be attached to window for this to work, so one run loop
-        Task {
-            if let scene = view.window?.windowScene,
-               let userInfo = scene.userActivity?.userInfo,
-               let index = userInfo["selectedIndex"] as? Int {
-                self.selectedIndex = index
-            }
-        }
     }
 
     @available(*, unavailable)

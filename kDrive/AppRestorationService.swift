@@ -90,13 +90,8 @@ public final class AppRestorationService: AppRestorationServiceable {
         }
 
         // Read the last tab selected in order to properly reload the App's UI.
-        // This should be migrated to NSUserActivity at some point
         let lastSelectedTab = UserDefaults.shared.lastSelectedTab
-        let newMainTabViewController = await MainTabViewController(
-            driveFileManager: currentDriveFileManager,
-            selectedIndex: lastSelectedTab
-        )
 
-        await appNavigable.setRootViewController(newMainTabViewController, animated: true)
+        await appNavigable.showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: lastSelectedTab)
     }
 }

@@ -147,8 +147,7 @@ class OnboardingViewController: UIViewController {
     private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-        appNavigable.setRootViewController(mainTabViewController, animated: true)
+        appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
     }
 
     private func updateButtonsState() {

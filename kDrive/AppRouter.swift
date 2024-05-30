@@ -27,7 +27,11 @@ import VersionChecker
 
 /// Something that can navigate to specific places of the kDrive app
 public protocol RouterAppNavigable {
-    @MainActor func showMainViewController(driveFileManager: DriveFileManager)
+    /// Show the main view with a customizable selected index
+    /// - Parameters:
+    ///   - driveFileManager: driveFileManager to use
+    ///   - selectedIndex: Nil will try to use state restoration if available
+    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?)
 
     @MainActor func showPreloading(currentAccount: Account)
 
@@ -52,6 +56,8 @@ public protocol RouterFileNavigable {
 /// Something that can set an arbitrary RootView controller
 public protocol RouterRootNavigable {
     /// Something that can set an arbitrary RootView controller
+    ///
+    /// Should not be used externally except by SceneDelegate.
     @MainActor func setRootViewController(_ viewController: UIViewController,
                                           animated: Bool)
 
@@ -145,7 +151,7 @@ public struct AppRouter: AppNavigable {
         case .appLock:
             showAppLock()
         case .mainViewController(let driveFileManager):
-            showMainViewController(driveFileManager: driveFileManager)
+            showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
             showLaunchFloatingPanel()
             Task {
                 await askForReview()
@@ -171,7 +177,8 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterAppNavigable
 
-    @MainActor public func showMainViewController(driveFileManager: DriveFileManager) {
+    @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
+                                                  selectedIndex: Int?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -182,7 +189,26 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager)
+        var indexToUse: Int?
+        // index is passed as an argument
+        if let selectedIndex {
+            indexToUse = selectedIndex
+        }
+
+        // try to read the tab from the current scene
+        else if let scene = window.windowScene,
+                let userInfo = scene.userActivity?.userInfo,
+                let index = userInfo["selectedIndex"] as? Int {
+            indexToUse = index
+        }
+
+        // no index to use
+        else {
+            indexToUse = nil
+        }
+
+        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager,
+                                                          selectedIndex: indexToUse)
         window.makeKeyAndVisible()
     }
 
@@ -389,7 +415,7 @@ public struct AppRouter: AppNavigable {
         let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
         let drive = driveFileManager.drive
         accountManager.setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
-        showMainViewController(driveFileManager: driveFileManager)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
     }
 
     private func scanLibraryAndRestartUpload() async {
