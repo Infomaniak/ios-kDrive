@@ -796,6 +796,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - State restoration
 
+    // TODO: Maybe keep it
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
@@ -806,6 +807,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    // TODO: Maybe keep it
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 
