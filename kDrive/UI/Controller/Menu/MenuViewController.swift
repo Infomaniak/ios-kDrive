@@ -239,7 +239,10 @@ extension MenuViewController {
                     SentrySDK.setUser(nil)
                 }
                 self.accountManager.saveAccounts()
-                self.appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
+                self.appNavigable.prepareRootViewController(
+                    currentState: RootViewControllerState.getCurrentState(),
+                    restoration: false
+                )
             }
             present(alert, animated: true)
         case .help:

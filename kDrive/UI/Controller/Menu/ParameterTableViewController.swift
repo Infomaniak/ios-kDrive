@@ -198,7 +198,7 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             SentrySDK.setUser(nil)
         }
         accountManager.saveAccounts()
-        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 

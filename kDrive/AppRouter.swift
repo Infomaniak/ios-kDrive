@@ -61,7 +61,11 @@ public protocol RouterRootNavigable {
     @MainActor func setRootViewController(_ viewController: UIViewController,
                                           animated: Bool)
 
-    @MainActor func prepareRootViewController(currentState: RootViewControllerState)
+    /// Setup the root of the view stack
+    /// - Parameters:
+    ///   - currentState: the state to present
+    ///   - restoration: try to restore scene or not
+    @MainActor func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool)
 
     /// Set the main theme color
     @MainActor func updateTheme()
@@ -94,6 +98,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var reviewManager: ReviewManageable
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var backgroundUploadSessionManager: BackgroundUploadSessionManager
+    @LazyInjectService private var accountManager: AccountManageable
 
     // Get the current window from the app scene
     @MainActor private var window: UIWindow? {
@@ -112,6 +117,15 @@ public struct AppRouter: AppNavigable {
         }
 
         return window
+    }
+
+    @MainActor var sceneUserInfo: [AnyHashable: Any]? {
+        guard let scene = window?.windowScene,
+              let userInfo = scene.userActivity?.userInfo else {
+            return nil
+        }
+
+        return userInfo
     }
 
     // MARK: TopmostViewControllerFetchable
@@ -146,12 +160,15 @@ public struct AppRouter: AppNavigable {
                           completion: nil)
     }
 
-    @MainActor public func prepareRootViewController(currentState: RootViewControllerState) {
+    @MainActor public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
         switch currentState {
         case .appLock:
             showAppLock()
         case .mainViewController(let driveFileManager):
-            showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+
+            // Entry point for scene restoration
+            restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
+
             showLaunchFloatingPanel()
             Task {
                 await askForReview()
@@ -163,6 +180,96 @@ public struct AppRouter: AppNavigable {
             showUpdateRequired()
         case .preloading(let currentAccount):
             showPreloading(currentAccount: currentAccount)
+        }
+    }
+
+    @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
+        // Try to read the tab from the current scene, and restore `MainViewController`
+        var indexToUse: Int?
+        if let sceneUserInfo,
+           let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
+            indexToUse = index
+        }
+
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
+
+        guard restoration else {
+            return
+        }
+
+        // one run loop
+        Task { @MainActor in
+            // try to decode further screens
+            guard let sceneUserInfo else {
+                return
+            }
+
+            guard let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
+                  let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString),
+                  let rootViewController = window?.rootViewController else {
+                return
+            }
+
+            switch lastViewController {
+            case .FileDetailViewController:
+                // inflate file
+                guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+                    fatalError("unable to load file id")
+                }
+
+                let database = driveFileManager.database
+                guard let frozenFile = database.fetchObject(ofType: File.self, forPrimaryKey: fileId)?.freeze() else {
+                    fatalError("unable to load file from DB")
+                }
+
+                // Todo, create a method in the router
+                let fileDetailViewController = FileDetailViewController.instantiate(
+                    driveFileManager: driveFileManager,
+                    file: frozenFile
+                )
+                rootViewController.navigationController?.pushViewController(fileDetailViewController, animated: true)
+
+            case .FileListViewController:
+                fatalError("TODO")
+            /*
+             let drive = Drive()
+             guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                 return
+             }
+             
+             FilePresenter.presentParent(
+                 of: fileToUse,
+                 driveFileManager: driveFileManager,
+                 viewController: rootViewController
+             )
+              */
+            case .PreviewViewController:
+                fatalError("TODO")
+            /*
+             let drive = Drive()
+             guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                 return
+             }
+             
+             let previewViewController = PreviewViewController.instantiate(files: [],
+                                               index: 1234,
+                                               driveFileManager: driveFileManager,
+                                               normalFolderHierarchy: yes,
+                                               fromActivities: yes)
+             rootViewController.navigationController?.pushViewController(previewViewController, animated: true)
+              */
+            case .StoreViewController:
+                fatalError("TODO")
+                /*
+                 let drive = Drive()
+                 guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                     return
+                 }
+
+                 let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+                 rootViewController.navigationController?.pushViewController(storeViewController, animated: true)
+                  */
+            }
         }
     }
 
@@ -189,26 +296,8 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        var indexToUse: Int?
-        // index is passed as an argument
-        if let selectedIndex {
-            indexToUse = selectedIndex
-        }
-
-        // try to read the tab from the current scene
-        else if let scene = window.windowScene,
-                let userInfo = scene.userActivity?.userInfo,
-                let index = userInfo["selectedIndex"] as? Int {
-            indexToUse = index
-        }
-
-        // no index to use
-        else {
-            indexToUse = nil
-        }
-
         window.rootViewController = MainTabViewController(driveFileManager: driveFileManager,
-                                                          selectedIndex: indexToUse)
+                                                          selectedIndex: selectedIndex)
         window.makeKeyAndVisible()
     }
 

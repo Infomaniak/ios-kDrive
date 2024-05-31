@@ -152,7 +152,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func informationsAction() {
         let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
-        fileDetailViewController.file = file
+//        fileDetailViewController.file = file // woot ?
         presentingParent?.navigationController?.pushViewController(fileDetailViewController, animated: true)
         dismiss(animated: true)
     }

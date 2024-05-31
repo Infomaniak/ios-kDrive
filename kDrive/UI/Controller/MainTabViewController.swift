@@ -86,16 +86,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         updateTabBarProfilePicture()
     }
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-        coder.encode(selectedIndex, forKey: "SelectedIndex")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-        selectedIndex = coder.decodeInteger(forKey: "SelectedIndex")
-    }
-
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
         let homeViewController = HomeViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
@@ -276,6 +266,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
         updateCenterButton()
     }
 
+    // TODO: Extend UIViewController
     private var currentUserActivity: NSUserActivity {
         let activity: NSUserActivity
         if let currentUserActivity = view.window?.windowScene?.userActivity {
@@ -286,9 +277,10 @@ extension MainTabViewController: UITabBarControllerDelegate {
         return activity
     }
 
+    // TODO: Abstract to protocol
     private func saveSelectedTabUserActivity(_ index: Int) {
         let currentUserActivity = currentUserActivity
-        let metadata = ["selectedIndex": index]
+        let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]
         currentUserActivity.addUserInfoEntries(from: metadata as [AnyHashable: Any])
 
         view.window?.windowScene?.userActivity = currentUserActivity

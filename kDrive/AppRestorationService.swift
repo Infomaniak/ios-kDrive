@@ -23,11 +23,12 @@ import UIKit
 
 /// Something that centralize the App Restoration logic
 public protocol AppRestorationServiceable {
+    /// Is restoration enabled
+    var shouldRestoreApplicationState: Bool { get }
+
     func shouldSaveApplicationState(coder: NSCoder) -> Bool
 
     func shouldRestoreApplicationState(coder: NSCoder) -> Bool
-
-    var shouldRestoreApplicationState: Bool { get }
 
     func reloadAppUI(for driveId: Int, userId: Int) async
 }
@@ -61,14 +62,17 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
-        let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
-            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
-        Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-        return shouldRestoreApplicationState
+        print("•• shouldRestoreApplicationState coder:")
+        return true
+        /* let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
+         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+         return shouldRestoreApplicationState */
     }
 
     public var shouldRestoreApplicationState: Bool {
+        print("•• shouldRestoreApplicationState")
         return true
 
         // TODO: Use user defaults

@@ -25,6 +25,38 @@ import SafariServices
 import UIKit
 import VersionChecker
 
+public protocol SceneStateRestorable {
+    func saveSceneState()
+}
+
+enum SceneRestorationKeys: String {
+    /// The selected index of the MainViewController that should be restored
+    case selectedIndex
+
+    /// Array representing the stack of view controllers that should be restored
+    // TODO: Implement stack restoration
+    // case fileViewStack
+
+    /// The screen that should be restored on top of the MainViewController
+    case lastViewController
+}
+
+enum SceneRestorationValues: String {
+    case DriveId
+    case FileId
+}
+
+/// ViewController identifiers for state restoration
+enum SceneRestorationScreens: String {
+    case FileDetailViewController
+
+    case FileListViewController
+
+    case StoreViewController
+
+    case PreviewViewController
+}
+
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable
@@ -98,19 +130,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
 
         Log.sceneDelegate("restore from \(userActivity.activityType)")
-        Log.sceneDelegate("selectedIndex:\(userInfo["selectedIndex"])")
+        Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
         // Create a new UIWindow using the windowScene constructor which takes in a window scene.
         let window = UIWindow(windowScene: windowScene)
-
-        // Create a view hierarchy programmatically
-//        let viewController = ArticleListViewController()
-//        let navigation = UINavigationController(rootViewController: viewController)
-
-        // Set the root view controller of the window with your view controller
-//        window.rootViewController = navigation
 
         // Set the window and call makeKeyAndVisible()
         self.window = window
@@ -151,9 +176,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
-        // Set root view here
+        // Set root view here, trying to restore state
         let currentState = RootViewControllerState.getCurrentState()
-        appNavigable.prepareRootViewController(currentState: currentState)
+        let session = scene.session
+        let isRestoration: Bool = session.stateRestorationActivity != nil
+        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
+        appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
+
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
@@ -170,7 +199,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         Task {
             if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
-                appNavigable.prepareRootViewController(currentState: .updateRequired)
+                appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
             }
         }
     }

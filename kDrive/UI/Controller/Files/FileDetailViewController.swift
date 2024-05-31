@@ -22,7 +22,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class FileDetailViewController: UIViewController {
+class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
@@ -215,11 +215,17 @@ class FileDetailViewController: UIViewController {
         // Load file informations
         loadFileInformation()
 
+        // Save file info into current scene
+        saveSceneState()
+
         // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
             Task { @MainActor [weak self] in
-                self?.file = newFile
-                self?.reloadTableView()
+                guard let self else {
+                    return
+                }
+                self.file = newFile
+                self.reloadTableView()
             }
         }
     }
@@ -480,6 +486,36 @@ class FileDetailViewController: UIViewController {
 
     // MARK: - State restoration
 
+    // TODO: Extend UIViewController
+    private var currentUserActivity: NSUserActivity {
+        let activity: NSUserActivity
+        if let currentUserActivity = view.window?.windowScene?.userActivity {
+            activity = currentUserActivity
+        } else {
+            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
+        }
+        return activity
+    }
+
+    // TODO: Use Encodable
+    func saveSceneState() {
+        print("•• saveSceneState")
+        let currentUserActivity = currentUserActivity
+        let metadata: [AnyHashable: Any] = [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileDetailViewController.rawValue,
+            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.FileId.rawValue: file.id
+        ]
+        currentUserActivity.addUserInfoEntries(from: metadata)
+
+        guard let scene = view.window?.windowScene else {
+            fatalError("no scene")
+        }
+
+        scene.userActivity = currentUserActivity
+    }
+
+    // TODO: Remove
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
@@ -487,6 +523,7 @@ class FileDetailViewController: UIViewController {
         coder.encode(file.id, forKey: "FileId")
     }
 
+    // TODO: Remove
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 

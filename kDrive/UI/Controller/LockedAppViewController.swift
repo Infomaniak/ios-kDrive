@@ -42,7 +42,7 @@ class LockedAppViewController: UIViewController {
 
     func unlockApp() {
         appLockHelper.setTime()
-        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: true)
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {
