@@ -123,13 +123,12 @@ public struct FreeSpaceService {
         }
 
         Log.uploadOperation("Almost not enough space for chunk upload, clearing temporary files")
-        let cleanActions = CleanSpaceActions()
 
         // Clean temp files we are absolutely sure will not end up with a data loss.
-        let temporaryDirectory = FileManager.default.temporaryDirectory.path
-        let size = cleanActions.getFileSize(at: temporaryDirectory)
-        let temporaryStorageCache = StorageFile(path: temporaryDirectory, size: size)
-        cleanActions.delete(file: temporaryStorageCache)
+        let temporaryDirectory = FileManager.default.temporaryDirectory
+        try? FileManager.default.removeItem(at: temporaryDirectory)
+        // Recreate directory to avoid any issue
+        try? FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
     }
 
     // MARK: - private
