@@ -306,12 +306,12 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
                                                                  firstFilename: firstSelectedItem.name,
                                                                  driveFileManager: driveFileManager) { [weak self] deletedFiles in
-                // quickwin for privacy, remove all image cache after a permanent clean
-                ImageCache.default.diskStorage.removeAll()
-                ImageCache.default.memoryStorage.removeAll()
-
                 MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "DeleteFromTrash", numberOfItems: selectedItemCount)
                 self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
+
+                // quickwin for privacy, remove all image cache after a permanent clean
+                try? ImageCache.default.diskStorage.removeAll()
+                ImageCache.default.memoryStorage.removeAll()
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
