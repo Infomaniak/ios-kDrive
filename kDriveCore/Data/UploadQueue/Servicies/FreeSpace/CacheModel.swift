@@ -149,25 +149,30 @@ public enum CacheItem {
             return url.lastPathComponent
 
         case .storageImageCache:
-            return "Image Cache"
-            // return KDriveResourcesStrings.Localizable.imageCache
+            return KDriveResourcesStrings.Localizable.imageCache
         }
     }
 
     public var directoryTitle: String {
-        switch name {
-        case "drives":
-            return KDriveResourcesStrings.Localizable.drivesDirectory
-        case "Documents":
-            return KDriveResourcesStrings.Localizable.documentsDirectory
-        case "import":
-            return KDriveResourcesStrings.Localizable.importDirectory
-        case "tmp":
-            return KDriveResourcesStrings.Localizable.tempDirectory
-        case "Caches":
-            return KDriveResourcesStrings.Localizable.cacheDirectory
-        default:
-            return name.capitalized
+        switch self {
+        case .fileSystem:
+            switch name {
+            case "drives":
+                return KDriveResourcesStrings.Localizable.drivesDirectory
+            case "Documents":
+                return KDriveResourcesStrings.Localizable.documentsDirectory
+            case "import":
+                return KDriveResourcesStrings.Localizable.importDirectory
+            case "tmp":
+                return KDriveResourcesStrings.Localizable.tempDirectory
+            case "Caches":
+                return KDriveResourcesStrings.Localizable.cacheDirectory
+            default:
+                return name.capitalized
+            }
+
+        case .storageImageCache:
+            return KDriveResourcesStrings.Localizable.imageCache
         }
     }
 
