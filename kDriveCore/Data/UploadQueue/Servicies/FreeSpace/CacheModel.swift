@@ -88,9 +88,7 @@ public enum CacheItem {
     public var size: UInt64 {
         switch self {
         case .fileSystem(let url):
-            let path = url.path
-            let size = getPathSize(at: path)
-            return size
+            return getPathSize(at: url.path)
 
         case .storageImageCache:
             let cacheSize = try? ImageCache.default.diskStorage.totalSize()
@@ -100,33 +98,33 @@ public enum CacheItem {
 
     /// Recursively explore a path and count total size
     private func getPathSize(at path: String) -> UInt64 {
-        var size = getFileSize(at: path)
+        var fileSize = getFileSize(at: path)
 
         // Explore children
         if isDirectory {
             let children = try? FileManager.default.contentsOfDirectory(atPath: path)
             for child in children ?? [] {
-                size += getPathSize(at: (path as NSString).appendingPathComponent(child))
+                fileSize += getPathSize(at: (path as NSString).appendingPathComponent(child))
             }
         }
 
-        return size
+        return fileSize
     }
 
     /// Get the file size of a single file at path
     private func getFileSize(at path: String) -> UInt64 {
-        var size: UInt64 = 0
+        var fileSize: UInt64 = 0
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: path)
             if let sizeAttribute = attributes[.size] as? NSNumber {
-                size = sizeAttribute.uint64Value
+                fileSize = sizeAttribute.uint64Value
             } else {
                 DDLogError("Failed to get a size attribute from path: \(path)")
             }
         } catch {
             DDLogError("Failed to get file attributes for path: \(path) with error: \(error)")
         }
-        return size
+        return fileSize
     }
 
     var isDirectory: Bool {
@@ -151,8 +149,8 @@ public enum CacheItem {
             return url.lastPathComponent
 
         case .storageImageCache:
-            // TODO: i18n
             return "Image Cache"
+            // return KDriveResourcesStrings.Localizable.imageCache
         }
     }
 
@@ -168,9 +166,6 @@ public enum CacheItem {
             return KDriveResourcesStrings.Localizable.tempDirectory
         case "Caches":
             return KDriveResourcesStrings.Localizable.cacheDirectory
-        case ".shared":
-            // TODO: i18n
-            return "Open in place"
         default:
             return name.capitalized
         }
@@ -179,15 +174,13 @@ public enum CacheItem {
     public func clean() async {
         switch self {
         case .fileSystem(let url):
-            let isDirectory = isDirectory
-
             do {
                 try FileManager.default.removeItem(at: url)
+
+                // Recreate directory to avoid any issue if directory
                 guard isDirectory else {
                     return
                 }
-
-                // Recreate directory to avoid any issue
                 try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             } catch {
                 DDLogError("Failed to remove item for path: \(url) with error: \(error)")
