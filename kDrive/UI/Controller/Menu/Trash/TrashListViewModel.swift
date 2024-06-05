@@ -124,6 +124,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
 
     private func emptyTrash() async {
         do {
+            // Quickwin for privacy, remove all image cache after a permanent clean
+            try? ImageCache.default.diskStorage.removeAll()
+            ImageCache.default.memoryStorage.removeAll()
+
             let success = try await driveFileManager.apiFetcher.emptyTrash(drive: driveFileManager.drive)
             let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings
                 .Localizable.errorDelete
@@ -185,6 +189,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
         // TODO: Split code away from the ViewController, so it is not pinned to the main thread, and we can remove the .detached
         Task.detached { [weak self] in
             await self?.removeFiles(deletedFiles)
+
+            // Quickwin for privacy, remove all image cache after a permanent clean
+            try? ImageCache.default.diskStorage.removeAll()
+            ImageCache.default.memoryStorage.removeAll()
         }
     }
 }
@@ -308,10 +316,6 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
                                                                  driveFileManager: driveFileManager) { [weak self] deletedFiles in
                 MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "DeleteFromTrash", numberOfItems: selectedItemCount)
                 self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
-
-                // quickwin for privacy, remove all image cache after a permanent clean
-                try? ImageCache.default.diskStorage.removeAll()
-                ImageCache.default.memoryStorage.removeAll()
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
