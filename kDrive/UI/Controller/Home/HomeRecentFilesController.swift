@@ -71,6 +71,10 @@ class HomeRecentFilesController {
         self.homeViewController = homeViewController
     }
 
+    func viewDidAppear(_ animated: Bool) {
+        refresh()
+    }
+
     func getFiles() async throws -> [File] {
         fatalError(#function + " needs to be overwritten")
     }
@@ -100,6 +104,12 @@ class HomeRecentFilesController {
     func forceRefresh() {
         lastUpdate = Date()
         loadNextPage(forceRefresh: true)
+    }
+
+    // Reload content from DB without triggering a network call
+    func refresh() {
+        resetController()
+        loadNextPage(forceRefresh: false)
     }
 
     func resetController() {
