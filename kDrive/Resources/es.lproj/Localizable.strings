@@ -4,7 +4,7 @@
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Tue, 04 Jun 2024 16:57:50 +0200
+ * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1518,6 +1518,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Haz copia de seguridad de tus recuerdos";
+
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Abierto en su sitio";
 
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "El acceso a tus fotos está desactivado. Puedes cambiar este parámetro en los ajustes";

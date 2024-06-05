@@ -167,6 +167,8 @@ public enum CacheItem {
                 return KDriveResourcesStrings.Localizable.tempDirectory
             case "Caches":
                 return KDriveResourcesStrings.Localizable.cacheDirectory
+            case ".shared":
+                return KDriveResourcesStrings.Localizable.openInPlaceDirectory
             default:
                 return name.capitalized
             }
