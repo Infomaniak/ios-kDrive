@@ -73,7 +73,9 @@ public enum Logging {
                 isDirectory: true
             ).path)
         let fileLogger = DDFileLogger(logFileManager: logFileManager)
-        fileLogger.rollingFrequency = 60 * 60 * 24 // 24 hours
+        // 24-hour rolling, 50 MB max per file, 7 files max.
+        fileLogger.rollingFrequency = 60 * 60 * 24
+        fileLogger.maximumFileSize = 50 * 1024 * 1024
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
         DDLog.add(fileLogger)
     }

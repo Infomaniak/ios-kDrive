@@ -4,7 +4,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Mon, 27 May 2024 14:40:51 +0200
+ * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1279,6 +1279,9 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Home";
 
+/* loco:665f25aff2cdb8afe902d122 */
+"imageCache" = "Cache immagini";
+
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Importazioni";
 
@@ -1515,6 +1518,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Salva i tuoi ricordi in modo sicuro";
+
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Aprire in posizione";
 
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "L’accesso alle tue foto è disattivato. Puoi modificare questo parametro nelle impostazioni";
