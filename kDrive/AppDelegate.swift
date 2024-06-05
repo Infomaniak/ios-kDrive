@@ -63,9 +63,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         Logging.initLogging()
         Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
 
-        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
+        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.ImageCache.memorySizeLimit
         // Must define a limit, unlimited otherwise
-        ImageCache.default.diskStorage.config.sizeLimit = Constants.diskCacheSizeLimit
+        ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
 
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
