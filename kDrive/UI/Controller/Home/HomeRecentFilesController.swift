@@ -71,7 +71,7 @@ class HomeRecentFilesController {
         self.homeViewController = homeViewController
     }
 
-    func viewDidAppear(_ animated: Bool) {
+    func viewDidAppear() {
         refresh()
     }
 
