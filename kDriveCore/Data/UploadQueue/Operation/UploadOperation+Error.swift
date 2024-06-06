@@ -16,8 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -145,8 +147,21 @@ extension UploadOperation {
     @discardableResult
     func handleRemoteErrors(error: Error) -> Bool {
         guard let error = error as? DriveError, (error.type == .networkError) || (error.type == .serverError) else {
-            Log.uploadOperation("error:\(error) not a remote one ufid:\(uploadFileId)")
-            return false
+            // TODO: App level interceptor when the auth stack was unable to keep a valid session to log out
+            guard let authError = error as? AuthenticationError,
+                  authError == .excessiveRefresh else {
+                Log.uploadOperation("error:\(error) not a remote one ufid:\(uploadFileId)")
+                return false
+            }
+
+            @InjectService var accountManager: AccountManageable
+            if let currentAccount = accountManager.currentAccount {
+                Log.uploadOperation("log out currentAccount:\(currentAccount)")
+                accountManager.removeTokenAndAccount(account: currentAccount)
+            }
+
+            Log.uploadOperation("auth error:\(error), disconnecting ufid:\(uploadFileId)")
+            return true
         }
 
         var errorHandled = false

@@ -459,9 +459,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
     // MARK: - Account manager delegate
 
     func currentAccountNeedsAuthentication() {
-        Task { @MainActor in
-            setRootViewController(SwitchUserViewController.instantiateInNavigationController())
-        }
+        Log.appDelegate("currentAccountNeedsAuthentication", level: .error)
     }
 
     // MARK: - State restoration

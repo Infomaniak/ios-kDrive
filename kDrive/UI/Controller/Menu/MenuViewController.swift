@@ -286,20 +286,7 @@ extension MenuViewController {
                                                     .alertRemoveUserDescription(currentAccount?.user.displayName ?? ""),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
-                if let currentAccount = self.accountManager.currentAccount {
-                    self.accountManager.removeTokenAndAccount(account: currentAccount)
-                }
-
-                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
-                if let nextAccount = self.accountManager.accounts.first {
-                    self.accountManager.switchAccount(newAccount: nextAccount)
-                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
-                } else {
-                    SentrySDK.setUser(nil)
-                }
-                self.accountManager.saveAccounts()
-                appDelegate?.updateRootViewControllerState()
+                self.accountManager.switchToNextAvailableAccountOrLogout()
             }
             present(alert, animated: true)
         case .help:

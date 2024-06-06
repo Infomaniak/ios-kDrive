@@ -30,6 +30,8 @@ public protocol UpdateAccountDelegate: AnyObject {
 
 public protocol AccountManagerDelegate: AnyObject {
     func currentAccountNeedsAuthentication()
+    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool)
+    func updateRootViewControllerState()
 }
 
 public extension InfomaniakLogin {
@@ -81,6 +83,7 @@ public protocol AccountManageable: AnyObject {
     func removeTokenAndAccount(account: Account)
     func account(for token: ApiToken) -> Account?
     func account(for userId: Int) -> Account?
+    func switchToNextAvailableAccountOrLogout()
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
@@ -245,13 +248,16 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let context = ["User id": token.userId,
                        "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
-
         tokenStore.removeTokenFor(userId: token.userId)
-        if let account = account(for: token),
-           account.userId == currentUserId {
-            delegate?.currentAccountNeedsAuthentication()
-            notificationHelper.sendDisconnectedNotification()
-        }
+
+        DownloadQueue.instance.suspendAllOperations()
+
+        @InjectService var uploadQueue: UploadQueue
+        uploadQueue.suspendAllOperations()
+
+        delegate?.currentAccountNeedsAuthentication()
+        switchToNextAvailableAccountOrLogout()
+        notificationHelper.sendDisconnectedNotification()
     }
 
     public func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account {
@@ -433,5 +439,22 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func account(for userId: Int) -> Account? {
         return accounts.first { $0.userId == userId }
+    }
+
+    public func switchToNextAvailableAccountOrLogout() {
+        Task { @MainActor in
+            if let currentAccount {
+                removeTokenAndAccount(account: currentAccount)
+            }
+
+            if let nextAccount = accounts.first {
+                switchAccount(newAccount: nextAccount)
+                delegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            } else {
+                SentrySDK.setUser(nil)
+            }
+            saveAccounts()
+            delegate?.updateRootViewControllerState()
+        }
     }
 }
