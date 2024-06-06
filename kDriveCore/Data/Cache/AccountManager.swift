@@ -29,7 +29,6 @@ public protocol UpdateAccountDelegate: AnyObject {
 }
 
 public protocol AccountManagerDelegate: AnyObject {
-    func currentAccountNeedsAuthentication()
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool)
     func updateRootViewControllerState()
 }
@@ -265,8 +264,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if accountToDelete == currentAccount {
             DDLogInfo("matched \(currentAccount) to \(accountToDelete), removing current account")
-
-            delegate?.currentAccountNeedsAuthentication()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
             DDLogInfo("user with token error \(accountToDelete) do not match current account, doing nothing")

@@ -460,12 +460,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    // MARK: - Account manager delegate
-
-    func currentAccountNeedsAuthentication() {
-        Log.appDelegate("currentAccountNeedsAuthentication", level: .error)
-    }
-
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
