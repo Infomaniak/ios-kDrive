@@ -83,7 +83,7 @@ public protocol AccountManageable: AnyObject {
     func removeTokenAndAccount(account: Account)
     func account(for token: ApiToken) -> Account?
     func account(for userId: Int) -> Account?
-    func switchToNextAvailableAccountOrLogout()
+    func logoutCurrentAccountAndSwitchToNextIfPossible()
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
@@ -248,16 +248,30 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let context = ["User id": token.userId,
                        "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
+
+        let tokenUserId = token.userId
         tokenStore.removeTokenFor(userId: token.userId)
 
-        DownloadQueue.instance.suspendAllOperations()
+        // Remove matching account
+        guard let accountToDelete = accounts.first(where: { account in
+            account.userId == tokenUserId
+        }) else {
+            SentryDebug.capture(message: "Failed matching failed token to account \(tokenUserId)",
+                                context: context,
+                                contextKey: "Token Infos")
+            DDLogError("Failed matching failed token to account \(tokenUserId)")
+            return
+        }
 
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.suspendAllOperations()
+        if accountToDelete == currentAccount {
+            DDLogInfo("matched \(currentAccount) to \(accountToDelete), removing current account")
 
-        delegate?.currentAccountNeedsAuthentication()
-        switchToNextAvailableAccountOrLogout()
-        notificationHelper.sendDisconnectedNotification()
+            delegate?.currentAccountNeedsAuthentication()
+            logoutCurrentAccountAndSwitchToNextIfPossible()
+        } else {
+            DDLogInfo("user with token error \(accountToDelete) do not match current account, doing nothing")
+            removeAccount(toDeleteAccount: accountToDelete)
+        }
     }
 
     public func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account {
@@ -441,10 +455,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return accounts.first { $0.userId == userId }
     }
 
-    public func switchToNextAvailableAccountOrLogout() {
+    public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)
+                notificationHelper.sendDisconnectedNotification()
             }
 
             if let nextAccount = accounts.first {

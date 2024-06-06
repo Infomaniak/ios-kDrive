@@ -286,7 +286,7 @@ extension MenuViewController {
                                                     .alertRemoveUserDescription(currentAccount?.user.displayName ?? ""),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
-                self.accountManager.switchToNextAvailableAccountOrLogout()
+                self.accountManager.logoutCurrentAccountAndSwitchToNextIfPossible()
             }
             present(alert, animated: true)
         case .help:
