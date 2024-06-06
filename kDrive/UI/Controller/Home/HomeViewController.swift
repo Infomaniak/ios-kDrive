@@ -247,6 +247,7 @@ class HomeViewController: UICollectionViewController, UpdateAccountDelegate, Top
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateNavbarAppearance()
+        currentRecentFilesController.viewDidAppear(animated)
         MatomoUtils.track(view: ["Home"])
     }
 

@@ -17,22 +17,23 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakConcurrency
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import Kingfisher
 import UIKit
 
 final class StorageTableViewController: UITableViewController {
-    private let cleanActions = CleanSpaceActions()
-
     private enum Section: CaseIterable {
         case header, directories, files
     }
 
     private let sections = Section.allCases
 
-    private var totalSize: UInt64 = 0
-    private var directories = [StorageFile]()
-    private var files = [StorageFile]()
+    @MainActor private var totalSize: UInt64 = 0
+    @MainActor private var directories = [CacheModel]()
+    @MainActor private var files = [CacheModel]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +44,9 @@ final class StorageTableViewController: UITableViewController {
 
         title = KDriveResourcesStrings.Localizable.manageStorageTitle
 
-        reload()
+        Task {
+            await reload()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -51,27 +54,45 @@ final class StorageTableViewController: UITableViewController {
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "Storage"])
     }
 
-    private func reload() {
-        totalSize = 0
+    private func reload() async {
         // Get directories
-        var paths = [DriveFileManager.constants.rootDocumentsURL,
-                     NSFileProviderManager.default.documentStorageURL,
-                     DriveFileManager.constants.importDirectoryURL,
-                     FileManager.default.temporaryDirectory,
-                     DriveFileManager.constants.cacheDirectoryURL]
+        var directoryStorage: [CacheItem] = [CacheItem.fileSystem(url: DriveFileManager.constants.rootDocumentsURL),
+                                             CacheItem.fileSystem(url: NSFileProviderManager.default.documentStorageURL),
+                                             CacheItem.fileSystem(url: DriveFileManager.constants.importDirectoryURL),
+                                             CacheItem.fileSystem(url: FileManager.default.temporaryDirectory),
+                                             CacheItem.fileSystem(url: DriveFileManager.constants.cacheDirectoryURL),
+                                             CacheItem.storageImageCache]
+
+        if let openInPlaceURL = DriveFileManager.constants.openInPlaceDirectoryURL {
+            directoryStorage.append(CacheItem.fileSystem(url: openInPlaceURL))
+        }
 
         // Append document directory if it exists
         if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
                                                             in: .userDomainMask).first {
-            paths.insert(documentDirectory, at: 1)
+            directoryStorage.insert(CacheItem.fileSystem(url: documentDirectory), at: 1)
         }
 
-        directories = paths.compactMap { self.cleanActions.getFile(at: $0.path) }
-        // Get total size
-        totalSize = directories.reduce(0) { $0 + $1.size }
-        // Get files
-        files = cleanActions.exploreDirectory(at: DriveFileManager.constants.cacheDirectoryURL.path) ?? []
-        files.removeAll { $0.path.contains("logs") } // Exclude log files
+        // Compute cacheDirectories
+        let cacheDirectories = await directoryStorage.concurrentMap { CacheModel(datasource: $0) }
+
+        // Compute cacheFiles
+        let cacheFilesItems = CacheItem.exploreFiles(for: DriveFileManager.constants.cacheDirectoryURL)
+        let cacheFiles = await cacheFilesItems.concurrentMap { CacheModel(datasource: $0) }
+
+        // Compute space usage
+        let usedSize = cacheDirectories.reduce(0) { $0 + $1.size }
+
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            self.totalSize = usedSize
+            self.directories = cacheDirectories
+            self.files = cacheFiles
+            self.tableView.reloadData()
+        }
     }
 
     // MARK: - Table view data source
@@ -107,13 +128,13 @@ final class StorageTableViewController: UITableViewController {
             let directory = directories[indexPath.row]
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == directories.count - 1)
             cell.titleLabel.text = directory.directoryTitle
-            cell.valueLabel.text = Constants.formatFileSize(Int64(directory.size))
+            cell.valueLabel.text = directory.formattedSize
             cell.selectionStyle = indexPath.row == 0 ? .none : .default
         case .files:
             let file = files[indexPath.row]
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == files.count - 1)
             cell.titleLabel.text = file.name
-            cell.valueLabel.text = Constants.formatFileSize(Int64(file.size))
+            cell.valueLabel.text = file.formattedSize
             cell.selectionStyle = .default
         }
 
@@ -137,7 +158,7 @@ final class StorageTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let section = sections[indexPath.section]
-        let file: StorageFile
+        let storage: CacheModel
         let message: String
 
         switch section {
@@ -145,11 +166,11 @@ final class StorageTableViewController: UITableViewController {
             return
         case .directories:
             guard indexPath.row != 0 else { return }
-            file = directories[indexPath.row]
-            message = KDriveResourcesStrings.Localizable.modalClearCacheDirectoryDescription(file.directoryTitle)
+            storage = directories[indexPath.row]
+            message = KDriveResourcesStrings.Localizable.modalClearCacheDirectoryDescription(storage.directoryTitle)
         case .files:
-            file = files[indexPath.row]
-            message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(file.name)
+            storage = files[indexPath.row]
+            message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(storage.name)
         }
 
         let alertViewController = AlertTextViewController(
@@ -158,18 +179,15 @@ final class StorageTableViewController: UITableViewController {
             action: KDriveResourcesStrings.Localizable.buttonClear,
             destructive: true
         ) { [weak self] in
-            DispatchQueue.global(qos: .utility).async {
-                guard let self else {
-                    return
-                }
-                self.cleanActions.delete(file: file)
-                self.reload()
-                // Reload data
-                Task { @MainActor [weak self] in
-                    self?.tableView.reloadData()
-                }
+            Task {
+                // clean element
+                await storage.clean()
+
+                // Reload datasource
+                await self?.reload()
             }
         }
+
         present(alertViewController, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
     }
