@@ -460,14 +460,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
         }
     }
 
-    // MARK: - Account manager delegate
-
-    func currentAccountNeedsAuthentication() {
-        Task { @MainActor in
-            setRootViewController(SwitchUserViewController.instantiateInNavigationController())
-        }
-    }
-
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
