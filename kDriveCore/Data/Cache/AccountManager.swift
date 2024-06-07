@@ -264,6 +264,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if accountToDelete == currentAccount {
             DDLogInfo("matched \(currentAccount) to \(accountToDelete), removing current account")
+            notificationHelper.sendDisconnectedNotification()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
             DDLogInfo("user with token error \(accountToDelete) do not match current account, doing nothing")
@@ -456,7 +457,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         Task { @MainActor in
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)
-                notificationHelper.sendDisconnectedNotification()
             }
 
             if let nextAccount = accounts.first {
