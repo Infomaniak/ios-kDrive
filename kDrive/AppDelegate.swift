@@ -387,32 +387,52 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDeleg
                 return
             }
 
-            if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
-                // Pop to root
-                navController.popToRootViewController(animated: false)
-                // Present file
-                guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
-                if office {
-                    OnlyOfficeViewController.open(driveFileManager: driveFileManager,
-                                                  file: file,
-                                                  viewController: fileListViewController)
-                } else {
-                    let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(for: file,
-                                          files: [file],
-                                          driveFileManager: driveFileManager,
-                                          normalFolderHierarchy: false)
-                }
+            guard !file.isRoot,
+                  viewController.viewModel.currentDirectory.id != file.id else {
+                Log.appDelegate("Already presenting the correct screen")
+                return
+            }
+
+            // Pop to root
+            navController.popToRootViewController(animated: false)
+
+            // Present file
+            guard let fileListViewController = navController.topViewController as? RootMenuViewController else {
+                Log.appDelegate("Top navigation is not a RootMenuViewController")
+                return
+            }
+
+            if office {
+                OnlyOfficeViewController.open(driveFileManager: driveFileManager,
+                                              file: file,
+                                              viewController: fileListViewController)
+            } else {
+                let filePresenter = FilePresenter(viewController: fileListViewController)
+                filePresenter.present(for: file,
+                                      files: [file],
+                                      driveFileManager: driveFileManager,
+                                      normalFolderHierarchy: false)
             }
         }
     }
 
     @objc func handleLocateUploadNotification(_ notification: Notification) {
-        if let parentId = notification.userInfo?["parentId"] as? Int,
-           let driveFileManager = accountManager.currentDriveFileManager,
-           let folder = driveFileManager.getCachedFile(id: parentId) {
-            present(file: folder, driveFileManager: driveFileManager)
+        guard let parentId = notification.userInfo?["parentId"] as? Int else {
+            Log.appDelegate("No parentId")
+            return
         }
+
+        guard let driveFileManager = accountManager.currentDriveFileManager else {
+            Log.appDelegate("No driveFileManager")
+            return
+        }
+
+        guard let folder = driveFileManager.getCachedFile(id: parentId) else {
+            Log.appDelegate("No matching cached files")
+            return
+        }
+
+        present(file: folder, driveFileManager: driveFileManager)
     }
 
     @objc func reloadDrive(_ notification: Notification) {
