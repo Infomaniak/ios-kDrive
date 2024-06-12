@@ -133,7 +133,7 @@ public final class FileImportHelper {
                     var finalUrl: URL
                     if self.appContextService.isExtension {
                         // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
-                        let appGroupURL = try URL.appGroupUniqueFolderURL()
+                        let appGroupURL = try URL.appGroupImportUniqueFolderURL()
 
                         // Get import URL
                         let appGroupFileURL = appGroupURL.appendingPathComponent(fileName)
@@ -249,7 +249,7 @@ public final class FileImportHelper {
                     var finalUrl: URL
                     if self.appContextService.isExtension {
                         // In extension, we need to copy files to a path within appGroup to be able to upload from the main app.
-                        let appGroupURL = try URL.appGroupUniqueFolderURL()
+                        let appGroupURL = try URL.appGroupImportUniqueFolderURL()
 
                         // Get import URL
                         let appGroupFileURL = appGroupURL.appendingPathComponent(fileName)
@@ -281,10 +281,12 @@ public final class FileImportHelper {
 // TODO: move to core
 extension URL {
     /// Build a path where a file can be moved within the appGroup while preventing collisions
-    static func appGroupUniqueFolderURL() throws -> URL {
+    ///
+    /// Uses the importDirectoryURL, that exists within the appGroup, to allow for easy cleaning.
+    static func appGroupImportUniqueFolderURL() throws -> URL {
         // Use a unique folder to prevent collisions
         @InjectService var pathProvider: AppGroupPathProvidable
-        let targetFolderURL = pathProvider.groupDirectoryURL
+        let targetFolderURL = pathProvider.importDirectoryURL
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: targetFolderURL, withIntermediateDirectories: true)
         return targetFolderURL
