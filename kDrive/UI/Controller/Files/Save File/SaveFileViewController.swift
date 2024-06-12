@@ -208,10 +208,14 @@ class SaveFileViewController: UIViewController {
             assetIdentifiers,
             userPreferredPhotoFormat: userPreferredPhotoFormat
         ) { [weak self] importedFiles, errorCount in
-            self?.items = importedFiles
-            self?.errorCount = errorCount
+            guard let self else {
+                return
+            }
+
+            items = importedFiles
+            self.errorCount = errorCount
             Task { @MainActor in
-                self?.updateTableViewAfterImport()
+                self.updateTableViewAfterImport()
             }
         }
     }
@@ -222,10 +226,14 @@ class SaveFileViewController: UIViewController {
         importProgress = fileImportHelper
             .importItems(itemProviders,
                          userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
-                self?.items = importedFiles
-                self?.errorCount = errorCount
+                guard let self else {
+                    return
+                }
+
+                items = importedFiles
+                self.errorCount = errorCount
                 Task { @MainActor in
-                    self?.updateTableViewAfterImport()
+                    self.updateTableViewAfterImport()
                 }
             }
     }
