@@ -95,8 +95,6 @@ public struct FreeSpaceService {
             return
         }
 
-        Log.uploadOperation("found \(cachedFiles.count) in the group directory \(cachedFiles)")
-
         // Keep only folders, where names are a UUID
         let importUUIDsFolders: [URL] = cachedFiles.compactMap { url in
             guard Self.isDirectory(url: url) else {
@@ -111,7 +109,9 @@ public struct FreeSpaceService {
             return url
         }
 
-        Log.uploadOperation("found \(importUUIDsFolders.count) legacy import folders in the group directory")
+        Log.uploadOperation(
+            "found \(importUUIDsFolders.count) legacy import folders in the group directory, within \(cachedFiles.count) objects"
+        )
 
         // Keep only folders that are not present in any upload in progress
         let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
@@ -132,9 +132,8 @@ public struct FreeSpaceService {
             return folderUrl
         }
 
-        Log.uploadOperation("found \(foldersToClean.count) orphan foldersToClean")
+        Log.uploadOperation("found \(foldersToClean.count) orphan folders to clean")
         for folderToClean in foldersToClean {
-            Log.uploadOperation("removing orphan folder \(folderToClean)")
             try? fileManager.removeItem(at: folderToClean)
         }
     }
