@@ -37,7 +37,7 @@ public struct FreeSpaceService {
         case unavailable(wrapping: Error)
     }
 
-    private static let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+    private static let temporaryDirectoryURL = DriveFileManager.constants.tmpDirectoryURL
 
     private static let importDirectoryURL = DriveFileManager.constants.importDirectoryURL
 
@@ -125,7 +125,7 @@ public struct FreeSpaceService {
         Log.uploadOperation("Almost not enough space for chunk upload, clearing temporary files")
 
         // Clean temp files we are absolutely sure will not end up with a data loss.
-        let temporaryDirectory = FileManager.default.temporaryDirectory
+        let temporaryDirectory = Self.temporaryDirectoryURL
         try? FileManager.default.removeItem(at: temporaryDirectory)
         // Recreate directory to avoid any issue
         try? FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)

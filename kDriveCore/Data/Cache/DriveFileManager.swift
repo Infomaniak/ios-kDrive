@@ -51,13 +51,58 @@ public final class DriveFileManager {
             DropBoxSize.self,
             DropBoxValidity.self
         ]
+
         private let fileManager = FileManager.default
+
+        // MARK: appDirectory URL
+
+        /// App files url
+        public var appDirectoryURL: URL? {
+            guard let appDirectory = FileManager.default.urls(for: .applicationDirectory,
+                                                              in: .userDomainMask).first else {
+                return nil
+            }
+
+            return appDirectory
+        }
+
+        public var appDocumentsDirectoryURL: URL? {
+            guard let appDocumentDirectory = FileManager.default.urls(for: .documentDirectory,
+                                                                      in: .userDomainMask).first else {
+                return nil
+            }
+
+            return appDocumentDirectory
+        }
+
+        public var appLibraryDirectoryURL: URL? {
+            guard let appLibraryDirectory = FileManager.default.urls(for: .libraryDirectory,
+                                                                     in: .userDomainMask).first else {
+                return nil
+            }
+
+            return appLibraryDirectory
+        }
+
+        /// Documents folder, within appDirectoryURL
         public let rootDocumentsURL: URL
-        public let importDirectoryURL: URL
-        public let groupDirectoryURL: URL
-        public var cacheDirectoryURL: URL
+
+        // MARK: system cache URL
+
         public var tmpDirectoryURL: URL
+
+        // MARK: groupDirectory URL
+
+        /// AppGroup url
+        public let groupDirectoryURL: URL
+
+        public let importDirectoryURL: URL
+        public var cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
+
+        /// The URL of the files of Files.app, within the appGroup.
+        public let fileProviderDirectoryURL: URL = NSFileProviderManager.default.documentStorageURL
+
         public let rootID = 1
         public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
@@ -203,9 +248,7 @@ public final class DriveFileManager {
             cacheDirectoryURL = pathProvider.cacheDirectoryURL
             openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
 
-            DDLogInfo(
-                "App working path is: \(fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? "")"
-            )
+            DDLogInfo("App working path is: \(appDirectoryURL?.absoluteString ?? "")")
             DDLogInfo("Group container path is: \(groupDirectoryURL.absoluteString)")
         }
     }
