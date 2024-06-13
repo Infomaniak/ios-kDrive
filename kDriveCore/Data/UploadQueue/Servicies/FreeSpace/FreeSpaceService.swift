@@ -39,8 +39,6 @@ public struct FreeSpaceService {
 
     private static let temporaryDirectoryURL = FileManager.default.temporaryDirectory
 
-    private static let importDirectoryURL = DriveFileManager.constants.importDirectoryURL
-
     private static let groupDirectoryURL = DriveFileManager.constants.groupDirectoryURL
 
     private let fileManager = FileManager.default
@@ -140,7 +138,7 @@ public struct FreeSpaceService {
 
     /// Check for orphan files in the import folder, clean if file is not tracked in DB.
     private func cleanOrphanImportFolderFiles() {
-        let importDirectory = Self.importDirectoryURL
+        let importDirectory = DriveFileManager.constants.importDirectoryURL
         do {
             // Read content of import folder
             let cachedFiles = try fileManager.contentsOfDirectory(at: importDirectory, includingPropertiesForKeys: nil)
