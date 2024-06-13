@@ -56,7 +56,6 @@ final class StorageTableViewController: UITableViewController {
 
     private func reload() async {
         // Get directories
-        let imageCacheItem = CacheItem.storageImageCache
         let temporaryCacheItem = CacheItem.fileSystem(url: FileManager.default.temporaryDirectory)
         var directoryStorage: [CacheItem] = [
             CacheItem.fileSystem(url: DriveFileManager.constants.rootDocumentsURL),
@@ -64,7 +63,7 @@ final class StorageTableViewController: UITableViewController {
             CacheItem.fileSystem(url: DriveFileManager.constants.importDirectoryURL),
             temporaryCacheItem,
             CacheItem.fileSystem(url: DriveFileManager.constants.cacheDirectoryURL),
-            imageCacheItem
+            CacheItem.storageImageCache
         ]
 
         if let openInPlaceURL = DriveFileManager.constants.openInPlaceDirectoryURL {
@@ -83,22 +82,23 @@ final class StorageTableViewController: UITableViewController {
         let cacheFilesItems = CacheItem.exploreFiles(for: DriveFileManager.constants.cacheDirectoryURL)
         let cacheFiles = await cacheFilesItems.concurrentMap { CacheModel(datasource: $0) }
 
-        // Compute space usage
+        // Compute appGroup space usage
         let appGroupSize = CacheItem.fileSystem(url: DriveFileManager.constants.groupDirectoryURL).size
 
-        var appFileSize: UInt64 = 0
-        if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL {
-            let documentsSize = CacheItem.fileSystem(url: documentsURL).size
-            print("documentsSize:\(documentsSize)")
-            appFileSize += documentsSize
-        }
-        if let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
+        // Compute app space usage
+        let appSize: UInt64
+        if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL,
+           let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
+            // image cache is contained within the app library folder
             let librarySize = CacheItem.fileSystem(url: libraryURL).size
-            print("librarySize:\(librarySize)")
-            appFileSize += librarySize
+            let documentSize = CacheItem.fileSystem(url: documentsURL).size
+            appSize = documentSize + librarySize
+        } else {
+            appSize = 0
         }
 
-        let usedSize = imageCacheItem.size + temporaryCacheItem.size + appFileSize + appGroupSize
+        // Total app usage and monitor difference to sentry
+        let usedSize = temporaryCacheItem.size + appSize + appGroupSize
 
         Task { @MainActor [weak self] in
             guard let self else {
@@ -114,9 +114,16 @@ final class StorageTableViewController: UITableViewController {
         // Check old size calculation and new one, send a sentry.
         Task {
             let legacySize = cacheDirectories.reduce(0) { $0 + $1.size }
-            // TODO: Sentry if legacySize > usedSize
 
-            print("size \(usedSize) VS old \(legacySize) - appFileSize:\(appFileSize) appGroupSize:\(appGroupSize)")
+            let metadata = [
+                "usedSize": usedSize,
+                "legacySize": legacySize,
+                "appSize": appSize,
+                "appGroupSize": appGroupSize
+            ]
+            SentryDebug.appSizeUsage(metadata)
+
+            print("size \(usedSize) VS legacySize \(legacySize) - appSize:\(appSize) appGroupSize:\(appGroupSize)")
         }
     }
 
