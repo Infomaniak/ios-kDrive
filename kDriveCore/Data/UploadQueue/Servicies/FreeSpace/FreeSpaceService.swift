@@ -98,7 +98,7 @@ public struct FreeSpaceService {
         Log.uploadOperation("found \(cachedFiles.count) in the group directory \(cachedFiles)")
 
         // Keep only folders, where names are a UUID
-        let UUIDsFolders: [URL] = cachedFiles.compactMap { url in
+        let importUUIDsFolders: [URL] = cachedFiles.compactMap { url in
             guard Self.isDirectory(url: url) else {
                 return nil
             }
@@ -111,11 +111,11 @@ public struct FreeSpaceService {
             return url
         }
 
-        Log.uploadOperation("found \(UUIDsFolders.count) legacy import folders in the group directory")
+        Log.uploadOperation("found \(importUUIDsFolders.count) legacy import folders in the group directory")
 
         // Keep only folders that are not present in any upload in progress
         let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
-        let foldersToClean: [URL] = UUIDsFolders.compactMap { folderUrl in
+        let foldersToClean: [URL] = importUUIDsFolders.compactMap { folderUrl in
             let folderName = folderUrl.lastPathComponent
             let isUploading = uploadingFiles.contains { uploadFile in
                 guard let uploadFilePath = uploadFile.url else {
