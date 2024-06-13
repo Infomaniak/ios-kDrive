@@ -44,6 +44,7 @@ public enum SentryDebug {
 
     public enum EventNames {
         static let uploadCompletedSuccess = "UploadCompletedSuccess"
+        static let appSizeUsage = "appSizeUsage"
     }
 
     public enum ErrorNames {

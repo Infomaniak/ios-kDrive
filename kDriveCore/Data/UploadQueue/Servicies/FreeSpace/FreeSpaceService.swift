@@ -37,9 +37,11 @@ public struct FreeSpaceService {
         case unavailable(wrapping: Error)
     }
 
-    private static let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+    private static let temporaryDirectoryURL = FileManager.default.temporaryDirectory
 
-    private static let importDirectoryURL = DriveFileManager.constants.importDirectoryURL
+    private static let groupDirectoryURL = DriveFileManager.constants.groupDirectoryURL
+
+    private let fileManager = FileManager.default
 
     ///  The minimum available space required to start uploading with chunks
     ///
@@ -69,41 +71,106 @@ public struct FreeSpaceService {
     }
 
     /// Run cache consistency checks
+    ///
+    /// Removes orphan import files, and cache if constrained in space
+    /// This works on the assumption that the UploadQueue is stopped
     public func auditCache() {
-        cleanOrphanFiles()
+        assert(uploadQueue.operationQueue.isSuspended, "expecting the uploadQueue to be suspended")
+
+        cleanOrphanImportFolderFiles()
+        cleanOrphanRootImportFiles()
         cleanCacheIfAlmostFull()
     }
 
+    /// Check for legacy imports files, clean if file is not tracked in DB.
+    ///
+    /// This checks within the appGroup directory, not in the import one.
+    private func cleanOrphanRootImportFiles() {
+        // Read content of app group folder
+        guard let cachedFiles = try? fileManager.contentsOfDirectory(at: Self.groupDirectoryURL, includingPropertiesForKeys: nil)
+        else {
+            Log.uploadOperation("unable to enumerate groupDirectoryURL \(Self.groupDirectoryURL)")
+            return
+        }
+
+        // Keep only folders, where names are a UUID
+        let importUUIDsFolders: [URL] = cachedFiles.compactMap { url in
+            guard Self.isDirectory(url: url) else {
+                return nil
+            }
+
+            let uuid = url.lastPathComponent
+            guard UUID(uuidString: uuid) != nil else {
+                return nil
+            }
+
+            return url
+        }
+
+        Log.uploadOperation(
+            "found \(importUUIDsFolders.count) legacy import folders in the group directory, within \(cachedFiles.count) objects"
+        )
+
+        // Keep only folders that are not present in any upload in progress
+        let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
+        let foldersToClean: [URL] = importUUIDsFolders.compactMap { folderUrl in
+            let folderName = folderUrl.lastPathComponent
+            let isUploading = uploadingFiles.contains { uploadFile in
+                guard let uploadFilePath = uploadFile.url else {
+                    return false
+                }
+
+                return uploadFilePath.contains(folderName)
+            }
+
+            guard !isUploading else {
+                return nil
+            }
+
+            return folderUrl
+        }
+
+        Log.uploadOperation("found \(foldersToClean.count) orphan folders to clean")
+        for folderToClean in foldersToClean {
+            try? fileManager.removeItem(at: folderToClean)
+        }
+    }
+
     /// Check for orphan files in the import folder, clean if file is not tracked in DB.
-    private func cleanOrphanFiles() {
-        let fileManager = FileManager.default
+    private func cleanOrphanImportFolderFiles() {
+        let importDirectory = DriveFileManager.constants.importDirectoryURL
         do {
             // Read content of import folder
-            let cachedFiles = try fileManager.contentsOfDirectory(atPath: Self.importDirectoryURL.path)
-            Log.uploadOperation("found \(cachedFiles.count) in the import directory")
+            let cachedFiles = try fileManager.contentsOfDirectory(at: importDirectory, includingPropertiesForKeys: nil)
+            guard !cachedFiles.isEmpty else {
+                Log.uploadOperation("no cache files in \(importDirectory) folder, exiting")
+                return
+            }
 
+            Log.uploadOperation("found \(cachedFiles.count) in the \(importDirectory) folder")
             // Get uploading in progress tracked in DB
             let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
 
             // Match files on SSD against DB, delete if not matched.
-            let filesToClean = cachedFiles.filter { cachedFileName in
+            let cachedFilesNames = cachedFiles.map { $0.lastPathComponent }
+            let filesNamesToClean = cachedFilesNames.filter { cachedFileName in
                 let cachedFileIsUploading = uploadingFiles.contains { uploadFile in
-                    guard let uploadFileUrl = uploadFile.url else {
+                    guard let uploadFilePath = uploadFile.url else {
                         return false
                     }
-                    return uploadFileUrl.hasSuffix(cachedFileName)
+                    return uploadFilePath.hasSuffix(cachedFileName)
                 }
 
                 return !cachedFileIsUploading
             }
 
-            Log.uploadOperation("cleanning \(filesToClean.count) files in import folder", level: .info)
-            for fileToClean in filesToClean {
-                let fileToCleanURL = Self.importDirectoryURL.appendingPathComponent(fileToClean)
+            Log.uploadOperation("cleanning \(filesNamesToClean.count) files in \(importDirectory) folder", level: .info)
+            for fileToClean in filesNamesToClean {
+                let fileToCleanURL = importDirectory.appendingPathComponent(fileToClean)
                 try? fileManager.removeItem(at: fileToCleanURL)
             }
         } catch {
-            Log.uploadOperation("Unexpected error working with import folder:\(error)", level: .error)
+            Log.uploadOperation("Unexpected error working with \(importDirectory) folder:\(error)", level: .error)
         }
     }
 
@@ -125,13 +192,17 @@ public struct FreeSpaceService {
         Log.uploadOperation("Almost not enough space for chunk upload, clearing temporary files")
 
         // Clean temp files we are absolutely sure will not end up with a data loss.
-        let temporaryDirectory = FileManager.default.temporaryDirectory
+        let temporaryDirectory = Self.temporaryDirectoryURL
         try? FileManager.default.removeItem(at: temporaryDirectory)
         // Recreate directory to avoid any issue
         try? FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
     }
 
-    // MARK: - private
+    private static func isDirectory(url: URL) -> Bool {
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+        return exists && isDirectory.boolValue
+    }
 
     private func freeSpace(url: URL) throws -> Int64 {
         do {

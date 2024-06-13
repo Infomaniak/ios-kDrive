@@ -491,7 +491,7 @@ public final class File: Object, Codable {
     }
 
     public var localContainerUrl: URL {
-        let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants
+        let directory = isAvailableOffline ? DriveFileManager.constants.realmRootURL : DriveFileManager.constants
             .cacheDirectoryURL
         return directory.appendingPathComponent("\(driveId)", isDirectory: true)
             .appendingPathComponent("\(id)", isDirectory: true)

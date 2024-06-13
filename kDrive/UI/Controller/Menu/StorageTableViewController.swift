@@ -56,20 +56,22 @@ final class StorageTableViewController: UITableViewController {
 
     private func reload() async {
         // Get directories
-        var directoryStorage: [CacheItem] = [CacheItem.fileSystem(url: DriveFileManager.constants.rootDocumentsURL),
-                                             CacheItem.fileSystem(url: NSFileProviderManager.default.documentStorageURL),
-                                             CacheItem.fileSystem(url: DriveFileManager.constants.importDirectoryURL),
-                                             CacheItem.fileSystem(url: FileManager.default.temporaryDirectory),
-                                             CacheItem.fileSystem(url: DriveFileManager.constants.cacheDirectoryURL),
-                                             CacheItem.storageImageCache]
+        let temporaryCacheItem = CacheItem.fileSystem(url: FileManager.default.temporaryDirectory)
+        var directoryStorage: [CacheItem] = [
+            CacheItem.fileSystem(url: DriveFileManager.constants.realmRootURL),
+            CacheItem.fileSystem(url: DriveFileManager.constants.fileProviderDirectoryURL),
+            CacheItem.fileSystem(url: DriveFileManager.constants.importDirectoryURL),
+            temporaryCacheItem,
+            CacheItem.fileSystem(url: DriveFileManager.constants.cacheDirectoryURL),
+            CacheItem.storageImageCache
+        ]
 
         if let openInPlaceURL = DriveFileManager.constants.openInPlaceDirectoryURL {
             directoryStorage.append(CacheItem.fileSystem(url: openInPlaceURL))
         }
 
         // Append document directory if it exists
-        if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
-                                                            in: .userDomainMask).first {
+        if let documentDirectory = DriveFileManager.constants.appDocumentsDirectoryURL {
             directoryStorage.insert(CacheItem.fileSystem(url: documentDirectory), at: 1)
         }
 
@@ -80,8 +82,23 @@ final class StorageTableViewController: UITableViewController {
         let cacheFilesItems = CacheItem.exploreFiles(for: DriveFileManager.constants.cacheDirectoryURL)
         let cacheFiles = await cacheFilesItems.concurrentMap { CacheModel(datasource: $0) }
 
-        // Compute space usage
-        let usedSize = cacheDirectories.reduce(0) { $0 + $1.size }
+        // Compute appGroup space usage
+        let appGroupSize = CacheItem.fileSystem(url: DriveFileManager.constants.groupDirectoryURL).size
+
+        // Compute app space usage
+        let appSize: UInt64
+        if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL,
+           let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
+            // Image cache is contained within the app library folder
+            let librarySize = CacheItem.fileSystem(url: libraryURL).size
+            let documentSize = CacheItem.fileSystem(url: documentsURL).size
+            let temporarySize = temporaryCacheItem.size
+            appSize = documentSize + librarySize + temporarySize
+        } else {
+            appSize = 0
+        }
+
+        let usedSize = appSize + appGroupSize
 
         Task { @MainActor [weak self] in
             guard let self else {
@@ -92,6 +109,19 @@ final class StorageTableViewController: UITableViewController {
             self.directories = cacheDirectories
             self.files = cacheFiles
             self.tableView.reloadData()
+        }
+
+        // Check old size calculation and new one, send a sentry.
+        Task {
+            let legacySize = cacheDirectories.reduce(0) { $0 + $1.size }
+
+            let metadata = [
+                "usedSize": usedSize,
+                "legacySize": legacySize,
+                "appSize": appSize,
+                "appGroupSize": appGroupSize
+            ]
+            SentryDebug.appSizeUsage(metadata)
         }
     }
 

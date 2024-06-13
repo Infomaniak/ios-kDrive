@@ -131,8 +131,8 @@ public enum Logging {
             try? fileManager.removeItem(atPath: documentDrivesPath)
             try? fileManager.removeItem(atPath: documentLogsPath)
 
-            if fileManager.fileExists(atPath: DriveFileManager.constants.rootDocumentsURL.path) {
-                try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
+            if fileManager.fileExists(atPath: DriveFileManager.constants.realmRootURL.path) {
+                try fileManager.copyItem(atPath: DriveFileManager.constants.realmRootURL.path, toPath: documentDrivesPath)
             }
             let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
             if fileManager.fileExists(atPath: cachedLogsUrl.path) {
