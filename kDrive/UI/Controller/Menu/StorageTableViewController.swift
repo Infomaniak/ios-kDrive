@@ -89,16 +89,17 @@ final class StorageTableViewController: UITableViewController {
         let appSize: UInt64
         if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL,
            let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
-            // image cache is contained within the app library folder
+            // Image cache is contained within the app library folder
             let librarySize = CacheItem.fileSystem(url: libraryURL).size
             let documentSize = CacheItem.fileSystem(url: documentsURL).size
-            appSize = documentSize + librarySize
+            let temporarySize = temporaryCacheItem.size
+            appSize = documentSize + librarySize + temporarySize
         } else {
             appSize = 0
         }
 
         // Total app usage and monitor difference to sentry
-        let usedSize = temporaryCacheItem.size + appSize + appGroupSize
+        let usedSize = appSize + appGroupSize
 
         Task { @MainActor [weak self] in
             guard let self else {
