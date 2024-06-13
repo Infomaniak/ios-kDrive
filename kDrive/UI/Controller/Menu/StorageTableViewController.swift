@@ -98,7 +98,6 @@ final class StorageTableViewController: UITableViewController {
             appSize = 0
         }
 
-        // Total app usage and monitor difference to sentry
         let usedSize = appSize + appGroupSize
 
         Task { @MainActor [weak self] in
@@ -123,8 +122,6 @@ final class StorageTableViewController: UITableViewController {
                 "appGroupSize": appGroupSize
             ]
             SentryDebug.appSizeUsage(metadata)
-
-            print("size \(usedSize) VS legacySize \(legacySize) - appSize:\(appSize) appGroupSize:\(appGroupSize)")
         }
     }
 
