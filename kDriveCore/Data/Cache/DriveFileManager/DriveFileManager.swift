@@ -177,6 +177,7 @@ public final class DriveFileManager {
                         if let id = oldObject?["id"] as? Int,
                            let driveId = oldObject?["driveId"] as? Int {
                             newObject?["uid"] = File.uid(driveId: driveId, fileId: id)
+                            newObject?["revisedAt"] = Date(timeIntervalSince1970: 0)
                         } else if let oldObject {
                             migration.delete(oldObject)
                         } else if let newObject {
