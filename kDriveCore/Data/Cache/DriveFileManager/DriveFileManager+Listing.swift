@@ -34,6 +34,7 @@ public extension DriveFileManager {
 
         let children = result.validApiResponse.data.files
         let nextCursor = result.validApiResponse.cursor
+        let responseAt = result.validApiResponse.responseAt
         let hasMore = result.validApiResponse.hasMore
 
         var managedParentDirectory: File?
@@ -63,6 +64,7 @@ public extension DriveFileManager {
             managedParent.lastCursor = nextCursor
             managedParent.versionCode = DriveFileManager.constants.currentVersionCode
             managedParent.fullyDownloaded = !hasMore
+            managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
         }
 
         guard let managedParentDirectory else {
