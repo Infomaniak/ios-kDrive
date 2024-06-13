@@ -33,6 +33,6 @@ struct FileActionBody: Encodable {
 
     init(file: File) {
         id = file.id
-        fromDate = max(file.responseAt, Int(file.lastModifiedAt.timeIntervalSince1970))
+        fromDate = max(file.responseAt, Int(file.revisedAt.timeIntervalSince1970))
     }
 }

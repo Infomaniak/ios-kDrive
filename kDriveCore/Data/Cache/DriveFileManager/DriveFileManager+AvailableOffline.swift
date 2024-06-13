@@ -35,27 +35,31 @@ public extension DriveFileManager {
         let offlineFiles = getAvailableOfflineFiles()
         guard !offlineFiles.isEmpty else { return }
 
-        let activities = try await apiFetcher.filesLastActivities(files: offlineFiles, drive: drive)
+        let batchSize = 500
+        for i in stride(from: 0, through: offlineFiles.count - 1, by: batchSize) {
+            let batchFiles = Array(offlineFiles.dropFirst(i).prefix(batchSize))
+            let batchActivities = try await apiFetcher.filesLastActivities(files: batchFiles, drive: drive)
 
-        try database.writeTransaction { writableRealm in
-            for activity in activities {
-                if let file = activity.file,
-                   [FileActivityType.fileUpdate, FileActivityType.fileRename].contains(activity.lastAction) {
-                    updateFile(updatedFile: file, lastActionAt: activity.lastActionAt, writableRealm: writableRealm)
-                } else if [FileActivityType.fileDelete, FileActivityType.fileTrash].contains(activity.lastAction) {
-                    removeFileInDatabase(
-                        fileUid: File.uid(driveId: drive.id, fileId: activity.fileId),
-                        cascade: false,
-                        writableRealm: writableRealm
-                    )
+            var updatedFiles = [File]()
+            try database.writeTransaction { writableRealm in
+                for activity in batchActivities {
+                    if let file = activity.file,
+                       [FileActivityType.fileUpdate, FileActivityType.fileRename].contains(activity.lastAction) {
+                        updateFile(updatedFile: file, lastActionAt: activity.lastActionAt, writableRealm: writableRealm)
+                        updatedFiles.append(file)
+                    } else if [FileActivityType.fileDelete, FileActivityType.fileTrash].contains(activity.lastAction) {
+                        removeFileInDatabase(
+                            fileUid: File.uid(driveId: drive.id, fileId: activity.fileId),
+                            cascade: false,
+                            writableRealm: writableRealm
+                        )
+                    }
                 }
             }
-        }
 
-        // After metadata update, download real files if needed
-        let updatedOfflineFiles = getAvailableOfflineFiles()
-        for updateOfflineFile in updatedOfflineFiles where updateOfflineFile.isLocalVersionOlderThanRemote {
-            DownloadQueue.instance.addToQueue(file: updateOfflineFile, userId: drive.userId)
+            for updatedFile in updatedFiles where updatedFile.isLocalVersionOlderThanRemote {
+                DownloadQueue.instance.addToQueue(file: updatedFile, userId: drive.userId)
+            }
         }
     }
 
