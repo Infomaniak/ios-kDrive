@@ -56,16 +56,7 @@ public final class DriveFileManager {
 
         // MARK: appDirectory URL
 
-        /// App files url
-        public var appDirectoryURL: URL? {
-            guard let appDirectory = FileManager.default.urls(for: .applicationDirectory,
-                                                              in: .userDomainMask).first else {
-                return nil
-            }
-
-            return appDirectory
-        }
-
+        /// Documents/ folder within the App directory
         public var appDocumentsDirectoryURL: URL? {
             guard let appDocumentDirectory = FileManager.default.urls(for: .documentDirectory,
                                                                       in: .userDomainMask).first else {
@@ -75,6 +66,7 @@ public final class DriveFileManager {
             return appDocumentDirectory
         }
 
+        /// Library/ folder within the App directory
         public var appLibraryDirectoryURL: URL? {
             guard let appLibraryDirectory = FileManager.default.urls(for: .libraryDirectory,
                                                                      in: .userDomainMask).first else {
@@ -84,24 +76,32 @@ public final class DriveFileManager {
             return appLibraryDirectory
         }
 
-        /// Documents folder, within appDirectoryURL
-        public let rootDocumentsURL: URL
+        /// Documents/.shared/ folder within the App directory
+        public let openInPlaceDirectoryURL: URL?
 
         // MARK: system cache URL
 
+        /// Some folder named with a UUID generated at app startup within .temporaryDirectory
         public var tmpDirectoryURL: URL
 
         // MARK: groupDirectory URL
 
-        /// AppGroup url
+        /// AppGroup root URL
         public let groupDirectoryURL: URL
 
-        public let importDirectoryURL: URL
-        public var cacheDirectoryURL: URL
-        public let openInPlaceDirectoryURL: URL?
+        /// Realm folder, within the appGroup
+        public let realmRootURL: URL
 
-        /// The URL of the files of Files.app, within the appGroup.
+        /// Dedicated import folder URL within the appGroup
+        public let importDirectoryURL: URL
+
+        /// Library/Caches/ folder URL within the appGroup
+        public var cacheDirectoryURL: URL
+
+        /// Content of Files.app, within the appGroup
         public let fileProviderDirectoryURL: URL = NSFileProviderManager.default.documentStorageURL
+
+        // MARK: Realm
 
         public let rootID = 1
         public let currentVersionCode = 1
@@ -201,7 +201,7 @@ public final class DriveFileManager {
         }
 
         /// Path of the upload DB
-        public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
+        public lazy var uploadsRealmURL = realmRootURL.appendingPathComponent("uploads.realm")
 
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
             fileURL: uploadsRealmURL,
@@ -242,13 +242,13 @@ public final class DriveFileManager {
         init() {
             @InjectService var pathProvider: AppGroupPathProvidable
             groupDirectoryURL = pathProvider.groupDirectoryURL
-            rootDocumentsURL = pathProvider.realmRootURL
+            realmRootURL = pathProvider.realmRootURL
             importDirectoryURL = pathProvider.importDirectoryURL
             tmpDirectoryURL = pathProvider.tmpDirectoryURL
             cacheDirectoryURL = pathProvider.cacheDirectoryURL
             openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
 
-            DDLogInfo("App working path is: \(appDirectoryURL?.absoluteString ?? "")")
+            DDLogInfo("App working path is: \(appDocumentsDirectoryURL?.absoluteString ?? "")")
             DDLogInfo("Group container path is: \(groupDirectoryURL.absoluteString)")
         }
     }
@@ -324,7 +324,7 @@ public final class DriveFileManager {
     init(drive: Drive, apiFetcher: DriveApiFetcher) {
         self.drive = drive
         self.apiFetcher = apiFetcher
-        realmURL = DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
+        realmURL = DriveFileManager.constants.realmRootURL.appendingPathComponent("\(drive.userId)-\(drive.id).realm")
 
         realmConfiguration = Realm.Configuration(
             fileURL: realmURL,
@@ -443,7 +443,7 @@ public final class DriveFileManager {
         }
 
         let config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
+            fileURL: DriveFileManager.constants.realmRootURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [
                 Drive.self,
@@ -463,7 +463,7 @@ public final class DriveFileManager {
         }
 
         let files = (try? fileManager
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil)) ?? []
+            .contentsOfDirectory(at: DriveFileManager.constants.realmRootURL, includingPropertiesForKeys: nil)) ?? []
         for file in files where file.pathExtension == "realm" {
             do {
                 let realmConfiguration = Realm.Configuration(
@@ -507,7 +507,7 @@ public final class DriveFileManager {
     ///   - driveId: Drive ID (`nil` if all user drives)
     public static func deleteUserDriveFiles(userId: Int, driveId: Int? = nil) {
         let files = (try? FileManager.default
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil))
+            .contentsOfDirectory(at: DriveFileManager.constants.realmRootURL, includingPropertiesForKeys: nil))
         files?.forEach { file in
             if let matches = Regex(pattern: "(\\d+)-(\\d+).realm.*")?.firstMatch(in: file.lastPathComponent), matches.count > 2 {
                 let fileUserId = matches[1]

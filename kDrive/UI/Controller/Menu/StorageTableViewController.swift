@@ -58,7 +58,7 @@ final class StorageTableViewController: UITableViewController {
         // Get directories
         let temporaryCacheItem = CacheItem.fileSystem(url: FileManager.default.temporaryDirectory)
         var directoryStorage: [CacheItem] = [
-            CacheItem.fileSystem(url: DriveFileManager.constants.rootDocumentsURL),
+            CacheItem.fileSystem(url: DriveFileManager.constants.realmRootURL),
             CacheItem.fileSystem(url: DriveFileManager.constants.fileProviderDirectoryURL),
             CacheItem.fileSystem(url: DriveFileManager.constants.importDirectoryURL),
             temporaryCacheItem,

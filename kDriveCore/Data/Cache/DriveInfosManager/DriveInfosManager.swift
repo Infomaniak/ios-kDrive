@@ -45,7 +45,7 @@ public final class DriveInfosManager {
 
     private init() {
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(Self.dbName),
+            fileURL: DriveFileManager.constants.realmRootURL.appendingPathComponent(Self.dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {

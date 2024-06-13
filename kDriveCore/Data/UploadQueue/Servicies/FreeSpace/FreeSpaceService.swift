@@ -37,7 +37,7 @@ public struct FreeSpaceService {
         case unavailable(wrapping: Error)
     }
 
-    private static let temporaryDirectoryURL = DriveFileManager.constants.tmpDirectoryURL
+    private static let temporaryDirectoryURL = FileManager.default.temporaryDirectory
 
     private static let importDirectoryURL = DriveFileManager.constants.importDirectoryURL
 
