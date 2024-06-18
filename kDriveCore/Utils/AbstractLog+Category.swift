@@ -208,6 +208,43 @@ public enum Log {
               tag: tag)
     }
 
+    public static func tokenAuthentication(_ message: @autoclosure () -> Any,
+                                           metadata: [String: Any]? = nil,
+                                           level: AbstractLogLevel = .debug,
+                                           context: Int = 0,
+                                           file: StaticString = #file,
+                                           function: StaticString = #function,
+                                           line: UInt = #line,
+                                           tag: Any? = nil) {
+        let category = "SyncedAuthenticator"
+        let messageAny = message()
+        guard let messageString = messageAny as? String else {
+            assertionFailure("This should always cast to a String")
+            return
+        }
+
+        // All errors are tracked on Sentry
+        if level == .error {
+            SentryDebug.capture(
+                message: messageString,
+                context: metadata,
+                level: .error,
+                extras: ["function": "\(function)", "line": "\(line)"]
+            )
+        }
+
+        SentryDebug.addBreadcrumb(message: messageString, category: .DriveInfosManager, level: .error, metadata: metadata)
+
+        ABLog(messageAny,
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
+
     private static func defaultLogHandler(_ message: @autoclosure () -> Any,
                                           category: String,
                                           level: AbstractLogLevel,
