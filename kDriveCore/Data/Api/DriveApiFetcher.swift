@@ -476,12 +476,15 @@ class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var keychainHelper: KeychainHelper
 
-    func handleFailedRefreshingToken(oldToken: ApiToken, error: Error?) -> Result<OAuthAuthenticator.Credential, Error> {
+    func handleFailedRefreshingToken(oldToken: ApiToken,
+                                     newToken: ApiToken?,
+                                     error: Error?) -> Result<OAuthAuthenticator.Credential, Error> {
         guard let error else {
             // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
             Log.tokenAuthentication(
                 "Refreshing token failed - Other \(error.debugDescription)",
-                metadata: oldToken.metadata,
+                oldToken: oldToken,
+                newToken: newToken,
                 level: AbstractLogLevel.error
             )
 
@@ -492,7 +495,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
             // Couldn't refresh the token because we don't have a refresh token
             Log.tokenAuthentication(
                 "Refreshing token failed - Cannot refresh infinite token",
-                metadata: oldToken.metadata,
+                oldToken: oldToken,
+                newToken: newToken,
                 level: AbstractLogLevel.error
             )
 
@@ -504,7 +508,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
             // Couldn't refresh the token, API says it's invalid
             Log.tokenAuthentication(
                 "Refreshing token failed - Invalid grant",
-                metadata: oldToken.metadata,
+                oldToken: oldToken,
+                newToken: newToken,
                 level: AbstractLogLevel.error
             )
 
@@ -523,16 +528,20 @@ class SyncedAuthenticator: OAuthAuthenticator {
     ) {
         // Only resolve locally to break init loop
         accountManager.refreshTokenLockedQueue.async {
+            let storedToken = self.accountManager.getTokenForUserId(credential.userId)
+
             Log.tokenAuthentication(
                 "Refreshing token - Starting",
-                metadata: (credential as ApiToken).metadata,
+                oldToken: storedToken,
+                newToken: credential,
                 level: AbstractLogLevel.info
             )
 
             if !self.keychainHelper.isKeychainAccessible {
                 Log.tokenAuthentication(
                     "Refreshing token failed - Keychain unaccessible",
-                    metadata: (credential as ApiToken).metadata,
+                    oldToken: storedToken,
+                    newToken: credential,
                     level: AbstractLogLevel.error
                 )
 
@@ -540,12 +549,13 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 return
             }
 
-            if let storedToken = self.accountManager.getTokenForUserId(credential.userId) {
+            if let storedToken {
                 // Someone else refreshed our token and we already have an infinite token
                 if storedToken.expirationDate == nil && credential.expirationDate != nil {
                     Log.tokenAuthentication(
                         "Refreshing token failed - Keychain unaccessible",
-                        metadata: (credential as ApiToken).metadata,
+                        oldToken: storedToken,
+                        newToken: credential,
                         level: AbstractLogLevel.info
                     )
 
@@ -558,7 +568,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
                    tokenExpirationDate > storedTokenExpirationDate {
                     Log.tokenAuthentication(
                         "Refreshing token - Success with local",
-                        metadata: (credential as ApiToken).metadata,
+                        oldToken: storedToken,
+                        newToken: credential,
                         level: AbstractLogLevel.info
                     )
 
@@ -575,14 +586,15 @@ class SyncedAuthenticator: OAuthAuthenticator {
                 if let token {
                     Log.tokenAuthentication(
                         "Refreshing token - Success with remote",
-                        metadata: (credential as ApiToken).metadata,
+                        oldToken: credential,
+                        newToken: token,
                         level: AbstractLogLevel.info
                     )
 
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))
                 } else {
-                    completion(self.handleFailedRefreshingToken(oldToken: credential, error: error))
+                    completion(self.handleFailedRefreshingToken(oldToken: credential, newToken: token, error: error))
                 }
                 expiringActivity.endAll()
             }

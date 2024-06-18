@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakDI
 import os.log
+import Sentry
 
 /// A representation of sandard log levels
 public enum AbstractLogLevel {
@@ -47,6 +48,22 @@ public enum AbstractLogLevel {
             return .debug
         case .fault:
             return .fault
+        }
+    }
+
+    // Bridge to sentry
+    var sentry: SentryLevel {
+        switch self {
+        case .warning, .notice, .emergency, .alert, .critical:
+            return .warning
+        case .error:
+            return .error
+        case .info:
+            return .info
+        case .debug:
+            return .debug
+        case .fault:
+            return .error
         }
     }
 }

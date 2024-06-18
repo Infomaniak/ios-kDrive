@@ -99,10 +99,12 @@ public enum SentryDebug {
     public static func captureNoWindow() {
         capture(message: "Trying to call show with no window")
     }
+}
 
-    // MARK: - SHARED -
+// MARK: - SHARED -
 
-    public static func addBreadcrumb(
+public extension SentryDebug {
+    static func addBreadcrumb(
         message: String,
         category: SentryDebug.Category,
         level: SentryLevel,
@@ -116,7 +118,7 @@ public enum SentryDebug {
         }
     }
 
-    public static func capture(
+    static func capture(
         error: Error,
         context: [String: Any]? = nil,
         contextKey: String? = nil,
@@ -135,7 +137,7 @@ public enum SentryDebug {
         }
     }
 
-    public static func capture(
+    static func capture(
         message: String,
         context: [String: Any]? = nil,
         contextKey: String? = nil,

@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakLogin
 
 /// Name spacing log methods by `category`.
 public enum Log {
@@ -209,9 +210,9 @@ public enum Log {
     }
 
     public static func tokenAuthentication(_ message: @autoclosure () -> Any,
-                                           metadata: [String: Any]? = nil,
+                                           oldToken: ApiToken?,
+                                           newToken: ApiToken?,
                                            level: AbstractLogLevel = .debug,
-                                           context: Int = 0,
                                            file: StaticString = #file,
                                            function: StaticString = #function,
                                            line: UInt = #line,
@@ -223,26 +224,40 @@ public enum Log {
             return
         }
 
-        // All errors are tracked on Sentry
-        if level == .error {
-            SentryDebug.capture(
-                message: messageString,
-                context: metadata,
-                level: .error,
-                extras: ["function": "\(function)", "line": "\(line)"]
-            )
-        }
+        let oldTokenMetadata: Any = oldToken?.metadata ?? "NULL"
+        let newTokenMetadata: Any = newToken?.metadata ?? "NULL"
+        var metadata = [String: Any]()
+        metadata["oldToken"] = oldTokenMetadata
+        metadata["newToken"] = newTokenMetadata
 
-        SentryDebug.addBreadcrumb(message: messageString, category: .DriveInfosManager, level: .error, metadata: metadata)
+        SentryDebug.capture(
+            message: messageString,
+            context: metadata,
+            level: level.sentry,
+            extras: ["file": "\(file)", "function": "\(function)", "line": "\(line)"]
+        )
+
+        SentryDebug.addBreadcrumb(message: messageString, category: .DriveInfosManager, level: level.sentry, metadata: metadata)
 
         ABLog(messageAny,
               category: category,
               level: level,
-              context: context,
               file: file,
               function: function,
               line: line,
               tag: tag)
+
+        // log token if error state
+        if level == .error || level == .fault {
+            let tokenMessage = "old token:\(oldTokenMetadata) \nnew token:\(newTokenMetadata)"
+            ABLog(tokenMessage,
+                  category: category,
+                  level: level,
+                  file: file,
+                  function: function,
+                  line: line,
+                  tag: tag)
+        }
     }
 
     private static func defaultLogHandler(_ message: @autoclosure () -> Any,
