@@ -625,7 +625,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
             SceneRestorationValues.FilesIds.rawValue: previewFiles.map(\.id),
             SceneRestorationValues.currentIndex.rawValue: currentIndex.row,
-            SceneRestorationValues.initialLoading.rawValue: initialLoading,
             SceneRestorationValues.normalFolderHierarchy.rawValue: normalFolderHierarchy,
             SceneRestorationValues.fromActivities.rawValue: fromActivities
         ]

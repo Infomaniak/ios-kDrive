@@ -113,6 +113,11 @@ final class StoreViewController: UICollectionViewController {
 
         // Fetch product information
         fetchProductInformation()
+
+        // State restoration must have access to windowScene that is not available yet
+        Task { @MainActor in
+            saveSceneState()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -340,12 +345,42 @@ final class StoreViewController: UICollectionViewController {
 
     // MARK: - State restoration
 
+    // TODO: Extend UIViewController
+    private var currentUserActivity: NSUserActivity {
+        let activity: NSUserActivity
+        if let currentUserActivity = view.window?.windowScene?.userActivity {
+            activity = currentUserActivity
+        } else {
+            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
+        }
+        return activity
+    }
+
+    // TODO: Abstract to prot to test
+    func saveSceneState() {
+        print("•• saveSceneState")
+        let currentUserActivity = currentUserActivity
+        let metadata: [AnyHashable: Any] = [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.StoreViewController.rawValue,
+            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id
+        ]
+        currentUserActivity.addUserInfoEntries(from: metadata)
+
+        guard let scene = view.window?.windowScene else {
+            fatalError("no scene")
+        }
+
+        scene.userActivity = currentUserActivity
+    }
+
+    // TODO: Remove
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
     }
 
+    // TODO: Remove
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 

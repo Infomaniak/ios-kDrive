@@ -49,7 +49,6 @@ enum SceneRestorationValues: String {
     // PreviewVC
     case FilesIds
     case currentIndex
-    case initialLoading
     case normalFolderHierarchy
     case fromActivities
 }

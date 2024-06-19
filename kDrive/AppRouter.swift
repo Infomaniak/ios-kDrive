@@ -197,21 +197,26 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let database = driveFileManager.database
-
         // one run loop
         Task { @MainActor in
-            // try to decode further screens
-            guard let sceneUserInfo else {
-                return
-            }
 
-            guard let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
+            // try to decode further screens
+            guard let sceneUserInfo,
+                  let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString),
                   let rootViewController = window?.rootViewController else {
                 return
             }
 
+            let idx = tabBarViewController.selectedIndex
+            let vcs = tabBarViewController.viewControllers
+            guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
+                fatalError("unable to access navigationController")
+                return
+            }
+
+            let database = driveFileManager.database
+            let nextViewController: UIViewController?
             switch lastViewController {
             case .FileDetailViewController:
                 // inflate file
@@ -228,7 +233,8 @@ public struct AppRouter: AppNavigable {
                     driveFileManager: driveFileManager,
                     file: frozenFile
                 )
-                rootViewController.navigationController?.pushViewController(fileDetailViewController, animated: true)
+
+                nextViewController = fileDetailViewController
 
             case .FileListViewController:
                 fatalError("TODO")
@@ -245,7 +251,8 @@ public struct AppRouter: AppNavigable {
              )
               */
             case .PreviewViewController:
-                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int else {
+                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+                      driveFileManager.drive.id == driveId else {
                     fatalError("unable to load drive id")
                 }
 
@@ -255,10 +262,6 @@ public struct AppRouter: AppNavigable {
 
                 guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
                     fatalError("unable to load currentIndex")
-                }
-
-                guard let initialLoading = sceneUserInfo[SceneRestorationValues.initialLoading.rawValue] as? Bool else {
-                    fatalError("unable to load initialLoading")
                 }
 
                 guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
@@ -286,30 +289,23 @@ public struct AppRouter: AppNavigable {
                                                                               driveFileManager: driveFileManager,
                                                                               normalFolderHierarchy: normalFolderHierarchy,
                                                                               fromActivities: fromActivities)
-
-                let idx = tabBarViewController.selectedIndex
-                let vcs = tabBarViewController.viewControllers
-                guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
-                    fatalError("unable to access navigationController")
-                }
-
-                rootNav.pushViewController(
-                    previewViewController,
-                    animated: true
-                )
+                nextViewController = previewViewController
 
             case .StoreViewController:
-                fatalError("TODO")
-                /*
-                 let drive = Drive()
-                 guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
-                     return
-                 }
+                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+                      driveFileManager.drive.id == driveId else {
+                    fatalError("unable to load drive id")
+                }
 
-                 let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
-                 rootViewController.navigationController?.pushViewController(storeViewController, animated: true)
-                  */
+                nextViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+            default:
+                nextViewController = nil
             }
+
+            guard let nextViewController else {
+                return
+            }
+            rootNav.pushViewController(nextViewController, animated: true)
         }
     }
 
