@@ -215,9 +215,6 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         // Load file informations
         loadFileInformation()
 
-        // Save file info into current scene
-        saveSceneState()
-
         // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
             Task { @MainActor [weak self] in
@@ -227,6 +224,11 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                 self.file = newFile
                 self.reloadTableView()
             }
+        }
+
+        Task { @MainActor in
+            // Save file info into current scene
+            saveSceneState()
         }
     }
 

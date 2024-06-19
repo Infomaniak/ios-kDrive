@@ -29,45 +29,6 @@ public protocol SceneStateRestorable {
     func saveSceneState()
 }
 
-enum SceneRestorationKeys: String {
-    /// The selected index of the MainViewController that should be restored
-    case selectedIndex
-
-    /// Array representing the stack of view controllers that should be restored
-    // TODO: Implement stack restoration
-    // case fileViewStack
-
-    /// The screen that should be restored on top of the MainViewController
-    case lastViewController
-}
-
-// TODO: Namespace by screen
-enum SceneRestorationValues: String {
-    case DriveId
-    case FileId
-
-    // PreviewVC
-    case FilesIds
-    case currentIndex
-    case normalFolderHierarchy
-    case fromActivities
-}
-
-/// ViewController identifiers for state restoration
-enum SceneRestorationScreens: String {
-    /// Preview a file
-    case PreviewViewController
-
-    /// Metadata of the file
-    case FileDetailViewController
-
-    /// File listing view
-    case FileListViewController
-
-    /// InApp purchase
-    case StoreViewController
-}
-
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable

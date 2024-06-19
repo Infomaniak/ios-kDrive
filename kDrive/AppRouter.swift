@@ -212,11 +212,9 @@ public struct AppRouter: AppNavigable {
             let vcs = tabBarViewController.viewControllers
             guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
                 fatalError("unable to access navigationController")
-                return
             }
 
             let database = driveFileManager.database
-            let nextViewController: UIViewController?
             switch lastViewController {
             case .FileDetailViewController:
                 // inflate file
@@ -224,8 +222,13 @@ public struct AppRouter: AppNavigable {
                     fatalError("unable to load file id")
                 }
 
-                guard let frozenFile = database.fetchObject(ofType: File.self, forPrimaryKey: fileId)?.freeze() else {
-                    fatalError("unable to load file from DB")
+                let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
+                    partial.filter("id == %@", fileId)
+                        .first?.freezeIfNeeded()
+                })
+
+                guard let frozenFile else {
+                    return
                 }
 
                 // Todo, create a method in the router
@@ -234,22 +237,33 @@ public struct AppRouter: AppNavigable {
                     file: frozenFile
                 )
 
-                nextViewController = fileDetailViewController
+                rootNav.pushViewController(fileDetailViewController, animated: true)
 
             case .FileListViewController:
-                fatalError("TODO")
-            /*
-             let drive = Drive()
-             guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
-                 return
-             }
-             
-             FilePresenter.presentParent(
-                 of: fileToUse,
-                 driveFileManager: driveFileManager,
-                 viewController: rootViewController
-             )
-              */
+                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+                      driveFileManager.drive.id == driveId else {
+                    fatalError("unable to load drive id")
+                }
+
+                guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+                    fatalError("unable to load file id")
+                }
+
+                let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
+                    partial.filter("id == %@", fileId)
+                        .first?.freezeIfNeeded()
+                })
+
+                guard let frozenFile else {
+                    return
+                }
+
+                FilePresenter.presentParent(
+                    of: frozenFile,
+                    driveFileManager: driveFileManager,
+                    viewController: rootNav
+                )
+
             case .PreviewViewController:
                 guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
                       driveFileManager.drive.id == driveId else {
@@ -289,23 +303,16 @@ public struct AppRouter: AppNavigable {
                                                                               driveFileManager: driveFileManager,
                                                                               normalFolderHierarchy: normalFolderHierarchy,
                                                                               fromActivities: fromActivities)
-                nextViewController = previewViewController
-
+                rootNav.pushViewController(previewViewController, animated: true)
             case .StoreViewController:
                 guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
                       driveFileManager.drive.id == driveId else {
                     fatalError("unable to load drive id")
                 }
 
-                nextViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
-            default:
-                nextViewController = nil
+                let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+                rootNav.pushViewController(storeViewController, animated: true)
             }
-
-            guard let nextViewController else {
-                return
-            }
-            rootNav.pushViewController(nextViewController, animated: true)
         }
     }
 

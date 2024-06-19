@@ -215,6 +215,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if viewModel != nil {
             setupViewModel()
         }
+
+        #if !ISEXTENSION
+        // State restoration must have access to windowScene that is not available yet
+        Task { @MainActor in
+            saveSceneState()
+        }
+        #endif
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -796,7 +803,39 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - State restoration
 
-    // TODO: Maybe keep it
+    #if !ISEXTENSION
+    // TODO: Extend UIViewController
+    private var currentUserActivity: NSUserActivity {
+        let activity: NSUserActivity
+        if let currentUserActivity = view.window?.windowScene?.userActivity {
+            activity = currentUserActivity
+        } else {
+            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
+        }
+        return activity
+    }
+
+    // TODO: Abstract to prot to test
+    func saveSceneState() {
+        print("•• saveSceneState")
+        let currentUserActivity = currentUserActivity
+        let metadata: [AnyHashable: Any] = [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
+            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.FileId.rawValue: viewModel.currentDirectory.id
+        ]
+        currentUserActivity.addUserInfoEntries(from: metadata)
+
+        guard let scene = view.window?.windowScene else {
+            fatalError("no scene")
+        }
+
+        scene.userActivity = currentUserActivity
+    }
+
+    #endif
+
+    // TODO: remove
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
@@ -807,7 +846,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    // TODO: Maybe keep it
+    // TODO: remove
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 
