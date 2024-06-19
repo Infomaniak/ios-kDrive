@@ -224,6 +224,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         NSLayoutConstraint.activate(constraints)
 
         observeFileUpdated()
+
+        // State restoration must have access to windowScene that is not available yet
+        Task { @MainActor in
+            saveSceneState()
+        }
     }
 
     @objc func tapPreview() {
@@ -600,7 +605,40 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     // MARK: - State restoration
 
-    // update
+    // TODO: Extend UIViewController
+    private var currentUserActivity: NSUserActivity {
+        let activity: NSUserActivity
+        if let currentUserActivity = view.window?.windowScene?.userActivity {
+            activity = currentUserActivity
+        } else {
+            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
+        }
+        return activity
+    }
+
+    // TODO: Abstract to prot
+    func saveSceneState() {
+        print("•• saveSceneState")
+        let currentUserActivity = currentUserActivity
+        let metadata: [AnyHashable: Any] = [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
+            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.FilesIds.rawValue: previewFiles.map(\.id),
+            SceneRestorationValues.currentIndex.rawValue: currentIndex.row,
+            SceneRestorationValues.initialLoading.rawValue: initialLoading,
+            SceneRestorationValues.normalFolderHierarchy.rawValue: normalFolderHierarchy,
+            SceneRestorationValues.fromActivities.rawValue: fromActivities
+        ]
+        currentUserActivity.addUserInfoEntries(from: metadata)
+
+        guard let scene = view.window?.windowScene else {
+            fatalError("no scene")
+        }
+
+        scene.userActivity = currentUserActivity
+    }
+
+    // TODO: remove
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
@@ -612,6 +650,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         coder.encode(fromActivities, forKey: "FromActivities")
     }
 
+    // TODO: remove
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 

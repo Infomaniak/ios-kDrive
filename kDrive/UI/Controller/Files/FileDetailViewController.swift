@@ -497,7 +497,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         return activity
     }
 
-    // TODO: Use Encodable
+    // TODO: Abstract to prot to test
     func saveSceneState() {
         print("•• saveSceneState")
         let currentUserActivity = currentUserActivity

@@ -31,7 +31,7 @@ public protocol RouterAppNavigable {
     /// - Parameters:
     ///   - driveFileManager: driveFileManager to use
     ///   - selectedIndex: Nil will try to use state restoration if available
-    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?)
+    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UITabBarController?
 
     @MainActor func showPreloading(currentAccount: Account)
 
@@ -191,11 +191,13 @@ public struct AppRouter: AppNavigable {
             indexToUse = index
         }
 
-        showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
+        let tabBarViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
-        guard restoration else {
+        guard restoration, let tabBarViewController else {
             return
         }
+
+        let database = driveFileManager.database
 
         // one run loop
         Task { @MainActor in
@@ -217,7 +219,6 @@ public struct AppRouter: AppNavigable {
                     fatalError("unable to load file id")
                 }
 
-                let database = driveFileManager.database
                 guard let frozenFile = database.fetchObject(ofType: File.self, forPrimaryKey: fileId)?.freeze() else {
                     fatalError("unable to load file from DB")
                 }
@@ -244,20 +245,59 @@ public struct AppRouter: AppNavigable {
              )
               */
             case .PreviewViewController:
-                fatalError("TODO")
-            /*
-             let drive = Drive()
-             guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
-                 return
-             }
-             
-             let previewViewController = PreviewViewController.instantiate(files: [],
-                                               index: 1234,
-                                               driveFileManager: driveFileManager,
-                                               normalFolderHierarchy: yes,
-                                               fromActivities: yes)
-             rootViewController.navigationController?.pushViewController(previewViewController, animated: true)
-              */
+                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int else {
+                    fatalError("unable to load drive id")
+                }
+
+                guard let fileIds = sceneUserInfo[SceneRestorationValues.FilesIds.rawValue] as? [Int] else {
+                    fatalError("unable to load file ids")
+                }
+
+                guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
+                    fatalError("unable to load currentIndex")
+                }
+
+                guard let initialLoading = sceneUserInfo[SceneRestorationValues.initialLoading.rawValue] as? Bool else {
+                    fatalError("unable to load initialLoading")
+                }
+
+                guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
+                else {
+                    fatalError("unable to load normalFolderHierarchy")
+                }
+
+                guard let fromActivities = sceneUserInfo[SceneRestorationValues.fromActivities.rawValue] as? Bool else {
+                    fatalError("unable to load fromActivities")
+                }
+
+                let frozenFiles = database.fetchResults(ofType: File.self, filtering: { partial in
+                    partial.freezeIfNeeded()
+                })
+
+                // TODO: Use pred
+                let f = Array(frozenFiles).filter { fileIds.contains($0.id) }
+
+                print("frozenFiles:\(frozenFiles.count)")
+                print("f:\(f.count)")
+
+                // TODO: create a method in the router
+                let previewViewController = PreviewViewController.instantiate(files: f,
+                                                                              index: currentIndex,
+                                                                              driveFileManager: driveFileManager,
+                                                                              normalFolderHierarchy: normalFolderHierarchy,
+                                                                              fromActivities: fromActivities)
+
+                let idx = tabBarViewController.selectedIndex
+                let vcs = tabBarViewController.viewControllers
+                guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
+                    fatalError("unable to access navigationController")
+                }
+
+                rootNav.pushViewController(
+                    previewViewController,
+                    animated: true
+                )
+
             case .StoreViewController:
                 fatalError("TODO")
                 /*
@@ -285,20 +325,24 @@ public struct AppRouter: AppNavigable {
     // MARK: RouterAppNavigable
 
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) {
+                                                  selectedIndex: Int?) -> UITabBarController? {
         guard let window else {
             SentryDebug.captureNoWindow()
-            return
+            return nil
         }
 
         let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
         guard currentDriveObjectId != driveFileManager.drive.objectId else {
-            return
+            return nil
         }
 
-        window.rootViewController = MainTabViewController(driveFileManager: driveFileManager,
-                                                          selectedIndex: selectedIndex)
+        let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager,
+                                                         selectedIndex: selectedIndex)
+
+        window.rootViewController = tabBarViewController
         window.makeKeyAndVisible()
+
+        return tabBarViewController
     }
 
     @MainActor public func showPreloading(currentAccount: Account) {

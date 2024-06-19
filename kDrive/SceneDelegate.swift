@@ -41,20 +41,32 @@ enum SceneRestorationKeys: String {
     case lastViewController
 }
 
+// TODO: Namespace by screen
 enum SceneRestorationValues: String {
     case DriveId
     case FileId
+
+    // PreviewVC
+    case FilesIds
+    case currentIndex
+    case initialLoading
+    case normalFolderHierarchy
+    case fromActivities
 }
 
 /// ViewController identifiers for state restoration
 enum SceneRestorationScreens: String {
+    /// Preview a file
+    case PreviewViewController
+
+    /// Metadata of the file
     case FileDetailViewController
 
+    /// File listing view
     case FileListViewController
 
+    /// InApp purchase
     case StoreViewController
-
-    case PreviewViewController
 }
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
