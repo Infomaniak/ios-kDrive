@@ -348,7 +348,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
     var currentSceneMetadata: [AnyHashable: Any] {
         [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.StoreViewController.rawValue,
-            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id
         ]
     }
 }

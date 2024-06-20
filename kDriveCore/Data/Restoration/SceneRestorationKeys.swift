@@ -45,14 +45,16 @@ public enum SceneRestorationKeys: String {
     case lastViewController
 }
 
-// TODO: Namespace by screen
+/// Keys used for Scene based restoration
 public enum SceneRestorationValues: String {
-    case DriveId
-    case FileId
+    case driveId
+    case fileId
 
-    // PreviewVC
-    case FilesIds
-    case currentIndex
-    case normalFolderHierarchy
-    case fromActivities
+    // Preview View controller keys
+    public enum Carousel: String {
+        case filesIds
+        case currentIndex
+        case normalFolderHierarchy
+        case fromActivities
+    }
 }

@@ -588,11 +588,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     var currentSceneMetadata: [AnyHashable: Any] {
         [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
-            SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
-            SceneRestorationValues.FilesIds.rawValue: previewFiles.map(\.id),
-            SceneRestorationValues.currentIndex.rawValue: currentIndex.row,
-            SceneRestorationValues.normalFolderHierarchy.rawValue: normalFolderHierarchy,
-            SceneRestorationValues.fromActivities.rawValue: fromActivities
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.Carousel.filesIds.rawValue: previewFiles.map(\.id),
+            SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndex.row,
+            SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
+            SceneRestorationValues.Carousel.fromActivities.rawValue: fromActivities
         ]
     }
 }

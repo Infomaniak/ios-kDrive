@@ -282,7 +282,7 @@ public struct AppRouter: AppNavigable {
     private func restoreFileDetailViewController(driveFileManager: DriveFileManager,
                                                  navigationController: UINavigationController,
                                                  sceneUserInfo: [AnyHashable: Any]) async {
-        guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+        guard let fileId = sceneUserInfo[SceneRestorationValues.fileId.rawValue] else {
             Log.sceneDelegate("unable to load file id", level: .error)
             return
         }
@@ -309,13 +309,13 @@ public struct AppRouter: AppNavigable {
     private func restoreFileListViewController(driveFileManager: DriveFileManager,
                                                navigationController: UINavigationController,
                                                sceneUserInfo: [AnyHashable: Any]) async {
-        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+        guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
               driveFileManager.drive.id == driveId else {
             Log.sceneDelegate("unable to load drive id", level: .error)
             return
         }
 
-        guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+        guard let fileId = sceneUserInfo[SceneRestorationValues.fileId.rawValue] else {
             Log.sceneDelegate("unable to load file id", level: .error)
             return
         }
@@ -341,29 +341,29 @@ public struct AppRouter: AppNavigable {
     private func restorePreviewViewController(driveFileManager: DriveFileManager,
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
-        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+        guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
               driveFileManager.drive.id == driveId else {
             Log.sceneDelegate("unable to load drive id", level: .error)
             return
         }
 
-        guard let fileIds = sceneUserInfo[SceneRestorationValues.FilesIds.rawValue] as? [Int] else {
+        guard let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int] else {
             Log.sceneDelegate("unable to load file ids", level: .error)
             return
         }
 
-        guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
+        guard let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int else {
             Log.sceneDelegate("unable to load currentIndex", level: .error)
             return
         }
 
-        guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
+        guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool
         else {
             Log.sceneDelegate("unable to load normalFolderHierarchy", level: .error)
             return
         }
 
-        guard let fromActivities = sceneUserInfo[SceneRestorationValues.fromActivities.rawValue] as? Bool else {
+        guard let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
             Log.sceneDelegate("unable to load fromActivities", level: .error)
             return
         }
@@ -392,7 +392,7 @@ public struct AppRouter: AppNavigable {
     private func restoreStoreViewController(driveFileManager: DriveFileManager,
                                             navigationController: UINavigationController,
                                             sceneUserInfo: [AnyHashable: Any]) async {
-        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+        guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
               driveFileManager.drive.id == driveId else {
             Log.sceneDelegate("unable to load drive id", level: .error)
             return
