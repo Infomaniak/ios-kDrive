@@ -163,8 +163,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return DeeplinkParser().parse(url: url)
     }
 
-    // Migrated to sceneWillEnterForeground
-    // func applicationWillEnterForeground(_ application: UIApplication) { }
 
     // Migrated to sceneDidBecomeActive
     // func applicationDidBecomeActive(_ application: UIApplication) { }
