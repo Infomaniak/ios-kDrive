@@ -48,9 +48,41 @@ public protocol RouterAppNavigable {
 
 /// Something that can present a File within the app
 public protocol RouterFileNavigable {
+    /// Pop to root and present file
     @MainActor func present(file: File, driveFileManager: DriveFileManager)
 
+    /// Pop to root and present file
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
+
+    /// Present FileList for folder
+    @MainActor func presentFileList(
+        frozenFolder: File,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController
+    )
+
+    @MainActor func presentPreviewViewController(
+        frozenFiles: [File],
+        index: Int,
+        driveFileManager: DriveFileManager,
+        normalFolderHierarchy: Bool,
+        fromActivities: Bool,
+        navigationController: UINavigationController,
+        animated: Bool
+    )
+
+    @MainActor func presentFileDetails(
+        frozenFile: File,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    )
+
+    @MainActor func presentStoreViewController(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    )
 }
 
 /// Something that can set an arbitrary RootView controller
@@ -208,123 +240,169 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            let idx = tabBarViewController.selectedIndex
-            let vcs = tabBarViewController.viewControllers
-            guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
+            let selectedIndex = tabBarViewController.selectedIndex
+            let viewControllers = tabBarViewController.viewControllers
+            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
                 Log.sceneDelegate("unable to access navigationController", level: .error)
                 return
             }
 
-            let database = driveFileManager.database
             switch lastViewController {
             case .FileDetailViewController:
-                // inflate file
-                guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
-                    Log.sceneDelegate("unable to load file id", level: .error)
-                    return
-                }
-
-                let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
-                    partial.filter("id == %@", fileId)
-                        .first?.freezeIfNeeded()
-                })
-
-                guard let frozenFile else {
-                    Log.sceneDelegate("unable to load file", level: .error)
-                    return
-                }
-
-                // Todo, create a method in the router
-                let fileDetailViewController = FileDetailViewController.instantiate(
+                await restoreFileDetailViewController(
                     driveFileManager: driveFileManager,
-                    file: frozenFile
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
                 )
 
-                rootNav.pushViewController(fileDetailViewController, animated: true)
-
             case .FileListViewController:
-                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
-                      driveFileManager.drive.id == driveId else {
-                    Log.sceneDelegate("unable to load drive id", level: .error)
-                    return
-                }
-
-                guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
-                    Log.sceneDelegate("unable to load file id", level: .error)
-                    return
-                }
-
-                let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
-                    partial.filter("id == %@", fileId)
-                        .first?.freezeIfNeeded()
-                })
-
-                guard let frozenFile else {
-                    Log.sceneDelegate("unable to load file", level: .error)
-                    return
-                }
-
-                FilePresenter.presentParent(
-                    of: frozenFile,
+                await restoreFileListViewController(
                     driveFileManager: driveFileManager,
-                    viewController: rootNav
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
                 )
 
             case .PreviewViewController:
-                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
-                      driveFileManager.drive.id == driveId else {
-                    Log.sceneDelegate("unable to load drive id", level: .error)
-                    return
-                }
+                await restorePreviewViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
 
-                guard let fileIds = sceneUserInfo[SceneRestorationValues.FilesIds.rawValue] as? [Int] else {
-                    Log.sceneDelegate("unable to load file ids", level: .error)
-                    return
-                }
-
-                guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
-                    Log.sceneDelegate("unable to load currentIndex", level: .error)
-                    return
-                }
-
-                guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
-                else {
-                    Log.sceneDelegate("unable to load normalFolderHierarchy", level: .error)
-                    return
-                }
-
-                guard let fromActivities = sceneUserInfo[SceneRestorationValues.fromActivities.rawValue] as? Bool else {
-                    Log.sceneDelegate("unable to load fromActivities", level: .error)
-                    return
-                }
-
-                let fetchedFiles = database.fetchResults(ofType: File.self, filtering: { partial in
-                    partial
-                        .filter("id IN %@", fileIds)
-                        .freezeIfNeeded()
-                })
-
-                Log.sceneDelegate("restoring \(fetchedFiles.count) files")
-                let filesToRestore = Array(fetchedFiles)
-
-                // TODO: create a method in the router
-                let previewViewController = PreviewViewController.instantiate(files: filesToRestore,
-                                                                              index: currentIndex,
-                                                                              driveFileManager: driveFileManager,
-                                                                              normalFolderHierarchy: normalFolderHierarchy,
-                                                                              fromActivities: fromActivities)
-                rootNav.pushViewController(previewViewController, animated: true)
             case .StoreViewController:
-                guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
-                      driveFileManager.drive.id == driveId else {
-                    Log.sceneDelegate("unable to load drive id", level: .error)
-                    return
-                }
-
-                let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
-                rootNav.pushViewController(storeViewController, animated: true)
+                await restoreStoreViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
             }
         }
+    }
+
+    private func restoreFileDetailViewController(driveFileManager: DriveFileManager,
+                                                 navigationController: UINavigationController,
+                                                 sceneUserInfo: [AnyHashable: Any]) async {
+        guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+            Log.sceneDelegate("unable to load file id", level: .error)
+            return
+        }
+
+        let database = driveFileManager.database
+        let frozenFile = database.fetchObject(ofType: File.self) { partial in
+            partial
+                .filter("id == %@", fileId)
+                .first?
+                .freezeIfNeeded()
+        }
+
+        guard let frozenFile else {
+            Log.sceneDelegate("unable to load file", level: .error)
+            return
+        }
+
+        await presentFileDetails(frozenFile: frozenFile,
+                                 driveFileManager: driveFileManager,
+                                 navigationController: navigationController,
+                                 animated: false)
+    }
+
+    private func restoreFileListViewController(driveFileManager: DriveFileManager,
+                                               navigationController: UINavigationController,
+                                               sceneUserInfo: [AnyHashable: Any]) async {
+        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+              driveFileManager.drive.id == driveId else {
+            Log.sceneDelegate("unable to load drive id", level: .error)
+            return
+        }
+
+        guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
+            Log.sceneDelegate("unable to load file id", level: .error)
+            return
+        }
+
+        let database = driveFileManager.database
+        let frozenFile = database.fetchObject(ofType: File.self) { partial in
+            partial
+                .filter("id == %@", fileId)
+                .first?
+                .freezeIfNeeded()
+        }
+
+        guard let frozenFile else {
+            Log.sceneDelegate("unable to load file", level: .error)
+            return
+        }
+
+        await presentFileList(frozenFolder: frozenFile,
+                              driveFileManager: driveFileManager,
+                              navigationController: navigationController)
+    }
+
+    private func restorePreviewViewController(driveFileManager: DriveFileManager,
+                                              navigationController: UINavigationController,
+                                              sceneUserInfo: [AnyHashable: Any]) async {
+        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+              driveFileManager.drive.id == driveId else {
+            Log.sceneDelegate("unable to load drive id", level: .error)
+            return
+        }
+
+        guard let fileIds = sceneUserInfo[SceneRestorationValues.FilesIds.rawValue] as? [Int] else {
+            Log.sceneDelegate("unable to load file ids", level: .error)
+            return
+        }
+
+        guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
+            Log.sceneDelegate("unable to load currentIndex", level: .error)
+            return
+        }
+
+        guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
+        else {
+            Log.sceneDelegate("unable to load normalFolderHierarchy", level: .error)
+            return
+        }
+
+        guard let fromActivities = sceneUserInfo[SceneRestorationValues.fromActivities.rawValue] as? Bool else {
+            Log.sceneDelegate("unable to load fromActivities", level: .error)
+            return
+        }
+
+        let database = driveFileManager.database
+        let frozenFetchedFiles = database.fetchResults(ofType: File.self) { partial in
+            partial
+                .filter("id IN %@", fileIds)
+                .freezeIfNeeded()
+        }
+
+        Log.sceneDelegate("restoring \(frozenFetchedFiles.count) files")
+        let frozenFilesToRestore = Array(frozenFetchedFiles)
+
+        await presentPreviewViewController(
+            frozenFiles: frozenFilesToRestore,
+            index: currentIndex,
+            driveFileManager: driveFileManager,
+            normalFolderHierarchy: normalFolderHierarchy,
+            fromActivities: fromActivities,
+            navigationController: navigationController,
+            animated: false
+        )
+    }
+
+    private func restoreStoreViewController(driveFileManager: DriveFileManager,
+                                            navigationController: UINavigationController,
+                                            sceneUserInfo: [AnyHashable: Any]) async {
+        guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
+              driveFileManager.drive.id == driveId else {
+            Log.sceneDelegate("unable to load drive id", level: .error)
+            return
+        }
+
+        await presentStoreViewController(
+            driveFileManager: driveFileManager,
+            navigationController: navigationController,
+            animated: false
+        )
     }
 
     @MainActor public func updateTheme() {
@@ -617,5 +695,60 @@ public struct AppRouter: AppNavigable {
                 }
             }
         }
+    }
+
+    @MainActor public func presentFileList(
+        frozenFolder: File,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController
+    ) {
+        assert(frozenFolder.realm == nil || frozenFolder.isFrozen, "expecting this realm object to be thread safe")
+        assert(frozenFolder.isDirectory, "This will only work for folders")
+
+        FilePresenter.presentParent(
+            of: frozenFolder,
+            driveFileManager: driveFileManager,
+            viewController: navigationController
+        )
+    }
+
+    @MainActor public func presentPreviewViewController(
+        frozenFiles: [File],
+        index: Int,
+        driveFileManager: DriveFileManager,
+        normalFolderHierarchy: Bool,
+        fromActivities: Bool,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        let previewViewController = PreviewViewController.instantiate(files: frozenFiles,
+                                                                      index: index,
+                                                                      driveFileManager: driveFileManager,
+                                                                      normalFolderHierarchy: normalFolderHierarchy,
+                                                                      fromActivities: fromActivities)
+        navigationController.pushViewController(previewViewController, animated: animated)
+    }
+
+    @MainActor public func presentFileDetails(
+        frozenFile: File,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        let fileDetailViewController = FileDetailViewController.instantiate(
+            driveFileManager: driveFileManager,
+            file: frozenFile
+        )
+
+        navigationController.pushViewController(fileDetailViewController, animated: animated)
+    }
+
+    @MainActor public func presentStoreViewController(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+        navigationController.pushViewController(storeViewController, animated: false)
     }
 }

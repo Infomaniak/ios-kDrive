@@ -36,7 +36,6 @@ final class FilePresenter {
         self.viewController = viewController
     }
 
-    // TODO: Refactor to AppRouter
     class func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
         guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
             return
