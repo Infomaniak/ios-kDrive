@@ -104,7 +104,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
         let newWindow = UIWindow(windowScene: windowScene)
 
-        // Set the window and call makeKeyAndVisible()
         window = newWindow
         newWindow.makeKeyAndVisible()
 
