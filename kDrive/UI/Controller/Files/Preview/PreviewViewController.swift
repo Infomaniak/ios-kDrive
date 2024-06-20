@@ -33,26 +33,6 @@ protocol PreviewContentCellDelegate: AnyObject {
     func openWith(from: UIView)
 }
 
-extension PreviewViewController: Encodable {
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(driveFileManager.drive.id, forKey: .driveId)
-        let fileIds = previewFiles.map { $0.uid }
-        try container.encode(fileIds, forKey: .files)
-        try container.encode(currentIndex, forKey: .currentIndex)
-        try container.encode(initialLoading, forKey: .initialLoading)
-        try container.encode(normalFolderHierarchy, forKey: .normalFolderHierarchy)
-    }
-
-    enum CodingKeys: CodingKey {
-        case driveId
-        case files
-        case currentIndex
-        case initialLoading
-        case normalFolderHierarchy
-    }
-}
-
 class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
