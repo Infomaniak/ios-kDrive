@@ -48,16 +48,16 @@ public extension UIViewController {
             return
         }
 
-        let currentUserActivity = currentUserActivity
         let metadata = restorableViewController.currentSceneMetadata
-        currentUserActivity.addUserInfoEntries(from: metadata)
+        let userActivity = currentUserActivity
+        userActivity.addUserInfoEntries(from: metadata)
 
         guard let scene = view.window?.windowScene else {
             Log.sceneDelegate("no scene linked to \(self)", level: .error)
             return
         }
 
-        scene.userActivity = currentUserActivity
+        scene.userActivity = userActivity
     }
 
     /// Current NSUserActivity for a given UIViewController

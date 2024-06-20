@@ -235,8 +235,7 @@ public struct AppRouter: AppNavigable {
             // try to decode further screens
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
-                  let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString),
-                  let rootViewController = window?.rootViewController else {
+                  let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
                 return
             }
 
@@ -618,7 +617,6 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor private func refreshAccountAndShowMainView() async throws {
-        @InjectService var accountManager: AccountManageable
         let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
 
         guard let currentAccount = accountManager.currentAccount else {

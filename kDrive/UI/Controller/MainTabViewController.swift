@@ -269,13 +269,13 @@ extension MainTabViewController: UITabBarControllerDelegate {
     // MARK: - State restoration
 
     private func saveSelectedTabUserActivity(_ index: Int) {
-        let currentUserActivity = currentUserActivity
         let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]
 
         // Override previous metadata if any
-        currentUserActivity.userInfo = metadata
+        let userActivity = currentUserActivity
+        userActivity.userInfo = metadata
 
-        view.window?.windowScene?.userActivity = currentUserActivity
+        view.window?.windowScene?.userActivity = userActivity
     }
 }
 

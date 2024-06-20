@@ -103,11 +103,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
         // Create a new UIWindow using the windowScene constructor which takes in a window scene.
-        let window = UIWindow(windowScene: windowScene)
+        let newWindow = UIWindow(windowScene: windowScene)
 
         // Set the window and call makeKeyAndVisible()
-        self.window = window
-        window.makeKeyAndVisible()
+        window = newWindow
+        newWindow.makeKeyAndVisible()
 
         // Update tint
         setGlobalWindowTint()
