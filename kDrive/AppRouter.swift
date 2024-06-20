@@ -211,7 +211,8 @@ public struct AppRouter: AppNavigable {
             let idx = tabBarViewController.selectedIndex
             let vcs = tabBarViewController.viewControllers
             guard let rootNav = vcs?[safe: idx] as? UINavigationController else {
-                fatalError("unable to access navigationController")
+                Log.sceneDelegate("unable to access navigationController", level: .error)
+                return
             }
 
             let database = driveFileManager.database
@@ -219,7 +220,8 @@ public struct AppRouter: AppNavigable {
             case .FileDetailViewController:
                 // inflate file
                 guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
-                    fatalError("unable to load file id")
+                    Log.sceneDelegate("unable to load file id", level: .error)
+                    return
                 }
 
                 let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
@@ -228,6 +230,7 @@ public struct AppRouter: AppNavigable {
                 })
 
                 guard let frozenFile else {
+                    Log.sceneDelegate("unable to load file", level: .error)
                     return
                 }
 
@@ -242,11 +245,13 @@ public struct AppRouter: AppNavigable {
             case .FileListViewController:
                 guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
                       driveFileManager.drive.id == driveId else {
-                    fatalError("unable to load drive id")
+                    Log.sceneDelegate("unable to load drive id", level: .error)
+                    return
                 }
 
                 guard let fileId = sceneUserInfo[SceneRestorationValues.FileId.rawValue] else {
-                    fatalError("unable to load file id")
+                    Log.sceneDelegate("unable to load file id", level: .error)
+                    return
                 }
 
                 let frozenFile = database.fetchObject(ofType: File.self, filtering: { partial in
@@ -255,6 +260,7 @@ public struct AppRouter: AppNavigable {
                 })
 
                 guard let frozenFile else {
+                    Log.sceneDelegate("unable to load file", level: .error)
                     return
                 }
 
@@ -267,24 +273,29 @@ public struct AppRouter: AppNavigable {
             case .PreviewViewController:
                 guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
                       driveFileManager.drive.id == driveId else {
-                    fatalError("unable to load drive id")
+                    Log.sceneDelegate("unable to load drive id", level: .error)
+                    return
                 }
 
                 guard let fileIds = sceneUserInfo[SceneRestorationValues.FilesIds.rawValue] as? [Int] else {
-                    fatalError("unable to load file ids")
+                    Log.sceneDelegate("unable to load file ids", level: .error)
+                    return
                 }
 
                 guard let currentIndex = sceneUserInfo[SceneRestorationValues.currentIndex.rawValue] as? Int else {
-                    fatalError("unable to load currentIndex")
+                    Log.sceneDelegate("unable to load currentIndex", level: .error)
+                    return
                 }
 
                 guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.normalFolderHierarchy.rawValue] as? Bool
                 else {
-                    fatalError("unable to load normalFolderHierarchy")
+                    Log.sceneDelegate("unable to load normalFolderHierarchy", level: .error)
+                    return
                 }
 
                 guard let fromActivities = sceneUserInfo[SceneRestorationValues.fromActivities.rawValue] as? Bool else {
-                    fatalError("unable to load fromActivities")
+                    Log.sceneDelegate("unable to load fromActivities", level: .error)
+                    return
                 }
 
                 let frozenFiles = database.fetchResults(ofType: File.self, filtering: { partial in
@@ -292,13 +303,11 @@ public struct AppRouter: AppNavigable {
                 })
 
                 // TODO: Use pred
-                let f = Array(frozenFiles).filter { fileIds.contains($0.id) }
-
-                print("frozenFiles:\(frozenFiles.count)")
-                print("f:\(f.count)")
+                let filesToRestore = Array(frozenFiles).filter { fileIds.contains($0.id) }
+                Log.sceneDelegate("restoring \(filesToRestore.count) files")
 
                 // TODO: create a method in the router
-                let previewViewController = PreviewViewController.instantiate(files: f,
+                let previewViewController = PreviewViewController.instantiate(files: filesToRestore,
                                                                               index: currentIndex,
                                                                               driveFileManager: driveFileManager,
                                                                               normalFolderHierarchy: normalFolderHierarchy,
@@ -307,7 +316,8 @@ public struct AppRouter: AppNavigable {
             case .StoreViewController:
                 guard let driveId = sceneUserInfo[SceneRestorationValues.DriveId.rawValue] as? Int,
                       driveFileManager.drive.id == driveId else {
-                    fatalError("unable to load drive id")
+                    Log.sceneDelegate("unable to load drive id", level: .error)
+                    return
                 }
 
                 let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
@@ -327,6 +337,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterAppNavigable
 
+    @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
                                                   selectedIndex: Int?) -> UITabBarController? {
         guard let window else {
@@ -436,7 +447,7 @@ public struct AppRouter: AppNavigable {
     public func askUserToRemovePicturesIfNecessary() async {
         @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
         guard photoCleaner.hasPicturesToRemove else {
-            Log.appDelegate("No pictures to remove", level: .info)
+            Log.sceneDelegate("No pictures to remove", level: .info)
             return
         }
 
@@ -502,7 +513,7 @@ public struct AppRouter: AppNavigable {
     }
 
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
-        Log.appDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
+        Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
         availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
 
@@ -523,7 +534,7 @@ public struct AppRouter: AppNavigable {
             await setRootViewController(driveErrorNavigationViewController, animated: true)
         } catch {
             await UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-            Log.appDelegate("Error while updating user account: \(error)", level: .error)
+            Log.sceneDelegate("Error while updating user account: \(error)", level: .error)
         }
     }
 
@@ -532,7 +543,7 @@ public struct AppRouter: AppNavigable {
         let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
 
         guard let currentAccount = accountManager.currentAccount else {
-            Log.appDelegate("No account to refresh", level: .error)
+            Log.sceneDelegate("No account to refresh", level: .error)
             return
         }
 
@@ -557,7 +568,7 @@ public struct AppRouter: AppNavigable {
     private func scanLibraryAndRestartUpload() async {
         backgroundUploadSessionManager.reconnectBackgroundTasks()
 
-        Log.appDelegate("Restart queue")
+        Log.sceneDelegate("Restart queue")
         @InjectService var photoUploader: PhotoLibraryUploader
         photoUploader.scheduleNewPicturesForUpload()
 
