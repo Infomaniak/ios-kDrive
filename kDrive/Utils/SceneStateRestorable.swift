@@ -27,12 +27,10 @@ public protocol SceneStateRestorable {
 
 /// Activity identifiers of the app
 public enum SceneActivityIdentifier {
-    // Activity type for restoring this scene (loaded from the plist).
     static let mainSceneActivityType: String = {
-        // Load the activity type from the Info.plist.
         let activityTypes = Bundle.main.infoDictionary?["NSUserActivityTypes"] as? [String]
         guard let activity = activityTypes?.first else {
-            fatalError("Unable to read NSUserActivity config from app plist")
+            fatalError("Unable to read NSUserActivity config from app plist. Please update Plist for your target.")
         }
 
         return activity

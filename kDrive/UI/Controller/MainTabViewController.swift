@@ -24,6 +24,14 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+/// Enum to explicit tab names
+enum MainTabIndex: Int {
+    case home = 0
+    case files = 1
+    case gallery = 3
+    case profile = 4
+}
+
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
@@ -45,7 +53,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
 
-        // Use selectedIndex argument if any
         if let selectedIndex {
             self.selectedIndex = selectedIndex
         }
@@ -257,10 +264,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let selectedIndex = tabBarController.selectedIndex
 
-        // Save tab for drive change
         UserDefaults.shared.lastSelectedTab = selectedIndex
-
-        // Save tab for UIScene
         saveSelectedTabUserActivity(selectedIndex)
 
         updateCenterButton()

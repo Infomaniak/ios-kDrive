@@ -41,20 +41,17 @@ final class FilePresenter {
             return
         }
 
-        // Pop current navigation stack
         viewController.navigationController?.popToRootViewController(animated: false)
-        // Dismiss all view controllers presented
+
         rootViewController.dismiss(animated: false) {
-            // Select Files tab
-            rootViewController.selectedIndex = 1
+            rootViewController.selectedIndex = MainTabIndex.files.rawValue
 
             guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
                 return
             }
 
-            // Pop to root
             navigationController.popToRootViewController(animated: false)
-            // Present file
+
             guard let fileListViewController = navigationController.topViewController as? FileListViewController else { return }
             let filePresenter = FilePresenter(viewController: fileListViewController)
             filePresenter.presentParent(of: file, driveFileManager: driveFileManager, animated: false)

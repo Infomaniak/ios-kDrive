@@ -48,19 +48,39 @@ public protocol RouterAppNavigable {
 
 /// Something that can present a File within the app
 public protocol RouterFileNavigable {
-    /// Pop to root and present file
+    /// Pop to root and present file, will never open OnlyOffice
+    /// - Parameters:
+    ///   - file: File to display
+    ///   - driveFileManager: driveFileManager
     @MainActor func present(file: File, driveFileManager: DriveFileManager)
 
     /// Pop to root and present file
+    /// - Parameters:
+    ///   - file: File to display
+    ///   - driveFileManager: driveFileManager
+    ///   - office: Open in only office
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 
-    /// Present FileList for folder
+    /// Present a list of files from a folder
+    /// - Parameters:
+    ///   - frozenFolder: Folder to display
+    ///   - driveFileManager: driveFileManager
+    ///   - navigationController: The navigation controller to use
     @MainActor func presentFileList(
         frozenFolder: File,
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController
     )
 
+    /// Present PreviewViewController
+    /// - Parameters:
+    ///   - frozenFiles: File list to display, must be frozen
+    ///   - index: The Index of the file to display
+    ///   - driveFileManager: The driveFileManager
+    ///   - normalFolderHierarchy: See FileListViewModel.Configuration for details
+    ///   - fromActivities: Opening from an activity
+    ///   - navigationController: The navigation controller to use
+    ///   - animated: Should be animated
     @MainActor func presentPreviewViewController(
         frozenFiles: [File],
         index: Int,
@@ -71,6 +91,12 @@ public protocol RouterFileNavigable {
         animated: Bool
     )
 
+    /// Present the details of a file and all the linked metadata
+    /// - Parameters:
+    ///   - frozenFile: A frozen file to display
+    ///   - driveFileManager: driveFileManager
+    ///   - navigationController: The navigation controller to use
+    ///   - animated: Should be animated
     @MainActor func presentFileDetails(
         frozenFile: File,
         driveFileManager: DriveFileManager,
@@ -78,6 +104,11 @@ public protocol RouterFileNavigable {
         animated: Bool
     )
 
+    /// Present the InApp purchase StoreViewController
+    /// - Parameters:
+    ///   - driveFileManager: driveFileManager
+    ///   - navigationController: The navigation controller to use
+    ///   - animated: Should be animated
     @MainActor func presentStoreViewController(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController,
@@ -104,11 +135,13 @@ public protocol RouterRootNavigable {
 }
 
 public protocol TopmostViewControllerFetchable {
+    /// Access the current top most ViewController
     @MainActor var topMostViewController: UIViewController? { get }
 }
 
 /// Actions performed by router, `async` by design
 public protocol RouterActionable {
+    /// Ask the user to review the app
     func askForReview() async
 
     /// Ask the user to remove pictures if configured
@@ -132,7 +165,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService private var accountManager: AccountManageable
 
-    // Get the current window from the app scene
+    /// Get the current window from the app scene
     @MainActor private var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
@@ -198,7 +231,6 @@ public struct AppRouter: AppNavigable {
             showAppLock()
         case .mainViewController(let driveFileManager):
 
-            // Entry point for scene restoration
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()
@@ -215,8 +247,8 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
-        // Try to read the tab from the current scene, and restore `MainViewController`
         var indexToUse: Int?
         if let sceneUserInfo,
            let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
@@ -229,10 +261,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        // one run loop
         Task { @MainActor in
-
-            // try to decode further screens
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
@@ -309,13 +338,9 @@ public struct AppRouter: AppNavigable {
                                                navigationController: UINavigationController,
                                                sceneUserInfo: [AnyHashable: Any]) async {
         guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-              driveFileManager.drive.id == driveId else {
-            Log.sceneDelegate("unable to load drive id", level: .error)
-            return
-        }
-
-        guard let fileId = sceneUserInfo[SceneRestorationValues.fileId.rawValue] else {
-            Log.sceneDelegate("unable to load file id", level: .error)
+              driveFileManager.drive.id == driveId,
+              let fileId = sceneUserInfo[SceneRestorationValues.fileId.rawValue] else {
+            Log.sceneDelegate("metadata issue for FileList :\(sceneUserInfo)", level: .error)
             return
         }
 
@@ -341,29 +366,11 @@ public struct AppRouter: AppNavigable {
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
         guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-              driveFileManager.drive.id == driveId else {
-            Log.sceneDelegate("unable to load drive id", level: .error)
-            return
-        }
-
-        guard let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int] else {
-            Log.sceneDelegate("unable to load file ids", level: .error)
-            return
-        }
-
-        guard let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int else {
-            Log.sceneDelegate("unable to load currentIndex", level: .error)
-            return
-        }
-
-        guard let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool
-        else {
-            Log.sceneDelegate("unable to load normalFolderHierarchy", level: .error)
-            return
-        }
-
-        guard let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
-            Log.sceneDelegate("unable to load fromActivities", level: .error)
+              let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
+              let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
+              let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
+              let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
+            Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
 
@@ -374,7 +381,6 @@ public struct AppRouter: AppNavigable {
                 .freezeIfNeeded()
         }
 
-        Log.sceneDelegate("restoring \(frozenFetchedFiles.count) files")
         let frozenFilesToRestore = Array(frozenFetchedFiles)
 
         await presentPreviewViewController(
@@ -458,7 +464,6 @@ public struct AppRouter: AppNavigable {
             driveInfosManager.deleteAllFileProviderDomains()
         }
 
-        // Check if presenting onboarding
         let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
         guard isNotPresentingOnboarding else {
             return
@@ -506,10 +511,8 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        // Dismiss all view controllers presented
         rootViewController.dismiss(animated: false)
-        // Select Menu tab
-        rootViewController.selectedIndex = 4
+        rootViewController.selectedIndex = MainTabIndex.profile.rawValue
 
         guard let navController = rootViewController.selectedViewController as? UINavigationController else {
             return
@@ -536,7 +539,6 @@ public struct AppRouter: AppNavigable {
                                                 destructive: true,
                                                 loading: false) {
                 Task {
-                    // Proceed with removal
                     @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
                     await photoCleaner.removePicturesScheduledForDeletion()
                 }
@@ -665,32 +667,34 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        // Dismiss all view controllers presented
         rootViewController.dismiss(animated: false) {
-            // Select Files tab
-            rootViewController.selectedIndex = 1
+            rootViewController.selectedIndex = MainTabIndex.files.rawValue
 
             guard let navController = rootViewController.selectedViewController as? UINavigationController,
                   let viewController = navController.topViewController as? FileListViewController else {
                 return
             }
 
-            if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
-                // Pop to root
-                navController.popToRootViewController(animated: false)
-                // Present file
-                guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
-                if office {
-                    OnlyOfficeViewController.open(driveFileManager: driveFileManager,
-                                                  file: file,
-                                                  viewController: fileListViewController)
-                } else {
-                    let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(for: file,
-                                          files: [file],
-                                          driveFileManager: driveFileManager,
-                                          normalFolderHierarchy: false)
-                }
+            guard !file.isRoot && viewController.viewModel.currentDirectory.id != file.id else {
+                return
+            }
+
+            navController.popToRootViewController(animated: false)
+
+            guard let fileListViewController = navController.topViewController as? FileListViewController else {
+                return
+            }
+
+            if office {
+                OnlyOfficeViewController.open(driveFileManager: driveFileManager,
+                                              file: file,
+                                              viewController: fileListViewController)
+            } else {
+                let filePresenter = FilePresenter(viewController: fileListViewController)
+                filePresenter.present(for: file,
+                                      files: [file],
+                                      driveFileManager: driveFileManager,
+                                      normalFolderHierarchy: false)
             }
         }
     }
@@ -733,6 +737,8 @@ public struct AppRouter: AppNavigable {
         navigationController: UINavigationController,
         animated: Bool
     ) {
+        assert(frozenFile.realm == nil || frozenFile.isFrozen, "expecting this realm object to be thread safe")
+
         let fileDetailViewController = FileDetailViewController.instantiate(
             driveFileManager: driveFileManager,
             file: frozenFile

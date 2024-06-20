@@ -61,7 +61,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         prepareWindowScene(windowScene)
 
-        // Setup accountManager delegation after the window setup like previously in app delegate
         accountManager.delegate = self
 
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
@@ -72,8 +71,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             name: .locateUploadActionTapped,
             object: nil
         )
-
-        // Determine the user activity from a new connection or from a session's state restoration.
 
         let isRestoration: Bool = session.stateRestorationActivity != nil
         Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
@@ -88,7 +85,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        // Save activity to new scene
         scene.userActivity = userActivity
 
         guard let userInfo = userActivity.userInfo else {
@@ -140,7 +136,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         @InjectService var uploadQueue: UploadQueue
         uploadQueue.pausedNotificationSent = false
 
-        // Set root view here, trying to restore state
         let currentState = RootViewControllerState.getCurrentState()
         let session = scene.session
         let isRestoration: Bool = session.stateRestorationActivity != nil
@@ -158,7 +153,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         case .onboarding, .updateRequired, .preloading: break
         }
 
-        // Remove all notifications on App Opening
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
 
         Task {
@@ -182,7 +176,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        // Dismiss all view controllers presented
         rootViewController.dismiss(animated: false)
 
         guard let navController = rootViewController.selectedViewController as? UINavigationController,
@@ -214,7 +207,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             break
         }
 
-        // reset the shortcut item
         shortcutItemToProcess = nil
     }
 
@@ -296,7 +288,6 @@ extension SceneDelegate {
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
         // Hierarchy inside folderURL should be /driveId/fileId/fileName.extension
         for driveFolder in driveFolders {
-            // Read drive folder
             let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
             guard let driveId = Int(driveFolder),
                   let drive = driveInfosManager.getDrive(id: driveId, userId: accountManager.currentUserId),
@@ -370,10 +361,10 @@ extension SceneDelegate {
         }
     }
 
-    /// Set global tint color
     private func setGlobalWindowTint() {
         window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
         UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
+
         // Migration from old UserDefaults
         if UserDefaults.shared.legacyIsFirstLaunch {
             UserDefaults.shared.legacyIsFirstLaunch = UserDefaults.standard.legacyIsFirstLaunch
@@ -381,7 +372,6 @@ extension SceneDelegate {
     }
 }
 
-/// Main Scene
 extension SceneDelegate {
     /** This is the NSUserActivity that you use to restore state when the Scene reconnects.
         It can be the same activity that you use for handoff or spotlight, or it can be a separate activity
@@ -396,13 +386,10 @@ extension SceneDelegate {
      */
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
         Log.sceneDelegate("stateRestorationActivity for:\(scene)")
-
-        // check if restoration is enabled
         guard appRestorationService.shouldRestoreApplicationState else {
             return nil
         }
 
-        // Offer the user activity for this scene.
         return scene.userActivity
     }
 }

@@ -206,16 +206,13 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
         tableView.separatorColor = .clear
 
-        // Set initial rows
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
                                                          categoryRights: driveFileManager.drive.categoryRights)
 
-        // Load file informations
         loadFileInformation()
 
-        // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
             Task { @MainActor [weak self] in
                 guard let self else {
@@ -227,7 +224,6 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         }
 
         Task { @MainActor in
-            // Save file info into current scene
             saveSceneState()
         }
     }
