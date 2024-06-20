@@ -224,11 +224,6 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-        bindPhotoListViewModel()
-    }
-
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {

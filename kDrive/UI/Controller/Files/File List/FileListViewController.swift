@@ -811,62 +811,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         ]
     }
 
-    // TODO: remove
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(viewModel.driveFileManager.drive.id, forKey: "DriveID")
-        coder.encode(viewModel.currentDirectory.id, forKey: "DirectoryID")
-        if let viewModel {
-            coder.encode(String(describing: type(of: viewModel)), forKey: "ViewModel")
-        }
-    }
-
-    // TODO: remove
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveID")
-        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
-        let viewModelName = coder.decodeObject(of: NSString.self, forKey: "ViewModel") as String?
-
-        // Drive File Manager should be consistent
-        let maybeDriveFileManager: DriveFileManager?
-        #if ISEXTENSION
-        maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
-        #else
-        if viewModelName == String(describing: SharedWithMeViewModel.self) {
-            maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
-        } else {
-            maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
-        }
-        #endif
-        guard let driveFileManager = maybeDriveFileManager else {
-            // Handle error?
-            return
-        }
-        let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
-
-        if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
-           let viewModelName,
-           let viewModel = getViewModel(
-               viewModelName: viewModelName,
-               driveFileManager: driveFileManager,
-               currentDirectory: maybeCurrentDirectory
-           ) {
-            self.viewModel = viewModel
-            setupViewModel()
-            tryLoadingFilesOrDisplayError()
-        } else {
-            // We need some view model to restore the view controller and pop it...
-            viewModel = ConcreteFileListViewModel(
-                driveFileManager: driveFileManager,
-                currentDirectory: driveFileManager.getCachedRootFile()
-            )
-            navigationController?.popViewController(animated: true)
-        }
-    }
-
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {

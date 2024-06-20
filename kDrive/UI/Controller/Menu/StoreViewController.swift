@@ -351,27 +351,6 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
             SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id
         ]
     }
-
-    // TODO: Remove
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-    }
-
-    // TODO: Remove
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        checkDriveFileManager()
-        updateOffers()
-    }
 }
 
 // MARK: - Cell delegates

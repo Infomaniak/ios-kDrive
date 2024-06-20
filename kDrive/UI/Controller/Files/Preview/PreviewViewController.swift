@@ -615,62 +615,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
             SceneRestorationValues.fromActivities.rawValue: fromActivities
         ]
     }
-
-    // TODO: remove
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(previewFiles.map(\.id), forKey: "Files")
-        coder.encode(currentIndex.row, forKey: "CurrentIndex")
-        coder.encode(initialLoading, forKey: "InitialLoading")
-        coder.encode(normalFolderHierarchy, forKey: "NormalFolderHierarchy")
-        coder.encode(fromActivities, forKey: "FromActivities")
-    }
-
-    // TODO: remove
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        initialLoading = coder.decodeBool(forKey: "InitialLoading")
-        normalFolderHierarchy = coder.decodeBool(forKey: "NormalFolderHierarchy")
-        fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
-        fromActivities = coder.decodeBool(forKey: "FromActivities")
-        if fromActivities {
-            floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
-        }
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        self.driveFileManager = driveFileManager
-        let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-
-        let matchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("id IN %@", previewFileIds)
-        }
-
-        previewFiles = Array(matchedFiles)
-
-        let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
-        if decodedIndex >= previewFiles.count {
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        currentIndex = IndexPath(row: decodedIndex, section: 0)
-
-        // Update UI
-        Task { @MainActor [self] in
-            collectionView.reloadData()
-            updateFileForCurrentIndex()
-            collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
-            updateNavigationBar()
-            downloadFileIfNeeded(at: currentIndex)
-        }
-        observeFileUpdated()
-    }
 }
 
 // MARK: - Collection view data source

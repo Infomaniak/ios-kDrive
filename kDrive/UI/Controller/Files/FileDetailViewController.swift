@@ -495,49 +495,6 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             SceneRestorationValues.FileId.rawValue: file.id
         ]
     }
-
-    // TODO: Remove
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(file.id, forKey: "FileId")
-    }
-
-    // TODO: Remove
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
-        guard file != nil else {
-            // If file doesn't exist anymore, pop view controller
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
-            async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
-
-            fileInformationRows = try await FileInformationRow.getRows(for: file,
-                                                                       fileAccess: currentFileAccess,
-                                                                       contentCount: folderContentCount,
-                                                                       categoryRights: driveFileManager.drive
-                                                                           .categoryRights)
-            fileAccess = try await currentFileAccess
-            contentCount = try await folderContentCount
-
-            if tableView.window != nil && currentTab == .informations {
-                reloadTableView()
-            }
-        }
-    }
 }
 
 extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
