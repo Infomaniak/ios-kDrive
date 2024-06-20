@@ -164,8 +164,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
-    // Migrated to sceneDidBecomeActive
-    // func applicationDidBecomeActive(_ application: UIApplication) { }
 
     func application(_ application: UIApplication,
                      open url: URL,
