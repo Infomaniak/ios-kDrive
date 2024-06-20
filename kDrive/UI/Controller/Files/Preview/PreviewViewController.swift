@@ -53,7 +53,7 @@ extension PreviewViewController: Encodable {
     }
 }
 
-class PreviewViewController: UIViewController, PreviewContentCellDelegate {
+class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
     class PreviewError {
@@ -605,22 +605,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     // MARK: - State restoration
 
-    // TODO: Extend UIViewController
-    private var currentUserActivity: NSUserActivity {
-        let activity: NSUserActivity
-        if let currentUserActivity = view.window?.windowScene?.userActivity {
-            activity = currentUserActivity
-        } else {
-            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
-        }
-        return activity
-    }
-
-    // TODO: Abstract to prot
-    func saveSceneState() {
-        print("•• saveSceneState")
-        let currentUserActivity = currentUserActivity
-        let metadata: [AnyHashable: Any] = [
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
             SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
             SceneRestorationValues.FilesIds.rawValue: previewFiles.map(\.id),
@@ -628,13 +614,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             SceneRestorationValues.normalFolderHierarchy.rawValue: normalFolderHierarchy,
             SceneRestorationValues.fromActivities.rawValue: fromActivities
         ]
-        currentUserActivity.addUserInfoEntries(from: metadata)
-
-        guard let scene = view.window?.windowScene else {
-            fatalError("no scene")
-        }
-
-        scene.userActivity = currentUserActivity
     }
 
     // TODO: remove

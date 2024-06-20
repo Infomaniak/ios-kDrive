@@ -23,7 +23,7 @@ import kDriveResources
 import StoreKit
 import UIKit
 
-final class StoreViewController: UICollectionViewController {
+final class StoreViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
     struct Item {
@@ -345,32 +345,11 @@ final class StoreViewController: UICollectionViewController {
 
     // MARK: - State restoration
 
-    // TODO: Extend UIViewController
-    private var currentUserActivity: NSUserActivity {
-        let activity: NSUserActivity
-        if let currentUserActivity = view.window?.windowScene?.userActivity {
-            activity = currentUserActivity
-        } else {
-            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
-        }
-        return activity
-    }
-
-    // TODO: Abstract to prot to test
-    func saveSceneState() {
-        print("•• saveSceneState")
-        let currentUserActivity = currentUserActivity
-        let metadata: [AnyHashable: Any] = [
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.StoreViewController.rawValue,
             SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id
         ]
-        currentUserActivity.addUserInfoEntries(from: metadata)
-
-        guard let scene = view.window?.windowScene else {
-            fatalError("no scene")
-        }
-
-        scene.userActivity = currentUserActivity
     }
 
     // TODO: Remove

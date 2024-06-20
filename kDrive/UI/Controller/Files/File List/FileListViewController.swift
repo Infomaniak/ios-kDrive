@@ -132,7 +132,7 @@ class ConcreteFileListViewModel: FileListViewModel {
 }
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -803,37 +803,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - State restoration
 
-    #if !ISEXTENSION
-    // TODO: Extend UIViewController
-    private var currentUserActivity: NSUserActivity {
-        let activity: NSUserActivity
-        if let currentUserActivity = view.window?.windowScene?.userActivity {
-            activity = currentUserActivity
-        } else {
-            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
-        }
-        return activity
-    }
-
-    // TODO: Abstract to prot to test
-    func saveSceneState() {
-        print("•• saveSceneState")
-        let currentUserActivity = currentUserActivity
-        let metadata: [AnyHashable: Any] = [
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
             SceneRestorationValues.DriveId.rawValue: driveFileManager.drive.id,
             SceneRestorationValues.FileId.rawValue: viewModel.currentDirectory.id
         ]
-        currentUserActivity.addUserInfoEntries(from: metadata)
-
-        guard let scene = view.window?.windowScene else {
-            fatalError("no scene")
-        }
-
-        scene.userActivity = currentUserActivity
     }
-
-    #endif
 
     // TODO: remove
     override func encodeRestorableState(with coder: NSCoder) {

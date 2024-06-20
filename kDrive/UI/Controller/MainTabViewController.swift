@@ -266,18 +266,8 @@ extension MainTabViewController: UITabBarControllerDelegate {
         updateCenterButton()
     }
 
-    // TODO: Extend UIViewController
-    private var currentUserActivity: NSUserActivity {
-        let activity: NSUserActivity
-        if let currentUserActivity = view.window?.windowScene?.userActivity {
-            activity = currentUserActivity
-        } else {
-            activity = NSUserActivity(activityType: SceneDelegate.MainSceneActivityType)
-        }
-        return activity
-    }
+    // MARK: - State restoration
 
-    // TODO: Abstract to protocol
     private func saveSelectedTabUserActivity(_ index: Int) {
         let currentUserActivity = currentUserActivity
         let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]

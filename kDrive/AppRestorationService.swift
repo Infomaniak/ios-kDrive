@@ -62,7 +62,7 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        print("•• shouldRestoreApplicationState coder:")
+        print("shouldRestoreApplicationState coder:")
         return true
         /* let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
          let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
@@ -72,7 +72,7 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public var shouldRestoreApplicationState: Bool {
-        print("•• shouldRestoreApplicationState")
+        print("shouldRestoreApplicationState")
         return true
 
         // TODO: Use user defaults

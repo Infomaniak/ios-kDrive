@@ -25,10 +25,6 @@ import SafariServices
 import UIKit
 import VersionChecker
 
-public protocol SceneStateRestorable {
-    func saveSceneState()
-}
-
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable
@@ -88,7 +84,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard userActivity.activityType == SceneDelegate.MainSceneActivityType else {
+        guard userActivity.activityType == SceneActivityIdentifier.mainSceneActivityType else {
             Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
             return
         }
@@ -413,15 +409,4 @@ extension SceneDelegate {
         // Offer the user activity for this scene.
         return scene.userActivity
     }
-
-    // Activity type for restoring this scene (loaded from the plist).
-    static let MainSceneActivityType: String = {
-        // Load the activity type from the Info.plist.
-        let activityTypes = Bundle.main.infoDictionary?["NSUserActivityTypes"] as? [String]
-        guard let activity = activityTypes?.first else {
-            fatalError("Unable to read NSUserActivity config from app plist")
-        }
-
-        return activity
-    }()
 }
