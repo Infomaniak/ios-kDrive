@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
 /// Express a current state for scene based restoration.
@@ -41,9 +42,9 @@ public enum SceneActivityIdentifier {
 public extension UIViewController {
     /// Saves the current state within a scene, for state restoration
     func saveSceneState() {
-        print("•• saveSceneState")
+        Log.sceneDelegate("saveSceneState")
         guard let restorableViewController = self as? SceneStateRestorable else {
-            print("Implement SceneStateRestorable to \(self) to save its state")
+            Log.sceneDelegate("Implement SceneStateRestorable to \(self) to save its state", level: .error)
             return
         }
 
@@ -52,7 +53,8 @@ public extension UIViewController {
         currentUserActivity.addUserInfoEntries(from: metadata)
 
         guard let scene = view.window?.windowScene else {
-            fatalError("no scene")
+            Log.sceneDelegate("no scene linked to \(self)", level: .error)
+            return
         }
 
         scene.userActivity = currentUserActivity

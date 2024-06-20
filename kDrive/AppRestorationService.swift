@@ -55,14 +55,14 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public func shouldSaveApplicationState(coder: NSCoder) -> Bool {
-        Log.appDelegate("shouldSaveApplicationState")
-        Log.appDelegate("Restoration files:\(String(describing: Self.statePath))")
+        Log.sceneDelegate("shouldSaveApplicationState")
+        Log.sceneDelegate("Restoration files:\(String(describing: Self.statePath))")
         coder.encode(Self.currentStateVersion, forKey: Self.appStateVersionKey)
         return true
     }
 
     public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        print("shouldRestoreApplicationState coder:")
+        Log.sceneDelegate("shouldRestoreApplicationState coder:")
         return true
         /* let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
          let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
@@ -72,7 +72,7 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public var shouldRestoreApplicationState: Bool {
-        print("shouldRestoreApplicationState")
+        Log.sceneDelegate("shouldRestoreApplicationState")
         return true
 
         // TODO: Use user defaults
