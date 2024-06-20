@@ -108,7 +108,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         window = newWindow
         newWindow.makeKeyAndVisible()
 
-        // Update tint
         setGlobalWindowTint()
         appNavigable.updateTheme()
     }
