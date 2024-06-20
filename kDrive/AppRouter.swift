@@ -298,13 +298,14 @@ public struct AppRouter: AppNavigable {
                     return
                 }
 
-                let frozenFiles = database.fetchResults(ofType: File.self, filtering: { partial in
-                    partial.freezeIfNeeded()
+                let fetchedFiles = database.fetchResults(ofType: File.self, filtering: { partial in
+                    partial
+                        .filter("id IN %@", fileIds)
+                        .freezeIfNeeded()
                 })
 
-                // TODO: Use pred
-                let filesToRestore = Array(frozenFiles).filter { fileIds.contains($0.id) }
-                Log.sceneDelegate("restoring \(filesToRestore.count) files")
+                Log.sceneDelegate("restoring \(fetchedFiles.count) files")
+                let filesToRestore = Array(fetchedFiles)
 
                 // TODO: create a method in the router
                 let previewViewController = PreviewViewController.instantiate(files: filesToRestore,
