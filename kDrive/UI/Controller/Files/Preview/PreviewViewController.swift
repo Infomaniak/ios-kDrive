@@ -80,6 +80,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             setTitle()
+            saveSceneState()
         }
     }
 
