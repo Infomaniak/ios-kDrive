@@ -365,7 +365,7 @@ public struct AppRouter: AppNavigable {
     private func restorePreviewViewController(driveFileManager: DriveFileManager,
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
-        guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
+        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int != nil,
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
