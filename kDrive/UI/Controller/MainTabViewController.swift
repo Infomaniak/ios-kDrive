@@ -274,8 +274,6 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
     private func saveSelectedTabUserActivity(_ index: Int) {
         let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]
-
-        // Override previous metadata if any
         let userActivity = currentUserActivity
         userActivity.userInfo = metadata
 

@@ -45,16 +45,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     var window: UIWindow?
 
-    /** Apps configure their UIWindow and attach it to the provided UIWindowScene scene.
-         The system calls willConnectTo shortly after the app delegate's "configurationForConnecting" function.
-         Use this function to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-
-         When using a storyboard file, as specified by the Info.plist key, UISceneStoryboardFile, the system automatically configures
-         the window property and attaches it to the windowScene.
-
-         Remember to retain the SceneDelegate's UIWindow.
-         The recommended approach is for the SceneDelegate to retain the scene's window.
-     */
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Log.sceneDelegate("scene session options")
         guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -111,26 +101,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         return true
     }
 
-    /** Use this delegate as the system is releasing the scene or on window close.
-         This occurs shortly after the scene enters the background, or when the system discards its session.
-         Release any scene-related resources that the system can recreate the next time the scene connects.
-         The scene may reconnect later because the system didn't necessarily discard its session (see`application:didDiscardSceneSessions` instead),
-         so don't delete any user data or state permanently.
-     */
     func sceneDidDisconnect(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidDisconnect \(scene)")
     }
 
-    /** Use this delegate when the scene moves from an active state to an inactive state, on window close, or in iOS enter background.
-         This may occur due to temporary interruptions (for example, an incoming phone call).
-     */
     func sceneWillResignActive(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillResignActive \(scene)")
     }
 
-    /** Use this delegate as the scene transitions from the background to the foreground, on window open, or in iOS resume.
-         Use it to undo the changes made on entering the background.
-     */
     func sceneWillEnterForeground(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(window)")
         @InjectService var uploadQueue: UploadQueue
@@ -162,10 +140,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
     }
 
-    /** Use this delegate when the scene "has moved" from an inactive state to an active state.
-         Also use it to restart any tasks that the system paused (or didn't start) when the scene was inactive.
-         The system calls this delegate every time a scene becomes active so set up your scene UI here.
-     */
     func sceneDidBecomeActive(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidBecomeActive \(scene)")
         guard let shortcutItem = shortcutItemToProcess else {
@@ -210,10 +184,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         shortcutItemToProcess = nil
     }
 
-    /** Use this delegate as the scene transitions from the foreground to the background.
-        Also use it to save data, release shared resources, and store enough scene-specific state information
-        to restore the scene to its current state.
-     */
     func sceneDidEnterBackground(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidEnterBackground \(scene)")
         backgroundTasksService.scheduleBackgroundRefresh()
@@ -226,7 +196,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     // MARK: - Window Scene
 
-    // Listen for size change.
     func windowScene(_ windowScene: UIWindowScene,
                      didUpdate previousCoordinateSpace: UICoordinateSpace,
                      interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
@@ -297,7 +266,6 @@ extension SceneDelegate {
             }
 
             for fileFolder in fileFolders {
-                // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
                 guard let fileId = Int(fileFolder),
                       let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
@@ -311,7 +279,6 @@ extension SceneDelegate {
                     continue
                 }
 
-                // Compare modification date
                 let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
                 let modificationDate = attributes?[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
 
@@ -319,7 +286,6 @@ extension SceneDelegate {
                     continue
                 }
 
-                // Copy and upload file
                 let uploadFile = UploadFile(parentDirectoryId: file.parentId,
                                             userId: accountManager.currentUserId,
                                             driveId: file.driveId,
@@ -352,7 +318,6 @@ extension SceneDelegate {
             }
         }
 
-        // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
                 Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Cleaning folder")
@@ -373,17 +338,6 @@ extension SceneDelegate {
 }
 
 extension SceneDelegate {
-    /** This is the NSUserActivity that you use to restore state when the Scene reconnects.
-        It can be the same activity that you use for handoff or spotlight, or it can be a separate activity
-        with a different activity type and/or userInfo.
-
-        This object must be lightweight. You should store the key information about what the user was doing last.
-
-        After the system calls this function, and before it saves the activity in the restoration file, if the returned NSUserActivity has a
-        delegate (NSUserActivityDelegate), the function userActivityWillSave calls that delegate. Additionally, if any UIResponders have the activity
-        set as their userActivity property, the system calls the UIResponder updateUserActivityState function to update the activity.
-        This happens synchronously and ensures that the system has filled in all the information for the activity before saving it.
-     */
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
         Log.sceneDelegate("stateRestorationActivity for:\(scene)")
         guard appRestorationService.shouldRestoreApplicationState else {

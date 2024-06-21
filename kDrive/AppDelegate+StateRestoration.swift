@@ -19,24 +19,20 @@
 import UIKit
 
 extension AppDelegate {
-    // For non-scene-based versions of this app on iOS 13.1 and earlier.
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         return appRestorationService.shouldSaveApplicationState(coder: coder)
     }
 
-    // For non-scene-based versions of this app on iOS 13.1 and earlier.
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         return appRestorationService.shouldRestoreApplicationState(coder: coder)
     }
 
     @available(iOS 13.2, *)
-    // For non-scene-based versions of this app on iOS 13.2 and later.
     func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
         return appRestorationService.shouldSaveApplicationState(coder: coder)
     }
 
     @available(iOS 13.2, *)
-    // For non-scene-based versions of this app on iOS 13.2 and later.
     func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
         return appRestorationService.shouldRestoreApplicationState(coder: coder)
     }

@@ -146,9 +146,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
 
-    // Migrated to sceneDidEnterBackground
-    // func applicationDidEnterBackground(_ application: UIApplication) { }
-
     func application(
         _ application: UIApplication,
         performActionFor shortcutItem: UIApplicationShortcutItem,
@@ -198,7 +195,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         _ = notification.request.content.userInfo
 
-        // Change this to your preferred presentation option
         completionHandler([.alert, .sound])
     }
 

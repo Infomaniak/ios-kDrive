@@ -36,7 +36,6 @@ public struct EarlyDIHook {
         ]
 
         #if !ISEXTENSION
-        // AppRestorationService only available for main app, not extensions
         extraDependencies += [
             Factory(type: AppRestorationServiceable.self) { _, _ in
                 AppRestorationService()
