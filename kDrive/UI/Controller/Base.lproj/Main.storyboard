@@ -494,6 +494,9 @@
                             <constraint firstItem="g4c-X4-Qk2" firstAttribute="centerX" secondItem="hFu-Wv-d7v" secondAttribute="centerX" id="xlL-Ne-cWk"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="unlockAppButton" destination="QKz-Y6-C7W" id="1JN-2U-WbR"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ibK-nd-h3J" sceneMemberID="firstResponder"/>
             </objects>

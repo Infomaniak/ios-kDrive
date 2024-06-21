@@ -61,6 +61,9 @@ final class FileProviderExtension: NSFileProviderExtension {
     /// Restart the dedicated `FileManager` upload queue on init
     @InjectService var uploadQueue: UploadQueueable
 
+    // Not lazy to force init of the object early, and set a userID in Sentry
+    @InjectService var accountManager: AccountManageable
+
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderService: FileProviderServiceable
 
@@ -70,7 +73,6 @@ final class FileProviderExtension: NSFileProviderExtension {
         return fileCoordinator
     }()
 
-    @LazyInjectService var accountManager: AccountManageable
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
     lazy var manager: NSFileProviderManager = {
         if let domain {

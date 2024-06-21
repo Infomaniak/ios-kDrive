@@ -163,8 +163,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return DeeplinkParser().parse(url: url)
     }
 
-
-
     func application(_ application: UIApplication,
                      open url: URL,
                      sourceApplication: String?,

@@ -27,7 +27,8 @@ final class ActionNavigationController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .actionExtension)
 
-    @LazyInjectService var accountManager: AccountManageable
+    // Not lazy to force init of the object early, and set a userID in Sentry
+    @InjectService var accountManager: AccountManageable
 
     override func viewDidLoad() {
         super.viewDidLoad()
