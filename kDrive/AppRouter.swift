@@ -316,8 +316,8 @@ public struct AppRouter: AppNavigable {
         }
 
         let database = driveFileManager.database
-        let frozenFile = database.fetchObject(ofType: File.self) { partial in
-            partial
+        let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection
                 .filter("id == %@", fileId)
                 .first?
                 .freezeIfNeeded()
@@ -345,8 +345,8 @@ public struct AppRouter: AppNavigable {
         }
 
         let database = driveFileManager.database
-        let frozenFile = database.fetchObject(ofType: File.self) { partial in
-            partial
+        let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection
                 .filter("id == %@", fileId)
                 .first?
                 .freezeIfNeeded()
@@ -375,8 +375,8 @@ public struct AppRouter: AppNavigable {
         }
 
         let database = driveFileManager.database
-        let frozenFetchedFiles = database.fetchResults(ofType: File.self) { partial in
-            partial
+        let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
+            lazyCollection
                 .filter("id IN %@", fileIds)
                 .freezeIfNeeded()
         }
