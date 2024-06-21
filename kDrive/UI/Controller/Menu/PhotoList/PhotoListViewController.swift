@@ -95,6 +95,12 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        saveSceneState()
+    }
+
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         collectionView.collectionViewLayout.invalidateLayout()
@@ -345,5 +351,11 @@ final class PhotoListViewController: FileListViewController {
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
         return .zero
+    }
+
+    // MARK: - State restoration
+
+    override var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }

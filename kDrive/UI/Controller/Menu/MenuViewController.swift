@@ -116,6 +116,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         super.viewDidAppear(animated)
         updateContentIfNeeded()
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName])
+        saveSceneState()
     }
 
     func updateContentIfNeeded() {
@@ -273,6 +274,12 @@ extension MenuViewController {
                                                                                                               .buttonSwitchDrive,
                                                                                                           delegate: self)
         present(floatingPanelViewController, animated: true)
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }
 
