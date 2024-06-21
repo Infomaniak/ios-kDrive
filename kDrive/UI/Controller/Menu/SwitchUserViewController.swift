@@ -91,8 +91,7 @@ class SwitchUserViewController: UIViewController {
             MatomoUtils.connectUser()
 
             accountManager.switchAccount(newAccount: account)
-            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-            appNavigable.setRootViewController(newMainTabViewController, animated: true)
+            appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                 errorType: .noDrive,

@@ -23,6 +23,9 @@ import UIKit
 
 /// Something that centralize the App Restoration logic
 public protocol AppRestorationServiceable {
+    /// Is restoration enabled
+    var shouldRestoreApplicationState: Bool { get }
+
     func shouldSaveApplicationState(coder: NSCoder) -> Bool
 
     func shouldRestoreApplicationState(coder: NSCoder) -> Bool
@@ -52,20 +55,34 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public func shouldSaveApplicationState(coder: NSCoder) -> Bool {
-        Log.appDelegate("shouldSaveApplicationState")
-        Log.appDelegate("Restoration files:\(String(describing: Self.statePath))")
+        Log.sceneDelegate("shouldSaveApplicationState")
+        Log.sceneDelegate("Restoration files:\(String(describing: Self.statePath))")
         coder.encode(Self.currentStateVersion, forKey: Self.appStateVersionKey)
         return true
     }
 
     public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        return false
-        /* TODO: Rework app restoration before re-enabling
+        Log.sceneDelegate("shouldRestoreApplicationState coder:")
+        return true
+        /* let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
+         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+         return shouldRestoreApplicationState */
+    }
+
+    public var shouldRestoreApplicationState: Bool {
+        Log.sceneDelegate("shouldRestoreApplicationState")
+        return true
+
+        // TODO: Use user defaults
+        /*
          let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
          let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
              !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
          Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-         return shouldRestoreApplicationState*/
+         return shouldRestoreApplicationState
+          */
     }
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {
@@ -77,13 +94,8 @@ public final class AppRestorationService: AppRestorationServiceable {
         }
 
         // Read the last tab selected in order to properly reload the App's UI.
-        // This should be migrated to NSUserActivity at some point
         let lastSelectedTab = UserDefaults.shared.lastSelectedTab
-        let newMainTabViewController = await MainTabViewController(
-            driveFileManager: currentDriveFileManager,
-            selectedIndex: lastSelectedTab
-        )
 
-        await appNavigable.setRootViewController(newMainTabViewController, animated: true)
+        await appNavigable.showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: lastSelectedTab)
     }
 }

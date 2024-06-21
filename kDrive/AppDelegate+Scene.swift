@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
 extension AppDelegate {
@@ -31,7 +32,7 @@ extension AppDelegate {
     func application(_ application: UIApplication,
                      configurationForConnecting connectingSceneSession: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        print("•• application configurationForConnecting:\(connectingSceneSession)")
+        Log.appDelegate("application configurationForConnecting:\(connectingSceneSession)")
         return connectingSceneSession.configuration
     }
 
@@ -45,6 +46,6 @@ extension AppDelegate {
          Remove any state or data associated with this session, as it will not return (such as, unsaved draft of a document).
      */
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        print("•• application didDiscardSceneSessions:\(sceneSessions)")
+        Log.appDelegate("application didDiscardSceneSessions:\(sceneSessions)")
     }
 }

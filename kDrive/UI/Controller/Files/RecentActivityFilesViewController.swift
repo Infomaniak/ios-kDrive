@@ -44,25 +44,6 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
             currentDirectory: DriveFileManager.homeRootFile
         )
     }
-
-    func encodeRestorableState(with coder: NSCoder) {
-        coder.encode(activity?.id ?? 0, forKey: "ActivityId")
-        coder.encode(getAllFiles().map(\.id), forKey: "Files")
-    }
-
-    func decodeRestorableState(with coder: NSCoder) {
-        let activityId = coder.decodeInteger(forKey: "ActivityId")
-        let fileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-
-        // TODO: fixme with proper fetch transaction + pred
-        try? driveFileManager.database.writeTransaction { realm in
-            activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
-            let cachedFiles = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }.map { $0.detached() }
-            addPage(files: cachedFiles, fullyDownloaded: true, cursor: nil)
-        }
-
-        forceRefresh()
-    }
 }
 
 class RecentActivityFilesViewController: FileListViewController {
@@ -138,19 +119,5 @@ class RecentActivityFilesViewController: FileListViewController {
             return nil
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
-    }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        activityViewModel?.encodeRestorableState(with: coder)
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        activityViewModel?.decodeRestorableState(with: coder)
     }
 }

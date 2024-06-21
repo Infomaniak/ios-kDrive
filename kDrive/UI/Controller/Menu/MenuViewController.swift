@@ -116,6 +116,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         super.viewDidAppear(animated)
         updateContentIfNeeded()
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName])
+        saveSceneState()
     }
 
     func updateContentIfNeeded() {
@@ -239,7 +240,10 @@ extension MenuViewController {
                     SentrySDK.setUser(nil)
                 }
                 self.accountManager.saveAccounts()
-                self.appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState())
+                self.appNavigable.prepareRootViewController(
+                    currentState: RootViewControllerState.getCurrentState(),
+                    restoration: false
+                )
             }
             present(alert, animated: true)
         case .help:
@@ -270,6 +274,12 @@ extension MenuViewController {
                                                                                                               .buttonSwitchDrive,
                                                                                                           delegate: self)
         present(floatingPanelViewController, animated: true)
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }
 

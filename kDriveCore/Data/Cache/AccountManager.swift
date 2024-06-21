@@ -94,7 +94,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
 
-    public var currentAccount: Account?
+    @SendableProperty public var currentAccount: Account?
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
 
