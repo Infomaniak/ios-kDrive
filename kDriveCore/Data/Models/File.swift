@@ -381,7 +381,9 @@ public final class File: Object, Codable {
     @Persisted public var createdAt: Date?
     /// Date of upload
     @Persisted public var addedAt: Date
-    /// Date of modification
+    /// Date of modification of content / path / name
+    @Persisted public var updatedAt: Date
+    /// Date of modification of metadata
     @Persisted public var lastModifiedAt: Date
     /// Date of deleted resource, only visible when the File is trashed
     @Persisted public var deletedBy: Int?
@@ -452,6 +454,7 @@ public final class File: Object, Codable {
         case createdBy = "created_by"
         case createdAt = "created_at"
         case addedAt = "added_at"
+        case updatedAt = "updated_at"
         case lastModifiedAt = "last_modified_at"
         case revisedAt = "revised_at"
         case deletedBy = "deleted_by"
@@ -783,6 +786,7 @@ public final class File: Object, Codable {
         addedAt = try container.decode(Date.self, forKey: .addedAt)
         lastModifiedAt = try container.decode(Date.self, forKey: .lastModifiedAt)
         revisedAt = try container.decode(Date.self, forKey: .revisedAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
