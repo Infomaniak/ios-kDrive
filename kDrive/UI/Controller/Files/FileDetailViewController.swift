@@ -157,6 +157,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: ["FileDetail"])
+
+        saveSceneState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -221,10 +223,6 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                 self.file = newFile
                 self.reloadTableView()
             }
-        }
-
-        Task { @MainActor in
-            saveSceneState()
         }
     }
 

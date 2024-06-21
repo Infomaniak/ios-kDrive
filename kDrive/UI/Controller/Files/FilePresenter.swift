@@ -52,7 +52,10 @@ final class FilePresenter {
 
             navigationController.popToRootViewController(animated: false)
 
-            guard let fileListViewController = navigationController.topViewController as? FileListViewController else { return }
+            guard let fileListViewController = navigationController.topViewController as? FileListViewController else {
+                return
+            }
+
             let filePresenter = FilePresenter(viewController: fileListViewController)
             filePresenter.presentParent(of: file, driveFileManager: driveFileManager, animated: false)
         }
@@ -129,13 +132,16 @@ final class FilePresenter {
         }
     }
 
-    private func presentDirectory(
+    public func presentDirectory(
         for file: File,
         driveFileManager: DriveFileManager,
         animated: Bool,
         completion: ((Bool) -> Void)?
     ) {
-        // Show files list
+        defer {
+            completion?(true)
+        }
+
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
@@ -144,37 +150,40 @@ final class FilePresenter {
         } else {
             viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         }
+
         let nextVC = FileListViewController.instantiate(viewModel: viewModel)
-        if file.isDisabled {
-            if driveFileManager.drive.isUserAdmin {
-                let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = accessFileDriveFloatingPanelController
-                    .contentViewController as? AccessFileFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { [weak self] _ in
-                    guard let self else { return }
-                    floatingPanelViewController?.rightButton.setLoading(true)
-                    Task { [proxyFile = file.proxify()] in
-                        do {
-                            let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
-                            if response {
-                                accessFileDriveFloatingPanelController.dismiss(animated: true)
-                                self.navigationController?.pushViewController(nextVC, animated: true)
-                            } else {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
-                            }
-                        } catch {
-                            UIConstants.showSnackBarIfNeeded(error: error)
-                        }
-                    }
-                }
-                viewController?.present(accessFileDriveFloatingPanelController, animated: true)
-            } else {
-                viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
-            }
-        } else {
+        guard file.isDisabled else {
             navigationController?.pushViewController(nextVC, animated: animated)
+            return
         }
-        completion?(true)
+
+        guard driveFileManager.drive.isUserAdmin else {
+            viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
+            return
+        }
+
+        let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
+        let floatingPanelViewController = accessFileDriveFloatingPanelController
+            .contentViewController as? AccessFileFloatingPanelViewController
+        floatingPanelViewController?.actionHandler = { [weak self] _ in
+            guard let self else { return }
+            floatingPanelViewController?.rightButton.setLoading(true)
+            Task { [proxyFile = file.proxify()] in
+                do {
+                    let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
+                    if response {
+                        accessFileDriveFloatingPanelController.dismiss(animated: true)
+                        self.navigationController?.pushViewController(nextVC, animated: true)
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
+                    }
+                } catch {
+                    UIConstants.showSnackBarIfNeeded(error: error)
+                }
+            }
+        }
+
+        viewController?.present(accessFileDriveFloatingPanelController, animated: true)
     }
 
     private func downloadAndPresentBookmark(for file: File, completion: ((Bool) -> Void)?) {

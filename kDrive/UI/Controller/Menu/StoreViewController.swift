@@ -113,11 +113,6 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
 
         // Fetch product information
         fetchProductInformation()
-
-        // State restoration must have access to windowScene that is not available yet
-        Task { @MainActor in
-            saveSceneState()
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -125,6 +120,12 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName])
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        saveSceneState()
     }
 
     @objc func closeButtonPressed() {

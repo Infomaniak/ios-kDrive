@@ -707,11 +707,16 @@ public struct AppRouter: AppNavigable {
         assert(frozenFolder.realm == nil || frozenFolder.isFrozen, "expecting this realm object to be thread safe")
         assert(frozenFolder.isDirectory, "This will only work for folders")
 
-        FilePresenter.presentParent(
-            of: frozenFolder,
-            driveFileManager: driveFileManager,
-            viewController: navigationController
-        )
+        guard let topViewController = navigationController.topViewController else {
+            Log.sceneDelegate("unable to presentFileList, no topViewController", level: .error)
+            return
+        }
+
+        FilePresenter(viewController: topViewController)
+            .presentDirectory(for: frozenFolder,
+                              driveFileManager: driveFileManager,
+                              animated: false,
+                              completion: nil)
     }
 
     @MainActor public func presentPreviewViewController(

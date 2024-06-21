@@ -215,13 +215,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if viewModel != nil {
             setupViewModel()
         }
-
-        #if !ISEXTENSION
-        // State restoration must have access to windowScene that is not available yet
-        Task { @MainActor in
-            saveSceneState()
-        }
-        #endif
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -239,6 +232,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: viewModel.configuration.matomoViewPath)
+
+        saveSceneState()
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

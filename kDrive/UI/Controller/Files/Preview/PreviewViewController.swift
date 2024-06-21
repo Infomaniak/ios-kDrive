@@ -204,11 +204,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
         NSLayoutConstraint.activate(constraints)
 
         observeFileUpdated()
-
-        // State restoration must have access to windowScene that is not available yet
-        Task { @MainActor in
-            saveSceneState()
-        }
     }
 
     @objc func tapPreview() {
@@ -265,6 +260,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
 
         heightToHide = backButton.frame.minY
         MatomoUtils.track(view: [MatomoUtils.Views.preview.displayName, "File"])
+
+        saveSceneState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
