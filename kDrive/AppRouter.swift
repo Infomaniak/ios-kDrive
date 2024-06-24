@@ -257,11 +257,16 @@ public struct AppRouter: AppNavigable {
 
         let tabBarViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
-        guard restoration, let tabBarViewController else {
-            return
-        }
-
         Task { @MainActor in
+            defer {
+                @InjectService var appRestorationService: AppRestorationServiceable
+                appRestorationService.saveRestorationVersion()
+            }
+
+            guard restoration, let tabBarViewController else {
+                return
+            }
+
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {

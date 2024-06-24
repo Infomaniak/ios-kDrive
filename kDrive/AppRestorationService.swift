@@ -26,9 +26,11 @@ public protocol AppRestorationServiceable {
     /// Is restoration enabled
     var shouldRestoreApplicationState: Bool { get }
 
-    func shouldSaveApplicationState(coder: NSCoder) -> Bool
+    /// Should save the scene sate
+    var shouldSaveApplicationState: Bool { get }
 
-    func shouldRestoreApplicationState(coder: NSCoder) -> Bool
+    /// Saves a restoration version, for forward compatibility
+    func saveRestorationVersion()
 
     func reloadAppUI(for driveId: Int, userId: Int) async
 }
@@ -54,35 +56,24 @@ public final class AppRestorationService: AppRestorationServiceable {
         // META: keep SonarCloud happy
     }
 
-    public func shouldSaveApplicationState(coder: NSCoder) -> Bool {
+    public var shouldSaveApplicationState: Bool {
         Log.sceneDelegate("shouldSaveApplicationState")
         Log.sceneDelegate("Restoration files:\(String(describing: Self.statePath))")
-        coder.encode(Self.currentStateVersion, forKey: Self.appStateVersionKey)
-        return true
-    }
 
-    public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        Log.sceneDelegate("shouldRestoreApplicationState coder:")
         return true
-        /* let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
-         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
-             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
-         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-         return shouldRestoreApplicationState */
     }
 
     public var shouldRestoreApplicationState: Bool {
-        Log.sceneDelegate("shouldRestoreApplicationState")
-        return true
+        let encodedVersion = UserDefaults.shared.value(forKey: Self.appStateVersionKey) as? Int
+        let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
 
-        // TODO: Use user defaults
-        /*
-         let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
-         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
-             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
-         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-         return shouldRestoreApplicationState
-          */
+        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+        return shouldRestoreApplicationState
+    }
+
+    public func saveRestorationVersion() {
+        UserDefaults.shared.set(Self.currentStateVersion, forKey: Self.appStateVersionKey)
     }
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {
