@@ -186,6 +186,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidEnterBackground \(scene)")
+
         backgroundTasksService.scheduleBackgroundRefresh()
 
         if UserDefaults.shared.isAppLockEnabled,

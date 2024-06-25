@@ -201,7 +201,11 @@ final class UTRootViewControllerState: XCTestCase {
 
         // THEN
         @InjectService var accountManager: AccountManageable
-        XCTAssertEqual(currentState, .mainViewController(accountManager.currentDriveFileManager!), "State should be mainview")
+        XCTAssertEqual(
+            currentState,
+            .mainViewController(driveFileManager: accountManager.currentDriveFileManager!),
+            "State should be mainview"
+        )
     }
 }
 

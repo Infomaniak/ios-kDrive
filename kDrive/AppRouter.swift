@@ -593,6 +593,17 @@ public struct AppRouter: AppNavigable {
     }
 
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
+        // TODO: Use TEST flag
+        // Disabled in test target
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
+            return
+        }
+
+        //        /// Exit early on test target
+        //        #if TEST
+        //        return
+        //        #endif
+
         Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
         availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)

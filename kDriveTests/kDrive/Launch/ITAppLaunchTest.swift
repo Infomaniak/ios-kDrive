@@ -25,6 +25,123 @@ import InfomaniakLogin
 import RealmSwift
 import XCTest
 
+final class MCKAvailableOfflineManager: AvailableOfflineManageable {
+    func updateAvailableOfflineFiles(status: InfomaniakCore.ReachabilityListener.NetworkStatus) {
+        print("noop updateAvailableOfflineFiles :\(status)")
+    }
+}
+
+/// A noop implementation of AppNavigable
+final class MCKRouteur: AppNavigable {
+    init(topMostViewController: UIViewController? = nil) {
+        self.topMostViewController = topMostViewController
+    }
+
+    private func logNoop(function: String = #function) {
+        print("MCKRouteur: noop \(function) called")
+    }
+
+    func askForReview() async {
+        logNoop()
+    }
+
+    func askUserToRemovePicturesIfNecessary() async {
+        logNoop()
+    }
+
+    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
+        logNoop()
+    }
+
+    func showMainViewController(driveFileManager: kDriveCore.DriveFileManager, selectedIndex: Int?) -> UITabBarController? {
+        logNoop()
+        return nil
+    }
+
+    func showPreloading(currentAccount: InfomaniakCore.Account) {
+        logNoop()
+    }
+
+    func showOnboarding() {
+        logNoop()
+    }
+
+    func showAppLock() {
+        logNoop()
+    }
+
+    func showLaunchFloatingPanel() {
+        logNoop()
+    }
+
+    func showUpdateRequired() {
+        logNoop()
+    }
+
+    func showPhotoSyncSettings() {
+        logNoop()
+    }
+
+    func present(file: kDriveCore.File, driveFileManager: kDriveCore.DriveFileManager) {
+        logNoop()
+    }
+
+    func present(file: kDriveCore.File, driveFileManager: kDriveCore.DriveFileManager, office: Bool) {
+        logNoop()
+    }
+
+    func presentFileList(
+        frozenFolder: kDriveCore.File,
+        driveFileManager: kDriveCore.DriveFileManager,
+        navigationController: UINavigationController
+    ) {
+        logNoop()
+    }
+
+    func presentPreviewViewController(
+        frozenFiles: [kDriveCore.File],
+        index: Int,
+        driveFileManager: kDriveCore.DriveFileManager,
+        normalFolderHierarchy: Bool,
+        fromActivities: Bool,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        logNoop()
+    }
+
+    func presentFileDetails(
+        frozenFile: kDriveCore.File,
+        driveFileManager: kDriveCore.DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        logNoop()
+    }
+
+    func presentStoreViewController(
+        driveFileManager: kDriveCore.DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        logNoop()
+    }
+
+    func setRootViewController(_ viewController: UIViewController, animated: Bool) {
+        logNoop()
+    }
+
+    func prepareRootViewController(currentState: kDrive.RootViewControllerState, restoration: Bool) {
+        logNoop()
+    }
+
+    func updateTheme() {
+        logNoop()
+    }
+
+    var topMostViewController: UIViewController?
+}
+
 final class ITAppLaunchTest: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
@@ -89,6 +206,12 @@ final class ITAppLaunchTest: XCTestCase {
             },
             Factory(type: DriveInfosManager.self) { _, _ in
                 DriveInfosManager()
+            },
+            Factory(type: AppNavigable.self) { _, _ in
+                MCKRouteur()
+            },
+            Factory(type: AvailableOfflineManageable.self) { _, _ in
+                MCKAvailableOfflineManager()
             }
         ]
         SimpleResolver.register(services)
@@ -113,7 +236,10 @@ final class ITAppLaunchTest: XCTestCase {
         lockedAppViewController.unlockApp()
 
         // THEN
-        let rootViewController = (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController
+        let scene = UIApplication.shared.connectedScenes.first
+        let sceneDelegate = (scene?.delegate as? SceneDelegate)
+        let window = sceneDelegate?.window
+        let rootViewController = window?.rootViewController
         XCTAssertNotNil(
             rootViewController as? MainTabViewController,
             "View controller should be MainTabViewController after unlock, got \(rootViewController)"
