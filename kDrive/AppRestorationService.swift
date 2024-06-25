@@ -47,10 +47,7 @@ public final class AppRestorationService: AppRestorationServiceable {
     @LazyInjectService private var accountManager: AccountManageable
 
     /// State restoration version
-    private static let currentStateVersion = 4
-
-    /// State restoration key
-    private static let appStateVersionKey = "appStateVersionKey"
+    private static let currentStateVersion = 5
 
     public init() {
         // META: keep SonarCloud happy
@@ -64,16 +61,16 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public var shouldRestoreApplicationState: Bool {
-        let encodedVersion = UserDefaults.shared.value(forKey: Self.appStateVersionKey) as? Int
-        let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
+        let storedVersion = UserDefaults.shared.appRestorationVersion
+        let shouldRestoreApplicationState = Self.currentStateVersion == storedVersion &&
             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
 
-        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
+        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState) appRestorationVersion:\(storedVersion)")
         return shouldRestoreApplicationState
     }
 
     public func saveRestorationVersion() {
-        UserDefaults.shared.set(Self.currentStateVersion, forKey: Self.appStateVersionKey)
+        UserDefaults.shared.appRestorationVersion = Self.currentStateVersion
     }
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {

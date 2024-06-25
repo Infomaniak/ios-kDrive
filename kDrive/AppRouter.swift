@@ -158,6 +158,7 @@ public typealias AppNavigable = RouterActionable
     & TopmostViewControllerFetchable
 
 public struct AppRouter: AppNavigable {
+    @LazyInjectService private var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var keychainHelper: KeychainHelper
     @LazyInjectService private var reviewManager: ReviewManageable
@@ -249,6 +250,11 @@ public struct AppRouter: AppNavigable {
 
     /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
+        guard appRestorationService.shouldRestoreApplicationState else {
+            Log.sceneDelegate("Restoration disabled", level: .error)
+            return
+        }
+
         var indexToUse: Int?
         if let sceneUserInfo,
            let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
