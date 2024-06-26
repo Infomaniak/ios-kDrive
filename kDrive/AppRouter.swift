@@ -250,24 +250,23 @@ public struct AppRouter: AppNavigable {
 
     /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
-        guard appRestorationService.shouldRestoreApplicationState else {
-            Log.sceneDelegate("Restoration disabled", level: .error)
-            return
-        }
-
+        let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
         var indexToUse: Int?
-        if let sceneUserInfo,
+        if shouldRestoreApplicationState,
+           let sceneUserInfo,
            let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
             indexToUse = index
         }
 
         let tabBarViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
-        Task { @MainActor in
-            defer {
-                self.appRestorationService.saveRestorationVersion()
-            }
+        guard shouldRestoreApplicationState else {
+            Log.sceneDelegate("Restoration disabled", level: .error)
+            appRestorationService.saveRestorationVersion()
+            return
+        }
 
+        Task { @MainActor in
             guard restoration, let tabBarViewController else {
                 return
             }

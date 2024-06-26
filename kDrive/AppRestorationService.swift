@@ -71,6 +71,7 @@ public final class AppRestorationService: AppRestorationServiceable {
 
     public func saveRestorationVersion() {
         UserDefaults.shared.appRestorationVersion = Self.currentStateVersion
+        Log.sceneDelegate("saveRestorationVersion to \(Self.currentStateVersion)")
     }
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {
