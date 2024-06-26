@@ -39,7 +39,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Log.sceneDelegate("scene session options")
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else {
+            return
+        }
+
+        if let shortcutItem = connectionOptions.shortcutItem {
+            shortcutItemToProcess = shortcutItem
+        }
 
         prepareWindowScene(windowScene)
 
