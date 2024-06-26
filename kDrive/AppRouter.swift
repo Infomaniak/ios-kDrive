@@ -265,8 +265,7 @@ public struct AppRouter: AppNavigable {
 
         Task { @MainActor in
             defer {
-                @InjectService var appRestorationService: AppRestorationServiceable
-                appRestorationService.saveRestorationVersion()
+                self.appRestorationService.saveRestorationVersion()
             }
 
             guard restoration, let tabBarViewController else {

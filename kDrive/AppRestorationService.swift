@@ -62,11 +62,11 @@ public final class AppRestorationService: AppRestorationServiceable {
 
     public var shouldRestoreApplicationState: Bool {
         let storedVersion = UserDefaults.shared.appRestorationVersion
-        let shouldRestoreApplicationState = Self.currentStateVersion == storedVersion &&
+        let shouldRestore = Self.currentStateVersion == storedVersion &&
             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
 
-        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState) appRestorationVersion:\(storedVersion)")
-        return shouldRestoreApplicationState
+        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestore) appRestorationVersion:\(storedVersion)")
+        return shouldRestore
     }
 
     public func saveRestorationVersion() {
