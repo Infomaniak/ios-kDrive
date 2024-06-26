@@ -33,21 +33,19 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
 
-    // TODO: Abstract away from AppDelegate
-    private var shortcutItemToProcess: UIApplicationShortcutItem? {
-        get {
-            (UIApplication.shared.delegate as? AppDelegate)?.shortcutItemToProcess
-        }
-        set {
-            (UIApplication.shared.delegate as? AppDelegate)?.shortcutItemToProcess = newValue
-        }
-    }
+    var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Log.sceneDelegate("scene session options")
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else {
+            return
+        }
+
+        if let shortcutItem = connectionOptions.shortcutItem {
+            shortcutItemToProcess = shortcutItem
+        }
 
         prepareWindowScene(windowScene)
 
@@ -202,6 +200,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
                      interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
                      traitCollection previousTraitCollection: UITraitCollection) {
         Log.sceneDelegate("windowScene didUpdate")
+    }
+
+    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem) async -> Bool {
+        Log.sceneDelegate("windowScene performActionFor :\(shortcutItem)")
+        shortcutItemToProcess = shortcutItem
+        return true
     }
 
     // MARK: - Handoff support
