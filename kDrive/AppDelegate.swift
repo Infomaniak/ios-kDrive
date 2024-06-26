@@ -47,9 +47,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var appNavigable: AppNavigable
 
-    // TODO: Abstract from AppDelegate
-    var shortcutItemToProcess: UIApplicationShortcutItem?
-
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
@@ -100,10 +97,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         application.registerForRemoteNotifications()
 
-        if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
-            shortcutItemToProcess = shortcutItem
-        }
-
         return true
     }
 
@@ -144,14 +137,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
-    }
-
-    func application(
-        _ application: UIApplication,
-        performActionFor shortcutItem: UIApplicationShortcutItem,
-        completionHandler: @escaping (Bool) -> Void
-    ) {
-        shortcutItemToProcess = shortcutItem
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
