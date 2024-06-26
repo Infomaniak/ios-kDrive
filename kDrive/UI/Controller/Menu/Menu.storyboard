@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,7 +13,7 @@
         <!--Store Success View Controller-->
         <scene sceneID="wDu-Op-Gjv">
             <objects>
-                <viewController storyboardIdentifier="StoreSuccessViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="GUY-UU-JfR" customClass="StoreSuccessViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="StoreSuccessViewController" id="GUY-UU-JfR" customClass="StoreSuccessViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="tcC-IV-wbn">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -32,7 +32,7 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
-                                <rect key="frame" x="24" y="302" width="366" height="292"/>
+                                <rect key="frame" x="24" y="332.5" width="366" height="231"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
                                         <rect key="frame" x="108" y="0.0" width="150" height="150"/>
@@ -42,7 +42,7 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                        <rect key="frame" x="0.0" y="174" width="366" height="41"/>
+                                        <rect key="frame" x="0.0" y="174" width="366" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -52,7 +52,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                        <rect key="frame" x="0.0" y="231" width="366" height="61"/>
+                                        <rect key="frame" x="0.0" y="210.5" width="366" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -95,7 +95,7 @@
         <!--Modifier votre offre-->
         <scene sceneID="Cfv-v2-dbY">
             <objects>
-                <collectionViewController storyboardIdentifier="StoreViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="EfG-kK-v5l" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="StoreViewController" id="EfG-kK-v5l" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="vM7-1Z-EaT">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -125,7 +125,7 @@
         <!--Photo List View Controller-->
         <scene sceneID="o5v-5A-Uxe">
             <objects>
-                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="HTJ-aD-7V4">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -239,7 +239,7 @@
         <!--Paramètres-->
         <scene sceneID="y6v-Ie-BNX">
             <objects>
-                <tableViewController storyboardIdentifier="ParameterTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jNB-aI-vQT" customClass="ParameterTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ParameterTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="jNB-aI-vQT" customClass="ParameterTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="ZjA-WC-gaF">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -269,7 +269,7 @@
         <!--Sauvegarde des photos-->
         <scene sceneID="sII-wC-jln">
             <objects>
-                <viewController storyboardIdentifier="PhotoSyncSettingsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cZK-V1-h3I" customClass="PhotoSyncSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoSyncSettingsViewController" hidesBottomBarWhenPushed="YES" id="cZK-V1-h3I" customClass="PhotoSyncSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="CG6-wn-Ezl">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -308,7 +308,7 @@
         <!--Switch User View Controller-->
         <scene sceneID="unT-Z0-cpP">
             <objects>
-                <viewController storyboardIdentifier="SwitchUserViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="26B-is-bLi" customClass="SwitchUserViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SwitchUserViewController" hidesBottomBarWhenPushed="YES" id="26B-is-bLi" customClass="SwitchUserViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="kX2-JG-t95">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -439,7 +439,7 @@
         <!--A Propos-->
         <scene sceneID="QGu-aW-zne">
             <objects>
-                <tableViewController storyboardIdentifier="AboutTableViewController" title="A Propos" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6Iz-rf-sb0" customClass="AboutTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="AboutTableViewController" title="A Propos" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="6Iz-rf-sb0" customClass="AboutTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="O1B-x1-98T">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -462,7 +462,7 @@
         <!--Notifications-->
         <scene sceneID="kcj-KO-Hyu">
             <objects>
-                <tableViewController storyboardIdentifier="NotificationsSettingsTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="gfb-Up-kOo" customClass="NotificationsSettingsTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="NotificationsSettingsTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="gfb-Up-kOo" customClass="NotificationsSettingsTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="nqr-nQ-uJw">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -485,7 +485,7 @@
         <!--App Lock Settings View Controller-->
         <scene sceneID="0Gq-HL-lDR">
             <objects>
-                <viewController storyboardIdentifier="AppLockSettingsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="c0t-5c-eBh" customClass="AppLockSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AppLockSettingsViewController" id="c0t-5c-eBh" customClass="AppLockSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="9eh-5H-O68">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -630,7 +630,7 @@
         <!--Sécurité-->
         <scene sceneID="Tt7-mj-zPY">
             <objects>
-                <tableViewController storyboardIdentifier="SecurityTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="zSd-it-dsI" customClass="SecurityTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="SecurityTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="zSd-it-dsI" customClass="SecurityTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="rtN-7Y-qdP">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -657,17 +657,17 @@
             <size key="intrinsicContentSize" width="66.5" height="24"/>
         </designable>
         <designable name="Bwo-OH-mV3">
-            <size key="intrinsicContentSize" width="852.5" height="20.5"/>
+            <size key="intrinsicContentSize" width="190" height="20.5"/>
         </designable>
         <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="123" height="30"/>
+            <size key="intrinsicContentSize" width="196" height="32"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="188.5" height="24"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
         <designable name="Yth-Zq-eKV">
-            <size key="intrinsicContentSize" width="610.5" height="20.5"/>
+            <size key="intrinsicContentSize" width="134.5" height="20.5"/>
         </designable>
         <designable name="ahf-mt-ZbI">
             <size key="intrinsicContentSize" width="987" height="20.5"/>

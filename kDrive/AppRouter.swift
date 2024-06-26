@@ -158,6 +158,7 @@ public typealias AppNavigable = RouterActionable
     & TopmostViewControllerFetchable
 
 public struct AppRouter: AppNavigable {
+    @LazyInjectService private var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var keychainHelper: KeychainHelper
     @LazyInjectService private var reviewManager: ReviewManageable
@@ -249,19 +250,27 @@ public struct AppRouter: AppNavigable {
 
     /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
+        let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
         var indexToUse: Int?
-        if let sceneUserInfo,
+        if shouldRestoreApplicationState,
+           let sceneUserInfo,
            let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
             indexToUse = index
         }
 
         let tabBarViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
-        guard restoration, let tabBarViewController else {
+        guard shouldRestoreApplicationState else {
+            Log.sceneDelegate("Restoration disabled", level: .error)
+            appRestorationService.saveRestorationVersion()
             return
         }
 
         Task { @MainActor in
+            guard restoration, let tabBarViewController else {
+                return
+            }
+
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
