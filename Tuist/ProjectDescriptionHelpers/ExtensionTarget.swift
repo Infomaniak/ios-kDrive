@@ -16,9 +16,65 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import ProjectDescription
 
 public extension Target {
+  
+  /// Main app target, factorized
+  /// 
+  /// Allows for easy duplication, in order to create instrumented builds
+  /// if instrumented = true, `TEST` flag set in main app.
+  static func mainAppTarget(name: String, instrumented: Bool) -> Target {
+    
+    let settings :[String: SettingValue]
+    if instrumented {
+      settings = Constants.baseSettings.merging(Constants.testSettings) { (_, new) in new }
+    } else {
+      settings = Constants.baseSettings
+    }
+
+    let appTarget = Target(name: name,
+      platform: .iOS,
+      product: .app,
+      bundleId: "com.infomaniak.drive",
+      deploymentTarget: Constants.deploymentTarget,
+      infoPlist: .file(path: "kDrive/Resources/Info.plist"),
+      sources: "kDrive/**",
+      resources: [
+        "kDrive/**/*.storyboard",
+        "kDrive/**/*.xcassets",
+        "kDrive/**/*.strings",
+        "kDrive/**/*.stringsdict",
+        "kDrive/**/*.xib",
+        "kDrive/**/*.json",
+        "kDrive/IAP/ProductIds.plist",
+        "kDriveCore/GoogleService-Info.plist",
+        "kDrive/**/PrivacyInfo.xcprivacy"
+      ],
+      entitlements: "kDrive/Resources/kDrive.entitlements",
+      scripts: [Constants.swiftlintScript],
+      dependencies: [
+        .target(name: "kDriveFileProvider"),
+        .target(name: "kDriveCore"),
+        .target(name: "kDriveShareExtension"),
+        .target(name: "kDriveActionExtension"),
+        .package(product: "FloatingPanel"),
+        .package(product: "Lottie"),
+        .package(product: "DropDown"),
+        .package(product: "HorizonCalendar"),
+        .package(product: "Kvitto"),
+        .package(product: "Highlightr"),
+        .package(product: "MarkdownKit"),
+        .package(product: "MatomoTracker"),
+        .sdk(name: "StoreKit", type: .framework, status: .required)
+      ],
+      settings: .settings(base: settings),
+      environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."])
+    
+    return appTarget
+  }
+  
     static func extensionTarget(
         name: String,
         bundleId: String,

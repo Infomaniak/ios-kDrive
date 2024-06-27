@@ -49,43 +49,8 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
                       ],
                       targets: [
-                          Target(name: "kDrive",
-                                 platform: .iOS,
-                                 product: .app,
-                                 bundleId: "com.infomaniak.drive",
-                                 deploymentTarget: Constants.deploymentTarget,
-                                 infoPlist: .file(path: "kDrive/Resources/Info.plist"),
-                                 sources: "kDrive/**",
-                                 resources: [
-                                     "kDrive/**/*.storyboard",
-                                     "kDrive/**/*.xcassets",
-                                     "kDrive/**/*.strings",
-                                     "kDrive/**/*.stringsdict",
-                                     "kDrive/**/*.xib",
-                                     "kDrive/**/*.json",
-                                     "kDrive/IAP/ProductIds.plist",
-                                     "kDriveCore/GoogleService-Info.plist",
-                                     "kDrive/**/PrivacyInfo.xcprivacy"
-                                 ],
-                                 entitlements: "kDrive/Resources/kDrive.entitlements",
-                                 scripts: [Constants.swiftlintScript],
-                                 dependencies: [
-                                     .target(name: "kDriveFileProvider"),
-                                     .target(name: "kDriveCore"),
-                                     .target(name: "kDriveShareExtension"),
-                                     .target(name: "kDriveActionExtension"),
-                                     .package(product: "FloatingPanel"),
-                                     .package(product: "Lottie"),
-                                     .package(product: "DropDown"),
-                                     .package(product: "HorizonCalendar"),
-                                     .package(product: "Kvitto"),
-                                     .package(product: "Highlightr"),
-                                     .package(product: "MarkdownKit"),
-                                     .package(product: "MatomoTracker"),
-                                     .sdk(name: "StoreKit", type: .framework, status: .required)
-                                 ],
-                                 settings: .settings(base: Constants.baseSettings),
-                                 environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."]),
+                          .mainAppTarget(name: "kDrive", instrumented:false),
+                          .mainAppTarget(name: "kDrive_instrumented", instrumented:true),
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
@@ -101,7 +66,7 @@ let project = Project(name: "kDrive",
                                      "kDriveTests/**/*.json"
                                  ],
                                  dependencies: [
-                                     .target(name: "kDrive")
+                                     .target(name: "kDrive_instrumented")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),
                           Target(name: "kDriveAPITests",
@@ -115,7 +80,7 @@ let project = Project(name: "kDrive",
                                     "kDriveTestShared/**"
                                  ],
                                  dependencies: [
-                                     .target(name: "kDrive")
+                                     .target(name: "kDrive_instrumented")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),
                           Target(name: "kDriveUITests",
@@ -126,7 +91,7 @@ let project = Project(name: "kDrive",
                                  infoPlist: .default,
                                  sources: "kDriveUITests/**",
                                  dependencies: [
-                                     .target(name: "kDrive"),
+                                     .target(name: "kDrive_instrumented"),
                                      .target(name: "kDriveCore")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),
