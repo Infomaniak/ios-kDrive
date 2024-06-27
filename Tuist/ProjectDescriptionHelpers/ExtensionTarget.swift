@@ -58,7 +58,7 @@ public extension Target {
         .package(product: "MatomoTracker"),
         .sdk(name: "StoreKit", type: .framework, status: .required)
       ],
-      settings: .settings(base: Constants.testSettings),
+      settings: .settings(base: Constants.baseSettings),
       environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."])
   }
   
