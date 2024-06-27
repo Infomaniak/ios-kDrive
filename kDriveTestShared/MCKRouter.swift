@@ -23,13 +23,13 @@ import kDriveCore
 import UIKit
 
 /// A NOOP implementation of AppNavigable
-public final class MCKRouteur: AppNavigable {
+public final class MCKRouter: AppNavigable {
     public init(topMostViewController: UIViewController? = nil) {
         self.topMostViewController = topMostViewController
     }
 
     private func logNoop(function: String = #function) {
-        print("MCKRouteur: NOOP \(function) called")
+        print("MCKRouter: NOOP \(function) called")
     }
 
     public func askForReview() async {

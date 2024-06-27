@@ -97,7 +97,7 @@ final class ITAppLaunchTest: XCTestCase {
                 DriveInfosManager()
             },
             Factory(type: AppNavigable.self) { _, _ in
-                MCKRouteur()
+                MCKRouter()
             },
             Factory(type: AvailableOfflineManageable.self) { _, _ in
                 MCKAvailableOfflineManager()
