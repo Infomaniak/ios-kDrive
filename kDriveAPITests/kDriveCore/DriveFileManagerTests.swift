@@ -39,7 +39,7 @@ final class DriveFileManagerTests: XCTestCase {
             fatalError("John Appleseed is missing")
         }
         @InjectService var mckAccountManager: AccountManageable
-        driveFileManager = mckAccountManager.getDriveFileManager(for: drive)
+        driveFileManager = mckAccountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
         let token = ApiToken(accessToken: Env.token,
                              expiresIn: Int.max,
                              refreshToken: "",
@@ -150,7 +150,6 @@ final class DriveFileManagerTests: XCTestCase {
             query: file.name,
             categories: [],
             belongToAllCategories: true,
-            page: 1,
             sortType: .nameAZ
         )
         let children = DriveFileManagerTests.driveFileManager.getCachedFile(id: DriveFileManager.searchFilesRootFile.id)?.children
