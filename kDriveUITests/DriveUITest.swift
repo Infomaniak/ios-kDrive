@@ -60,10 +60,6 @@ class AppUITest: XCTestCase {
         app.launch()
     }
 
-    override func tearDown() {
-        super.tearDown()
-    }
-
     // MARK: - Tests setup
 
     func setUpTest(testName: String) -> String {

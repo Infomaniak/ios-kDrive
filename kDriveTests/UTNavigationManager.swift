@@ -44,10 +44,6 @@ final class UTNavigationManager: XCTestCase {
         super.setUp()
     }
 
-    override func tearDown() {
-        super.tearDown()
-    }
-
     // MARK: - Upload observation
 
     func testDeeplinkFileSharing() {
@@ -101,10 +97,6 @@ final class UTNavigationRoutes: XCTestCase {
     override func setUp() {
         SimpleResolver.sharedResolver.removeAll()
         super.setUp()
-    }
-
-    override func tearDown() {
-        super.tearDown()
     }
 
     // MARK: File

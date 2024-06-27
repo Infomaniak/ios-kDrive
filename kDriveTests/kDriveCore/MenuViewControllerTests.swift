@@ -25,10 +25,6 @@ import InfomaniakLogin
 import XCTest
 
 final class MenuViewControllerTests: XCTestCase {
-    override func tearDown() {
-        super.tearDown()
-    }
-
     override func setUp() {
         SimpleResolver.sharedResolver.removeAll()
         let factoriesWithIdentifier = FactoryService.debugServices + FactoryService.transactionableServices

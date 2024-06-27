@@ -50,10 +50,6 @@ final class DriveFileManagerTests: XCTestCase {
         driveFileManager.apiFetcher.setToken(token, delegate: MCKTokenDelegate())
     }
 
-    override class func tearDown() {
-        super.tearDown()
-    }
-
     // MARK: - Tests setup
 
     func setUpTest(testName: String) async throws -> ProxyFile {
