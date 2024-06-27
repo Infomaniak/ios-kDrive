@@ -21,47 +21,50 @@ import Foundation
 @testable import kDrive
 @testable import kDriveCore
 
-public enum MockingConfig {
+public enum MockingConfiguration {
     /// Full app, able to perform network calls.
     /// The app is unaware of the tests
     /// Perfect for UItests
     case realApp
 
-    /// Full app, network stack is NOOP
-    case mockedNetwork
+    // TODO: make sure only the minimal set of real object is set in DI
+    /// Minimal real objects
+    /// Mocked navigation and networking stack…
+    case minimal
 }
 
 /// Something to help using the DI in the test target
 public enum MockingHelper {
     /// Register "real" instances like in the app
-    static func registerConcreteTypes() {
-        let extraFactories = [
-            Factory(type: AppContextServiceable.self) { _, _ in
-                AppContextService(context: .appTests)
-            }
-        ]
+    static func registerConcreteTypes(configuration: MockingConfiguration) {
+        let extraFactories: [Factory]
 
-        /* TODO:
-         var extraDependencies = [
-             Factory(type: NavigationManageable.self) { _, _ in
-                 NavigationManager()
-             },
-             Factory(type: AppContextServiceable.self) { _, _ in
-                 AppContextService(context: context)
-             }
-         ]
-
-         #if !ISEXTENSION
-         extraDependencies += [
-             Factory(type: AppRestorationServiceable.self) { _, _ in
-                 AppRestorationService()
-             },
-             Factory(type: AppNavigable.self) { _, _ in
-                 AppRouter()
-             }
-         ]
-         #endif
-         */
+        switch configuration {
+        case .realApp:
+            extraFactories = [
+                Factory(type: AppContextServiceable.self) { _, _ in
+                    AppContextService(context: .app)
+                },
+                Factory(type: AppRestorationServiceable.self) { _, _ in
+                    AppRestorationService()
+                },
+                Factory(type: AppNavigable.self) { _, _ in
+                    AppRouter()
+                }
+            ]
+        case .minimal:
+            extraFactories = [
+                Factory(type: AppContextServiceable.self) { _, _ in
+                    AppContextService(context: .appTests)
+                },
+                Factory(type: AppRestorationServiceable.self) { _, _ in
+                    AppRestorationService()
+                },
+                Factory(type: AppNavigable.self) { _, _ in
+                    MCKRouter()
+                }
+            ]
+        }
 
         FactoryService.setupDependencyInjection(other: extraFactories)
     }

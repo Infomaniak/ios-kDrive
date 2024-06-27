@@ -32,7 +32,7 @@ final class DriveFileManagerTests: XCTestCase {
     override class func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes()
+        MockingHelper.registerConcreteTypes(configuration: .realApp)
 
         @InjectService var driveInfosManager: DriveInfosManager
         guard let drive = driveInfosManager.getDrive(id: Env.driveId, userId: Env.userId) else {

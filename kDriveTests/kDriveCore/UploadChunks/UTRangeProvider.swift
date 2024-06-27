@@ -24,7 +24,7 @@ final class UTRangeProvider: XCTestCase {
     override class func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
     }
 
     func testAllRanges_zeroes() throws {
