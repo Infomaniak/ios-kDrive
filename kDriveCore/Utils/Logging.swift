@@ -50,12 +50,15 @@ public enum Logging {
         ]
         SentryDebug.capture(error: error, context: context, contextKey: "Realm")
 
-        #if DEBUG && !TEST
-        copyDebugInformations()
-        DDLogError(
-            "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
-        )
-        _ = try? Realm.deleteFiles(for: realmConfiguration)
+        #if DEBUG
+        @InjectService var appContextService: AppContextServiceable
+        if appContextService.context != .appTests {
+            copyDebugInformations()
+            DDLogError(
+                "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
+            )
+            _ = try? Realm.deleteFiles(for: realmConfiguration)
+        }
         #endif
         fatalError("Failed creating realm \(error.localizedDescription)")
     }
@@ -79,9 +82,10 @@ public enum Logging {
     }
 
     private static func initNetworkLogging() {
-        #if DEBUG && !TEST
+        #if DEBUG
         @InjectService var appContextService: AppContextServiceable
-        if !appContextService.isExtension {
+        if !appContextService.isExtension,
+           appContextService.context != .appTests {
             Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
         }
         #endif
@@ -96,7 +100,13 @@ public enum Logging {
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]
-                #if DEBUG || TEST
+
+                @InjectService var appContextService: AppContextServiceable
+                guard appContextService.context != .appTests else {
+                    return nil
+                }
+
+                #if DEBUG
                 return nil
                 #else
                 return event
@@ -106,8 +116,12 @@ public enum Logging {
     }
 
     private static func copyDebugInformations() {
-        #if DEBUG && !TEST
+        #if DEBUG
         @InjectService var appContextService: AppContextServiceable
+        guard appContextService.context != .appTests else {
+            return
+        }
+
         guard !appContextService.isExtension else {
             return
         }

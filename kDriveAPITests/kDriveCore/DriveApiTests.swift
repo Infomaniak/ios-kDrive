@@ -23,16 +23,6 @@ import InfomaniakLogin
 import kDriveCore
 import XCTest
 
-class FakeTokenDelegate: RefreshTokenDelegate {
-    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
-        // META: keep SonarCloud happy
-    }
-
-    func didFailRefreshToken(_ token: ApiToken) {
-        // META: keep SonarCloud happy
-    }
-}
-
 final class DriveApiTests: XCTestCase {
     private static let defaultTimeout = 30.0
     private static let token = ApiToken(accessToken: Env.token,
@@ -43,14 +33,13 @@ final class DriveApiTests: XCTestCase {
                                         userId: Env.userId,
                                         expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-    private let currentApiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
+    private let currentApiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
 
     override class func setUp() {
         super.setUp()
-
-        // prepare mocking solver
+        MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes()
     }
 
@@ -59,14 +48,11 @@ final class DriveApiTests: XCTestCase {
         group.enter()
         Task {
             let drive = ProxyDrive(id: Env.driveId)
-            let apiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
+            let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
             _ = try await apiFetcher.emptyTrash(drive: drive)
             group.leave()
         }
         group.wait()
-
-        // clear mocking solver so the next test is stable
-        MockingHelper.clearRegisteredTypes()
 
         super.tearDown()
     }

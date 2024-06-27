@@ -77,14 +77,7 @@ public func ABLog(_ message: @autoclosure () -> Any,
                   asynchronous async: Bool = asyncLoggingEnabled) {
     let messageString = message() as! String
 
-    // TODO: Check why TEST flag not set in _all_ test targets
-    // Test target dynamically reset DI state, therefore custom loggers are disabled
-    guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
-        print("[\(category)] \(messageString)")
-        return
-    }
-
-    #if DEBUG && !TEST
+    #if DEBUG
     if #available(iOS 14.0, *), !category.isEmpty {
         let factoryParameters = [categoryKey: category]
         @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger

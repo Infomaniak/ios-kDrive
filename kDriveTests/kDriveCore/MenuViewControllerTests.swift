@@ -26,7 +26,6 @@ import XCTest
 
 final class MenuViewControllerTests: XCTestCase {
     override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
         super.tearDown()
     }
 
@@ -59,6 +58,11 @@ final class MenuViewControllerTests: XCTestCase {
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)
+            },
+            Factory(type: InfomaniakNetworkLogin.self) { _, resolver in
+                // TODO: clean
+                let config = InfomaniakLogin.Config(clientId: "test")
+                return InfomaniakNetworkLogin(config: config)
             },
             Factory(type: InfomaniakTokenable.self) { _, resolver in
                 try resolver.resolve(type: InfomaniakLoginable.self,

@@ -22,9 +22,7 @@ import XCTest
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
-    override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
-    }
+    override func tearDown() {}
 
     override func setUp() {
         SimpleResolver.sharedResolver.removeAll()

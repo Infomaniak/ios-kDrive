@@ -31,8 +31,7 @@ final class DriveFileManagerTests: XCTestCase {
 
     override class func setUp() {
         super.setUp()
-
-        // prepare mocking solver
+        MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes()
 
         @InjectService var driveInfosManager: DriveInfosManager
@@ -48,13 +47,10 @@ final class DriveFileManagerTests: XCTestCase {
                              tokenType: "",
                              userId: Env.userId,
                              expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
-        driveFileManager.apiFetcher.setToken(token, delegate: FakeTokenDelegate())
+        driveFileManager.apiFetcher.setToken(token, delegate: MCKTokenDelegate())
     }
 
     override class func tearDown() {
-        // clear mocking solver so the next test is stable
-        MockingHelper.clearRegisteredTypes()
-
         super.tearDown()
     }
 

@@ -49,8 +49,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
                       ],
                       targets: [
-                          .mainAppTarget(name: "kDrive", instrumented:false),
-                          .mainAppTarget(name: "kDrive_instrumented", instrumented:true),
+                          .mainAppTarget(name: "kDrive"),
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
@@ -66,7 +65,7 @@ let project = Project(name: "kDrive",
                                      "kDriveTests/**/*.json"
                                  ],
                                  dependencies: [
-                                     .target(name: "kDrive_instrumented")
+                                     .target(name: "kDrive")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),
                           Target(name: "kDriveAPITests",
@@ -80,7 +79,7 @@ let project = Project(name: "kDrive",
                                     "kDriveTestShared/**"
                                  ],
                                  dependencies: [
-                                     .target(name: "kDrive_instrumented")
+                                     .target(name: "kDrive")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),
                           Target(name: "kDriveUITests",
@@ -91,7 +90,7 @@ let project = Project(name: "kDrive",
                                  infoPlist: .default,
                                  sources: "kDriveUITests/**",
                                  dependencies: [
-                                     .target(name: "kDrive_instrumented"),
+                                     .target(name: "kDrive"),
                                      .target(name: "kDriveCore")
                                  ],
                                  settings: .settings(base: Constants.testSettings)),

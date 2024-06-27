@@ -21,20 +21,9 @@ import ProjectDescription
 
 public extension Target {
   
-  /// Main app target, factorized
-  /// 
-  /// Allows for easy duplication, in order to create instrumented builds
-  /// if instrumented = true, `TEST` flag set in main app.
-  static func mainAppTarget(name: String, instrumented: Bool) -> Target {
-    
-    let settings :[String: SettingValue]
-    if instrumented {
-      settings = Constants.baseSettings.merging(Constants.testSettings) { (_, new) in new }
-    } else {
-      settings = Constants.baseSettings
-    }
-
-    let appTarget = Target(name: name,
+  /// Main app target
+  static func mainAppTarget(name: String) -> Target {
+    return Target(name: name,
       platform: .iOS,
       product: .app,
       bundleId: "com.infomaniak.drive",
@@ -69,10 +58,8 @@ public extension Target {
         .package(product: "MatomoTracker"),
         .sdk(name: "StoreKit", type: .framework, status: .required)
       ],
-      settings: .settings(base: settings),
+      settings: .settings(base: Constants.testSettings),
       environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."])
-    
-    return appTarget
   }
   
     static func extensionTarget(

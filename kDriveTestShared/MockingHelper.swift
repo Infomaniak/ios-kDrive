@@ -21,11 +21,49 @@ import Foundation
 @testable import kDrive
 @testable import kDriveCore
 
+public enum MockingConfig {
+    /// Full app, able to perform network calls.
+    /// The app is unaware of the tests
+    /// Perfect for UItests
+    case realApp
+
+    /// Full app, network stack is NOOP
+    case mockedNetwork
+}
+
 /// Something to help using the DI in the test target
 public enum MockingHelper {
     /// Register "real" instances like in the app
     static func registerConcreteTypes() {
-        FactoryService.setupDependencyInjection()
+        let extraFactories = [
+            Factory(type: AppContextServiceable.self) { _, _ in
+                AppContextService(context: .appTests)
+            }
+        ]
+
+        /* TODO:
+         var extraDependencies = [
+             Factory(type: NavigationManageable.self) { _, _ in
+                 NavigationManager()
+             },
+             Factory(type: AppContextServiceable.self) { _, _ in
+                 AppContextService(context: context)
+             }
+         ]
+
+         #if !ISEXTENSION
+         extraDependencies += [
+             Factory(type: AppRestorationServiceable.self) { _, _ in
+                 AppRestorationService()
+             },
+             Factory(type: AppNavigable.self) { _, _ in
+                 AppRouter()
+             }
+         ]
+         #endif
+         */
+
+        FactoryService.setupDependencyInjection(other: extraFactories)
     }
 
     /// Register most instances with mocks

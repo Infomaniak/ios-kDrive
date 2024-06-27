@@ -39,12 +39,7 @@ class PreloadingViewController: UIViewController {
     }
 
     private let driveImageView: UIImageView = {
-        #if TEST
-        let imageView = UIImageView(image: KDriveInstrumentedAsset.splashscreenKdrive.image)
-        #else
         let imageView = UIImageView(image: KDriveAsset.splashscreenKdrive.image)
-        #endif
-
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.widthAnchor.constraint(lessThanOrEqualToConstant: 204).isActive = true
         return imageView
@@ -58,12 +53,7 @@ class PreloadingViewController: UIViewController {
     }()
 
     private let splashscreenInfomaniakImageView: UIImageView = {
-        #if TEST
-        let imageView = UIImageView(image: KDriveInstrumentedAsset.splashscreenInfomaniak.image)
-        #else
         let imageView = UIImageView(image: KDriveAsset.splashscreenInfomaniak.image)
-        #endif
-
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.widthAnchor.constraint(equalToConstant: 178).isActive = true
         return imageView
@@ -71,11 +61,7 @@ class PreloadingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        #if TEST
-        view.backgroundColor = KDriveInstrumentedAsset.backgroundColor.color
-        #else
         view.backgroundColor = KDriveAsset.backgroundColor.color
-        #endif
 
         setupViews()
 

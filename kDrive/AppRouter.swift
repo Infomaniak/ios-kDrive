@@ -165,6 +165,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var appContextService: AppContextServiceable
 
     /// Get the current window from the app scene
     @MainActor private var window: UIWindow? {
@@ -602,18 +603,12 @@ public struct AppRouter: AppNavigable {
     }
 
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
-        // TODO: Use TEST flag
-        // Disabled in test target
-        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
+        Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
+
+        // TODO: Split this code with DI in order to remove the check for test target
+        guard appContextService.context != .appTests else {
             return
         }
-
-        //        /// Exit early on test target
-        //        #if TEST
-        //        return
-        //        #endif
-
-        Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
         availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
 

@@ -21,12 +21,19 @@ import InfomaniakDI
 import kDriveCore
 import MatomoTracker
 
-class MatomoUtils {
+enum MatomoUtils {
     static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
-        #if DEBUG || TEST
-        tracker.isOptedOut = true
-        #endif
+
+        @InjectService var appContextService: AppContextServiceable
+        if appContextService.context == .appTests {
+            tracker.isOptedOut = true
+        } else {
+            #if DEBUG
+            tracker.isOptedOut = true
+            #endif
+        }
+
         @InjectService var accountManager: AccountManageable
         tracker.userId = String(accountManager.currentUserId)
         return tracker

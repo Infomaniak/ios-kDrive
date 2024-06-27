@@ -45,7 +45,6 @@ final class UTNavigationManager: XCTestCase {
     }
 
     override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
         super.tearDown()
     }
 
@@ -105,7 +104,6 @@ final class UTNavigationRoutes: XCTestCase {
     }
 
     override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
         super.tearDown()
     }
 

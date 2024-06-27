@@ -23,24 +23,13 @@ import InfomaniakLogin
 @testable import kDriveCore
 import XCTest
 
-private class FakeTokenDelegate: RefreshTokenDelegate {
-    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
-        // META: keep SonarCloud happy
-    }
-
-    func didFailRefreshToken(_ token: ApiToken) {
-        // META: keep SonarCloud happy
-    }
-}
-
 /// Unit test metadata for each supported screen
 final class UTSceneRestorationMetadata: XCTestCase {
     static var driveFileManager: DriveFileManager!
 
     override class func setUp() {
         super.setUp()
-
-        // prepare mocking solver
+        MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes()
 
         @InjectService var driveInfosManager: DriveInfosManager
@@ -54,19 +43,12 @@ final class UTSceneRestorationMetadata: XCTestCase {
                              userId: Env.userId,
                              expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-        let apiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
+        let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
         let drive = Drive()
         drive.userId = Env.userId
         driveFileManager = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
 
         mckAccountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
-    }
-
-    override class func tearDown() {
-        // clear mocking solver so the next test is stable
-        MockingHelper.clearRegisteredTypes()
-
-        super.tearDown()
     }
 
     @MainActor func testFileListViewModel() {
