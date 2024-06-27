@@ -605,11 +605,6 @@ public struct AppRouter: AppNavigable {
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
         Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 
-        // TODO: Split this code with DI in order to remove the check for test target
-        guard appContextService.context != .appTests else {
-            return
-        }
-
         availableOfflineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
 
         do {
