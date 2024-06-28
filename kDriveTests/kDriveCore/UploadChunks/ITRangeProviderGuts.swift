@@ -21,6 +21,12 @@ import XCTest
 
 /// Integration Tests of the RangeProviderGuts
 final class ITRangeProviderGuts: XCTestCase {
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
+    }
+
     // MARK: - readFileByteSize
 
     let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"

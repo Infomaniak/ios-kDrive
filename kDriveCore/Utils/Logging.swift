@@ -51,14 +51,11 @@ public enum Logging {
         SentryDebug.capture(error: error, context: context, contextKey: "Realm")
 
         #if DEBUG
-        @InjectService var appContextService: AppContextServiceable
-        if appContextService.context != .appTests {
-            copyDebugInformations()
-            DDLogError(
-                "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
-            )
-            _ = try? Realm.deleteFiles(for: realmConfiguration)
-        }
+        copyDebugInformations()
+        DDLogError(
+            "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
+        )
+        _ = try? Realm.deleteFiles(for: realmConfiguration)
         #endif
         fatalError("Failed creating realm \(error.localizedDescription)")
     }
@@ -113,10 +110,6 @@ public enum Logging {
     private static func copyDebugInformations() {
         #if DEBUG
         @InjectService var appContextService: AppContextServiceable
-        guard appContextService.context != .appTests else {
-            return
-        }
-
         guard !appContextService.isExtension else {
             return
         }

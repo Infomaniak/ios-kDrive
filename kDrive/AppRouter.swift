@@ -165,7 +165,6 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService private var accountManager: AccountManageable
-    @LazyInjectService private var appContextService: AppContextServiceable
 
     /// Get the current window from the app scene
     @MainActor private var window: UIWindow? {
