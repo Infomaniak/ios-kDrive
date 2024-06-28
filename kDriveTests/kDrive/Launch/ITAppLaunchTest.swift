@@ -97,7 +97,7 @@ final class ITAppLaunchTest: XCTestCase {
                 DriveInfosManager()
             },
             Factory(type: AppNavigable.self) { _, _ in
-                MCKRouter()
+                AppRouter()
             },
             Factory(type: AvailableOfflineManageable.self) { _, _ in
                 MCKAvailableOfflineManager()
@@ -106,12 +106,14 @@ final class ITAppLaunchTest: XCTestCase {
         SimpleResolver.register(services)
     }
 
-    func testUnlock() throws {
+    @MainActor func testUnlock() throws {
         // GIVEN applock enabled
         UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
             accountManager.accounts.append(self.fakeAccount)
+            accountManager.currentAccount = self.fakeAccount
+            accountManager.currentUserId = self.fakeAccount.userId
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
                 apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)
@@ -120,18 +122,32 @@ final class ITAppLaunchTest: XCTestCase {
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
 
-        // WHEN
-        let lockedAppViewController = LockedAppViewController.instantiate()
-        lockedAppViewController.unlockApp()
+        @InjectService var accountManager: AccountManageable
+        XCTAssertNotNil(accountManager.currentAccount, "expecting a user logged in")
 
-        // THEN
+        @InjectService var router: AppNavigable
+        router.showAppLock()
+
         let scene = UIApplication.shared.connectedScenes.first
         let sceneDelegate = (scene?.delegate as? SceneDelegate)
         let window = sceneDelegate?.window
         let rootViewController = window?.rootViewController
         XCTAssertNotNil(
-            rootViewController as? MainTabViewController,
-            "View controller should be MainTabViewController after unlock, got \(rootViewController)"
+            rootViewController as? LockedAppViewController,
+            "Should be a LockedAppViewController, got \(rootViewController)"
         )
+
+        // WHEN
+        let lockedAppViewController = LockedAppViewController.instantiate()
+        lockedAppViewController.unlockApp()
+
+        // THEN
+        guard let rootViewControllerRefresh = window?.rootViewController else {
+            XCTFail("Expecting a rootViewController")
+            return
+        }
+
+        let lockView = rootViewControllerRefresh as? LockedAppViewController
+        XCTAssertNil(lockView, "no longer expecting a lock view, got \(lockView)")
     }
 }
