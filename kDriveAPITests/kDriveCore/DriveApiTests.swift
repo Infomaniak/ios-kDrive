@@ -74,7 +74,7 @@ final class DriveApiTests: XCTestCase {
 
     func getRootDirectory() async throws -> ProxyFile {
         let fileInfo = try await currentApiFetcher.rootFiles(drive: proxyDrive, cursor: nil).validApiResponse.data
-        return fileInfo.first { $0.visibility == .root }!.proxify()
+        return fileInfo.first { $0.name == "Private" }!.proxify()
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
@@ -121,20 +121,19 @@ final class DriveApiTests: XCTestCase {
 
     // MARK: - Test methods
 
-    // FIXME: update to APIV3
-//    func testGetRootFile() async throws {
-//        let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(
-//            driveId: Env.driveId,
-//            id: DriveFileManager.constants.rootID
-//        ))
-//        _ = try await currentApiFetcher.files(in: file.proxify())
-//    }
+    func testGetRootFile() async throws {
+        let file = try await currentApiFetcher.fileInfo(ProxyFile(
+            driveId: Env.driveId,
+            id: DriveFileManager.constants.rootID
+        )).validApiResponse.data
+        _ = try await currentApiFetcher.files(in: file.proxify())
+    }
 
-    // FIXME: update to APIV3
-//    func testGetCommonDocuments() async throws {
-//        let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: Env.commonDocumentsId))
-//        _ = try await currentApiFetcher.files(in: file.proxify())
-//    }
+    func testGetCommonDocuments() async throws {
+        let file = try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: Env.commonDocumentsId))
+            .validApiResponse.data
+        _ = try await currentApiFetcher.files(in: file.proxify())
+    }
 
     func testPerformAuthenticatedRequest() {
         let testName = "Perform authenticated request"
@@ -491,30 +490,31 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    // FIXME: update to APIV3
-//    func testDeleteFile() async throws {
-//        let testDirectory = try await setUpTest(testName: "Delete file")
-//        let directory = try await createTestDirectory(name: "Delete file", parentDirectory: testDirectory)
-//        _ = try await currentApiFetcher.delete(file: directory)
-//        // Check that file has been deleted
-//        let (files, _) = try await currentApiFetcher.files(in: testDirectory)
-//        let deletedFile = files.first { $0.id == directory.id }
-//        XCTAssertNil(deletedFile, TestsMessages.notNil("trashed file"))
-//        // Check that file is in trash
-//        let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
-//        let fileInTrash = trashedFiles.first { $0.id == directory.id }
-//        XCTAssertNotNil(fileInTrash, TestsMessages.notNil("trashed file"))
-//        if let proxyFile = fileInTrash?.proxify() {
-//            // Delete definitely
-//            let response = try await currentApiFetcher.deleteDefinitely(file: proxyFile)
-//            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
-//            // Check that file is not in trash anymore
-//            let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
-//            let deletedDefinitelyFile = trashedFiles.first { $0.id == proxyFile.id }
-//            XCTAssertNil(deletedDefinitelyFile, TestsMessages.notNil("deleted file"))
-//        }
-//        tearDownTest(directory: testDirectory)
-//    }
+    func testDeleteFile() async throws {
+        let testDirectory = try await setUpTest(testName: "Delete file")
+        let directory = try await createTestDirectory(name: "Delete file", parentDirectory: testDirectory)
+        _ = try await currentApiFetcher.delete(file: directory)
+        // Check that file has been deleted
+        let files = try await currentApiFetcher.files(in: testDirectory).validApiResponse.data.files
+        let deletedFile = files.first { $0.id == directory.id }
+        XCTAssertNil(deletedFile, TestsMessages.notNil("trashed file"))
+        // Check that file is in trash
+        let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete).validApiResponse
+            .data
+        let fileInTrash = trashedFiles.first { $0.id == directory.id }
+        XCTAssertNotNil(fileInTrash, TestsMessages.notNil("trashed file"))
+        if let proxyFile = fileInTrash?.proxify() {
+            // Delete definitely
+            let response = try await currentApiFetcher.deleteDefinitely(file: proxyFile)
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
+            // Check that file is not in trash anymore
+            let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
+                .validApiResponse.data
+            let deletedDefinitelyFile = trashedFiles.first { $0.id == proxyFile.id }
+            XCTAssertNil(deletedDefinitelyFile, TestsMessages.notNil("deleted file"))
+        }
+        tearDownTest(directory: testDirectory)
+    }
 
     func testRenameFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Rename file")
@@ -523,13 +523,13 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-//    func testDuplicateFile() async throws {
-//        let (testDirectory, file) = try await initOfficeFile(testName: "Duplicate file")
-//        _ = try await currentApiFetcher.duplicate(file: file, duplicateName: "duplicate-\(Date())")
-//        let (files, _) = try await currentApiFetcher.files(in: testDirectory)
-//        XCTAssertEqual(files.count, 2, "Root file should have 2 children")
-//        tearDownTest(directory: testDirectory)
-//    }
+    func testDuplicateFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Duplicate file")
+        _ = try await currentApiFetcher.duplicate(file: file, duplicateName: "duplicate-\(Date())")
+        let files = try await currentApiFetcher.files(in: testDirectory).validApiResponse.data.files
+        XCTAssertEqual(files.count, 2, "Root file should have 2 children")
+        tearDownTest(directory: testDirectory)
+    }
 
     func testCopyFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Copy file")
@@ -546,27 +546,26 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    // FIXME: update to APIV3
-//    func testFavoriteFile() async throws {
-//        let (testDirectory, file) = try await initOfficeFile(testName: "Favorite file")
-//        // Favorite
-//        let favoriteResponse = try await currentApiFetcher.favorite(file: file)
-//        XCTAssertTrue(favoriteResponse, TestsMessages.shouldReturnTrue)
-//        var files = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer)
-//        let favoriteFile = files.first { $0.id == file.id }
-//        XCTAssertNotNil(favoriteFile, "File should be in Favorite files")
-//        XCTAssertTrue(favoriteFile?.isFavorite == true, "File should be favorite")
-//        // Unfavorite
-//        let unfavoriteResponse = try await currentApiFetcher.unfavorite(file: file)
-//        XCTAssertTrue(unfavoriteResponse, TestsMessages.shouldReturnTrue)
-//        files = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer)
-//        let unfavoriteFile = files.first { $0.id == file.id }
-//        XCTAssertNil(unfavoriteFile, "File should be in Favorite files")
-//        // Check file
-//        let (finalFile, _) = try await currentApiFetcher.fileInfo(file)
-//        XCTAssertFalse(finalFile.isFavorite, "File shouldn't be favorite")
-//        tearDownTest(directory: testDirectory)
-//    }
+    func testFavoriteFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Favorite file")
+        // Favorite
+        let favoriteResponse = try await currentApiFetcher.favorite(file: file)
+        XCTAssertTrue(favoriteResponse, TestsMessages.shouldReturnTrue)
+        var files = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer).validApiResponse.data
+        let favoriteFile = files.first { $0.id == file.id }
+        XCTAssertNotNil(favoriteFile, "File should be in Favorite files")
+        XCTAssertTrue(favoriteFile?.isFavorite == true, "File should be favorite")
+        // Unfavorite
+        let unfavoriteResponse = try await currentApiFetcher.unfavorite(file: file)
+        XCTAssertTrue(unfavoriteResponse, TestsMessages.shouldReturnTrue)
+        files = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer).validApiResponse.data
+        let unfavoriteFile = files.first { $0.id == file.id }
+        XCTAssertNil(unfavoriteFile, "File should be in Favorite files")
+        // Check file
+        let finalFile = try await currentApiFetcher.fileInfo(file).validApiResponse.data
+        XCTAssertFalse(finalFile.isFavorite, "File shouldn't be favorite")
+        tearDownTest(directory: testDirectory)
+    }
 
     // MARK: Bulk actions
 
@@ -609,26 +608,25 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    // FIXME: update to APIV3
-//    func testGetFilesActivities() async throws {
-//        let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
-//        let secondFile = try await currentApiFetcher.createFile(
-//            in: testDirectory,
-//            name: "Get files activities-\(Date())",
-//            type: "docx"
-//        ).proxify()
-//        let (activities, _) = try await currentApiFetcher.filesActivities(
-//            drive: proxyDrive,
-//            files: [file, secondFile],
-//            from: Date(timeIntervalSince1970: 0)
-//        )
-//        XCTAssertEqual(activities.count, 2, "Array should contain two activities")
-//        for activity in activities {
-//            XCTAssertTrue(activity.result, TestsMessages.shouldReturnTrue)
-//            XCTAssertNil(activity.message, TestsMessages.noError)
-//        }
-//        tearDownTest(directory: testDirectory)
-//    }
+    func testGetFilesActivities() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
+        let secondFile = try await currentApiFetcher.createFile(
+            in: testDirectory,
+            name: "Get files activities-\(Date())",
+            type: "docx"
+        ).proxify()
+        let activities = try await currentApiFetcher.filesActivities(
+            drive: proxyDrive,
+            files: [file, secondFile],
+            from: Date(timeIntervalSince1970: 0)
+        ).validApiResponse.data
+        XCTAssertEqual(activities.count, 2, "Array should contain two activities")
+        for activity in activities {
+            XCTAssertTrue(activity.result, TestsMessages.shouldReturnTrue)
+            XCTAssertNil(activity.message, TestsMessages.noError)
+        }
+        tearDownTest(directory: testDirectory)
+    }
 
     // MARK: Trashed files
 
@@ -636,12 +634,12 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
     }
 
-//    func testTrashedFilesOf() async throws {
-//        let (testDirectory, _) = try await initOfficeFile(testName: "Get children trashed file")
-//        _ = try await currentApiFetcher.delete(file: testDirectory)
-//        let files = try await currentApiFetcher.trashedFiles(of: testDirectory)
-//        XCTAssertEqual(files.count, 1, "There should be one file in the trashed directory")
-//    }
+    func testTrashedFilesOf() async throws {
+        let (testDirectory, _) = try await initOfficeFile(testName: "Get children trashed file")
+        _ = try await currentApiFetcher.delete(file: testDirectory)
+        let files = try await currentApiFetcher.trashedFiles(of: testDirectory).validApiResponse.data
+        XCTAssertEqual(files.count, 1, "There should be one file in the trashed directory")
+    }
 
     func testRestoreTrashedFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Restore trashed file")
