@@ -20,49 +20,7 @@ import Foundation
 import ProjectDescription
 
 public extension Target {
-  
-  /// Main app target
-  static func mainAppTarget(name: String) -> Target {
-    return Target(name: name,
-      platform: .iOS,
-      product: .app,
-      bundleId: "com.infomaniak.drive",
-      deploymentTarget: Constants.deploymentTarget,
-      infoPlist: .file(path: "kDrive/Resources/Info.plist"),
-      sources: "kDrive/**",
-      resources: [
-        "kDrive/**/*.storyboard",
-        "kDrive/**/*.xcassets",
-        "kDrive/**/*.strings",
-        "kDrive/**/*.stringsdict",
-        "kDrive/**/*.xib",
-        "kDrive/**/*.json",
-        "kDrive/IAP/ProductIds.plist",
-        "kDriveCore/GoogleService-Info.plist",
-        "kDrive/**/PrivacyInfo.xcprivacy"
-      ],
-      entitlements: "kDrive/Resources/kDrive.entitlements",
-      scripts: [Constants.swiftlintScript],
-      dependencies: [
-        .target(name: "kDriveFileProvider"),
-        .target(name: "kDriveCore"),
-        .target(name: "kDriveShareExtension"),
-        .target(name: "kDriveActionExtension"),
-        .package(product: "FloatingPanel"),
-        .package(product: "Lottie"),
-        .package(product: "DropDown"),
-        .package(product: "HorizonCalendar"),
-        .package(product: "Kvitto"),
-        .package(product: "Highlightr"),
-        .package(product: "MarkdownKit"),
-        .package(product: "MatomoTracker"),
-        .sdk(name: "StoreKit", type: .framework, status: .required)
-      ],
-      settings: .settings(base: Constants.baseSettings),
-      environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."])
-  }
-  
-    static func extensionTarget(
+  static func extensionTarget(
         name: String,
         bundleId: String,
         entitlements: String,
