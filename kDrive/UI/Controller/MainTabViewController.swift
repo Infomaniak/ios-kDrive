@@ -272,7 +272,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
         if tabBarController.selectedViewController == viewController {
             // Detect double tap on menu
-            if let viewController = topViewController as? MenuViewController,
+            if topViewController as? MenuViewController != nil,
                let lastDate = lastInteraction,
                Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
                 print("double tap detected")
