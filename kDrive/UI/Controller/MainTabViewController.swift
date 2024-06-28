@@ -25,6 +25,12 @@ import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
+    /// Tracking the last selection date to detect double tap
+    private var lastInteraction: Date?
+
+    /// Time between two tap events that feels alright for a double tap
+    private static let doubleTapInterval = TimeInterval(0.350)
+
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -251,13 +257,31 @@ extension MainTabViewController: MainTabBarDelegate {
 
 extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeViewController {
+        guard let navigationController = viewController as? UINavigationController else {
+            return false
+        }
+
+        defer {
+            lastInteraction = Date()
+        }
+
+        let topViewController = navigationController.topViewController
+        if let homeViewController = topViewController as? HomeViewController {
             homeViewController.presentedFromTabBar()
         }
 
-        if tabBarController.selectedViewController == viewController,
-           let viewController = (viewController as? UINavigationController)?.topViewController as? TopScrollable {
-            viewController.scrollToTop()
+        if tabBarController.selectedViewController == viewController {
+            // Detect double tap on menu
+            if let viewController = topViewController as? MenuViewController,
+               let lastDate = lastInteraction,
+               Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
+                print("double tap detected")
+                return true
+            }
+
+            if let viewController = topViewController as? TopScrollable {
+                viewController.scrollToTop()
+            }
         }
 
         return true

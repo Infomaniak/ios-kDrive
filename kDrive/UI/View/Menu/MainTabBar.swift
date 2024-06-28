@@ -74,7 +74,7 @@ final class MainTabBar: UITabBar {
         self.shapeLayer = shapeLayer
         setupBackgroundGradient()
         setupMiddleButton()
-        setupDoubleTapRecognizer()
+        setupGestureRecognizer()
     }
 
     override func layoutSubviews() {
@@ -165,32 +165,28 @@ final class MainTabBar: UITabBar {
         centerButton.addTarget(self, action: #selector(centerButtonAction), for: .touchUpInside)
     }
 
-    private func setupDoubleTapRecognizer() {
-        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(Self.handleDoubleTap(recognizer:)))
-        doubleTap.numberOfTapsRequired = 2
-        addGestureRecognizer(doubleTap)
-        doubleTap.delaysTouchesBegan = false
+    private func setupGestureRecognizer() {
+        let longTouch = UILongPressGestureRecognizer(target: self,
+                                                     action: #selector(Self.handleLongTouch(recognizer:)))
+        addGestureRecognizer(longTouch)
     }
 
-    @objc func handleDoubleTap(recognizer: UITapGestureRecognizer) {
-        let touchPoint = recognizer.location(in: self)
-
-        // Tap is over the 5th button
-        if touchPoint.x > bounds.width / 5 * 4 {
-            print("Double Tap profile")
-            @InjectService var accountManager: AccountManageable
-            guard let account = accountManager.accounts.values.randomElement() else {
-                fatalError("woops")
-            }
-            accountManager.switchAccount(newAccount: account)
-
-            // TODO: "Respring" with restoration code
-            guard let driveFileManager = try? accountManager.getFirstAvailableDriveFileManager(for: account.userId) else {
-                fatalError("woops V2")
-            }
-            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+    @objc func handleLongTouch(recognizer: UITapGestureRecognizer) {
+        guard recognizer.state == .began else {
+            return
         }
+
+        // Touch is over the 5th button's x position
+        let touchPoint = recognizer.location(in: self)
+        guard touchPoint.x > bounds.width / 5 * 4 else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        print("Long touch")
+        // TODO: Nav to detail View, wait for AppNavigable to be available
     }
 
     @objc func centerButtonAction(sender: UIButton) {
