@@ -66,7 +66,7 @@ public enum Log {
 
     /// shorthand for ABLog, with "SceneDelegate" category
     ///
-    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:AppDelegate`
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:SceneDelegate`
     ///
     public static func sceneDelegate(_ message: @autoclosure () -> Any,
                                      level: AbstractLogLevel = .debug,
