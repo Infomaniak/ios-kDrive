@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import ProjectDescription
 
 public extension Target {
-  static func extensionTarget(
+    static func extensionTarget(
         name: String,
         bundleId: String,
         entitlements: String,
