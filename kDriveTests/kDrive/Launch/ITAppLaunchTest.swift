@@ -25,12 +25,6 @@ import InfomaniakLogin
 import RealmSwift
 import XCTest
 
-final class MCKAvailableOfflineManager: AvailableOfflineManageable {
-    func updateAvailableOfflineFiles(status: InfomaniakCore.ReachabilityListener.NetworkStatus) {
-        print("noop updateAvailableOfflineFiles :\(status)")
-    }
-}
-
 final class ITAppLaunchTest: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 

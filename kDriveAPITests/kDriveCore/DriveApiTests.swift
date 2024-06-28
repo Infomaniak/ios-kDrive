@@ -74,7 +74,7 @@ final class DriveApiTests: XCTestCase {
 
     func getRootDirectory() async throws -> ProxyFile {
         let fileInfo = try await currentApiFetcher.rootFiles(drive: proxyDrive, cursor: nil).validApiResponse.data
-        return fileInfo.first { $0.name == "Private" }!.proxify()
+        return fileInfo.first { $0.visibility == .isPrivateSpace }!.proxify()
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {

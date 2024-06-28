@@ -26,54 +26,8 @@ import XCTest
 
 final class MenuViewControllerTests: XCTestCase {
     override func setUp() {
-        SimpleResolver.sharedResolver.removeAll()
-        let factoriesWithIdentifier = FactoryService.debugServices + FactoryService.transactionableServices
-        SimpleResolver.register(factoriesWithIdentifier)
-        let services = [
-            Factory(type: KeychainHelper.self) { _, _ in
-                KeychainHelper(accessGroup: AccountManager.accessGroup)
-            },
-            Factory(type: TokenStore.self) { _, _ in
-                TokenStore()
-            },
-            Factory(type: AppContextServiceable.self) { _, _ in
-                // We fake the main app context
-                return AppContextService(context: .app)
-            },
-            Factory(type: UploadQueue.self) { _, _ in
-                UploadQueue()
-            },
-            Factory(type: UploadQueueable.self) { _, resolver in
-                try resolver.resolve(type: UploadQueue.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakNetworkLogin.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: InfomaniakNetworkLogin.self) { _, resolver in
-                // TODO: clean
-                let config = InfomaniakLogin.Config(clientId: "test")
-                return InfomaniakNetworkLogin(config: config)
-            },
-            Factory(type: InfomaniakTokenable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakLoginable.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: PhotoLibraryUploader.self) { _, _ in
-                PhotoLibraryUploader()
-            },
-            Factory(type: DriveInfosManager.self) { _, _ in
-                DriveInfosManager()
-            }
-        ]
-        SimpleResolver.register(services)
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
     }
 
     // MARK: - Upload observation
