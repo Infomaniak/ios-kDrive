@@ -101,11 +101,6 @@ public enum Logging {
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]
 
-                @InjectService var appContextService: AppContextServiceable
-                guard appContextService.context != .appTests else {
-                    return nil
-                }
-
                 #if DEBUG
                 return nil
                 #else
