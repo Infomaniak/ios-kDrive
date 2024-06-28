@@ -25,14 +25,9 @@ enum MatomoUtils {
     static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
 
-        @InjectService var appContextService: AppContextServiceable
-        if appContextService.context == .appTests {
-            tracker.isOptedOut = true
-        } else {
-            #if DEBUG
-            tracker.isOptedOut = true
-            #endif
-        }
+        #if DEBUG
+        tracker.isOptedOut = true
+        #endif
 
         @InjectService var accountManager: AccountManageable
         tracker.userId = String(accountManager.currentUserId)
