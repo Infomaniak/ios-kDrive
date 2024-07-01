@@ -22,10 +22,10 @@ import InfomaniakCoreUI
 import InfomaniakDI
 import kDriveCore
 
-enum RootViewControllerState {
+public enum RootViewControllerState {
     case onboarding
     case appLock
-    case mainViewController(DriveFileManager)
+    case mainViewController(driveFileManager: DriveFileManager)
     case updateRequired
     case preloading(Account)
 
@@ -43,7 +43,7 @@ enum RootViewControllerState {
             return .appLock
         } else if let driveFileManager = accountManager.currentDriveFileManager,
                   driveFileManager.getCachedMyFilesRoot() != nil {
-            return .mainViewController(driveFileManager)
+            return .mainViewController(driveFileManager: driveFileManager)
         } else {
             return .preloading(currentAccount)
         }

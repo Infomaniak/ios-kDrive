@@ -29,7 +29,7 @@ class StoreSuccessViewController: UIViewController {
         if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
             rootViewController.dismiss(animated: true)
             (rootViewController.selectedViewController as? UINavigationController)?.popToRootViewController(animated: true)
-            rootViewController.selectedIndex = 0
+            rootViewController.selectedIndex = MainTabIndex.home.rawValue
         } else {
             dismiss(animated: true)
         }

@@ -230,41 +230,6 @@ final class ManageCategoriesViewController: UITableViewController {
         return UINavigationController(rootViewController: viewController)
     }
 
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        if let files {
-            coder.encode(files.map(\.id), forKey: "FilesId")
-        }
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let filesId = coder.decodeObject(forKey: "FilesId") as! [Int]
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-
-        let matchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("id IN %@", filesId)
-        }
-
-        files = Array(matchedFiles)
-
-        // Reload view
-        updateTitle()
-        updateNavigationItem()
-        setUpObserver()
-    }
-
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

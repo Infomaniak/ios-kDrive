@@ -26,6 +26,7 @@ import UIKit
 class ParameterTableViewController: UITableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var appNavigable: AppNavigable
 
     var driveFileManager: DriveFileManager!
 
@@ -174,25 +175,6 @@ class ParameterTableViewController: UITableViewController {
         }
     }
 
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-    }
-
     static func instantiate(driveFileManager: DriveFileManager) -> ParameterTableViewController {
         let viewController = Storyboard.menu
             .instantiateViewController(withIdentifier: "ParameterTableViewController") as! ParameterTableViewController
@@ -207,16 +189,16 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             accountManager.removeTokenAndAccount(account: currentAccount)
         }
 
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            }
         } else {
             SentrySDK.setUser(nil)
         }
         accountManager.saveAccounts()
-        appDelegate?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 

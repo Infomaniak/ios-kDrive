@@ -180,7 +180,8 @@ public enum FactoryService {
                 (loggerFactory, "PhotoLibraryUploader"),
                 (loggerFactory, "AppDelegate"),
                 (loggerFactory, "FileProvider"),
-                (loggerFactory, "DriveInfosManager")
+                (loggerFactory, "DriveInfosManager"),
+                (loggerFactory, "SceneDelegate")
             ]
             return services
         } else {

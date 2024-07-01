@@ -25,6 +25,7 @@ import UIKit
 
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService var appNavigable: AppNavigable
 
     private let driveFileManager: DriveFileManager
     var uploadCountManager: UploadCountManager?
@@ -115,6 +116,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         super.viewDidAppear(animated)
         updateContentIfNeeded()
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName])
+        saveSceneState()
     }
 
     func updateContentIfNeeded() {
@@ -229,16 +231,19 @@ extension MenuViewController {
                     self.accountManager.removeTokenAndAccount(account: currentAccount)
                 }
 
-                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
                 if let nextAccount = self.accountManager.accounts.first {
                     self.accountManager.switchAccount(newAccount: nextAccount)
-                    appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                    Task {
+                        await self.appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                    }
                 } else {
                     SentrySDK.setUser(nil)
                 }
                 self.accountManager.saveAccounts()
-                appDelegate?.updateRootViewControllerState()
+                self.appNavigable.prepareRootViewController(
+                    currentState: RootViewControllerState.getCurrentState(),
+                    restoration: false
+                )
             }
             present(alert, animated: true)
         case .help:
@@ -270,10 +275,16 @@ extension MenuViewController {
                                                                                                           delegate: self)
         present(floatingPanelViewController, animated: true)
     }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
+    }
 }
 
 extension MenuViewController: UpdateAccountDelegate {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
         needsContentUpdate = true
     }

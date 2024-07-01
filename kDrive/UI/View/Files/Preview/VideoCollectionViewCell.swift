@@ -63,6 +63,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func configureWith(file: File) {
+        assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
+
         self.file = file
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil

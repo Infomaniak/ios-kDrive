@@ -104,7 +104,7 @@ extension UploadQueue: UploadQueueable {
     /// Query to fetch `UploadFiles` for the current execution context
     var uploadFileQuery: String? {
         switch appContextService.context {
-        case .app:
+        case .app, .appTests:
             return Self.appFilesToUploadQuery
         case .fileProviderExtension:
             return Self.fileProviderFilesToUploadQuery

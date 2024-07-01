@@ -20,7 +20,7 @@ import ProjectDescription
 
 public enum Constants {
     public static let testSettings: [String: SettingValue] = [
-        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "TEST DEBUG"
+        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG"
     ]
 
     public static let baseSettings = SettingsDictionary()

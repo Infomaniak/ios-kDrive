@@ -257,7 +257,7 @@ extension MultipleSelectionFloatingPanelViewController {
                     // Present from root view controller if the panel is no longer presented
                     let viewController = self.view.window != nil
                         ? self
-                        : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+                        : self.appNavigable.topMostViewController
                     guard viewController as? UIDocumentPickerViewController == nil else { return }
                     let documentExportViewController = UIDocumentPickerViewController(
                         url: downloadedArchiveUrl,

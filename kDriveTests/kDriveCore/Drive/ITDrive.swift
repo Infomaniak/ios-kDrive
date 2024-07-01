@@ -33,8 +33,9 @@ final class ITDrive: XCTestCase {
 
     func testFreeDriveIsFree() {
         // GIVEN
-        guard let driveData = freeDriveJson() else {
-            XCTFail("Unexpected")
+        guard let driveData = freeDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load free drive JSON")
             return
         }
 
@@ -54,8 +55,9 @@ final class ITDrive: XCTestCase {
 
     func testPaidDriveIsPaid() {
         // GIVEN
-        guard let driveData = paidDriveJson() else {
-            XCTFail("Unexpected")
+        guard let driveData = paidDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load paid drive JSON")
             return
         }
 

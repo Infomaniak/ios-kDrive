@@ -148,6 +148,12 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        saveSceneState()
+    }
+
     @objc func presentSearch() {
         let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
@@ -267,5 +273,11 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let destinationViewController = FileListViewController.instantiate(viewModel: destinationViewModel)
         navigationController?.pushViewController(destinationViewController, animated: true)
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }

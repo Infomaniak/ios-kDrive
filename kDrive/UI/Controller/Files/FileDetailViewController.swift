@@ -22,7 +22,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class FileDetailViewController: UIViewController {
+class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
@@ -157,6 +157,8 @@ class FileDetailViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: ["FileDetail"])
+
+        saveSceneState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -206,20 +208,20 @@ class FileDetailViewController: UIViewController {
 
         tableView.separatorColor = .clear
 
-        // Set initial rows
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
                                                          categoryRights: driveFileManager.drive.categoryRights)
 
-        // Load file informations
         loadFileInformation()
 
-        // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
             Task { @MainActor [weak self] in
-                self?.file = newFile
-                self?.reloadTableView()
+                guard let self else {
+                    return
+                }
+                self.file = newFile
+                self.reloadTableView()
             }
         }
     }
@@ -480,45 +482,12 @@ class FileDetailViewController: UIViewController {
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(file.id, forKey: "FileId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
-        guard file != nil else {
-            // If file doesn't exist anymore, pop view controller
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
-            async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
-
-            fileInformationRows = try await FileInformationRow.getRows(for: file,
-                                                                       fileAccess: currentFileAccess,
-                                                                       contentCount: folderContentCount,
-                                                                       categoryRights: driveFileManager.drive
-                                                                           .categoryRights)
-            fileAccess = try await currentFileAccess
-            contentCount = try await folderContentCount
-
-            if tableView.window != nil && currentTab == .informations {
-                reloadTableView()
-            }
-        }
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileDetailViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.fileId.rawValue: file.id
+        ]
     }
 }
 
