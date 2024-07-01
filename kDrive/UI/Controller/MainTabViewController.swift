@@ -25,7 +25,7 @@ import kDriveResources
 import UIKit
 
 /// Enum to explicit tab names
-enum MainTabIndex: Int {
+public enum MainTabBarIndex: Int {
     case home = 0
     case files = 1
     case gallery = 3
@@ -45,6 +45,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService var fileImportHelper: FileImportHelper
+    @LazyInjectService var router: AppNavigable
 
     let driveFileManager: DriveFileManager
 
@@ -249,6 +250,35 @@ extension MainTabViewController: MainTabBarDelegate {
         floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
         present(floatingPanelViewController, animated: true)
     }
+
+    func avatarLongTouch() {
+        let viewControllers = viewControllers
+        guard let rootNavigationController = viewControllers?[safe: MainTabBarIndex.profile.rawValue] as? UINavigationController
+        else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        selectedIndex = MainTabBarIndex.profile.rawValue
+
+        router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
+    }
+
+    func avatarDoubleTap() {
+        accountManager.switchToNextAvailableAccount()
+        guard let accountManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        @InjectService var router: AppNavigable
+        _ = router.showMainViewController(driveFileManager: accountManager,
+                                          selectedIndex: MainTabBarIndex.profile.rawValue)
+    }
 }
 
 // MARK: - Tab bar controller delegate
@@ -273,7 +303,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
             if topViewController as? MenuViewController != nil,
                let lastDate = lastInteraction,
                Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
-                print("double tap detected")
+                avatarDoubleTap()
                 return true
             }
 

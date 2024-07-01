@@ -21,8 +21,11 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+/// Delegation from MainTabBar towards MainTabViewController
 protocol MainTabBarDelegate: AnyObject {
     func plusButtonPressed()
+    func avatarLongTouch()
+    func avatarDoubleTap()
 }
 
 final class MainTabBar: UITabBar {
@@ -182,11 +185,7 @@ final class MainTabBar: UITabBar {
             return
         }
 
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
-
-        print("Long touch")
-        // TODO: Nav to detail View, wait for AppNavigable to be available
+        tabDelegate?.avatarLongTouch()
     }
 
     @objc func centerButtonAction(sender: UIButton) {

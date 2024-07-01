@@ -114,6 +114,15 @@ public protocol RouterFileNavigable {
         navigationController: UINavigationController,
         animated: Bool
     )
+
+    /// Present the SwitchAccountViewController
+    /// - Parameters:
+    ///   - navigationController: The navigation controller to use
+    ///   - animated: Should be animated
+    @MainActor func presentAccountViewController(
+        navigationController: UINavigationController,
+        animated: Bool
+    )
 }
 
 /// Something that can set an arbitrary RootView controller
@@ -521,7 +530,7 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: false)
-        rootViewController.selectedIndex = MainTabIndex.profile.rawValue
+        rootViewController.selectedIndex = MainTabBarIndex.profile.rawValue
 
         guard let navController = rootViewController.selectedViewController as? UINavigationController else {
             return
@@ -677,7 +686,7 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabIndex.files.rawValue
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
 
             guard let navController = rootViewController.selectedViewController as? UINavigationController,
                   let viewController = navController.topViewController as? FileListViewController else {
@@ -767,6 +776,14 @@ public struct AppRouter: AppNavigable {
         animated: Bool
     ) {
         let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
-        navigationController.pushViewController(storeViewController, animated: false)
+        navigationController.pushViewController(storeViewController, animated: animated)
+    }
+
+    @MainActor public func presentAccountViewController(
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        let accountViewController = SwitchUserViewController.instantiate()
+        navigationController.pushViewController(accountViewController, animated: animated)
     }
 }
