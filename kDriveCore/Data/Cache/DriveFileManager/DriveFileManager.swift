@@ -177,6 +177,7 @@ public final class DriveFileManager {
                         if let id = oldObject?["id"] as? Int,
                            let driveId = oldObject?["driveId"] as? Int {
                             newObject?["uid"] = File.uid(driveId: driveId, fileId: id)
+                            newObject?["revisedAt"] = Date(timeIntervalSince1970: 0)
                         } else if let oldObject {
                             migration.delete(oldObject)
                         } else if let newObject {
@@ -1212,13 +1213,15 @@ public final class DriveFileManager {
         public static let version = FilePropertiesOptions(rawValue: 1 << 5)
         public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
         public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
+        public static let lastActionAt = FilePropertiesOptions(rawValue: 1 << 8)
 
-        public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastCursor]
+        public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastActionAt, .lastCursor]
         public static let extras: FilePropertiesOptions = [.path, .users, .version]
         public static let all: FilePropertiesOptions = [
             .fullyDownloaded,
             .children,
             .responseAt,
+            .lastActionAt,
             .lastCursor,
             .path,
             .users,
@@ -1253,6 +1256,9 @@ public final class DriveFileManager {
         }
         if keepProperties.contains(.responseAt) {
             newFile.responseAt = savedChild.responseAt
+        }
+        if keepProperties.contains(.lastActionAt) {
+            newFile.lastActionAt = savedChild.lastActionAt
         }
         if keepProperties.contains(.lastCursor) {
             newFile.lastCursor = savedChild.lastCursor

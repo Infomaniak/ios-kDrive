@@ -28,7 +28,7 @@ public enum RealmSchemaVersion {
     static let upload: UInt64 = 21
 
     /// Current version of the Drive Realm
-    static let drive: UInt64 = 10
+    static let drive: UInt64 = 11
 }
 
 public class DriveFileManagerConstants {

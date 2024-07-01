@@ -206,6 +206,13 @@ public extension Endpoint {
                                                                                  FileWith.fileListingMinimal.toQueryItem()])
     }
 
+    static func filePartialListing(drive: AbstractDrive) -> Endpoint {
+        return .driveInfo(drive: drive).appending(
+            path: "/files/listing/partial",
+            queryItems: [URLQueryItem(name: "with", value: "file")]
+        )
+    }
+
     // MARK: Activities
 
     static func recentActivity(drive: AbstractDrive) -> Endpoint {
