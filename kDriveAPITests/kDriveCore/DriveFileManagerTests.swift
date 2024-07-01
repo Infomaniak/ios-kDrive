@@ -29,18 +29,15 @@ final class DriveFileManagerTests: XCTestCase {
     static let defaultTimeout = 10.0
     static var driveFileManager: DriveFileManager!
 
-    override class func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
 
-        // prepare mocking solver
-        MockingHelper.registerConcreteTypes()
+        MockingHelper.clearRegisteredTypes()
+        // TODO: Mock TokenStore
+        MockingHelper.registerConcreteTypes(configuration: .realApp)
 
         @InjectService var driveInfosManager: DriveInfosManager
-        guard let drive = driveInfosManager.getDrive(id: Env.driveId, userId: Env.userId) else {
-            fatalError("John Appleseed is missing")
-        }
-        @InjectService var mckAccountManager: AccountManageable
-        driveFileManager = mckAccountManager.getDriveFileManager(for: drive)
+        @InjectService var accountManager: AccountManageable
         let token = ApiToken(accessToken: Env.token,
                              expiresIn: Int.max,
                              refreshToken: "",
@@ -48,14 +45,18 @@ final class DriveFileManagerTests: XCTestCase {
                              tokenType: "",
                              userId: Env.userId,
                              expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
-        driveFileManager.apiFetcher.setToken(token, delegate: FakeTokenDelegate())
+        let account = Account(apiToken: token)
+        try await accountManager.updateUser(for: account, registerToken: false)
+        DriveFileManagerTests.driveFileManager = accountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
+        DriveFileManagerTests.driveFileManager.apiFetcher.setToken(token, delegate: MCKTokenDelegate())
+
+        guard let drive = driveInfosManager.getDrive(id: Env.driveId, userId: Env.userId) else {
+            fatalError("John Appleseed is missing")
+        }
     }
 
-    override class func tearDown() {
-        // clear mocking solver so the next test is stable
-        MockingHelper.clearRegisteredTypes()
-
-        super.tearDown()
+    override func tearDown() {
+        DriveFileManagerTests.driveFileManager = nil
     }
 
     // MARK: - Tests setup
@@ -158,7 +159,6 @@ final class DriveFileManagerTests: XCTestCase {
             query: file.name,
             categories: [],
             belongToAllCategories: true,
-            page: 1,
             sortType: .nameAZ
         )
         let children = DriveFileManagerTests.driveFileManager.getCachedFile(id: DriveFileManager.searchFilesRootFile.id)?.children

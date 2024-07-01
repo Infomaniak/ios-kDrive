@@ -1,6 +1,12 @@
 {
+  "account": {
+    "created_at": 1716328800,
+    "id": 1234,
+    "legal_entity_type": "restrict",
+    "name": "Apple Dev Developper"
+  },
   "account_admin": true,
-  "account_id": 98765,
+  "account_id": 1234,
   "capabilities": {
     "can_add_user": true,
     "can_rewind": false,
@@ -13,115 +19,107 @@
   "categories": [
     {
       "color": "#1ABC9C",
-      "created_at": 1643969478,
-      "created_by": 1,
+      "created_at": 1717588987,
+      "created_by": 0,
       "id": 1,
       "is_predefined": true,
       "name": "PREDEF_CAT_CONTRACT"
     },
     {
       "color": "#11806A",
-      "created_at": 1643969478,
-      "created_by": 1,
+      "created_at": 1717588987,
+      "created_by": 0,
       "id": 2,
       "is_predefined": true,
       "name": "PREDEF_CAT_BILL"
     },
     {
       "color": "#206694",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 6,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 3,
       "is_predefined": true,
       "name": "PREDEF_CAT_WARRANTY"
     },
     {
       "color": "#9B59B6",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 7,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 4,
       "is_predefined": true,
       "name": "PREDEF_CAT_ID"
     },
     {
       "color": "#71368A",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 8,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 5,
       "is_predefined": true,
       "name": "PREDEF_CAT_FORM"
     },
     {
       "color": "#E91E63",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 9,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 6,
       "is_predefined": true,
       "name": "PREDEF_CAT_QUOTATION"
     },
     {
       "color": "#C45911",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 13,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 7,
       "is_predefined": true,
       "name": "PREDEF_CAT_BANKING"
     },
     {
       "color": "#E74C3C",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 15,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 8,
       "is_predefined": true,
       "name": "PREDEF_CAT_TAXATION"
     },
     {
       "color": "#9D00FF",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 17,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 9,
       "is_predefined": true,
       "name": "PREDEF_CAT_INSURANCE"
     },
     {
       "color": "#00B0F0",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 18,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 10,
       "is_predefined": true,
       "name": "PREDEF_CAT_TRANSPORTATION"
     },
     {
       "color": "#2E77B5",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 22,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 11,
       "is_predefined": true,
       "name": "PREDEF_CAT_WORK"
     },
     {
       "color": "#70AD47",
-      "created_at": 1643969478,
-      "created_by": 1,
-      "id": 23,
+      "created_at": 1717588987,
+      "created_by": 0,
+      "id": 12,
       "is_predefined": true,
       "name": "PREDEF_CAT_HOBBIES"
     },
     {
-      "color": "#70AD47",
-      "created_at": 1659000255,
+      "color": "#713D47",
+      "created_at": 1717588987,
       "created_by": 0,
-      "id": 27,
+      "id": 13,
       "is_predefined": true,
       "name": "PREDEF_CAT_RESUME"
-    },
-    {
-      "color": "#ad1457",
-      "created_at": 1669190277,
-      "created_by": 10111213,
-      "id": 36,
-      "is_predefined": false,
-      "name": "test4"
     }
   ],
   "categories_permissions": {
@@ -131,7 +129,7 @@
     "can_put_on_file": true,
     "can_read_on_file": true
   },
-  "created_at": 1643969336,
+  "created_at": 1716376329,
   "description": "",
   "expired_at": null,
   "id": 98765,
@@ -142,7 +140,7 @@
   "maintenance_at": null,
   "maintenance_types": [
   ],
-  "name": "John Appleseed",
+  "name": "Apple Dev Developper",
   "pack": {
     "capabilities": {
       "can_access_dashboard": false,
@@ -151,6 +149,7 @@
       "can_set_sharelink_expiration": false,
       "can_set_sharelink_password": false,
       "can_set_trash_duration": false,
+      "can_use_content_search": false,
       "use_dropbox": false,
       "use_folder_custom_color": false,
       "use_manage_right": false,
@@ -160,7 +159,7 @@
     "name": "free"
   },
   "preferences": {
-    "color": "#009688",
+    "color": "#03A9F4",
     "default": false,
     "default_page": "private",
     "hide": false
@@ -174,10 +173,11 @@
   "role": "admin",
   "settings": {
     "ai_scan": {
-      "has_approved": true,
+      "has_approved": null,
       "has_approved_ai_categories": null,
+      "has_approved_content_search": false,
       "is_enabled": false,
-      "updated_at": 1643969602
+      "updated_at": null
     },
     "max_keep_deleted_user": "6 months",
     "versioning": {
@@ -195,24 +195,22 @@
     "drive": [
     ]
   },
-  "updated_at": 1702650132,
-  "used_size": 4586343632,
+  "updated_at": 1719562963,
+  "used_size": 4135228267,
   "users": {
     "account": [
-      10111213,
-      10111214,
-      10111215
+      13
     ],
     "drive": [
-      10111216
+      14
     ],
     "external": [
     ],
     "internal": [
-      10111217
+      15
     ]
   },
   "users_count": 1,
   "users_quota": 1,
-  "version": "3.6"
+  "version": "3.7"
 }

@@ -104,9 +104,10 @@ public final class FileActionsHelper {
 
     #if !ISEXTENSION
     public static func save(file: File, from viewController: UIViewController? = nil, showSuccessSnackBar: Bool = true) {
+        @InjectService var appNavigable: AppNavigable
         let presenterViewController = viewController != nil
             ? viewController
-            : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+            : appNavigable.topMostViewController
         guard presenterViewController as? UIDocumentPickerViewController == nil else { return }
 
         let convertedType = file.convertedType

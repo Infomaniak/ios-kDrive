@@ -21,6 +21,12 @@ import XCTest
 
 /// Unit Tests of the RangeProvider
 final class UTRangeProvider: XCTestCase {
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
+    }
+
     func testAllRanges_zeroes() throws {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!

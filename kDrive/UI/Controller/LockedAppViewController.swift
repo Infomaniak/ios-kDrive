@@ -24,6 +24,7 @@ import UIKit
 
 class LockedAppViewController: UIViewController {
     @LazyInjectService private var appLockHelper: AppLockHelper
+    @LazyInjectService private var appNavigable: AppNavigable
 
     @IBOutlet weak var unlockAppButton: IKLargeButton!
 
@@ -45,7 +46,7 @@ class LockedAppViewController: UIViewController {
 
     func unlockApp() {
         appLockHelper.setTime()
-        (UIApplication.shared.delegate as? AppDelegate)?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: true)
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {

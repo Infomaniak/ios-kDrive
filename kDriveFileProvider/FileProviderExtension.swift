@@ -85,7 +85,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         var currentDriveFileManager: DriveFileManager?
         if let objectId = domain?.identifier.rawValue,
            let drive = driveInfosManager.getDrive(primaryKey: objectId),
-           let driveFileManager = accountManager.getDriveFileManager(for: drive) {
+           let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) {
             currentDriveFileManager = driveFileManager
         } else {
             currentDriveFileManager = accountManager.currentDriveFileManager

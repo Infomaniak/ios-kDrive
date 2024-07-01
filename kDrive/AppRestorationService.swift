@@ -21,8 +21,23 @@ import InfomaniakDI
 import kDriveCore
 import UIKit
 
-// TODO: Refactor with Scenes / NSUserActivity
-public final class AppRestorationService {
+/// Something that centralize the App Restoration logic
+public protocol AppRestorationServiceable {
+    /// Is restoration enabled
+    var shouldRestoreApplicationState: Bool { get }
+
+    /// Should save the scene sate
+    var shouldSaveApplicationState: Bool { get }
+
+    /// Saves a restoration version, for forward compatibility
+    func saveRestorationVersion()
+
+    func reloadAppUI(for driveId: Int, userId: Int) async
+}
+
+public final class AppRestorationService: AppRestorationServiceable {
+    @LazyInjectService var appNavigable: AppNavigable
+
     /// Path where the state restoration state is saved
     private static let statePath = FileManager.default
         .urls(for: .libraryDirectory, in: .userDomainMask)
@@ -32,34 +47,35 @@ public final class AppRestorationService {
     @LazyInjectService private var accountManager: AccountManageable
 
     /// State restoration version
-    private static let currentStateVersion = 4
-
-    /// State restoration key
-    private static let appStateVersionKey = "appStateVersionKey"
+    private static let currentStateVersion = 5
 
     public init() {
         // META: keep SonarCloud happy
     }
 
-    public func shouldSaveApplicationState(coder: NSCoder) -> Bool {
-        Log.appDelegate("shouldSaveApplicationState")
-        Log.appDelegate("Restoration files:\(String(describing: Self.statePath))")
-        coder.encode(Self.currentStateVersion, forKey: Self.appStateVersionKey)
+    public var shouldSaveApplicationState: Bool {
+        Log.sceneDelegate("shouldSaveApplicationState")
+        Log.sceneDelegate("Restoration files:\(String(describing: Self.statePath))")
+
         return true
     }
 
-    public func shouldRestoreApplicationState(coder: NSCoder) -> Bool {
-        return false
-        /* TODO: Rework app restoration before re-enabling
-         let encodedVersion = coder.decodeInteger(forKey: Self.appStateVersionKey)
-         let shouldRestoreApplicationState = Self.currentStateVersion == encodedVersion &&
-             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
-         Log.appDelegate("shouldRestoreApplicationState:\(shouldRestoreApplicationState)")
-         return shouldRestoreApplicationState*/
+    public var shouldRestoreApplicationState: Bool {
+        let storedVersion = UserDefaults.shared.appRestorationVersion
+        let shouldRestore = Self.currentStateVersion == storedVersion &&
+            !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
+
+        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestore) appRestorationVersion:\(storedVersion)")
+        return shouldRestore
     }
 
-    public func reloadAppUI(for drive: Drive) {
-        accountManager.setCurrentDriveForCurrentAccount(drive: drive)
+    public func saveRestorationVersion() {
+        UserDefaults.shared.appRestorationVersion = Self.currentStateVersion
+        Log.sceneDelegate("saveRestorationVersion to \(Self.currentStateVersion)")
+    }
+
+    public func reloadAppUI(for driveId: Int, userId: Int) async {
+        accountManager.setCurrentDriveForCurrentAccount(for: driveId, userId: userId)
         accountManager.saveAccounts()
 
         guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
@@ -67,12 +83,8 @@ public final class AppRestorationService {
         }
 
         // Read the last tab selected in order to properly reload the App's UI.
-        // This should be migrated to NSUserActivity at some point
         let lastSelectedTab = UserDefaults.shared.lastSelectedTab
-        let newMainTabViewController = MainTabViewController(
-            driveFileManager: currentDriveFileManager,
-            selectedIndex: lastSelectedTab
-        )
-        (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+
+        await appNavigable.showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: lastSelectedTab)
     }
 }
