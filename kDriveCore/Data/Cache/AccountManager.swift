@@ -384,8 +384,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     private var nextAvailableAccount: Account? {
-        let accounts = accounts.values
-        guard accounts.count > 1 else {
+        let allAccounts = accounts.values
+        guard allAccounts.count > 1 else {
             return nil
         }
 
@@ -393,13 +393,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        guard let currentIndex = accounts.firstIndex(of: currentAccount) else {
+        guard let currentIndex = allAccounts.firstIndex(of: currentAccount) else {
             return nil
         }
 
         let nextIndex = currentIndex + 1
-        guard let nextAccount = accounts[safe: nextIndex] else {
-            return accounts.first
+        guard let nextAccount = allAccounts[safe: nextIndex] else {
+            return allAccounts.first
         }
 
         return nextAccount
