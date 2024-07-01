@@ -30,7 +30,7 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.0")),
                           .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "0.0.4")),
                           .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "5.0.0")),
-                          .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.43.0")),
+                          .package(url: "https://github.com/realm/realm-swift", .exact("10.49.0")),
                           .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
                           .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "7.6.2")),
                           .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
@@ -93,8 +93,8 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
                                  sources: [
-                                    "kDriveTests/**",
-                                    "kDriveTestShared/**"
+                                     "kDriveTests/**",
+                                     "kDriveTestShared/**"
                                  ],
                                  resources: [
                                      "kDriveTests/**/*.jpg",
@@ -111,8 +111,8 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
                                  sources: [
-                                    "kDriveAPITests/**", 
-                                    "kDriveTestShared/**"
+                                     "kDriveAPITests/**",
+                                     "kDriveTestShared/**"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
@@ -181,11 +181,12 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
                                  sources: [
-                                    "kDriveFileProvider/**", 
-                                    "kDrive/Utils/AppFactoryService.swift", 
-                                    "kDrive/Utils/NavigationManager.swift"],
+                                     "kDriveFileProvider/**",
+                                     "kDrive/Utils/AppFactoryService.swift",
+                                     "kDrive/Utils/NavigationManager.swift"
+                                 ],
                                  resources: [
-                                    "kDrive/**/PrivacyInfo.xcprivacy"
+                                     "kDrive/**/PrivacyInfo.xcprivacy"
                                  ],
                                  headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",

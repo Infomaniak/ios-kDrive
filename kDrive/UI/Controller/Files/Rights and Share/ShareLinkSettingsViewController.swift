@@ -220,32 +220,6 @@ class ShareLinkSettingsViewController: UIViewController {
         return Storyboard.files
             .instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
     }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(file.id, forKey: "FileId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
-        // Update UI
-        initOptions()
-        updateButton()
-        tableView.reloadData()
-    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource

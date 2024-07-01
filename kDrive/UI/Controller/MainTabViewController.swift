@@ -24,6 +24,14 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+/// Enum to explicit tab names
+enum MainTabIndex: Int {
+    case home = 0
+    case files = 1
+    case gallery = 3
+    case profile = 4
+}
+
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
@@ -83,16 +91,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewWillAppear(animated)
         configureTabBar()
         updateTabBarProfilePicture()
-    }
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-        coder.encode(selectedIndex, forKey: "SelectedIndex")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-        selectedIndex = coder.decodeInteger(forKey: "SelectedIndex")
     }
 
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
@@ -264,15 +262,29 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        UserDefaults.shared.lastSelectedTab = tabBarController.selectedIndex
+        let selectedIndex = tabBarController.selectedIndex
+
+        UserDefaults.shared.lastSelectedTab = selectedIndex
+        saveSelectedTabUserActivity(selectedIndex)
+
         updateCenterButton()
+    }
+
+    // MARK: - State restoration
+
+    private func saveSelectedTabUserActivity(_ index: Int) {
+        let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]
+        let userActivity = currentUserActivity
+        userActivity.userInfo = metadata
+
+        view.window?.windowScene?.userActivity = userActivity
     }
 }
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
 extension MainTabViewController: UpdateAccountDelegate {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,7 +13,7 @@
         <!--Westworld-->
         <scene sceneID="JJW-z8-kTh">
             <objects>
-                <collectionViewController storyboardIdentifier="FileListViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="FileListViewController" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="yCM-Om-3CZ" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -48,7 +48,7 @@
         <!--Importation en cours-->
         <scene sceneID="naE-ZF-Fiy">
             <objects>
-                <tableViewController storyboardIdentifier="UploadQueueFoldersViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="uHr-zE-0EB" customClass="UploadQueueFoldersViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="UploadQueueFoldersViewController" id="uHr-zE-0EB" customClass="UploadQueueFoldersViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="aaj-mp-ccy">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -71,7 +71,7 @@
         <!--Importation en cours-->
         <scene sceneID="VST-BU-uqD">
             <objects>
-                <viewController storyboardIdentifier="UploadQueueViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="nN3-5p-EMr" customClass="UploadQueueViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UploadQueueViewController" hidesBottomBarWhenPushed="YES" id="nN3-5p-EMr" customClass="UploadQueueViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Gsf-qq-7Sa">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -127,7 +127,7 @@
         <!--File Detail View Controller-->
         <scene sceneID="9sZ-cC-ENE">
             <objects>
-                <viewController storyboardIdentifier="FileDetailViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="mHr-Px-vFn" customClass="FileDetailViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="FileDetailViewController" hidesBottomBarWhenPushed="YES" id="mHr-Px-vFn" customClass="FileDetailViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8xO-wI-c0p">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -184,7 +184,7 @@
         <!--Share Link Settings View Controller-->
         <scene sceneID="HZ5-Aa-1K1">
             <objects>
-                <viewController storyboardIdentifier="ShareLinkSettingsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="c84-xf-u0q" customClass="ShareLinkSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ShareLinkSettingsViewController" id="c84-xf-u0q" customClass="ShareLinkSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="hWA-co-zIc">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -217,7 +217,7 @@
         <!--Gérer les catégories-->
         <scene sceneID="zJK-Lt-WLk">
             <objects>
-                <tableViewController storyboardIdentifier="ManageCategoriesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="1T1-ZU-t6a" customClass="ManageCategoriesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ManageCategoriesViewController" id="1T1-ZU-t6a" customClass="ManageCategoriesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" allowsMultipleSelection="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" id="zar-Ox-jwP">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -247,7 +247,7 @@
         <!--Créer une catégorie-->
         <scene sceneID="Rph-IY-9AO">
             <objects>
-                <tableViewController storyboardIdentifier="EditCategoryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="PRb-bx-VPS" customClass="EditCategoryViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="EditCategoryViewController" id="PRb-bx-VPS" customClass="EditCategoryViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" id="c1A-G2-eFE">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -298,7 +298,7 @@
         <!--Preview View Controller-->
         <scene sceneID="WAk-Xm-vgO">
             <objects>
-                <viewController storyboardIdentifier="PreviewViewController" extendedLayoutIncludesOpaqueBars="YES" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cTq-SF-IvZ" customClass="PreviewViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PreviewViewController" extendedLayoutIncludesOpaqueBars="YES" hidesBottomBarWhenPushed="YES" id="cTq-SF-IvZ" customClass="PreviewViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="XG8-QT-Clg">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -349,7 +349,7 @@
         <!--Title Size Adjusting Navigation Controller-->
         <scene sceneID="5PS-aw-ccj">
             <objects>
-                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCoreUI" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCoreUI" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-filled-tab" id="FVI-Sh-h25">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
                     </tabBarItem>
@@ -371,7 +371,7 @@
         <!--Partage et droits du dossier Name-->
         <scene sceneID="Meu-fU-x3Z">
             <objects>
-                <viewController storyboardIdentifier="ShareAndRightsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jan-Kd-tqe" customClass="ShareAndRightsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ShareAndRightsViewController" hidesBottomBarWhenPushed="YES" id="jan-Kd-tqe" customClass="ShareAndRightsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="s5J-hM-3Lw">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -423,7 +423,7 @@
         <!--Sélectionner le droit-->
         <scene sceneID="4Xd-IM-nVK">
             <objects>
-                <viewController storyboardIdentifier="RightsSelectionViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="pa0-zX-qJK" customClass="RightsSelectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RightsSelectionViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="pa0-zX-qJK" customClass="RightsSelectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="vrM-ZE-S6f">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -481,7 +481,7 @@
         <!--Partager le dossier-->
         <scene sceneID="ZhU-6K-d5L">
             <objects>
-                <viewController storyboardIdentifier="InviteUserViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Aw1-qf-pda" customClass="InviteUserViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="InviteUserViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="Aw1-qf-pda" customClass="InviteUserViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pd9-N5-6Lf">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -539,7 +539,7 @@
         <!--Gérer la boîte de dépôt-->
         <scene sceneID="ThO-qS-flQ">
             <objects>
-                <viewController storyboardIdentifier="ManageDropBoxViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="iUR-vc-8XP" customClass="ManageDropBoxViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ManageDropBoxViewController" hidesBottomBarWhenPushed="YES" id="iUR-vc-8XP" customClass="ManageDropBoxViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ADM-5M-DdB">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -578,7 +578,7 @@
         <!--Activités-->
         <scene sceneID="jQX-tY-pqn">
             <objects>
-                <viewController storyboardIdentifier="RecentActivityFilesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="SXx-tI-VhM" customClass="RecentActivityFilesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RecentActivityFilesViewController" hidesBottomBarWhenPushed="YES" id="SXx-tI-VhM" customClass="RecentActivityFilesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="KJR-0t-Oxg">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -646,7 +646,7 @@
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="previewBackgroundColor">
             <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

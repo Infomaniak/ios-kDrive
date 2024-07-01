@@ -175,6 +175,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: ["Home"])
+
+        saveSceneState()
     }
 
     @objc func searchButtonPressed() {
@@ -324,7 +326,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     // MARK: - Switch account delegate
 
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         if isViewLoaded {
             reloadTopRows()
         }
@@ -334,6 +336,12 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     func scrollToTop() {
         collectionView?.scrollToTop(animated: true, navigationController: nil)
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }
 

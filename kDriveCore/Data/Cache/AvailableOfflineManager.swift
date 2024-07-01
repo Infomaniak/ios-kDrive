@@ -39,7 +39,7 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
 
         for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             let frozenDrive = drive.freezeIfNeeded()
-            guard let driveFileManager = accountManager.getDriveFileManager(for: frozenDrive) else {
+            guard let driveFileManager = accountManager.getDriveFileManager(for: frozenDrive.id, userId: drive.userId) else {
                 continue
             }
 

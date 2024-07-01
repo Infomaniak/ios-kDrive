@@ -29,6 +29,7 @@ class SwitchUserViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
@@ -90,8 +91,7 @@ class SwitchUserViewController: UIViewController {
             MatomoUtils.connectUser()
 
             accountManager.switchAccount(newAccount: account)
-            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+            appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                 errorType: .noDrive,

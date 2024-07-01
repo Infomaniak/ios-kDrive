@@ -24,6 +24,7 @@ import UIKit
 
 class PreloadingViewController: UIViewController {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var appNavigable: AppNavigable
 
     private let currentAccount: Account
 
@@ -61,6 +62,7 @@ class PreloadingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = KDriveAsset.backgroundColor.color
+
         setupViews()
 
         preloadAccountAndDrives()
@@ -90,15 +92,15 @@ class PreloadingViewController: UIViewController {
 
     func preloadAccountAndDrives() {
         Task {
-            guard let appDelegate = (UIApplication.shared.delegate as? AppDelegate) else { return }
             do {
                 let _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
 
-                if let currentDriveFileManager = accountManager.currentDriveFileManager {
-                    appDelegate.prepareRootViewController(currentState: .mainViewController(currentDriveFileManager))
+                if let currentDriveFileManager = self.accountManager.currentDriveFileManager {
+                    let state = RootViewControllerState.mainViewController(driveFileManager: currentDriveFileManager)
+                    self.appNavigable.prepareRootViewController(currentState: state, restoration: false)
                 } else {
-                    appDelegate.prepareRootViewController(currentState: .onboarding)
+                    self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
                 }
             } catch DriveError.NoDriveError.noDrive {
                 let driveErrorViewController = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
@@ -111,7 +113,7 @@ class PreloadingViewController: UIViewController {
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
-                appDelegate.prepareRootViewController(currentState: .onboarding)
+                self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }
     }

@@ -33,7 +33,7 @@ protocol PreviewContentCellDelegate: AnyObject {
     func openWith(from: UIView)
 }
 
-class PreviewViewController: UIViewController, PreviewContentCellDelegate {
+class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
     class PreviewError {
@@ -80,6 +80,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             setTitle()
+            saveSceneState()
         }
     }
 
@@ -260,6 +261,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
         heightToHide = backButton.frame.minY
         MatomoUtils.track(view: [MatomoUtils.Views.preview.displayName, "File"])
+
+        saveSceneState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -580,58 +583,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(previewFiles.map(\.id), forKey: "Files")
-        coder.encode(currentIndex.row, forKey: "CurrentIndex")
-        coder.encode(initialLoading, forKey: "InitialLoading")
-        coder.encode(normalFolderHierarchy, forKey: "NormalFolderHierarchy")
-        coder.encode(fromActivities, forKey: "FromActivities")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        initialLoading = coder.decodeBool(forKey: "InitialLoading")
-        normalFolderHierarchy = coder.decodeBool(forKey: "NormalFolderHierarchy")
-        fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
-        fromActivities = coder.decodeBool(forKey: "FromActivities")
-        if fromActivities {
-            floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
-        }
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        self.driveFileManager = driveFileManager
-        let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-
-        let matchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("id IN %@", previewFileIds)
-        }
-
-        previewFiles = Array(matchedFiles)
-
-        let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
-        if decodedIndex >= previewFiles.count {
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        currentIndex = IndexPath(row: decodedIndex, section: 0)
-
-        // Update UI
-        Task { @MainActor [self] in
-            collectionView.reloadData()
-            updateFileForCurrentIndex()
-            collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
-            updateNavigationBar()
-            downloadFileIfNeeded(at: currentIndex)
-        }
-        observeFileUpdated()
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.Carousel.filesIds.rawValue: previewFiles.map(\.id),
+            SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndex.row,
+            SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
+            SceneRestorationValues.Carousel.fromActivities.rawValue: fromActivities
+        ]
     }
 }
 

@@ -32,8 +32,13 @@ extension SelectSwitchDriveDelegate {
         } else {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")
 
-            @InjectService var appRestorationService: AppRestorationService
-            appRestorationService.reloadAppUI(for: drive)
+            let driveId = drive.id
+            let driveUserId = drive.userId
+
+            Task {
+                @InjectService var appRestorationService: AppRestorationServiceable
+                await appRestorationService.reloadAppUI(for: driveId, userId: driveUserId)
+            }
         }
     }
 }

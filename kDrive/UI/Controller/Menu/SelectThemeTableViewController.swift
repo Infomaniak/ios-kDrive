@@ -16,11 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class SelectThemeTableViewController: UITableViewController {
+    @LazyInjectService private var appNavigable: AppNavigable
+
     private var tableContent: [Theme] = Theme.allCases
     private var selectedTheme: Theme!
 
@@ -63,8 +66,7 @@ class SelectThemeTableViewController: UITableViewController {
         let theme = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
         UserDefaults.shared.theme = theme
-        (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme
-            .interfaceStyle
+        appNavigable.updateTheme()
         navigationController?.popViewController(animated: true)
     }
 }

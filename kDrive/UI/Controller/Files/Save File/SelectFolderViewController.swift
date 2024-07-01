@@ -183,19 +183,4 @@ class SelectFolderViewController: FileListViewController {
             navigationController?.pushViewController(nextVC, animated: true)
         }
     }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(disabledDirectoriesSelection, forKey: "DisabledDirectories")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        disabledDirectoriesSelection = coder.decodeObject(forKey: "DisabledDirectories") as? [Int] ?? []
-        setUpDirectory()
-    }
 }
