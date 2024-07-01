@@ -34,12 +34,14 @@ final class UTRootViewControllerState: XCTestCase {
         refreshToken: "",
         scope: "",
         tokenType: "",
-        userId: 0,
+        userId: 1234,
         expirationDate: Date()
     ))
 
-    override func setUpWithError() throws {
-        SimpleResolver.sharedResolver.removeAll()
+    override func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
 
         let services = [
             Factory(type: KeychainHelper.self) { _, _ in
@@ -83,6 +85,7 @@ final class UTRootViewControllerState: XCTestCase {
                 AppLockHelper()
             }
         ]
+
         for service in services {
             SimpleResolver.sharedResolver.store(factory: service)
         }
@@ -150,6 +153,8 @@ final class UTRootViewControllerState: XCTestCase {
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
             accountManager.accounts.append(self.fakeAccount)
+            accountManager.currentAccount = self.fakeAccount
+            accountManager.currentUserId = self.fakeAccount.userId
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
@@ -188,6 +193,8 @@ final class UTRootViewControllerState: XCTestCase {
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
             accountManager.accounts.append(self.fakeAccount)
+            accountManager.currentAccount = self.fakeAccount
+            accountManager.currentUserId = self.fakeAccount.userId
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
                 apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)
@@ -196,12 +203,19 @@ final class UTRootViewControllerState: XCTestCase {
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
 
+        @InjectService var accountManager: AccountManageable
+        XCTAssertNotNil(accountManager.currentAccount, "expecting a user logged in")
+
         // WHEN
         let currentState = RootViewControllerState.getCurrentState()
 
         // THEN
-        @InjectService var accountManager: AccountManageable
-        XCTAssertEqual(currentState, .mainViewController(accountManager.currentDriveFileManager!), "State should be mainview")
+        switch currentState {
+        case .preloading(let account):
+            XCTAssertEqual(account.id, fakeAccount.userId)
+        default:
+            XCTFail("Should be preloading \(fakeAccount), got \(currentState)")
+        }
     }
 }
 

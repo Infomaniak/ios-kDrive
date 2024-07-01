@@ -93,8 +93,8 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
                                  sources: [
-                                    "kDriveTests/**",
-                                    "kDriveTestShared/**"
+                                     "kDriveTests/**",
+                                     "kDriveTestShared/**"
                                  ],
                                  resources: [
                                      "kDriveTests/**/*.jpg",
@@ -111,8 +111,8 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
                                  sources: [
-                                    "kDriveAPITests/**", 
-                                    "kDriveTestShared/**"
+                                     "kDriveAPITests/**",
+                                     "kDriveTestShared/**"
                                  ],
                                  dependencies: [
                                      .target(name: "kDrive")
@@ -181,11 +181,12 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
                                  sources: [
-                                    "kDriveFileProvider/**", 
-                                    "kDrive/Utils/AppFactoryService.swift", 
-                                    "kDrive/Utils/NavigationManager.swift"],
+                                     "kDriveFileProvider/**",
+                                     "kDrive/Utils/AppFactoryService.swift",
+                                     "kDrive/Utils/NavigationManager.swift"
+                                 ],
                                  resources: [
-                                    "kDrive/**/PrivacyInfo.xcprivacy"
+                                     "kDrive/**/PrivacyInfo.xcprivacy"
                                  ],
                                  headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",

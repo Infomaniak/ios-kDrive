@@ -22,18 +22,10 @@ import XCTest
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
-    override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
-    }
-
-    override func setUp() {
-        SimpleResolver.sharedResolver.removeAll()
-        SimpleResolver.register([
-            Factory(type: AppContextServiceable.self) { _, _ in
-                // We fake the main app context
-                return AppContextService(context: .app)
-            }
-        ])
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
     }
 
     // MARK: - readFileByteSize

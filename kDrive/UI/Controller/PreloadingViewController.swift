@@ -62,6 +62,7 @@ class PreloadingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = KDriveAsset.backgroundColor.color
+
         setupViews()
 
         preloadAccountAndDrives()
