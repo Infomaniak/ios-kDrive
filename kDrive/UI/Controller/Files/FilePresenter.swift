@@ -44,7 +44,7 @@ final class FilePresenter {
         viewController.navigationController?.popToRootViewController(animated: false)
 
         rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabIndex.files.rawValue
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
 
             guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
                 return

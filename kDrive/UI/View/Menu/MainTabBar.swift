@@ -16,12 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
+/// Delegation from MainTabBar towards MainTabViewController
 protocol MainTabBarDelegate: AnyObject {
     func plusButtonPressed()
+    func avatarLongTouch()
+    func avatarDoubleTap()
 }
 
 final class MainTabBar: UITabBar {
@@ -73,6 +77,7 @@ final class MainTabBar: UITabBar {
         self.shapeLayer = shapeLayer
         setupBackgroundGradient()
         setupMiddleButton()
+        setupGestureRecognizer()
     }
 
     override func layoutSubviews() {
@@ -161,6 +166,26 @@ final class MainTabBar: UITabBar {
         centerButton.elevation = 16
         addSubview(centerButton)
         centerButton.addTarget(self, action: #selector(centerButtonAction), for: .touchUpInside)
+    }
+
+    private func setupGestureRecognizer() {
+        let longTouch = UILongPressGestureRecognizer(target: self,
+                                                     action: #selector(Self.handleLongTouch(recognizer:)))
+        addGestureRecognizer(longTouch)
+    }
+
+    @objc func handleLongTouch(recognizer: UITapGestureRecognizer) {
+        guard recognizer.state == .began else {
+            return
+        }
+
+        // Touch is over the 5th button's x position
+        let touchPoint = recognizer.location(in: self)
+        guard touchPoint.x > bounds.width / 5 * 4 else {
+            return
+        }
+
+        tabDelegate?.avatarLongTouch()
     }
 
     @objc func centerButtonAction(sender: UIButton) {

@@ -75,6 +75,8 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func switchAccount(newAccount: Account) {}
 
+    func switchToNextAvailableAccount() {}
+
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {}
 
     func addAccount(account: Account, token apiToken: ApiToken) {}
