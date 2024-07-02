@@ -40,12 +40,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private var reachabilityListener: ReachabilityListener!
 
+    @LazyInjectService private var appNavigable: AppNavigable
+
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
-    @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
+    @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
 
     // MARK: - UIApplicationDelegate
 
