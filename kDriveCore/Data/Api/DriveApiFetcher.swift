@@ -174,11 +174,11 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.shareLink(file: file)))
     }
 
-    public func createShareLink(for file: ProxyFile, isFreeDrive: Bool) async throws -> ShareLink {
+    public func createShareLink(for file: ProxyFile, right: ShareLinkPermission, isFreeDrive: Bool) async throws -> ShareLink {
         try await perform(request: authenticatedRequest(
             .shareLink(file: file),
             method: .post,
-            parameters: ShareLinkSettings(right: .public, isFreeDrive: isFreeDrive)
+            parameters: ShareLinkSettings(right: right, isFreeDrive: isFreeDrive)
         ))
     }
 

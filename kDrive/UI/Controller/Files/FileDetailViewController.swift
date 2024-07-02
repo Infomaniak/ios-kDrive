@@ -668,7 +668,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC
-                    .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
+                    .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.password).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
                 rightsSelectionVC.delegate = self
             }
@@ -926,8 +926,8 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         let right = ShareLinkPermission(rawValue: value)!
-        Task { [proxyFile = file.proxify()] in
-            _ = try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
+        Task { [frozenFile = file.freezeIfNeeded()] in
+            _ = try await driveFileManager.createOrUpdateShareLink(frozenFile: frozenFile, right: right)
             self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
         }
     }

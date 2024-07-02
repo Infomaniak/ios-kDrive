@@ -1029,24 +1029,18 @@ public final class DriveFileManager {
     }
 
     @discardableResult
-    public func createOrRemoveShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink? {
-        if right == .restricted {
-            // Remove share link
-            let response = try await removeShareLink(for: file)
-            if response {
-                return nil
-            } else {
-                throw DriveError.serverError
-            }
-        } else {
-            // Update share link
-            let shareLink = try await createShareLink(for: file)
-            return shareLink
+    public func createOrUpdateShareLink(frozenFile: File, right: ShareLinkPermission) async throws -> ShareLink? {
+        let proxyFile = frozenFile.proxify()
+        if frozenFile.hasSharelink {
+            try? await removeShareLink(for: proxyFile)
         }
+
+        let shareLink = try await createShareLink(for: proxyFile, right: right)
+        return shareLink
     }
 
-    public func createShareLink(for file: ProxyFile) async throws -> ShareLink {
-        let shareLink = try await apiFetcher.createShareLink(for: file, isFreeDrive: drive.isFreePack)
+    public func createShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink {
+        let shareLink = try await apiFetcher.createShareLink(for: file, right: right, isFreeDrive: drive.isFreePack)
         // Fix for API not returning share link activities
         setFileShareLink(file: file, shareLink: shareLink)
         return shareLink.freeze()
@@ -1062,6 +1056,7 @@ public final class DriveFileManager {
         return response
     }
 
+    @discardableResult
     public func removeShareLink(for file: ProxyFile) async throws -> Bool {
         let response = try await apiFetcher.removeShareLink(for: file)
         if response {

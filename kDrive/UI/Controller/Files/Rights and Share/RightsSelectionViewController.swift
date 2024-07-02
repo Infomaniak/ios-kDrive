@@ -47,7 +47,7 @@ struct Right {
     var documentDescription: String
 
     static let shareLinkRights = [
-        Right(key: ShareLinkPermission.restricted.rawValue,
+        Right(key: ShareLinkPermission.password.rawValue,
               title: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveResourcesAsset.lock.image,
               fileDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,

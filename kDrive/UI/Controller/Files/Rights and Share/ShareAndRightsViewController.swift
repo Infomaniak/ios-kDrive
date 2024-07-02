@@ -110,7 +110,7 @@ class ShareAndRightsViewController: UIViewController {
                 rightsSelectionVC.fileAccessElement = element
             } else {
                 rightsSelectionVC
-                    .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
+                    .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.password).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
@@ -241,10 +241,10 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         if shareLinkRights {
-            let right = ShareLinkPermission(rawValue: value)!
-            Task { [proxyFile = file.proxify()] in
+            let newRight = ShareLinkPermission(rawValue: value)!
+            Task { [frozenFile = file.freezeIfNeeded()] in
                 do {
-                    try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
+                    try await driveFileManager.createOrUpdateShareLink(frozenFile: frozenFile, right: newRight)
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)

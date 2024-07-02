@@ -96,27 +96,47 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             initWithoutInsets()
         }
         layoutIfNeeded()
+        guard let sharelink = file.sharelink else {
+            return
+        }
+
         if let shareLink = file.sharelink {
-            shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
-            let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable
-                .shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle)
-                .lowercased()
-            let documentType = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkTypeFolder : file
-                .isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkTypeDocument : KDriveResourcesStrings.Localizable
-                .shareLinkTypeFile
-            let password = shareLink.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable
-                .shareLinkPublicRightDescriptionPassword : ""
-            let date = shareLink.validUntil != nil ? KDriveResourcesStrings.Localizable
-                .shareLinkPublicRightDescriptionDate(Constants.formatDate(shareLink.validUntil!)) : ""
-            shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.shareLinkPublicRightDescription(
-                rightPermission,
-                documentType,
-                password,
-                date
-            )
+            switch sharelink.shareLinkPermission {
+            case .password:
+                shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
+                shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightFileDescriptionShort
+                shareIconImageView.image = KDriveResourcesAsset.lock.image
+            case .public:
+                shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
+                let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable
+                    .shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle)
+                    .lowercased()
+                let documentType = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkTypeFolder : file
+                    .isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkTypeDocument : KDriveResourcesStrings.Localizable
+                    .shareLinkTypeFile
+                let password = shareLink.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable
+                    .shareLinkPublicRightDescriptionPassword : ""
+                let date = shareLink.validUntil != nil ? KDriveResourcesStrings.Localizable
+                    .shareLinkPublicRightDescriptionDate(Constants.formatDate(shareLink.validUntil!)) : ""
+                shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.shareLinkPublicRightDescription(
+                    rightPermission,
+                    documentType,
+                    password,
+                    date
+                )
+                shareIconImageView.image = KDriveResourcesAsset.unlock.image
+            default:
+                // TODO: default handling
+                shareLinkTitleLabel.text = ""
+                rightArrow.isHidden = true
+                shareIconImageView.image = nil
+            }
+
             shareLinkStackView.isHidden = false
             url = shareLink.url
-            shareIconImageView.image = KDriveResourcesAsset.unlock.image
         } else if file.isDropbox {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkDescription
@@ -124,13 +144,10 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
         } else {
-            shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
-            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
-                .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
-                .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
-                .shareLinkRestrictedRightFileDescriptionShort
-            shareLinkStackView.isHidden = true
-            shareIconImageView.image = KDriveResourcesAsset.lock.image
+            // TODO: default handling
+            shareLinkTitleLabel.text = ""
+            rightArrow.isHidden = true
+            shareIconImageView.image = nil
         }
     }
 

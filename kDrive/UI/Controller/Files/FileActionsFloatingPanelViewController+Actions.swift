@@ -37,7 +37,7 @@ extension FileActionsFloatingPanelViewController {
         let offline = ReachabilityListener.instance.currentStatus == .offline
 
         quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
-        quickActions.forEach { action in
+        for action in quickActions {
             switch action {
             case .shareAndRights:
                 if !file.capabilities.canShare || offline {
@@ -197,9 +197,16 @@ extension FileActionsFloatingPanelViewController {
         } else {
             // Create share link
             setLoading(true, action: action, at: indexPath)
-            Task { [proxyFile = file.proxify()] in
+            Task { [frozenFile = file.freezeIfNeeded()] in
+                let proxyFile = frozenFile.proxify()
                 do {
-                    let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
+                    // TODO: Optimise API calls
+                    if frozenFile.hasSharelink {
+                        _ = try await driveFileManager.removeShareLink(for: proxyFile)
+                    }
+                    let permission = (indexPath.row == 0) ? ShareLinkPermission.password : ShareLinkPermission.public
+                    let shareLink = try await driveFileManager.createShareLink(for: proxyFile, right: permission)
+
                     setLoading(false, action: action, at: indexPath)
                     copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
                 } catch {
