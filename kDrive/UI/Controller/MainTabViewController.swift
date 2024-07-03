@@ -252,7 +252,6 @@ extension MainTabViewController: MainTabBarDelegate {
     }
 
     func avatarLongTouch() {
-        let viewControllers = viewControllers
         guard let rootNavigationController = viewControllers?[safe: MainTabBarIndex.profile.rawValue] as? UINavigationController
         else {
             return
@@ -275,7 +274,6 @@ extension MainTabViewController: MainTabBarDelegate {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
 
-        @InjectService var router: AppNavigable
         _ = router.showMainViewController(driveFileManager: accountManager,
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
     }
