@@ -35,81 +35,44 @@ public extension DriveFileManager {
         let offlineFiles = getAvailableOfflineFiles()
         guard !offlineFiles.isEmpty else { return }
 
-        let updatedFileResult = try await getUpdatedAvailableOffline()
+        let batchSize = 500
+        for i in stride(from: 0, through: offlineFiles.count - 1, by: batchSize) {
+            let batchFiles = Array(offlineFiles.dropFirst(i).prefix(batchSize))
+            let batchActivities = try await apiFetcher.filesLastActivities(files: batchFiles, drive: drive)
 
-        try database.writeTransaction { writableRealm in
-            for updatedFile in updatedFileResult.updatedFiles {
-                updateFile(updatedFile: updatedFile, writableRealm: writableRealm)
+            var updatedFiles = [File]()
+            try database.writeTransaction { writableRealm in
+                for activity in batchActivities {
+                    if let file = activity.file,
+                       [FileActivityType.fileUpdate, FileActivityType.fileRename].contains(activity.lastAction) {
+                        updateFile(updatedFile: file, lastActionAt: activity.lastActionAt, writableRealm: writableRealm)
+                        updatedFiles.append(file)
+                    } else if [FileActivityType.fileDelete, FileActivityType.fileTrash].contains(activity.lastAction) {
+                        removeFileInDatabase(
+                            fileUid: File.uid(driveId: drive.id, fileId: activity.fileId),
+                            cascade: false,
+                            writableRealm: writableRealm
+                        )
+                    }
+                }
             }
 
-            for deletedFileUid in updatedFileResult.deletedFileUids {
-                deleteOfflineFile(uid: deletedFileUid, writableRealm: writableRealm)
-            }
-
-            // After metadata update, download real files if needed
-            let updatedOfflineFiles = getAvailableOfflineFiles()
-            for updateOfflineFile in updatedOfflineFiles where updateOfflineFile.isLocalVersionOlderThanRemote {
-                DownloadQueue.instance.addToQueue(file: updateOfflineFile, userId: drive.userId)
+            for updatedFile in updatedFiles where updatedFile.isLocalVersionOlderThanRemote {
+                DownloadQueue.instance.addToQueue(file: updatedFile, userId: drive.userId)
             }
         }
     }
 
-    private func updateFile(updatedFile: File, writableRealm: Realm) {
+    private func updateFile(updatedFile: File, lastActionAt: Int?, writableRealm: Realm) {
         let oldFile = writableRealm.object(ofType: File.self, forPrimaryKey: updatedFile.uid)?.freeze()
-        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.standard, .extras], writableRealm: writableRealm)
+        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.all], writableRealm: writableRealm)
+        if let lastActionAt {
+            updatedFile.lastActionAt = lastActionAt
+        }
         _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, writableRealm: writableRealm)
     }
 
     private func deleteOfflineFile(uid: String, writableRealm: Realm) {
         removeFileInDatabase(fileUid: uid, cascade: false, writableRealm: writableRealm)
-    }
-}
-
-// FIXME: This part should be deleted once we get a better api
-extension DriveFileManager {
-    enum OfflineFileUpdate {
-        case updated(File)
-        case deleted(String)
-        case error(Error)
-    }
-
-    typealias UpdatedFileResult = (updatedFiles: [File], deletedFileUids: [String])
-
-    func getUpdatedAvailableOffline() async throws -> UpdatedFileResult {
-        let offlineFiles = getAvailableOfflineFiles()
-
-        return await withTaskGroup(of: OfflineFileUpdate.self, returning: UpdatedFileResult.self) { group in
-            for file in offlineFiles {
-                group.addTask { [self] in
-                    do {
-                        let updatedFile = try await apiFetcher.file(file)
-                        if updatedFile.isTrashed {
-                            return .deleted(file.uid)
-                        } else {
-                            return .updated(updatedFile)
-                        }
-                    } catch let error as DriveError where error == .objectNotFound {
-                        return .deleted(file.uid)
-                    } catch {
-                        return .error(error)
-                    }
-                }
-            }
-
-            var updatedFiles = [File]()
-            var deletedFiles = [String]()
-            for await result in group {
-                switch result {
-                case .updated(let file):
-                    updatedFiles.append(file)
-                case .deleted(let fileUid):
-                    deletedFiles.append(fileUid)
-                case .error:
-                    break
-                }
-            }
-
-            return (updatedFiles, deletedFiles)
-        }
     }
 }

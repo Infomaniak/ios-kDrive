@@ -381,12 +381,16 @@ public final class File: Object, Codable {
     @Persisted public var createdAt: Date?
     /// Date of upload
     @Persisted public var addedAt: Date
-    /// Date of modification
+    /// Date of modification of content / path / name
+    @Persisted public var updatedAt: Date
+    /// Date of modification of metadata
     @Persisted public var lastModifiedAt: Date
     /// Date of deleted resource, only visible when the File is trashed
     @Persisted public var deletedBy: Int?
     /// User identifier of deleted resource, only visible when the File is trashed
     @Persisted public var deletedAt: Date?
+    /// Date of file/folder content modification (ie: underlying data changed)
+    @Persisted public var revisedAt: Date
     /// Array of users identifiers that has access to the File
     @Persisted public var users: List<Int> // Extra property
     /// Is File pinned as favorite
@@ -429,7 +433,10 @@ public final class File: Object, Codable {
     // Other
     @Persisted public var children: MutableSet<File>
     @Persisted(originProperty: "children") var parentLink: LinkingObjects<File>
+    /// Only used for directories: the last time we got a response from the server for this directory
     @Persisted public var responseAt: Int
+    /// Only used for offline files: the last time we got an update from the server
+    @Persisted public var lastActionAt: Int
     @Persisted public var versionCode: Int
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
@@ -447,7 +454,9 @@ public final class File: Object, Codable {
         case createdBy = "created_by"
         case createdAt = "created_at"
         case addedAt = "added_at"
+        case updatedAt = "updated_at"
         case lastModifiedAt = "last_modified_at"
+        case revisedAt = "revised_at"
         case deletedBy = "deleted_by"
         case deletedAt = "deleted_at"
         case users
@@ -606,7 +615,7 @@ public final class File: Object, Codable {
 
     public var isLocalVersionOlderThanRemote: Bool {
         if let modificationDate = try? fileManager.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date,
-           modificationDate >= lastModifiedAt {
+           modificationDate >= revisedAt {
             return false
         }
         return true
@@ -776,6 +785,8 @@ public final class File: Object, Codable {
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
         addedAt = try container.decode(Date.self, forKey: .addedAt)
         lastModifiedAt = try container.decode(Date.self, forKey: .lastModifiedAt)
+        revisedAt = try container.decode(Date.self, forKey: .revisedAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()

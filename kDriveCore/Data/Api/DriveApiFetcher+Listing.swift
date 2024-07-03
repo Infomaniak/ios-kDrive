@@ -48,4 +48,15 @@ public extension DriveApiFetcher {
             return try await files(in: directory, sortType: sortType)
         }
     }
+
+    func filesLastActivities(
+        files: [File],
+        drive: AbstractDrive
+    ) async throws -> [PartialFileActivity] {
+        try await perform(request: authenticatedRequest(
+            .filePartialListing(drive: drive),
+            method: .post,
+            parameters: FileLastActivityBody(files: files)
+        ))
+    }
 }

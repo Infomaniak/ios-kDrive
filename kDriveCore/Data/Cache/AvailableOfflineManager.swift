@@ -38,7 +38,8 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
         }
 
         for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
-            guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
+            let frozenDrive = drive.freezeIfNeeded()
+            guard let driveFileManager = accountManager.getDriveFileManager(for: frozenDrive.id, userId: drive.userId) else {
                 continue
             }
 
@@ -48,7 +49,7 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
                 } catch {
                     // Silently handle error
                     Log.appDelegate(
-                        "Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)",
+                        "Error while fetching offline files activities in [\(frozenDrive.id) - \(frozenDrive.name)]: \(error)",
                         level: .error
                     )
                 }
