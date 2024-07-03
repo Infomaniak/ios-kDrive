@@ -73,6 +73,7 @@ public protocol AccountManageable: AnyObject {
     func loadAccounts() -> [Account]
     func saveAccounts()
     func switchAccount(newAccount: Account)
+    func switchToNextAvailableAccount()
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(account: Account, token: ApiToken)
     func removeAccount(toDeleteAccount: Account)
@@ -372,6 +373,36 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
         saveAccounts()
+    }
+
+    public func switchToNextAvailableAccount() {
+        guard let nextAccount = nextAvailableAccount else {
+            return
+        }
+
+        switchAccount(newAccount: nextAccount)
+    }
+
+    private var nextAvailableAccount: Account? {
+        let allAccounts = accounts.values
+        guard allAccounts.count > 1 else {
+            return nil
+        }
+
+        guard let currentAccount else {
+            return nil
+        }
+
+        guard let currentIndex = allAccounts.firstIndex(of: currentAccount) else {
+            return nil
+        }
+
+        let nextIndex = currentIndex + 1
+        guard let nextAccount = allAccounts[safe: nextIndex] else {
+            return allAccounts.first
+        }
+
+        return nextAccount
     }
 
     private func setCurrentAccount(account: Account) {

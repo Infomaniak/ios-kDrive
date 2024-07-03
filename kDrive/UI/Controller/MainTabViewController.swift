@@ -25,7 +25,7 @@ import kDriveResources
 import UIKit
 
 /// Enum to explicit tab names
-enum MainTabIndex: Int {
+public enum MainTabBarIndex: Int {
     case home = 0
     case files = 1
     case gallery = 3
@@ -33,12 +33,19 @@ enum MainTabIndex: Int {
 }
 
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
+    /// Tracking the last selection date to detect double tap
+    private var lastInteraction: Date?
+
+    /// Time between two tap events that feels alright for a double tap
+    private static let doubleTapInterval = TimeInterval(0.350)
+
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService var fileImportHelper: FileImportHelper
+    @LazyInjectService var router: AppNavigable
 
     let driveFileManager: DriveFileManager
 
@@ -243,19 +250,64 @@ extension MainTabViewController: MainTabBarDelegate {
         floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
         present(floatingPanelViewController, animated: true)
     }
+
+    func avatarLongTouch() {
+        guard let rootNavigationController = viewControllers?[safe: MainTabBarIndex.profile.rawValue] as? UINavigationController
+        else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        selectedIndex = MainTabBarIndex.profile.rawValue
+
+        router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
+    }
+
+    func avatarDoubleTap() {
+        accountManager.switchToNextAvailableAccount()
+        guard let accountManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        _ = router.showMainViewController(driveFileManager: accountManager,
+                                          selectedIndex: MainTabBarIndex.profile.rawValue)
+    }
 }
 
 // MARK: - Tab bar controller delegate
 
 extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeViewController {
+        guard let navigationController = viewController as? UINavigationController else {
+            return false
+        }
+
+        defer {
+            lastInteraction = Date()
+        }
+
+        let topViewController = navigationController.topViewController
+        if let homeViewController = topViewController as? HomeViewController {
             homeViewController.presentedFromTabBar()
         }
 
-        if tabBarController.selectedViewController == viewController,
-           let viewController = (viewController as? UINavigationController)?.topViewController as? TopScrollable {
-            viewController.scrollToTop()
+        if tabBarController.selectedViewController == viewController {
+            // Detect double tap on menu
+            if topViewController as? MenuViewController != nil,
+               let lastDate = lastInteraction,
+               Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
+                avatarDoubleTap()
+                return true
+            }
+
+            if let viewController = topViewController as? TopScrollable {
+                viewController.scrollToTop()
+            }
         }
 
         return true
