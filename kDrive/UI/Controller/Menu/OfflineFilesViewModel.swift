@@ -25,7 +25,7 @@ class OfflineFilesViewModel: FileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = Configuration(normalFolderHierarchy: false,
                                           showUploadingFiles: false,
-                                          isRefreshControlEnabled: false, selectAllSupported: false,
+                                          isRefreshControlEnabled: true, selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
                                           emptyViewType: .noOffline,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "Offline"])
@@ -41,5 +41,12 @@ class OfflineFilesViewModel: FileListViewModel {
         }
 
         files = AnyRealmCollection(results)
+    }
+
+    override func forceRefresh() {
+        Task {
+            try await driveFileManager.updateAvailableOfflineFiles()
+            endRefreshing()
+        }
     }
 }
