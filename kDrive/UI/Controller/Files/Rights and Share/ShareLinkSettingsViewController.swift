@@ -380,7 +380,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
         Task { [proxyFile = file.proxify()] in
             do {
                 let response = try await driveFileManager.updateShareLink(for: proxyFile, settings: settings)
-                if response {
+                if response != nil {
                     self.navigationController?.popViewController(animated: true)
                 }
             } catch {

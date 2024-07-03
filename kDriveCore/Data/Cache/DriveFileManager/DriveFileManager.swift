@@ -1031,12 +1031,20 @@ public final class DriveFileManager {
     @discardableResult
     public func createOrUpdateShareLink(frozenFile: File, right: ShareLinkPermission) async throws -> ShareLink? {
         let proxyFile = frozenFile.proxify()
-        if frozenFile.hasSharelink {
-            try? await removeShareLink(for: proxyFile)
+        guard let shareLink = frozenFile.sharelink else {
+            return try await createShareLink(for: proxyFile, right: right)
         }
 
-        let shareLink = try await createShareLink(for: proxyFile, right: right)
-        return shareLink
+        let updatedSettings = ShareLinkSettings(canComment: shareLink.capabilities.canComment,
+                                                canDownload: shareLink.capabilities.canDownload,
+                                                canEdit: shareLink.capabilities.canEdit,
+                                                canSeeInfo: shareLink.capabilities.canSeeInfo,
+                                                canSeeStats: shareLink.capabilities.canSeeStats,
+                                                right: right,
+                                                validUntil: shareLink.validUntil,
+                                                isFreeDrive: drive.isFreePack)
+
+        return try await updateShareLink(for: proxyFile, settings: updatedSettings)
     }
 
     public func createShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink {
@@ -1046,14 +1054,17 @@ public final class DriveFileManager {
         return shareLink.freeze()
     }
 
-    public func updateShareLink(for file: ProxyFile, settings: ShareLinkSettings) async throws -> Bool {
-        let response = try await apiFetcher.updateShareLink(for: file, settings: settings)
-        if response {
-            // Update sharelink in Realm
-            let shareLink = try await apiFetcher.shareLink(for: file)
-            setFileShareLink(file: file, shareLink: shareLink)
+    @discardableResult
+    public func updateShareLink(for file: ProxyFile, settings: ShareLinkSettings) async throws -> ShareLink? {
+        let shareLinkUpdated = try await apiFetcher.updateShareLink(for: file, settings: settings)
+        guard shareLinkUpdated else {
+            return nil
         }
-        return response
+
+        let shareLink = try await apiFetcher.shareLink(for: file)
+        setFileShareLink(file: file, shareLink: shareLink)
+
+        return shareLink
     }
 
     @discardableResult

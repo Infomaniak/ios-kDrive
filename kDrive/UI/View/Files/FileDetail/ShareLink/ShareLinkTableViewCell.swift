@@ -85,6 +85,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     func configureWith(file: File, insets: Bool = true) {
+        print("• configureWith \(file.sharelink)")
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -96,13 +97,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             initWithoutInsets()
         }
         layoutIfNeeded()
-        guard let sharelink = file.sharelink else {
-            return
-        }
 
         if let shareLink = file.sharelink {
-            switch sharelink.shareLinkPermission {
+            switch shareLink.shareLinkPermission {
             case .password:
+                print("• pass")
                 shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
                 shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
                     .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
@@ -110,6 +109,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                     .shareLinkRestrictedRightFileDescriptionShort
                 shareIconImageView.image = KDriveResourcesAsset.lock.image
             case .public:
+                print("• public")
                 shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
                 let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable
                     .shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle)
@@ -128,11 +128,18 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                     date
                 )
                 shareIconImageView.image = KDriveResourcesAsset.unlock.image
-            default:
-                // TODO: default handling
-                shareLinkTitleLabel.text = ""
-                rightArrow.isHidden = true
-                shareIconImageView.image = nil
+            case .inherit:
+                print("• inherit")
+                fallthrough
+            case .none:
+                print("• none")
+                shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
+                shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
+                    .shareLinkRestrictedRightFileDescriptionShort
+                shareLinkStackView.isHidden = true
+                shareIconImageView.image = KDriveResourcesAsset.lock.image
             }
 
             shareLinkStackView.isHidden = false
@@ -144,10 +151,15 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
         } else {
+            print("no sharing enabled")
             // TODO: default handling
-            shareLinkTitleLabel.text = ""
-            rightArrow.isHidden = true
-            shareIconImageView.image = nil
+            shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
+                .shareLinkRestrictedRightFileDescriptionShort
+            shareLinkStackView.isHidden = true
+            shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
     }
 
