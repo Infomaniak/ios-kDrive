@@ -48,12 +48,56 @@ public class DriveFileManagerConstants {
         DropBoxValidity.self
     ]
     private let fileManager = FileManager.default
-    public let rootDocumentsURL: URL
-    public let importDirectoryURL: URL
-    public let groupDirectoryURL: URL
-    public var cacheDirectoryURL: URL
-    public var tmpDirectoryURL: URL
+
+    // MARK: appDirectory URL
+
+    /// Documents/ folder within the App directory
+    public var appDocumentsDirectoryURL: URL? {
+        guard let appDocumentDirectory = FileManager.default.urls(for: .documentDirectory,
+                                                                  in: .userDomainMask).first else {
+            return nil
+        }
+
+        return appDocumentDirectory
+    }
+
+    /// Library/ folder within the App directory
+    public var appLibraryDirectoryURL: URL? {
+        guard let appLibraryDirectory = FileManager.default.urls(for: .libraryDirectory,
+                                                                 in: .userDomainMask).first else {
+            return nil
+        }
+
+        return appLibraryDirectory
+    }
+
+    /// Documents/.shared/ folder within the App directory
     public let openInPlaceDirectoryURL: URL?
+
+    // MARK: system cache URL
+
+    /// Some folder named with a UUID generated at app startup within .temporaryDirectory
+    public var tmpDirectoryURL: URL
+
+    // MARK: groupDirectory URL
+
+    /// AppGroup root URL
+    public let groupDirectoryURL: URL
+
+    /// Realm folder, within the appGroup
+    public let realmRootURL: URL
+
+    /// Dedicated import folder URL within the appGroup
+    public let importDirectoryURL: URL
+
+    /// Library/Caches/ folder URL within the appGroup
+    public var cacheDirectoryURL: URL
+
+    /// Content of Files.app, within the appGroup
+    public let fileProviderDirectoryURL: URL = NSFileProviderManager.default.documentStorageURL
+
+    // MARK: Realm
+
     public let rootID = 1
     public let currentVersionCode = 1
     public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
@@ -163,7 +207,7 @@ public class DriveFileManagerConstants {
     }
 
     /// Path of the upload DB
-    public lazy var uploadsRealmURL = rootDocumentsURL.appendingPathComponent("uploads.realm")
+    public lazy var uploadsRealmURL = realmRootURL.appendingPathComponent("uploads.realm")
 
     public lazy var uploadsRealmConfiguration = Realm.Configuration(
         fileURL: uploadsRealmURL,
@@ -181,7 +225,7 @@ public class DriveFileManagerConstants {
     init() {
         @InjectService var pathProvider: AppGroupPathProvidable
         groupDirectoryURL = pathProvider.groupDirectoryURL
-        rootDocumentsURL = pathProvider.realmRootURL
+        realmRootURL = pathProvider.realmRootURL
         importDirectoryURL = pathProvider.importDirectoryURL
         tmpDirectoryURL = pathProvider.tmpDirectoryURL
         cacheDirectoryURL = pathProvider.cacheDirectoryURL

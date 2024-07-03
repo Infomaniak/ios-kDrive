@@ -19,7 +19,6 @@
 import Foundation
 import InfomaniakCore
 import kDriveResources
-import Kingfisher
 import RealmSwift
 import UIKit
 

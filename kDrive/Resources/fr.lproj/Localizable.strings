@@ -1,11 +1,10 @@
 /*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
- * Release: Working copy
  * Locale: fr, French
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Wed, 13 Mar 2024 11:10:26 +0100
+ * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -219,7 +218,7 @@
 "belongToOneCategoryFilterDescription" = "Les résultats doivent appartenir à une des catégories sélectionnées";
 
 /* loco:60f7f3ae370e015fb90d7bd2 */
-"betaTestDescription" = "Notre application mobile est en constante évolution et nous cherchons toujours à l'améliorer.\nVous voulez nous aider ? Participez à la Beta, profitez en exclusivité de toutes les nouvelles fonctionnalités et faites-nous part de vos retours et vos idées !";
+"betaTestDescription" = "Notre application mobile est en constante évolution et nous cherchons toujours à l’améliorer.\nVous voulez nous aider ? Participez à la Beta, profitez en exclusivité de toutes les nouvelles fonctionnalités et faites-nous part de vos retours et vos idées !";
 
 /* loco:60f7edd07ee3f419944935d2 */
 "betaTestTitle" = "Tester les dernières nouveautés";
@@ -606,7 +605,7 @@
 "createFolderAccessPermissionTitle" = "Qui peut accéder à ce dossier ?";
 
 /* loco:6049df4d5c2c3a04bc397983 */
-"createFolderEmailWhenFinishedTitle" = "Recevoir un email dès qu’un fichier a été importé";
+"createFolderEmailWhenFinishedTitle" = "Recevoir un e-mail dès qu’un fichier a été importé";
 
 /* loco:6049df4d5c2c3a04bc397977 */
 "createFolderKeepParentsRightDescription" = "Les utilisateurs qui ont accès au dossier %@ pourront également accéder à ce dossier";
@@ -764,6 +763,9 @@
 /* loco:60e2d1ed77622d4af14f5a72 */
 "errorFileLocked" = "Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié";
 
+/* loco:664c499b09f1290486001cb2 */
+"errorFilesLimitExceeded" = "Limite de fichiers dans le dossier atteinte";
+
 /* loco:605b1b5f49d7ff61223fcfe2 */
 "errorGeneric" = "Une erreur est survenue";
 
@@ -792,7 +794,7 @@
 "errorNetworkDescription" = "Les résultats peuvent être incomplets";
 
 /* loco:62aad9bc0b461303fb5559d2 */
-"errorPhotoLibraryAccessLimited" = "kDrive n'a pas accès à votre photothèque";
+"errorPhotoLibraryAccessLimited" = "kDrive n’a pas accès à votre photothèque";
 
 /* loco:6049df4d5c2c3a04bc3979a0 */
 "errorPreviewDeleted" = "Ce fichier a été supprimé définitivement";
@@ -1239,7 +1241,7 @@
 "galleryTitle" = "Galerie";
 
 /* loco:60c75903284c670edb7a7b72 */
-"goToInfomaniakWebsite" = "Pour créer un compte, rendez-vous sur le site officiel d'Infomaniak";
+"goToInfomaniakWebsite" = "Pour créer un compte, rendez-vous sur le site officiel d’Infomaniak";
 
 /* loco:6281fb1abfdfb513f5356323 */
 "heicRecommandation" = "Nous recommandons l’enregistrement au format JPG car de nombreux services ne peuvent pas afficher les photos HEIC.";
@@ -1277,6 +1279,9 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Accueil";
 
+/* loco:665f25aff2cdb8afe902d122 */
+"imageCache" = "Cache d'images";
+
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Importations";
 
@@ -1287,7 +1292,7 @@
 "inputExpirationTime" = "Heure d’expiration";
 
 /* loco:604a24e398f36a2fa97de36a */
-"ios12LimitationPhotoSyncDescription" = "La sauvegarde initiale de vos photos ne peut se faire correctement que lorsque l'application est en premier plan. La sauvegarde des futures photos sera faite en arrière-plan.";
+"ios12LimitationPhotoSyncDescription" = "La sauvegarde initiale de vos photos ne peut se faire correctement que lorsque l’application est en premier plan. La sauvegarde des futures photos sera faite en arrière-plan.";
 
 /* loco:604a2468f32e550ab01a8e5d */
 "ios12LimitationPhotoSyncTitle" = "Fonctionnalité restreinte";
@@ -1514,6 +1519,9 @@
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Sauvegardez vos souvenirs en sécurité";
 
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Ouvert sur place";
+
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "L’accès à vos photos est désactivé, vous pouvez changer ce paramètre dans les réglages";
 
@@ -1521,7 +1529,7 @@
 "photoFormatTitle" = "Options";
 
 /* loco:638469dc5d9b75142a430ac2 */
-"photoLibraryAccessLimitedDescription" = "L'accès à votre photothèque est nécessaire pour sauvegarder vos photos.";
+"photoLibraryAccessLimitedDescription" = "L’accès à votre photothèque est nécessaire pour sauvegarder vos photos.";
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Accès limité ou refusé";
@@ -1563,7 +1571,7 @@
 "recentActivitySeeMore" = "Voir plus de fichiers récents";
 
 /* loco:6049df4d5c2c3a04bc397a2c */
-"refreshTokenError" = "Vous avez été déconnecté en raison d’un problème. Veuillez vous reconnecter";
+"refreshTokenError" = "Vous avez été déconnecté";
 
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Lien de partage restreint";
@@ -1893,7 +1901,7 @@
 "storeRetrieving" = "Récupération…";
 
 /* loco:6126137b32c58504e96a36f3 */
-"storeSuccessDescription" = "Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible.";
+"storeSuccessDescription" = "Nous sommes en train de finaliser la commande, vous serez notifié par e-mail lorsque votre kDrive sera disponible.";
 
 /* loco:6126135a6c5d5a0c28679842 */
 "storeSuccessTitle" = "Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !";
@@ -2043,7 +2051,7 @@
 "updateAvailableTitle" = "Mise à jour disponible !";
 
 /* loco:61261255d4c1162fbc75aae2 */
-"upgradeOfferTitle" = "Débloquer plus de fonctionnalités et obtenir plus d'espace de stockage !";
+"upgradeOfferTitle" = "Débloquer plus de fonctionnalités et obtenir plus d’espace de stockage !";
 
 /* loco:6049df4d5c2c3a04bc397a7f */
 "uploadCancelDescription" = "L’importation a été annulée par l’utilisateur";

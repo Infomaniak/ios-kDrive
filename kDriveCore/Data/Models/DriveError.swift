@@ -182,7 +182,7 @@ public struct DriveError: Error, Equatable {
     public static let lock = DriveError(type: .serverError,
                                         code: "lock_error",
                                         localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
-    public static let donwloadPermission = DriveError(type: .serverError,
+    public static let downloadPermission = DriveError(type: .serverError,
                                                       code: "you_must_add_at_least_one_file",
                                                       localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError,
@@ -218,11 +218,17 @@ public struct DriveError: Error, Equatable {
 
     public static let uploadTokenCanceled = DriveError(type: .serverError, code: "upload_token_canceled")
 
-    // MARK: - Network
+    public static let limitExceededError = DriveError(
+        type: .serverError,
+        code: "limit_exceeded_error",
+        localizedString: KDriveResourcesStrings.Localizable.errorFilesLimitExceeded
+    )
 
-    public static let networkError = DriveError(type: .networkError,
-                                                code: "networkError",
-                                                localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
+    public static let networkError = DriveError(
+        type: .networkError,
+        code: "networkError",
+        localizedString: KDriveResourcesStrings.Localizable.errorNetwork
+    )
 
     private static let allErrors: [DriveError] = [fileNotFound,
                                                   photoAssetNoLongerExists,
@@ -245,7 +251,7 @@ public struct DriveError: Error, Equatable {
                                                   productMaintenance,
                                                   driveMaintenance,
                                                   lock,
-                                                  donwloadPermission,
+                                                  downloadPermission,
                                                   categoryAlreadyExists,
                                                   stillUploadingError,
                                                   uploadNotTerminated,
@@ -258,7 +264,8 @@ public struct DriveError: Error, Equatable {
                                                   uploadFailedError,
                                                   uploadTokenIsNotValid,
                                                   fileAlreadyExistsError,
-                                                  errorDeviceStorage]
+                                                  errorDeviceStorage,
+                                                  limitExceededError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()

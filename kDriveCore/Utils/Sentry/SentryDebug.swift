@@ -44,6 +44,7 @@ public enum SentryDebug {
 
     public enum EventNames {
         static let uploadCompletedSuccess = "UploadCompletedSuccess"
+        static let appSizeUsage = "appSizeUsage"
     }
 
     public enum ErrorNames {
@@ -98,10 +99,12 @@ public enum SentryDebug {
     public static func captureNoWindow(function: String = #function) {
         capture(message: "Trying to call show with no window in :\(function)")
     }
+}
 
-    // MARK: - SHARED -
+// MARK: - SHARED -
 
-    public static func addBreadcrumb(
+public extension SentryDebug {
+    static func addBreadcrumb(
         message: String,
         category: SentryDebug.Category,
         level: SentryLevel,
@@ -115,7 +118,7 @@ public enum SentryDebug {
         }
     }
 
-    public static func capture(
+    static func capture(
         error: Error,
         context: [String: Any]? = nil,
         contextKey: String? = nil,
@@ -134,7 +137,7 @@ public enum SentryDebug {
         }
     }
 
-    public static func capture(
+    static func capture(
         message: String,
         context: [String: Any]? = nil,
         contextKey: String? = nil,

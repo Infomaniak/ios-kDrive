@@ -57,6 +57,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         thumbnailDownloadTask?.cancel()
         darkLayer.isHidden = true
+        checkmarkImage.isHidden = true
+        videoData.isHidden = true
         fileImage.image = nil
         fileImage.backgroundColor = nil
     }
@@ -70,6 +72,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     func configureLoading() {
         darkLayer.isHidden = true
         checkmarkImage.isHidden = true
+        videoData.isHidden = true
         fileImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         contentInsetView.cornerRadius = UIConstants.cornerRadius
     }

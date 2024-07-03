@@ -229,11 +229,6 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         operationQueue.cancelAllOperations()
     }
 
-    public func cancelRunningOperations() {
-        Log.downloadQueue("cancelRunningOperations")
-        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
-    }
-
     /// Check if a file is been uploaded
     ///
     /// Thread safe

@@ -1,11 +1,10 @@
 /*
  * Loco ios export: iOS Localizable.strings
  * Project: kDrive
- * Release: Working copy
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Wed, 13 Mar 2024 11:10:26 +0100
+ * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -764,6 +763,9 @@
 /* loco:60e2d1ed77622d4af14f5a72 */
 "errorFileLocked" = "El archivo está actualmente abierto por un usuario y no puede ser modificado";
 
+/* loco:664c499b09f1290486001cb2 */
+"errorFilesLimitExceeded" = "Límite de archivos alcanzado en la carpeta";
+
 /* loco:605b1b5f49d7ff61223fcfe2 */
 "errorGeneric" = "Se ha producido un error";
 
@@ -1277,6 +1279,9 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Recepción";
 
+/* loco:665f25aff2cdb8afe902d122 */
+"imageCache" = "Caché de imágenes";
+
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Importaciones";
 
@@ -1514,6 +1519,9 @@
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Haz copia de seguridad de tus recuerdos";
 
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Abierto en su sitio";
+
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "El acceso a tus fotos está desactivado. Puedes cambiar este parámetro en los ajustes";
 
@@ -1563,7 +1571,7 @@
 "recentActivitySeeMore" = "Ver más archivos recientes";
 
 /* loco:6049df4d5c2c3a04bc397a2c */
-"refreshTokenError" = "Te has desconectado por un problema. Vuelve a conectarte";
+"refreshTokenError" = "Ha sido desconectado";
 
 /* loco:6049df4d5c2c3a04bc397a3b */
 "restrictedSharedLinkTitle" = "Enlace de uso compartido restringido";

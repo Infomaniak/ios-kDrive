@@ -20,6 +20,14 @@ import Foundation
 import RealmSwift
 
 public extension UploadQueue {
+    /// Returns all the UploadFiles currently uploading regardless of execution context
+    func getAllUploadingFilesFrozen() -> Results<UploadFile> {
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter("uploadDate = nil")
+                .freezeIfNeeded()
+        }
+    }
+
     func getUploadingFiles(withParent parentId: Int,
                            userId: Int,
                            driveId: Int) -> Results<UploadFile> {

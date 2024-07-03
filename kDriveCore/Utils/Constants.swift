@@ -41,7 +41,7 @@ public struct URLConstants {
     public static let sourceCode = URLConstants(urlString: "https://github.com/Infomaniak/ios-kDrive")
     public static let gpl = URLConstants(urlString: "https://www.gnu.org/licenses/gpl-3.0.html")
     public static let support = URLConstants(urlString: "https://support.infomaniak.com")
-    public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2631")
+    public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2632")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")
 
     public static func renewDrive(accountId: Int) -> URLConstants {
@@ -78,7 +78,12 @@ public enum Constants {
     public static let timeout: Double = 30
     public static let bulkActionThreshold = 10
     public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
-    public static let memoryCacheSizeLimit = 10 * 1024 * 1024 // 10 Mo
+
+    /// Constants used by Kingfisher to manage image cache
+    public enum ImageCache {
+        public static let memorySizeLimit = 10 * 1024 * 1024 // 10 Mi
+        public static let diskSizeLimit: UInt = 512 * 1024 * 1024 // 512 Mi
+    }
 
     public static let kDriveTeams = "Solo, Team & Pro"
 

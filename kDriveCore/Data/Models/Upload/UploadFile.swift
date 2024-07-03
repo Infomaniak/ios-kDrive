@@ -63,7 +63,7 @@ public final class UploadFile: Object, UploadFilable {
     @Persisted(primaryKey: true) public var id = UUID().uuidString
     @Persisted public var name = ""
     @Persisted var relativePath = ""
-    @Persisted private var url: String?
+    @Persisted var url: String?
     @Persisted private var rawType = "file"
     @Persisted public var parentDirectoryId = 1
     @Persisted public var userId = 0
@@ -326,6 +326,7 @@ public extension UploadFile {
     }
 }
 
+/// Cleaning
 public extension UploadFile {
     /// Centralise error cleaning
     func clearErrorsForRetry() {
@@ -333,6 +334,25 @@ public extension UploadFile {
         error = nil
         // Reset retry count to default
         maxRetryCount = UploadFile.defaultMaxRetryCount
+    }
+
+    /// Centralise source file cleaning
+    @discardableResult
+    func cleanSourceFileIfNeeded() -> Bool {
+        guard let path = pathURL,
+              shouldRemoveAfterUpload else {
+            return false
+        }
+
+        do {
+            try FileManager.default.removeItem(at: path)
+            assert(!FileManager.default.fileExists(atPath: path.path), "expecting the file to be removed")
+
+            return true
+
+        } catch {
+            return false
+        }
     }
 }
 

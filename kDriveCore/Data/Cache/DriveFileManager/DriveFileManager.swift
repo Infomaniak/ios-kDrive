@@ -218,7 +218,7 @@ public final class DriveFileManager {
     ///   - driveId: Drive ID (`nil` if all user drives)
     public static func deleteUserDriveFiles(userId: Int, driveId: Int? = nil) {
         let files = (try? FileManager.default
-            .contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil))
+            .contentsOfDirectory(at: DriveFileManager.constants.realmRootURL, includingPropertiesForKeys: nil))
         files?.forEach { file in
             if let matches = Regex(pattern: "(\\d+)-(\\d+).realm.*")?.firstMatch(in: file.lastPathComponent), matches.count > 2 {
                 let fileUserId = matches[1]

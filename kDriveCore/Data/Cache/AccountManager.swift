@@ -80,6 +80,7 @@ public protocol AccountManageable: AnyObject {
     func removeTokenAndAccount(account: Account)
     func account(for token: ApiToken) -> Account?
     func account(for userId: Int) -> Account?
+    func logoutCurrentAccountAndSwitchToNextIfPossible()
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
@@ -89,6 +90,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -243,11 +245,27 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                        "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
 
+        let tokenUserId = token.userId
         tokenStore.removeTokenFor(userId: token.userId)
-        if let account = account(for: token),
-           account.userId == currentUserId {
-            delegate?.currentAccountNeedsAuthentication()
+
+        // Remove matching account
+        guard let accountToDelete = accounts.first(where: { account in
+            account.userId == tokenUserId
+        }) else {
+            SentryDebug.capture(message: "Failed matching failed token to account \(tokenUserId)",
+                                context: context,
+                                contextKey: "Token Infos")
+            DDLogError("Failed matching failed token to account \(tokenUserId)")
+            return
+        }
+
+        if accountToDelete == currentAccount {
+            DDLogInfo("matched \(currentAccount) to \(accountToDelete), removing current account")
             notificationHelper.sendDisconnectedNotification()
+            logoutCurrentAccountAndSwitchToNextIfPossible()
+        } else {
+            DDLogInfo("user with token error \(accountToDelete) do not match current account, doing nothing")
+            removeAccount(toDeleteAccount: accountToDelete)
         }
     }
 
@@ -473,5 +491,25 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func account(for userId: Int) -> Account? {
         return accounts.first { $0.userId == userId }
+    }
+
+    public func logoutCurrentAccountAndSwitchToNextIfPossible() {
+        Task { @MainActor in
+            if let currentAccount {
+                removeTokenAndAccount(account: currentAccount)
+            }
+
+            if let nextAccount = accounts.first {
+                switchAccount(newAccount: nextAccount)
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            } else {
+                SentrySDK.setUser(nil)
+            }
+            saveAccounts()
+            appNavigable.prepareRootViewController(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
+        }
     }
 }

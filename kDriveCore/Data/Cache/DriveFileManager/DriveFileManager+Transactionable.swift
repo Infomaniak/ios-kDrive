@@ -32,11 +32,11 @@ public enum DriveFileManagerContext {
     func realmURL(driveId: Int, driveUserId: Int) -> URL {
         switch self {
         case .drive:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-\(driveId).realm")
+            return DriveFileManager.constants.realmRootURL.appendingPathComponent("\(driveUserId)-\(driveId).realm")
         case .sharedWithMe:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-shared.realm")
+            return DriveFileManager.constants.realmRootURL.appendingPathComponent("\(driveUserId)-shared.realm")
         case .fileProvider:
-            return DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("\(driveUserId)-\(driveId)-fp.realm")
+            return DriveFileManager.constants.realmRootURL.appendingPathComponent("\(driveUserId)-\(driveId)-fp.realm")
         }
     }
 }

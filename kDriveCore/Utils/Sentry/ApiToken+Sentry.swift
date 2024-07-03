@@ -20,6 +20,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakLogin
 
+// TODO: Remove
 public extension ApiToken {
     func breadcrumbMetadata(keychainError: OSStatus = noErr) -> [String: Any] {
         return ["User id": userId,
@@ -27,5 +28,20 @@ public extension ApiToken {
                 "Access Token": truncatedAccessToken,
                 "Refresh Token": truncatedRefreshToken,
                 "Keychain error code": keychainError]
+    }
+}
+
+public extension ApiToken {
+    var isInfinite: Bool {
+        expirationDate == nil
+    }
+
+    var metadata: [String: Any] {
+        [
+            "User id": userId,
+            "Expiration date": expirationDate?.timeIntervalSince1970 ?? "infinite",
+            "Access Token": truncatedAccessToken,
+            "Refresh Token": truncatedRefreshToken,
+        ]
     }
 }

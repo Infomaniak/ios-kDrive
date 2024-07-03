@@ -20,7 +20,6 @@ import Foundation
 import InfomaniakCore
 import InfomaniakCoreUI
 import InfomaniakDI
-import kDriveCore
 
 public enum RootViewControllerState {
     case onboarding
@@ -29,7 +28,7 @@ public enum RootViewControllerState {
     case updateRequired
     case preloading(Account)
 
-    static func getCurrentState() -> RootViewControllerState {
+    public static func getCurrentState() -> RootViewControllerState {
         @InjectService var accountManager: AccountManageable
         @InjectService var lockHelper: AppLockHelper
 

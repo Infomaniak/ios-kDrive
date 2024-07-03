@@ -111,6 +111,11 @@ public final class ExpiringActivity: ExpiringActivityable {
             if shouldTerminate {
                 self.shouldTerminate = true
                 delegate?.backgroundActivityExpiring()
+
+                // At this point we should release the block, but we prefer to wait until the end 🫡⛵️🪦
+                // There is a chance endAll() is called while we wait in should terminate
+                group.wait()
+                return
             }
 
             group.enter()

@@ -56,7 +56,7 @@ public final class DriveInfosManager: DriveInfosManagerQueryable {
     let currentFpStorageVersion = 1
 
     public static let realmConfiguration = Realm.Configuration(
-        fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
+        fileURL: DriveFileManager.constants.realmRootURL.appendingPathComponent(dbName),
         schemaVersion: DriveInfosManager.currentDbVersion,
         migrationBlock: { migration, oldSchemaVersion in
             if oldSchemaVersion < DriveInfosManager.currentDbVersion {

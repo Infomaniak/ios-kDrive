@@ -55,7 +55,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
         Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
-        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
+
+        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.ImageCache.memorySizeLimit
+        // Must define a limit, unlimited otherwise
+        ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
+
         reachabilityListener = ReachabilityListener.instance
         ApiEnvironment.current = .prod
 
@@ -122,7 +126,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         uploadQueue.waitForCompletion {
             // Clean temp files once the upload queue is stoped if needed
             @LazyInjectService var freeSpaceService: FreeSpaceService
-            freeSpaceService.cleanCacheIfAlmostFull()
+            freeSpaceService.auditCache()
 
             group.leave()
         }

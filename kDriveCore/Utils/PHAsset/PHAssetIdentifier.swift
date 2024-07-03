@@ -95,7 +95,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
                 return true
             }
 
-            // Trigger a request in order to intercept change data
+            group.enter()
             asset.requestContentEditingInput(with: options) { input, _ in
                 defer {
                     group.leave()
@@ -113,10 +113,8 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
                 // This will exclude changes related to like and albums
                 hash = url.dataRepresentation.SHA256DigestString
             }
-
-            // wait for the request to finish
-            group.enter()
             group.wait()
+
             activity.endAll()
 
             guard let error = activityDelegate.error else {
@@ -156,6 +154,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
                 Log.photoLibraryUploader("hashing resource \(progress * 100)% …")
             }
 
+            group.enter()
             PHAssetResourceManager.default().requestData(for: bestResource,
                                                          options: options) { data in
                 hasher.update(data)
@@ -163,10 +162,8 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
                 hasher.finalize()
                 group.leave()
             }
-
-            // wait for the request to finish
-            group.enter()
             group.wait()
+
             activity.endAll()
 
             guard let error = activityDelegate.error else {

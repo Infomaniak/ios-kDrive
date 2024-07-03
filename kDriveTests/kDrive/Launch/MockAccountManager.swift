@@ -90,4 +90,6 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
     func account(for userId: Int) -> Account? { fatalError("Not implemented") }
 
     func updateToken(newToken: ApiToken, oldToken: ApiToken) {}
+
+    func logoutCurrentAccountAndSwitchToNextIfPossible() { fatalError("Not implemented") }
 }
