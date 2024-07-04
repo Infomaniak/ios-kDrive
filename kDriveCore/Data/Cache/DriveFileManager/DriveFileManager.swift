@@ -232,8 +232,8 @@ public final class DriveFileManager {
     }
 
     public func initRoot() async throws {
-        let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
-        _ = try await files(in: root.proxify(), forceRefresh: true)
+        let root = ProxyFile(driveId: drive.id, id: DriveFileManager.constants.rootID)
+        _ = try await files(in: root, forceRefresh: true)
     }
 
     public func files(in directory: ProxyFile, cursor: String? = nil, sortType: SortType = .nameAZ,

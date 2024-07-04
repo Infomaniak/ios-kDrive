@@ -36,6 +36,12 @@ extension SelectSwitchDriveDelegate {
             let driveUserId = drive.userId
 
             Task {
+                @InjectService var accountManager: AccountManageable
+                let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: driveUserId)
+                try await driveFileManager?.initRoot()
+            }
+
+            Task {
                 @InjectService var appRestorationService: AppRestorationServiceable
                 await appRestorationService.reloadAppUI(for: driveId, userId: driveUserId)
             }
