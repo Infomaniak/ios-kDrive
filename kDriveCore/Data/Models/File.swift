@@ -687,7 +687,7 @@ public final class File: Object, Codable {
     }
 
     public func applyLastModifiedDateToLocalFile() {
-        try? fileManager.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
+        try? fileManager.setAttributes([.modificationDate: revisedAt], ofItemAtPath: localUrl.path)
     }
 
     public func excludeFileFromSystemBackup() {

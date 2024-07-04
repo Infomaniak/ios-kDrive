@@ -287,7 +287,7 @@ extension SceneDelegate {
                 let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
                 let modificationDate = attributes?[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
 
-                guard modificationDate > file.lastModifiedAt else {
+                guard modificationDate > file.revisedAt else {
                     continue
                 }
 
@@ -312,7 +312,7 @@ extension SceneDelegate {
                             // Update file to get the new modification date
                             Task {
                                 let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
-                                try? FileManager.default.setAttributes([.modificationDate: file.lastModifiedAt],
+                                try? FileManager.default.setAttributes([.modificationDate: file.revisedAt],
                                                                        ofItemAtPath: file.localUrl.path)
                                 driveFileManager.notifyObserversWith(file: file)
                             }
