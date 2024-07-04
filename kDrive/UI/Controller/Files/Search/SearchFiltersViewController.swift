@@ -115,6 +115,12 @@ class SearchFiltersViewController: UITableViewController {
         switch filterTypes[section] {
         case .categories:
             return 3
+        case .type:
+            // searchExtension has a second cell for input
+            guard filters.fileType == .searchExtension else {
+                return 1
+            }
+            return 2
         default:
             return 1
         }
@@ -123,7 +129,7 @@ class SearchFiltersViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
-        case .date, .type:
+        case .date:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
 
             let filterType = filterTypes[indexPath.section]
@@ -131,6 +137,38 @@ class SearchFiltersViewController: UITableViewController {
             cell.configure(with: filterType, filters: filters)
 
             return cell
+        case .type:
+            guard indexPath.row != 0,
+                  filters.fileType == .searchExtension else {
+                let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
+
+                let filterType = filterTypes[indexPath.section]
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.configure(with: filterType, filters: filters)
+
+                return cell
+            }
+
+            let cell = UITableViewCell()
+            let textField = UITextField(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+            let cellContentView = cell.contentView
+
+            cellContentView.translatesAutoresizingMaskIntoConstraints = false
+            textField.translatesAutoresizingMaskIntoConstraints = false
+
+            cell.backgroundColor = .clear
+            textField.backgroundColor = .purple
+
+            cell.addSubview(textField)
+            NSLayoutConstraint.activate([
+                textField.leadingAnchor.constraint(equalTo: cellContentView.leadingAnchor),
+                textField.trailingAnchor.constraint(equalTo: cellContentView.trailingAnchor),
+                textField.topAnchor.constraint(equalTo: cellContentView.topAnchor),
+                textField.bottomAnchor.constraint(equalTo: cellContentView.bottomAnchor)
+            ])
+
+            return cell
+
         case .categories:
             if indexPath.row == 0 {
                 let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
