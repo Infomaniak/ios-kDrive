@@ -383,7 +383,7 @@ public final class File: Object, Codable {
     @Persisted public var addedAt: Date
     /// Date of modification of content / path / name
     @Persisted public var updatedAt: Date
-    /// Date of modification of metadata
+    /// Date of modification of the content by manual upload or OnlyOffice
     @Persisted public var lastModifiedAt: Date
     /// Date of deleted resource, only visible when the File is trashed
     @Persisted public var deletedBy: Int?
@@ -687,7 +687,7 @@ public final class File: Object, Codable {
     }
 
     public func applyLastModifiedDateToLocalFile() {
-        try? fileManager.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
+        try? fileManager.setAttributes([.modificationDate: revisedAt], ofItemAtPath: localUrl.path)
     }
 
     public func excludeFileFromSystemBackup() {
