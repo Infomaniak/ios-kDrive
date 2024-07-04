@@ -35,6 +35,7 @@ enum FileWith: String, CaseIterable {
     case fileIsFavorite = "file.is_favorite"
     case fileShareLink = "file.sharelink"
     case fileSortedName = "file.sorted_name"
+    case fileSupportedBy = "file.supported_by"
     case isFavorite = "is_favorite"
     case path
     case shareLink = "sharelink"
@@ -87,7 +88,8 @@ enum FileWith: String, CaseIterable {
                                              .fileDropboxCapabilities,
                                              .fileIsFavorite,
                                              .fileShareLink,
-                                             .fileSortedName]
+                                             .fileSortedName,
+                                             .fileSupportedBy]
     static let fileActivitiesWithExtra: [FileWith] = fileActivities + [.fileExternalImport]
     static let fileUpload: [FileWith] = [.capabilities,
                                          .categories,
