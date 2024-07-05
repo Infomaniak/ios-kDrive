@@ -176,11 +176,6 @@ class ShareLinkSettingsViewController: UIViewController {
         MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "ShareLinkSettings"])
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        tableView.reloadData()
-    }
-
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
