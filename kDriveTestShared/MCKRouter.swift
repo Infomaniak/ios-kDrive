@@ -36,6 +36,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func presentAccountViewController(navigationController: UINavigationController, animated: Bool) {
+        logNoop()
+    }
+
     public func askUserToRemovePicturesIfNecessary() async {
         logNoop()
     }
@@ -123,7 +127,7 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func prepareRootViewController(currentState: kDrive.RootViewControllerState, restoration: Bool) {
+    public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
         logNoop()
     }
 
