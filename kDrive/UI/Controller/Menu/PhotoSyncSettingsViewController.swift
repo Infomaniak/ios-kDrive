@@ -25,9 +25,7 @@ import Photos
 import RealmSwift
 import UIKit
 
-final class PhotoSyncSettingsViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-
+final class PhotoSyncSettingsViewController: GenericGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
@@ -99,6 +97,7 @@ final class PhotoSyncSettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.syncSettingsTitle
 
         navigationItem.hideBackButtonText()
 
@@ -110,9 +109,6 @@ final class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
         tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
-
-        tableView.sectionHeaderHeight = UITableView.automaticDimension
-        tableView.estimatedSectionHeaderHeight = 50
 
         let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.delegate = self
@@ -277,8 +273,8 @@ final class PhotoSyncSettingsViewController: UIViewController {
 
 // MARK: - Table view data source
 
-extension PhotoSyncSettingsViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+extension PhotoSyncSettingsViewController {
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .syncSwitch:
             let saveDetailsHeaderText = KDriveResourcesStrings.Localizable.syncSettingsDescription
@@ -296,11 +292,11 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         }
     }
 
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
         case .syncSwitch:
             return switchSyncRows.count
@@ -313,7 +309,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
         case .syncSwitch:
             switch switchSyncRows[indexPath.row] {
@@ -445,8 +441,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
 
 // MARK: - Table view delegate
 
-extension PhotoSyncSettingsViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+extension PhotoSyncSettingsViewController {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let section = sections[indexPath.section]
         if section == .syncLocation {

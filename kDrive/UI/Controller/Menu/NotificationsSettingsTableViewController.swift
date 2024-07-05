@@ -20,7 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class NotificationsSettingsTableViewController: UITableViewController {
+class NotificationsSettingsTableViewController: GenericGroupedTableViewController {
     private enum NotificationRow {
         case receiveNotification
         case general
@@ -35,11 +35,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.notificationTitle
 
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
         tableView.register(cellView: ParameterAccessDeniedTableViewCell.self)
-        tableView.separatorColor = .clear
-        navigationController?.navigationBar.sizeToFit()
 
         updateTableViewContent()
         NotificationCenter.default.addObserver(
