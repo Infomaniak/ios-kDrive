@@ -107,9 +107,6 @@ class ShareLinkSettingsViewController: UIViewController {
         tableView.register(cellView: ShareLinkSettingTableViewCell.self)
         tableView.separatorColor = .clear
 
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
-
         hideKeyboardWhenTappedAround()
         initOptions()
 
@@ -174,11 +171,6 @@ class ShareLinkSettingsViewController: UIViewController {
         navigationBarAppearanceLarge.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
         MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "ShareLinkSettings"])
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        tableView.reloadData()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
