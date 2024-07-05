@@ -52,12 +52,12 @@ enum UniversalLinksHelper {
         case office, file
     }
 
-    static func handlePath(_ path: String, appDelegate: AppDelegate) -> Bool {
+    static func handlePath(_ path: String) -> Bool {
         DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
         for link in Link.all {
             let matches = link.regex.matches(in: path)
-            if processRegex(matches: matches, displayMode: link.displayMode, appDelegate: appDelegate) {
+            if processRegex(matches: matches, displayMode: link.displayMode) {
                 return true
             }
         }
@@ -66,7 +66,7 @@ enum UniversalLinksHelper {
         return false
     }
 
-    private static func processRegex(matches: [[String]], displayMode: DisplayMode, appDelegate: AppDelegate) -> Bool {
+    private static func processRegex(matches: [[String]], displayMode: DisplayMode) -> Bool {
         @InjectService var accountManager: AccountManageable
 
         guard let firstMatch = matches.first,
@@ -78,12 +78,12 @@ enum UniversalLinksHelper {
                                                                         userId: accountManager.currentUserId)
         else { return false }
 
-        openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office, appDelegate: appDelegate)
+        openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office)
 
         return true
     }
 
-    private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool, appDelegate: AppDelegate) {
+    private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
         Task {
             do {
                 let file = try await driveFileManager.file(id: id)

@@ -285,10 +285,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                 if recentActivitiesController?.empty == true {
                     return recentActivitiesController?.getEmptyLayout()
                 } else {
-                    return recentActivitiesController?.getLayout(
-                        for: UserDefaults.shared.homeListStyle,
-                        layoutEnvironment: layoutEnvironment
-                    )
+                    return recentActivitiesController?.getLayout()
                 }
             }
         }, configuration: configuration)

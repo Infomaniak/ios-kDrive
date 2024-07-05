@@ -416,8 +416,6 @@ extension UploadQueue: UploadQueueable {
     // MARK: - Private methods
 
     private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
-        var failedFileIds = [String]()
-
         Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
         let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
         let uploadingFiles = getUploadingFiles(withParent: parentId,
@@ -427,7 +425,8 @@ extension UploadQueue: UploadQueueable {
         Log.uploadQueue("uploading:\(uploadingFiles.count)")
         let failedUploadFiles = uploadingFiles
             .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
-        failedFileIds = failedUploadFiles.map(\.id)
+
+        let failedFileIds = Array(failedUploadFiles.map(\.id))
         Log.uploadQueue("retying:\(failedFileIds.count)")
 
         return failedFileIds

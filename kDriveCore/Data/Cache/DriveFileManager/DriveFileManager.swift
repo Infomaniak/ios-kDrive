@@ -285,7 +285,7 @@ public final class DriveFileManager {
             fetchedFiles = getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType)
         }
 
-        let nextCursor = response.validApiResponse.hasMore == true ? response.validApiResponse.cursor : nil
+        let nextCursor = response.validApiResponse.hasMore ? response.validApiResponse.cursor : nil
 
         return (fetchedFiles, nextCursor)
     }

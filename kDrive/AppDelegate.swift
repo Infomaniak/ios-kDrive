@@ -173,7 +173,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Check for specific URL components that you need.
-        return UniversalLinksHelper.handlePath(components.path, appDelegate: self)
+        return UniversalLinksHelper.handlePath(components.path)
     }
 }
 

@@ -71,8 +71,4 @@ public extension DriveFileManager {
         }
         _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, writableRealm: writableRealm)
     }
-
-    private func deleteOfflineFile(uid: String, writableRealm: Realm) {
-        removeFileInDatabase(fileUid: uid, cascade: false, writableRealm: writableRealm)
-    }
 }
