@@ -45,6 +45,7 @@ public final class AppRestorationService: AppRestorationServiceable {
         .appendingPathComponent("Saved Application State")
 
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var appContextService: AppContextServiceable
 
     /// State restoration version
     private static let currentStateVersion = 5
@@ -61,6 +62,10 @@ public final class AppRestorationService: AppRestorationServiceable {
     }
 
     public var shouldRestoreApplicationState: Bool {
+        guard !appContextService.isExtension else {
+            return false
+        }
+
         let storedVersion = UserDefaults.shared.appRestorationVersion
         let shouldRestore = Self.currentStateVersion == storedVersion &&
             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
