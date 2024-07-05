@@ -107,9 +107,6 @@ class ShareLinkSettingsViewController: UIViewController {
         tableView.register(cellView: ShareLinkSettingTableViewCell.self)
         tableView.separatorColor = .clear
 
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
-
         hideKeyboardWhenTappedAround()
         initOptions()
 
