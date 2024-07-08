@@ -18,7 +18,7 @@
 
 import Foundation
 
-public class IPSToken: Codable {
+@frozen public struct IPSToken: Codable {
     let uuid: String
     let validUntil: Int
 }

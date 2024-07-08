@@ -18,7 +18,7 @@
 
 import Foundation
 
-public struct ListingResult: Codable {
+@frozen public struct ListingResult: Codable {
     public let actions: [FileAction]
     public let files: [File]
     public let actionsFiles: [File]

@@ -20,7 +20,7 @@ import Foundation
 import InfomaniakCore
 import RealmSwift
 
-public final class DriveResponse: Codable {
+@frozen public struct DriveResponse: Codable {
     public let drives: [Drive]
     public let users: [DriveUser]
     public let teams: [Team]
