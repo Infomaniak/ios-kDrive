@@ -64,6 +64,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: SelectTableViewCell.self)
+//        tableView.register(cellView: TextInputTableViewCell.self)
 
         let index = filters.belongToAllCategories ? 1 : 2
         tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
@@ -159,19 +160,16 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
                 return cell
             }
 
+//            let cell = tableView.dequeueReusableCell(type: TextInputTableViewCell.self, for: indexPath)
             let cell = UITableViewCell()
             let textField = UITextField(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
             textField.delegate = self
+            textField.translatesAutoresizingMaskIntoConstraints = false
+            textField.backgroundColor = .purple
+            textField.layoutMargins = .init(top: 10, left: 10, bottom: 10, right: 10)
 
             let cellContentView = cell.contentView
-
-            cellContentView.translatesAutoresizingMaskIntoConstraints = false
-            textField.translatesAutoresizingMaskIntoConstraints = false
-
-            cell.backgroundColor = .clear
-            textField.backgroundColor = .purple
-
-            cell.addSubview(textField)
+            cellContentView.addSubview(textField)
             NSLayoutConstraint.activate([
                 textField.leadingAnchor.constraint(equalTo: cellContentView.leadingAnchor),
                 textField.trailingAnchor.constraint(equalTo: cellContentView.trailingAnchor),
