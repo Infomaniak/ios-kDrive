@@ -236,75 +236,6 @@
             </objects>
             <point key="canvasLocation" x="1424.6376811594205" y="920.75892857142856"/>
         </scene>
-        <!--Paramètres-->
-        <scene sceneID="y6v-Ie-BNX">
-            <objects>
-                <tableViewController storyboardIdentifier="ParameterTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="jNB-aI-vQT" customClass="ParameterTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="ZjA-WC-gaF">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="jNB-aI-vQT" id="GLY-Lb-iNG"/>
-                            <outlet property="delegate" destination="jNB-aI-vQT" id="yHA-Eu-CYd"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Paramètres" largeTitleDisplayMode="always" id="JaU-H2-8DB">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="settingsTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <segue destination="cZK-V1-h3I" kind="show" identifier="photoSyncSegue" id="2H9-XI-PH6"/>
-                        <segue destination="6Iz-rf-sb0" kind="show" identifier="aboutSegue" id="FcK-H4-v1m"/>
-                        <segue destination="gfb-Up-kOo" kind="show" identifier="notificationsSegue" id="reO-Fp-cjy"/>
-                        <segue destination="MCZ-rj-Suy" kind="show" identifier="themeSelectionSegue" id="bgg-d7-ne2"/>
-                        <segue destination="zSd-it-dsI" kind="show" identifier="securitySegue" id="hul-F5-HkZ"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="4Kq-PW-o7g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3188" y="921"/>
-        </scene>
-        <!--Sauvegarde des photos-->
-        <scene sceneID="sII-wC-jln">
-            <objects>
-                <viewController storyboardIdentifier="PhotoSyncSettingsViewController" hidesBottomBarWhenPushed="YES" id="cZK-V1-h3I" customClass="PhotoSyncSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="CG6-wn-Ezl">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="Qit-an-WTq">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
-                                <connections>
-                                    <outlet property="dataSource" destination="cZK-V1-h3I" id="acc-PS-gCv"/>
-                                    <outlet property="delegate" destination="cZK-V1-h3I" id="eEB-ho-NT3"/>
-                                </connections>
-                            </tableView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="PKW-7V-hCs"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="Qit-an-WTq" secondAttribute="trailing" id="3w8-ym-fRE"/>
-                            <constraint firstAttribute="bottom" secondItem="Qit-an-WTq" secondAttribute="bottom" id="6Lx-g0-n4T"/>
-                            <constraint firstItem="Qit-an-WTq" firstAttribute="top" secondItem="CG6-wn-Ezl" secondAttribute="top" id="RtE-WD-L0K"/>
-                            <constraint firstItem="Qit-an-WTq" firstAttribute="leading" secondItem="CG6-wn-Ezl" secondAttribute="leading" id="cYG-Z8-mTT"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Sauvegarde des photos" largeTitleDisplayMode="always" id="rHu-OF-I7F">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="syncSettingsTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="tableView" destination="Qit-an-WTq" id="f9U-TH-Sde"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="lov-7m-2UZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1581" y="1669"/>
-        </scene>
         <!--Switch User View Controller-->
         <scene sceneID="unT-Z0-cpP">
             <objects>
@@ -436,52 +367,6 @@
             </objects>
             <point key="canvasLocation" x="2326" y="921"/>
         </scene>
-        <!--A Propos-->
-        <scene sceneID="QGu-aW-zne">
-            <objects>
-                <tableViewController storyboardIdentifier="AboutTableViewController" title="A Propos" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="6Iz-rf-sb0" customClass="AboutTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="O1B-x1-98T">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="6Iz-rf-sb0" id="UDc-V9-hGM"/>
-                            <outlet property="delegate" destination="6Iz-rf-sb0" id="vHK-Ly-uzJ"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="À propos" largeTitleDisplayMode="always" id="OJG-BJ-8Ho">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="aboutTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Jqo-5s-4Oy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2361" y="1669"/>
-        </scene>
-        <!--Notifications-->
-        <scene sceneID="kcj-KO-Hyu">
-            <objects>
-                <tableViewController storyboardIdentifier="NotificationsSettingsTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="gfb-Up-kOo" customClass="NotificationsSettingsTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="nqr-nQ-uJw">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="gfb-Up-kOo" id="YWM-py-UXB"/>
-                            <outlet property="delegate" destination="gfb-Up-kOo" id="0Xy-kl-4bd"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Notifications" largeTitleDisplayMode="always" id="AV2-JR-19y">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notificationTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Vqe-Nq-yew" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3187" y="1669"/>
-        </scene>
         <!--App Lock Settings View Controller-->
         <scene sceneID="0Gq-HL-lDR">
             <objects>
@@ -605,51 +490,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5619" y="1669"/>
-        </scene>
-        <!--Select Theme Table View Controller-->
-        <scene sceneID="pbm-gZ-Aoh">
-            <objects>
-                <tableViewController storyboardIdentifier="SelectThemeTableViewController" id="MCZ-rj-Suy" customClass="SelectThemeTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="BNd-1L-UFl">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="MCZ-rj-Suy" id="Xiu-t7-Qci"/>
-                            <outlet property="delegate" destination="MCZ-rj-Suy" id="3mz-8S-28x"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" id="jTL-Js-Zhl"/>
-                    <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="GuQ-eD-LUX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3965" y="1669"/>
-        </scene>
-        <!--Sécurité-->
-        <scene sceneID="Tt7-mj-zPY">
-            <objects>
-                <tableViewController storyboardIdentifier="SecurityTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="zSd-it-dsI" customClass="SecurityTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="rtN-7Y-qdP">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="zSd-it-dsI" id="Yg7-8w-qd8"/>
-                            <outlet property="delegate" destination="zSd-it-dsI" id="DJ3-uX-MJG"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Sécurité" largeTitleDisplayMode="always" id="NKw-yM-tPc">
-                        <barButtonItem key="backBarButtonItem" title=" " id="8vz-bS-dr5"/>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="securityTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="NK2-E3-Zz4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4764" y="1669"/>
+            <point key="canvasLocation" x="3217" y="921"/>
         </scene>
     </scenes>
     <designables>

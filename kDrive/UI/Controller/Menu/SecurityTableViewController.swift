@@ -22,7 +22,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SecurityTableViewController: UITableViewController {
+class SecurityTableViewController: BaseGroupedTableViewController {
     private enum SecurityOption: CaseIterable {
         case appLock
         case fileProviderExtension
@@ -34,6 +34,8 @@ class SecurityTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.securityTitle
+
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
 
