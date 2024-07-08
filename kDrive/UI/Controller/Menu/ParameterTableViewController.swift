@@ -23,7 +23,7 @@ import kDriveResources
 import Sentry
 import UIKit
 
-class ParameterTableViewController: GenericGroupedTableViewController {
+class ParameterTableViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var appNavigable: AppNavigable

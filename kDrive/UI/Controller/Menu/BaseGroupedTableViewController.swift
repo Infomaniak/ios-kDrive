@@ -19,7 +19,7 @@
 import kDriveResources
 import UIKit
 
-class GenericGroupedTableViewController: UITableViewController {
+class BaseGroupedTableViewController: UITableViewController {
     init() {
         super.init(style: .grouped)
         tableView.separatorStyle = .none

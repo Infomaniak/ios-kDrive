@@ -25,7 +25,7 @@ import Photos
 import RealmSwift
 import UIKit
 
-final class PhotoSyncSettingsViewController: GenericGroupedTableViewController {
+final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader

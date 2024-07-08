@@ -20,7 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class AboutTableViewController: GenericGroupedTableViewController {
+class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
         case privacy, sourceCode, license, version
 

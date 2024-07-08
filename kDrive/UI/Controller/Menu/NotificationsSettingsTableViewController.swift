@@ -20,7 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class NotificationsSettingsTableViewController: GenericGroupedTableViewController {
+class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
     private enum NotificationRow {
         case receiveNotification
         case general

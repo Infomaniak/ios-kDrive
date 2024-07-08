@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectThemeTableViewController: GenericGroupedTableViewController {
+class SelectThemeTableViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [Theme] = Theme.allCases

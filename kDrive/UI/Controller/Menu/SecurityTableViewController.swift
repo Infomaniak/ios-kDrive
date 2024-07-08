@@ -22,7 +22,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SecurityTableViewController: GenericGroupedTableViewController {
+class SecurityTableViewController: BaseGroupedTableViewController {
     private enum SecurityOption: CaseIterable {
         case appLock
         case fileProviderExtension
