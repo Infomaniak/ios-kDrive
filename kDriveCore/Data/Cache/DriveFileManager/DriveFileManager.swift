@@ -546,7 +546,7 @@ public final class DriveFileManager {
         // Get all pages and assemble
         let fetchedFile = try file.resolve(within: self).freeze()
         let timestamp = TimeInterval(timestamp ?? fetchedFile.responseAt)
-        var page = 1
+        var cursor: String?
         var moreComing = true
         var pagedActions = [String: FileActivityType]()
         var pagedActivities = ActivitiesResult()
@@ -557,12 +557,12 @@ public final class DriveFileManager {
             let response = try await apiFetcher.fileActivities(
                 file: file,
                 from: Date(timeIntervalSince1970: timestamp),
-                page: page
+                cursor: cursor
             )
 
             let activities = response.validApiResponse.data
-            moreComing = activities.count == Endpoint.itemsPerPage
-            page += 1
+            moreComing = response.validApiResponse.hasMore
+            cursor = response.validApiResponse.cursor
             responseAt = response.validApiResponse.responseAt ?? Int(Date().timeIntervalSince1970)
 
             try database.writeTransaction { writableRealm in

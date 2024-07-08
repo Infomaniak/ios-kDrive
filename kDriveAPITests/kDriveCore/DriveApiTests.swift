@@ -597,14 +597,14 @@ final class DriveApiTests: XCTestCase {
 
     func testGetFileActivities() async throws {
         let testDirectory = try await setUpTest(testName: "Get file detail activity")
-        _ = try await currentApiFetcher.fileActivities(file: testDirectory, page: 1)
+        _ = try await currentApiFetcher.fileActivities(file: testDirectory, cursor: nil)
         tearDownTest(directory: testDirectory)
     }
 
     func testGetFileActivitiesFromDate() async throws {
         let earlyDate = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
         let (testDirectory, file) = try await initOfficeFile(testName: "Get file activity from date")
-        _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, page: 1)
+        _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, cursor: nil)
         tearDownTest(directory: testDirectory)
     }
 
