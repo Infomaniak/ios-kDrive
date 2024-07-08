@@ -29,6 +29,7 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         super.awakeFromNib()
         pdfPreview.autoScales = true
         pdfPreview.enableDataDetectors = true
+        pdfPreview.interpolationQuality = .none
         pdfPreview.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color
     }
 
