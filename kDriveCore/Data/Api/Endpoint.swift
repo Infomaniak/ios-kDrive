@@ -236,17 +236,6 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/activities")
     }
 
-    static func filesActivities(drive: AbstractDrive, fileIds: [Int], from date: Date) -> Endpoint {
-        return .recentActivity(drive: drive).appending(path: "/batch", queryItems: [
-            noAvatarDefault(),
-            FileWith.fileActivities.toQueryItem(),
-            URLQueryItem(name: "actions[]", value: "file_rename"),
-            URLQueryItem(name: "actions[]", value: "file_update"),
-            URLQueryItem(name: "file_ids", value: fileIds.map(String.init).joined(separator: ",")),
-            URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
-        ])
-    }
-
     static func trashedFileActivities(file: AbstractFile) -> Endpoint {
         return .trashedInfo(file: file).appending(path: "/activities")
     }

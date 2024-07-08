@@ -608,26 +608,6 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    func testGetFilesActivities() async throws {
-        let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
-        let secondFile = try await currentApiFetcher.createFile(
-            in: testDirectory,
-            name: "Get files activities-\(Date())",
-            type: "docx"
-        ).proxify()
-        let activities = try await currentApiFetcher.filesActivities(
-            drive: proxyDrive,
-            files: [file, secondFile],
-            from: Date(timeIntervalSince1970: 0)
-        ).validApiResponse.data
-        XCTAssertEqual(activities.count, 2, "Array should contain two activities")
-        for activity in activities {
-            XCTAssertTrue(activity.result, TestsMessages.shouldReturnTrue)
-            XCTAssertNil(activity.message, TestsMessages.noError)
-        }
-        tearDownTest(directory: testDirectory)
-    }
-
     // MARK: Trashed files
 
     func testTrashedFiles() async throws {

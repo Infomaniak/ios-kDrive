@@ -325,12 +325,6 @@ public class DriveApiFetcher: ApiFetcher {
         return activities
     }
 
-    public func filesActivities(drive: AbstractDrive, files: [ProxyFile],
-                                from date: Date) async throws
-        -> ValidServerResponse<[ActivitiesForFile]> {
-        try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
-    }
-
     public func favorite(file: ProxyFile) async throws -> Bool {
         try await perform(request: authenticatedRequest(.favorite(file: file), method: .post))
     }
