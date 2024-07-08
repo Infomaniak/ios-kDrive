@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
@@ -27,17 +28,18 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var shareLinkTitleLabel: IKLabel!
-    @IBOutlet weak var shareIconImageView: UIImageView!
-    @IBOutlet weak var rightArrow: UIImageView!
-    @IBOutlet weak var shareLinkStackView: UIStackView!
-    @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
-    @IBOutlet weak var copyButton: ImageButton!
-    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var leadingInnerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var separatorView: UIView!
+    @IBOutlet var shareLinkTitleLabel: IKLabel!
+    @IBOutlet var shareIconImageView: UIImageView!
+    @IBOutlet var rightArrow: UIImageView!
+    @IBOutlet var shareLinkStackView: UIStackView!
+    @IBOutlet var shareLinkDescriptionLabel: UILabel!
+    @IBOutlet var copyButton: ImageButton!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet var trailingConstraint: NSLayoutConstraint!
+    @IBOutlet var leadingInnerConstraint: NSLayoutConstraint!
+    @IBOutlet var trailingInnerConstraint: NSLayoutConstraint!
+    @IBOutlet var separatorView: UIView!
+    @IBOutlet var fileShareLinkSettingTitle: IKButton!
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
@@ -95,7 +97,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         } else {
             initWithoutInsets()
         }
-        layoutIfNeeded()
+
         if let shareLink = file.sharelink {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
             let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable
@@ -115,12 +117,15 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 date
             )
             shareLinkStackView.isHidden = false
+            fileShareLinkSettingTitle.alpha = 1
+            fileShareLinkSettingTitle.isUserInteractionEnabled = true
             url = shareLink.url
             shareIconImageView.image = KDriveResourcesAsset.unlock.image
         } else if file.isDropbox {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkDescription
             shareLinkStackView.isHidden = true
+            url = ""
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
         } else {
@@ -129,9 +134,14 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightFileDescriptionShort
-            shareLinkStackView.isHidden = true
+            shareLinkStackView.isHidden = false
+            url = file.privateSharePath(host: ApiEnvironment.current.driveHost)
+            fileShareLinkSettingTitle.alpha = 0
+            fileShareLinkSettingTitle.isUserInteractionEnabled = false
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
+
+        layoutIfNeeded()
     }
 
     func initWithoutInsets() {
