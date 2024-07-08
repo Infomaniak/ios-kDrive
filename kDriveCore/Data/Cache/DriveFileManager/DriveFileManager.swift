@@ -397,7 +397,13 @@ public final class DriveFileManager {
                                                  drive: drive,
                                                  query: query,
                                                  date: date,
-                                                 fileTypes: [fileType].compactMap { $0 },
+                                                 fileTypes: [fileType].compactMap { type in
+                                                     guard type != .searchExtension else {
+                                                         return nil
+                                                     }
+
+                                                     return type
+                                                 },
                                                  fileExtensions: fileExtensions,
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
