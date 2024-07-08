@@ -46,7 +46,7 @@ extension ConvertedType: Selectable {
     }
 }
 
-class SearchFiltersViewController: UITableViewController {
+class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
     var driveFileManager: DriveFileManager!
     var filters = Filters()
 
@@ -97,6 +97,16 @@ class SearchFiltersViewController: UITableViewController {
                 tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
             }
         }
+    }
+
+    // MARK: - TextFieldDelegate
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        filters.fileExtensionsRaw = textField.text
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
     }
 
     // MARK: - Actions
@@ -151,6 +161,8 @@ class SearchFiltersViewController: UITableViewController {
 
             let cell = UITableViewCell()
             let textField = UITextField(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+            textField.delegate = self
+
             let cellContentView = cell.contentView
 
             cellContentView.translatesAutoresizingMaskIntoConstraints = false
