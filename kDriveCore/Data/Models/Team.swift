@@ -75,13 +75,6 @@ public class Team: Object, Codable {
         super.init()
         // primary key is set as default value
     }
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case usersCount = "users_count"
-        case colorId = "color_id"
-    }
 }
 
 extension Team: Comparable {

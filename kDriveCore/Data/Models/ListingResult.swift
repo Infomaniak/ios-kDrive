@@ -22,10 +22,4 @@ public struct ListingResult: Codable {
     public let actions: [FileAction]
     public let files: [File]
     public let actionsFiles: [File]
-
-    enum CodingKeys: String, CodingKey {
-        case actions
-        case files
-        case actionsFiles = "actions_files"
-    }
 }

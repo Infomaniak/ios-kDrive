@@ -26,20 +26,10 @@ public final class UploadedChunk: Object, Decodable {
     @Persisted var size: Int64
     @Persisted var chunkHash: String
 
-    public required convenience init(from decoder: Decoder) throws {
-        self.init()
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        number = try container.decode(Int64.self, forKey: .number)
-        status = try container.decode(String.self, forKey: .status)
-        createdAt = try container.decode(Date.self, forKey: .createdAt)
-        size = try container.decode(Int64.self, forKey: .size)
-        chunkHash = try container.decode(String.self, forKey: .chunkHash)
-    }
-
     enum CodingKeys: String, CodingKey {
         case number
         case status
-        case createdAt = "created_at"
+        case createdAt
         case size
         case chunkHash = "hash"
     }

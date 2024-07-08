@@ -147,11 +147,11 @@ public class FileActivity: Object, Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case id
-        case createdAt = "created_at"
+        case createdAt
         case action
-        case newPath = "new_path"
-        case oldPath = "old_path"
-        case fileId = "file_id"
+        case newPath
+        case oldPath
+        case fileId
         case user
         case file
     }

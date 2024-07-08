@@ -39,6 +39,6 @@ public class DriveAccount: EmbeddedObject, Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case name
-        case _legalEntityType = "legal_entity_type"
+        case _legalEntityType = "legalEntityType"
     }
 }

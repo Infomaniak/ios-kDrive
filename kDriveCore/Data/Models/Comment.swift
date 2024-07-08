@@ -35,14 +35,14 @@ public class Comment: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id
-        case parentId = "parent_id"
+        case parentId
         case body
-        case isResolved = "is_resolved"
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
+        case isResolved
+        case createdAt
+        case updatedAt
         case liked
-        case likesCount = "likes_count"
-        case responsesCount = "responses_count"
+        case likesCount
+        case responsesCount
         case user
         case responses
         case likes

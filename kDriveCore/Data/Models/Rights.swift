@@ -57,22 +57,22 @@ public class Rights: EmbeddedObject, Codable {
     @Persisted public var canBecomeDropbox: Bool
 
     enum CodingKeys: String, CodingKey {
-        case canShow = "can_show"
-        case canRead = "can_read"
-        case canWrite = "can_write"
-        case canShare = "can_share"
-        case canLeave = "can_leave"
-        case canDelete = "can_delete"
-        case canRename = "can_rename"
-        case canMove = "can_move"
-        case canBecomeSharelink = "can_become_sharelink"
-        case canUseFavorite = "can_use_favorite"
-        case canUseTeam = "can_use_team"
-        case canCreateDirectory = "can_create_directory"
-        case canCreateFile = "can_create_file"
-        case canUpload = "can_upload"
-        case canMoveInto = "can_move_into"
-        case canBecomeDropbox = "can_become_dropbox"
+        case canShow
+        case canRead
+        case canWrite
+        case canShare
+        case canLeave
+        case canDelete
+        case canRename
+        case canMove
+        case canBecomeSharelink
+        case canUseFavorite
+        case canUseTeam
+        case canCreateDirectory
+        case canCreateFile
+        case canUpload
+        case canMoveInto
+        case canBecomeDropbox
     }
 
     public required init(from decoder: Decoder) throws {

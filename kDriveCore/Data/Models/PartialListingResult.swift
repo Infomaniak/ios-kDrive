@@ -23,11 +23,4 @@ import Foundation
     let fileId: Int
     let lastActionAt: Int?
     let file: File?
-
-    enum CodingKeys: String, CodingKey {
-        case lastAction = "last_action"
-        case fileId = "file_id"
-        case lastActionAt = "last_action_at"
-        case file
-    }
 }

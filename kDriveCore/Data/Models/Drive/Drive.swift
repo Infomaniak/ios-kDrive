@@ -25,13 +25,6 @@ public final class DriveResponse: Codable {
     public let users: [DriveUser]
     public let teams: [Team]
     public let ips: IPSToken
-
-    enum CodingKeys: String, CodingKey {
-        case drives
-        case users
-        case teams
-        case ips
-    }
 }
 
 public final class DriveUsersCategories: EmbeddedObject, Codable {
@@ -54,9 +47,9 @@ public final class DriveTeamsCategories: EmbeddedObject, Codable {
 }
 
 public enum MaintenanceReason: String, PersistableEnum, Codable {
-    case notRenew = "not_renew"
-    case demoEnd = "demo_end"
-    case invoiceOverdue = "invoice_overdue"
+    case notRenew
+    case demoEnd
+    case invoiceOverdue
     case technical
 }
 
@@ -198,26 +191,26 @@ public final class Drive: Object, Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case accountId = "account_id"
+        case accountId
         case id
         case name
         case _pack = "pack"
         case role
         case _preferences = "preferences"
         case size
-        case usedSize = "used_size"
+        case usedSize
         case _users = "users"
         case _teams = "teams"
         case categories
-        case _categoryRights = "categories_permissions"
+        case _categoryRights = "categoriesPermissions"
         case rights
         case _capabilities = "capabilities"
-        case inMaintenance = "in_maintenance"
-        case maintenanceReason = "maintenance_reason"
-        case updatedAt = "updated_at"
+        case inMaintenance
+        case maintenanceReason
+        case updatedAt
         case _account = "account"
-        case accountAdmin = "account_admin"
-        case isInAppSubscription = "is_in_app_subscription"
+        case accountAdmin
+        case isInAppSubscription
     }
 
     public static func == (lhs: Drive, rhs: Drive) -> Bool {
