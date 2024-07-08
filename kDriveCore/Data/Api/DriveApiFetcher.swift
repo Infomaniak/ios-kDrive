@@ -406,7 +406,7 @@ public class DriveApiFetcher: ApiFetcher {
         categories: [Category],
         belongToAllCategories: Bool,
         cursor: String? = nil,
-        sortType: SortType = .nameAZ
+        sortType: SortType
     ) async throws -> ValidServerResponse<[File]> {
         try await perform(request: authenticatedRequest(.search(
             drive: drive,

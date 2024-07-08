@@ -646,7 +646,8 @@ final class DriveApiTests: XCTestCase {
             drive: proxyDrive,
             query: "officeFile",
             categories: [],
-            belongToAllCategories: true
+            belongToAllCategories: true,
+            sortType: .newer
         ).validApiResponse.data
         let fileFound = files.contains { $0.id == file.id }
         XCTAssertTrue(fileFound, "File created should be in response")
