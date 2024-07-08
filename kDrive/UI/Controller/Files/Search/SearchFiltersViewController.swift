@@ -230,6 +230,11 @@ class SearchFiltersViewController: UITableViewController {
             present(floatingPanelController, animated: true)
             return nil
         case .type:
+            // Action only on the first cell
+            guard indexPath.row == 0 else {
+                return nil
+            }
+
             MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
