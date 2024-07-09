@@ -22,4 +22,6 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class TextInputTableViewCell: InsetTableViewCell {}
+class TextInputTableViewCell: InsetTableViewCell {
+    @IBOutlet var textField: UITextField!
+}
