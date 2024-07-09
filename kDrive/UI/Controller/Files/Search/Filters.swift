@@ -132,5 +132,6 @@ struct Filters {
         date = nil
         fileType = nil
         categories.removeAll()
+        fileExtensionsRaw = nil
     }
 }

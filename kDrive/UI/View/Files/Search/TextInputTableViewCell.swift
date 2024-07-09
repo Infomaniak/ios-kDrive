@@ -22,6 +22,32 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class TextInputTableViewCell: InsetTableViewCell {
+final class TextInputTableViewCell: InsetTableViewCell {
     @IBOutlet var textField: UITextField!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        contentInsetView.layer.cornerRadius = UIConstants.buttonCornerRadius
+        contentInsetView.clipsToBounds = true
+    }
+
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        if selected {
+            contentInsetView.borderWidth = 2
+            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
+            contentInsetView.alpha = 1
+
+            textField.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+            contentInsetView.borderWidth = 0
+        }
+    }
+
+    override func prepareForReuse() {
+        setSelected(false, animated: false)
+    }
 }
