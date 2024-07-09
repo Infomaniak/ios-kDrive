@@ -850,10 +850,11 @@ extension File: FileProviderItemProvider {
     /// DTO of a File used by the FileProvider
     /// Represents a `File` in database
     public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   drive: Drive?,
                                    domain: NSFileProviderDomain?) -> NSFileProviderItem {
         // TODO: override parent and domain for future working set support.
 
-        let item = FileProviderItem(file: self, domain: domain)
+        let item = FileProviderItem(file: self, drive: drive, domain: domain)
         return item
     }
 }

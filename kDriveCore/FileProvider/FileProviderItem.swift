@@ -106,14 +106,14 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
     // MARK: Static
 
-    public static func getFileName(file: File) -> String {
-        file.name.isEmpty ? "Root" : file.formattedLocalizedName()
+    public static func getFileName(file: File, drive: Drive?) -> String {
+        file.name.isEmpty ? "Root" : file.formattedLocalizedName(drive: drive)
     }
 
     public static func getStorageUrl(file: File, domain: NSFileProviderDomain?) -> URL {
         @InjectService var fileProviderService: FileProviderServiceable
         let identifier = NSFileProviderItemIdentifier(file.id)
-        let fileName = getFileName(file: file)
+        let fileName = getFileName(file: file, drive: nil)
         let storageUrl = fileProviderService.createStorageUrl(identifier: identifier, filename: fileName, domain: domain)
         return storageUrl
     }
@@ -121,13 +121,13 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     /// Init a `FileProviderItem` DTO
     ///
     /// Prefer using `FileProviderItemProvider` than calling init directly
-    init(file: File, parent: NSFileProviderItemIdentifier? = nil, domain: NSFileProviderDomain?) {
+    init(file: File, parent: NSFileProviderItemIdentifier? = nil, drive: Drive?, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
         @InjectService var fileProviderService: FileProviderServiceable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        filename = Self.getFileName(file: file)
+        filename = Self.getFileName(file: file, drive: drive)
         typeIdentifier = file.typeIdentifier
 
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()

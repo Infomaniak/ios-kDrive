@@ -36,7 +36,11 @@ final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
         var containerItems = [NSFileProviderItem]()
         for file in workingSetFiles {
             autoreleasepool {
-                containerItems.append(file.toFileProviderItem(parent: .workingSet, domain: self.domain))
+                containerItems.append(file.toFileProviderItem(
+                    parent: .workingSet,
+                    drive: driveFileManager.drive,
+                    domain: self.domain
+                ))
             }
         }
         observer.didEnumerate(containerItems)

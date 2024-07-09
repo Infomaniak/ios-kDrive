@@ -360,6 +360,7 @@ extension UploadFile: FileProviderItemProvider {
     /// DTO of an UploadFile used by the FileProvider
     /// Represents an `UploadFile` in the UploadQueue been uploaded
     public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   drive: Drive?,
                                    domain: NSFileProviderDomain?) -> NSFileProviderItem {
         // TODO: override parent and domain for future working set support.
 
