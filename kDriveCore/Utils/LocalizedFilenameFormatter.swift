@@ -20,17 +20,29 @@ import Foundation
 import kDriveResources
 
 public extension File {
-    func formattedLocalizedName() -> String {
-        Self.LocalizedFilenameFormatter().format(self)
+    func formattedLocalizedName(drive: Drive? = nil) -> String {
+        let packId = drive?.pack.drivePackId
+        let isIndividualDrive = packId == .solo || packId == .free
+        return Self.LocalizedFilenameFormatter(isIndividualDrive: isIndividualDrive).format(self)
     }
 
     struct LocalizedFilenameFormatter: Foundation.FormatStyle, Codable, Equatable, Hashable {
+        let isIndividualDrive: Bool
+
+        init(isIndividualDrive: Bool) {
+            self.isIndividualDrive = isIndividualDrive
+        }
+
         public func format(_ value: File) -> String {
             switch value.visibility {
             case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder:
                 return value.name
             case .isPrivateSpace:
-                return KDriveResourcesStrings.Localizable.localizedFilenamePrivateSpace
+                if isIndividualDrive {
+                    return KDriveResourcesStrings.Localizable.localizedFilenamePrivateSpace
+                } else {
+                    return KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
+                }
             case .isTeamSpace:
                 return KDriveResourcesStrings.Localizable.localizedFilenameTeamSpace
             case nil:

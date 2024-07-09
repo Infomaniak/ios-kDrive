@@ -62,7 +62,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                                                                    userId: driveFileManager.drive.userId,
                                                                    driveId: driveFileManager.drive.id)
                 for uploadFile in uploadingFiles {
-                    let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, domain: domain)
+                    let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
                     uploadFilesItems.append(uploadFileItem)
                 }
                 Log.fileProvider("files uploading in progress: \(uploadFilesItems.count) INITIAL")
@@ -74,7 +74,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let files = Array(parentDirectory.children) + [parentDirectory]
                 let filesItems = files.map { item in
                     autoreleasepool {
-                        return item.toFileProviderItem(parent: nil, domain: domain)
+                        return item.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
                     }
                 }
 
@@ -131,7 +131,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let pageItems: [NSFileProviderItemProtocol] = uploadFilesItems
                     + response.data.files.map { item in
                         autoreleasepool {
-                            return item.toFileProviderItem(parent: nil, domain: self.domain)
+                            return item.toFileProviderItem(parent: nil, drive: self.driveFileManager.drive, domain: self.domain)
                         }
                     }
 
@@ -212,7 +212,11 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     parentDirectory.lastCursor = response.cursor
                 }
 
-                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(parent: nil, domain: domain) })
+                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(
+                    parent: nil,
+                    drive: driveFileManager.drive,
+                    domain: domain
+                ) })
                 observer.didDeleteItems(withIdentifiers: deletedItems)
 
                 guard let newLastCursor = response.cursor,

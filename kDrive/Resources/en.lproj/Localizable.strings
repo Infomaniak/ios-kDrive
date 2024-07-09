@@ -1303,6 +1303,9 @@
 /* loco:65a13fff84b88c92410f5052 */
 "localizedFilenamePrivateSpace" = "My files";
 
+/* loco:668cfa288f78f439cc044b92 */
+"localizedFilenamePrivateTeamSpace" = "My personnal folder";
+
 /* loco:65a140c3cdbe107c5a025352 */
 "localizedFilenameTeamSpace" = "Organisation’s files";
 

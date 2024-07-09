@@ -74,6 +74,10 @@ final class FileProviderExtension: NSFileProviderExtension {
     }()
 
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
+    var drive: Drive {
+        return driveFileManager.drive
+    }
+
     lazy var manager: NSFileProviderManager = {
         if let domain {
             return NSFileProviderManager(for: domain) ?? .default
@@ -119,7 +123,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Read from upload queue
         if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
-            let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, domain: domain)
+            let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
             return uploadingItem
         }
 
@@ -132,7 +136,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
-            let item = file.toFileProviderItem(parent: nil, domain: domain)
+            let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
             return item
         }
 
@@ -140,7 +144,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
-            let item = file.toFileProviderItem(parent: nil, domain: domain)
+            let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
             return item
         }
 
@@ -233,7 +237,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
-        guard let item = file.toFileProviderItem(parent: nil, domain: domain) as? FileProviderItem else {
+        guard let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain) as? FileProviderItem
+        else {
             completionHandler(NSFileProviderError(.noSuchItem))
             return
         }
