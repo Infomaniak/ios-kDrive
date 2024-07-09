@@ -79,7 +79,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(name: $0.formattedLocalizedName(), image: $0.icon, destinationFile: $0)
+            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
         } ?? []
 
         var menuItems = userRootFolders + RootMenuViewController.baseItems
