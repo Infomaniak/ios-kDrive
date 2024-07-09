@@ -116,6 +116,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
     }
 
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        tableView.selectRow(at: inputCellPath, animated: true, scrollPosition: .none)
         return true
     }
 

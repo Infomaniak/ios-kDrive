@@ -33,12 +33,15 @@ final class TextInputTableViewCell: InsetTableViewCell {
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
+        guard selected != isSelected else {
+            return
+        }
+
         super.setSelected(selected, animated: animated)
 
         if selected {
             contentInsetView.borderWidth = 2
             contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-            contentInsetView.alpha = 1
 
             textField.becomeFirstResponder()
         } else {
@@ -48,6 +51,9 @@ final class TextInputTableViewCell: InsetTableViewCell {
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
+
         setSelected(false, animated: false)
+        textField.text = ""
     }
 }
