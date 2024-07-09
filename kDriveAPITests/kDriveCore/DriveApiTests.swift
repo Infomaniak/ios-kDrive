@@ -597,34 +597,14 @@ final class DriveApiTests: XCTestCase {
 
     func testGetFileActivities() async throws {
         let testDirectory = try await setUpTest(testName: "Get file detail activity")
-        _ = try await currentApiFetcher.fileActivities(file: testDirectory, page: 1)
+        _ = try await currentApiFetcher.fileActivities(file: testDirectory, cursor: nil)
         tearDownTest(directory: testDirectory)
     }
 
     func testGetFileActivitiesFromDate() async throws {
         let earlyDate = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
         let (testDirectory, file) = try await initOfficeFile(testName: "Get file activity from date")
-        _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, page: 1)
-        tearDownTest(directory: testDirectory)
-    }
-
-    func testGetFilesActivities() async throws {
-        let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
-        let secondFile = try await currentApiFetcher.createFile(
-            in: testDirectory,
-            name: "Get files activities-\(Date())",
-            type: "docx"
-        ).proxify()
-        let activities = try await currentApiFetcher.filesActivities(
-            drive: proxyDrive,
-            files: [file, secondFile],
-            from: Date(timeIntervalSince1970: 0)
-        ).validApiResponse.data
-        XCTAssertEqual(activities.count, 2, "Array should contain two activities")
-        for activity in activities {
-            XCTAssertTrue(activity.result, TestsMessages.shouldReturnTrue)
-            XCTAssertNil(activity.message, TestsMessages.noError)
-        }
+        _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, cursor: nil)
         tearDownTest(directory: testDirectory)
     }
 
@@ -666,7 +646,8 @@ final class DriveApiTests: XCTestCase {
             drive: proxyDrive,
             query: "officeFile",
             categories: [],
-            belongToAllCategories: true
+            belongToAllCategories: true,
+            sortType: .newer
         ).validApiResponse.data
         let fileFound = files.contains { $0.id == file.id }
         XCTAssertTrue(fileFound, "File created should be in response")

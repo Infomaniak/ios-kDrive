@@ -23,6 +23,7 @@ import kDriveResources
 import UIKit
 
 class FileDetailViewController: UIViewController, SceneStateRestorable {
+    private typealias ActivitiesInfo = (cursor: String?, hasNextPage: Bool, isLoading: Bool)
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
@@ -34,7 +35,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     var contentCount: FileCount?
 
     private var activities = [ActivitySection]()
-    private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
+    private var activitiesInfo: ActivitiesInfo = (cursor: nil, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
 
@@ -275,13 +276,13 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         activitiesInfo.isLoading = true
         Task { [proxyFile = file.proxify()] in
             do {
-                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(
+                let cursoredActivities = try await driveFileManager.apiFetcher.fileActivities(
                     file: proxyFile,
-                    page: activitiesInfo.page
+                    cursor: self.activitiesInfo.cursor
                 )
-                self.orderActivities(data: pagedActivities)
-                self.activitiesInfo.page += 1
-                self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
+                self.orderActivities(data: cursoredActivities.validApiResponse.data)
+                self.activitiesInfo.cursor = cursoredActivities.validApiResponse.cursor
+                self.activitiesInfo.hasNextPage = cursoredActivities.validApiResponse.hasMore
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
@@ -807,7 +808,7 @@ extension FileDetailViewController: FileDetailDelegate {
             break
         case .activity:
             // Fetch first page
-            if activitiesInfo.page == 1 {
+            if activitiesInfo.cursor == nil {
                 fetchNextActivities()
             }
         case .comments:
