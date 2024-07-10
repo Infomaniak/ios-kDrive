@@ -236,17 +236,6 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/activities")
     }
 
-    static func filesActivities(drive: AbstractDrive, fileIds: [Int], from date: Date) -> Endpoint {
-        return .recentActivity(drive: drive).appending(path: "/batch", queryItems: [
-            noAvatarDefault(),
-            FileWith.fileActivities.toQueryItem(),
-            URLQueryItem(name: "actions[]", value: "file_rename"),
-            URLQueryItem(name: "actions[]", value: "file_update"),
-            URLQueryItem(name: "file_ids", value: fileIds.map(String.init).joined(separator: ",")),
-            URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
-        ])
-    }
-
     static func trashedFileActivities(file: AbstractFile) -> Endpoint {
         return .trashedInfo(file: file).appending(path: "/activities")
     }
@@ -649,6 +638,10 @@ public extension Endpoint {
         return .driveInfo(drive: drive).appending(path: "/trash", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
+    static func trashV2(drive: AbstractDrive) -> Endpoint {
+        return .driveInfoV2(drive: drive).appending(path: "/trash")
+    }
+
     static func emptyTrash(drive: AbstractDrive) -> Endpoint {
         return .driveInfoV2(drive: drive).appending(path: "/trash")
     }
@@ -664,12 +657,16 @@ public extension Endpoint {
         )
     }
 
+    static func trashedInfoV2(file: AbstractFile) -> Endpoint {
+        return .trashV2(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)")
+    }
+
     static func trashedFiles(of directory: AbstractFile) -> Endpoint {
         return .trashedInfo(file: directory).appending(path: "/files", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func restore(file: AbstractFile) -> Endpoint {
-        return .trashedInfo(file: file).appending(path: "/restore")
+        return .trashedInfoV2(file: file).appending(path: "/restore")
     }
 
     static func trashThumbnail(file: AbstractFile, at date: Date) -> Endpoint {

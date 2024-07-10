@@ -20,7 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class AboutTableViewController: UITableViewController {
+class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
         case privacy, sourceCode, license, version
 
@@ -44,9 +44,10 @@ class AboutTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.aboutTitle
+
         tableView.register(cellView: ParameterAboutTableViewCell.self)
         tableView.register(cellView: AboutDetailTableViewCell.self)
-        navigationController?.navigationBar.sizeToFit()
 
         navigationItem.hideBackButtonText()
     }

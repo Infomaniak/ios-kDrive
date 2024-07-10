@@ -23,15 +23,8 @@ import Foundation
 protocol FileProviderItemProvider {
     /// Anything  _to_ FileProvider DTO
     func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                            drive: Drive?,
                             domain: NSFileProviderDomain?) -> NSFileProviderItem
-
-    func toFileProviderItem() -> NSFileProviderItem
-}
-
-extension FileProviderItemProvider {
-    func toFileProviderItem() -> NSFileProviderItem {
-        toFileProviderItem(parent: nil, domain: nil)
-    }
 }
 
 /// Something to hide implementation details form the FileProviderExtension

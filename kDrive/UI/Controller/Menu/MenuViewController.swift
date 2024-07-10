@@ -240,8 +240,8 @@ extension MenuViewController {
             let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
             navigationController?.pushViewController(storeViewController, animated: true)
         case .parameters:
-            let parameterTableViewController = ParameterTableViewController.instantiate(driveFileManager: driveFileManager)
-            navigationController?.pushViewController(parameterTableViewController, animated: true)
+            let parametersViewController = ParameterTableViewController(driveFileManager: driveFileManager)
+            navigationController?.pushViewController(parametersViewController, animated: true)
         case .switchUser:
             let switchUserViewController = SwitchUserViewController.instantiate()
             navigationController?.pushViewController(switchUserViewController, animated: true)

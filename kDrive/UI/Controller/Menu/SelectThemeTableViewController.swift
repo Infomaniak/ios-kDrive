@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectThemeTableViewController: UITableViewController {
+class SelectThemeTableViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [Theme] = Theme.allCases
@@ -33,7 +33,6 @@ class SelectThemeTableViewController: UITableViewController {
         title = KDriveResourcesStrings.Localizable.themeSettingsTitle
 
         tableView.register(cellView: SelectionTableViewCell.self)
-        tableView.separatorColor = .clear
         tableView.allowsMultipleSelection = false
 
         selectedTheme = UserDefaults.shared.theme

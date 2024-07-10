@@ -35,7 +35,7 @@ extension FileProviderExtension {
 
             // Call completion handler with error if the file name already exists
             let itemsWithSameParent = file.children
-                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
+                .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
             let newItemFileName = directoryName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
                !(collidingItem.isTrashed ?? false) {
@@ -50,7 +50,7 @@ extension FileProviderExtension {
                     name: directoryName,
                     onlyForMe: false
                 )
-                completionHandler(directory.toFileProviderItem(parent: nil, domain: self.domain), nil)
+                completionHandler(directory.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
             }
@@ -99,7 +99,7 @@ extension FileProviderExtension {
             return
         }
         let itemsWithSameParent = file.children
-            .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
+            .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
            !(collidingItem.isTrashed ?? false) {
@@ -169,7 +169,7 @@ extension FileProviderExtension {
 
             // Check if file name already exists
             let itemsWithSameParent = file.parent!.children
-                .map { $0.toFileProviderItem(parent: nil, domain: self.domain) }
+                .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
             let newItemFileName = itemName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
                !(collidingItem.isTrashed ?? false) {
@@ -181,7 +181,7 @@ extension FileProviderExtension {
             do {
                 let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
                 completionHandler(
-                    file.freeze().toFileProviderItem(parent: nil, domain: self.domain), nil
+                    file.freeze().toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil
                 )
             } catch {
                 completionHandler(nil, error)
@@ -216,7 +216,7 @@ extension FileProviderExtension {
             do {
                 let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
                 completionHandler(
-                    file.freeze().toFileProviderItem(parent: nil, domain: self.domain), nil
+                    file.freeze().toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil
                 )
             } catch {
                 completionHandler(nil, error)
@@ -238,7 +238,7 @@ extension FileProviderExtension {
             return
         }
 
-        let item = file.toFileProviderItem(parent: nil, domain: domain)
+        let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
         item.favoriteRankModifier(newValue: favoriteRank)
 
         completionHandler(item, nil)
@@ -283,7 +283,7 @@ extension FileProviderExtension {
 
             // Make deleted file copy
             let deletedFile = file.detached()
-            let item = deletedFile.toFileProviderItem(parent: nil, domain: self.domain)
+            let item = deletedFile.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain)
             item.trashModifier(newValue: true)
 
             let proxyFile = file.proxify()
@@ -326,7 +326,7 @@ extension FileProviderExtension {
                 }
                 // Restore in given parent
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
-                let item = file.toFileProviderItem(parent: parentItemIdentifier, domain: self.domain)
+                let item = file.toFileProviderItem(parent: parentItemIdentifier, drive: self.drive, domain: self.domain)
                 item.trashModifier(newValue: false)
 
                 completionHandler(item, nil)
