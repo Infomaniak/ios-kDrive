@@ -26,11 +26,25 @@ public struct EarlyDIHook {
     public init(context: DriveAppContext) {
         os_log("EarlyDIHook")
 
-        let extraDependencies = [Factory(type: NavigationManageable.self) { _, _ in
-            NavigationManager()
-        }, Factory(type: AppContextServiceable.self) { _, _ in
-            AppContextService(context: context)
-        }]
+        var extraDependencies = [
+            Factory(type: NavigationManageable.self) { _, _ in
+                NavigationManager()
+            },
+            Factory(type: AppContextServiceable.self) { _, _ in
+                AppContextService(context: context)
+            }
+        ]
+
+        #if !ISEXTENSION
+        extraDependencies += [
+            Factory(type: AppRestorationServiceable.self) { _, _ in
+                AppRestorationService()
+            },
+            Factory(type: AppNavigable.self) { _, _ in
+                AppRouter()
+            }
+        ]
+        #endif
 
         // setup DI ASAP
         FactoryService.setupDependencyInjection(other: extraDependencies)

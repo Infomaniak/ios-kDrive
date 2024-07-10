@@ -96,8 +96,8 @@ public enum SentryDebug {
 
     // MARK: - No Window
 
-    public static func captureNoWindow() {
-        capture(message: "Trying to call show with no window")
+    public static func captureNoWindow(function: String = #function) {
+        capture(message: "Trying to call show with no window in :\(function)")
     }
 }
 

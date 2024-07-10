@@ -27,7 +27,9 @@ class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
@@ -89,8 +91,7 @@ class SwitchUserViewController: UIViewController {
             MatomoUtils.connectUser()
 
             accountManager.switchAccount(newAccount: account)
-            let newMainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-            (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(newMainTabViewController)
+            appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                 errorType: .noDrive,
@@ -144,7 +145,7 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
         cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
-        cell.isUserInteractionEnabled = !DriveInfosManager.instance.getDrives(for: account.userId).isEmpty
+        cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: account.userId).isEmpty
 
         account.user.getAvatar { image in
             cell.logoImage.image = image
@@ -160,8 +161,6 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
         Task {
             do {
                 let connectedAccount = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
-                // Download root files
-                try await accountManager.currentDriveFileManager?.initRoot()
 
                 switchToConnectedAccount(connectedAccount)
             } catch {

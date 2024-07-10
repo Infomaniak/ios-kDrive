@@ -173,6 +173,7 @@ public enum SortType: String {
     case olderDelete
     case newerDelete
     case type
+    case relevance
 
     public struct SortTypeValue {
         public let apiValue: String
@@ -189,14 +190,14 @@ public enum SortType: String {
         switch self {
         case .nameAZ:
             return SortTypeValue(
-                apiValue: "path",
+                apiValue: "name",
                 order: "asc",
                 translation: KDriveResourcesStrings.Localizable.sortNameAZ,
                 realmKeyPath: \.sortedName
             )
         case .nameZA:
             return SortTypeValue(
-                apiValue: "path",
+                apiValue: "name",
                 order: "desc",
                 translation: KDriveResourcesStrings.Localizable.sortNameZA,
                 realmKeyPath: \.sortedName
@@ -252,6 +253,13 @@ public enum SortType: String {
             )
         case .type:
             return SortTypeValue(apiValue: "type", order: "asc", translation: "", realmKeyPath: \.type)
+        case .relevance:
+            return SortTypeValue(
+                apiValue: "relevance",
+                order: "asc",
+                translation: KDriveResourcesStrings.Localizable.sortMostRelevant,
+                realmKeyPath: \.sortedName
+            )
         }
     }
 }
@@ -262,6 +270,7 @@ public enum FileVisibility: String {
     case isTeamSpace = "is_team_space"
     case isTeamSpaceFolder = "is_team_space_folder"
     case isInTeamSpaceFolder = "is_in_team_space_folder"
+    case isPrivateSpace = "is_private_space"
 }
 
 public enum FileStatus: String {
@@ -337,12 +346,23 @@ public final class FileVersion: EmbeddedObject, Codable {
     }
 }
 
+public enum FileSupportedBy: String, PersistableEnum, Codable {
+    /// This file can have a thumbnail generated
+    case thumbnail
+    /// This file can be read by OnlyOffice
+    case onlyOffice = "onlyoffice"
+}
+
+public typealias FileCursor = String
+
 public final class File: Object, Codable {
     private let fileManager = FileManager.default
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
-    @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
+    @Persisted(primaryKey: true) public var uid = UUID().uuidString
+    @Persisted public var id: Int
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int
@@ -361,12 +381,16 @@ public final class File: Object, Codable {
     @Persisted public var createdAt: Date?
     /// Date of upload
     @Persisted public var addedAt: Date
-    /// Date of modification
+    /// Date of modification of content / path / name
+    @Persisted public var updatedAt: Date
+    /// Date of modification of the content by manual upload or OnlyOffice
     @Persisted public var lastModifiedAt: Date
     /// Date of deleted resource, only visible when the File is trashed
     @Persisted public var deletedBy: Int?
     /// User identifier of deleted resource, only visible when the File is trashed
     @Persisted public var deletedAt: Date?
+    /// Date of file/folder content modification (ie: underlying data changed)
+    @Persisted public var revisedAt: Date
     /// Array of users identifiers that has access to the File
     @Persisted public var users: List<Int> // Extra property
     /// Is File pinned as favorite
@@ -393,10 +417,10 @@ public final class File: Object, Codable {
     // File only
     /// Size of File (byte unit)
     @Persisted public var size: Int?
-    /// File has thumbnail, if so you can request thumbnail route
-    @Persisted public var hasThumbnail: Bool
-    /// File can be handled by only-office
-    @Persisted public var hasOnlyoffice: Bool
+
+    /// Contains all the services that supports this file, for available services see *FileSupportedBy*
+    @Persisted public var supportedBy: MutableSet<FileSupportedBy>
+
     /// File type
     @Persisted public var extensionType: String?
     /// Information when file has multi-version
@@ -404,17 +428,18 @@ public final class File: Object, Codable {
     /// File can be converted to another extension
     @Persisted public var conversion: FileConversion?
 
+    @Persisted public var lastCursor: FileCursor?
+
     // Other
     @Persisted public var children: MutableSet<File>
     @Persisted(originProperty: "children") var parentLink: LinkingObjects<File>
+    /// Only used for directories: the last time we got a response from the server for this directory
     @Persisted public var responseAt: Int
+    /// Only used for offline files: the last time we got an update from the server
+    @Persisted public var lastActionAt: Int
     @Persisted public var versionCode: Int
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
-
-    public var userId: Int?
-    public var isFirstInCollection = false
-    public var isLastInCollection = false
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -429,7 +454,9 @@ public final class File: Object, Codable {
         case createdBy = "created_by"
         case createdAt = "created_at"
         case addedAt = "added_at"
+        case updatedAt = "updated_at"
         case lastModifiedAt = "last_modified_at"
+        case revisedAt = "revised_at"
         case deletedBy = "deleted_by"
         case deletedAt = "deleted_at"
         case users
@@ -440,12 +467,11 @@ public final class File: Object, Codable {
         case color
         case dropbox
         case size
-        case hasThumbnail = "has_thumbnail"
-        case hasOnlyoffice = "has_onlyoffice"
         case extensionType = "extension_type"
         case externalImport = "external_import"
         case version
         case conversion = "conversion_capabilities"
+        case supportedBy = "supported_by"
     }
 
     public var parent: File? {
@@ -455,7 +481,7 @@ public final class File: Object, Codable {
 
     public var creator: DriveUser? {
         if let createdBy {
-            return DriveInfosManager.instance.getUser(id: createdBy)
+            return driveInfosManager.getUser(primaryKey: createdBy)
         }
         return nil
     }
@@ -508,9 +534,15 @@ public final class File: Object, Codable {
     }
 
     public var isDownloaded: Bool {
+        let localPath = localUrl.path
+        guard fileManager.fileExists(atPath: localPath) else {
+            DDLogError("[File] no local copy to read from")
+            return false
+        }
+
         // Check that size on disk matches, if available
         do {
-            let attributes = try fileManager.attributesOfItem(atPath: localUrl.path)
+            let attributes = try fileManager.attributesOfItem(atPath: localPath)
             if let remoteSize = size,
                let metadataSize = attributes[FileAttributeKey.size] as? NSNumber,
                metadataSize.intValue != remoteSize {
@@ -520,7 +552,7 @@ public final class File: Object, Codable {
             DDLogError("[File] unable to read metadata on disk: \(error)")
         }
 
-        return fileManager.fileExists(atPath: localUrl.path)
+        return true
     }
 
     public var isMostRecentDownloaded: Bool {
@@ -528,7 +560,7 @@ public final class File: Object, Codable {
     }
 
     public var isOfficeFile: Bool {
-        return hasOnlyoffice || conversion?.whenOnlyoffice == true
+        return supportedBy.contains(.onlyOffice) || conversion?.whenOnlyoffice == true
     }
 
     public var isBookmark: Bool {
@@ -583,7 +615,7 @@ public final class File: Object, Codable {
 
     public var isLocalVersionOlderThanRemote: Bool {
         if let modificationDate = try? fileManager.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date,
-           modificationDate >= lastModifiedAt {
+           modificationDate >= revisedAt {
             return false
         }
         return true
@@ -655,7 +687,7 @@ public final class File: Object, Codable {
     }
 
     public func applyLastModifiedDateToLocalFile() {
-        try? fileManager.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
+        try? fileManager.setAttributes([.modificationDate: revisedAt], ofItemAtPath: localUrl.path)
     }
 
     public func excludeFileFromSystemBackup() {
@@ -713,7 +745,8 @@ public final class File: Object, Codable {
         } else {
             identifier = .rootContainer
         }
-        DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
+
+        driveInfosManager.getFileProviderManager(driveId: driveId, userId: userId) { manager in
             manager.signalEnumerator(for: .workingSet) { _ in
                 // META: keep SonarCloud happy
             }
@@ -727,13 +760,20 @@ public final class File: Object, Codable {
         return ProxyFile(driveId: driveId, id: id)
     }
 
+    public static func uid(driveId: Int, fileId: Int) -> String {
+        "\(fileId)_\(driveId)"
+    }
+
     public convenience init(from decoder: Decoder) throws {
         self.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
+        let id = try container.decode(Int.self, forKey: .id)
+        self.id = id
         parentId = try container.decode(Int.self, forKey: .parentId)
-        driveId = try container.decode(Int.self, forKey: .driveId)
+        let driveId = try container.decode(Int.self, forKey: .driveId)
+        self.driveId = driveId
+        uid = File.uid(driveId: driveId, fileId: id)
         let decodedName = try container.decode(String.self, forKey: .name)
         name = decodedName
         sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
@@ -745,6 +785,8 @@ public final class File: Object, Codable {
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
         addedAt = try container.decode(Date.self, forKey: .addedAt)
         lastModifiedAt = try container.decode(Date.self, forKey: .lastModifiedAt)
+        revisedAt = try container.decode(Date.self, forKey: .revisedAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
@@ -756,8 +798,9 @@ public final class File: Object, Codable {
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         externalImport = try container.decodeIfPresent(FileExternalImport.self, forKey: .externalImport)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
-        hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail) ?? false
-        hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice) ?? false
+        let rawSupportedBy = try container.decodeIfPresent([String].self, forKey: .supportedBy) ?? []
+        supportedBy = MutableSet()
+        supportedBy.insert(objectsIn: rawSupportedBy.compactMap { FileSupportedBy(rawValue: $0) })
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
         version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
@@ -769,10 +812,14 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String) {
+    convenience init(id: Int, name: String, driveId: Int? = nil) {
         self.init()
         self.id = id
         self.name = name
+        if let driveId {
+            self.driveId = driveId
+            uid = File.uid(driveId: driveId, fileId: id)
+        }
         rawType = "dir"
         children = MutableSet<File>()
     }
@@ -789,8 +836,6 @@ extension File: Differentiable {
                 && sortedName == source.sortedName
                 && isFavorite == source.isFavorite
                 && isAvailableOffline == source.isAvailableOffline
-                && isFirstInCollection == source.isFirstInCollection
-                && isLastInCollection == source.isLastInCollection
                 && visibility == source.visibility
                 && hasSharelink == source.hasSharelink
                 && isDropbox == source.isDropbox
@@ -798,5 +843,18 @@ extension File: Differentiable {
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color
         }
+    }
+}
+
+extension File: FileProviderItemProvider {
+    /// DTO of a File used by the FileProvider
+    /// Represents a `File` in database
+    public func toFileProviderItem(parent: NSFileProviderItemIdentifier?,
+                                   drive: Drive?,
+                                   domain: NSFileProviderDomain?) -> NSFileProviderItem {
+        // TODO: override parent and domain for future working set support.
+
+        let item = FileProviderItem(file: self, drive: drive, domain: domain)
+        return item
     }
 }

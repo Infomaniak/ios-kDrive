@@ -36,7 +36,7 @@ public class PdfPreviewCache {
         do {
             if let modifiedDate = try FileManager.default
                 .attributesOfItem(atPath: pdfPreviewUrl(for: file).path)[.modificationDate] as? Date {
-                if modifiedDate >= file.lastModifiedAt {
+                if modifiedDate >= file.revisedAt {
                     return false
                 }
             }

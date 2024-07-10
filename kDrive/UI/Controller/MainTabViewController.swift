@@ -24,32 +24,45 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-final class MainTabViewController: UITabBarController, Restorable {
+/// Enum to explicit tab names
+public enum MainTabBarIndex: Int {
+    case home = 0
+    case files = 1
+    case gallery = 3
+    case profile = 4
+}
+
+class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
+    /// Tracking the last selection date to detect double tap
+    private var lastInteraction: Date?
+
+    /// Time between two tap events that feels alright for a double tap
+    private static let doubleTapInterval = TimeInterval(0.350)
+
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService var fileImportHelper: FileImportHelper
+    @LazyInjectService var router: AppNavigable
 
     let driveFileManager: DriveFileManager
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
         self.driveFileManager = driveFileManager
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
-        rootViewControllers.append(Self.initRootViewController(with: ConcreteFileListViewModel(
-            driveFileManager: driveFileManager,
-            currentDirectory: nil
-        )))
+        rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
         rootViewControllers.append(Self.initFakeViewController())
-        rootViewControllers.append(Self.initRootViewController(with: FavoritesViewModel(
-            driveFileManager: driveFileManager,
-            currentDirectory: nil
-        )))
+        rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager)))
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
+
+        if let selectedIndex {
+            self.selectedIndex = selectedIndex
+        }
     }
 
     @available(*, unavailable)
@@ -87,16 +100,6 @@ final class MainTabViewController: UITabBarController, Restorable {
         updateTabBarProfilePicture()
     }
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-        coder.encode(selectedIndex, forKey: "SelectedIndex")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-        selectedIndex = coder.decodeInteger(forKey: "SelectedIndex")
-    }
-
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
         let homeViewController = HomeViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
@@ -105,6 +108,16 @@ final class MainTabViewController: UITabBarController, Restorable {
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
         navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
         navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
+        return navigationViewController
+    }
+
+    private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+        navigationViewController.navigationBar.prefersLargeTitles = true
+        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.folder.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.folderFilledTab.image
         return navigationViewController
     }
 
@@ -125,14 +138,14 @@ final class MainTabViewController: UITabBarController, Restorable {
         return fakeViewController
     }
 
-    private static func initRootViewController(with viewModel: FileListViewModel) -> UIViewController {
-        let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
-        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: fileListViewController)
-        navigationViewController.restorationIdentifier = String(describing: type(of: viewModel))
+    private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
+        let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
+        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
+        navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
-        navigationViewController.tabBarItem.image = viewModel.configuration.tabBarIcon.image
-        navigationViewController.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
+        navigationViewController.tabBarItem.image = KDriveResourcesAsset.mediaInline.image
+        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.mediaBold.image
         return navigationViewController
     }
 
@@ -194,23 +207,25 @@ final class MainTabViewController: UITabBarController, Restorable {
         return (image, selectedImage)
     }
 
-    func getCurrentDirectory() -> (DriveFileManager, File) {
+    func getCurrentDirectory() -> (DriveFileManager, File?) {
         if let filesViewController = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController,
             filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
             return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
-            let file = driveFileManager.getCachedRootFile()
+            let file = driveFileManager.getCachedMyFilesRoot()
             return (driveFileManager, file)
         }
     }
 
-    func enableCenterButton(isEnabled: Bool) {
-        (tabBar as? MainTabBar)?.centerButton?.isEnabled = isEnabled
-    }
-
-    func enableCenterButton(from file: File) {
-        enableCenterButton(isEnabled: file.capabilities.canCreateFile)
+    func updateCenterButton() {
+        let (_, currentDirectory) = getCurrentDirectory()
+        guard let currentDirectory else {
+            (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
+            return
+        }
+        let canCreateFile = currentDirectory.isRoot || currentDirectory.capabilities.canCreateFile
+        (tabBar as? MainTabBar)?.centerButton?.isEnabled = canCreateFile
     }
 }
 
@@ -218,6 +233,8 @@ final class MainTabViewController: UITabBarController, Restorable {
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
+        guard let currentDirectory else { return }
+
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let fromFileList = (selectedViewController as? UINavigationController)?
             .topViewController as? FileListViewController != nil
@@ -233,34 +250,93 @@ extension MainTabViewController: MainTabBarDelegate {
         floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
         present(floatingPanelViewController, animated: true)
     }
+
+    func avatarLongTouch() {
+        guard let rootNavigationController = viewControllers?[safe: MainTabBarIndex.profile.rawValue] as? UINavigationController
+        else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        selectedIndex = MainTabBarIndex.profile.rawValue
+
+        router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
+    }
+
+    func avatarDoubleTap() {
+        accountManager.switchToNextAvailableAccount()
+        guard let accountManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        _ = router.showMainViewController(driveFileManager: accountManager,
+                                          selectedIndex: MainTabBarIndex.profile.rawValue)
+    }
 }
 
 // MARK: - Tab bar controller delegate
 
 extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeViewController {
+        guard let navigationController = viewController as? UINavigationController else {
+            return false
+        }
+
+        defer {
+            lastInteraction = Date()
+        }
+
+        let topViewController = navigationController.topViewController
+        if let homeViewController = topViewController as? HomeViewController {
             homeViewController.presentedFromTabBar()
         }
 
-        if tabBarController.selectedViewController == viewController,
-           let viewController = (viewController as? UINavigationController)?.topViewController as? TopScrollable {
-            viewController.scrollToTop()
+        if tabBarController.selectedViewController == viewController {
+            // Detect double tap on menu
+            if topViewController as? MenuViewController != nil,
+               let lastDate = lastInteraction,
+               Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
+                avatarDoubleTap()
+                return true
+            }
+
+            if let viewController = topViewController as? TopScrollable {
+                viewController.scrollToTop()
+            }
         }
 
         return true
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        let (_, currentDirectory) = getCurrentDirectory()
-        (tabBarController as? MainTabViewController)?.enableCenterButton(from: currentDirectory)
+        let selectedIndex = tabBarController.selectedIndex
+
+        UserDefaults.shared.lastSelectedTab = selectedIndex
+        saveSelectedTabUserActivity(selectedIndex)
+
+        updateCenterButton()
+    }
+
+    // MARK: - State restoration
+
+    private func saveSelectedTabUserActivity(_ index: Int) {
+        let metadata = [SceneRestorationKeys.selectedIndex.rawValue: index]
+        let userActivity = currentUserActivity
+        userActivity.userInfo = metadata
+
+        view.window?.windowScene?.userActivity = userActivity
     }
 }
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
 extension MainTabViewController: UpdateAccountDelegate {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
@@ -287,7 +363,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: accountManager.currentUserId,
-                            driveId: documentPicker.importDrive.id,
+                            driveId: documentPicker.importDriveDirectory.driveId,
                             url: targetURL,
                             name: url.lastPathComponent
                         )

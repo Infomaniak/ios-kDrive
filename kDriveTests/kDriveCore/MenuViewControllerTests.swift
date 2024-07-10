@@ -25,9 +25,9 @@ import InfomaniakLogin
 import XCTest
 
 final class MenuViewControllerTests: XCTestCase {
-    override func tearDown() {
-        SimpleResolver.sharedResolver.removeAll()
-        super.tearDown()
+    override func setUp() {
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
     }
 
     // MARK: - Upload observation
@@ -48,9 +48,6 @@ final class MenuViewControllerTests: XCTestCase {
             manager.currentAccount = mockAccount
             return manager
         }
-
-        SimpleResolver.sharedResolver.removeAll()
-        MockingHelper.registerConcreteTypes()
         SimpleResolver.register([accountManagerFactory])
 
         let driveApiFetcher = DriveApiFetcher()

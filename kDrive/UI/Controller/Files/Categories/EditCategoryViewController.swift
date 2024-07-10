@@ -93,46 +93,6 @@ final class EditCategoryViewController: UITableViewController {
         return viewController
     }
 
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        if let categoryId = category?.id {
-            coder.encode(categoryId, forKey: "CategoryId")
-        }
-        if let filesIdToAdd = filesToAdd?.map(\.id) {
-            coder.encode(filesIdToAdd, forKey: "FilesId")
-        }
-        coder.encode(name, forKey: "Name")
-        coder.encode(color, forKey: "Color")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let categoryId = coder.decodeInteger(forKey: "CategoryId")
-        let filesId = coder.decodeObject(of: [NSNumber.self], forKey: "FilesId") as? [NSNumber]
-        if let name = coder.decodeObject(of: NSString.self, forKey: "Name") {
-            self.name = name as String
-        }
-        if let color = coder.decodeObject(of: NSString.self, forKey: "Color") {
-            self.color = color as String
-        }
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        category = driveFileManager.drive.categories.first { $0.id == categoryId }
-        filesToAdd = filesId?.compactMap { driveFileManager.getCachedFile(id: Int(truncating: $0)) }
-        // Reload view
-        updateTitle()
-        setRows()
-    }
-
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

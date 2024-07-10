@@ -20,7 +20,7 @@ import Foundation
 import RealmSwift
 
 public enum ShareLinkPermission: String, Encodable {
-    case restricted, `public`, password
+    case restricted, `public`, password, inherit
 }
 
 public class ShareLink: EmbeddedObject, Codable {
@@ -34,6 +34,10 @@ public class ShareLink: EmbeddedObject, Codable {
         case right
         case validUntil = "valid_until"
         case capabilities
+    }
+
+    public var shareLinkPermission: ShareLinkPermission? {
+        ShareLinkPermission(rawValue: right)
     }
 }
 

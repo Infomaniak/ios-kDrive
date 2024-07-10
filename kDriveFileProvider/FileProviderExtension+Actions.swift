@@ -35,10 +35,10 @@ extension FileProviderExtension {
 
             // Call completion handler with error if the file name already exists
             let itemsWithSameParent = file.children
-                .map { FileProviderItem(file: $0, domain: self.domain) }
+                .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
             let newItemFileName = directoryName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-               !collidingItem.isTrashed {
+               !(collidingItem.isTrashed ?? false) {
                 completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
                 return
             }
@@ -50,7 +50,7 @@ extension FileProviderExtension {
                     name: directoryName,
                     onlyForMe: false
                 )
-                completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
+                completionHandler(directory.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
             }
@@ -64,7 +64,7 @@ extension FileProviderExtension {
         Log.fileProvider("deleteItem")
         Task {
             guard let fileId = itemIdentifier.toFileId() else {
-                completionHandler(self.nsError(code: .noSuchItem))
+                completionHandler(NSFileProviderError(.noSuchItem))
                 return
             }
 
@@ -76,7 +76,7 @@ extension FileProviderExtension {
                     try await self.manager.signalEnumerator(for: itemIdentifier)
                     completionHandler(nil)
                 } else {
-                    completionHandler(self.nsError(code: .serverUnreachable))
+                    completionHandler(NSFileProviderError(.serverUnreachable))
                 }
             } catch {
                 completionHandler(error)
@@ -99,17 +99,17 @@ extension FileProviderExtension {
             return
         }
         let itemsWithSameParent = file.children
-            .map { FileProviderItem(file: $0, domain: self.domain) }
+            .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !collidingItem.isTrashed {
+           !(collidingItem.isTrashed ?? false) {
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
 
-        let id = UUID().uuidString
-        let importedDocumentIdentifier = NSFileProviderItemIdentifier(id)
-        let storageUrl = FileProviderItem.createStorageUrl(
+        let importedFileUUID = UUID().uuidString
+        let importedDocumentIdentifier = NSFileProviderItemIdentifier(importedFileUUID)
+        let storageUrl = fileProviderService.createStorageUrl(
             identifier: importedDocumentIdentifier,
             filename: fileURL.lastPathComponent,
             domain: domain
@@ -131,15 +131,20 @@ extension FileProviderExtension {
         if accessingSecurityScopedResource {
             fileURL.stopAccessingSecurityScopedResource()
         }
-        let importedItem = FileProviderItem(
-            importedFileUrl: storageUrl,
-            identifier: importedDocumentIdentifier,
-            parentIdentifier: parentItemIdentifier
-        )
-        backgroundUploadItem(importedItem)
 
-        manager.signalEnumerator(for: parentItemIdentifier) { _ in
-            completionHandler(importedItem, nil)
+        guard let parentDirectoryId = parentItemIdentifier.toFileId() else {
+            fatalError("missing parentDirectoryId TODO sentry")
+        }
+
+        let importItem = UploadFileProviderItem(uploadFileUUID: importedFileUUID,
+                                                parentDirectoryId: parentDirectoryId,
+                                                userId: driveFileManager.drive.userId,
+                                                driveId: driveFileManager.drive.id,
+                                                sourceUrl: storageUrl,
+                                                conflictOption: .version,
+                                                driveError: nil)
+        backgroundUpload(importItem) {
+            completionHandler(importItem, nil)
         }
     }
 
@@ -150,6 +155,12 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("renameItem")
         Task {
+            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+                Log.fileProvider("renameItem not supported while uploading", level: .error)
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
+
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
@@ -158,10 +169,10 @@ extension FileProviderExtension {
 
             // Check if file name already exists
             let itemsWithSameParent = file.parent!.children
-                .map { FileProviderItem(file: $0, domain: self.domain) }
+                .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
             let newItemFileName = itemName.lowercased()
             if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-               !collidingItem.isTrashed {
+               !(collidingItem.isTrashed ?? false) {
                 completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
                 return
             }
@@ -169,7 +180,9 @@ extension FileProviderExtension {
             let proxyFile = file.proxify()
             do {
                 let file = try await self.driveFileManager.rename(file: proxyFile, newName: itemName)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                completionHandler(
+                    file.freeze().toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil
+                )
             } catch {
                 completionHandler(nil, error)
             }
@@ -184,6 +197,12 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("reparentItem")
         Task {
+            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+                Log.fileProvider("reparentItem not supported while uploading", level: .error)
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
+                return
+            }
+
             guard let fileId = itemIdentifier.toFileId(),
                   let file = self.driveFileManager.getCachedFile(id: fileId),
                   let parentId = parentItemIdentifier.toFileId(),
@@ -196,7 +215,9 @@ extension FileProviderExtension {
             let proxyParent = parent.proxify()
             do {
                 let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
+                completionHandler(
+                    file.freeze().toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil
+                )
             } catch {
                 completionHandler(nil, error)
             }
@@ -209,7 +230,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         let fileId = itemIdentifier.toFileId()
-        Log.fileProvider("setFavoriteRank forItemIdentifier:\(fileId)")
+        Log.fileProvider("setFavoriteRank forItemIdentifier:\(String(describing: fileId))")
         // How should we save favourite rank in database?
         guard let fileId,
               let file = driveFileManager.getCachedFile(id: fileId) else {
@@ -217,8 +238,8 @@ extension FileProviderExtension {
             return
         }
 
-        let item = FileProviderItem(file: file, domain: domain)
-        item.favoriteRank = favoriteRank
+        let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
+        item.favoriteRankModifier(newValue: favoriteRank)
 
         completionHandler(item, nil)
     }
@@ -230,7 +251,7 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("setLastUsedDate forItemIdentifier")
         // kDrive doesn't support this
-        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
+        completionHandler(nil, NSError.featureUnsupported)
     }
 
     override func setTagData(
@@ -240,7 +261,7 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
         // kDrive doesn't support this
-        completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError))
+        completionHandler(nil, NSError.featureUnsupported)
     }
 
     override func trashItem(
@@ -262,11 +283,16 @@ extension FileProviderExtension {
 
             // Make deleted file copy
             let deletedFile = file.detached()
-            let item = FileProviderItem(file: deletedFile, domain: self.domain)
-            item.isTrashed = true
+            let item = deletedFile.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain)
+            item.trashModifier(newValue: true)
+
             let proxyFile = file.proxify()
 
             do {
+                guard let item = item as? FileProviderItem else {
+                    return
+                }
+
                 _ = try await self.driveFileManager.delete(file: proxyFile)
                 completionHandler(item, nil)
             } catch {
@@ -284,7 +310,7 @@ extension FileProviderExtension {
         Log.fileProvider("untrashItem withIdentifier:\(fileId)")
         Task {
             guard let fileId else {
-                completionHandler(nil, self.nsError(code: .noSuchItem))
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
             }
 
@@ -300,16 +326,16 @@ extension FileProviderExtension {
                 }
                 // Restore in given parent
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
-                let item = FileProviderItem(file: file, domain: self.domain)
-                if let parentItemIdentifier {
-                    item.parentItemIdentifier = parentItemIdentifier
-                }
-                item.isTrashed = false
+                let item = file.toFileProviderItem(parent: parentItemIdentifier, drive: self.drive, domain: self.domain)
+                item.trashModifier(newValue: false)
+
+                completionHandler(item, nil)
+
+                // Signal after completionHandler
                 try await self.manager.signalEnumerator(for: .workingSet)
                 try await self.manager.signalEnumerator(for: item.parentItemIdentifier)
-                completionHandler(item, nil)
             } catch {
-                completionHandler(nil, self.nsError(code: .noSuchItem))
+                completionHandler(nil, NSFileProviderError(.noSuchItem))
             }
         }
     }

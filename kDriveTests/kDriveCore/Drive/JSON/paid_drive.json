@@ -1,6 +1,12 @@
 {
-  "account_admin": false,
-  "account_id": 98765,
+  "account": {
+    "created_at": 1641942000,
+    "id": 1234,
+    "legal_entity_type": "restrict",
+    "name": "John Appleseed"
+  },
+  "account_admin": true,
+  "account_id": 1234,
   "capabilities": {
     "can_add_user": true,
     "can_rewind": false,
@@ -13,7 +19,7 @@
   "categories": [
     {
       "color": "#1ABC9C",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 1,
       "is_predefined": true,
@@ -21,7 +27,7 @@
     },
     {
       "color": "#11806A",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 2,
       "is_predefined": true,
@@ -29,7 +35,7 @@
     },
     {
       "color": "#206694",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 6,
       "is_predefined": true,
@@ -37,7 +43,7 @@
     },
     {
       "color": "#9B59B6",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 7,
       "is_predefined": true,
@@ -45,7 +51,7 @@
     },
     {
       "color": "#71368A",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 8,
       "is_predefined": true,
@@ -53,7 +59,7 @@
     },
     {
       "color": "#E91E63",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 9,
       "is_predefined": true,
@@ -61,7 +67,7 @@
     },
     {
       "color": "#C45911",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 13,
       "is_predefined": true,
@@ -69,7 +75,7 @@
     },
     {
       "color": "#E74C3C",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 15,
       "is_predefined": true,
@@ -77,7 +83,7 @@
     },
     {
       "color": "#9D00FF",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 17,
       "is_predefined": true,
@@ -85,7 +91,7 @@
     },
     {
       "color": "#00B0F0",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 18,
       "is_predefined": true,
@@ -93,7 +99,7 @@
     },
     {
       "color": "#2E77B5",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 22,
       "is_predefined": true,
@@ -101,59 +107,27 @@
     },
     {
       "color": "#70AD47",
-      "created_at": 1643969225,
+      "created_at": 1641982108,
       "created_by": 1,
       "id": 23,
       "is_predefined": true,
       "name": "PREDEF_CAT_HOBBIES"
     },
     {
-      "color": "#FF0000",
-      "created_at": 1645697060,
-      "created_by": 1011121314,
-      "id": 482,
+      "color": "#0b4899",
+      "created_at": 1643039728,
+      "created_by": 1045453,
+      "id": 25,
       "is_predefined": false,
-      "name": "updateCategory-6b941316-ca2f-4930-9212-12313c61d7fa}"
-    },
-    {
-      "color": "#0000FF",
-      "created_at": 1645697061,
-      "created_by": 1011121315,
-      "id": 483,
-      "is_predefined": false,
-      "name": "category test c9e3419a-e812-41c9-bbeb-c23ea6f8d717}"
-    },
-    {
-      "color": "#9d00ff",
-      "created_at": 1648124986,
-      "created_by": 1011121316,
-      "id": 2537,
-      "is_predefined": false,
-      "name": "poney"
-    },
-    {
-      "color": "#0000FF",
-      "created_at": 1653387432,
-      "created_by": 1011121317,
-      "id": 2878,
-      "is_predefined": false,
-      "name": "testCreateCategory-05215a91-e553-4f89-ab0a-5f93815aa240}"
+      "name": "coucou"
     },
     {
       "color": "#70AD47",
-      "created_at": 1658994198,
+      "created_at": 1658994052,
       "created_by": 0,
-      "id": 3297,
+      "id": 27,
       "is_predefined": true,
       "name": "PREDEF_CAT_RESUME"
-    },
-    {
-      "color": "#0000FF",
-      "created_at": 1663926526,
-      "created_by": 1011121318,
-      "id": 3543,
-      "is_predefined": false,
-      "name": "category-46a467f0-bcd2-4db7-9dd5-31950e34a15e}"
     }
   ],
   "categories_permissions": {
@@ -163,10 +137,10 @@
     "can_put_on_file": true,
     "can_read_on_file": true
   },
-  "created_at": 1643969223,
+  "created_at": 1641981912,
   "description": "",
   "expired_at": null,
-  "id": 98765,
+  "id": 407472,
   "in_maintenance": false,
   "is_demo": false,
   "is_in_app_subscription": false,
@@ -174,30 +148,31 @@
   "maintenance_at": null,
   "maintenance_types": [
   ],
-  "name": "Team Mobile Test",
+  "name": "John Appleseed",
   "pack": {
     "capabilities": {
-      "can_access_dashboard": true,
+      "can_access_dashboard": false,
       "can_rewind": false,
-      "can_set_sharelink_custom_url": true,
-      "can_set_sharelink_expiration": true,
-      "can_set_sharelink_password": true,
-      "can_set_trash_duration": true,
-      "use_dropbox": true,
-      "use_folder_custom_color": true,
-      "use_manage_right": true,
+      "can_set_sharelink_custom_url": false,
+      "can_set_sharelink_expiration": false,
+      "can_set_sharelink_password": false,
+      "can_set_trash_duration": false,
+      "can_use_content_search": false,
+      "use_dropbox": false,
+      "use_folder_custom_color": false,
+      "use_manage_right": false,
       "use_vault": false
     },
     "id": 2,
     "name": "team"
   },
   "preferences": {
-    "color": "#673AB7",
+    "color": "#009688",
     "default": false,
     "default_page": "private",
     "hide": false
   },
-  "product_id": 5138536,
+  "product_id": 54321,
   "rewind": null,
   "rights": {
     "statistic": true,
@@ -208,16 +183,17 @@
     "ai_scan": {
       "has_approved": true,
       "has_approved_ai_categories": null,
+      "has_approved_content_search": false,
       "is_enabled": false,
-      "updated_at": 1643969326
+      "updated_at": 1641982119
     },
     "max_keep_deleted_user": "6 months",
     "versioning": {
-      "max_days": 60,
-      "max_numbers": 100
+      "max_days": 30,
+      "max_numbers": 30
     }
   },
-  "size": 3298534883328,
+  "size": 16106127360,
   "tags": [
   ],
   "teams": {
@@ -227,27 +203,23 @@
     "drive": [
     ]
   },
-  "updated_at": 1702650124,
-  "used_size": 6666595193,
+  "updated_at": 1719527157,
+  "used_size": 2445010139,
   "users": {
     "account": [
-      123,
-      456,
-      789,
-      1011
+      12,
+      13
     ],
     "drive": [
-      1011121314,
-      1011121315
+      14
     ],
     "external": [
     ],
     "internal": [
-      1011121314,
-      1011121315
+      15
     ]
   },
-  "users_count": 2,
-  "users_quota": 6,
-  "version": "3.6"
+  "users_count": 1,
+  "users_quota": 1,
+  "version": "3.7"
 }

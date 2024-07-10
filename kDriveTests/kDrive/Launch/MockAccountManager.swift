@@ -53,7 +53,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
 
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive? { nil }
+    func getDrive(for accountId: Int, driveId: Int) -> Drive? { nil }
+
+    func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive? { nil }
 
     func getTokenForUserId(_ id: Int) -> ApiToken? { nil }
 
@@ -73,7 +75,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func switchAccount(newAccount: Account) {}
 
-    func setCurrentDriveForCurrentAccount(drive: Drive) {}
+    func switchToNextAvailableAccount() {}
+
+    func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {}
 
     func addAccount(account: Account, token apiToken: ApiToken) {}
 

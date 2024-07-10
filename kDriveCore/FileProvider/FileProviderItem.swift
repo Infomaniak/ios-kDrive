@@ -40,6 +40,7 @@ public extension NSFileProviderItemIdentifier {
     }
 }
 
+/// DTO of the `File` Realm object
 public final class FileProviderItem: NSObject, NSFileProviderItem {
     // MARK: Private properties
 
@@ -64,8 +65,8 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var contentModificationDate: Date?
     public var versionIdentifier: Data?
     public var isMostRecentVersionDownloaded: Bool
-    public var isUploading: Bool
-    public var isUploaded: Bool
+    public var isUploading = false
+    public var isUploaded = true
     public var uploadingError: Error?
     public var isDownloading: Bool {
         guard !isDirectory else {
@@ -103,22 +104,45 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var storageUrl: URL
     public var alreadyEnumerated = false
 
-    public init(file: File, domain: NSFileProviderDomain?) {
+    // MARK: Static
+
+    public static func getFileName(file: File, drive: Drive?) -> String {
+        file.name.isEmpty ? "Root" : file.formattedLocalizedName(drive: drive)
+    }
+
+    public static func getStorageUrl(file: File, domain: NSFileProviderDomain?) -> URL {
+        @InjectService var fileProviderService: FileProviderServiceable
+        let identifier = NSFileProviderItemIdentifier(file.id)
+        let fileName = getFileName(file: file, drive: nil)
+        let storageUrl = fileProviderService.createStorageUrl(identifier: identifier, filename: fileName, domain: domain)
+        return storageUrl
+    }
+
+    /// Init a `FileProviderItem` DTO
+    ///
+    /// Prefer using `FileProviderItemProvider` than calling init directly
+    init(file: File, parent: NSFileProviderItemIdentifier? = nil, drive: Drive?, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
+        @InjectService var fileProviderService: FileProviderServiceable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        filename = file.name.isEmpty ? "Root" : file.name
+        filename = Self.getFileName(file: file, drive: drive)
         typeIdentifier = file.typeIdentifier
 
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
-        capabilities = FileProviderItem.rightsToCapabilities(rights)
+        capabilities = fileProviderService.rightsToCapabilities(rights)
 
         // Every file should have a parent, root file parent should not be called
-        parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
+        // If provided a different parent eg. WorkingSet
+        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parent?.id ?? 1)
 
         isDirectory = file.isDirectory
-        childItemCount = file.isDirectory ? NSNumber(value: file.children.count) : nil
+        if file.isDirectory && file.fullyDownloaded {
+            let totalCount = file.children.count
+            childItemCount = NSNumber(value: totalCount)
+        }
+
         if let size = file.size {
             documentSize = NSNumber(value: size)
         }
@@ -127,12 +151,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         isTrashed = file.isTrashed
         creationDate = file.createdAt
         contentModificationDate = file.lastModifiedAt
-        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
+        var modifiedAtInterval = file.lastModifiedAt.timeIntervalSince1970
+        versionIdentifier = Data(bytes: &modifiedAtInterval, count: MemoryLayout.size(ofValue: modifiedAtInterval))
         isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
-
-        // TODO: Lookup upload queue form id, for now fake it
-        isUploading = false
-        isUploaded = true
 
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
@@ -151,128 +172,31 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             ownerNameComponents = nameComponents
         }
 
-        let itemStorageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
-        storageUrl = itemStorageUrl
+        storageUrl = Self.getStorageUrl(file: file, domain: domain)
     }
 
-    public init(importedFileUrl: URL, identifier: NSFileProviderItemIdentifier, parentIdentifier: NSFileProviderItemIdentifier) {
-        Log.fileProvider("FileProviderItem init importedFileUrl:\(importedFileUrl)")
-
-        fileId = identifier.toFileId()
-        isDirectory = false
-
-        itemIdentifier = identifier
-        filename = importedFileUrl.lastPathComponent
-        typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
-        capabilities = .allowsAll
-        parentItemIdentifier = parentIdentifier
-
-        let resourceValues = try? importedFileUrl
-            .resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
-        if let totalSize = resourceValues?.totalFileSize {
-            documentSize = NSNumber(value: totalSize)
-        }
-        creationDate = resourceValues?.creationDate
-        contentModificationDate = resourceValues?.contentModificationDate
-        versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        isUploading = true
-        isUploaded = false
-        isDownloaded = false
-        isMostRecentVersionDownloaded = false
-        isShared = false
-        isTrashed = false
-        storageUrl = importedFileUrl
-    }
-
-    public func setUploadingError(_ error: DriveError) {
-        Log.fileProvider("FileProviderItem setUploadingError:\(error)")
-        switch error {
-        case .fileNotFound, .objectNotFound:
-            uploadingError = NSFileProviderError(.noSuchItem)
-        case .unknownToken:
-            uploadingError = NSFileProviderError(.notAuthenticated)
-        case .quotaExceeded:
-            uploadingError = NSFileProviderError(.insufficientQuota)
-        case .destinationAlreadyExists:
-            uploadingError = NSFileProviderError(.filenameCollision)
-        default:
-            uploadingError = NSFileProviderError(.serverUnreachable)
-        }
-    }
-
-    /*
-      (write)              .allowsWriting -> rights.write
-      (read properties)    .allowsReading -> rights.read
-      (rename)             .allowsRenaming -> rights.rename
-      (trash)              .allowsTrashing -> rights.delete
-      (delete)             .allowsDeleting -> ~= rights.delete
-      (move file/folder)   .allowsReparenting -> rights.move
-      (add file to folder) .allowsAddingSubItems -> rights.moveInto
-      (list folder files)  .allowsContentEnumerating -> rights.read
-     */
-    private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
-        var capabilities: NSFileProviderItemCapabilities = []
-        if rights.canWrite {
-            capabilities.insert(.allowsWriting)
-        }
-        if rights.canRead {
-            capabilities.insert(.allowsReading)
-        }
-        if rights.canRename {
-            capabilities.insert(.allowsRenaming)
-        }
-        if rights.canDelete {
-            capabilities.insert(.allowsDeleting)
-            capabilities.insert(.allowsTrashing)
-        }
-        if rights.canMove {
-            capabilities.insert(.allowsReparenting)
-        }
-        if rights.canMoveInto || rights.canCreateDirectory || rights.canCreateFile || rights.canUpload {
-            capabilities.insert(.allowsAddingSubItems)
-        }
-        if rights.canShow {
-            capabilities.insert(.allowsContentEnumerating)
-        }
-        return capabilities
-    }
-
-    public class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
-        let rootStorageURL: URL
-        if let domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
-                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
-        } else {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL
-        }
-        if itemURL == rootStorageURL {
-            return .rootContainer
-        }
-        let identifier = itemURL.deletingLastPathComponent().lastPathComponent
-        return NSFileProviderItemIdentifier(identifier)
-    }
-
-    public class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
-                                       domain: NSFileProviderDomain?) -> URL {
-        let rootStorageURL: URL
-        if let domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
-                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
-        } else {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL
-        }
-        if identifier == .rootContainer {
-            return rootStorageURL
-        }
-
-        let itemFolderURL = rootStorageURL.appendingPathComponent(identifier.rawValue)
-        if !FileManager.default.fileExists(atPath: itemFolderURL.path) {
-            do {
-                try FileManager.default.createDirectory(at: itemFolderURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print(error)
-            }
-        }
-        return itemFolderURL.appendingPathComponent(filename)
+    override public var description: String {
+        """
+        \(super.description)
+        fileId:\(String(describing: fileId))
+        itemIdentifier:\(itemIdentifier)
+        filename:\(filename)
+        typeIdentifier:\(typeIdentifier)
+        capabilities:\(capabilities)
+        parentItemIdentifier:\(parentItemIdentifier)
+        isDirectory:\(isDirectory)
+        childItemCount:\(String(describing: childItemCount))
+        documentSize:\(String(describing: documentSize))
+        createdBy:\(String(describing: createdBy))
+        isTrashed:\(isTrashed)
+        creationDate:\(String(describing: creationDate))
+        contentModificationDate:\(String(describing: contentModificationDate))
+        versionIdentifier:\(String(describing: versionIdentifier))
+        isMostRecentVersionDownloaded:\(isMostRecentVersionDownloaded)
+        isDownloaded:\(isDownloaded)
+        isShared:\(isShared)
+        ownerNameComponents:\(String(describing: ownerNameComponents))
+        storageUrl:\(storageUrl)
+        """
     }
 }

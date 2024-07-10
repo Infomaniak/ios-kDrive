@@ -139,7 +139,7 @@ public enum UIConstants {
     }
 
     private static func createLinkPreviewForFile(_ file: File, link: URL, completion: @escaping (LPLinkMetadata) -> Void) {
-        if ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) || !file.hasThumbnail {
+        if ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) || !file.supportedBy.contains(.thumbnail) {
             completion(createLinkMetadata(file: file, url: link, thumbnail: file.icon))
         } else {
             file.getThumbnail { thumbnail, _ in

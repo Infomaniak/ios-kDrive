@@ -34,22 +34,14 @@ extension UploadOperation {
             throw ErrorDomain.operationFinished
         }
 
-        try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-            uploadsRealm.refresh()
-
-            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                  !file.isInvalidated else {
+        try uploadsDatabase.writeTransaction { writableRealm in
+            guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
 
-            try uploadsRealm.safeWrite {
-                guard !file.isInvalidated else {
-                    throw ErrorDomain.databaseUploadFileNotFound
-                }
-                try task(file)
-                uploadsRealm.add(file, update: .modified)
-            }
+            try task(file)
+
+            writableRealm.add(file, update: .modified)
         }
     }
 
@@ -118,16 +110,21 @@ extension UploadOperation {
     /// Throws if any DB access issues
     /// Does not check upload.finished state of the upload operation
     func readOnlyFile() throws -> UploadFile {
-        return try autoreleasepool {
-            let uploadsRealm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration)
-            uploadsRealm.refresh()
+        guard let file = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            throw ErrorDomain.databaseUploadFileNotFound
+        }
 
-            guard let file = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                  !file.isInvalidated else {
-                throw ErrorDomain.databaseUploadFileNotFound
+        return file.detached()
+    }
+
+    /// Delete the UploadFile entity from database from forPrimaryKey of the current UploadOperation
+    func deleteUploadFile() async throws {
+        try uploadsDatabase.writeTransaction { writableRealm in
+            guard let uploadFile = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
+                return
             }
 
-            return file.detached()
+            writableRealm.delete(uploadFile)
         }
     }
 }

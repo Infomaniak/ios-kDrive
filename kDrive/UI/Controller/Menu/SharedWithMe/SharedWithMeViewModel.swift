@@ -17,24 +17,37 @@
  */
 
 import kDriveCore
+import RealmSwift
 import UIKit
 
-class SharedWithMeViewModel: ConcreteFileListViewModel {
-    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let isRoot = currentDirectory?.isRoot != false
-        let configuration = Configuration(selectAllSupported: !isRoot,
-                                          emptyViewType: isRoot ? .noSharedWithMe : .emptyFolder,
-                                          supportsDrop: !isRoot,
+class SharedWithMeViewModel: FileListViewModel {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let sharedWithMeRootFile = driveFileManager.getManagedFile(from: DriveFileManager.sharedWithMeRootFile)
+        let configuration = Configuration(selectAllSupported: false,
+                                          rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
+                                          emptyViewType: .noSharedWithMe,
+                                          supportsDrop: false,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "SharedWithMe"])
 
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: sharedWithMeRootFile)
+        files = AnyRealmCollection(AnyRealmCollection(sharedWithMeRootFile.children).filesSorted(by: sortType))
     }
 
-    override func loadActivities() async throws {
-        if currentDirectory.isRoot {
-            try await loadFiles(forceRefresh: true)
-        } else {
-            try await super.loadActivities()
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
+
+        // Only show loading indicator if we have nothing in cache
+        if !currentDirectory.canLoadChildrenFromCache {
+            startRefreshing(cursor: cursor)
+        }
+        defer {
+            endRefreshing()
+        }
+
+        let (_, nextCursor) = try await driveFileManager.sharedWithMeFiles(cursor: cursor, sortType: sortType, forceRefresh: true)
+        endRefreshing()
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 }

@@ -18,11 +18,15 @@
 
 import InfomaniakCoreUI
 import InfomaniakDI
+import kDriveCore
 import kDriveResources
 import UIKit
 
 class LockedAppViewController: UIViewController {
     @LazyInjectService private var appLockHelper: AppLockHelper
+    @LazyInjectService private var appNavigable: AppNavigable
+
+    @IBOutlet weak var unlockAppButton: IKLargeButton!
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -31,17 +35,18 @@ class LockedAppViewController: UIViewController {
     }
 
     func tryToUnlock() {
+        unlockAppButton.setLoading(true)
         Task {
-            let success = try await appLockHelper.evaluatePolicy(reason: KDriveResourcesStrings.Localizable.lockAppTitle)
-
-            guard success else { return }
-            unlockApp()
+            if await (try? appLockHelper.evaluatePolicy(reason: KDriveResourcesStrings.Localizable.lockAppTitle)) == true {
+                unlockApp()
+            }
+            unlockAppButton.setLoading(false)
         }
     }
 
     func unlockApp() {
         appLockHelper.setTime()
-        (UIApplication.shared.delegate as? AppDelegate)?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: true)
     }
 
     @IBAction func unlockAppButtonClicked(_ sender: UIButton) {

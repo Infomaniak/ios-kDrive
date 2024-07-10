@@ -28,8 +28,8 @@ import Vision
 import VisionKit
 
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
-    var currentDirectory: File!
-    var driveFileManager: DriveFileManager!
+    let currentDirectory: File
+    let driveFileManager: DriveFileManager
 
     let presentedFromPlusButton: Bool
     let presentedAboveFileList: Bool
@@ -167,12 +167,9 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesStrings.Localizable
-                .allRootName(driveFileManager.drive.name) : currentDirectory.name
-            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesAsset.drive
-                .image : KDriveResourcesAsset.folderFilled.image
-            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants
-                .rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
+            cell.titleLabel.text = currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
+            cell.accessoryImageView.image = currentDirectory.icon
+            cell.accessoryImageView.tintColor = currentDirectory.tintColor
             cell.separator?.isHidden = false
             cell.selectionStyle = .none
             cell.accessibilityTraits = .header

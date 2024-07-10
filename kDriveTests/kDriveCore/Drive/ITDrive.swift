@@ -33,8 +33,9 @@ final class ITDrive: XCTestCase {
 
     func testFreeDriveIsFree() {
         // GIVEN
-        guard let driveData = freeDriveJson() else {
-            XCTFail("Unexpected")
+        guard let driveData = freeDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load free drive JSON")
             return
         }
 
@@ -48,14 +49,15 @@ final class ITDrive: XCTestCase {
             XCTAssertTrue(drive.isFreePack, "We expect this drive to be free pack")
             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.free, "We expect this drive to be a free pack")
         } catch {
-            XCTFail("Unexpected Error")
+            XCTFail("Unexpected Error \(error)")
         }
     }
 
     func testPaidDriveIsPaid() {
         // GIVEN
-        guard let driveData = paidDriveJson() else {
-            XCTFail("Unexpected")
+        guard let driveData = paidDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load paid drive JSON")
             return
         }
 
@@ -69,7 +71,7 @@ final class ITDrive: XCTestCase {
             XCTAssertFalse(drive.isFreePack, "We expect this drive to be a paid pack")
             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.team, "We expect this drive to be a team pack")
         } catch {
-            XCTFail("Unexpected Error")
+            XCTFail("Unexpected Error \(error)")
         }
     }
 }

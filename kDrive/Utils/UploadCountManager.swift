@@ -24,6 +24,7 @@ import RealmSwift
 
 final class UploadCountManager {
     @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
@@ -36,7 +37,7 @@ final class UploadCountManager {
                                              qos: .utility, autoreleaseFrequency: .workItem)
 
     private lazy var userId = driveFileManager.drive.userId
-    private lazy var driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance
+    private lazy var driveIds = [driveFileManager.drive.id] + driveInfosManager
         .getDrives(for: userId, sharedWithMe: true).map(\.id)
 
     public var uploadCount = 0

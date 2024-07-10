@@ -23,7 +23,7 @@ import kDriveResources
 import StoreKit
 import UIKit
 
-final class StoreViewController: UICollectionViewController {
+final class StoreViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
     struct Item {
@@ -120,6 +120,12 @@ final class StoreViewController: UICollectionViewController {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName])
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        saveSceneState()
     }
 
     @objc func closeButtonPressed() {
@@ -340,23 +346,11 @@ final class StoreViewController: UICollectionViewController {
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        checkDriveFileManager()
-        updateOffers()
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.StoreViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id
+        ]
     }
 }
 

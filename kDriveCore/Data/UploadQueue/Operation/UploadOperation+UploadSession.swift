@@ -279,8 +279,9 @@ extension UploadOperation {
 
         await catching {
             let uploadedFile = try await apiFetcher.closeSession(drive: drive, sessionToken: abstractToken)
-            let driveFile = uploadedFile.file
-            Log.uploadOperation("uploadedFile 'File' id:\(uploadedFile.file.id) ufid:\(self.uploadFileId)")
+            let driveFile = File(value: uploadedFile.file)
+
+            Log.uploadOperation("uploadedFile 'File' id:\(driveFile.id) ufid:\(self.uploadFileId)")
             try self.handleDriveFilePostUpload(driveFile)
         }
     }
@@ -335,7 +336,7 @@ extension UploadOperation {
 
             // Cleanup the uploading chunks and session state for re-use
             let chunkTasksToClean = uploadingSession.chunkTasks.filter(UploadingChunkTask.toRetryPredicate)
-            chunkTasksToClean.forEach { uploadingChunkTask in
+            for uploadingChunkTask in chunkTasksToClean {
                 uploadingChunkTask.sessionIdentifier = nil
                 uploadingChunkTask.taskIdentifier = nil
                 uploadingChunkTask.requestUrl = nil

@@ -97,34 +97,27 @@ class ConcreteFileListViewModel: FileListViewModel {
         files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
-            try await loadActivitiesIfNeeded()
-        } else {
-            startRefreshing(page: page)
-            defer {
-                endRefreshing()
-            }
-
-            let (_, moreComing) = try await driveFileManager.files(
-                in: currentDirectory.proxify(),
-                page: page,
-                sortType: sortType,
-                forceRefresh: forceRefresh
-            )
+        startRefreshing(cursor: cursor)
+        defer {
             endRefreshing()
-            if moreComing {
-                try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-            } else if !forceRefresh {
-                try await loadActivities()
-            }
+        }
+
+        let (_, nextCursor) = try await driveFileManager.fileListing(
+            in: currentDirectory.proxify(),
+            sortType: sortType,
+            forceRefresh: forceRefresh
+        )
+        endRefreshing()
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
     override func loadActivities() async throws {
-        _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
+        try await loadFiles()
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {
@@ -139,7 +132,7 @@ class ConcreteFileListViewModel: FileListViewModel {
 }
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -230,15 +223,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         guard viewModel != nil else { return }
-        #if !ISEXTENSION
-        let plusButtonDirectory: File
-        if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
-            plusButtonDirectory = viewModel.currentDirectory
-        } else {
-            plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
-        }
-        (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
-        #endif
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
 
         tryLoadingFilesOrDisplayError()
     }
@@ -246,6 +232,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: viewModel.configuration.matomoViewPath)
+
+        saveSceneState()
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -594,6 +582,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
 
+        if viewModel.currentDirectory.visibility == .isTeamSpace {
+            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
+            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
+
+            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
+            headerView.commonDocumentsDescriptionLabel.isHidden = false
+        } else {
+            headerView.commonDocumentsDescriptionLabel.isHidden = true
+        }
+
         headerView.sortView.isHidden = !isEmptyViewHidden
 
         headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
@@ -800,58 +798,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(viewModel.driveFileManager.drive.id, forKey: "DriveID")
-        coder.encode(viewModel.currentDirectory.id, forKey: "DirectoryID")
-        if let viewModel {
-            coder.encode(String(describing: type(of: viewModel)), forKey: "ViewModel")
-        }
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveID")
-        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
-        let viewModelName = coder.decodeObject(of: NSString.self, forKey: "ViewModel") as String?
-
-        // Drive File Manager should be consistent
-        let maybeDriveFileManager: DriveFileManager?
-        #if ISEXTENSION
-        maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
-        #else
-        if viewModelName == String(describing: SharedWithMeViewModel.self) {
-            maybeDriveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId)
-        } else {
-            maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
-        }
-        #endif
-        guard let driveFileManager = maybeDriveFileManager else {
-            // Handle error?
-            return
-        }
-        let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
-
-        if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
-           let viewModelName,
-           let viewModel = getViewModel(
-               viewModelName: viewModelName,
-               driveFileManager: driveFileManager,
-               currentDirectory: maybeCurrentDirectory
-           ) {
-            self.viewModel = viewModel
-            setupViewModel()
-            tryLoadingFilesOrDisplayError()
-        } else {
-            // We need some view model to restore the view controller and pop it...
-            viewModel = ConcreteFileListViewModel(
-                driveFileManager: driveFileManager,
-                currentDirectory: driveFileManager.getCachedRootFile()
-            )
-            navigationController?.popViewController(animated: true)
-        }
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.fileId.rawValue: viewModel.currentDirectory.id
+        ]
     }
 
     // MARK: - Files header view delegate

@@ -117,40 +117,58 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .delete))
     }
 
-    public func rootFiles(drive: AbstractDrive, page: Int = 1,
-                          sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        let rootFilesEndpoint: Endpoint = .rootFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType])
-        let rootFiles: ValidServerResponse<[File]> = try await perform(request: authenticatedRequest(rootFilesEndpoint))
-
-        return (rootFiles.validApiResponse.data, rootFiles.validApiResponse.responseAt)
+    public func rootFiles(drive: AbstractDrive,
+                          cursor: String?,
+                          sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(
+            .rootFiles(drive: drive)
+                .sorted(by: [.type, sortType]),
+            method: .get
+        ))
     }
 
-    public func files(in directory: ProxyFile, page: Int = 1,
-                      sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
-        let filesEndpoint: Endpoint = .files(of: directory).paginated(page: page).sorted(by: [.type, sortType])
-        let files: ValidServerResponse<[File]> = try await perform(request: authenticatedRequest(filesEndpoint))
-
-        return (files.validApiResponse.data, files.validApiResponse.responseAt)
+    public func files(in directory: ProxyFile,
+                      cursor: String?,
+                      sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(
+            .files(of: directory)
+                .sorted(by: [.type, sortType])
+                .cursored(cursor),
+            method: .get
+        ))
     }
 
-    public func fileInfo(_ file: ProxyFile) async throws -> (data: File, responseAt: Int?) {
-        let file: ValidServerResponse<File> = try await perform(request: authenticatedRequest(.fileInfo(file)))
-
-        return (file.validApiResponse.data, file.validApiResponse.responseAt)
+    public func fileInfo(_ file: ProxyFile) async throws -> ValidServerResponse<File> {
+        try await perform(request: authenticatedRequest(.fileInfo(file)))
     }
 
-    public func favorites(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.favorites(drive: drive).paginated(page: page)
+    public func favorites(drive: AbstractDrive,
+                          cursor: String? = nil,
+                          sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.favorites(drive: drive)
+                .sorted(by: [.type, sortType])
+                .cursored(cursor)))
+    }
+
+    public func mySharedFiles(drive: AbstractDrive,
+                              cursor: String? = nil,
+                              sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.mySharedFiles(drive: drive)
+                .cursored(cursor)
                 .sorted(by: [.type, sortType])))
     }
 
-    public func mySharedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.mySharedFiles(drive: drive).paginated(page: page)
+    public func sharedWithMeFiles(drive: AbstractDrive,
+                                  cursor: String? = nil,
+                                  sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.sharedWithMeFiles(drive: drive)
+                .cursored(cursor)
                 .sorted(by: [.type, sortType])))
     }
 
-    public func lastModifiedFiles(drive: AbstractDrive, page: Int = 1) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).paginated(page: page)))
+    public func lastModifiedFiles(drive: AbstractDrive,
+                                  cursor: String? = nil) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).cursored(cursor)))
     }
 
     public func shareLink(for file: ProxyFile) async throws -> ShareLink {
@@ -247,15 +265,15 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
-        try await perform(request: authenticatedRequest(.fileInfo(file), method: .delete))
+        try await perform(request: authenticatedRequest(.fileInfoV2(file), method: .delete))
     }
 
     public func emptyTrash(drive: AbstractDrive) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.trash(drive: drive), method: .delete))
+        try await perform(request: authenticatedRequest(.emptyTrash(drive: drive), method: .delete))
     }
 
     public func deleteDefinitely(file: ProxyFile) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.trashedInfo(file: file), method: .delete))
+        try await perform(request: authenticatedRequest(.trashedInfoV2(file: file), method: .delete))
     }
 
     public func rename(file: ProxyFile, newName: String) async throws -> CancelableResponse {
@@ -275,23 +293,25 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.move(file: file, destination: destination), method: .post))
     }
 
-    public func recentActivity(drive: AbstractDrive, page: Int = 1) async throws -> [FileActivity] {
-        try await perform(request: authenticatedRequest(.recentActivity(drive: drive).paginated(page: page)))
+    public func recentActivity(drive: AbstractDrive, cursor: String? = nil)
+        async throws -> ValidServerResponse<[FileActivity]> {
+        try await perform(request: authenticatedRequest(.recentActivity(drive: drive).cursored(cursor)))
     }
 
-    public func fileActivities(file: ProxyFile, page: Int) async throws -> [FileActivity] {
+    public func fileActivities(file: ProxyFile, cursor: String? = nil) async throws -> ValidServerResponse<[FileActivity]> {
         var queryItems = [URLQueryItem(name: "with", value: "user")]
         queryItems
             .append(contentsOf: FileActivityType.displayedFileActivities
                 .map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
-            .paginated(page: page)
+            .cursored(cursor)
         return try await perform(request: authenticatedRequest(endpoint))
     }
 
-    public func fileActivities(file: ProxyFile, from date: Date,
-                               page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
+    public func fileActivities(file: ProxyFile,
+                               from date: Date,
+                               cursor: String? = nil) async throws -> ValidServerResponse<[FileActivity]> {
         var queryItems = [
             FileWith.fileActivitiesWithExtra.toQueryItem(),
             URLQueryItem(name: "depth", value: "children"),
@@ -300,17 +320,9 @@ public class DriveApiFetcher: ApiFetcher {
         queryItems.append(contentsOf: FileActivityType.fileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
-            .paginated(page: page)
+            .cursored(cursor)
         let activities: ValidServerResponse<[FileActivity]> = try await perform(request: authenticatedRequest(endpoint))
-        return (activities.validApiResponse.data, activities.validApiResponse.responseAt)
-    }
-
-    public func filesActivities(drive: AbstractDrive, files: [ProxyFile],
-                                from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
-        let endpoint: Endpoint = .filesActivities(drive: drive, fileIds: files.map(\.id), from: date)
-        let activities: ValidServerResponse<[ActivitiesForFile]> = try await perform(request: authenticatedRequest(endpoint))
-
-        return (activities.validApiResponse.data, activities.validApiResponse.responseAt)
+        return activities
     }
 
     public func favorite(file: ProxyFile) async throws -> Bool {
@@ -356,17 +368,24 @@ public class DriveApiFetcher: ApiFetcher {
 
     // MARK: -
 
-    public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trash(drive: drive).paginated(page: page).sorted(by: [sortType])))
+    public func trashedFiles(drive: AbstractDrive,
+                             cursor: String? = nil,
+                             sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.trash(drive: drive)
+                .sorted(by: [sortType])
+                .cursored(cursor)))
     }
 
     public func trashedFile(_ file: ProxyFile) async throws -> File {
         try await perform(request: authenticatedRequest(.trashedInfo(file: file)))
     }
 
-    public func trashedFiles(of directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: page)
-                .sorted(by: [sortType])))
+    public func trashedFiles(of directory: ProxyFile,
+                             cursor: String? = nil,
+                             sortType: SortType = .nameAZ) async throws -> ValidServerResponse<[File]> {
+        try await perform(request: authenticatedRequest(.trashedFiles(of: directory)
+                .sorted(by: [sortType])
+                .cursored(cursor)))
     }
 
     public func restore(file: ProxyFile, in directory: ProxyFile? = nil) async throws -> CancelableResponse {
@@ -386,9 +405,9 @@ public class DriveApiFetcher: ApiFetcher {
         fileTypes: [ConvertedType] = [],
         categories: [Category],
         belongToAllCategories: Bool,
-        page: Int = 1,
-        sortType: SortType = .nameAZ
-    ) async throws -> [File] {
+        cursor: String? = nil,
+        sortType: SortType
+    ) async throws -> ValidServerResponse<[File]> {
         try await perform(request: authenticatedRequest(.search(
             drive: drive,
             query: query,
@@ -396,7 +415,9 @@ public class DriveApiFetcher: ApiFetcher {
             fileTypes: fileTypes,
             categories: categories,
             belongToAllCategories: belongToAllCategories
-        ).paginated(page: page).sorted(by: [.type, sortType])))
+        )
+        .cursored(cursor)
+        .sorted(by: [sortType])))
     }
 
     public func add(category: Category, to file: ProxyFile) async throws -> CategoryResponse {
@@ -467,6 +488,10 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func cancelImport(drive: AbstractDrive, id: Int) async throws -> Bool {
         try await perform(request: authenticatedRequest(.cancelImport(drive: drive, id: id), method: .put))
+    }
+
+    public func file(_ file: AbstractFile) async throws -> File {
+        try await perform(request: authenticatedRequest(.file(file)))
     }
 }
 

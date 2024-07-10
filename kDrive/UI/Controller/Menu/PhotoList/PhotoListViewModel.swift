@@ -54,7 +54,7 @@ class PhotoListViewModel: FileListViewModel {
 
     var sections = emptySections
     private var moreComing = false
-    private var currentPage = 1
+    private var nextCursor: String?
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { sortingChanged() }
     }
@@ -71,15 +71,18 @@ class PhotoListViewModel: FileListViewModel {
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
-        files = AnyRealmCollection(driveFileManager.getRealm()
-            .objects(File.self)
-            .filter(NSPredicate(format: "extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue]))
-            .sorted(by: [SortType.newer.value.sortDescriptor]))
+
+        let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+            lazyCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+                .sorted(by: [SortType.newer.value.sortDescriptor])
+        }
+
+        files = AnyRealmCollection(fetchedFiles)
     }
 
     func loadNextPageIfNeeded() async throws {
         if !isLoading && moreComing {
-            try await loadFiles(page: currentPage + 1)
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
@@ -96,7 +99,7 @@ class PhotoListViewModel: FileListViewModel {
 
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "hasThumbnail"], on: .main) { [weak self] change in
+        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
             guard let self else {
                 return
             }
@@ -127,16 +130,16 @@ class PhotoListViewModel: FileListViewModel {
         }
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        startRefreshing(page: page)
+        startRefreshing(cursor: cursor)
         defer {
             endRefreshing()
         }
 
-        (_, moreComing) = try await driveFileManager.lastPictures(page: page)
-        currentPage = page
+        let (_, nextCursor) = try await driveFileManager.lastPictures(cursor: cursor)
+        self.nextCursor = nextCursor
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {

@@ -471,7 +471,7 @@ extension SaveFileViewController: SelectFolderDelegate {
 
 extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive) {
+        if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]

@@ -41,7 +41,7 @@ protocol FileCellDelegate: AnyObject {
         "isAvailableOffline",
         "categories",
         "size",
-        "hasThumbnail",
+        "supportedBy",
         "color",
         "externalImport.status"
     ]
@@ -54,7 +54,7 @@ protocol FileCellDelegate: AnyObject {
 
     var title: String {
         guard !file.isInvalidated else { return "" }
-        return file.name
+        return file.formattedLocalizedName()
     }
 
     var icon: UIImage {
@@ -139,7 +139,8 @@ protocol FileCellDelegate: AnyObject {
 
     func setThumbnail(on imageView: UIImageView) {
         guard !file.isInvalidated,
-              (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
+              (file.convertedType == .image || file.convertedType == .video) && file.supportedBy.contains(.thumbnail)
+        else { return }
         // Configure placeholder
         imageView.image = nil
         imageView.contentMode = .scaleAspectFill

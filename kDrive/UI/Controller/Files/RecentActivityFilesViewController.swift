@@ -27,7 +27,7 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
     convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {
         self.init(driveFileManager: driveFileManager)
         activity = activities.first
-        addPage(files: activities.compactMap(\.file).map { $0.detached() }, fullyDownloaded: true, page: 1)
+        addPage(files: activities.compactMap(\.file).map { $0.detached() }, fullyDownloaded: true, cursor: nil)
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
@@ -43,23 +43,6 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.homeRootFile
         )
-    }
-
-    func encodeRestorableState(with coder: NSCoder) {
-        coder.encode(activity?.id ?? 0, forKey: "ActivityId")
-        coder.encode(getAllFiles().map(\.id), forKey: "Files")
-    }
-
-    func decodeRestorableState(with coder: NSCoder) {
-        let activityId = coder.decodeInteger(forKey: "ActivityId")
-        let fileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-
-        let realm = driveFileManager.getRealm()
-        activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
-        let cachedFiles = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }.map { $0.detached() }
-        addPage(files: cachedFiles, fullyDownloaded: true, page: 1)
-
-        forceRefresh()
     }
 }
 
@@ -136,19 +119,5 @@ class RecentActivityFilesViewController: FileListViewController {
             return nil
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
-    }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        activityViewModel?.encodeRestorableState(with: coder)
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        activityViewModel?.decodeRestorableState(with: coder)
     }
 }

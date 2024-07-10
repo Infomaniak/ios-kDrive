@@ -23,11 +23,12 @@ import kDriveResources
 import Sentry
 import UIKit
 
-class ParameterTableViewController: UITableViewController {
+class ParameterTableViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var appNavigable: AppNavigable
 
-    var driveFileManager: DriveFileManager!
+    let driveFileManager: DriveFileManager
 
     private enum ParameterRow: CaseIterable {
         case photos
@@ -59,31 +60,20 @@ class ParameterTableViewController: UITableViewController {
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
-
-        var segue: String? {
-            switch self {
-            case .photos:
-                return "photoSyncSegue"
-            case .theme:
-                return "themeSelectionSegue"
-            case .notifications:
-                return "notificationsSegue"
-            case .security:
-                return "securitySegue"
-            case .wifi, .storage, .deleteAccount:
-                return nil
-            case .about:
-                return "aboutSegue"
-            }
-        }
     }
 
     private var tableContent: [ParameterRow] {
         return ParameterRow.allCases
     }
 
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.settingsTitle
 
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterAboutTableViewCell.self)
@@ -159,11 +149,23 @@ class ParameterTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let row = tableContent[indexPath.row]
         tableView.deselectRow(at: indexPath, animated: true)
-        if let segueIdentifier = row.segue {
-            performSegue(withIdentifier: segueIdentifier, sender: self)
-        } else if row == .storage {
+
+        switch row {
+        case .storage:
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
-        } else if row == .deleteAccount {
+        case .photos:
+            navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
+        case .theme:
+            navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
+        case .notifications:
+            navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
+        case .security:
+            navigationController?.pushViewController(SecurityTableViewController(), animated: true)
+        case .wifi:
+            break
+        case .about:
+            navigationController?.pushViewController(AboutTableViewController(), animated: true)
+        case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
                 accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
@@ -173,32 +175,6 @@ class ParameterTableViewController: UITableViewController {
             navigationController?.present(deleteAccountViewController, animated: true)
         }
     }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-    }
-
-    static func instantiate(driveFileManager: DriveFileManager) -> ParameterTableViewController {
-        let viewController = Storyboard.menu
-            .instantiateViewController(withIdentifier: "ParameterTableViewController") as! ParameterTableViewController
-        viewController.driveFileManager = driveFileManager
-        return viewController
-    }
 }
 
 extension ParameterTableViewController: DeleteAccountDelegate {
@@ -207,16 +183,16 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             accountManager.removeTokenAndAccount(account: currentAccount)
         }
 
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-
         if let nextAccount = accountManager.accounts.first {
             accountManager.switchAccount(newAccount: nextAccount)
-            appDelegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+            }
         } else {
             SentrySDK.setUser(nil)
         }
         accountManager.saveAccounts()
-        appDelegate?.updateRootViewControllerState()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
 

@@ -42,7 +42,7 @@ class LocationTableViewCell: InsetTableViewCell {
                 configure(with: drive)
                 titleLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)
             } else {
-                titleLabel.text = folder.name
+                titleLabel.text = folder.formattedLocalizedName(drive: drive)
                 logoImage.image = folder.icon
                 logoImage.tintColor = folder.tintColor
             }

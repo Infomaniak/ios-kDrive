@@ -107,7 +107,7 @@ class FileListViewModel: SelectDelegate {
     /// Internal realm collection of Files observed
     ///
     /// They should be frozen by convention.
-    #if DEBUG || TEST
+    #if DEBUG
     var _frozenFiles = AnyRealmCollection(List<File>()) {
         willSet {
             for item in newValue {
@@ -215,7 +215,7 @@ class FileListViewModel: SelectDelegate {
                 title = driveFileManager.drive.name
             }
         } else {
-            title = self.currentDirectory.name
+            title = self.currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
         }
 
         if configuration.showUploadingFiles {
@@ -350,10 +350,10 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    func startRefreshing(page: Int) {
+    func startRefreshing(cursor: String?) {
         isLoading = true
 
-        if page == 1 {
+        if cursor == nil {
             showLoadingIndicatorIfNeeded()
         }
     }
@@ -369,7 +369,7 @@ class FileListViewModel: SelectDelegate {
         // Implemented by subclasses
     }
 
-    func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
+    func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         // Implemented by subclasses
     }
 
@@ -456,7 +456,7 @@ class FileListViewModel: SelectDelegate {
     func forceRefresh() {
         endRefreshing()
         Task {
-            try await loadFiles(page: 1, forceRefresh: true)
+            try await loadFiles(cursor: nil, forceRefresh: true)
         }
     }
 
@@ -465,7 +465,7 @@ class FileListViewModel: SelectDelegate {
             let responseAtDate = Date(timeIntervalSince1970: Double(currentDirectory.responseAt))
             let now = Date()
             if responseAtDate.distance(to: now) > Constants.activitiesReloadTimeOut {
-                try await loadFiles(page: 1, forceRefresh: true)
+                try await loadFiles(cursor: nil, forceRefresh: true)
             } else {
                 try await loadActivities()
             }

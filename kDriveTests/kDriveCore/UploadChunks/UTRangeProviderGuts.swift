@@ -16,11 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@testable import InfomaniakDI
 @testable import kDriveCore
 import XCTest
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
+    }
+
     // MARK: - readFileByteSize
 
     // covered by IT

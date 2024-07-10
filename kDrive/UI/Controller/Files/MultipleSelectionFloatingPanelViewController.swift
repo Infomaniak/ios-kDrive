@@ -25,6 +25,7 @@ import UIKit
 
 final class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var appNavigable: AppNavigable
 
     var driveFileManager: DriveFileManager!
     var files = [File]()

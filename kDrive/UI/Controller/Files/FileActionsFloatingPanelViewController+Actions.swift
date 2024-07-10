@@ -37,7 +37,7 @@ extension FileActionsFloatingPanelViewController {
         let offline = ReachabilityListener.instance.currentStatus == .offline
 
         quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
-        quickActions.forEach { action in
+        for action in quickActions {
             switch action {
             case .shareAndRights:
                 if !file.capabilities.canShare || offline {
@@ -152,7 +152,6 @@ extension FileActionsFloatingPanelViewController {
 
     private func informationsAction() {
         let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
-        fileDetailViewController.file = file
         presentingParent?.navigationController?.pushViewController(fileDetailViewController, animated: true)
         dismiss(animated: true)
     }

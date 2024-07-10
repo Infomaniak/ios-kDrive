@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -24,9 +25,8 @@ import Photos
 import RealmSwift
 import UIKit
 
-class PhotoSyncSettingsViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-
+final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
@@ -68,8 +68,9 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     private var newSyncSettings: PhotoSyncSettings = {
         @InjectService var photoUploader: PhotoLibraryUploader
-        if photoUploader.settings != nil {
-            return PhotoSyncSettings(value: photoUploader.settings as Any)
+
+        if let settings = photoUploader.frozenSettings {
+            return PhotoSyncSettings(value: settings as Any)
         } else {
             return PhotoSyncSettings()
         }
@@ -96,6 +97,7 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = KDriveResourcesStrings.Localizable.syncSettingsTitle
 
         navigationItem.hideBackButtonText()
 
@@ -107,9 +109,6 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
         tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
-
-        tableView.sectionHeaderHeight = UITableView.automaticDimension
-        tableView.estimatedSectionHeaderHeight = 50
 
         let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.delegate = self
@@ -204,7 +203,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func updateSaveButtonState() {
-        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.settings?
+        let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.frozenSettings?
             .isContentEqual(to: newSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
@@ -216,34 +215,41 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings() {
-        BackgroundRealm.uploads.execute { _ in
-            if photoSyncEnabled {
-                guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1
-                else { return }
-                switch newSyncSettings.syncMode {
-                case .new:
-                    newSyncSettings.lastSync = Date()
-                case .all:
-                    if let currentSyncSettings = photoLibraryUploader.settings, currentSyncSettings.syncMode == .all {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
-                    } else {
-                        newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
-                    }
-                case .fromDate:
-                    if let currentSyncSettings = photoLibraryUploader.settings,
-                       currentSyncSettings
-                       .syncMode == .all ||
-                       (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                           .compare(newSyncSettings.fromDate) == .orderedAscending) {
-                        newSyncSettings.lastSync = currentSyncSettings.lastSync
-                    } else {
-                        newSyncSettings.lastSync = newSyncSettings.fromDate
-                    }
-                }
-                photoLibraryUploader.enableSync(with: newSyncSettings)
-            } else {
-                photoLibraryUploader.disableSync()
+        guard photoSyncEnabled else {
+            photoLibraryUploader.disableSync()
+            return
+        }
+
+        let currentSyncSettings = photoLibraryUploader.frozenSettings
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            guard newSyncSettings.userId != -1,
+                  newSyncSettings.driveId != -1,
+                  newSyncSettings.parentDirectoryId != -1 else {
+                return
             }
+
+            switch newSyncSettings.syncMode {
+            case .new:
+                newSyncSettings.lastSync = Date()
+            case .all:
+                if let currentSyncSettings,
+                   currentSyncSettings.syncMode == .all {
+                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                }
+            case .fromDate:
+                if let currentSyncSettings = photoLibraryUploader.frozenSettings,
+                   currentSyncSettings
+                   .syncMode == .all ||
+                   (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
+                       .compare(newSyncSettings.fromDate) == .orderedAscending) {
+                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    newSyncSettings.lastSync = newSyncSettings.fromDate
+                }
+            }
+            photoLibraryUploader.enableSync(with: newSyncSettings, writableRealm: writableRealm)
         }
     }
 
@@ -267,8 +273,8 @@ class PhotoSyncSettingsViewController: UIViewController {
 
 // MARK: - Table view data source
 
-extension PhotoSyncSettingsViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+extension PhotoSyncSettingsViewController {
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .syncSwitch:
             let saveDetailsHeaderText = KDriveResourcesStrings.Localizable.syncSettingsDescription
@@ -286,11 +292,11 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         }
     }
 
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
         case .syncSwitch:
             return switchSyncRows.count
@@ -303,7 +309,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
         case .syncSwitch:
             switch switchSyncRows[indexPath.row] {
@@ -435,8 +441,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
 
 // MARK: - Table view delegate
 
-extension PhotoSyncSettingsViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+extension PhotoSyncSettingsViewController {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let section = sections[indexPath.section]
         if section == .syncLocation {
@@ -491,7 +497,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        driveFileManager = accountManager.getDriveFileManager(for: drive)
+        driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)

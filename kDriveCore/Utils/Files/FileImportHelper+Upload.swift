@@ -35,14 +35,14 @@ public extension FileImportHelper {
         expiringActivity.start()
 
         let parentDirectoryId = directory.id
+        let parentDirectoryDriveId = directory.driveId
         let userId = drive.userId
-        let driveId = drive.id
 
         await files.concurrentForEach { file in
             let uploadFile = UploadFile(
                 parentDirectoryId: parentDirectoryId,
                 userId: userId,
-                driveId: driveId,
+                driveId: parentDirectoryDriveId,
                 url: file.path,
                 name: file.name
             )
@@ -175,7 +175,7 @@ public extension FileImportHelper {
         let newFile = UploadFile(
             parentDirectoryId: directory.id,
             userId: drive.userId,
-            driveId: drive.id,
+            driveId: directory.driveId,
             url: targetURL,
             name: name
         )

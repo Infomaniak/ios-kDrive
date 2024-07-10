@@ -23,7 +23,7 @@ import UIKit
 final class FileGridViewModel: FileViewModel {
     var iconImageHidden: Bool { file.isDirectory }
 
-    var hasThumbnail: Bool { !file.isDirectory && file.hasThumbnail }
+    var hasThumbnail: Bool { !file.isDirectory && file.supportedBy.contains(.thumbnail) }
 
     var shouldCenterTitle: Bool { file.isDirectory }
 

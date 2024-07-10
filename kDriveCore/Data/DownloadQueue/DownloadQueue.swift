@@ -70,6 +70,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
@@ -114,11 +115,22 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public func addToQueue(file: File,
                            userId: Int,
                            itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        dispatchQueue.async { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
-                  let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
-                  !self.hasOperation(for: file.id) else {
+        Log.downloadQueue("addToQueue file:\(file.id)")
+        let file = file.freezeIfNeeded()
+
+        dispatchQueue.async {
+            guard let drive = self.driveInfosManager.getDrive(id: file.driveId, userId: userId) else {
+                Log.downloadQueue("Unable to get a drive", level: .error)
+                return
+            }
+
+            guard let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                Log.downloadQueue("Unable to get a driveFileManager", level: .error)
+                return
+            }
+
+            guard !self.hasOperation(for: file.id) else {
+                Log.downloadQueue("Already in download queue, skipping \(file.id)", level: .error)
                 return
             }
 
@@ -132,8 +144,8 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             )
             operation.completionBlock = {
                 self.dispatchQueue.async {
-                    self.operationsInQueue.removeValue(forKey: fileId)
-                    self.publishFileDownloaded(fileId: fileId, error: operation.error)
+                    self.operationsInQueue.removeValue(forKey: file.id)
+                    self.publishFileDownloaded(fileId: file.id, error: operation.error)
                     OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
                 }
             }
@@ -143,9 +155,10 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     }
 
     public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
+        Log.downloadQueue("addToQueue archiveId:\(archiveId)")
         dispatchQueue.async {
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive) else {
+            guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) else {
                 return
             }
 
@@ -172,13 +185,14 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                                   userId: Int,
                                   onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
                                   completion: @escaping (DriveError?) -> Void) {
+        Log.downloadQueue("temporaryDownload file:\(file.id)")
         dispatchQueue.async(qos: .userInitiated) { [
             driveId = file.driveId,
             fileId = file.id,
             isManagedByRealm = file.isManagedByRealm
         ] in
-            guard let drive = self.accountManager.getDrive(for: userId, driveId: driveId, using: nil),
-                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive),
+            guard let drive = self.driveInfosManager.getDrive(id: driveId, userId: userId),
+                  let driveFileManager = self.accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                   let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file.id) else {
                 return
@@ -201,14 +215,17 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     }
 
     public func suspendAllOperations() {
+        Log.downloadQueue("suspendAllOperations")
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
+        Log.downloadQueue("resumeAllOperations")
         operationQueue.isSuspended = false
     }
 
     public func cancelAllOperations() {
+        Log.downloadQueue("cancelAllOperations")
         operationQueue.cancelAllOperations()
     }
 

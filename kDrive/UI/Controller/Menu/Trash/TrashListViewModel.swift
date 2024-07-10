@@ -54,38 +54,41 @@ class TrashListViewModel: InMemoryFileListViewModel {
         files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        startRefreshing(page: page)
+        startRefreshing(cursor: cursor)
         defer {
             endRefreshing()
         }
 
-        let fetchedFiles: [File]
+        let fetchResponse: ValidServerResponse<[File]>
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(
+            fetchResponse = try await driveFileManager.apiFetcher.trashedFiles(
                 drive: driveFileManager.drive,
-                page: page,
+                cursor: cursor,
                 sortType: sortType
             )
         } else {
-            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(
+            fetchResponse = try await driveFileManager.apiFetcher.trashedFiles(
                 of: currentDirectory.proxify(),
-                page: page,
+                cursor: cursor,
                 sortType: sortType
             )
         }
 
-        let moreComing = fetchedFiles.count == Endpoint.itemsPerPage
-        addPage(files: fetchedFiles, fullyDownloaded: !moreComing, page: page)
+        addPage(
+            files: fetchResponse.validApiResponse.data,
+            fullyDownloaded: fetchResponse.validApiResponse.hasMore,
+            cursor: cursor
+        )
         endRefreshing()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
             currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
         }
-        if moreComing {
-            try await loadFiles(page: page + 1)
+        if let nextCursor = fetchResponse.validApiResponse.cursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
@@ -331,7 +334,7 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             guard let realm = try? Realm(configuration: realmConfiguration) else { return }
             try? realm.write {
                 for file in deletedFiles {
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: file.id), !file.isInvalidated {
+                    if let file = realm.object(ofType: File.self, forPrimaryKey: file.uid), !file.isInvalidated {
                         realm.delete(file)
                     }
                 }

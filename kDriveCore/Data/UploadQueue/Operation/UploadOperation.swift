@@ -20,6 +20,7 @@ import Alamofire
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
@@ -70,6 +71,20 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+
+    /// The number of chunks we try to keep ready to upload in one UploadOperation
+    private static let parallelism = 2
+
+    /// An Activity to prevent the system from interrupting it without been notified beforehand
+    private var expiringActivity: ExpiringActivityable?
+
+    /// Local tracking of running network tasks
+    /// The key used is the and absolute identifier of the task.
+    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
+
+    /// The url session used to upload chunks
+    let urlSession: URLSession
 
     override public var debugDescription: String {
         """
@@ -80,21 +95,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         """
     }
 
-    /// The number of chunks we try to keep ready to upload in one UploadOperation
-    private static let parallelism = 2
-
     /// The id of the entity in base representing the upload task
     public let uploadFileId: String
-
-    /// Local tracking of running network tasks
-    /// The key used is the and absolute identifier of the task.
-    let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
-
-    /// An Activity to prevent the system from interrupting it without been notified beforehand
-    private var expiringActivity: ExpiringActivityable?
-
-    /// The url session used to upload chunks
-    let urlSession: URLSession
 
     /// Object used to pass a completion state beyond to the OperationQueue
     public var result: UploadCompletionResult
@@ -187,6 +189,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                                            directoryId: uploadFile.parentDirectoryId,
                                                                            directoryPath: uploadFile.relativePath,
                                                                            fileData: Data())
+
+        // Make sure the parent of the `File` is transferred from the `UploadFile`
+        driveFile.parentId = uploadFile.parentDirectoryId
 
         try handleDriveFilePostUpload(driveFile)
 
@@ -298,13 +303,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if shouldCleanUploadFile {
             Log.uploadOperation("Delete file ufid:\(uploadFileId)")
             // Delete UploadFile as canceled by the user
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId),
-                   !toDelete.isInvalidated {
-                    try? uploadsRealm.safeWrite {
-                        uploadsRealm.delete(toDelete)
-                    }
-                }
+            Task {
+                try await deleteUploadFile()
             }
         }
     }
@@ -485,39 +485,45 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
     }
 
-    /// Propagate the newly uploaded DriveFile into the specialized Realm
+    /// Propagate the newly uploaded DriveFile / File into the specialized Realms
     func handleDriveFilePostUpload(_ driveFile: File) throws {
-        var driveId: Int?
-        var userId: Int?
-        var relativePath: String?
-        var parentDirectoryId: Int?
-        try transactionWithFile { file in
-            file.uploadDate = Date()
-            file.uploadingSession = nil // For the sake of keeping the Realm small
-            file.error = nil
-            driveId = file.driveId
-            userId = file.userId
-            relativePath = file.relativePath
-            parentDirectoryId = file.parentDirectoryId
+        let readOnlyFile = try readOnlyFile()
+        let driveId = readOnlyFile.driveId
+        let userId = readOnlyFile.userId
+        @InjectService var appContext: AppContextServiceable
+
+        // Get a DriveFileManager specific to current context
+        let driveFileManager: DriveFileManager?
+        if appContext.context == .fileProviderExtension {
+            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)?
+                .instanceWith(context: .fileProvider)
+        } else {
+            driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)
         }
 
-        guard let driveId,
-              let userId,
-              let relativePath,
-              let parentDirectoryId,
-              let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-            return
-        }
+        // Add/Update the new remote `File` in database immediately
+        if let driveFileManager {
+            try? driveFileManager.database.writeTransaction { writableRealm in
+                let parentFolder = writableRealm.objects(File.self)
+                    .filter("id == %@", driveFile.parentId)
+                    .first
 
-        // File is already here or has parent in DB let's update it
-        let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
-        queue.execute { realm in
-            if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil
-                || relativePath.isEmpty {
-                let parent = driveFileManager.getCachedFile(id: parentDirectoryId, freeze: false, using: realm)
-                queue.bufferedWrite(in: parent, file: driveFile)
-                self.result.driveFile = File(value: driveFile)
+                writableRealm.add(driveFile, update: .modified)
+
+                // Make sure the parent folder state is consistent, if available
+                parentFolder?.children.insert(driveFile)
             }
         }
+
+        // Update the UploadFile to reflect the upload is finished
+        // This will generate events threw observation
+        try transactionWithFile { file in
+            file.uploadDate = Date()
+            file.remoteFileId = driveFile.id
+            file.uploadingSession = nil // For the sake of keeping the Realm small
+            file.error = nil
+        }
+
+        result.driveFile = File(value: driveFile)
     }
 }

@@ -23,6 +23,9 @@ public enum DriveAppContext: String {
     /// Current execution context is the main app
     case app
 
+    /// Current execution context is testing
+    case appTests
+
     /// Current execution context is an action extension
     case actionExtension
 
@@ -46,7 +49,7 @@ public struct AppContextService: AppContextServiceable {
     public var context: DriveAppContext
 
     public var isExtension: Bool {
-        guard context == .app else {
+        guard context == .app || context == .appTests else {
             return true
         }
 

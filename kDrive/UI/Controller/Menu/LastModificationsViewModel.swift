@@ -34,8 +34,12 @@ class LastModificationsViewModel: FileListViewModel {
             driveFileManager: driveFileManager,
             currentDirectory: DriveFileManager.lastModificationsRootFile
         )
-        files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
-            .filter(NSPredicate(format: "rawType != \"dir\"")))
+
+        let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+            lazyCollection.filter("rawType != \"dir\"")
+        }
+
+        files = AnyRealmCollection(fetchedFiles)
     }
 
     override func startObservation() {
@@ -50,22 +54,22 @@ class LastModificationsViewModel: FileListViewModel {
         files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
-        guard !isLoading || page > 1 else { return }
+    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
+        guard !isLoading || cursor != nil else { return }
 
-        startRefreshing(page: page)
+        startRefreshing(cursor: cursor)
         defer {
             endRefreshing()
         }
 
-        let (_, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
+        let (_, nextCursor) = try await driveFileManager.lastModifiedFiles(cursor: cursor)
         endRefreshing()
-        if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
+        if let nextCursor {
+            try await loadFiles(cursor: nextCursor)
         }
     }
 
     override func loadActivities() async throws {
-        try await loadFiles(page: 1, forceRefresh: true)
+        try await loadFiles(cursor: nil, forceRefresh: true)
     }
 }

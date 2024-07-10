@@ -42,6 +42,7 @@ class OnboardingViewController: UIViewController {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     var addUser = false
     var slides: [Slide] = []
@@ -146,8 +147,7 @@ class OnboardingViewController: UIViewController {
     private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager)
-        (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabViewController, animated: true)
+        appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
     }
 
     private func updateButtonsState() {
@@ -275,8 +275,6 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
                     throw DriveError.NoDriveError.noDriveFileManager
                 }
-                // Download root files
-                try await accountManager.currentDriveFileManager?.initRoot()
                 signInButton.setLoading(false)
                 registerButton.isEnabled = true
                 MatomoUtils.connectUser()

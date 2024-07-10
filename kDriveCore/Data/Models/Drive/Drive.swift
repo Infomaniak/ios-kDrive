@@ -92,6 +92,7 @@ public final class Drive: Object, Codable {
     @Persisted public var inMaintenance = false
     @Persisted public var maintenanceReason: MaintenanceReason?
     @Persisted public var updatedAt: Date
+    @Persisted public var _account: DriveAccount?
     /// Is manager admin.
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
@@ -120,6 +121,10 @@ public final class Drive: Object, Codable {
 
     public var capabilities: DriveCapabilities {
         return _capabilities ?? DriveCapabilities()
+    }
+
+    public var account: DriveAccount {
+        return _account ?? DriveAccount()
     }
 
     public var pack: DrivePack {
@@ -168,6 +173,7 @@ public final class Drive: Object, Codable {
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
+        _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
         isInAppSubscription = try values.decode(Bool.self, forKey: .isInAppSubscription)
     }
@@ -209,6 +215,7 @@ public final class Drive: Object, Codable {
         case inMaintenance = "in_maintenance"
         case maintenanceReason = "maintenance_reason"
         case updatedAt = "updated_at"
+        case _account = "account"
         case accountAdmin = "account_admin"
         case isInAppSubscription = "is_in_app_subscription"
     }

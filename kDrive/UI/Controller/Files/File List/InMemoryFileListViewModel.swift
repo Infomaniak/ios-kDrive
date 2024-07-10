@@ -63,9 +63,8 @@ class InMemoryFileListViewModel: FileListViewModel {
     /// - Parameters:
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.
-    final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, page: Int) {
-        guard let liveCurrentDirectory = realm.object(ofType: File.self, forPrimaryKey: currentDirectory.id) else { return }
-
+    final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, cursor: String?) {
+        guard let liveCurrentDirectory = realm.object(ofType: File.self, forPrimaryKey: currentDirectory.uid) else { return }
         try? realm.write {
             var children = [File]()
             if copyInRealm {
@@ -77,7 +76,7 @@ class InMemoryFileListViewModel: FileListViewModel {
                 children = fetchedFiles
             }
 
-            if page == 1 {
+            if cursor == nil {
                 liveCurrentDirectory.children.removeAll()
             }
             liveCurrentDirectory.children.insert(objectsIn: children)
@@ -89,7 +88,7 @@ class InMemoryFileListViewModel: FileListViewModel {
     func removeFiles(_ files: [ProxyFile]) {
         try? realm.write {
             for file in files {
-                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id), !file.isInvalidated {
+                if let file = realm.object(ofType: File.self, forPrimaryKey: file.uid), !file.isInvalidated {
                     realm.delete(file)
                 }
             }

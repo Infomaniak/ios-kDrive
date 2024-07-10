@@ -26,6 +26,7 @@ class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     var file: File!
     var fileAccess: FileAccess!
@@ -188,44 +189,6 @@ class InviteUserViewController: UIViewController {
 
     class func instantiate() -> InviteUserViewController {
         return Storyboard.files.instantiateViewController(withIdentifier: "InviteUserViewController") as! InviteUserViewController
-    }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(file.id, forKey: "FileId")
-        coder.encode(emails, forKey: "Emails")
-        coder.encode(userIds, forKey: "UserIds")
-        coder.encode(teamIds, forKey: "TeamIds")
-        coder.encode(newPermission.rawValue, forKey: "NewPermission")
-        coder.encode(message, forKey: "Message")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
-        emails = coder.decodeObject(forKey: "Emails") as? [String] ?? []
-        let restoredUserIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
-        let restoredTeamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
-        newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
-        message = coder.decodeObject(forKey: "Message") as? String ?? ""
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
-        let realm = DriveInfosManager.instance.getRealm()
-        shareables = restoredUserIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
-            + restoredTeamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
-        // Update UI
-        setTitle()
-        reloadInvited()
     }
 }
 

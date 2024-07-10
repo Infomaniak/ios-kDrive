@@ -65,6 +65,28 @@ public enum Log {
                           tag: tag)
     }
 
+    /// shorthand for ABLog, with "SceneDelegate" category
+    ///
+    /// In system console, visualize them with `subsystem:com.infomaniak.drive category:SceneDelegate`
+    ///
+    public static func sceneDelegate(_ message: @autoclosure () -> Any,
+                                     level: AbstractLogLevel = .debug,
+                                     context: Int = 0,
+                                     file: StaticString = #file,
+                                     function: StaticString = #function,
+                                     line: UInt = #line,
+                                     tag: Any? = nil) {
+        let category = "SceneDelegate"
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
+    }
+
     /// shorthand for ABLog, with "PhotoLibraryUploader" category
     ///
     /// In system console, visualize them with `subsystem:com.infomaniak.drive category:PhotoLibraryUploader`
@@ -140,6 +162,25 @@ public enum Log {
                                    line: UInt = #line,
                                    tag: Any? = nil) {
         let category = "UploadQueue"
+        defaultLogHandler(message(),
+                          category: category,
+                          level: level,
+                          context: context,
+                          file: file,
+                          function: function,
+                          line: line,
+                          tag: tag)
+    }
+
+    /// shorthand for ABLog, with "DownloadQueue" category
+    public static func downloadQueue(_ message: @autoclosure () -> Any,
+                                     level: AbstractLogLevel = .debug,
+                                     context: Int = 0,
+                                     file: StaticString = #file,
+                                     function: StaticString = #function,
+                                     line: UInt = #line,
+                                     tag: Any? = nil) {
+        let category = "DownloadQueue"
         defaultLogHandler(message(),
                           category: category,
                           level: level,

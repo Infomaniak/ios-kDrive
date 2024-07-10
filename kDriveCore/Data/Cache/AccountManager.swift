@@ -25,12 +25,11 @@ import RealmSwift
 import Sentry
 
 public protocol UpdateAccountDelegate: AnyObject {
-    func didUpdateCurrentAccountInformations(_ currentAccount: Account)
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account)
 }
 
 public protocol AccountManagerDelegate: AnyObject {
-    func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool)
-    func updateRootViewControllerState()
+    func currentAccountNeedsAuthentication()
 }
 
 public extension InfomaniakLogin {
@@ -62,11 +61,9 @@ public protocol AccountManageable: AnyObject {
 
     func forceReload()
     func reloadTokensAndAccounts()
-    func getDriveFileManager(for drive: Drive) -> DriveFileManager?
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm?) -> Drive?
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
     func didFailRefreshToken(_ token: ApiToken)
@@ -76,7 +73,8 @@ public protocol AccountManageable: AnyObject {
     func loadAccounts() -> [Account]
     func saveAccounts()
     func switchAccount(newAccount: Account)
-    func setCurrentDriveForCurrentAccount(drive: Drive)
+    func switchToNextAvailableAccount()
+    func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(account: Account, token: ApiToken)
     func removeAccount(toDeleteAccount: Account)
     func removeTokenAndAccount(account: Account)
@@ -86,18 +84,20 @@ public protocol AccountManageable: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
+    @LazyInjectService var appNavigable: AppNavigable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
 
-    public var currentAccount: Account?
+    @SendableProperty public var currentAccount: Account?
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
 
@@ -115,15 +115,15 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public var drives: [Drive] {
-        return DriveInfosManager.instance.getDrives(for: currentUserId)
+        return Array(driveInfosManager.getDrives(for: currentUserId))
     }
 
     public var currentDriveFileManager: DriveFileManager? {
         if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
             return currentDriveFileManager
         } else if let newCurrentDrive = drives.first {
-            setCurrentDriveForCurrentAccount(drive: newCurrentDrive)
-            return getDriveFileManager(for: newCurrentDrive)
+            setCurrentDriveForCurrentAccount(for: newCurrentDrive.id, userId: newCurrentDrive.userId)
+            return getDriveFileManager(for: newCurrentDrive.id, userId: newCurrentDrive.userId)
         } else {
             return nil
         }
@@ -151,8 +151,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let account = account(for: currentUserId) ?? accounts.first {
             setCurrentAccount(account: account)
 
-            if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
-                setCurrentDriveForCurrentAccount(drive: currentDrive)
+            if let currentDrive = driveInfosManager.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
+                setCurrentDriveForCurrentAccount(for: currentDrive.id, userId: currentDrive.userId)
             }
         }
     }
@@ -173,10 +173,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    public func getDriveFileManager(for drive: Drive) -> DriveFileManager? {
-        return getDriveFileManager(for: drive.id, userId: drive.userId)
-    }
-
+    @discardableResult
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
@@ -184,9 +181,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return mailboxManager
         } else if account(for: userId) != nil,
                   let token = tokenStore.tokenFor(userId: userId),
-                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
+                  let drive = driveInfosManager.getDrive(id: driveId, userId: userId) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
-            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
+            driveFileManagers[objectId] = DriveFileManager(
+                drive: drive,
+                apiFetcher: apiFetcher,
+                context: drive.sharedWithMe ? .sharedWithMe : .drive
+            )
             return driveFileManagers[objectId]
         } else {
             return nil
@@ -194,7 +195,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
-        let userDrives = DriveInfosManager.instance.getDrives(for: userId)
+        let userDrives = driveInfosManager.getDrives(for: userId)
 
         guard !userDrives.isEmpty else {
             throw DriveError.NoDriveError.noDrive
@@ -208,7 +209,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive) else {
+        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive.id, userId: firstAvailableDrive.userId) else {
             // We should always have a driveFileManager here
             throw DriveError.NoDriveError.noDriveFileManager
         }
@@ -228,10 +229,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             apiFetchers[userId] = apiFetcher
             return apiFetcher
         }
-    }
-
-    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm? = nil) -> Drive? {
-        return DriveInfosManager.instance.getDrive(id: driveId, userId: accountId, using: realm)
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
@@ -299,9 +296,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw driveResponse.drives.first?.isInTechnicalMaintenance == true ?
                 DriveError.productMaintenance : DriveError.blocked
         }
-        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
 
-        setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
+        let frozenDrive = mainDrive.freeze()
+        setCurrentDriveForCurrentAccount(for: frozenDrive.id, userId: frozenDrive.userId)
+        let driveFileManager = getDriveFileManager(for: mainDrive.id, userId: mainDrive.userId)
+        try await driveFileManager?.initRoot()
+
         saveAccounts()
         mqService.registerForNotifications(with: driveResponse.ips)
 
@@ -324,19 +325,23 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.NoDriveError.noDrive
         }
 
-        let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        let driveRemovedList = driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
 
         for driveRemoved in driveRemovedList {
-            if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == user.id && photoLibraryUploader
-                .settings?.driveId == driveRemoved.id {
+            let frozenSettings = photoLibraryUploader.frozenSettings
+            if photoLibraryUploader.isSyncEnabled,
+               frozenSettings?.userId == user.id,
+               frozenSettings?.driveId == driveRemoved.id {
                 photoLibraryUploader.disableSync()
             }
             if currentDriveFileManager?.drive.id == driveRemoved.id {
-                setCurrentDriveForCurrentAccount(drive: firstDrive)
+                setCurrentDriveForCurrentAccount(for: firstDrive.id, userId: firstDrive.userId)
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
         }
+
+        try await currentDriveFileManager?.initRoot()
 
         saveAccounts()
         if registerToken {
@@ -381,10 +386,41 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func switchAccount(newAccount: Account) {
         setCurrentAccount(account: newAccount)
+        UserDefaults.shared.lastSelectedTab = nil
         if let drive = drives.first {
-            setCurrentDriveForCurrentAccount(drive: drive)
+            setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
         saveAccounts()
+    }
+
+    public func switchToNextAvailableAccount() {
+        guard let nextAccount = nextAvailableAccount else {
+            return
+        }
+
+        switchAccount(newAccount: nextAccount)
+    }
+
+    private var nextAvailableAccount: Account? {
+        let allAccounts = accounts.values
+        guard allAccounts.count > 1 else {
+            return nil
+        }
+
+        guard let currentAccount else {
+            return nil
+        }
+
+        guard let currentIndex = allAccounts.firstIndex(of: currentAccount) else {
+            return nil
+        }
+
+        let nextIndex = currentIndex + 1
+        guard let nextAccount = allAccounts[safe: nextIndex] else {
+            return allAccounts.first
+        }
+
+        return nextAccount
     }
 
     private func setCurrentAccount(account: Account) {
@@ -401,12 +437,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         SentrySDK.setUser(user)
     }
 
-    public func setCurrentDriveForCurrentAccount(drive: Drive) {
-        currentDriveId = drive.id
-        _ = getDriveFileManager(for: drive)
+    public func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {
+        currentDriveId = driveId
+        getDriveFileManager(for: driveId, userId: userId)
     }
 
     public func addAccount(account: Account, token: ApiToken) {
+        UserDefaults.shared.lastSelectedTab = nil
+
         if accounts.contains(account) {
             removeAccount(toDeleteAccount: account)
         }
@@ -416,17 +454,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func removeAccount(toDeleteAccount: Account) {
+        UserDefaults.shared.lastSelectedTab = nil
+
         if currentAccount == toDeleteAccount {
             currentAccount = nil
             currentDriveId = 0
             currentUserId = 0
         }
-        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.settings?.userId == toDeleteAccount.userId {
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == toDeleteAccount.userId {
             photoLibraryUploader.disableSync()
         }
-        DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
+        driveInfosManager.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
-        DriveInfosManager.instance.removeDrivesFor(userId: toDeleteAccount.userId)
+        driveInfosManager.removeDrivesFor(userId: toDeleteAccount.userId)
         driveFileManagers.removeAll()
         apiFetchers.removeAll()
         accounts.removeAll { account -> Bool in
@@ -461,12 +501,15 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
             if let nextAccount = accounts.first {
                 switchAccount(newAccount: nextAccount)
-                delegate?.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
             } else {
                 SentrySDK.setUser(nil)
             }
             saveAccounts()
-            delegate?.updateRootViewControllerState()
+            appNavigable.prepareRootViewController(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
         }
     }
 }

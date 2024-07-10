@@ -22,7 +22,8 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class FileDetailViewController: UIViewController {
+class FileDetailViewController: UIViewController, SceneStateRestorable {
+    private typealias ActivitiesInfo = (cursor: String?, hasNextPage: Bool, isLoading: Bool)
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
@@ -34,7 +35,7 @@ class FileDetailViewController: UIViewController {
     var contentCount: FileCount?
 
     private var activities = [ActivitySection]()
-    private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
+    private var activitiesInfo: ActivitiesInfo = (cursor: nil, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
 
@@ -124,7 +125,8 @@ class FileDetailViewController: UIViewController {
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
+        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.supportedBy
+            .contains(.thumbnail) {
             return .default
         } else {
             return .lightContent
@@ -134,7 +136,7 @@ class FileDetailViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation
-            .isPortrait && file.hasThumbnail ? .white : nil
+            .isPortrait && file.supportedBy.contains(.thumbnail) ? .white : nil
         let navigationBarAppearanceStandard = UINavigationBarAppearance()
         navigationBarAppearanceStandard.configureWithTransparentBackground()
         navigationBarAppearanceStandard.backgroundColor = KDriveResourcesAsset.backgroundColor.color
@@ -156,6 +158,8 @@ class FileDetailViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: ["FileDetail"])
+
+        saveSceneState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -205,20 +209,20 @@ class FileDetailViewController: UIViewController {
 
         tableView.separatorColor = .clear
 
-        // Set initial rows
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
                                                          categoryRights: driveFileManager.drive.categoryRights)
 
-        // Load file informations
         loadFileInformation()
 
-        // Observe file changes
         driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
             Task { @MainActor [weak self] in
-                self?.file = newFile
-                self?.reloadTableView()
+                guard let self else {
+                    return
+                }
+                self.file = newFile
+                self.reloadTableView()
             }
         }
     }
@@ -272,13 +276,13 @@ class FileDetailViewController: UIViewController {
         activitiesInfo.isLoading = true
         Task { [proxyFile = file.proxify()] in
             do {
-                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(
+                let cursoredActivities = try await driveFileManager.apiFetcher.fileActivities(
                     file: proxyFile,
-                    page: activitiesInfo.page
+                    cursor: self.activitiesInfo.cursor
                 )
-                self.orderActivities(data: pagedActivities)
-                self.activitiesInfo.page += 1
-                self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
+                self.orderActivities(data: cursoredActivities.validApiResponse.data)
+                self.activitiesInfo.cursor = cursoredActivities.validApiResponse.cursor
+                self.activitiesInfo.hasNextPage = cursoredActivities.validApiResponse.hasMore
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
@@ -479,45 +483,12 @@ class FileDetailViewController: UIViewController {
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(file.id, forKey: "FileId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
-
-        guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: accountManager.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
-        guard file != nil else {
-            // If file doesn't exist anymore, pop view controller
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
-            async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
-
-            fileInformationRows = try await FileInformationRow.getRows(for: file,
-                                                                       fileAccess: currentFileAccess,
-                                                                       contentCount: folderContentCount,
-                                                                       categoryRights: driveFileManager.drive
-                                                                           .categoryRights)
-            fileAccess = try await currentFileAccess
-            contentCount = try await folderContentCount
-
-            if tableView.window != nil && currentTab == .informations {
-                reloadTableView()
-            }
-        }
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileDetailViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.fileId.rawValue: file.id
+        ]
     }
 }
 
@@ -551,7 +522,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            if !file.hasThumbnail {
+            if !file.supportedBy.contains(.thumbnail) {
                 let cell = tableView.dequeueReusableCell(type: FileDetailHeaderAltTableViewCell.self, for: indexPath)
                 cell.delegate = self
                 cell.configureWith(file: file)
@@ -798,7 +769,7 @@ extension FileDetailViewController {
                 navigationController?.navigationBar.tintColor = nil
             } else {
                 title = ""
-                navigationController?.navigationBar.tintColor = file.hasThumbnail ? .white : nil
+                navigationController?.navigationBar.tintColor = file.supportedBy.contains(.thumbnail) ? .white : nil
             }
         } else {
             title = scrollView.contentOffset.y > 200 ? file.name : ""
@@ -837,7 +808,7 @@ extension FileDetailViewController: FileDetailDelegate {
             break
         case .activity:
             // Fetch first page
-            if activitiesInfo.page == 1 {
+            if activitiesInfo.cursor == nil {
                 fetchNextActivities()
             }
         case .comments:

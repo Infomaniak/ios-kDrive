@@ -22,6 +22,12 @@ import XCTest
 
 /// Unit Tests of the ChunkProvider
 final class UTChunkProvider: XCTestCase {
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
+    }
+
     // MARK: - next
 
     func testNext_emptyRanges() throws {

@@ -18,9 +18,22 @@
 
 import FileProvider
 import Foundation
+import RealmSwift
 
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
+
+    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
+    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
+    /// - Returns:Matching UploadFile if any
+    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
+
+    /// Fetch all uploading item for a given parent folder, userId, driveId
+    func getUploadingFiles(withParent parentId: Int,
+                           userId: Int,
+                           driveId: Int) -> Results<UploadFile>
+
+    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
 
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
@@ -47,18 +60,16 @@ public protocol UploadQueueable {
     // Retry all uploads within a specified graph, this re-enqueue the tasks.
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
+
     /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
     ///
     /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
     /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
-    /// Clean errors linked to any upload operation in base. Does not restart the operations.
-    ///
-    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
-    func cleanNetworkAndLocalErrorsForAllOperations()
-
-    func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
+    /// Cancel all running operations, regardless of state
+    func cancelRunningOperations()
 
     /// Cancel an upload from an UploadFile. The UploadFile is removed and a matching operation is removed.
     /// - Parameter file: the upload file id to cancel.
@@ -68,4 +79,9 @@ public protocol UploadQueueable {
     /// - Parameter uploadFileId: the upload file id to cancel.
     /// - Returns: true if fileId matched
     func cancel(uploadFileId: String) -> Bool
+
+    /// Clean errors linked to any upload operation in base. Does not restart the operations.
+    ///
+    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
+    func cleanNetworkAndLocalErrorsForAllOperations()
 }
