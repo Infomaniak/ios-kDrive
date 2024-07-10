@@ -28,7 +28,8 @@ public enum Constants {
         .currentProjectVersion("1")
         .marketingVersion("4.5.0")
 
-    public static let deploymentTarget = DeploymentTarget.iOS(targetVersion: "13.4", devices: [.iphone, .ipad])
+    public static let deploymentTarget = DeploymentTargets.iOS("13.4")
+    public static let destinations = Set<Destination>([.iPhone, .iPad])
 
     public static let fileProviderSettings = baseSettings
         .bridgingHeader(path: "$(SRCROOT)/kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h")
