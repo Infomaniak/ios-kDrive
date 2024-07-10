@@ -39,7 +39,7 @@ class SecurityTableViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
 
-        if lockHelper.isAvailable() {
+        if lockHelper.isAvailable {
             tableContent = SecurityOption.allCases
         } else {
             tableContent = [.fileProviderExtension]
