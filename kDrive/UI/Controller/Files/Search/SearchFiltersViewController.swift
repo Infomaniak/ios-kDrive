@@ -54,6 +54,13 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
 
     private let filterTypes = FilterType.allCases
 
+    private enum SearchFiltersRowsInSection {
+        static let categories = 3
+        static let type = 2
+        static let typeSearchExtension = 1
+        static let date = 1
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -150,15 +157,15 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch filterTypes[section] {
         case .categories:
-            return 3
+            return SearchFiltersRowsInSection.categories
         case .type:
             // searchExtension has a second cell for input
             guard filters.fileType == .searchExtension else {
-                return 1
+                return SearchFiltersRowsInSection.typeSearchExtension
             }
-            return 2
-        default:
-            return 1
+            return SearchFiltersRowsInSection.type
+        case .date:
+            return SearchFiltersRowsInSection.date
         }
     }
 
