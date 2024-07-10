@@ -50,10 +50,10 @@ public struct AppContextService: AppContextServiceable {
 
     public var isExtension: Bool {
         guard context == .app, context == .appTests else {
-            return true
+            return false
         }
 
-        return false
+        return true
     }
 
     public init(context: DriveAppContext) {
