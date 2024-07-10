@@ -33,6 +33,8 @@ analyzer_rules:
  - unused_import
 excluded:
  - .tuist-bin/*
- - Derived/
+ - Derived/Sources/*
  - DerivedData/
+ - Derived/
+ - Tuist/.build/
 function_parameter_count: 7
