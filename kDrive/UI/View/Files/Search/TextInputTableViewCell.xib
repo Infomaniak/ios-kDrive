@@ -14,42 +14,31 @@
         <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="75" id="KGk-i7-Jjw" customClass="TextInputTableViewCell" customModule="kDrive" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="320" height="75"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
                 <rect key="frame" x="0.0" y="0.0" width="320" height="75"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0B7-gm-BBF">
-                        <rect key="frame" x="24" y="8" width="272" height="59"/>
-                        <subviews>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hFJ-dH-hmS">
-                                <rect key="frame" x="24" y="16" width="224" height="27"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
-                        </subviews>
+                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hFJ-dH-hmS" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
+                        <rect key="frame" x="24" y="8" width="272" height="50"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="hFJ-dH-hmS" firstAttribute="leading" secondItem="0B7-gm-BBF" secondAttribute="leading" constant="24" id="4ZD-CA-3I4"/>
-                            <constraint firstItem="hFJ-dH-hmS" firstAttribute="top" secondItem="0B7-gm-BBF" secondAttribute="top" constant="16" id="4vN-oK-dCs"/>
-                            <constraint firstAttribute="trailing" secondItem="hFJ-dH-hmS" secondAttribute="trailing" constant="24" id="CzW-4i-5Lo"/>
-                            <constraint firstAttribute="bottom" secondItem="hFJ-dH-hmS" secondAttribute="bottom" constant="16" id="Yi4-GS-bn7"/>
+                            <constraint firstAttribute="height" constant="50" id="hRE-te-AR9"/>
                         </constraints>
-                    </view>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <textInputTraits key="textInputTraits"/>
+                    </textField>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="0B7-gm-BBF" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="PZG-fu-iuc"/>
-                    <constraint firstAttribute="bottom" secondItem="0B7-gm-BBF" secondAttribute="bottom" constant="8" id="Qnt-xc-wfk"/>
-                    <constraint firstItem="0B7-gm-BBF" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="c7L-XC-pcT"/>
-                    <constraint firstAttribute="trailing" secondItem="0B7-gm-BBF" secondAttribute="trailing" constant="24" id="swl-gN-CcC"/>
+                    <constraint firstItem="hFJ-dH-hmS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="Myh-om-lQo"/>
+                    <constraint firstItem="hFJ-dH-hmS" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="PkS-fa-Dfp"/>
+                    <constraint firstAttribute="bottom" secondItem="hFJ-dH-hmS" secondAttribute="bottom" constant="8" id="VYI-hL-Iax"/>
+                    <constraint firstAttribute="trailing" secondItem="hFJ-dH-hmS" secondAttribute="trailing" constant="24" id="hSC-Nb-D8n"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
-                <outlet property="bottomConstraint" destination="Qnt-xc-wfk" id="vu4-rK-Fbb"/>
-                <outlet property="contentInsetView" destination="0B7-gm-BBF" id="e7v-To-8Ws"/>
                 <outlet property="textField" destination="hFJ-dH-hmS" id="3VM-yr-viD"/>
-                <outlet property="topConstraint" destination="PZG-fu-iuc" id="3yH-Xw-bN4"/>
             </connections>
             <point key="canvasLocation" x="131.8840579710145" y="86.71875"/>
         </tableViewCell>

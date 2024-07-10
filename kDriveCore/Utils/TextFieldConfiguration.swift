@@ -58,4 +58,9 @@ public struct TextFieldConfiguration {
         autocorrectionType: .no,
         spellCheckingType: .no
     )
+    public static let fileExtensionConfiguration = TextFieldConfiguration(
+        autocapitalizationType: .none,
+        autocorrectionType: .no,
+        spellCheckingType: .no
+    )
 }

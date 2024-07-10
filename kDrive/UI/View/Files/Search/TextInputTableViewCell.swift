@@ -20,16 +20,20 @@ import Foundation
 import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
+import MaterialOutlinedTextField
 import UIKit
 
-final class TextInputTableViewCell: InsetTableViewCell {
-    @IBOutlet var textField: UITextField!
+final class TextInputTableViewCell: UITableViewCell {
+    @IBOutlet var textField: MaterialOutlinedTextField!
 
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        contentInsetView.layer.cornerRadius = UIConstants.buttonCornerRadius
-        contentInsetView.clipsToBounds = true
+        textField.setInfomaniakColors()
+        // TODO: i18n
+        textField.setHint("Extension")
+        textField.placeholder = ".jpg, .mov …"
+        TextFieldConfiguration.fileExtensionConfiguration.apply(to: textField)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -40,13 +44,9 @@ final class TextInputTableViewCell: InsetTableViewCell {
         super.setSelected(selected, animated: animated)
 
         if selected {
-            contentInsetView.borderWidth = 2
-            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-
             textField.becomeFirstResponder()
         } else {
             textField.resignFirstResponder()
-            contentInsetView.borderWidth = 0
         }
     }
 
