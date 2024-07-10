@@ -28,8 +28,21 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
-    case archive, audio, code, folder = "dir", font, form, image, pdf, presentation, spreadsheet, text, unknown, url, video,
-         searchExtension = "Search for an extension"
+    case archive
+    case audio
+    case code
+    case folder = "dir"
+    case font
+    case form
+    case image
+    case pdf
+    case presentation
+    case spreadsheet
+    case text
+    case unknown
+    case url
+    case video
+    case searchExtension = "Search for an extension"
 
     public var icon: UIImage {
         switch self {
@@ -62,7 +75,7 @@ public enum ConvertedType: String, CaseIterable {
         case .video:
             return KDriveResourcesAsset.fileVideo.image
         case .searchExtension:
-            return UIImage(systemName: "magnifyingglass")!
+            return KDriveResourcesAsset.search.image
         }
     }
 
@@ -138,7 +151,7 @@ public enum ConvertedType: String, CaseIterable {
         case .video:
             return .movie
         case .searchExtension:
-            return .item // maybe content ?
+            return .item
         }
     }
 
