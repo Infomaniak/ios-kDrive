@@ -49,11 +49,11 @@ public struct AppContextService: AppContextServiceable {
     public var context: DriveAppContext
 
     public var isExtension: Bool {
-        guard context == .app, context == .appTests else {
-            return false
+        guard context == .app || context == .appTests else {
+            return true
         }
 
-        return true
+        return false
     }
 
     public init(context: DriveAppContext) {
