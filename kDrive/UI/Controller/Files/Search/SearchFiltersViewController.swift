@@ -260,8 +260,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
             return nil
         case .type:
 
-            switch indexPath.row {
-            case 0:
+            if indexPath.row == 0 {
                 MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
                 var fileTypes = ConvertedType.allCases
                 fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
@@ -273,7 +272,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
                 )
                 present(floatingPanelController, animated: true)
                 return nil
-            default:
+            } else {
                 return indexPath
             }
 
@@ -299,10 +298,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
         case .date:
             break
         case .type:
-            switch indexPath.row {
-            case 0:
-                break
-            default:
+            if indexPath.row != 0 {
                 // TODO: Matomo?
                 if let inputCell = getTextInputCell() {
                     inputCell.setSelected(true, animated: true)
