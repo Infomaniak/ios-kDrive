@@ -4,7 +4,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
+ * Exported at: Thu, 11 Jul 2024 16:43:23 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -232,6 +232,9 @@
 /* loco:6049df4d5c2c3a04bc397937 */
 "buttonAddFavorites" = "Zu Favoriten hinzufügen";
 
+/* loco:668e92d227a71514a808d485 */
+"buttonAddToKDrive" = "Zu kDrive hinzufügen";
+
 /* loco:6049df4d5c2c3a04bc397938 */
 "buttonAddUser" = "Benutzer hinzufügen";
 
@@ -413,7 +416,7 @@
 "buttonRetry" = "Erneut versuchen";
 
 /* loco:6049df4d5c2c3a04bc397961 */
-"buttonSave" = "Aufnehmen";
+"buttonSave" = "Speichern";
 
 /* loco:606f1b035b651445ab137732 */
 "buttonSeeFolder" = "Ordner anzeigen";
@@ -1600,6 +1603,9 @@
 /* loco:61696114b9fa15412d6a2fb6 */
 "searchFiltersSelectType" = "Dateityp wählen";
 
+/* loco:668feca6092b456442086012 */
+"searchForAnExtension" = "Suche nach einer Erweiterung";
+
 /* loco:6049df4d5c2c3a04bc397a30 */
 "searchLastTitle" = "Letzte Suchen";
 
@@ -1937,7 +1943,7 @@
 "syncSettingsButtonActiveSync" = "Automatische Sicherung aktivieren";
 
 /* loco:6049df4d5c2c3a04bc397a67 */
-"syncSettingsButtonSaveDate" = "Aufnehmen";
+"syncSettingsButtonSaveDate" = "Speichern";
 
 /* loco:6049df4d5c2c3a04bc397a68 */
 "syncSettingsButtonSyncPeriodicity" = "Synchronisierung";
@@ -1976,7 +1982,7 @@
 "syncSettingsSaveDateNowValue2" = "Nur neue Fotos (ab jetzt)";
 
 /* loco:6049df4d5c2c3a04bc397a70 */
-"syncSettingsSaveOn" = "Aufnehmen auf";
+"syncSettingsSaveOn" = "Speichern auf";
 
 /* loco:6049df4d5c2c3a04bc397a71 */
 "syncSettingsSyncPeriodicityFourHoursValue" = "Alle 4 Stunden";
