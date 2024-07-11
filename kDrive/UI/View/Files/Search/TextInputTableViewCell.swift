@@ -30,8 +30,7 @@ final class TextInputTableViewCell: UITableViewCell {
         super.awakeFromNib()
 
         textField.setInfomaniakColors()
-        // TODO: i18n
-        textField.setHint("Extension")
+        textField.setHint(KDriveResourcesStrings.Localizable.sortExtension)
         textField.placeholder = ".jpg, .mov …"
         TextFieldConfiguration.fileExtensionConfiguration.apply(to: textField)
     }

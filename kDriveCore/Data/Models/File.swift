@@ -42,7 +42,7 @@ public enum ConvertedType: String, CaseIterable {
     case unknown
     case url
     case video
-    case searchExtension = "Search for an extension"
+    case searchExtension
 
     public var icon: UIImage {
         switch self {
@@ -115,8 +115,7 @@ public enum ConvertedType: String, CaseIterable {
         case .video:
             return KDriveResourcesStrings.Localizable.allVideo
         case .searchExtension:
-            // TODO: i18n
-            return ConvertedType.searchExtension.rawValue
+            return KDriveResourcesStrings.Localizable.searchForAnExtension
         }
     }
 
