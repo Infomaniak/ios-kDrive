@@ -756,7 +756,7 @@ public final class File: Object, Codable {
         uid = File.uid(driveId: driveId, fileId: id)
         let decodedName = try container.decode(String.self, forKey: .name)
         name = decodedName
-        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? decodedName
+        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName)?.lowercased() ?? decodedName.lowercased()
         path = try container.decodeIfPresent(String.self, forKey: .path)
         rawType = try container.decode(String.self, forKey: .rawType)
         rawStatus = try container.decodeIfPresent(String.self, forKey: .rawStatus)
