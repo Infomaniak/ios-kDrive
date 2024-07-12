@@ -24,12 +24,32 @@ import MaterialOutlinedTextField
 import UIKit
 
 class TextInputTableViewCell: UITableViewCell {
-    @IBOutlet var textField: MaterialOutlinedTextField!
+    let textField = MaterialOutlinedTextField()
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        backgroundColor = .clear
+        selectionStyle = .none
+        textField.backgroundColor = .systemBackground
 
         textField.setInfomaniakColors()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+
+        contentView.addSubview(textField)
+
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            textField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            textField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            textField.heightAnchor.constraint(equalToConstant: 50)
+        ])
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

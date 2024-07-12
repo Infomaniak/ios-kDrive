@@ -71,7 +71,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: SelectTableViewCell.self)
-        tableView.register(cellView: FileExtensionTextInputTableViewCell.self)
+        tableView.register(FileExtensionTextInputTableViewCell.self, forCellReuseIdentifier: "FileExtensionTextInputTableViewCell")
 
         let index = filters.belongToAllCategories ? 1 : 2
         tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)

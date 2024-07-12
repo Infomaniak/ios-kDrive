@@ -24,11 +24,15 @@ import MaterialOutlinedTextField
 import UIKit
 
 final class FileExtensionTextInputTableViewCell: TextInputTableViewCell {
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         textField.setHint(KDriveResourcesStrings.Localizable.sortExtension)
         textField.placeholder = ".jpg, .mov …"
         TextFieldConfiguration.fileExtensionConfiguration.apply(to: textField)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
