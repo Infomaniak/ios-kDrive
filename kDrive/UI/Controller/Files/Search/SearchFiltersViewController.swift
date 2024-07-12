@@ -71,7 +71,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: SelectTableViewCell.self)
-        tableView.register(cellView: TextInputTableViewCell.self)
+        tableView.register(cellView: FileExtensionTextInputTableViewCell.self)
 
         let index = filters.belongToAllCategories ? 1 : 2
         tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
@@ -134,8 +134,8 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
 
     private let inputCellPath = IndexPath(row: 1, section: 1)
 
-    private func getTextInputCell() -> TextInputTableViewCell? {
-        guard let inputCell = tableView(tableView, cellForRowAt: inputCellPath) as? TextInputTableViewCell else {
+    private func getTextInputCell() -> FileExtensionTextInputTableViewCell? {
+        guard let inputCell = tableView(tableView, cellForRowAt: inputCellPath) as? FileExtensionTextInputTableViewCell else {
             return nil
         }
 
@@ -192,7 +192,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
                 return cell
             }
 
-            let cell = tableView.dequeueReusableCell(type: TextInputTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: FileExtensionTextInputTableViewCell.self, for: indexPath)
             cell.textField.delegate = self
             cell.textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
 

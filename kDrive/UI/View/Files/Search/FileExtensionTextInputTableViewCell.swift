@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2023 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,33 +23,12 @@ import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
-class TextInputTableViewCell: UITableViewCell {
-    @IBOutlet var textField: MaterialOutlinedTextField!
-
+final class FileExtensionTextInputTableViewCell: TextInputTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        textField.setInfomaniakColors()
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        guard selected != isSelected else {
-            return
-        }
-
-        super.setSelected(selected, animated: animated)
-
-        if selected {
-            textField.becomeFirstResponder()
-        } else {
-            textField.resignFirstResponder()
-        }
-    }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-
-        setSelected(false, animated: false)
-        textField.text = ""
+        textField.setHint(KDriveResourcesStrings.Localizable.sortExtension)
+        textField.placeholder = ".jpg, .mov …"
+        TextFieldConfiguration.fileExtensionConfiguration.apply(to: textField)
     }
 }
