@@ -19,5 +19,5 @@
 import UIKit
 
 class ImportingTableViewCell: UITableViewCell {
-    @IBOutlet var importationProgressView: UIProgressView!
+    @IBOutlet weak var importationProgressView: UIProgressView!
 }
