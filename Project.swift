@@ -147,7 +147,8 @@ let project = Project(name: "kDrive",
                                       .external(name: "MaterialOutlinedTextField"),
                                       .external(name: "SwiftRegex"),
                                       .external(name: "Sentry"),
-                                      .external(name: "VersionChecker")
+                                      .external(name: "VersionChecker"),
+                                      .external(name: "LocalizeKit")
                                   ]),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,

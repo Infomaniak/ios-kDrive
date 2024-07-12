@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "branch" : "mail",
-        "revision" : "8178fa508021e1d34deed765f545d4333d695a8e"
+        "revision" : "6c175294c2ff03c43eb7c9bd32ebd3a8c6448b0d",
+        "version" : "11.0.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "b190fc752289c127d17ab707444dc1b83017eaad",
-        "version" : "8.0.0"
+        "revision" : "f6aa4a07a6668c86e9665be93cc6199c1dd64895",
+        "version" : "10.0.0"
       }
     },
     {
@@ -122,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "4a9f4342fef91a132676ddcdd50c4808fefd4736",
-        "version" : "5.0.0"
+        "revision" : "c8fd02352bfc6bede63e41bdb21f2472f7bc1612",
+        "version" : "6.0.0"
       }
     },
     {
@@ -149,8 +149,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/LocalizeKit",
       "state" : {
-        "revision" : "a8f5b63a242a7cb5d8939db011fc9ee871a2a300",
-        "version" : "1.0.1"
+        "revision" : "e7dbea6d3a8d57f8352e1457649c45e49699b5eb",
+        "version" : "1.0.2"
       }
     },
     {
