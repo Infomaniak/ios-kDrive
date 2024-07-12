@@ -193,6 +193,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
             }
 
             let cell = tableView.dequeueReusableCell(type: FileExtensionTextInputTableViewCell.self, for: indexPath)
+            cell.textField.text = filters.fileExtensionsRaw
             cell.textField.delegate = self
             cell.textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
 
