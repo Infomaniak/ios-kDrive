@@ -299,7 +299,7 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
             break
         case .type:
             if indexPath.row != 0 {
-                // TODO: Matomo?
+                MatomoUtils.track(eventWithCategory: .search, name: "filterExtension")
                 if let inputCell = getTextInputCell() {
                     inputCell.setSelected(true, animated: true)
                 }
