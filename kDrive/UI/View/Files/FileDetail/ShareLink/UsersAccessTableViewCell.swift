@@ -26,12 +26,12 @@ import UIKit
 class UsersAccessTableViewCell: InsetTableViewCell {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
 
-    @IBOutlet weak var rightsStackView: UIStackView!
-    @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var detailLabel: UILabel!
-    @IBOutlet weak var rightsLabel: UILabel!
-    @IBOutlet weak var notAcceptedView: UIView!
-    @IBOutlet weak var externalUserView: UIView!
+    @IBOutlet var rightsStackView: UIStackView!
+    @IBOutlet var avatarImage: UIImageView!
+    @IBOutlet var detailLabel: UILabel!
+    @IBOutlet var rightsLabel: UILabel!
+    @IBOutlet var notAcceptedView: UIView!
+    @IBOutlet var externalUserView: UIView!
 
     @LazyInjectService var accountManager: AccountManageable
 

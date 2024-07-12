@@ -27,8 +27,8 @@ protocol SelectedUsersDelegate: AnyObject {
 }
 
 class InvitedUserTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var invitedCollectionView: UICollectionView!
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
+    @IBOutlet var invitedCollectionView: UICollectionView!
+    @IBOutlet var heightConstraint: NSLayoutConstraint!
 
     weak var delegate: SelectedUsersDelegate?
 

@@ -23,8 +23,8 @@ import LocalizeKit
 import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var detailLabel: UILabel!
-    @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet var detailLabel: UILabel!
+    @IBOutlet var timeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

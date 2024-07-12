@@ -26,9 +26,9 @@ protocol FileUsersDelegate: AnyObject {
 }
 
 class FileInformationUsersTableViewCell: UITableViewCell {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var shareButton: ImageButton!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var shareButton: ImageButton!
 
     var fileAccessElements = [FileAccessElement]()
     weak var delegate: FileUsersDelegate?

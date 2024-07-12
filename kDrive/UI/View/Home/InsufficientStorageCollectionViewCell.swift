@@ -22,10 +22,10 @@ import kDriveResources
 import UIKit
 
 class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var storageLabel: UILabel!
-    @IBOutlet weak var storageDescription: UILabel!
-    @IBOutlet weak var upgradeButton: UIButton!
+    @IBOutlet var progressView: RPCircularProgress!
+    @IBOutlet var storageLabel: UILabel!
+    @IBOutlet var storageDescription: UILabel!
+    @IBOutlet var upgradeButton: UIButton!
 
     var actionHandler: ((UIButton) -> Void)?
     var closeHandler: ((UIButton) -> Void)?

@@ -20,8 +20,8 @@ import InfomaniakCoreUI
 import UIKit
 
 class ParameterWifiTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var valueSwitch: UISwitch!
-    @IBOutlet weak var detailsLabel: UILabel!
+    @IBOutlet var valueSwitch: UISwitch!
+    @IBOutlet var detailsLabel: UILabel!
     var switchHandler: ((UISwitch) -> Void)?
 
     @IBAction func switchValueChanged(_ sender: UISwitch) {

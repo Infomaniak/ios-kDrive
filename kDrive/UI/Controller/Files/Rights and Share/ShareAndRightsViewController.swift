@@ -25,7 +25,7 @@ import LinkPresentation
 import UIKit
 
 class ShareAndRightsViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
 

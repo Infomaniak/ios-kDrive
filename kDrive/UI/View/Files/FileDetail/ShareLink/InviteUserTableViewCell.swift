@@ -30,8 +30,8 @@ protocol SearchUserDelegate: AnyObject {
 class InviteUserTableViewCell: InsetTableViewCell {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
 
-    @IBOutlet weak var textField: UITextField!
-    @IBOutlet weak var dropDownAnchorView: UIView!
+    @IBOutlet var textField: UITextField!
+    @IBOutlet var dropDownAnchorView: UIView!
 
     weak var delegate: SearchUserDelegate?
     let dropDown = DropDown()

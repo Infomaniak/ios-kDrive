@@ -21,7 +21,7 @@ import kDriveCore
 import UIKit
 
 class PhotoSectionHeaderView: UICollectionReusableView {
-    @IBOutlet weak var titleLabel: IKLabel!
+    @IBOutlet var titleLabel: IKLabel!
 
     override func prepareForReuse() {
         super.prepareForReuse()

@@ -44,8 +44,8 @@ class SelectView: UIView {
         }
     }
 
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var actionsView: UIStackView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var actionsView: UIStackView!
     var buttonTint: UIColor?
 
     weak var delegate: FilesHeaderViewDelegate?

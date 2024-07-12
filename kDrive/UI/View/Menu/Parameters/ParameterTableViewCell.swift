@@ -20,7 +20,7 @@ import InfomaniakCoreUI
 import UIKit
 
 class ParameterTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var valueLabel: UILabel!
+    @IBOutlet var valueLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

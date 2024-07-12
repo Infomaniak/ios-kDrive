@@ -28,9 +28,9 @@ class DriveSwitchTableViewCell: InsetTableViewCell {
         static let switchDrive = Style(height: 72)
     }
 
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var driveImageView: UIImageView!
-    @IBOutlet weak var selectDriveImageView: UIImageView!
+    @IBOutlet var heightConstraint: NSLayoutConstraint!
+    @IBOutlet var driveImageView: UIImageView!
+    @IBOutlet var selectDriveImageView: UIImageView!
     var style: Style = .home {
         didSet {
             heightConstraint.constant = style.height

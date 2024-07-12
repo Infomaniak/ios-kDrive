@@ -19,11 +19,11 @@
 import UIKit
 
 class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
-    @IBOutlet weak var topSeparator: UIView!
-    @IBOutlet weak var topSeparatorHeight: NSLayoutConstraint!
-    @IBOutlet weak var textView: UIView!
-    @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var bottomSeparator: UIView!
+    @IBOutlet var topSeparator: UIView!
+    @IBOutlet var topSeparatorHeight: NSLayoutConstraint!
+    @IBOutlet var textView: UIView!
+    @IBOutlet var dateLabel: UILabel!
+    @IBOutlet var bottomSeparator: UIView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

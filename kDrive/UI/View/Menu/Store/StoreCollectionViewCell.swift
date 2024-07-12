@@ -27,12 +27,12 @@ protocol StoreCellDelegate: AnyObject {
 }
 
 final class StoreCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var titleLabel: IKLabel!
-    @IBOutlet weak var descriptionLabel: IKLabel!
-    @IBOutlet weak var priceLabel: IKLabel!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var selectButton: IKLargeButton!
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var titleLabel: IKLabel!
+    @IBOutlet var descriptionLabel: IKLabel!
+    @IBOutlet var priceLabel: IKLabel!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var selectButton: IKLargeButton!
 
     weak var delegate: StoreCellDelegate?
 

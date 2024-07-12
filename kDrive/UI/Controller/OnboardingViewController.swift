@@ -26,19 +26,19 @@ import Lottie
 import UIKit
 
 class OnboardingViewController: UIViewController {
-    @IBOutlet weak var navigationBar: UINavigationBar!
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var pageControl: UIPageControl!
-    @IBOutlet weak var nextButton: UIButton!
-    @IBOutlet weak var signInButton: UIButton!
-    @IBOutlet weak var registerButton: UIButton!
-    @IBOutlet weak var buttonContentView: UIView!
-    @IBOutlet weak var closeBarButtonItem: UIBarButtonItem!
+    @IBOutlet var navigationBar: UINavigationBar!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var pageControl: UIPageControl!
+    @IBOutlet var nextButton: UIButton!
+    @IBOutlet var signInButton: UIButton!
+    @IBOutlet var registerButton: UIButton!
+    @IBOutlet var buttonContentView: UIView!
+    @IBOutlet var closeBarButtonItem: UIBarButtonItem!
 
-    @IBOutlet weak var collectionViewTopConstraint: NSLayoutConstraint!
-    @IBOutlet weak var signInButtonHeight: NSLayoutConstraint!
-    @IBOutlet weak var nextButtonHeight: NSLayoutConstraint!
-    @IBOutlet weak var registerButtonHeight: NSLayoutConstraint!
+    @IBOutlet var collectionViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet var signInButtonHeight: NSLayoutConstraint!
+    @IBOutlet var nextButtonHeight: NSLayoutConstraint!
+    @IBOutlet var registerButtonHeight: NSLayoutConstraint!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable

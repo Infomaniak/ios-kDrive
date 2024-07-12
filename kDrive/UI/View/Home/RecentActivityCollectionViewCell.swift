@@ -23,14 +23,14 @@ import UIKit
 
 class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
     UICollectionViewDelegateFlowLayout {
-    @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var timeLabel: UILabel!
-    @IBOutlet weak var titleLabel: IKLabel!
-    @IBOutlet weak var detailLabel: UILabel!
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var collectionViewFlowLayout: UICollectionViewFlowLayout!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+    @IBOutlet var avatarImage: UIImageView!
+    @IBOutlet var timeLabel: UILabel!
+    @IBOutlet var titleLabel: IKLabel!
+    @IBOutlet var detailLabel: UILabel!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var collectionViewFlowLayout: UICollectionViewFlowLayout!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var tableViewHeight: NSLayoutConstraint!
 
     weak var delegate: RecentActivityDelegate?
 

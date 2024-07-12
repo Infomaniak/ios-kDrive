@@ -24,7 +24,7 @@ import MarkdownKit
 import UIKit
 
 class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet weak var textView: UITextView!
+    @IBOutlet var textView: UITextView!
 
     private let highlightr = Highlightr()
     private let markdownParser = MarkdownParser(font: UIFontMetrics.default.scaledFont(for: MarkdownParser.defaultFont),

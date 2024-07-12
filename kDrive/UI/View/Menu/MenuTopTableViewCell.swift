@@ -23,15 +23,15 @@ import kDriveResources
 import UIKit
 
 class MenuTopTableViewCell: UITableViewCell {
-    @IBOutlet weak var userAvatarContainerView: UIView!
-    @IBOutlet weak var userAvatarImageView: UIImageView!
-    @IBOutlet weak var userDisplayNameLabel: UILabel!
-    @IBOutlet weak var userEmailLabel: UILabel!
-    @IBOutlet weak var driveNameLabel: UILabel!
-    @IBOutlet weak var driveImageView: UIImageView!
-    @IBOutlet weak var switchDriveButton: UIButton!
-    @IBOutlet weak var progressView: UIProgressView!
-    @IBOutlet weak var progressLabel: UILabel!
+    @IBOutlet var userAvatarContainerView: UIView!
+    @IBOutlet var userAvatarImageView: UIImageView!
+    @IBOutlet var userDisplayNameLabel: UILabel!
+    @IBOutlet var userEmailLabel: UILabel!
+    @IBOutlet var driveNameLabel: UILabel!
+    @IBOutlet var driveImageView: UIImageView!
+    @IBOutlet var switchDriveButton: UIButton!
+    @IBOutlet var progressView: UIProgressView!
+    @IBOutlet var progressLabel: UILabel!
 
     @LazyInjectService var accountManager: AccountManageable
 

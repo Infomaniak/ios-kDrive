@@ -29,14 +29,14 @@ protocol NewFolderSettingsDelegate: AnyObject {
 }
 
 class NewFolderSettingsTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var bottomStackView: UIStackView!
-    @IBOutlet weak var settingSwitch: UISwitch!
-    @IBOutlet weak var detailLabel: UILabel!
-    @IBOutlet weak var actionButton: UIButton!
-    @IBOutlet weak var textField: MaterialOutlinedTextField!
-    @IBOutlet weak var textFieldStackView: UIStackView!
-    @IBOutlet weak var datePicker: UIDatePicker!
-    @IBOutlet weak var dateTextField: MaterialOutlinedTextField!
+    @IBOutlet var bottomStackView: UIStackView!
+    @IBOutlet var settingSwitch: UISwitch!
+    @IBOutlet var detailLabel: UILabel!
+    @IBOutlet var actionButton: UIButton!
+    @IBOutlet var textField: MaterialOutlinedTextField!
+    @IBOutlet var textFieldStackView: UIStackView!
+    @IBOutlet var datePicker: UIDatePicker!
+    @IBOutlet var dateTextField: MaterialOutlinedTextField!
 
     var showPassword = false
     var datePickerView = UIDatePicker()

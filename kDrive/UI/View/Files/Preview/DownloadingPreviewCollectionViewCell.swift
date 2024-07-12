@@ -34,9 +34,9 @@ extension DownloadProgressObserver {
 }
 
 class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDelegate, DownloadProgressObserver {
-    @IBOutlet weak var previewZoomView: UIScrollView!
-    @IBOutlet weak var previewImageView: UIImageView!
-    @IBOutlet weak var progressView: UIProgressView!
+    @IBOutlet var previewZoomView: UIScrollView!
+    @IBOutlet var previewImageView: UIImageView!
+    @IBOutlet var progressView: UIProgressView!
 
     weak var previewDelegate: PreviewContentCellDelegate?
     private var file: File!

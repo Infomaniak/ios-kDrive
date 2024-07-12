@@ -23,7 +23,7 @@ import kDriveResources
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
 

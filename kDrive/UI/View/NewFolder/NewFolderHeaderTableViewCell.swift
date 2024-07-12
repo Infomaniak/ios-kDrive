@@ -27,7 +27,7 @@ protocol NewFolderTextFieldDelegate: AnyObject {
 }
 
 class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
-    @IBOutlet weak var titleTextField: MaterialOutlinedTextField!
+    @IBOutlet var titleTextField: MaterialOutlinedTextField!
     weak var delegate: NewFolderTextFieldDelegate?
 
     override func awakeFromNib() {

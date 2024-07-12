@@ -21,8 +21,8 @@ import kDriveCore
 import UIKit
 
 class NewFolderLocationTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var driveIcon: UIImageView!
-    @IBOutlet weak var driveLabel: IKLabel!
+    @IBOutlet var driveIcon: UIImageView!
+    @IBOutlet var driveLabel: IKLabel!
 
     func configure(with drive: Drive) {
         driveIcon.tintColor = UIColor(hex: drive.preferences.color)

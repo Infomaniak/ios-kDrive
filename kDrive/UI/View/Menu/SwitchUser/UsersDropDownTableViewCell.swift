@@ -23,9 +23,9 @@ import kDriveResources
 import UIKit
 
 class UsersDropDownTableViewCell: DropDownCell {
-    @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var detailLabel: UILabel!
+    @IBOutlet var avatarImage: UIImageView!
+    @IBOutlet var usernameLabel: UILabel!
+    @IBOutlet var detailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

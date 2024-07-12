@@ -23,12 +23,12 @@ import kDriveResources
 import UIKit
 
 class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var disabledView: UIView!
-    @IBOutlet weak var highlightedView: UIView!
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var titleLabel: IKLabel!
-    @IBOutlet weak var switchView: UISwitch!
+    @IBOutlet var disabledView: UIView!
+    @IBOutlet var highlightedView: UIView!
+    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var progressView: RPCircularProgress!
+    @IBOutlet var titleLabel: IKLabel!
+    @IBOutlet var switchView: UISwitch!
 
     private var observationToken: ObservationToken?
 

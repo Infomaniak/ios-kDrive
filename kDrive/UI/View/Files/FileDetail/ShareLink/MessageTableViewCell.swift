@@ -21,7 +21,7 @@ import kDriveResources
 import UIKit
 
 class MessageTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var messageTextView: UITextView!
+    @IBOutlet var messageTextView: UITextView!
 
     var textDidChange: ((String?) -> Void)?
 

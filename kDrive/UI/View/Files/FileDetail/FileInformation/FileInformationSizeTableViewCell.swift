@@ -19,8 +19,8 @@
 import UIKit
 
 class FileInformationSizeTableViewCell: UITableViewCell {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var sizeLabel: UILabel!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var sizeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

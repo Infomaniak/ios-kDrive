@@ -149,7 +149,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Properties
 
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet var collectionView: UICollectionView!
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?

@@ -20,10 +20,10 @@ import kDriveCore
 import UIKit
 
 class PhotoCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var imageHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var imageWidthConstraint: NSLayoutConstraint!
+    @IBOutlet var imageHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var imageWidthConstraint: NSLayoutConstraint!
 
-    @IBOutlet weak var image: UIImageView!
+    @IBOutlet var image: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

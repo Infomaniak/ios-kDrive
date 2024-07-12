@@ -25,7 +25,7 @@ import UIKit
 import WebKit
 
 class RegisterViewController: UIViewController {
-    @IBOutlet weak var webView: WKWebView!
+    @IBOutlet var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable

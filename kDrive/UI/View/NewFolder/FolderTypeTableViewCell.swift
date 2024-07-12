@@ -20,5 +20,5 @@ import InfomaniakCoreUI
 import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
 }

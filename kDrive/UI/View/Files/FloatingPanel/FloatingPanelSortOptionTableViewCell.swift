@@ -20,7 +20,7 @@ import InfomaniakCoreUI
 import UIKit
 
 class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var iconImageView: UIImageView!
+    @IBOutlet var iconImageView: UIImageView!
 
     var isHeader = false {
         didSet { setUpView() }

@@ -29,12 +29,12 @@ protocol ShareLinkSettingsDelegate: AnyObject {
 }
 
 class ShareLinkSettingTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var settingSwitch: UISwitch!
-    @IBOutlet weak var settingDetail: UILabel!
-    @IBOutlet weak var passwordTextField: MaterialOutlinedTextField!
-    @IBOutlet weak var newPasswordButton: IKButton!
-    @IBOutlet weak var compactDatePicker: UIDatePicker!
-    @IBOutlet weak var updateButton: UIButton!
+    @IBOutlet var settingSwitch: UISwitch!
+    @IBOutlet var settingDetail: UILabel!
+    @IBOutlet var passwordTextField: MaterialOutlinedTextField!
+    @IBOutlet var newPasswordButton: IKButton!
+    @IBOutlet var compactDatePicker: UIDatePicker!
+    @IBOutlet var updateButton: UIButton!
 
     var option: ShareLinkSettingsViewController.OptionsRow?
     weak var delegate: ShareLinkSettingsDelegate?

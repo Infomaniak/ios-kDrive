@@ -23,9 +23,9 @@ import kDriveResources
 import UIKit
 
 class NewFolderShareRuleTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var imageStackViewWidth: NSLayoutConstraint!
-    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var imageStackViewWidth: NSLayoutConstraint!
+    @IBOutlet var descriptionLabel: UILabel!
 
     @LazyInjectService var accountManager: AccountManageable
 

@@ -21,9 +21,9 @@ import kDriveCore
 import UIKit
 
 class RecentSearchCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var highlightedView: UIView!
-    @IBOutlet weak var recentSearchTitle: IKLabel!
+    @IBOutlet var contentInsetView: UIView!
+    @IBOutlet var highlightedView: UIView!
+    @IBOutlet var recentSearchTitle: IKLabel!
     var removeButtonHandler: ((UIButton) -> Void)?
 
     override var isHighlighted: Bool {

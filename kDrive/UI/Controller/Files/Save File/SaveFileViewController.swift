@@ -111,8 +111,8 @@ class SaveFileViewController: UIViewController {
         }
     }
 
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var closeBarButtonItem: UIBarButtonItem!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var closeBarButtonItem: UIBarButtonItem!
 
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -21,13 +21,13 @@ import kDriveResources
 import UIKit
 
 class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var previewImage: UIImageView!
-    @IBOutlet weak var moreLabel: UILabel!
-    @IBOutlet weak var darkLayer: UIView!
-    @IBOutlet weak var noPreviewView: UIView!
-    @IBOutlet weak var logoContainerView: UIView!
-    @IBOutlet weak var logoImage: UIImageView!
+    @IBOutlet var contentInsetView: UIView!
+    @IBOutlet var previewImage: UIImageView!
+    @IBOutlet var moreLabel: UILabel!
+    @IBOutlet var darkLayer: UIView!
+    @IBOutlet var noPreviewView: UIView!
+    @IBOutlet var logoContainerView: UIView!
+    @IBOutlet var logoImage: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

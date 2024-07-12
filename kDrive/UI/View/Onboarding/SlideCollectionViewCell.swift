@@ -21,11 +21,11 @@ import Lottie
 import UIKit
 
 class SlideCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var backgroundImageView: UIImageView!
-    @IBOutlet weak var illustrationAnimationView: AnimationView!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    @IBOutlet weak var animationViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet var backgroundImageView: UIImageView!
+    @IBOutlet var illustrationAnimationView: AnimationView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var animationViewTopConstraint: NSLayoutConstraint!
 
     var isSmallDevice = false
 

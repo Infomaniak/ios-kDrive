@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 class CategoryBadgeCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var moreLabel: IKLabel!
+    @IBOutlet var moreLabel: IKLabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

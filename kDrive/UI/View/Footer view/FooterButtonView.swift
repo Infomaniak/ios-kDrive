@@ -24,8 +24,8 @@ protocol FooterButtonDelegate: AnyObject {
 }
 
 class FooterButtonView: UITableViewHeaderFooterView {
-    @IBOutlet weak var footerButton: IKLargeButton!
-    @IBOutlet weak var background: UIView!
+    @IBOutlet var footerButton: IKLargeButton!
+    @IBOutlet var background: UIView!
     weak var delegate: FooterButtonDelegate?
 
     override class func awakeFromNib() {

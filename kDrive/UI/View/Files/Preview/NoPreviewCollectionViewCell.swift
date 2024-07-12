@@ -22,12 +22,12 @@ import kDriveResources
 import UIKit
 
 class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserver {
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var subtitleLabel: UILabel!
-    @IBOutlet weak var offlineView: UIView!
-    @IBOutlet weak var progressView: UIProgressView!
-    @IBOutlet weak var openButton: IKLargeIconButton!
+    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var subtitleLabel: UILabel!
+    @IBOutlet var offlineView: UIView!
+    @IBOutlet var progressView: UIProgressView!
+    @IBOutlet var openButton: IKLargeIconButton!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 

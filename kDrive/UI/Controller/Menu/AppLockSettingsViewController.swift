@@ -21,8 +21,8 @@ import LocalAuthentication
 import UIKit
 
 class AppLockSettingsViewController: UIViewController {
-    @IBOutlet weak var faceIdSwitch: UISwitch!
-    @IBOutlet weak var navigationBar: UINavigationBar!
+    @IBOutlet var faceIdSwitch: UISwitch!
+    @IBOutlet var navigationBar: UINavigationBar!
 
     var closeActionHandler: (() -> Void)?
 

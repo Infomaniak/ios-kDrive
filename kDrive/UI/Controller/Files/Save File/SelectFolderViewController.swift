@@ -46,7 +46,7 @@ class SelectFolderViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.saveFile }
     override class var storyboardIdentifier: String { "SelectFolderViewController" }
 
-    @IBOutlet weak var selectFolderButton: UIButton!
+    @IBOutlet var selectFolderButton: UIButton!
 
     var disabledDirectoriesSelection = [Int]()
     var fileToMove: Int?

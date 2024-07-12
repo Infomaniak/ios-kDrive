@@ -21,7 +21,7 @@ import kDriveResources
 import UIKit
 
 class UserAccountTableViewCell: MenuTableViewCell {
-    @IBOutlet weak var userEmailLabel: UILabel!
+    @IBOutlet var userEmailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

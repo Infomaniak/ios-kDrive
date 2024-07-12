@@ -78,8 +78,8 @@ struct Right {
 }
 
 class RightsSelectionViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var closeButton: UIButton!
 
     var fileAccessElement: FileAccessElement?
 
