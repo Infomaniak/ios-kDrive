@@ -27,9 +27,4 @@ public class DirectUploadToken: Codable {
         let twoHours = 60 * 60 * 2
         return Date(timeIntervalSinceNow: TimeInterval(twoHours)) > expiration
     }
-
-    enum CodingKeys: String, CodingKey {
-        case token
-        case expiration
-    }
 }

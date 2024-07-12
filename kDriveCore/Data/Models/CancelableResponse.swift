@@ -21,6 +21,7 @@ import Foundation
 public class CancelableResponse: Codable {
     public let id: String
     public let validUntil: Int
+
     public var offline: Bool {
         return id.isEmpty
     }
@@ -31,7 +32,7 @@ public class CancelableResponse: Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id = "cancel_id"
-        case validUntil = "valid_until"
+        case id = "cancelId"
+        case validUntil
     }
 }

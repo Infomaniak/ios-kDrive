@@ -29,13 +29,6 @@ public class ShareLink: EmbeddedObject, Codable {
     @Persisted public var validUntil: Date?
     @Persisted public var capabilities: ShareLinkCapabilities!
 
-    enum CodingKeys: String, CodingKey {
-        case url
-        case right
-        case validUntil = "valid_until"
-        case capabilities
-    }
-
     public var shareLinkPermission: ShareLinkPermission? {
         ShareLinkPermission(rawValue: right)
     }
@@ -47,14 +40,6 @@ public class ShareLinkCapabilities: EmbeddedObject, Codable {
     @Persisted public var canSeeInfo: Bool
     @Persisted public var canDownload: Bool
     @Persisted public var canComment: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case canEdit = "can_edit"
-        case canSeeStats = "can_see_stats"
-        case canSeeInfo = "can_see_info"
-        case canDownload = "can_download"
-        case canComment = "can_comment"
-    }
 }
 
 public struct ShareLinkSettings: Encodable {

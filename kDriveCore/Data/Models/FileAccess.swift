@@ -112,8 +112,7 @@ public class UserFileAccess: FileAccessElement {
 }
 
 public enum UserFileAccessStatus: String, Codable {
-    case active, deletedKept = "deleted_kept", deletedRemoved = "deleted_removed", deletedTransferred = "deleted_transferred",
-         locked, pending
+    case active, deletedKept, deletedRemoved, deletedTransferred, locked, pending
 }
 
 public class TeamFileAccess: FileAccessElement {
@@ -165,16 +164,6 @@ public class ExternInvitationFileAccess: FileAccessElement {
     public var user: DriveUser?
     public var invitationDriveId: Int?
 
-    enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case right
-        case status
-        case email
-        case user
-        case invitationDriveId = "invitation_drive_id"
-    }
-
     public var shareable: Shareable? {
         return nil
     }
@@ -218,11 +207,4 @@ public class CheckChangeAccessFeedbackResource: Codable {
     public var currentRight: String
     public var needChange: Bool
     public var message: String
-
-    enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
-        case currentRight = "current_right"
-        case needChange = "need_change"
-        case message
-    }
 }

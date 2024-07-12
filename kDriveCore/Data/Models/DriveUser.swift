@@ -77,8 +77,8 @@ public final class DriveUser: Object, Codable, InfomaniakUser {
         case id
         case email
         case _avatar = "avatar"
-        case _avatarUrl = "avatar_url"
-        case displayName = "display_name"
+        case _avatarUrl = "avatarUrl"
+        case displayName
         case role
     }
 

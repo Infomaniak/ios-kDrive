@@ -18,12 +18,7 @@
 
 import Foundation
 
-public class IPSToken: Codable {
+@frozen public struct IPSToken: Codable {
     let uuid: String
     let validUntil: Int
-
-    enum CodingKeys: String, CodingKey {
-        case uuid
-        case validUntil = "valid_until"
-    }
 }

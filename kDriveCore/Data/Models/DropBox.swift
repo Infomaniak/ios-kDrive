@@ -32,25 +32,11 @@ public class DropBoxCapabilities: EmbeddedObject, Codable {
     @Persisted public var hasSizeLimit: Bool
     @Persisted public var validity: DropBoxValidity!
     @Persisted public var size: DropBoxSize!
-
-    enum CodingKeys: String, CodingKey {
-        case hasPassword = "has_password"
-        case hasNotification = "has_notification"
-        case hasValidity = "has_validity"
-        case hasSizeLimit = "has_size_limit"
-        case validity
-        case size
-    }
 }
 
 public class DropBoxValidity: EmbeddedObject, Codable {
     @Persisted public var date: Date?
     @Persisted public var hasExpired: Bool?
-
-    enum CodingKeys: String, CodingKey {
-        case date
-        case hasExpired = "has_expired"
-    }
 }
 
 public class DropBoxSize: EmbeddedObject, Codable {

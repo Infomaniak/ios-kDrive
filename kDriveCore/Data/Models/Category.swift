@@ -48,11 +48,11 @@ public class Category: EmbeddedObject, Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case name
-        case isPredefined = "is_predefined"
+        case isPredefined
         case colorHex = "color"
-        case createdBy = "created_by"
-        case createdAt = "created_at"
-        case userUsageCount = "user_usage_count"
+        case createdBy
+        case createdAt
+        case userUsageCount
     }
 }
 

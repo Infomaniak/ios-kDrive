@@ -282,7 +282,7 @@ public enum FileStatus: String {
 }
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
-    case waiting, inProgress = "in_progress", done, failed, canceling, canceled
+    case waiting, inProgress, done, failed, canceling, canceled
 }
 
 public final class FileExternalImport: EmbeddedObject, Codable {
@@ -297,20 +297,6 @@ public final class FileExternalImport: EmbeddedObject, Codable {
     @Persisted public var countFailedFiles: Int
     @Persisted public var countSuccessFiles: Int
     @Persisted public var hasSharedFiles: String
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case directoryId = "directory_id"
-        case accountName = "account_name"
-        case application
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-        case path
-        case status
-        case countFailedFiles = "count_failed_files"
-        case countSuccessFiles = "count_success_files"
-        case hasSharedFiles = "has_shared_files"
-    }
 }
 
 public final class FileConversion: EmbeddedObject, Codable {
@@ -324,10 +310,10 @@ public final class FileConversion: EmbeddedObject, Codable {
     @Persisted public var onylofficeExtension: String?
 
     private enum CodingKeys: String, CodingKey {
-        case whenDownload = "when_downloading"
-        case downloadExtensions = "download_extensions"
-        case whenOnlyoffice = "when_onlyoffice_opening"
-        case onylofficeExtension = "onlyoffice_extension"
+        case whenDownload = "whenDownloading"
+        case downloadExtensions
+        case whenOnlyoffice = "whenOnlyofficeOpening"
+        case onylofficeExtension
     }
 }
 
@@ -338,12 +324,6 @@ public final class FileVersion: EmbeddedObject, Codable {
     @Persisted public var number: Int
     /// Size of the file with all version (byte unit)
     @Persisted public var totalSize: Int
-
-    private enum CodingKeys: String, CodingKey {
-        case isMultiple = "is_multiple"
-        case number
-        case totalSize = "total_size"
-    }
 }
 
 public enum FileSupportedBy: String, PersistableEnum, Codable {
@@ -443,35 +423,35 @@ public final class File: Object, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case id
-        case parentId = "parent_id"
-        case driveId = "drive_id"
+        case parentId
+        case driveId
         case name
-        case sortedName = "sorted_name"
+        case sortedName
         case path
         case rawType = "type"
         case rawStatus = "status"
         case rawVisibility = "visibility"
-        case createdBy = "created_by"
-        case createdAt = "created_at"
-        case addedAt = "added_at"
-        case updatedAt = "updated_at"
-        case lastModifiedAt = "last_modified_at"
-        case revisedAt = "revised_at"
-        case deletedBy = "deleted_by"
-        case deletedAt = "deleted_at"
+        case createdBy
+        case createdAt
+        case addedAt
+        case updatedAt
+        case lastModifiedAt
+        case revisedAt
+        case deletedBy
+        case deletedAt
         case users
-        case isFavorite = "is_favorite"
+        case isFavorite
         case sharelink
         case _capabilities = "capabilities"
         case categories
         case color
         case dropbox
         case size
-        case extensionType = "extension_type"
-        case externalImport = "external_import"
+        case extensionType
+        case externalImport
         case version
-        case conversion = "conversion_capabilities"
-        case supportedBy = "supported_by"
+        case conversion = "conversionCapabilities"
+        case supportedBy
     }
 
     public var parent: File? {

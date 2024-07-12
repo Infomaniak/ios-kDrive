@@ -352,20 +352,38 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func loadAccounts() -> [Account] {
-        var accounts = [Account]()
-        if let groupDirectoryURL = FileManager.default
+        guard let groupDirectoryURL = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: AccountManager.appGroup)?
-            .appendingPathComponent("preferences", isDirectory: true) {
-            let decoder = JSONDecoder()
-            do {
-                let data = try Data(contentsOf: groupDirectoryURL.appendingPathComponent("accounts.json"))
-                let savedAccounts = try decoder.decode([Account].self, from: data)
-                accounts = savedAccounts
-            } catch {
-                DDLogError("Error loading accounts \(error)")
-            }
+            .appendingPathComponent("preferences", isDirectory: true) else { return [] }
+        let data: Data
+        do {
+            data = try Data(contentsOf: groupDirectoryURL.appendingPathComponent("accounts.json"))
+        } catch {
+            DDLogError("Error loading accounts \(error)")
+            return []
         }
-        return accounts
+
+        do {
+            let decoder = JSONDecoder()
+            let savedAccounts = try decoder.decode([Account].self, from: data)
+
+            return savedAccounts
+        } catch is DecodingError {
+            do {
+                let migrationDecoder = JSONDecoder()
+                migrationDecoder.keyDecodingStrategy = .convertFromSnakeCase
+
+                let savedAccounts = try migrationDecoder.decode([Account].self, from: data)
+
+                return savedAccounts
+            } catch {
+                DDLogError("Error migrating accounts \(error)")
+                return []
+            }
+        } catch {
+            DDLogError("Error loading accounts \(error)")
+            return []
+        }
     }
 
     public func saveAccounts() {

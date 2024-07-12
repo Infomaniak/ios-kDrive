@@ -27,14 +27,4 @@ public class DriveCapabilities: EmbeddedObject, Codable {
     @Persisted public var canSeeStats = false
     @Persisted public var canUpgradeToKsuite = false
     @Persisted public var canRewind = false
-
-    enum CodingKeys: String, CodingKey {
-        case useVersioning = "use_versioning"
-        case useUploadCompression = "use_upload_compression"
-        case useTeamSpace = "use_team_space"
-        case canAddUser = "can_add_user"
-        case canSeeStats = "can_see_stats"
-        case canUpgradeToKsuite = "can_upgrade_to_ksuite"
-        case canRewind = "can_rewind"
-    }
 }
