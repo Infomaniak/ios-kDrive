@@ -21,12 +21,12 @@ import kDriveResources
 import UIKit
 
 class FileDetailHeaderAltTableViewCell: UITableViewCell {
-    @IBOutlet weak var fileView: UIView!
-    @IBOutlet weak var logoImage: UIImageView!
-    @IBOutlet weak var logoContainerView: UIView!
-    @IBOutlet weak var fileNameLabel: UILabel!
-    @IBOutlet weak var fileDetailLabel: UILabel!
-    @IBOutlet weak var segmentedControl: IKSegmentedControl!
+    @IBOutlet var fileView: UIView!
+    @IBOutlet var logoImage: UIImageView!
+    @IBOutlet var logoContainerView: UIView!
+    @IBOutlet var fileNameLabel: UILabel!
+    @IBOutlet var fileDetailLabel: UILabel!
+    @IBOutlet var segmentedControl: IKSegmentedControl!
 
     weak var delegate: FileDetailDelegate?
 

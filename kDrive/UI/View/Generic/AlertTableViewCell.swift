@@ -22,9 +22,9 @@ import kDriveResources
 import UIKit
 
 class AlertTableViewCell: UITableViewCell {
-    @IBOutlet weak var view: UIView!
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var messageLabel: IKLabel!
+    @IBOutlet var view: UIView!
+    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var messageLabel: IKLabel!
 
     enum Style {
         case info, warning

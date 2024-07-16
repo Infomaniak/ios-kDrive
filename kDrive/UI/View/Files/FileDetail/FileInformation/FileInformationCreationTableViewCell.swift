@@ -19,8 +19,8 @@
 import UIKit
 
 class FileInformationCreationTableViewCell: UITableViewCell {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var creationLabel: UILabel!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var creationLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

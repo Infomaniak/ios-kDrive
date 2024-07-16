@@ -22,13 +22,13 @@ import kDriveResources
 import UIKit
 
 class RightsSelectionTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var rightsIconImageView: UIImageView!
-    @IBOutlet weak var rightsTitleLabel: UILabel!
-    @IBOutlet weak var rightsDetailLabel: UILabel!
-    @IBOutlet weak var bannerView: UIView!
-    @IBOutlet weak var bannerBackgroundView: UIView!
-    @IBOutlet weak var bannerLabel: UILabel!
-    @IBOutlet weak var updateButton: UIButton!
+    @IBOutlet var rightsIconImageView: UIImageView!
+    @IBOutlet var rightsTitleLabel: UILabel!
+    @IBOutlet var rightsDetailLabel: UILabel!
+    @IBOutlet var bannerView: UIView!
+    @IBOutlet var bannerBackgroundView: UIView!
+    @IBOutlet var bannerLabel: UILabel!
+    @IBOutlet var updateButton: UIButton!
 
     var isSelectable = true
     var actionHandler: ((UIButton) -> Void)?

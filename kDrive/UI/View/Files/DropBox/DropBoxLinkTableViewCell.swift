@@ -25,8 +25,8 @@ protocol DropBoxLinkDelegate: AnyObject {
 }
 
 class DropBoxLinkTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var copyTextField: UITextField!
-    @IBOutlet weak var copyButton: ImageButton!
+    @IBOutlet var copyTextField: UITextField!
+    @IBOutlet var copyButton: ImageButton!
     weak var delegate: DropBoxLinkDelegate?
 
     override func awakeFromNib() {

@@ -21,7 +21,7 @@ import UIKit
 import WebKit
 
 class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet weak var documentPreview: WKWebView!
+    @IBOutlet var documentPreview: WKWebView!
     private var fileId: Int?
 
     override func awakeFromNib() {

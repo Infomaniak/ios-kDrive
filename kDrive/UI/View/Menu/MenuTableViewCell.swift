@@ -20,5 +20,5 @@ import InfomaniakCoreUI
 import UIKit
 
 class MenuTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var logoImage: UIImageView!
+    @IBOutlet var logoImage: UIImageView!
 }

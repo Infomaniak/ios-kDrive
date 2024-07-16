@@ -20,7 +20,7 @@ import InfomaniakCoreUI
 import UIKit
 
 class AboutDetailTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var detailLabel: UILabel!
+    @IBOutlet var detailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

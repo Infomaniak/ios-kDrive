@@ -21,8 +21,8 @@ import kDriveResources
 import UIKit
 
 class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var userImage: UIImageView!
-    @IBOutlet weak var moreLabel: UILabel!
+    @IBOutlet var userImage: UIImageView!
+    @IBOutlet var moreLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -20,10 +20,10 @@ import kDriveCore
 import UIKit
 
 class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
-    @IBOutlet weak var imageHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var imageWidthConstraint: NSLayoutConstraint!
-    @IBOutlet weak var zoomScrollView: UIScrollView!
-    @IBOutlet weak var imagePreview: UIImageView!
+    @IBOutlet var imageHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var imageWidthConstraint: NSLayoutConstraint!
+    @IBOutlet var zoomScrollView: UIScrollView!
+    @IBOutlet var imagePreview: UIImageView!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
 
     override func awakeFromNib() {

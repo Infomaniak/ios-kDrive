@@ -20,7 +20,7 @@ import kDriveResources
 import UIKit
 
 class ColorSelectionCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var checkmark: UIImageView!
+    @IBOutlet var checkmark: UIImageView!
 
     override var isSelected: Bool {
         didSet {

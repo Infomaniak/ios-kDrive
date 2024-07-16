@@ -29,12 +29,12 @@ class DriveErrorViewController: UIViewController {
         case blocked
     }
 
-    @IBOutlet weak var circleView: UIView!
-    @IBOutlet weak var otherProfileButton: UIButton!
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    @IBOutlet weak var mainButton: IKLargeButton!
+    @IBOutlet var circleView: UIView!
+    @IBOutlet var otherProfileButton: UIButton!
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var mainButton: IKLargeButton!
 
     var driveErrorViewType = DriveErrorViewType.noDrive
     var driveName: String?

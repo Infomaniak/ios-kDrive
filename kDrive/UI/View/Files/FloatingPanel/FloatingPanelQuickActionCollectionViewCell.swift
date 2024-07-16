@@ -22,13 +22,13 @@ import kDriveResources
 import UIKit
 
 class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var buttonView: UIView!
-    @IBOutlet weak var actionImage: UIImageView!
-    @IBOutlet weak var actionLabel: UILabel!
-    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
-    @IBOutlet weak var darkLayer: UIView!
+    @IBOutlet var buttonView: UIView!
+    @IBOutlet var actionImage: UIImageView!
+    @IBOutlet var actionLabel: UILabel!
+    @IBOutlet var loadingIndicator: UIActivityIndicatorView!
+    @IBOutlet var darkLayer: UIView!
 
-    @IBOutlet weak var progressView: RPCircularProgress!
+    @IBOutlet var progressView: RPCircularProgress!
     private var observationToken: ObservationToken?
 
     override var isHighlighted: Bool {

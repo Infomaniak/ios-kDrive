@@ -23,7 +23,7 @@ import kDriveResources
 import UIKit
 
 class InviteUserViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager

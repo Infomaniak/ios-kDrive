@@ -24,8 +24,8 @@ import UIKit
 
 class FileDetailViewController: UIViewController, SceneStateRestorable {
     private typealias ActivitiesInfo = (cursor: String?, hasNextPage: Bool, isLoading: Bool)
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var commentButton: UIButton!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var commentButton: UIButton!
 
     @LazyInjectService var accountManager: AccountManageable
 

@@ -173,25 +173,25 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     var swipeStartPoint: CGPoint = .zero
     var initialTrailingConstraintValue: CGFloat = 0
 
-    @IBOutlet weak var disabledView: UIView!
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var detailLabel: UILabel?
-    @IBOutlet weak var logoImage: UIImageView!
-    @IBOutlet weak var accessoryImage: UIImageView?
-    @IBOutlet weak var moreButton: UIButton!
-    @IBOutlet weak var favoriteImageView: UIImageView?
-    @IBOutlet weak var collectionView: UICollectionView?
-    @IBOutlet weak var availableOfflineImageView: UIImageView!
-    @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
-    @IBOutlet weak var innerViewTrailingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var innerViewLeadingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var swipeActionsView: UIStackView?
-    @IBOutlet weak var stackViewTrailingConstraint: NSLayoutConstraint?
-    @IBOutlet weak var detailsStackView: UIStackView?
-    @IBOutlet weak var importProgressView: RPCircularProgress?
-    @IBOutlet weak var downloadProgressView: RPCircularProgress?
-    @IBOutlet weak var highlightedView: UIView!
+    @IBOutlet var disabledView: UIView!
+    @IBOutlet var contentInsetView: UIView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var detailLabel: UILabel?
+    @IBOutlet var logoImage: UIImageView!
+    @IBOutlet var accessoryImage: UIImageView?
+    @IBOutlet var moreButton: UIButton!
+    @IBOutlet var favoriteImageView: UIImageView?
+    @IBOutlet var collectionView: UICollectionView?
+    @IBOutlet var availableOfflineImageView: UIImageView!
+    @IBOutlet var centerTitleConstraint: NSLayoutConstraint!
+    @IBOutlet var innerViewTrailingConstraint: NSLayoutConstraint!
+    @IBOutlet var innerViewLeadingConstraint: NSLayoutConstraint!
+    @IBOutlet var swipeActionsView: UIStackView?
+    @IBOutlet var stackViewTrailingConstraint: NSLayoutConstraint?
+    @IBOutlet var detailsStackView: UIStackView?
+    @IBOutlet var importProgressView: RPCircularProgress?
+    @IBOutlet var downloadProgressView: RPCircularProgress?
+    @IBOutlet var highlightedView: UIView!
 
     var viewModel: FileViewModel?
 

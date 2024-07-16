@@ -24,7 +24,7 @@ protocol SelectPhotoFormatDelegate: AnyObject {
 }
 
 class SelectPhotoFormatViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     private var tableContent: [PhotoFileFormat] = [.jpg, .heic]
     private var selectedFormat: PhotoFileFormat!

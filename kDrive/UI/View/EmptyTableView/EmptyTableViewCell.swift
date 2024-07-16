@@ -19,7 +19,7 @@
 import UIKit
 
 class EmptyTableViewCell: UITableViewCell {
-    @IBOutlet weak var contentHoldingView: UIStackView!
+    @IBOutlet var contentHoldingView: UIStackView!
     var emptyView: EmptyTableView!
 
     override func prepareForReuse() {

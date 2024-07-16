@@ -19,7 +19,7 @@
 import UIKit
 
 class HomeEmptyFilesCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var stackView: UIStackView!
+    @IBOutlet var stackView: UIStackView!
     var emptyView: EmptyTableView!
 
     override func prepareForReuse() {

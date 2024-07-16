@@ -22,10 +22,10 @@ import kDriveResources
 import UIKit
 
 class UploadFolderTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var folderLabel: IKLabel!
-    @IBOutlet weak var subtitleLabel: IKLabel!
+    @IBOutlet var progressView: RPCircularProgress!
+    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var folderLabel: IKLabel!
+    @IBOutlet var subtitleLabel: IKLabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

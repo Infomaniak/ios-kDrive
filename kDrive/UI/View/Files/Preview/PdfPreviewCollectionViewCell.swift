@@ -22,7 +22,7 @@ import PDFKit
 import UIKit
 
 class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
-    @IBOutlet weak var pdfPreview: PDFView!
+    @IBOutlet var pdfPreview: PDFView!
     private var document: PDFDocument?
 
     override func awakeFromNib() {

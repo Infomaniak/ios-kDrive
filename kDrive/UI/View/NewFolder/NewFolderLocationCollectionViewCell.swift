@@ -19,9 +19,9 @@
 import UIKit
 
 class NewFolderLocationCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var accessoryImage: UIImageView!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var chevronImage: UIImageView!
+    @IBOutlet var accessoryImage: UIImageView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var chevronImage: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

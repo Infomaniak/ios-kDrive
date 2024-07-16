@@ -24,7 +24,7 @@ protocol StoreNextCellDelegate: AnyObject {
 }
 
 class StoreNextCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var button: IKLargeButton!
+    @IBOutlet var button: IKLargeButton!
 
     weak var delegate: StoreNextCellDelegate?
 

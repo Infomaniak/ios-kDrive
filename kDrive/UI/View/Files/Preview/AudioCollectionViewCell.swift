@@ -24,13 +24,13 @@ import MediaPlayer
 import UIKit
 
 class AudioCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var elapsedTimeLabel: UILabel!
-    @IBOutlet weak var remainingTimeLabel: UILabel!
-    @IBOutlet weak var positionSlider: UISlider!
-    @IBOutlet weak var playButton: UIButton!
-    @IBOutlet weak var landscapePlayButton: UIButton!
-    @IBOutlet weak var iconHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var elapsedTimeLabel: UILabel!
+    @IBOutlet var remainingTimeLabel: UILabel!
+    @IBOutlet var positionSlider: UISlider!
+    @IBOutlet var playButton: UIButton!
+    @IBOutlet var landscapePlayButton: UIButton!
+    @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
 
     var driveFileManager: DriveFileManager!
 

@@ -26,12 +26,12 @@ protocol FileDetailDelegate: AnyObject {
 }
 
 class FileDetailHeaderTableViewCell: UITableViewCell {
-    @IBOutlet weak var segmentedControl: IKSegmentedControl!
-    @IBOutlet weak var fileNameLabel: UILabel!
-    @IBOutlet weak var fileDetailLabel: UILabel!
-    @IBOutlet weak var fileImage: UIImageView!
-    @IBOutlet weak var fileImageView: UIView!
-    @IBOutlet weak var darkLayer: UIView!
+    @IBOutlet var segmentedControl: IKSegmentedControl!
+    @IBOutlet var fileNameLabel: UILabel!
+    @IBOutlet var fileDetailLabel: UILabel!
+    @IBOutlet var fileImage: UIImageView!
+    @IBOutlet var fileImageView: UIView!
+    @IBOutlet var darkLayer: UIView!
 
     weak var delegate: FileDetailDelegate?
 

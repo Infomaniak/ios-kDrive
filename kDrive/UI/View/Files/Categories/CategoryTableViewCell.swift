@@ -26,11 +26,11 @@ protocol CategoryCellDelegate: AnyObject {
 }
 
 class CategoryTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var borderView: UIView!
-    @IBOutlet weak var circleImageView: UIImageView!
-    @IBOutlet weak var label: IKLabel!
-    @IBOutlet weak var moreButton: UIButton!
-    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet var borderView: UIView!
+    @IBOutlet var circleImageView: UIImageView!
+    @IBOutlet var label: IKLabel!
+    @IBOutlet var moreButton: UIButton!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
 
     weak var delegate: CategoryCellDelegate?
 

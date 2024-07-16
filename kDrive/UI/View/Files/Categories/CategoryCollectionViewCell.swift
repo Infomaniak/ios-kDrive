@@ -21,8 +21,8 @@ import kDriveCore
 import UIKit
 
 class CategoryCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var chipView: UIView!
-    @IBOutlet weak var categoryLabel: IKLabel!
+    @IBOutlet var chipView: UIView!
+    @IBOutlet var categoryLabel: IKLabel!
 
     func configure(with category: kDriveCore.Category) {
         chipView.backgroundColor = category.color

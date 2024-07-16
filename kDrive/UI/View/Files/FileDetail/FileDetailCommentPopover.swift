@@ -19,7 +19,7 @@
 import UIKit
 
 class FileDetailCommentPopover: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     var users: [String] = []
 

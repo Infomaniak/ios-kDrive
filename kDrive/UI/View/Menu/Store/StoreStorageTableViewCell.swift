@@ -25,9 +25,9 @@ protocol StoreStorageDelegate: AnyObject {
 }
 
 class StoreStorageTableViewCell: UITableViewCell {
-    @IBOutlet weak var storageValueLabel: IKLabel!
-    @IBOutlet weak var slider: UISlider!
-    @IBOutlet weak var containerView: UIView!
+    @IBOutlet var storageValueLabel: IKLabel!
+    @IBOutlet var slider: UISlider!
+    @IBOutlet var containerView: UIView!
 
     weak var delegate: StoreStorageDelegate?
 

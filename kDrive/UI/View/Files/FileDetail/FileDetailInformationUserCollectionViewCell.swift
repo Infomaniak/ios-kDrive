@@ -21,8 +21,8 @@ import kDriveResources
 import UIKit
 
 class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var moreLabel: UILabel!
+    @IBOutlet var avatarImage: UIImageView!
+    @IBOutlet var moreLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

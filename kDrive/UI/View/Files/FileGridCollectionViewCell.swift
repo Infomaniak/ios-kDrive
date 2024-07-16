@@ -39,9 +39,9 @@ final class FileGridViewModel: FileViewModel {
 }
 
 class FileGridCollectionViewCell: FileCollectionViewCell {
-    @IBOutlet weak var _checkmarkImage: UIImageView!
-    @IBOutlet weak var largeIconImageView: UIImageView!
-    @IBOutlet weak var iconImageView: UIImageView!
+    @IBOutlet var _checkmarkImage: UIImageView!
+    @IBOutlet var largeIconImageView: UIImageView!
+    @IBOutlet var iconImageView: UIImageView!
     @IBOutlet var stackViewCenterConstraint: NSLayoutConstraint?
 
     override var checkmarkImage: UIImageView? {

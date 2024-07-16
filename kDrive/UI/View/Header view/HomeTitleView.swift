@@ -19,7 +19,7 @@
 import UIKit
 
 class HomeTitleView: UIView {
-    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet var titleLabel: UILabel!
 
     class func instantiate(title: String) -> HomeTitleView {
         let view = Bundle.main.loadNibNamed("HomeTitleView", owner: nil, options: nil)![0] as! HomeTitleView

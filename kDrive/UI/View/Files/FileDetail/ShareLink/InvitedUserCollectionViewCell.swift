@@ -20,11 +20,11 @@ import kDriveResources
 import UIKit
 
 class InvitedUserCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var removeButton: UIButton!
-    @IBOutlet weak var widthConstraint: NSLayoutConstraint!
+    @IBOutlet var contentInsetView: UIView!
+    @IBOutlet var usernameLabel: UILabel!
+    @IBOutlet var avatarImage: UIImageView!
+    @IBOutlet var removeButton: UIButton!
+    @IBOutlet var widthConstraint: NSLayoutConstraint!
 
     var removeButtonHandler: ((UIButton) -> Void)?
 

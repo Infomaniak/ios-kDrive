@@ -24,8 +24,8 @@ protocol PhotoSyncSettingsTableViewCellDelegate: AnyObject {
 }
 
 class PhotoSyncSettingsTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var valueLabel: UILabel!
-    @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet var valueLabel: UILabel!
+    @IBOutlet var datePicker: UIDatePicker!
 
     weak var delegate: PhotoSyncSettingsTableViewCellDelegate?
 

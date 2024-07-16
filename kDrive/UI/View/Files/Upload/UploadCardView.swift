@@ -20,14 +20,14 @@ import kDriveResources
 import UIKit
 
 class UploadCardView: UIView {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var cancelButton: UIButton?
-    @IBOutlet weak var retryButton: UIButton?
-    @IBOutlet weak var editImage: UIImageView?
-    @IBOutlet weak var detailsLabel: UILabel!
-    @IBOutlet weak var iconView: UIImageView!
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var iconViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var cancelButton: UIButton?
+    @IBOutlet var retryButton: UIButton?
+    @IBOutlet var editImage: UIImageView?
+    @IBOutlet var detailsLabel: UILabel!
+    @IBOutlet var iconView: UIImageView!
+    @IBOutlet var progressView: RPCircularProgress!
+    @IBOutlet var iconViewHeightConstraint: NSLayoutConstraint!
     var cancelButtonPressedHandler: (() -> Void)?
     var retryButtonPressedHandler: (() -> Void)?
 

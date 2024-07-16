@@ -22,14 +22,14 @@ import kDriveResources
 import UIKit
 
 class ManageCategoriesTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet var trailingConstraint: NSLayoutConstraint!
     @IBOutlet var viewCenterConstraint: NSLayoutConstraint!
     @IBOutlet var contentViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var label: IKLabel!
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var collectionViewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet var label: IKLabel!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var collectionViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var collectionViewBottomConstraint: NSLayoutConstraint!
 
     var categories = [kDriveCore.Category]()
     var canManage = true {

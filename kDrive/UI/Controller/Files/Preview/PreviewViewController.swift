@@ -69,7 +69,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
         }
     }
 
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet var collectionView: UICollectionView!
     private var previewFiles = [File]()
     private var previewErrors = [Int: PreviewError]()
     private var driveFileManager: DriveFileManager!
@@ -92,7 +92,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     private let openButton = UIButton(type: .custom)
     private let backButton = UIButton(type: .custom)
     private var popRecognizer: InteractivePopRecognizer?
-    @IBOutlet weak var statusBarView: UIView!
+    @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
     private var heightToHide = 0.0
 

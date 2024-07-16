@@ -20,8 +20,8 @@ import InfomaniakCoreUI
 import UIKit
 
 class ParameterSwitchTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var valueLabel: UILabel!
-    @IBOutlet weak var valueSwitch: UISwitch!
+    @IBOutlet var valueLabel: UILabel!
+    @IBOutlet var valueSwitch: UISwitch!
 
     var switchHandler: ((UISwitch) -> Void)?
 

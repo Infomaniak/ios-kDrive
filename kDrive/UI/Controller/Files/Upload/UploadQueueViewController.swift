@@ -25,9 +25,9 @@ import RealmSwift
 import UIKit
 
 final class UploadQueueViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var retryButton: UIBarButtonItem!
-    @IBOutlet weak var cancelButton: UIBarButtonItem!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var retryButton: UIBarButtonItem!
+    @IBOutlet var cancelButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue

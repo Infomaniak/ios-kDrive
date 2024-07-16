@@ -24,10 +24,10 @@ protocol FileLocationDelegate: AnyObject {
 }
 
 class FileInformationLocationTableViewCell: UITableViewCell {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var locationImage: UIImageView!
-    @IBOutlet weak var locationLabel: UILabel!
-    @IBOutlet weak var locationButton: UIButton!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var locationImage: UIImageView!
+    @IBOutlet var locationLabel: UILabel!
+    @IBOutlet var locationButton: UIButton!
 
     weak var delegate: FileLocationDelegate?
 

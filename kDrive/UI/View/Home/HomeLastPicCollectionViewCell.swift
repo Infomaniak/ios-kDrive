@@ -22,11 +22,11 @@ import Kingfisher
 import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var fileImage: UIImageView!
-    @IBOutlet weak var darkLayer: UIView!
-    @IBOutlet weak var checkmarkImage: UIImageView!
-    @IBOutlet weak var videoData: UIView!
+    @IBOutlet var contentInsetView: UIView!
+    @IBOutlet var fileImage: UIImageView!
+    @IBOutlet var darkLayer: UIView!
+    @IBOutlet var checkmarkImage: UIImageView!
+    @IBOutlet var videoData: UIView!
 
     private var thumbnailDownloadTask: Kingfisher.DownloadTask?
 

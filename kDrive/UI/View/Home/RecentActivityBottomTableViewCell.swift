@@ -21,8 +21,8 @@ import kDriveResources
 import UIKit
 
 class RecentActivityBottomTableViewCell: UITableViewCell {
-    @IBOutlet weak var fileNameLabel: UILabel!
-    @IBOutlet weak var fileImage: UIImageView!
+    @IBOutlet var fileNameLabel: UILabel!
+    @IBOutlet var fileImage: UIImageView!
 
     override func prepareForReuse() {
         super.prepareForReuse()

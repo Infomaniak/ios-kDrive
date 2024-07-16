@@ -34,17 +34,17 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
-    @IBOutlet weak var commonDocumentsDescriptionLabel: UILabel!
-    @IBOutlet weak var sortView: UIView!
-    @IBOutlet weak var sortButton: UIButton!
-    @IBOutlet weak var listOrGridButton: UIButton!
-    @IBOutlet weak var uploadCardView: UploadCardView!
-    @IBOutlet weak var selectView: SelectView!
-    @IBOutlet weak var filterView: FilterView!
-    @IBOutlet weak var offlineView: UIView!
-    @IBOutlet weak var activityListView: UIView!
-    @IBOutlet weak var activityAvatar: UIImageView!
-    @IBOutlet weak var activityLabel: UILabel!
+    @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
+    @IBOutlet var sortView: UIView!
+    @IBOutlet var sortButton: UIButton!
+    @IBOutlet var listOrGridButton: UIButton!
+    @IBOutlet var uploadCardView: UploadCardView!
+    @IBOutlet var selectView: SelectView!
+    @IBOutlet var filterView: FilterView!
+    @IBOutlet var offlineView: UIView!
+    @IBOutlet var activityListView: UIView!
+    @IBOutlet var activityAvatar: UIImageView!
+    @IBOutlet var activityLabel: UILabel!
 
     weak var delegate: FilesHeaderViewDelegate? {
         didSet {

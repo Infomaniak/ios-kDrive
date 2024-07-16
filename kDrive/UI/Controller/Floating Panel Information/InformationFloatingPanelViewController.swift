@@ -22,17 +22,17 @@ import Lottie
 import UIKit
 
 class InformationFloatingPanelViewController: UIViewController {
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var imageViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var animationView: AnimationView!
-    @IBOutlet weak var animationViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    @IBOutlet weak var additionalInformationLabel: UILabel!
-    @IBOutlet weak var copyStackView: UIStackView!
-    @IBOutlet weak var copyTextField: UITextField!
-    @IBOutlet weak var leftButton: UIButton!
-    @IBOutlet weak var rightButton: UIButton!
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var animationView: AnimationView!
+    @IBOutlet var animationViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var additionalInformationLabel: UILabel!
+    @IBOutlet var copyStackView: UIStackView!
+    @IBOutlet var copyTextField: UITextField!
+    @IBOutlet var leftButton: UIButton!
+    @IBOutlet var rightButton: UIButton!
 
     var floatingPanelViewController: DriveFloatingPanelController!
 

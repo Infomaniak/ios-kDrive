@@ -23,8 +23,8 @@ protocol ColorSelectionDelegate: AnyObject {
 }
 
 class ColorSelectionTableViewCell: UITableViewCell {
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var collectionViewHeightConstraint: NSLayoutConstraint!
 
     weak var delegate: ColorSelectionDelegate?
 

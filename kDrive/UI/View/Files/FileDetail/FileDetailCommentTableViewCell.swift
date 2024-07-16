@@ -26,14 +26,14 @@ protocol FileCommentDelegate: AnyObject {
 }
 
 class FileDetailCommentTableViewCell: UITableViewCell {
-    @IBOutlet weak var userAvatar: UIImageView!
-    @IBOutlet weak var userNameLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    @IBOutlet weak var timeLabel: UILabel!
-    @IBOutlet weak var likeImage: UIImageView!
-    @IBOutlet weak var likeLabel: UILabel!
-    @IBOutlet weak var likesView: UIStackView!
-    @IBOutlet weak var commentLeadingConstraint: NSLayoutConstraint!
+    @IBOutlet var userAvatar: UIImageView!
+    @IBOutlet var userNameLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var timeLabel: UILabel!
+    @IBOutlet var likeImage: UIImageView!
+    @IBOutlet var likeLabel: UILabel!
+    @IBOutlet var likesView: UIStackView!
+    @IBOutlet var commentLeadingConstraint: NSLayoutConstraint!
     weak var commentDelegate: FileCommentDelegate?
     var comment: Comment!
     var index: Int!

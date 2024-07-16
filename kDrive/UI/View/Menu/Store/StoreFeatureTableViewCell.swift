@@ -21,5 +21,5 @@ import kDriveCore
 import UIKit
 
 class StoreFeatureTableViewCell: UITableViewCell {
-    @IBOutlet weak var label: IKLabel!
+    @IBOutlet var label: IKLabel!
 }

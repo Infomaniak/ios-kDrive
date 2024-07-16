@@ -34,8 +34,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    @IBOutlet weak var previewFrameImageView: UIImageView!
-    @IBOutlet weak var playButton: UIButton!
+    @IBOutlet var previewFrameImageView: UIImageView!
+    @IBOutlet var playButton: UIButton!
 
     var driveFileManager: DriveFileManager!
     weak var parentViewController: UIViewController?

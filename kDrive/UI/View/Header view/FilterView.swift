@@ -19,7 +19,7 @@
 import UIKit
 
 class FilterView: UIView {
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet var collectionView: UICollectionView!
 
     weak var delegate: FilesHeaderViewDelegate?
 

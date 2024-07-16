@@ -21,5 +21,5 @@ import kDriveCore
 import UIKit
 
 class HomeRecentFilesHeaderView: UICollectionReusableView {
-    @IBOutlet weak var titleLabel: IKLabel!
+    @IBOutlet var titleLabel: IKLabel!
 }

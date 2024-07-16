@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 class SelectTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var label: IKLabel!
+    @IBOutlet var label: IKLabel!
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)

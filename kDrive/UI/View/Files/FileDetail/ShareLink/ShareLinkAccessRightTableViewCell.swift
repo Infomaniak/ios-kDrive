@@ -26,11 +26,11 @@ protocol AccessRightPasswordDelegate: AnyObject {
 }
 
 class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var accessRightView: UIView!
-    @IBOutlet weak var accessRightLabel: UILabel!
-    @IBOutlet weak var accessRightImage: UIImageView!
-    @IBOutlet weak var textField: MaterialOutlinedTextField!
-    @IBOutlet weak var buttonNewPassword: UIButton!
+    @IBOutlet var accessRightView: UIView!
+    @IBOutlet var accessRightLabel: UILabel!
+    @IBOutlet var accessRightImage: UIImageView!
+    @IBOutlet var textField: MaterialOutlinedTextField!
+    @IBOutlet var buttonNewPassword: UIButton!
 
     var showPassword = false
     weak var delegate: AccessRightPasswordDelegate?

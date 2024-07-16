@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService private var navigationManager: NavigationManageable

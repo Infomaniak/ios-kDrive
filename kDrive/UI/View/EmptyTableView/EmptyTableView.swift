@@ -38,17 +38,17 @@ class EmptyTableView: UIView {
         case noCategories
     }
 
-    @IBOutlet weak var bottomToButtonConstraint: NSLayoutConstraint!
-    @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
-    @IBOutlet weak var mandatoryTopConstraint: NSLayoutConstraint!
-    @IBOutlet weak var topConstraint: NSLayoutConstraint!
-    @IBOutlet weak var centerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var emptyImageFrameView: UIView!
-    @IBOutlet weak var emptyMessageLabel: UILabel!
-    @IBOutlet weak var emptyDetailsLabel: UILabel!
-    @IBOutlet weak var emptyImageView: UIImageView!
-    @IBOutlet weak var reloadButton: UIButton!
-    @IBOutlet weak var emptyImageFrameViewHeightConstant: NSLayoutConstraint!
+    @IBOutlet var bottomToButtonConstraint: NSLayoutConstraint!
+    @IBOutlet var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet var mandatoryTopConstraint: NSLayoutConstraint!
+    @IBOutlet var topConstraint: NSLayoutConstraint!
+    @IBOutlet var centerConstraint: NSLayoutConstraint!
+    @IBOutlet var emptyImageFrameView: UIView!
+    @IBOutlet var emptyMessageLabel: UILabel!
+    @IBOutlet var emptyDetailsLabel: UILabel!
+    @IBOutlet var emptyImageView: UIImageView!
+    @IBOutlet var reloadButton: UIButton!
+    @IBOutlet var emptyImageFrameViewHeightConstant: NSLayoutConstraint!
     var actionHandler: ((UIButton) -> Void)?
 
     private func setCenteringEnabled(_ enabled: Bool) {

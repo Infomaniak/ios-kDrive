@@ -21,7 +21,7 @@ import kDriveCore
 import UIKit
 
 class ParameterAccessDeniedTableViewCell: UITableViewCell {
-    @IBOutlet weak var descriptionLabel: IKLabel!
+    @IBOutlet var descriptionLabel: IKLabel!
 
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
         Constants.openSettings()

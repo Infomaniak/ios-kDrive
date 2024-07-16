@@ -28,7 +28,7 @@ enum FolderType {
 }
 
 class NewFolderViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
 
     var folderType = FolderType.folder
     var driveFileManager: DriveFileManager!

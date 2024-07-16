@@ -22,8 +22,8 @@ import kDriveResources
 import UIKit
 
 class UploadsInProgressTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var subtitleLabel: IKLabel!
+    @IBOutlet var progressView: RPCircularProgress!
+    @IBOutlet var subtitleLabel: IKLabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

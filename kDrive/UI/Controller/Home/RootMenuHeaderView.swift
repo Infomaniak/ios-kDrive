@@ -24,11 +24,11 @@ import UIKit
 class RootMenuHeaderView: UICollectionReusableView {
     static let kind: UICollectionView.UICollectionViewSupplementaryViewKind = .custom("menuHeader")
 
-    @IBOutlet weak var topConstraint: NSLayoutConstraint!
-    @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet var topConstraint: NSLayoutConstraint!
+    @IBOutlet var bottomConstraint: NSLayoutConstraint!
 
-    @IBOutlet weak var offlineView: UIView!
-    @IBOutlet weak var uploadCardView: UploadCardView!
+    @IBOutlet var offlineView: UIView!
+    @IBOutlet var uploadCardView: UploadCardView!
 
     private var uploadCountManager: UploadCountManager?
     private weak var collectionView: UICollectionView?

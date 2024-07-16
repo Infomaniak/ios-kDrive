@@ -28,7 +28,7 @@ protocol ManageCategoriesDelegate: AnyObject {
 }
 
 final class ManageCategoriesViewController: UITableViewController {
-    @IBOutlet weak var createButton: UIBarButtonItem!
+    @IBOutlet var createButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
 

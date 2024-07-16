@@ -21,9 +21,9 @@ import kDriveResources
 import UIKit
 
 class FileInformationOwnerTableViewCell: UITableViewCell {
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var ownerImage: UIImageView!
-    @IBOutlet weak var ownerLabel: UILabel!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var ownerImage: UIImageView!
+    @IBOutlet var ownerLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
