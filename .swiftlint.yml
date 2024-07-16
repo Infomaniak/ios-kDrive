@@ -9,6 +9,7 @@ disabled_rules:
  - cyclomatic_complexity
  - closure_parameter_position
 opt_in_rules:
+ - strong_iboutlet
  - closure_end_indentation
  - closure_spacing
  - collection_alignment
