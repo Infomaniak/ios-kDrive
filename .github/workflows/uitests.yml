@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test project
+    name: UI tests
     runs-on: [ self-hosted, iOS ]
 
     steps:
