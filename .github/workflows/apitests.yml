@@ -32,4 +32,4 @@ jobs:
       - name: Project setup 
         run: tuist install && tuist generate
       - name: API tests
-        run: tuist test kDrive --test-targets kDriveAPITests
+        run: tuist test --test-targets kDriveAPITests
