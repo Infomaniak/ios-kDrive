@@ -21,7 +21,11 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(name: "kDrive",
-                      packages: [],
+                      options: .options(
+                          automaticSchemesOptions: .enabled(
+                              targetSchemesGrouping: .singleScheme
+                          )
+                      ),
                       targets: [
                           .target(name: "kDrive",
                                   destinations: Constants.destinations,
@@ -66,7 +70,8 @@ let project = Project(name: "kDrive",
                                   destinations: Constants.destinations,
                                   product: .unitTests,
                                   bundleId: "com.infomaniak.drive.mainTests",
-                                  deploymentTargets: Constants.deploymentTarget, infoPlist: .default,
+                                  deploymentTargets: Constants.deploymentTarget,
+                                  infoPlist: .default,
                                   sources: [
                                       "kDriveTests/**",
                                       "kDriveTestShared/**"
