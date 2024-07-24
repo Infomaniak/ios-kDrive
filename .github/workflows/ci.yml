@@ -30,6 +30,6 @@ jobs:
           touch $ENV_PATH
           echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
       - name: Build
-        run: tuist install && tuist build --generate kDrive
+        run: tuist install && tuist generate  && tuist build kDrive
       - name: Unit Test
         run: tuist test kDrive --skip-ui-tests
