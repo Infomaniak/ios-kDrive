@@ -27,6 +27,7 @@ class MenuTopTableViewCell: UITableViewCell {
     @IBOutlet var userAvatarImageView: UIImageView!
     @IBOutlet var userDisplayNameLabel: UILabel!
     @IBOutlet var userEmailLabel: UILabel!
+    @IBOutlet var switchDriveStackView: UIStackView!
     @IBOutlet var driveNameLabel: UILabel!
     @IBOutlet var driveImageView: UIImageView!
     @IBOutlet var switchDriveButton: UIButton!

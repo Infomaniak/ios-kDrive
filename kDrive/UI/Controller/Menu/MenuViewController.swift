@@ -189,6 +189,8 @@ extension MenuViewController {
             if let currentAccount {
                 cell.configureCell(with: driveFileManager.drive, and: currentAccount)
             }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(switchDriveButtonPressed(_:)))
+            cell.switchDriveStackView.addGestureRecognizer(tap)
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
