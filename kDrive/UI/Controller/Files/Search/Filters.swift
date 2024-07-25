@@ -116,7 +116,11 @@ struct Filters {
             return []
         }
 
-        return fileExtensionsRaw.components(separatedBy: Self.splitCharacterSet)
+        let components = fileExtensionsRaw
+            .components(separatedBy: Self.splitCharacterSet)
+            .filter { !$0.isEmpty }
+
+        return components
     }
 
     var hasFilters: Bool {
