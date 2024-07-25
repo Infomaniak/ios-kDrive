@@ -135,6 +135,7 @@
                 <outlet property="progressLabel" destination="Zml-xC-HzQ" id="NRn-TL-Dxj"/>
                 <outlet property="progressView" destination="Acs-ea-JHn" id="ugU-yA-MgW"/>
                 <outlet property="switchDriveButton" destination="Tyc-3X-hkw" id="dBe-RT-Bhv"/>
+                <outlet property="switchDriveStackView" destination="cA4-51-s4a" id="hOB-PT-KD1"/>
                 <outlet property="userAvatarContainerView" destination="e0w-EE-IZ4" id="Alo-Yx-dgW"/>
                 <outlet property="userAvatarImageView" destination="aiy-65-03w" id="ghV-Rz-shH"/>
                 <outlet property="userDisplayNameLabel" destination="Ed8-bN-hQH" id="6Wb-Vo-Z7M"/>
