@@ -46,18 +46,45 @@ class SelectFolderViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.saveFile }
     override class var storyboardIdentifier: String { "SelectFolderViewController" }
 
-    @IBOutlet var selectFolderButton: UIButton!
+    lazy var selectFolderButton: IKLargeButton = {
+        let button = IKLargeButton(frame: .zero)
+        button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
 
-    var disabledDirectoriesSelection = [Int]()
-    var fileToMove: Int?
+    let disabledDirectoriesSelection: [Int]
+    let fileToMove: Int?
     weak var delegate: SelectFolderDelegate?
-    var selectHandler: ((File) -> Void)?
+    let selectHandler: ((File) -> Void)?
+
+    init(
+        viewModel: FileListViewModel,
+        disabledDirectoriesSelection: [Int] = [Int](),
+        fileToMove: Int? = nil,
+        delegate: SelectFolderDelegate? = nil,
+        selectHandler: ((File) -> Void)? = nil
+    ) {
+        self.disabledDirectoriesSelection = disabledDirectoriesSelection
+        self.fileToMove = fileToMove
+        self.delegate = delegate
+        self.selectHandler = selectHandler
+        super.init(viewModel: viewModel)
+    }
 
     override func viewDidLoad() {
-        // Set configuration
         super.viewDidLoad()
 
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+
+        view.addSubview(selectFolderButton)
+
+        NSLayoutConstraint.activate([
+            selectFolderButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
+            selectFolderButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
+            selectFolderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -32),
+            selectFolderButton.heightAnchor.constraint(equalToConstant: 60)
+        ])
         setUpDirectory()
     }
 
@@ -75,27 +102,31 @@ class SelectFolderViewController: FileListViewController {
         -> TitleSizeAdjustingNavigationController {
         var viewControllers = [SelectFolderViewController]()
         if startDirectory == nil || startDirectory?.isRoot == true {
-            let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(
-                driveFileManager: driveFileManager,
-                currentDirectory: nil
-            ))
-            selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesIdsSelection
-            selectFolderViewController.fileToMove = fileToMove
-            selectFolderViewController.delegate = delegate
-            selectFolderViewController.selectHandler = selectHandler
+            let selectFolderViewController = SelectFolderViewController(
+                viewModel: SelectFolderViewModel(
+                    driveFileManager: driveFileManager,
+                    currentDirectory: nil
+                ),
+                disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
+                fileToMove: fileToMove,
+                delegate: delegate,
+                selectHandler: selectHandler
+            )
             selectFolderViewController.navigationItem.hideBackButtonText()
             viewControllers.append(selectFolderViewController)
         } else {
             var directory = startDirectory
             while directory != nil {
-                let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(
-                    driveFileManager: driveFileManager,
-                    currentDirectory: directory
-                ))
-                selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesIdsSelection
-                selectFolderViewController.fileToMove = fileToMove
-                selectFolderViewController.delegate = delegate
-                selectFolderViewController.selectHandler = selectHandler
+                let selectFolderViewController = SelectFolderViewController(
+                    viewModel: SelectFolderViewModel(
+                        driveFileManager: driveFileManager,
+                        currentDirectory: directory
+                    ),
+                    disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
+                    fileToMove: fileToMove,
+                    delegate: delegate,
+                    selectHandler: selectHandler
+                )
                 selectFolderViewController.navigationItem.hideBackButtonText()
                 viewControllers.append(selectFolderViewController)
                 directory = directory?.parent
@@ -172,14 +203,16 @@ class SelectFolderViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = viewModel.getFile(at: indexPath)!
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(
-                driveFileManager: viewModel.driveFileManager,
-                currentDirectory: selectedFile
-            ))
-            nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
-            nextVC.fileToMove = fileToMove
-            nextVC.delegate = delegate
-            nextVC.selectHandler = selectHandler
+            let nextVC = SelectFolderViewController(
+                viewModel: SelectFolderViewModel(
+                    driveFileManager: viewModel.driveFileManager,
+                    currentDirectory: selectedFile
+                ),
+                disabledDirectoriesSelection: disabledDirectoriesSelection,
+                fileToMove: fileToMove,
+                delegate: delegate,
+                selectHandler: selectHandler
+            )
             navigationController?.pushViewController(nextVC, animated: true)
         }
     }
