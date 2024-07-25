@@ -90,6 +90,7 @@ public extension Target {
                            "kDrive/UI/View/Files/FileGridCollectionViewCell.swift",
                            "kDrive/UI/View/Files/SwipableCell.swift",
                            "kDrive/UI/View/Files/SwipableCollectionView.swift",
+                           "kDrive/UI/View/Files/FileListBarButton.swift",
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.swift",
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.swift",
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.swift",
