@@ -103,7 +103,7 @@ class SearchViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(viewModel: SearchFilesViewModel) -> UINavigationController {
-        let searchViewController = instantiate(viewModel: viewModel)
+        let searchViewController = SearchViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
