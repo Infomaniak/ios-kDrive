@@ -46,13 +46,15 @@ extension ConvertedType: Selectable {
     }
 }
 
-class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
+class SearchFiltersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
     var filters = Filters()
 
     weak var delegate: SearchFiltersDelegate?
 
     private let filterTypes = FilterType.allCases
+
+    private let inputCellPath = IndexPath(row: 1, section: 1)
 
     private enum SearchFiltersRowsInSection {
         static let categories = 3
@@ -71,7 +73,10 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: SelectTableViewCell.self)
-        tableView.register(FileExtensionTextInputTableViewCell.self, forCellReuseIdentifier: "FileExtensionTextInputTableViewCell")
+        tableView.register(
+            FileExtensionTextInputTableViewCell.self,
+            forCellReuseIdentifier: "FileExtensionTextInputTableViewCell"
+        )
 
         let index = filters.belongToAllCategories ? 1 : 2
         tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
@@ -105,41 +110,6 @@ class SearchFiltersViewController: UITableViewController, UITextFieldDelegate {
                 tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
             }
         }
-    }
-
-    // MARK: - TextFieldDelegate
-
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        filters.fileExtensionsRaw = textField.text
-    }
-
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        filters.fileExtensionsRaw = textField.text
-    }
-
-    func textFieldShouldClear(_ textField: UITextField) -> Bool {
-        filters.fileExtensionsRaw = nil
-        return true
-    }
-
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        tableView.selectRow(at: inputCellPath, animated: true, scrollPosition: .none)
-        return true
-    }
-
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        tableView.deselectRow(at: inputCellPath, animated: true)
-        return true
-    }
-
-    private let inputCellPath = IndexPath(row: 1, section: 1)
-
-    private func getTextInputCell() -> FileExtensionTextInputTableViewCell? {
-        guard let inputCell = tableView(tableView, cellForRowAt: inputCellPath) as? FileExtensionTextInputTableViewCell else {
-            return nil
-        }
-
-        return inputCell
     }
 
     // MARK: - Actions
@@ -373,5 +343,40 @@ extension SearchFiltersViewController: FiltersFooterDelegate {
     func applyButtonPressed() {
         delegate?.didUpdateFilters(filters)
         dismiss(animated: true)
+    }
+}
+
+// MARK: - TextFieldDelegate
+
+extension SearchFiltersViewController: UITextFieldDelegate {
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        filters.fileExtensionsRaw = textField.text
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        filters.fileExtensionsRaw = textField.text
+    }
+
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        filters.fileExtensionsRaw = nil
+        return true
+    }
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        tableView.selectRow(at: inputCellPath, animated: true, scrollPosition: .none)
+        return true
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        tableView.deselectRow(at: inputCellPath, animated: true)
+        return true
+    }
+
+    private func getTextInputCell() -> FileExtensionTextInputTableViewCell? {
+        guard let inputCell = tableView(tableView, cellForRowAt: inputCellPath) as? FileExtensionTextInputTableViewCell else {
+            return nil
+        }
+
+        return inputCell
     }
 }
