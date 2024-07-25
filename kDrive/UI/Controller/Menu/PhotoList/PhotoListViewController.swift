@@ -159,7 +159,6 @@ final class PhotoListViewController: FileListViewController {
     override static func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = Storyboard.menu
             .instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
-        viewController.viewModel = viewModel
         return viewController as! Self
     }
 
@@ -193,7 +192,7 @@ final class PhotoListViewController: FileListViewController {
 
     // MARK: - Scroll view delegate
 
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
             (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
@@ -232,7 +231,7 @@ final class PhotoListViewController: FileListViewController {
 
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return photoListViewModel.sections.count
     }
 

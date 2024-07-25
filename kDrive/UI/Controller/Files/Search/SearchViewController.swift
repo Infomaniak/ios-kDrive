@@ -109,7 +109,7 @@ class SearchViewController: FileListViewController {
         return navigationController
     }
 
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let scrollPosition = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
         if scrollPosition > contentHeight {
@@ -148,7 +148,7 @@ class SearchViewController: FileListViewController {
             guard isViewLoaded else { return }
             // Update UI
             collectionView.refreshControl = searchViewModel.isDisplayingSearchResults ? refreshControl : nil
-            collectionViewLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
+            collectionViewFlowLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
             collectionView.backgroundView = nil
             if let headerView {
                 updateFilters(headerView: headerView)
