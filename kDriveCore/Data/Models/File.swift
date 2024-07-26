@@ -282,7 +282,8 @@ public enum FileStatus: String {
 }
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
-    case waiting, inProgress, done, failed, canceling, canceled
+    // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
+    case waiting, inProgress = "in_progress", done, failed, canceling, canceled
 }
 
 public final class FileExternalImport: EmbeddedObject, Codable {

@@ -47,9 +47,10 @@ public final class DriveTeamsCategories: EmbeddedObject, Codable {
 }
 
 public enum MaintenanceReason: String, PersistableEnum, Codable {
-    case notRenew
-    case demoEnd
-    case invoiceOverdue
+    // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
+    case notRenew = "not_renew"
+    case demoEnd = "demo_end"
+    case invoiceOverdue = "invoice_overdue"
     case technical
 }
 
