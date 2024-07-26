@@ -54,6 +54,15 @@ class SearchFiltersViewController: UITableViewController {
 
     private let filterTypes = FilterType.allCases
 
+    private let inputCellPath = IndexPath(row: 1, section: 1)
+
+    private enum SearchFiltersRowsInSection {
+        static let categories = 3
+        static let type = 2
+        static let typeSearchExtension = 1
+        static let date = 1
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -64,6 +73,10 @@ class SearchFiltersViewController: UITableViewController {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: SelectTableViewCell.self)
+        tableView.register(
+            FileExtensionTextInputTableViewCell.self,
+            forCellReuseIdentifier: "FileExtensionTextInputTableViewCell"
+        )
 
         let index = filters.belongToAllCategories ? 1 : 2
         tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
@@ -114,16 +127,22 @@ class SearchFiltersViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch filterTypes[section] {
         case .categories:
-            return 3
-        default:
-            return 1
+            return SearchFiltersRowsInSection.categories
+        case .type:
+            // searchExtension has a second cell for input
+            guard filters.fileType == .searchExtension else {
+                return SearchFiltersRowsInSection.typeSearchExtension
+            }
+            return SearchFiltersRowsInSection.type
+        case .date:
+            return SearchFiltersRowsInSection.date
         }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
-        case .date, .type:
+        case .date:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
 
             let filterType = filterTypes[indexPath.section]
@@ -131,6 +150,25 @@ class SearchFiltersViewController: UITableViewController {
             cell.configure(with: filterType, filters: filters)
 
             return cell
+        case .type:
+            guard indexPath.row != 0,
+                  filters.fileType == .searchExtension else {
+                let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
+
+                let filterType = filterTypes[indexPath.section]
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.configure(with: filterType, filters: filters)
+
+                return cell
+            }
+
+            let cell = tableView.dequeueReusableCell(type: FileExtensionTextInputTableViewCell.self, for: indexPath)
+            cell.textField.text = filters.fileExtensionsRaw
+            cell.textField.delegate = self
+            cell.textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+
+            return cell
+
         case .categories:
             if indexPath.row == 0 {
                 let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -192,17 +230,23 @@ class SearchFiltersViewController: UITableViewController {
             present(floatingPanelController, animated: true)
             return nil
         case .type:
-            MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
-            var fileTypes = ConvertedType.allCases
-            fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
-            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(
-                options: fileTypes,
-                selectedOption: filters.fileType,
-                headerTitle: filterType.title,
-                delegate: self
-            )
-            present(floatingPanelController, animated: true)
-            return nil
+
+            if indexPath.row == 0 {
+                MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
+                var fileTypes = ConvertedType.allCases
+                fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
+                let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(
+                    options: fileTypes,
+                    selectedOption: filters.fileType,
+                    headerTitle: filterType.title,
+                    delegate: self
+                )
+                present(floatingPanelController, animated: true)
+                return nil
+            } else {
+                return indexPath
+            }
+
         case .categories:
             if indexPath.row == 0 {
                 MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
@@ -222,8 +266,16 @@ class SearchFiltersViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
-        case .date, .type:
+        case .date:
             break
+        case .type:
+            if indexPath.row != 0 {
+                MatomoUtils.track(eventWithCategory: .search, name: "filterExtension")
+                if let inputCell = getTextInputCell() {
+                    inputCell.setSelected(true, animated: true)
+                }
+                return
+            }
         case .categories:
             if indexPath.row > 0 {
                 filters.belongToAllCategories = indexPath.row == 1
@@ -253,6 +305,10 @@ extension SearchFiltersViewController: SelectDelegate {
         } else if let fileType = option as? ConvertedType {
             filters.fileType = fileType
             reloadSection(.type)
+
+            if fileType == .searchExtension {
+                tableView.selectRow(at: inputCellPath, animated: true, scrollPosition: .none)
+            }
         }
     }
 }
@@ -287,5 +343,40 @@ extension SearchFiltersViewController: FiltersFooterDelegate {
     func applyButtonPressed() {
         delegate?.didUpdateFilters(filters)
         dismiss(animated: true)
+    }
+}
+
+// MARK: - TextFieldDelegate
+
+extension SearchFiltersViewController: UITextFieldDelegate {
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        filters.fileExtensionsRaw = textField.text
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        filters.fileExtensionsRaw = textField.text
+    }
+
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        filters.fileExtensionsRaw = nil
+        return true
+    }
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        tableView.selectRow(at: inputCellPath, animated: true, scrollPosition: .none)
+        return true
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        tableView.deselectRow(at: inputCellPath, animated: true)
+        return true
+    }
+
+    private func getTextInputCell() -> FileExtensionTextInputTableViewCell? {
+        guard let inputCell = tableView(tableView, cellForRowAt: inputCellPath) as? FileExtensionTextInputTableViewCell else {
+            return nil
+        }
+
+        return inputCell
     }
 }

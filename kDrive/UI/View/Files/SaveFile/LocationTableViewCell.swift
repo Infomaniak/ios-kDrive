@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 class LocationTableViewCell: InsetTableViewCell {
-    @IBOutlet var logoImage: UIImageView!
+    @IBOutlet weak var logoImage: UIImageView!
 
     func configure(with drive: Drive?) {
         logoImage.image = KDriveResourcesAsset.drive.image

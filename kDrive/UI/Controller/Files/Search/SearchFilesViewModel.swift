@@ -113,6 +113,7 @@ class SearchFilesViewModel: FileListViewModel {
                                                                         date: filters.date?.dateInterval,
                                                                         fileType: filters.fileType,
                                                                         categories: Array(filters.categories),
+                                                                        fileExtensions: filters.fileExtensions,
                                                                         belongToAllCategories: filters.belongToAllCategories,
                                                                         cursor: cursor,
                                                                         sortType: sortType)
@@ -147,6 +148,7 @@ class SearchFilesViewModel: FileListViewModel {
                                                                   date: filters.date?.dateInterval,
                                                                   fileType: filters.fileType,
                                                                   categories: Array(filters.categories),
+                                                                  fileExtensions: filters.fileExtensions,
                                                                   belongToAllCategories: filters.belongToAllCategories,
                                                                   sortType: sortType))
         startObservation()

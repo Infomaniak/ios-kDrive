@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Wed, 05 Jun 2024 08:48:02 +0200
+ * Exported by: Valentin Perignon
+ * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -231,6 +231,9 @@
 
 /* loco:6049df4d5c2c3a04bc397937 */
 "buttonAddFavorites" = "Aggiungi ai preferiti";
+
+/* loco:668e92d227a71514a808d485 */
+"buttonAddToKDrive" = "Aggiungi al mio kDrive";
 
 /* loco:6049df4d5c2c3a04bc397938 */
 "buttonAddUser" = "Aggiungi un utente";
@@ -1099,6 +1102,9 @@
 /* loco:6049df4d5c2c3a04bc3979de */
 "fileDetailsNoComments" = "Al momento non ci sono commenti";
 
+/* loco:66a369b1a84f9b44440e2423 */
+"fileExtesionFilterPlaceholder" = ".jpg, .mov, ecc.";
+
 /* loco:6049df4d5c2c3a04bc3979df */
 "fileInfoInputDuplicateFile" = "Nome della copia";
 
@@ -1307,7 +1313,7 @@
 "localizedFilenamePrivateTeamSpace" = "La mia cartella personale";
 
 /* loco:65a140c3cdbe107c5a025352 */
-"localizedFilenameTeamSpace" = "File dell’organizzazione";
+"localizedFilenameTeamSpace" = "Cartelle comuni";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Localizzare";
@@ -1599,6 +1605,9 @@
 
 /* loco:61696114b9fa15412d6a2fb6 */
 "searchFiltersSelectType" = "Seleziona un tipo di file";
+
+/* loco:668feca6092b456442086012 */
+"searchForAnExtension" = "Ricerca di un’estensione";
 
 /* loco:6049df4d5c2c3a04bc397a30 */
 "searchLastTitle" = "Ultime ricerche";

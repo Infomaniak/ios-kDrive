@@ -403,6 +403,7 @@ public class DriveApiFetcher: ApiFetcher {
         query: String? = nil,
         date: DateInterval? = nil,
         fileTypes: [ConvertedType] = [],
+        fileExtensions: [String],
         categories: [Category],
         belongToAllCategories: Bool,
         cursor: String? = nil,
@@ -413,6 +414,7 @@ public class DriveApiFetcher: ApiFetcher {
             query: query,
             date: date,
             fileTypes: fileTypes,
+            fileExtensions: fileExtensions,
             categories: categories,
             belongToAllCategories: belongToAllCategories
         )

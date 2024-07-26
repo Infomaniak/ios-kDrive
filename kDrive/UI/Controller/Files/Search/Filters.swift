@@ -108,6 +108,21 @@ struct Filters {
     var categories: Set<kDriveCore.Category> = []
     var belongToAllCategories = true
 
+    var fileExtensionsRaw: String?
+
+    private static var splitCharacterSet = CharacterSet(charactersIn: ", ")
+    var fileExtensions: [String] {
+        guard let fileExtensionsRaw else {
+            return []
+        }
+
+        let components = fileExtensionsRaw
+            .components(separatedBy: Self.splitCharacterSet)
+            .filter { !$0.isEmpty }
+
+        return components
+    }
+
     var hasFilters: Bool {
         return date != nil || fileType != nil || !categories.isEmpty
     }
@@ -121,5 +136,6 @@ struct Filters {
         date = nil
         fileType = nil
         categories.removeAll()
+        fileExtensionsRaw = nil
     }
 }

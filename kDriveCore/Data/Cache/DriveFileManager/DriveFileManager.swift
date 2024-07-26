@@ -386,6 +386,7 @@ public final class DriveFileManager {
                            date: DateInterval? = nil,
                            fileType: ConvertedType? = nil,
                            categories: [Category],
+                           fileExtensions: [String],
                            belongToAllCategories: Bool,
                            cursor: String? = nil,
                            sortType: SortType = .nameAZ) async throws -> (files: [File], nextCursor: String?) {
@@ -396,7 +397,14 @@ public final class DriveFileManager {
                                                  drive: drive,
                                                  query: query,
                                                  date: date,
-                                                 fileTypes: [fileType].compactMap { $0 },
+                                                 fileTypes: [fileType].compactMap { type in
+                                                     guard type != .searchExtension else {
+                                                         return nil
+                                                     }
+
+                                                     return type
+                                                 },
+                                                 fileExtensions: fileExtensions,
                                                  categories: categories,
                                                  belongToAllCategories: belongToAllCategories,
                                                  cursor: cursor,
@@ -420,6 +428,7 @@ public final class DriveFileManager {
                               date: DateInterval? = nil,
                               fileType: ConvertedType? = nil,
                               categories: [Category],
+                              fileExtensions: [String],
                               belongToAllCategories: Bool,
                               sortType: SortType = .nameAZ) -> Results<File> {
         let results = database.fetchResults(ofType: File.self) { lazyCollection in
@@ -437,10 +446,13 @@ public final class DriveFileManager {
             }
 
             if let fileType {
-                if fileType == .folder {
+                switch fileType {
+                case .folder:
                     searchResults = searchResults.filter("rawType == \"dir\"")
-                } else {
-                    searchResults = searchResults.filter("rawConvertedType == %@", fileType.rawValue)
+                case .searchExtension:
+                    searchResults = searchResults.filter("rawType IN %@", fileExtensions)
+                default:
+                    searchResults = searchResults.filter("rawType == %@", fileType.rawValue)
                 }
             }
 
@@ -512,6 +524,7 @@ public final class DriveFileManager {
             let lastPicturesResponse = try await apiFetcher.searchFiles(
                 drive: drive,
                 fileTypes: [.image, .video],
+                fileExtensions: [],
                 categories: [],
                 belongToAllCategories: false,
                 cursor: cursor,
