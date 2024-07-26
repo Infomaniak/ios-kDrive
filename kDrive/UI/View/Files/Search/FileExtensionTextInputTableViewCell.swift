@@ -28,7 +28,7 @@ final class FileExtensionTextInputTableViewCell: TextInputTableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         textField.setHint(KDriveResourcesStrings.Localizable.sortExtension)
-        textField.placeholder = ".jpg, .mov …"
+        textField.placeholder = KDriveResourcesStrings.Localizable.fileExtesionFilterPlaceholder
         TextFieldConfiguration.fileExtensionConfiguration.apply(to: textField)
     }
 

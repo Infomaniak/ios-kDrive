@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fr, French
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Thu, 11 Jul 2024 16:43:23 +0200
+ * Exported by: Valentin Perignon
+ * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1102,6 +1102,9 @@
 /* loco:6049df4d5c2c3a04bc3979de */
 "fileDetailsNoComments" = "Aucun commentaire pour le moment";
 
+/* loco:66a369b1a84f9b44440e2423 */
+"fileExtesionFilterPlaceholder" = ".jpg, .mov, etc.";
+
 /* loco:6049df4d5c2c3a04bc3979df */
 "fileInfoInputDuplicateFile" = "Nom de la copie";
 
@@ -1283,7 +1286,7 @@
 "homeTitle" = "Accueil";
 
 /* loco:665f25aff2cdb8afe902d122 */
-"imageCache" = "Cache d'images";
+"imageCache" = "Cache d’images";
 
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Importations";
@@ -1310,7 +1313,7 @@
 "localizedFilenamePrivateTeamSpace" = "Mon dossier personnel";
 
 /* loco:65a140c3cdbe107c5a025352 */
-"localizedFilenameTeamSpace" = "Dossiers de l’organisation";
+"localizedFilenameTeamSpace" = "Dossiers communs";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Localiser";
