@@ -105,8 +105,8 @@ class SwitchUserViewController: UIViewController {
             )
             present(driveErrorNavigationViewController, animated: true)
         } catch {
-            // Unknown error do nothing
-            return
+            // Unknown error, remove the user
+            accountManager.removeTokenAndAccount(account: account)
         }
     }
 

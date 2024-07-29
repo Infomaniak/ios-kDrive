@@ -113,6 +113,7 @@ class PreloadingViewController: UIViewController {
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
+                accountManager.removeTokenAndAccount(account: currentAccount)
                 self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }
