@@ -23,7 +23,11 @@ import ProjectDescriptionHelpers
 let project = Project(name: "kDrive",
                       options: .options(
                           automaticSchemesOptions: .enabled(
-                              targetSchemesGrouping: .singleScheme
+                            targetSchemesGrouping: .byNameSuffix(
+                              build: Set(["kDrive", "Extension"]),
+                              test: Set(["Tests"]),
+                              run: Set(["kDrive", "Extension"])
+                            )
                           )
                       ),
                       targets: [
