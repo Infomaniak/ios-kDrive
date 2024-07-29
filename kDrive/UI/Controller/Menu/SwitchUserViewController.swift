@@ -105,6 +105,7 @@ class SwitchUserViewController: UIViewController {
             )
             present(driveErrorNavigationViewController, animated: true)
         } catch {
+            SentryDebug.logPreloadingAccountError(error: error, origin: "SwitchUserViewController")
             // Unknown error, remove the user
             accountManager.removeTokenAndAccount(account: account)
         }
