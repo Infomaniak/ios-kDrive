@@ -503,6 +503,21 @@ public final class DriveFileManager {
         }
     }
 
+    /// Remove all children of to a root File with a transaction
+    public func removeLocalFiles(root: File) {
+        try? database.writeTransaction { writableRealm in
+            guard let lastPicturesRootInContext = writableRealm
+                .objects(File.self)
+                .filter("id == %@", DriveFileManager.lastPicturesRootFile.id)
+                .first else {
+                return
+            }
+
+            lastPicturesRootInContext.children.removeAll()
+            writableRealm.add(lastPicturesRootInContext, update: .modified)
+        }
+    }
+
     public func lastModifiedFiles(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
             let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)

@@ -156,6 +156,13 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
+    @objc override func forceRefresh() {
+        Task {
+            driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
+            super.forceRefresh()
+        }
+    }
+
     override static func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = Storyboard.menu
             .instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
