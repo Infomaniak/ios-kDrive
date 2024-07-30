@@ -28,11 +28,24 @@ import UIKit
 extension PhotoSortMode: Selectable {}
 
 final class PhotoListViewController: FileListViewController {
-    @IBOutlet var photoHeaderView: SelectView!
-    @IBOutlet var headerImageView: UIImageView!
-    @IBOutlet var headerTitleLabel: IKLabel!
+    var headerTitleLabel: IKLabel {
+        return photoHeaderView.titleLabel
+    }
 
-    private var isLargeTitle = true
+    lazy var headerImageView: UIImageView = {
+        let imageView = UIImageView(frame: .zero)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    lazy var photoHeaderView: SelectView = {
+        let selectView = SelectView.instantiate()
+        selectView.translatesAutoresizingMaskIntoConstraints = false
+        selectView.backgroundColor = .clear
+        selectView.buttonTint = .white
+
+        return selectView
+    }()
 
     private var numberOfColumns: Int {
         let screenWidth = collectionView.bounds.width
@@ -40,6 +53,7 @@ final class PhotoListViewController: FileListViewController {
         return max(minColumns, maxColumns)
     }
 
+    private var isLargeTitle = true
     private let minColumns = 3
     private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
@@ -55,10 +69,23 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.addSubview(headerImageView)
+        view.addSubview(photoHeaderView)
+        selectView = photoHeaderView
 
-        headerTitleLabel.textColor = .white
-        photoHeaderView.buttonTint = .white
+        NSLayoutConstraint.activate([
+            photoHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            photoHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            photoHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
 
+            headerImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+            headerImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
+            headerImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            headerImageView.bottomAnchor.constraint(equalTo: photoHeaderView.bottomAnchor, constant: 0)
+        ])
+
+        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing = 4
+        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumLineSpacing = 4
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: photoHeaderView.frame.height, left: 0, bottom: 0, right: 0)
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self,
@@ -89,7 +116,6 @@ final class PhotoListViewController: FileListViewController {
 
         setPhotosNavigationBar()
         navigationItem.title = viewModel.title
-        applyGradient(view: headerImageView)
         Task {
             try await viewModel.loadFiles()
         }
@@ -103,7 +129,8 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        collectionView.collectionViewLayout.invalidateLayout()
+        applyGradient(view: headerImageView)
+        // collectionView.collectionViewLayout.invalidateLayout()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -156,12 +183,6 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
-    override static func instantiate(viewModel: FileListViewModel) -> Self {
-        let viewController = Storyboard.menu
-            .instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
-        return viewController as! Self
-    }
-
     // MARK: - Multiple selection
 
     override func toggleMultipleSelection(_ on: Bool) {
@@ -197,6 +218,7 @@ final class PhotoListViewController: FileListViewController {
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
             (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         photoHeaderView.isHidden = isLargeTitle
+        headerImageView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()

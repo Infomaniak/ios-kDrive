@@ -34,17 +34,18 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
+    @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
     @IBOutlet var sortButton: UIButton!
     @IBOutlet var listOrGridButton: UIButton!
     @IBOutlet var uploadCardView: UploadCardView!
-    @IBOutlet var selectView: SelectView!
     @IBOutlet var filterView: FilterView!
     @IBOutlet var offlineView: UIView!
     @IBOutlet var activityListView: UIView!
     @IBOutlet var activityAvatar: UIImageView!
     @IBOutlet var activityLabel: UILabel!
+    var selectView: SelectView!
 
     weak var delegate: FilesHeaderViewDelegate? {
         didSet {
@@ -73,6 +74,10 @@ class FilesHeaderView: UICollectionReusableView {
         )
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
+
+        selectView = SelectView.instantiate()
+        selectView.isHidden = true
+        containerStackView.addArrangedSubview(selectView)
     }
 
     @objc private func didTapOnCard() {
