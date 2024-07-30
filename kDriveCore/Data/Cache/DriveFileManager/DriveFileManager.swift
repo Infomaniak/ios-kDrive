@@ -72,8 +72,6 @@ public final class DriveFileManager {
         return offlineRoot
     }
 
-    // autorelease frequency so cleaner serialized realm base
-    let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public let realmConfiguration: Realm.Configuration
     public private(set) var drive: Drive
     public let apiFetcher: DriveApiFetcher
@@ -847,7 +845,7 @@ public final class DriveFileManager {
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
         let response = try await apiFetcher.delete(file: file)
-        backgroundQueue.async { [self] in
+        Task {
             try? database.writeTransaction { writableRealm in
                 let savedFile = try? file.resolve(using: writableRealm).freeze()
                 removeFileInDatabase(fileUid: file.uid, cascade: true, writableRealm: writableRealm)
@@ -866,6 +864,7 @@ public final class DriveFileManager {
                 )
             }
         }
+
         return response
     }
 
@@ -1158,9 +1157,15 @@ public final class DriveFileManager {
     }
 
     private func deleteOrphanFiles(root: File..., newFiles: [File]? = nil, writableRealm: Realm) {
+        let rootIds: [Int] = root.map(\.id)
         let maybeOrphanFiles = writableRealm.objects(File.self)
             .filter("parentLink.@count == 1")
-            .filter("ANY parentLink.id IN %@", root.map(\.id))
+            .filter("ANY parentLink.id IN %@", rootIds)
+
+        guard !maybeOrphanFiles.isEmpty else {
+            return
+        }
+
         var orphanFiles = [File]()
 
         for maybeOrphanFile in maybeOrphanFiles {
@@ -1373,36 +1378,35 @@ public final class DriveFileManager {
         }
     }
 
-    public func setLocalRecentActivities(_ activities: [FileActivity]) {
-        backgroundQueue.async { [self] in
-            try? database.writeTransaction { writableRealm in
-                let homeRootFile = DriveFileManager.homeRootFile
-                var activitiesSafe = [FileActivity]()
-                for activity in activities {
-                    guard !activity.isInvalidated else {
-                        continue
-                    }
-
-                    let safeActivity = FileActivity(value: activity)
-                    if let file = activity.file {
-                        let safeFile = file.detached()
-                        keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
-                        homeRootFile.children.insert(safeFile)
-                        safeActivity.file = safeFile
-                    }
-                    activitiesSafe.append(safeActivity)
+    public func setLocalRecentActivities(detachedActivities: [FileActivity]) async {
+        try? database.writeTransaction { writableRealm in
+            let homeRootFile = DriveFileManager.homeRootFile
+            var activitiesSafe = [FileActivity]()
+            for activity in detachedActivities {
+                guard !activity.isInvalidated else {
+                    continue
                 }
 
-                writableRealm.delete(writableRealm.objects(FileActivity.self))
-                writableRealm.add(activitiesSafe, update: .modified)
-                writableRealm.add(homeRootFile, update: .modified)
-
-                deleteOrphanFiles(
-                    root: DriveFileManager.homeRootFile,
-                    newFiles: Array(homeRootFile.children),
-                    writableRealm: writableRealm
-                )
+                let safeActivity = FileActivity(value: activity)
+                if let file = activity.file {
+                    let safeFile = file.detached()
+                    keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
+                    homeRootFile.children.insert(safeFile)
+                    safeActivity.file = safeFile
+                }
+                activitiesSafe.append(safeActivity)
             }
+
+            writableRealm.delete(writableRealm.objects(FileActivity.self))
+            writableRealm.add(activitiesSafe, update: .modified)
+            writableRealm.add(homeRootFile, update: .modified)
+
+            let homeRootFileChildren = Array(homeRootFile.children)
+            deleteOrphanFiles(
+                root: homeRootFile,
+                newFiles: homeRootFileChildren,
+                writableRealm: writableRealm
+            )
         }
     }
 }

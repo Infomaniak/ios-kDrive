@@ -93,7 +93,7 @@ class HomeRecentActivitiesController {
                 display(activities: activitiesResponse.data)
                 // Update cache
                 if nextCursor == nil {
-                    self.driveFileManager.setLocalRecentActivities(activitiesResponse.data)
+                    await self.driveFileManager.setLocalRecentActivities(detachedActivities: activitiesResponse.data)
                 }
                 self.nextCursor = activitiesResponse.cursor
             } catch {
