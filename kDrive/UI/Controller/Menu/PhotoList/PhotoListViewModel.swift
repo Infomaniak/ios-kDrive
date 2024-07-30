@@ -73,7 +73,9 @@ class PhotoListViewModel: FileListViewModel {
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+            lazyCollection
+                .filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+                .filter("ANY supportedBy CONTAINS %@", FileSupportedBy.thumbnail.rawValue)
                 .sorted(by: [SortType.newer.value.sortDescriptor])
         }
 
