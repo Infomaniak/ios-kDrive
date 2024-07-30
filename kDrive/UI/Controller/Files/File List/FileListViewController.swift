@@ -49,9 +49,6 @@ extension SortType: Selectable {
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
-    class var storyboard: UIStoryboard { Storyboard.files }
-    class var storyboardIdentifier: String { "FileListViewController" }
-
     @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants
@@ -104,11 +101,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         super.init(collectionViewLayout: UICollectionViewFlowLayout())
     }
 
-    override func loadView() {
-        super.loadView()
-        collectionView = SwipableCollectionView(frame: collectionView.frame, collectionViewLayout: collectionViewLayout)
-    }
-
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -120,6 +112,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         navigationItem.largeTitleDisplayMode = .always
 
         // Set up collection view
+        collectionView = SwipableCollectionView(frame: collectionView.frame, collectionViewLayout: collectionViewLayout)
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(
@@ -298,14 +291,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
             self?.selectView?.setActions(actions)
-        }
-    }
-
-    func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
-        if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
-            return viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        } else {
-            return nil
         }
     }
 
@@ -571,11 +556,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             type = .emptyFolderWithCreationRights
         }
         return type
-    }
-
-    class func instantiate(viewModel: FileListViewModel) -> Self {
-        let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
-        return viewController
     }
 
     // MARK: - Multiple selection

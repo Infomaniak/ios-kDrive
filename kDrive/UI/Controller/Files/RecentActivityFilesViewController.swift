@@ -47,9 +47,6 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
 }
 
 class RecentActivityFilesViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.files }
-    override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
-
     private var activityViewModel: RecentActivityFilesViewModel! {
         return viewModel as? RecentActivityFilesViewModel
     }

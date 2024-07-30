@@ -27,9 +27,6 @@ import UIKit
 // MARK: - SearchViewController
 
 class SearchViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.search }
-    override class var storyboardIdentifier: String { "SearchViewController" }
-
     // MARK: - Constants
 
     private let minSearchCount = 1

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -10,41 +10,6 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Westworld-->
-        <scene sceneID="JJW-z8-kTh">
-            <objects>
-                <collectionViewController storyboardIdentifier="FileListViewController" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="yCM-Om-3CZ" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" sectionInsetReference="safeArea" id="2vQ-MN-Kom">
-                            <size key="itemSize" width="128" height="128"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                        </collectionViewFlowLayout>
-                        <cells/>
-                        <connections>
-                            <outlet property="dataSource" destination="afx-Ig-yDG" id="s0S-nW-aft"/>
-                            <outlet property="delegate" destination="afx-Ig-yDG" id="1wH-tV-uZi"/>
-                        </connections>
-                    </collectionView>
-                    <navigationItem key="navigationItem" title="Westworld" largeTitleDisplayMode="always" id="6nN-R6-lch">
-                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="search" id="OAV-22-wNN">
-                            <connections>
-                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="UEV-hJ-7h0"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="yCM-Om-3CZ" id="ArS-ze-ns7"/>
-                    </connections>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cIe-lL-Jiy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="792.75362318840587" y="101.78571428571428"/>
-        </scene>
         <!--Importation en cours-->
         <scene sceneID="naE-ZF-Fiy">
             <objects>
@@ -346,28 +311,6 @@
             </objects>
             <point key="canvasLocation" x="-119.2" y="864.53201970443354"/>
         </scene>
-        <!--Title Size Adjusting Navigation Controller-->
-        <scene sceneID="5PS-aw-ccj">
-            <objects>
-                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCoreUI" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-filled-tab" id="FVI-Sh-h25">
-                        <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
-                    </tabBarItem>
-                    <toolbarItems/>
-                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="eMQ-BK-erX">
-                        <rect key="frame" x="0.0" y="48" width="414" height="96"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="afx-Ig-yDG" kind="relationship" relationship="rootViewController" id="8X2-I5-9w1"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="IK5-jC-d8D" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-117.39130434782609" y="101.78571428571428"/>
-        </scene>
         <!--Partage et droits du dossier Name-->
         <scene sceneID="Meu-fU-x3Z">
             <objects>
@@ -575,52 +518,6 @@
             </objects>
             <point key="canvasLocation" x="2534" y="1661"/>
         </scene>
-        <!--Activités-->
-        <scene sceneID="jQX-tY-pqn">
-            <objects>
-                <viewController storyboardIdentifier="RecentActivityFilesViewController" hidesBottomBarWhenPushed="YES" id="SXx-tI-VhM" customClass="RecentActivityFilesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="KJR-0t-Oxg">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tCK-Zo-2xk" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="e99-uM-yBD">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="SXx-tI-VhM" id="lrL-Zn-xAo"/>
-                                    <outlet property="delegate" destination="SXx-tI-VhM" id="bWw-uD-KYe"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="Pev-JJ-2tt"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="leading" secondItem="Pev-JJ-2tt" secondAttribute="leading" id="Xe5-zS-ktr"/>
-                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="top" secondItem="KJR-0t-Oxg" secondAttribute="top" id="kPi-Vf-ZbQ"/>
-                            <constraint firstItem="Pev-JJ-2tt" firstAttribute="trailing" secondItem="tCK-Zo-2xk" secondAttribute="trailing" id="sjk-A6-hQP"/>
-                            <constraint firstAttribute="bottom" secondItem="tCK-Zo-2xk" secondAttribute="bottom" id="zeT-mG-teZ"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Activités" largeTitleDisplayMode="always" id="dy4-zn-GY4">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsActivitiesTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="tCK-Zo-2xk" id="Dp1-UX-4Kb"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Sog-Va-4MF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2641" y="101"/>
-        </scene>
     </scenes>
     <designables>
         <designable name="6yn-n6-xrf">
@@ -636,8 +533,6 @@
     <resources>
         <image name="add" width="24" height="24"/>
         <image name="close" width="24" height="24"/>
-        <image name="folder" width="24" height="24"/>
-        <image name="folder-filled-tab" width="24" height="24"/>
         <image name="retry" width="24" height="24"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -646,7 +541,7 @@
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="previewBackgroundColor">
             <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

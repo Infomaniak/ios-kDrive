@@ -130,7 +130,6 @@ final class PhotoListViewController: FileListViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         applyGradient(view: headerImageView)
-        // collectionView.collectionViewLayout.invalidateLayout()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

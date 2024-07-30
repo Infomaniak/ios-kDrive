@@ -43,9 +43,6 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
 }
 
 class SelectFolderViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.saveFile }
-    override class var storyboardIdentifier: String { "SelectFolderViewController" }
-
     lazy var selectFolderButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
