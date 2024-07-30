@@ -90,7 +90,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        width = view.frame.width
+        width = Double(floatingPanelController?.view.frame.width ?? 0)
         setUpHeight()
     }
 
