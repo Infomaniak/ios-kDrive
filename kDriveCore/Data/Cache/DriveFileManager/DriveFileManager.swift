@@ -513,7 +513,9 @@ public final class DriveFileManager {
                 return
             }
 
-            lastPicturesRootInContext.children.removeAll()
+            for child in lastPicturesRootInContext.children {
+                removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+            }
             writableRealm.add(lastPicturesRootInContext, update: .modified)
         }
     }
