@@ -72,8 +72,6 @@ public final class DriveFileManager {
         return offlineRoot
     }
 
-    // autorelease frequency so cleaner serialized realm base
-    let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public let realmConfiguration: Realm.Configuration
     public private(set) var drive: Drive
     public let apiFetcher: DriveApiFetcher
@@ -559,163 +557,14 @@ public final class DriveFileManager {
         }
     }
 
-    public struct ActivitiesResult {
-        public var inserted: [File]
-        public var updated: [File]
-        public var deleted: [File]
+    /// Fetch changes for a given directory and add it to DB
+    /// - With API V3 there is no notion of activities. We only do a listing for an existing cursor
+    public func fileActivities(file: ProxyFile) async throws {
+        var (_, nextCursor) = try await fileListing(in: file)
 
-        public init(inserted: [File] = [], updated: [File] = [], deleted: [File] = []) {
-            self.inserted = inserted
-            self.updated = updated
-            self.deleted = deleted
+        while nextCursor != nil {
+            (_, nextCursor) = try await fileListing(in: file)
         }
-    }
-
-    public func fileActivities(file: ProxyFile,
-                               from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
-        // Get all pages and assemble
-        let fetchedFile = try file.resolve(within: self).freeze()
-        let timestamp = TimeInterval(timestamp ?? fetchedFile.responseAt)
-        var cursor: String?
-        var moreComing = true
-        var pagedActions = [String: FileActivityType]()
-        var pagedActivities = ActivitiesResult()
-        var responseAt = 0
-
-        while moreComing {
-            // Get activities page
-            let response = try await apiFetcher.fileActivities(
-                file: file,
-                from: Date(timeIntervalSince1970: timestamp),
-                cursor: cursor
-            )
-
-            let activities = response.validApiResponse.data
-            moreComing = response.validApiResponse.hasMore
-            cursor = response.validApiResponse.cursor
-            responseAt = response.validApiResponse.responseAt ?? Int(Date().timeIntervalSince1970)
-
-            try database.writeTransaction { writableRealm in
-                let cachedFile = try file.resolve(using: writableRealm)
-
-                // Apply activities to file
-                let results = apply(
-                    activities: activities,
-                    to: cachedFile,
-                    pagedActions: &pagedActions,
-                    timestamp: responseAt,
-                    writableRealm: writableRealm
-                )
-
-                pagedActivities.inserted.insert(contentsOf: results.inserted, at: 0)
-                pagedActivities.updated.insert(contentsOf: results.updated, at: 0)
-                pagedActivities.deleted.insert(contentsOf: results.deleted, at: 0)
-            }
-        }
-        return (pagedActivities, responseAt)
-    }
-
-    // swiftlint:disable:next cyclomatic_complexity
-    // TODO: Refactor
-    private func apply(activities: [FileActivity],
-                       to file: File,
-                       pagedActions: inout [String: FileActivityType],
-                       timestamp: Int,
-                       writableRealm: Realm) -> ActivitiesResult {
-        var insertedFiles = [File]()
-        var updatedFiles = [File]()
-        var deletedFiles = [File]()
-
-        for activity in activities {
-            let fileId = File.uid(driveId: file.driveId, fileId: activity.fileId)
-            if pagedActions[fileId] == nil {
-                switch activity.action {
-                case .fileDelete, .fileTrash:
-                    if let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileId), !file.isInvalidated {
-                        deletedFiles.append(file.freeze())
-                    }
-                    removeFileInDatabase(fileUid: fileId, cascade: true, writableRealm: writableRealm)
-                    if let file = activity.file {
-                        deletedFiles.append(file)
-                    }
-                    pagedActions[fileId] = .fileDelete
-                case .fileMoveOut:
-                    if let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileId),
-                       !file.isInvalidated,
-                       let oldParent = file.parent {
-                        oldParent.children.remove(file)
-                    }
-                    if let file = activity.file {
-                        deletedFiles.append(file)
-                    }
-                    pagedActions[fileId] = .fileDelete
-                case .fileRename:
-                    if let oldFile = writableRealm.object(ofType: File.self, forPrimaryKey: fileId),
-                       !file.isInvalidated,
-                       let renamedFile = activity.file {
-                        try? renameCachedFile(updatedFile: renamedFile, oldFile: oldFile)
-                        // If the file is a folder we have to copy the old attributes which are not returned by the API
-                        keepCacheAttributesForFile(
-                            newFile: renamedFile,
-                            keepProperties: [.standard, .extras],
-                            writableRealm: writableRealm
-                        )
-                        writableRealm.add(renamedFile, update: .modified)
-                        file.children.insert(renamedFile)
-                        renamedFile.applyLastModifiedDateToLocalFile()
-                        updatedFiles.append(renamedFile)
-                        pagedActions[fileId] = .fileUpdate
-                    }
-                case .fileMoveIn, .fileRestore, .fileCreate:
-                    if let newFile = activity.file {
-                        keepCacheAttributesForFile(
-                            newFile: newFile,
-                            keepProperties: [.standard, .extras],
-                            writableRealm: writableRealm
-                        )
-                        writableRealm.add(newFile, update: .modified)
-                        // If was already had a local parent, remove it
-                        if let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileId),
-                           !file.isInvalidated,
-                           let oldParent = file.parent {
-                            oldParent.children.remove(file)
-                        }
-                        file.children.insert(newFile)
-                        insertedFiles.append(newFile)
-                        pagedActions[fileId] = .fileCreate
-                    }
-                case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete,
-                     .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate,
-                     .fileColorDelete:
-                    if let newFile = activity.file {
-                        if newFile.isTrashed {
-                            removeFileInDatabase(fileUid: fileId, cascade: true, writableRealm: writableRealm)
-                            deletedFiles.append(newFile)
-                            pagedActions[fileId] = .fileDelete
-                        } else {
-                            keepCacheAttributesForFile(
-                                newFile: newFile,
-                                keepProperties: [.standard, .extras],
-                                writableRealm: writableRealm
-                            )
-                            writableRealm.add(newFile, update: .modified)
-                            file.children.insert(newFile)
-                            updatedFiles.append(newFile)
-                            pagedActions[fileId] = .fileUpdate
-                        }
-                    }
-                default:
-                    break
-                }
-            }
-        }
-        file.responseAt = timestamp
-
-        return ActivitiesResult(
-            inserted: insertedFiles.map { $0.freeze() },
-            updated: updatedFiles.map { $0.freeze() },
-            deleted: deletedFiles
-        )
     }
 
     func handleError(message: String, offlineFile file: File) {
@@ -864,7 +713,7 @@ public final class DriveFileManager {
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
         let response = try await apiFetcher.delete(file: file)
-        backgroundQueue.async { [self] in
+        Task {
             try? database.writeTransaction { writableRealm in
                 let savedFile = try? file.resolve(using: writableRealm).freeze()
                 removeFileInDatabase(fileUid: file.uid, cascade: true, writableRealm: writableRealm)
@@ -883,6 +732,7 @@ public final class DriveFileManager {
                 )
             }
         }
+
         return response
     }
 
@@ -1175,9 +1025,15 @@ public final class DriveFileManager {
     }
 
     private func deleteOrphanFiles(root: File..., newFiles: [File]? = nil, writableRealm: Realm) {
+        let rootIds: [Int] = root.map(\.id)
         let maybeOrphanFiles = writableRealm.objects(File.self)
             .filter("parentLink.@count == 1")
-            .filter("ANY parentLink.id IN %@", root.map(\.id))
+            .filter("ANY parentLink.id IN %@", rootIds)
+
+        guard !maybeOrphanFiles.isEmpty else {
+            return
+        }
+
         var orphanFiles = [File]()
 
         for maybeOrphanFile in maybeOrphanFiles {
@@ -1390,36 +1246,35 @@ public final class DriveFileManager {
         }
     }
 
-    public func setLocalRecentActivities(_ activities: [FileActivity]) {
-        backgroundQueue.async { [self] in
-            try? database.writeTransaction { writableRealm in
-                let homeRootFile = DriveFileManager.homeRootFile
-                var activitiesSafe = [FileActivity]()
-                for activity in activities {
-                    guard !activity.isInvalidated else {
-                        continue
-                    }
-
-                    let safeActivity = FileActivity(value: activity)
-                    if let file = activity.file {
-                        let safeFile = file.detached()
-                        keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
-                        homeRootFile.children.insert(safeFile)
-                        safeActivity.file = safeFile
-                    }
-                    activitiesSafe.append(safeActivity)
+    public func setLocalRecentActivities(detachedActivities: [FileActivity]) async {
+        try? database.writeTransaction { writableRealm in
+            let homeRootFile = DriveFileManager.homeRootFile
+            var activitiesSafe = [FileActivity]()
+            for activity in detachedActivities {
+                guard !activity.isInvalidated else {
+                    continue
                 }
 
-                writableRealm.delete(writableRealm.objects(FileActivity.self))
-                writableRealm.add(activitiesSafe, update: .modified)
-                writableRealm.add(homeRootFile, update: .modified)
-
-                deleteOrphanFiles(
-                    root: DriveFileManager.homeRootFile,
-                    newFiles: Array(homeRootFile.children),
-                    writableRealm: writableRealm
-                )
+                let safeActivity = FileActivity(value: activity)
+                if let file = activity.file {
+                    let safeFile = file.detached()
+                    keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, writableRealm: writableRealm)
+                    homeRootFile.children.insert(safeFile)
+                    safeActivity.file = safeFile
+                }
+                activitiesSafe.append(safeActivity)
             }
+
+            writableRealm.delete(writableRealm.objects(FileActivity.self))
+            writableRealm.add(activitiesSafe, update: .modified)
+            writableRealm.add(homeRootFile, update: .modified)
+
+            let homeRootFileChildren = Array(homeRootFile.children)
+            deleteOrphanFiles(
+                root: homeRootFile,
+                newFiles: homeRootFileChildren,
+                writableRealm: writableRealm
+            )
         }
     }
 }
