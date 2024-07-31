@@ -78,10 +78,9 @@ public enum UIConstants {
             action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                 Task {
                     do {
-                        let now = Date()
                         try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
                         if let parentFile {
-                            _ = try? await driveFileManager.fileActivities(file: parentFile, from: Int(now.timeIntervalSince1970))
+                            _ = try? await driveFileManager.fileActivities(file: parentFile)
                         }
 
                         UIConstants.showSnackBar(message: cancelSuccessMessage)
