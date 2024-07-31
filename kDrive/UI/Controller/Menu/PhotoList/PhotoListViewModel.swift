@@ -53,7 +53,10 @@ class PhotoListViewModel: FileListViewModel {
     private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
     var sections = emptySections
-    private var moreComing = false
+    private var moreComing: Bool {
+        nextCursor != nil
+    }
+
     private var nextCursor: String?
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { sortingChanged() }
