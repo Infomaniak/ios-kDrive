@@ -397,7 +397,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let photoSyncSettingsViewController = PhotoSyncSettingsViewController.instantiate()
+        let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
         navController.popToRootViewController(animated: false)
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }

@@ -264,11 +264,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             }
         }
     }
-
-    class func instantiate() -> PhotoSyncSettingsViewController {
-        return Storyboard.menu
-            .instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
-    }
 }
 
 // MARK: - Table view data source
