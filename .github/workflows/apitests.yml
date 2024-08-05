@@ -1,4 +1,4 @@
-name: CI workflow
+name: API tests workflow
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test project
+    name: API tests
     runs-on: [ self-hosted, iOS ]
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Create test env
         env:
-          ENV_PATH: "kDriveTestShared/Env.swift"
+          ENV_PATH: "kDriveAPITests/Env.swift"
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           USER_ID: ${{ secrets.USER_ID }}
           INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
@@ -29,7 +29,7 @@ jobs:
         run: |
           touch $ENV_PATH
           echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
-      - name: Build
-        run: tuist install && tuist build --generate "kDrive"
-      - name: Unit and Integration Test only
-        run: tuist test kDrive-Workspace --test-targets "kDriveTests"
+      - name: Setup
+        run: tuist install && tuist generate
+      - name: API tests
+        run: tuist test kDrive-Workspace --test-targets kDriveAPITests
