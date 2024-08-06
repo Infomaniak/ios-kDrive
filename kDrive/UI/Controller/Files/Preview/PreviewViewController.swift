@@ -584,11 +584,17 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     // MARK: - State restoration
 
     var currentSceneMetadata: [AnyHashable: Any] {
-        [
+        let allFilesIds = previewFiles.map(\.id)
+        let currentIndexRow = currentIndex.row
+        guard currentIndexRow <= allFilesIds.count else {
+            return [:]
+        }
+
+        return [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
             SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
-            SceneRestorationValues.Carousel.filesIds.rawValue: previewFiles.map(\.id),
-            SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndex.row,
+            SceneRestorationValues.Carousel.filesIds.rawValue: allFilesIds,
+            SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndexRow,
             SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
             SceneRestorationValues.Carousel.fromActivities.rawValue: fromActivities
         ]

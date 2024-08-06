@@ -397,7 +397,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let photoSyncSettingsViewController = PhotoSyncSettingsViewController.instantiate()
+        let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
         navController.popToRootViewController(animated: false)
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
@@ -610,6 +610,11 @@ public struct AppRouter: AppNavigable {
         navigationController: UINavigationController,
         animated: Bool
     ) {
+        guard index <= frozenFiles.count else {
+            Log.sceneDelegate("unable to presentPreviewViewController, invalid data", level: .error)
+            return
+        }
+
         let previewViewController = PreviewViewController.instantiate(files: frozenFiles,
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,
