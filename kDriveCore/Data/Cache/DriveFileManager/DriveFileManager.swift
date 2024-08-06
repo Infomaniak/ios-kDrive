@@ -1028,7 +1028,7 @@ public final class DriveFileManager {
         let rootIds: [Int] = root.map(\.id)
         let maybeOrphanFiles = writableRealm.objects(File.self)
             .filter("parentLink.@count == 1")
-            .filter("ANY parentLink.id IN %@", rootIds)
+            .filter("ANY parentLink.id IN %d", rootIds)
 
         guard !maybeOrphanFiles.isEmpty else {
             return
