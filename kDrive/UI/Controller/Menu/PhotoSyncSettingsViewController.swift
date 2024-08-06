@@ -60,7 +60,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         case deniedExplanation
     }
 
-    private var sections: [PhotoSyncSection] = [.syncSwitch]
+    private var sections = [PhotoSyncSection]()
     private let switchSyncRows: [PhotoSyncSwitchRows] = PhotoSyncSwitchRows.allCases
     private let locationRows: [PhotoSyncLocationRows] = PhotoSyncLocationRows.allCases
     private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
@@ -120,7 +120,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             driveFileManager = accountManager.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
         }
         updateSaveButtonState()
-        updateSectionList()
+
         if newSyncSettings.parentDirectoryId != -1 {
             // We should always have the folder in cache but just in case we don't...
             if let photoSyncDirectory = driveFileManager?.getCachedFile(id: newSyncSettings.parentDirectoryId) {
@@ -167,6 +167,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
     }
 
+    /// This method mutates `sections`, must be called within a `performBatchUpdates`
     func updateSectionList() {
         sections = [.syncSwitch]
         if photoSyncEnabled {
@@ -187,12 +188,15 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
     func updateSections() {
         let previousSections = sections
-        updateSectionList()
-        let commonSections = Set(previousSections).intersection(sections)
         tableView.performBatchUpdates {
-            tableView.deleteSections(IndexSet(commonSections.count ..< previousSections.count), with: .fade)
-            tableView.insertSections(IndexSet(commonSections.count ..< sections.count), with: .fade)
+            updateSectionList()
+            let commonSections = Set(previousSections).intersection(sections)
+            let sectionsToDelete = IndexSet(commonSections.count ..< previousSections.count)
+            let sectionsToInsert = IndexSet(commonSections.count ..< sections.count)
+            tableView.deleteSections(sectionsToDelete, with: .fade)
+            tableView.insertSections(sectionsToInsert, with: .fade)
         }
+
         // Scroll to bottom
         let lastSection = sections.count - 1
         tableView.scrollToRow(
