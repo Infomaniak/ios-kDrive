@@ -60,15 +60,9 @@ class LaunchPanelsController {
                     .instantiatePanel(drive: currentDriveFileManager.drive)
                 let floatingPanelViewController = driveFloatingPanelController
                     .contentViewController as? SavePhotosFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { _ in
-                    let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
-                    let mainTabVC = UIApplication.shared.delegate?.window??.rootViewController as? MainTabViewController
-                    guard let currentVC = mainTabVC?.selectedViewController as? UINavigationController else {
-                        return
-                    }
-                    currentVC.dismiss(animated: true)
-                    currentVC.setInfomaniakAppearanceNavigationBar()
-                    currentVC.pushViewController(photoSyncSettingsVC, animated: true)
+                floatingPanelViewController?.actionHandler = { @MainActor _ in
+                    @InjectService var appNavigable: AppNavigable
+                    appNavigable.showPhotoSyncSettings()
                 }
                 return driveFloatingPanelController
             },
@@ -106,11 +100,13 @@ class LaunchPanelsController {
     /// Pick and display a panel, if any, on the specified view controller.
     /// - Parameter viewController: View controller to present the panel.
     func pickAndDisplayPanel(viewController: UIViewController) {
-        DispatchQueue.global().async {
-            if let panel = self.pickPanelToDisplay() {
-                Task { @MainActor in
-                    viewController.present(panel.makePanelController(), animated: true, completion: panel.onDisplay)
-                }
+        Task {
+            guard let panel = self.pickPanelToDisplay() else {
+                return
+            }
+
+            Task { @MainActor in
+                viewController.present(panel.makePanelController(), animated: true, completion: panel.onDisplay)
             }
         }
     }
