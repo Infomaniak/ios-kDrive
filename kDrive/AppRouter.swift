@@ -610,6 +610,11 @@ public struct AppRouter: AppNavigable {
         navigationController: UINavigationController,
         animated: Bool
     ) {
+        guard index <= frozenFiles.count else {
+            Log.sceneDelegate("unable to presentPreviewViewController, invalid data", level: .error)
+            return
+        }
+
         let previewViewController = PreviewViewController.instantiate(files: frozenFiles,
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,
