@@ -863,14 +863,15 @@ public final class DriveFileManager {
                 notifyObserversWith(file: parent)
             }
 
-            liveDirectory = directory.freeze()
+            liveDirectory = directory
         }
 
         guard let liveDirectory else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentDirectory.id)])
         }
 
-        return liveDirectory
+        let frozenDirectory = liveDirectory.freeze()
+        return frozenDirectory
     }
 
     public func updateDropBox(directory: ProxyFile, settings: DropBoxSettings) async throws -> Bool {
