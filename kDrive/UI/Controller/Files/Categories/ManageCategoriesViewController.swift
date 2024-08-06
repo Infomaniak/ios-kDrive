@@ -189,17 +189,21 @@ final class ManageCategoriesViewController: UITableViewController {
         for file in files {
             driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
                 Task { @MainActor [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
                     guard !newFile.isInvalidated else {
-                        if self?.presentingViewController != nil && viewControllersCount < 2 {
-                            self?.closeButtonPressed()
+                        if self.presentingViewController != nil && viewControllersCount < 2 {
+                            self.closeButtonPressed()
                         } else {
-                            self?.navigationController?.popViewController(animated: true)
+                            self.navigationController?.popViewController(animated: true)
                         }
                         return
                     }
                     // Update list of files with new file
-                    self?.files?.removeAll { $0.id == file.id }
-                    self?.files?.append(newFile)
+                    self.files?.removeAll { $0.id == file.id }
+                    self.files?.append(newFile)
                 }
             }
         }
