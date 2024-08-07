@@ -33,10 +33,10 @@ protocol PreviewContentCellDelegate: AnyObject {
     func openWith(from: UIView)
 }
 
-class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
+final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
-    class PreviewError {
+    final class PreviewError {
         let fileId: Int
         var pdfGenerationProgress: Progress?
         var downloadTask: URLSessionDownloadTask?
@@ -213,13 +213,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
 
     func observeFileUpdated() {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
-            if self?.currentFile.id == file.id {
-                self?.currentFile = file
-                Task { @MainActor in
-                    guard let self else { return }
-                    self.collectionView.endEditing(true)
-                    self.collectionView.reloadItems(at: [self.currentIndex])
-                }
+            guard let self = self,
+                  self.currentFile.id == file.id else {
+                return
+            }
+
+            self.currentFile = file
+            Task { @MainActor in
+                self.collectionView.endEditing(true)
+                self.collectionView.reloadItems(at: [self.currentIndex])
             }
         }
     }
@@ -280,9 +282,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
 
     override func willMove(toParent parent: UIViewController?) {
         super.willMove(toParent: parent)
-        if parent == nil {
-            floatingPanelViewController?.dismiss(animated: false)
+        guard parent == nil else {
+            return
         }
+
+        floatingPanelViewController?.dismiss(animated: false)
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -332,28 +336,29 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     }
 
     func updateNavigationBar() {
-        if !currentFile.isLocalVersionOlderThanRemote {
-            switch currentFile.convertedType {
-            case .pdf:
-                if let pdfCell = (collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
-                   let currentPage = pdfCell.pdfPreview.currentPage?.pageRef?.pageNumber,
-                   let totalPages = pdfCell.pdfPreview.document?.pageCount {
-                    setNavbarForPdf(currentPage: currentPage, totalPages: totalPages)
-                } else {
-                    setNavbarStandard()
-                }
-            case .text, .presentation, .spreadsheet, .form:
-                if currentFile.capabilities.canWrite {
-                    setNavbarForEditing()
-                } else {
-                    setNavbarStandard()
-                }
-            case .url:
-                setNavbarForOpening()
-            default:
+        guard !currentFile.isLocalVersionOlderThanRemote else {
+            setNavbarStandard()
+            return
+        }
+
+        switch currentFile.convertedType {
+        case .pdf:
+            if let pdfCell = (collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
+               let currentPage = pdfCell.pdfPreview.currentPage?.pageRef?.pageNumber,
+               let totalPages = pdfCell.pdfPreview.document?.pageCount {
+                setNavbarForPdf(currentPage: currentPage, totalPages: totalPages)
+            } else {
                 setNavbarStandard()
             }
-        } else {
+        case .text, .presentation, .spreadsheet, .form:
+            if currentFile.capabilities.canWrite {
+                setNavbarForEditing()
+            } else {
+                setNavbarStandard()
+            }
+        case .url:
+            setNavbarForOpening()
+        default:
             setNavbarStandard()
         }
     }
@@ -402,17 +407,19 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     }
 
     @objc private func openFile() {
-        if currentFile.isBookmark {
-            floatingPanelViewController.dismiss(animated: false)
-            FilePresenter(viewController: self).present(
-                for: currentFile,
-                files: [],
-                driveFileManager: driveFileManager,
-                normalFolderHierarchy: true
-            ) { success in
-                if !success {
-                    self.present(self.floatingPanelViewController, animated: false)
-                }
+        guard currentFile.isBookmark else {
+            return
+        }
+
+        floatingPanelViewController.dismiss(animated: false)
+        FilePresenter(viewController: self).present(
+            for: currentFile,
+            files: [],
+            driveFileManager: driveFileManager,
+            normalFolderHierarchy: true
+        ) { success in
+            if !success {
+                self.present(self.floatingPanelViewController, animated: false)
             }
         }
     }
@@ -449,47 +456,53 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
-           currentIndex != centerCellIndexPath {
-            MatomoUtils.trackPreview(file: currentFile)
-
-            let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
-            previousCell?.didEndDisplaying()
-
-            currentIndex = centerCellIndexPath
-            updateFileForCurrentIndex()
-
-            updateNavigationBar()
-            downloadFileIfNeeded(at: currentIndex)
+        guard let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
+              currentIndex != centerCellIndexPath else {
+            return
         }
+
+        MatomoUtils.trackPreview(file: currentFile)
+
+        let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
+        previousCell?.didEndDisplaying()
+
+        currentIndex = centerCellIndexPath
+        updateFileForCurrentIndex()
+
+        updateNavigationBar()
+        downloadFileIfNeeded(at: currentIndex)
     }
 
     func errorWhilePreviewing(fileId: Int, error: Error) {
-        if let index = previewFiles.firstIndex(where: { $0.id == fileId }) {
-            let file = previewFiles[index]
-            let previewError = PreviewError(fileId: fileId)
-            if file.convertedType == .spreadsheet || file.convertedType == .presentation || file.convertedType == .text {
-                previewError.pdfGenerationProgress = Progress(totalUnitCount: 10)
-                PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
-                    previewError.addDownloadTask(downloadTask)
-                    Task { @MainActor [weak self] in
-                        self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                    }
-                } completion: { url, error in
-                    previewError.removeDownloadTask()
-                    if let url {
-                        previewError.pdfUrl = url
-                    } else {
-                        previewError.error = error
-                    }
-                    Task { @MainActor [weak self] in
-                        self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                    }
+        guard let index = previewFiles.firstIndex(where: { $0.id == fileId }) else {
+            return
+        }
+
+        let file = previewFiles[index]
+        let previewError = PreviewError(fileId: fileId)
+        if file.convertedType == .spreadsheet
+            || file.convertedType == .presentation
+            || file.convertedType == .text {
+            previewError.pdfGenerationProgress = Progress(totalUnitCount: 10)
+            PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
+                previewError.addDownloadTask(downloadTask)
+                Task { @MainActor [weak self] in
+                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+                }
+            } completion: { url, error in
+                previewError.removeDownloadTask()
+                if let url {
+                    previewError.pdfUrl = url
+                } else {
+                    previewError.error = error
+                }
+                Task { @MainActor [weak self] in
+                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
                 }
             }
-            previewErrors[fileId] = previewError
-            collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
+        previewErrors[fileId] = previewError
+        collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
     }
 
     func openWith(from: UIView) {
@@ -528,40 +541,51 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, Scene
         previewErrors.values.forEach { $0.downloadTask?.cancel() }
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
-        if currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
-            DownloadQueue.instance.temporaryDownload(
-                file: currentFile,
-                userId: accountManager.currentUserId,
-                onOperationCreated: { operation in
-                    Task { @MainActor [weak self] in
-                        self?.currentDownloadOperation = operation
-                        if let progress = self?.currentDownloadOperation?.task?.progress,
-                           let cell = self?.collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
-                            cell.setDownloadProgress(progress)
-                        }
+        guard currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType)
+        else {
+            return
+        }
+
+        DownloadQueue.instance.temporaryDownload(
+            file: currentFile,
+            userId: accountManager.currentUserId,
+            onOperationCreated: { operation in
+                Task { @MainActor [weak self] in
+                    guard let self = self else {
+                        return
                     }
-                },
-                completion: { error in
-                    Task { @MainActor [weak self] in
-                        self?.currentDownloadOperation = nil
-                        if self?.view.window != nil {
-                            if let error {
-                                if error != .taskCancelled {
-                                    self?.previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, error: error)
-                                    self?.collectionView.reloadItems(at: [indexPath])
-                                }
-                            } else {
-                                (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
-                                    .previewDownloadTask?.cancel()
-                                self?.collectionView.endEditing(true)
-                                self?.collectionView.reloadItems(at: [indexPath])
-                                self?.updateNavigationBar()
+
+                    self.currentDownloadOperation = operation
+                    if let progress = self.currentDownloadOperation?.task?.progress,
+                       let cell = self.collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+                        cell.setDownloadProgress(progress)
+                    }
+                }
+            },
+            completion: { error in
+                Task { @MainActor [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
+                    self.currentDownloadOperation = nil
+                    if self.view.window != nil {
+                        if let error {
+                            if error != .taskCancelled {
+                                self.previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, error: error)
+                                self.collectionView.reloadItems(at: [indexPath])
                             }
+                        } else {
+                            (self.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
+                                .previewDownloadTask?.cancel()
+                            self.collectionView.endEditing(true)
+                            self.collectionView.reloadItems(at: [indexPath])
+                            self.updateNavigationBar()
                         }
                     }
                 }
-            )
-        }
+            }
+        )
     }
 
     class func instantiate(

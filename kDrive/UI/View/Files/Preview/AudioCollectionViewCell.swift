@@ -23,7 +23,7 @@ import kDriveResources
 import MediaPlayer
 import UIKit
 
-class AudioCollectionViewCell: PreviewCollectionViewCell {
+final class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet var iconImageView: UIImageView!
     @IBOutlet var elapsedTimeLabel: UILabel!
     @IBOutlet var remainingTimeLabel: UILabel!
@@ -50,10 +50,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         didSet { updateUI() }
     }
 
-    private var interruptionObserver: NSObjectProtocol!
-    private var timeObserver: Any!
-    private var rateObserver: NSKeyValueObservation!
-    private var statusObserver: NSObjectProtocol!
+    private var interruptionObserver: NSObjectProtocol?
+    private var timeObserver: Any?
+    private var rateObserver: NSKeyValueObservation?
+    private var statusObserver: NSObjectProtocol?
 
     private let registeredCommands: [NowPlayableCommand] = [
         .togglePausePlay,
