@@ -432,7 +432,7 @@ class FileListViewModel: SelectDelegate {
         return file.freezeIfNeeded()
     }
 
-    func getAllFiles() -> [File] {
+    func getAllFrozenFiles() -> [File] {
         return Array(files.freeze())
     }
 
