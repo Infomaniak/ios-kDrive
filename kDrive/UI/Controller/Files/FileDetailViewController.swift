@@ -677,7 +677,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
         if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && canManageCategories {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(
-                files: [file],
+                frozenFiles: [file.freezeIfNeeded()],
                 driveFileManager: driveFileManager
             )
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
