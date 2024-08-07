@@ -274,7 +274,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             )
         }
 
-        let destinationViewController = FileListViewController.instantiate(viewModel: destinationViewModel)
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         navigationController?.pushViewController(destinationViewController, animated: true)
     }
 

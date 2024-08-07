@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="D2M-pg-lBR" customClass="SelectView" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="377" height="44"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7xf-sA-D2E" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                    <rect key="frame" x="0.0" y="8.9999999999999982" width="167.33333333333334" height="26.333333333333329"/>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
+                    </userDefinedRuntimeAttributes>
+                </label>
+                <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="YpP-eL-hOj">
+                    <rect key="frame" x="353" y="10" width="24" height="24"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p3m-ke-vG6">
+                            <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="24" id="K8L-jY-988"/>
+                                <constraint firstAttribute="height" constant="24" id="WF6-Hy-RfB"/>
+                            </constraints>
+                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                            <state key="normal" title="Button" image="menu"/>
+                        </button>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="ctP-wG-lpO"/>
+                    </constraints>
+                </stackView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="7pJ-Ao-faI"/>
+            <color key="backgroundColor" name="backgroundColor"/>
+            <constraints>
+                <constraint firstItem="7xf-sA-D2E" firstAttribute="leading" secondItem="D2M-pg-lBR" secondAttribute="leading" id="VFB-Mi-Xs7"/>
+                <constraint firstItem="YpP-eL-hOj" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7xf-sA-D2E" secondAttribute="trailing" constant="8" id="iNo-oU-mX5"/>
+                <constraint firstItem="YpP-eL-hOj" firstAttribute="centerY" secondItem="D2M-pg-lBR" secondAttribute="centerY" id="ohf-tH-zjm"/>
+                <constraint firstItem="7xf-sA-D2E" firstAttribute="centerY" secondItem="D2M-pg-lBR" secondAttribute="centerY" id="xfH-H1-xNX"/>
+                <constraint firstAttribute="height" constant="44" id="xkG-wE-7iG"/>
+                <constraint firstAttribute="trailing" secondItem="YpP-eL-hOj" secondAttribute="trailing" id="zVX-n3-kaT"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="actionsView" destination="YpP-eL-hOj" id="9tQ-S7-vfx"/>
+                <outlet property="titleLabel" destination="7xf-sA-D2E" id="qCX-Zz-ZAQ"/>
+            </connections>
+            <point key="canvasLocation" x="87.786259541984734" y="-747.18309859154931"/>
+        </view>
+    </objects>
+    <designables>
+        <designable name="7xf-sA-D2E">
+            <size key="intrinsicContentSize" width="167.33333333333334" height="26.333333333333332"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="menu" width="24" height="24"/>
+        <namedColor name="backgroundColor">
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

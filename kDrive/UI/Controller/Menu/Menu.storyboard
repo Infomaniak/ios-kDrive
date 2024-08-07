@@ -32,7 +32,7 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
-                                <rect key="frame" x="24" y="332.5" width="366" height="231"/>
+                                <rect key="frame" x="24" y="302" width="366" height="292"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
                                         <rect key="frame" x="108" y="0.0" width="150" height="150"/>
@@ -42,7 +42,7 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                        <rect key="frame" x="0.0" y="174" width="366" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="174" width="366" height="41"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -52,7 +52,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                        <rect key="frame" x="0.0" y="210.5" width="366" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="231" width="366" height="61"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -121,120 +121,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Vh-I9-VxC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-436" y="921"/>
-        </scene>
-        <!--Photo List View Controller-->
-        <scene sceneID="o5v-5A-Uxe">
-            <objects>
-                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="HTJ-aD-7V4">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="1Of-3f-AT1">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="4" minimumInteritemSpacing="4" id="f62-bG-Ru3">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="5Sh-8l-zI9" id="5rK-U7-c7n"/>
-                                    <outlet property="delegate" destination="5Sh-8l-zI9" id="813-gG-xaz"/>
-                                </connections>
-                            </collectionView>
-                            <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uZL-Ly-C2G" customClass="SelectView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="98"/>
-                                <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="i9M-AV-rfJ">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="98"/>
-                                    </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SeG-hp-Rwt" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                        <rect key="frame" x="16" y="82" width="0.0" height="0.0"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <nil key="highlightedColor"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </label>
-                                    <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="K7T-dN-pl1">
-                                        <rect key="frame" x="366" y="70" width="24" height="24"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Usk-1j-AUD">
-                                                <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="width" constant="24" id="AHO-Ug-Tkj"/>
-                                                    <constraint firstAttribute="height" constant="24" id="ruT-mb-PLM"/>
-                                                </constraints>
-                                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <inset key="imageEdgeInsets" minX="2" minY="2" maxX="2" maxY="2"/>
-                                                <state key="normal" image="menu"/>
-                                            </button>
-                                        </subviews>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="ZM7-hh-1aT"/>
-                                        </constraints>
-                                    </stackView>
-                                </subviews>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstItem="i9M-AV-rfJ" firstAttribute="leading" secondItem="uZL-Ly-C2G" secondAttribute="leading" id="1tw-ga-JaN"/>
-                                    <constraint firstItem="K7T-dN-pl1" firstAttribute="centerY" secondItem="SeG-hp-Rwt" secondAttribute="centerY" id="JwA-2i-a8c"/>
-                                    <constraint firstAttribute="bottom" secondItem="SeG-hp-Rwt" secondAttribute="bottom" constant="16" id="bjm-w1-pqH"/>
-                                    <constraint firstItem="K7T-dN-pl1" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="SeG-hp-Rwt" secondAttribute="trailing" constant="8" id="c5H-mQ-lkT"/>
-                                    <constraint firstAttribute="trailing" secondItem="i9M-AV-rfJ" secondAttribute="trailing" id="jCg-Xb-lN6"/>
-                                    <constraint firstItem="i9M-AV-rfJ" firstAttribute="top" secondItem="uZL-Ly-C2G" secondAttribute="top" id="r6t-qc-Huj"/>
-                                    <constraint firstAttribute="bottom" secondItem="i9M-AV-rfJ" secondAttribute="bottom" id="ugg-cO-KYw"/>
-                                </constraints>
-                                <connections>
-                                    <outlet property="actionsView" destination="K7T-dN-pl1" id="VHW-ro-kLF"/>
-                                    <outlet property="titleLabel" destination="SeG-hp-Rwt" id="rTr-ac-Uw1"/>
-                                </connections>
-                            </view>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="rdT-QV-MsF"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="uZL-Ly-C2G" secondAttribute="trailing" id="Ecn-5W-HaG"/>
-                            <constraint firstItem="1Of-3f-AT1" firstAttribute="leading" secondItem="rdT-QV-MsF" secondAttribute="leading" id="EeU-ap-vKs"/>
-                            <constraint firstItem="uZL-Ly-C2G" firstAttribute="leading" secondItem="HTJ-aD-7V4" secondAttribute="leading" id="GLf-WI-uSL"/>
-                            <constraint firstItem="SeG-hp-Rwt" firstAttribute="leading" secondItem="rdT-QV-MsF" secondAttribute="leading" constant="16" id="GQj-PX-gre"/>
-                            <constraint firstItem="rdT-QV-MsF" firstAttribute="trailing" secondItem="K7T-dN-pl1" secondAttribute="trailing" constant="24" id="Hzi-QE-S8t"/>
-                            <constraint firstItem="uZL-Ly-C2G" firstAttribute="top" secondItem="HTJ-aD-7V4" secondAttribute="top" id="STJ-yf-WFI"/>
-                            <constraint firstItem="1Of-3f-AT1" firstAttribute="top" secondItem="HTJ-aD-7V4" secondAttribute="top" id="fDy-4h-hom"/>
-                            <constraint firstItem="uZL-Ly-C2G" firstAttribute="bottom" secondItem="rdT-QV-MsF" secondAttribute="top" constant="50" id="fJz-C5-9KL"/>
-                            <constraint firstAttribute="bottom" secondItem="1Of-3f-AT1" secondAttribute="bottom" id="kNj-fb-ae5"/>
-                            <constraint firstItem="rdT-QV-MsF" firstAttribute="trailing" secondItem="1Of-3f-AT1" secondAttribute="trailing" id="ocA-Is-Fwg"/>
-                        </constraints>
-                    </view>
-                    <toolbarItems/>
-                    <navigationItem key="navigationItem" id="aYW-Kl-Q91">
-                        <rightBarButtonItems>
-                            <barButtonItem title="Sort" image="filter" id="UYX-PP-LON">
-                                <connections>
-                                    <action selector="sortButtonPressed:" destination="5Sh-8l-zI9" id="1A3-jc-VHW"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem style="done" systemItem="search" id="tWy-dV-s03">
-                                <connections>
-                                    <action selector="searchButtonPressed:" destination="5Sh-8l-zI9" id="yjU-pm-CSf"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="1Of-3f-AT1" id="apF-QE-Osu"/>
-                        <outlet property="headerImageView" destination="i9M-AV-rfJ" id="alM-Ql-dnA"/>
-                        <outlet property="headerTitleLabel" destination="SeG-hp-Rwt" id="UHM-bL-YCE"/>
-                        <outlet property="photoHeaderView" destination="uZL-Ly-C2G" id="rNV-vH-QZK"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="M92-KF-g2N" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1424.6376811594205" y="920.75892857142856"/>
         </scene>
         <!--Switch User View Controller-->
         <scene sceneID="unT-Z0-cpP">
@@ -498,17 +384,16 @@
             <size key="intrinsicContentSize" width="66.5" height="24"/>
         </designable>
         <designable name="Bwo-OH-mV3">
-            <size key="intrinsicContentSize" width="190" height="20.5"/>
+            <size key="intrinsicContentSize" width="852.5" height="20.5"/>
         </designable>
         <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="196" height="32"/>
+            <size key="intrinsicContentSize" width="123" height="30"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="188.5" height="24"/>
         </designable>
-        <designable name="SeG-hp-Rwt"/>
         <designable name="Yth-Zq-eKV">
-            <size key="intrinsicContentSize" width="134.5" height="20.5"/>
+            <size key="intrinsicContentSize" width="610.5" height="20.5"/>
         </designable>
         <designable name="ahf-mt-ZbI">
             <size key="intrinsicContentSize" width="987" height="20.5"/>
@@ -523,8 +408,6 @@
     <resources>
         <image name="add_user" width="512" height="512"/>
         <image name="face_id_edit" width="512" height="434"/>
-        <image name="filter" width="24" height="24"/>
-        <image name="menu" width="24" height="24"/>
         <image name="order-success" width="150" height="150"/>
         <image name="switch_user" width="512" height="434"/>
         <namedColor name="backgroundCardViewColor">
@@ -534,7 +417,7 @@
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="lightTextColor">
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>

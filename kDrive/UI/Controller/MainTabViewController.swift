@@ -139,7 +139,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
-        let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
+        let photoListViewController = PhotoListViewController(viewModel: viewModel)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
         navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true

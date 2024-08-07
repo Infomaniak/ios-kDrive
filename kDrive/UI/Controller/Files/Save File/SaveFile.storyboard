@@ -64,67 +64,6 @@
             </objects>
             <point key="canvasLocation" x="1592" y="-1194"/>
         </scene>
-        <!--Select Folder View Controller-->
-        <scene sceneID="uDx-cY-d43">
-            <objects>
-                <viewController storyboardIdentifier="SelectFolderViewController" id="M4y-LZ-Tfr" customClass="SelectFolderViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="w4H-fN-Usb">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="5nx-k1-kRF">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="HHO-8J-Uo4">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="M4y-LZ-Tfr" id="T7j-ij-pRH"/>
-                                    <outlet property="delegate" destination="M4y-LZ-Tfr" id="2gz-aV-X7J"/>
-                                </connections>
-                            </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gLb-rt-aBR" customClass="IKLargeButton" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="804" width="366" height="60"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="60" id="qVE-9h-Olj"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                <state key="normal" title="Valider"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonValid"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="selectButtonPressed:" destination="M4y-LZ-Tfr" eventType="touchUpInside" id="B6P-wS-fRU"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="SVQ-dY-azG"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="5nx-k1-kRF" secondAttribute="trailing" id="1bi-3C-hZa"/>
-                            <constraint firstItem="SVQ-dY-azG" firstAttribute="trailing" secondItem="gLb-rt-aBR" secondAttribute="trailing" constant="24" id="36d-kZ-qgo"/>
-                            <constraint firstItem="5nx-k1-kRF" firstAttribute="top" secondItem="w4H-fN-Usb" secondAttribute="top" id="5NA-ak-dHS"/>
-                            <constraint firstItem="gLb-rt-aBR" firstAttribute="leading" secondItem="SVQ-dY-azG" secondAttribute="leading" constant="24" id="eq0-0a-c2n"/>
-                            <constraint firstAttribute="bottom" secondItem="5nx-k1-kRF" secondAttribute="bottom" id="esH-ri-F1D"/>
-                            <constraint firstAttribute="bottom" secondItem="gLb-rt-aBR" secondAttribute="bottom" constant="32" id="thr-dg-KJT"/>
-                            <constraint firstItem="5nx-k1-kRF" firstAttribute="leading" secondItem="w4H-fN-Usb" secondAttribute="leading" id="wzo-tT-33K"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="d3J-4B-eDX"/>
-                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
-                    <connections>
-                        <outlet property="collectionView" destination="5nx-k1-kRF" id="bdd-ip-jIW"/>
-                        <outlet property="selectFolderButton" destination="gLb-rt-aBR" id="NvU-aP-uDB"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="O6B-rY-qA1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1594" y="-550"/>
-        </scene>
         <!--Sélectionner un format de photo-->
         <scene sceneID="kvU-CS-18l">
             <objects>
@@ -210,11 +149,6 @@
             <point key="canvasLocation" x="791" y="-550"/>
         </scene>
     </scenes>
-    <designables>
-        <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="85" height="32"/>
-        </designable>
-    </designables>
     <resources>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

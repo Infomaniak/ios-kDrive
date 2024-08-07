@@ -47,11 +47,12 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
 }
 
 class RecentActivityFilesViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.files }
-    override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
-
     private var activityViewModel: RecentActivityFilesViewModel! {
         return viewModel as? RecentActivityFilesViewModel
+    }
+    
+    init(activities: [FileActivity], driveFileManager: DriveFileManager) {
+        super.init(viewModel: RecentActivityFilesViewModel(driveFileManager: driveFileManager, activities: activities))
     }
 
     override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
@@ -105,10 +106,6 @@ class RecentActivityFilesViewController: FileListViewController {
             super.onFilePresented(file)
         }
         #endif
-    }
-
-    class func instantiate(activities: [FileActivity], driveFileManager: DriveFileManager) -> RecentActivityFilesViewController {
-        return instantiate(viewModel: RecentActivityFilesViewModel(driveFileManager: driveFileManager, activities: activities))
     }
 
     // MARK: - Swipe action collection view data source
