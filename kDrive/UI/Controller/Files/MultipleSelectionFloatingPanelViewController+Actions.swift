@@ -81,7 +81,8 @@ extension MultipleSelectionFloatingPanelViewController {
     }
 
     private func manageCategoriesAction(group: DispatchGroup) {
-        FileActionsHelper.manageCategories(files: files,
+        let frozenFiles = files.map { $0.freezeIfNeeded() }
+        FileActionsHelper.manageCategories(frozenFiles: frozenFiles,
                                            driveFileManager: driveFileManager,
                                            from: self,
                                            group: group,

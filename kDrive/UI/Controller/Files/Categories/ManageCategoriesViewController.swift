@@ -33,7 +33,7 @@ final class ManageCategoriesViewController: UITableViewController {
     @LazyInjectService var accountManager: AccountManageable
 
     var driveFileManager: DriveFileManager!
-    var files: [File]?
+    var frozenFiles: [File]?
     /// Disable category edition (can just add/remove).
     var canEdit = true
     var selectedCategories = [kDriveCore.Category]()
@@ -132,8 +132,8 @@ final class ManageCategoriesViewController: UITableViewController {
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
 
         // Select categories
-        if let files {
-            selectCategories(files: files)
+        if let frozenFiles {
+            selectCategories(files: frozenFiles)
         } else {
             selectCategoriesNoFiles()
         }
@@ -172,7 +172,7 @@ final class ManageCategoriesViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = files != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable
+        title = frozenFiles != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable
             .addCategoriesTitle
     }
 
@@ -183,10 +183,10 @@ final class ManageCategoriesViewController: UITableViewController {
     }
 
     private func setUpObserver() {
-        guard let files else { return }
+        guard let frozenFiles else { return }
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         // Observe files changes
-        for file in files {
+        for file in frozenFiles {
             driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
                 Task { @MainActor [weak self] in
                     guard let self = self else {
@@ -202,8 +202,8 @@ final class ManageCategoriesViewController: UITableViewController {
                         return
                     }
                     // Update list of files with new file
-                    self.files?.removeAll { $0.id == file.id }
-                    self.files?.append(newFile)
+                    self.frozenFiles?.removeAll { $0.id == file.id }
+                    self.frozenFiles?.append(newFile)
                 }
             }
         }
@@ -218,19 +218,23 @@ final class ManageCategoriesViewController: UITableViewController {
         tableView.backgroundView = isEmpty ? EmptyTableView.instantiate(type: .noCategories) : nil
     }
 
-    static func instantiate(files: [File]? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
+    static func instantiate(frozenFiles: [File]? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
+        #if DEBUG
+        frozenFiles?.forEach { assert($0.isFrozen, "expecting each file to be frozen") }
+        #endif
+
         let viewController = Storyboard.files
             .instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
-        if let files {
-            viewController.files = files
+        if let frozenFiles {
+            viewController.frozenFiles = frozenFiles
         }
         viewController.driveFileManager = driveFileManager
         return viewController
     }
 
-    static func instantiateInNavigationController(files: [File]? = nil,
+    static func instantiateInNavigationController(frozenFiles: [File]? = nil,
                                                   driveFileManager: DriveFileManager) -> UINavigationController {
-        let viewController = instantiate(files: files, driveFileManager: driveFileManager)
+        let viewController = instantiate(frozenFiles: frozenFiles, driveFileManager: driveFileManager)
         return UINavigationController(rootViewController: viewController)
     }
 
@@ -273,13 +277,13 @@ final class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let category = category(at: indexPath)
 
-        if files != nil {
+        if frozenFiles != nil {
             MatomoUtils.track(eventWithCategory: .categories, name: "assign")
         }
 
         if category == dummyCategory {
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
-            editCategoryViewController.filesToAdd = files
+            editCategoryViewController.filesToAdd = frozenFiles
             if let searchText {
                 editCategoryViewController.name = searchText
             }
@@ -288,8 +292,8 @@ final class ManageCategoriesViewController: UITableViewController {
         }
 
         category.isSelected = true
-        if let files {
-            Task { [proxyFiles = files.map { $0.proxify() }] in
+        if let frozenFiles {
+            Task { [proxyFiles = frozenFiles.map { $0.proxify() }] in
                 do {
                     try await driveFileManager.add(category: category, to: proxyFiles)
                 } catch {
@@ -306,13 +310,13 @@ final class ManageCategoriesViewController: UITableViewController {
         let category = category(at: indexPath)
         guard category != dummyCategory else { return }
 
-        if files != nil {
+        if frozenFiles != nil {
             MatomoUtils.track(eventWithCategory: .categories, name: "remove")
         }
 
         category.isSelected = false
-        if let files {
-            Task { [proxyFiles = files.map { $0.proxify() }] in
+        if let frozenFiles {
+            Task { [proxyFiles = frozenFiles.map { $0.proxify() }] in
                 do {
                     try await driveFileManager.remove(category: category, from: proxyFiles)
                 } catch {
@@ -331,7 +335,7 @@ final class ManageCategoriesViewController: UITableViewController {
         if segue.identifier == "createCategory" {
             let viewController = segue.destination as? EditCategoryViewController
             viewController?.driveFileManager = driveFileManager
-            viewController?.filesToAdd = files
+            viewController?.filesToAdd = frozenFiles
             if let searchText {
                 viewController?.name = searchText
             }
