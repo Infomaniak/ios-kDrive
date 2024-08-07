@@ -26,7 +26,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "0.0.4")),
         .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "6.0.0")),
         .package(url: "https://github.com/Infomaniak/LocalizeKit", .upToNextMajor(from: "1.0.2")),
-        .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.43.0")),
+        .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.52.0")),
         .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "7.6.2")),
         .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),

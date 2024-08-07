@@ -501,6 +501,23 @@ public final class DriveFileManager {
         }
     }
 
+    /// Remove all children of to a root File with a transaction
+    public func removeLocalFiles(root: File) {
+        try? database.writeTransaction { writableRealm in
+            guard let lastPicturesRootInContext = writableRealm
+                .objects(File.self)
+                .filter("id == %@", DriveFileManager.lastPicturesRootFile.id)
+                .first else {
+                return
+            }
+
+            for child in lastPicturesRootInContext.children {
+                removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+            }
+            writableRealm.add(lastPicturesRootInContext, update: .modified)
+        }
+    }
+
     public func lastModifiedFiles(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
             let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)
@@ -846,14 +863,15 @@ public final class DriveFileManager {
                 notifyObserversWith(file: parent)
             }
 
-            liveDirectory = directory.freeze()
+            liveDirectory = directory
         }
 
         guard let liveDirectory else {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentDirectory.id)])
         }
 
-        return liveDirectory
+        let frozenDirectory = liveDirectory.freeze()
+        return frozenDirectory
     }
 
     public func updateDropBox(directory: ProxyFile, settings: DropBoxSettings) async throws -> Bool {

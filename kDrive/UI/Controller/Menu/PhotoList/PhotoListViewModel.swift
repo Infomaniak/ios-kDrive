@@ -53,7 +53,10 @@ class PhotoListViewModel: FileListViewModel {
     private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
     var sections = emptySections
-    private var moreComing = false
+    private var moreComing: Bool {
+        nextCursor != nil
+    }
+
     private var nextCursor: String?
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { sortingChanged() }
@@ -73,7 +76,10 @@ class PhotoListViewModel: FileListViewModel {
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+            lazyCollection
+                .filter("ANY parentLink.id == %@", DriveFileManager.lastPicturesRootFile.id)
+                .filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+                .filter("ANY supportedBy CONTAINS %@", FileSupportedBy.thumbnail.rawValue)
                 .sorted(by: [SortType.newer.value.sortDescriptor])
         }
 

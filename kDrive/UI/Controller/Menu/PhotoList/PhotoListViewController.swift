@@ -182,6 +182,13 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
+    @objc override func forceRefresh() {
+        Task {
+            driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
+            super.forceRefresh()
+        }
+    }
+
     // MARK: - Multiple selection
 
     override func toggleMultipleSelection(_ on: Bool) {
