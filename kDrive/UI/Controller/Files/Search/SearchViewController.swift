@@ -27,9 +27,6 @@ import UIKit
 // MARK: - SearchViewController
 
 class SearchViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.search }
-    override class var storyboardIdentifier: String { "SearchViewController" }
-
     // MARK: - Constants
 
     private let minSearchCount = 1
@@ -103,13 +100,13 @@ class SearchViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(viewModel: SearchFilesViewModel) -> UINavigationController {
-        let searchViewController = instantiate(viewModel: viewModel)
+        let searchViewController = SearchViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
     }
 
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let scrollPosition = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
         if scrollPosition > contentHeight {
@@ -148,7 +145,7 @@ class SearchViewController: FileListViewController {
             guard isViewLoaded else { return }
             // Update UI
             collectionView.refreshControl = searchViewModel.isDisplayingSearchResults ? refreshControl : nil
-            collectionViewLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
+            collectionViewFlowLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
             collectionView.backgroundView = nil
             if let headerView {
                 updateFilters(headerView: headerView)

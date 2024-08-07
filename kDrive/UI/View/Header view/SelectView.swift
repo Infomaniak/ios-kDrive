@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import kDriveResources
 import UIKit
 
@@ -44,11 +45,16 @@ class SelectView: UIView {
         }
     }
 
-    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var titleLabel: IKLabel!
     @IBOutlet var actionsView: UIStackView!
     var buttonTint: UIColor?
 
     weak var delegate: FilesHeaderViewDelegate?
+
+    class func instantiate() -> SelectView {
+        let view = Bundle.main.loadNibNamed("SelectView", owner: nil, options: nil)![0] as! SelectView
+        return view
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -475,7 +475,7 @@ extension HomeViewController: RecentActivityDelegate {
         }
 
         if activities.count > 3 && index > 1 {
-            let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
+            let nextVC = RecentActivityFilesViewController(activities: activities, driveFileManager: driveFileManager)
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
             filePresenter.present(

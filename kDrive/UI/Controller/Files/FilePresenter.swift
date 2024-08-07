@@ -151,7 +151,7 @@ final class FilePresenter {
             viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         }
 
-        let nextVC = FileListViewController.instantiate(viewModel: viewModel)
+        let nextVC = FileListViewController(viewModel: viewModel)
         guard file.isDisabled else {
             navigationController?.pushViewController(nextVC, animated: animated)
             return
