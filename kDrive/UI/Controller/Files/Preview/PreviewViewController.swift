@@ -640,8 +640,6 @@ extension PreviewViewController: UICollectionViewDataSource {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
             cell.progressiveLoadingForFile(file)
-        } else if let cell = cell as? AudioCollectionViewCell {
-            cell.setUpObservers()
         }
     }
 
