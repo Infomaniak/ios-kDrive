@@ -626,16 +626,6 @@ public extension Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/search", queryItems: queryItems)
     }
 
-    // MARK: Share link
-
-    static func shareLinkFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfoV2(drive: drive).appending(path: "/files/links")
-    }
-
-    static func shareLink(file: AbstractFile) -> Endpoint {
-        return .fileInfoV2(file).appending(path: "/link")
-    }
-
     // MARK: Trash
 
     static func trash(drive: AbstractDrive) -> Endpoint {
@@ -737,4 +727,53 @@ public extension Endpoint {
     static func sendUserInvitation(drive: AbstractDrive, id: Int) -> Endpoint {
         return .userInvitation(drive: drive, id: id).appending(path: "/send")
     }
+
+    // MARK: Share Links
+
+    static var shareUrlV2: Endpoint {
+        return Endpoint(hostKeypath: \.driveHost, path: "/2/app")
+    }
+
+    static var shareUrlV3: Endpoint {
+        return Endpoint(hostKeypath: \.driveHost, path: "/3/app")
+    }
+
+    static func shareLinkFiles(drive: AbstractDrive) -> Endpoint {
+        return .driveInfoV2(drive: drive).appending(path: "/files/links")
+    }
+
+    static func shareLink(file: AbstractFile) -> Endpoint {
+        return .fileInfoV2(file).appending(path: "/link")
+    }
+
+    // Share link info
+    // fun getShareLinkInfo(driveld: Int, linkUvid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
+    var shareLinkInfo(driveId: Int, linkUuid: String) -> Endpoint {
+        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/init")
+    }
+
+    // Share link file
+    // fun getShareLinkFile(driveld: Int, linkUvid: String, fileId: Int) = "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId"
+    func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/files/\(fileId)")
+    }
+
+    // Share link file children
+    // fun getShareLinkFileChildren(driveld: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+    func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int /* , sortType: SortType */ ) -> Endpoint {}
+
+    val orderQuery = "?order_by=${sortType.orderBy}&order=${sortType.order}"
+    return "$SHARE_URL_V3$driveId/share/$linkUvid/files/$fileId/files$orderQuery"
+
+    // Share link file thumbnail
+    // fun getShareLinkFileThumbnail(driveld: Int, linkUvid: String, file: File): String {
+
+    // Share mink file preview
+    // fun getShareLinkFilePreview(driveId: Int, linkUvid: String, file: File): String {
+
+    // Download share link file
+    // fun downloadShareLinkFile(driveld: Int, linkUvid: String, file: File): String {
+
+    // Share link file
+    // private fun shareLinkFile(driveld: Int, linkUvid: String, file: File): String {
 }
