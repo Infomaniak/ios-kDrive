@@ -47,6 +47,7 @@ class SelectFolderViewController: FileListViewController {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(selectButtonPressed), for: .touchUpInside)
         return button
     }()
 
@@ -169,7 +170,7 @@ class SelectFolderViewController: FileListViewController {
         }
     }
 
-    @IBAction func selectButtonPressed(_ sender: UIButton) {
+    @objc func selectButtonPressed() {
         var frozenSelectedDirectory = viewModel.currentDirectory.freezeIfNeeded()
         if !frozenSelectedDirectory.isDirectory, let parent = frozenSelectedDirectory.parent {
             frozenSelectedDirectory = parent.freezeIfNeeded()
