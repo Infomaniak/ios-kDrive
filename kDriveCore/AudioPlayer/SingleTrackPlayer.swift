@@ -22,7 +22,7 @@ import MediaPlayer
 
 /// Track one file been played
 public final class SingleTrackPlayer {
-    private let registeredCommands: [NowPlayableCommand] = [
+    let registeredCommands: [NowPlayableCommand] = [
         .togglePausePlay,
         .play,
         .pause,
@@ -269,45 +269,6 @@ public final class SingleTrackPlayer {
         self.timeObserver = nil
     }
 
-    private func setUpRemoteControlEvents() {
-        for command in registeredCommands {
-            command.removeHandler()
-
-            command.addHandler { [weak self] command, event in
-                guard let self else {
-                    return .commandFailed
-                }
-                switch command {
-                case .togglePausePlay:
-                    togglePlayPause()
-                case .play:
-                    play()
-                case .pause:
-                    pause()
-                case .skipBackward:
-                    guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipBackward(by: event.interval)
-                case .skipForward:
-                    guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipForward(by: event.interval)
-                case .changePlaybackPosition:
-                    guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-                    seek(to: event.positionTime)
-                case .changePlaybackRate:
-                    guard let event = event as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
-                    setPlaybackRate(event.playbackRate)
-                default:
-                    return .commandFailed
-                }
-                return .success
-            }
-        }
-    }
-
-    private func removeAllRemoteControlEvents() {
-        registeredCommands.forEach { $0.removeHandler() }
-    }
-
     @objc private func playerDidFinishPlaying() {
         pause()
         seek(to: 0)
@@ -364,7 +325,10 @@ public final class SingleTrackPlayer {
     }
 
     public func setPlaybackRate(_ rate: Float) {
-        if case .stopped = playerState { return }
+        if case .stopped = playerState {
+            return
+        }
+
         player?.rate = rate
     }
 }
