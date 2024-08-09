@@ -213,7 +213,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     func observeFileUpdated() {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
-            guard let self = self,
+            guard let self,
                   self.currentFile.id == file.id else {
                 return
             }
