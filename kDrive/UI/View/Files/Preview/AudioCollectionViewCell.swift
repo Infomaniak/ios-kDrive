@@ -16,14 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AVKit
+import Combine
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import MediaPlayer
 import UIKit
 
-class AudioCollectionViewCell: PreviewCollectionViewCell {
+final class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet var iconImageView: UIImageView!
     @IBOutlet var elapsedTimeLabel: UILabel!
     @IBOutlet var remainingTimeLabel: UILabel!
@@ -34,42 +34,9 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     var driveFileManager: DriveFileManager!
 
-    private var file: File!
-    private var player: AVPlayer? {
-        didSet {
-            playButton.isEnabled = player != nil
-            landscapePlayButton.isEnabled = player != nil
-        }
-    }
+    public lazy var singleTrackPlayer = SingleTrackPlayer(driveFileManager: driveFileManager)
 
-    private var playerState: PlayerState = .stopped {
-        didSet { updateUI() }
-    }
-
-    private var isInterrupted = false {
-        didSet { updateUI() }
-    }
-
-    private var interruptionObserver: NSObjectProtocol!
-    private var timeObserver: Any!
-    private var rateObserver: NSKeyValueObservation!
-    private var statusObserver: NSObjectProtocol!
-
-    private let registeredCommands: [NowPlayableCommand] = [
-        .togglePausePlay,
-        .play,
-        .pause,
-        .skipBackward,
-        .skipForward,
-        .changePlaybackPosition,
-        .changePlaybackRate
-    ]
-
-    enum PlayerState {
-        case stopped
-        case playing
-        case paused
-    }
+    private var cancellables = Set<AnyCancellable>()
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -92,81 +59,95 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             name: UIDevice.orientationDidChangeNotification,
             object: nil
         )
+
+        setControls(enabled: false)
+    }
+
+    @MainActor func setControls(enabled: Bool) {
+        elapsedTimeLabel.text = CMTime.zeroTimeText
+        remainingTimeLabel.text = CMTime.unknownTimeText
+        positionSlider.value = 0.0
+        playButton.isEnabled = enabled
+        landscapePlayButton.isEnabled = enabled
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        optOut()
+        setControls(enabled: false)
+        singleTrackPlayer.reset()
     }
 
     override func configureWith(file: File) {
-        setUpPlayButtons()
-        self.file = file
-        if !file.isLocalVersionOlderThanRemote {
-            player = AVPlayer(url: file.localUrl)
-            setUpObservers()
-        } else if let token = driveFileManager.apiFetcher.currentToken {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
-                    let url = Endpoint.download(file: file).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                        self.setUpObservers()
-                    }
-                } else {
-                    Task {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
-                    }
-                }
-            }
-        } else {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
+        assert(file.isFrozen, "file should be frozen for safe async work in the player")
+
+        Task {
+            setUpPlayButtons()
+            await singleTrackPlayer.setup(with: file)
+            setControls(enabled: true)
+            setupObservation()
         }
     }
 
-    func setUpPlayButtons() {
+    /// Setup data flow
+    @MainActor func setupObservation() {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+
+        singleTrackPlayer
+            .onPlayerStateChange
+            .receive(on: DispatchQueue.main)
+            .sink { newState in
+                self.updateUI(state: newState)
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onPlaybackError
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onElapsedTimeChange
+            .receive(on: DispatchQueue.main)
+            .sink { elapsedTime in
+                self.elapsedTimeLabel.text = elapsedTime
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onRemainingTimeChange
+            .receive(on: DispatchQueue.main)
+            .sink { remainingTime in
+                self.remainingTimeLabel.text = remainingTime
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onPositionChange
+            .receive(on: DispatchQueue.main)
+            .sink { newPosition in
+                guard !self.positionSlider.isTracking else { return }
+                self.positionSlider.setValue(newPosition, animated: true)
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onPositionMaximumChange
+            .receive(on: DispatchQueue.main)
+            .sink { sliderMaximum in
+                self.positionSlider.maximumValue = sliderMaximum
+            }
+            .store(in: &cancellables)
+    }
+
+    @MainActor func setUpPlayButtons() {
         let isPortrait = (window?.windowScene?.interfaceOrientation.isPortrait ?? true)
         playButton.isHidden = !isPortrait
         landscapePlayButton.isHidden = isPortrait
         iconHeightConstraint.constant = isPortrait ? 254 : 120
-    }
-
-    func setUpObservers() {
-        interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
-                                                                      object: AVAudioSession.sharedInstance(),
-                                                                      queue: .main) { [weak self] notification in
-            self?.handleAudioSessionInterruption(notification: notification)
-        }
-        timeObserver = player?.addPeriodicTimeObserver(
-            forInterval: CMTime(seconds: 0.5, preferredTimescale: 10),
-            queue: DispatchQueue.main
-        ) { [weak self] time in
-            guard let strongSelf = self else { return }
-            strongSelf.elapsedTimeLabel.text = time.formattedText
-            if let duration = strongSelf.player?.currentItem?.duration {
-                strongSelf.remainingTimeLabel.text = "−\((duration - time).formattedText)"
-            }
-            if !strongSelf.positionSlider.isTracking {
-                strongSelf.positionSlider.setValue(Float(time.seconds), animated: true)
-            }
-        }
-        rateObserver = player?.observe(\.rate, options: .initial) { [weak self] _, _ in
-            self?.setNowPlayingPlaybackInfo()
-        }
-        statusObserver = player?.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
-            self?.setNowPlayingPlaybackInfo()
-        }
-        if let currentItem = player?.currentItem {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(playerDidFinishPlaying),
-                name: .AVPlayerItemDidPlayToEndTime,
-                object: currentItem
-            )
-        }
-        setUpRemoteControlEvents()
     }
 
     @objc func rotated() {
@@ -177,116 +158,21 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         togglePlayPause()
     }
 
-    @IBAction func sliderValueChanged(_ sender: UISlider) {
+    @IBAction func sliderBeganTracking(_ sender: UISlider) {
+        singleTrackPlayer.stopPlaybackObservation()
+    }
+
+    @IBAction func sliderEndedTracking(_ sender: UISlider) {
         seek(to: TimeInterval(sender.value))
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
-        optOut()
+        MatomoUtils.trackMediaPlayer(leaveAt: singleTrackPlayer.progressPercentage)
+        singleTrackPlayer.pause()
     }
 
-    @objc private func playerDidFinishPlaying() {
-        pause()
-        seek(to: 0)
-    }
-
-    private func setUpRemoteControlEvents() {
-        for command in registeredCommands {
-            command.removeHandler()
-
-            command.addHandler { [weak self] command, event in
-                guard let self else {
-                    return .commandFailed
-                }
-                switch command {
-                case .togglePausePlay:
-                    togglePlayPause()
-                case .play:
-                    play()
-                case .pause:
-                    pause()
-                case .skipBackward:
-                    guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipBackward(by: event.interval)
-                case .skipForward:
-                    guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipForward(by: event.interval)
-                case .changePlaybackPosition:
-                    guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-                    seek(to: event.positionTime)
-                case .changePlaybackRate:
-                    guard let event = event as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
-                    setPlaybackRate(event.playbackRate)
-                default:
-                    return .commandFailed
-                }
-                return .success
-            }
-        }
-    }
-
-    private func setNowPlayingMetadata() {
-        var nowPlayingInfo = [String: Any]()
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
-        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        nowPlayingInfo[MPMediaItemPropertyTitle] = file.name
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
-    private func setNowPlayingPlaybackInfo() {
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
-        if let position = player?.currentItem?.currentTime() {
-            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position.seconds)
-            elapsedTimeLabel.text = position.formattedText
-            positionSlider.setValue(Float(position.seconds), animated: true)
-        }
-        if let rate = player?.rate {
-            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = rate
-        }
-        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
-        if let duration = player?.currentItem?.duration {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration.seconds)
-            let elapsedTime = player?.currentItem?.currentTime() ?? .zero
-            remainingTimeLabel.text = "−\((duration - elapsedTime).formattedText)"
-            positionSlider.maximumValue = duration.seconds.isFinite ? Float(duration.seconds) : 1
-        }
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
-    private func handleAudioSessionInterruption(notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let interruptionTypeUInt = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-              let interruptionType = AVAudioSession.InterruptionType(rawValue: interruptionTypeUInt) else { return }
-
-        switch interruptionType {
-        case .began:
-            isInterrupted = true
-        case .ended:
-            isInterrupted = false
-
-            var shouldResume = false
-            if let optionsUInt = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt,
-               AVAudioSession.InterruptionOptions(rawValue: optionsUInt).contains(.shouldResume) {
-                shouldResume = true
-            }
-
-            if playerState == .playing {
-                if shouldResume {
-                    play()
-                } else {
-                    playerState = .paused
-                }
-            }
-        @unknown default:
-            break
-        }
-    }
-
-    private func updateUI() {
-        if playerState == .playing && !isInterrupted {
+    private func updateUI(state: SingleTrackPlayer.State) {
+        if state == .playing {
             playButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
             landscapePlayButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
         } else {
@@ -295,100 +181,35 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    private func optOut() {
-        if let interruptionObserver {
-            NotificationCenter.default.removeObserver(interruptionObserver)
-        }
-        interruptionObserver = nil
-        if let timeObserver {
-            player?.removeTimeObserver(timeObserver)
-        }
-        timeObserver = nil
-        rateObserver = nil
-        statusObserver = nil
-
-        player?.pause()
-        playerState = .stopped
-    }
-
     func play() {
-        if playerState == .stopped {
-            setNowPlayingMetadata()
-        }
-        playerState = .playing
-        isInterrupted = false
-        player?.play()
+        singleTrackPlayer.play()
     }
 
     func pause() {
-        playerState = .paused
-        isInterrupted = false
-        player?.pause()
+        singleTrackPlayer.pause()
     }
 
     func togglePlayPause() {
-        switch playerState {
-        case .playing:
-            pause()
-            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
-        case .stopped, .paused:
-            play()
-            MatomoUtils.trackMediaPlayer(playMedia: .audio)
-        }
+        singleTrackPlayer.togglePlayPause()
     }
 
     func seek(to time: CMTime) {
-        player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { isFinished in
-            if isFinished {
-                self.setNowPlayingPlaybackInfo()
-            }
-        }
+        singleTrackPlayer.seek(to: time)
     }
 
     func seek(to position: TimeInterval) {
-        seek(to: CMTime(seconds: position, preferredTimescale: 1))
+        singleTrackPlayer.seek(to: position)
     }
 
     func skipForward(by interval: TimeInterval) {
-        guard let player else { return }
-        seek(to: player.currentTime() + CMTime(seconds: interval, preferredTimescale: 1))
+        singleTrackPlayer.skipForward(by: interval)
     }
 
     func skipBackward(by interval: TimeInterval) {
-        guard let player else { return }
-        seek(to: player.currentTime() - CMTime(seconds: interval, preferredTimescale: 1))
+        singleTrackPlayer.skipBackward(by: interval)
     }
 
     func setPlaybackRate(_ rate: Float) {
-        if case .stopped = playerState { return }
-
-        player?.rate = rate
-    }
-}
-
-extension AVPlayer {
-    var isPlaying: Bool {
-        return rate != 0 && error == nil
-    }
-
-    var progressPercentage: Double {
-        guard let currentItem else { return 0 }
-        return (currentItem.currentTime().seconds * 100) / currentItem.duration.seconds
-    }
-}
-
-extension CMTime {
-    var formattedText: String {
-        let totalSeconds = seconds
-        guard totalSeconds.isFinite else { return "--:--" }
-        let hours = Int(totalSeconds.truncatingRemainder(dividingBy: 86400) / 3600)
-        let minutes = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
-        let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
-
-        if hours > 0 {
-            return String(format: "%i:%02i:%02i", hours, minutes, seconds)
-        } else {
-            return String(format: "%i:%02i", minutes, seconds)
-        }
+        singleTrackPlayer.setPlaybackRate(rate)
     }
 }
