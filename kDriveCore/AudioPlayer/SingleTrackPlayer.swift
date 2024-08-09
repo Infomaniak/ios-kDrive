@@ -47,7 +47,7 @@ public final class SingleTrackPlayer {
     private var interruptionObserver: NSObjectProtocol?
     private var timeObserver: Any?
     private var rateObserver: NSKeyValueObservation?
-    private var statusObserver: NSObjectProtocol?
+    private var statusObserver: NSKeyValueObservation?
     private var isInterrupted = false
 
     // MARK: Data flow
@@ -115,17 +115,7 @@ public final class SingleTrackPlayer {
     }
 
     public func reset() {
-        if let interruptionObserver {
-            NotificationCenter.default.removeObserver(interruptionObserver)
-        }
-        interruptionObserver = nil
-        if let timeObserver {
-            player?.removeTimeObserver(timeObserver)
-        }
-        timeObserver = nil
-        rateObserver = nil
-        statusObserver = nil
-
+        removeAllObservers()
         player?.pause()
         player = nil
         playerState = .stopped
@@ -215,7 +205,7 @@ public final class SingleTrackPlayer {
 
     // MARK: - Observation
 
-    func setUpObservers() {
+    private func setUpObservers() {
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
                                                                       object: AVAudioSession.sharedInstance(),
                                                                       queue: .main) { [weak self] notification in
@@ -238,6 +228,22 @@ public final class SingleTrackPlayer {
             )
         }
         setUpRemoteControlEvents()
+    }
+
+    private func removeAllObservers() {
+        if let interruptionObserver = interruptionObserver {
+            NotificationCenter.default.removeObserver(interruptionObserver)
+        }
+
+        stopPlaybackObservation()
+
+        rateObserver?.invalidate()
+        rateObserver = nil
+
+        statusObserver?.invalidate()
+        statusObserver = nil
+
+        removeAllRemoteControlEvents()
     }
 
     public func startPlaybackObservationIfNeeded() {
@@ -296,6 +302,10 @@ public final class SingleTrackPlayer {
                 return .success
             }
         }
+    }
+
+    private func removeAllRemoteControlEvents() {
+        registeredCommands.forEach { $0.removeHandler() }
     }
 
     @objc private func playerDidFinishPlaying() {

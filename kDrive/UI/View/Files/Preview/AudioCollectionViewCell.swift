@@ -168,7 +168,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func didEndDisplaying() {
         MatomoUtils.trackMediaPlayer(leaveAt: singleTrackPlayer.progressPercentage)
-        singleTrackPlayer.reset()
+        singleTrackPlayer.pause()
     }
 
     private func updateUI(state: SingleTrackPlayer.State) {
