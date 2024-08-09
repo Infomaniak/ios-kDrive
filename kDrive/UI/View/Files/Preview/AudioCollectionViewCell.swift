@@ -158,7 +158,11 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         togglePlayPause()
     }
 
-    @IBAction func sliderValueChanged(_ sender: UISlider) {
+    @IBAction func sliderBeganTracking(_ sender: UISlider) {
+        singleTrackPlayer.stopPlaybackObservation()
+    }
+
+    @IBAction func sliderEndedTracking(_ sender: UISlider) {
         seek(to: TimeInterval(sender.value))
     }
 

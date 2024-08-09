@@ -40,17 +40,18 @@ public final class SingleTrackPlayer {
         }
     }
 
-    // data
     private var playableFileName: String?
 
-    // observation
+    // MARK: Player Observation
+
     private var interruptionObserver: NSObjectProtocol?
     private var timeObserver: Any?
     private var rateObserver: NSKeyValueObservation?
     private var statusObserver: NSObjectProtocol?
     private var isInterrupted = false
 
-    // "delegation"
+    // MARK: Data flow
+
     public let onPlaybackError = PassthroughSubject<DomainError, Never>()
     public let onPlayerStateChange = PassthroughSubject<SingleTrackPlayer.State, Never>()
     public let onElapsedTimeChange = PassthroughSubject<String, Never>()
@@ -58,7 +59,6 @@ public final class SingleTrackPlayer {
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
 
-    // Player
     var player: AVPlayer?
 
     public var progressPercentage: Double {
@@ -72,7 +72,7 @@ public final class SingleTrackPlayer {
     }
 
     public enum DomainError: Error {
-        // Issue loading preview, missing auth token
+        /// Issue loading preview, missing auth token
         case previewLoadErrorNoToken
     }
 
@@ -84,9 +84,9 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    // MARK: Load
+    // MARK: - Load
 
-    /// Load internal sturctures to play a single track
+    /// Load internal structures to play a single track
     ///
     /// Async as may take up some time
     public func setup(with playableFile: File) async { // TODO: use abstract type
@@ -131,7 +131,7 @@ public final class SingleTrackPlayer {
         playerState = .stopped
     }
 
-    // MARK: MediaPlayer
+    // MARK: - MediaPlayer
 
     private func setNowPlayingMetadata() {
         var nowPlayingInfo = [String: Any]()
@@ -182,7 +182,7 @@ public final class SingleTrackPlayer {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
-    // MARK: Interruptions
+    // MARK: - Interruptions
 
     private func handleAudioSessionInterruption(notification: Notification) {
         guard let userInfo = notification.userInfo,
@@ -213,7 +213,7 @@ public final class SingleTrackPlayer {
         }
     }
 
-    // MARK: Observation
+    // MARK: - Observation
 
     func setUpObservers() {
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
@@ -221,12 +221,7 @@ public final class SingleTrackPlayer {
                                                                       queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
-        timeObserver = player?.addPeriodicTimeObserver(
-            forInterval: CMTime(seconds: 0.5, preferredTimescale: 10),
-            queue: DispatchQueue.main
-        ) { [weak self] time in
-            self?.setPlaybackInfo(time: time)
-        }
+        startPlaybackObservationIfNeeded()
         rateObserver = player?.observe(\.rate, options: .initial) { [weak self] _, _ in
             self?.setNowPlayingPlaybackInfo()
         }
@@ -243,6 +238,29 @@ public final class SingleTrackPlayer {
             )
         }
         setUpRemoteControlEvents()
+    }
+
+    public func startPlaybackObservationIfNeeded() {
+        guard timeObserver == nil else {
+            return
+        }
+
+        timeObserver = player?.addPeriodicTimeObserver(
+            forInterval: CMTime(seconds: 0.5, preferredTimescale: 10),
+            queue: DispatchQueue.main
+        ) { [weak self] time in
+            self?.setPlaybackInfo(time: time)
+        }
+    }
+
+    public func stopPlaybackObservation() {
+        guard let timeObserver = timeObserver,
+              let player = player else {
+            return
+        }
+
+        player.removeTimeObserver(timeObserver)
+        self.timeObserver = nil
     }
 
     private func setUpRemoteControlEvents() {
@@ -285,7 +303,7 @@ public final class SingleTrackPlayer {
         seek(to: 0)
     }
 
-    // MARK: Commands
+    // MARK: - Commands
 
     public func play() {
         if playerState == .stopped {
@@ -316,6 +334,7 @@ public final class SingleTrackPlayer {
     public func seek(to time: CMTime) {
         player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { isFinished in
             guard isFinished else { return }
+            self.startPlaybackObservationIfNeeded()
             self.setNowPlayingPlaybackInfo()
         }
     }
