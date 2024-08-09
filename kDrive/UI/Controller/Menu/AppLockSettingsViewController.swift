@@ -18,6 +18,7 @@
 
 import kDriveResources
 import LocalAuthentication
+import kDriveCore
 import UIKit
 
 class AppLockSettingsViewController: UIViewController {
