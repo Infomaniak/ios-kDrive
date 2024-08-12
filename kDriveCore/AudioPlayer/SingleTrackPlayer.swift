@@ -96,8 +96,7 @@ public final class SingleTrackPlayer {
         playableFileName = playableFile.name
 
         if !playableFile.isLocalVersionOlderThanRemote {
-            let url = playableFile.localUrl
-            player = AVPlayer(url: url)
+            player = AVPlayer(url: playableFile.localUrl)
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -210,13 +209,16 @@ public final class SingleTrackPlayer {
     // MARK: - Observation
 
     private func setUpObservers() {
+        defer {
+            setUpRemoteControlEvents()
+        }
+
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
                                                                       object: AVAudioSession.sharedInstance(),
                                                                       queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
         startPlaybackObservationIfNeeded()
-        setUpRemoteControlEvents()
 
         guard let player else {
             return
@@ -269,7 +271,7 @@ public final class SingleTrackPlayer {
     }
 
     public func stopPlaybackObservation() {
-        guard let timeObserver = timeObserver else {
+        guard let timeObserver else {
             return
         }
 
