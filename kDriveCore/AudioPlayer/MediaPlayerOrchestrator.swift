@@ -30,7 +30,7 @@ public final class MediaPlayerOrchestrator {
         }
 
         guard let lastUsedPlayer,
-              lastUsedPlayer != playable,
+              !(lastUsedPlayer === playable),
               lastUsedPlayer.playerState == .playing else {
             return
         }
