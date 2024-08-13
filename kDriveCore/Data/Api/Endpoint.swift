@@ -674,7 +674,7 @@ public extension Endpoint {
     }
 
     static func trashThumbnail(file: AbstractFile, at date: Date) -> Endpoint {
-        return .trashedInfo(file: file).appending(path: "/thumbnail", queryItems: [
+        return .trashedInfoV2(file: file).appending(path: "/thumbnail", queryItems: [
             URLQueryItem(name: "t", value: "\(Int(date.timeIntervalSince1970))")
         ])
     }
