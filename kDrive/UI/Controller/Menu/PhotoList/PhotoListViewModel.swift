@@ -83,7 +83,7 @@ class PhotoListViewModel: FileListViewModel {
                 .sorted(by: [SortType.newer.value.sortDescriptor])
         }
 
-        files = AnyRealmCollection(fetchedFiles)
+        observedFiles = AnyRealmCollection(fetchedFiles)
     }
 
     func loadNextPageIfNeeded() async throws {
@@ -105,7 +105,7 @@ class PhotoListViewModel: FileListViewModel {
 
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
+        realmObservationToken = observedFiles.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
             guard let self else {
                 return
             }
@@ -119,13 +119,13 @@ class PhotoListViewModel: FileListViewModel {
 
             switch change {
             case .initial(let results):
-                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
+                files = Array(results.freezeIfNeeded())
                 let changeset = insertAndSort(pictures: results.freeze())
                 onReloadWithChangeset(changeset) { newSections in
                     self.sections = newSections
                 }
             case .update(let results, deletions: _, insertions: _, modifications: _):
-                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
+                files = Array(results.freezeIfNeeded())
                 let changeset = insertAndSort(pictures: results.freeze())
                 onReloadWithChangeset(changeset) { newSections in
                     self.sections = newSections

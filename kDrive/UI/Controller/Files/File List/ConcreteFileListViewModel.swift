@@ -33,7 +33,7 @@ class ConcreteFileListViewModel: FileListViewModel {
     override init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile(freeze: false)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+        observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {

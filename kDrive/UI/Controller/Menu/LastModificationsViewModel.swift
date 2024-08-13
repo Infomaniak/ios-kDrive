@@ -39,7 +39,7 @@ class LastModificationsViewModel: FileListViewModel {
             lazyCollection.filter("rawType != \"dir\"")
         }
 
-        files = AnyRealmCollection(fetchedFiles)
+        observedFiles = AnyRealmCollection(fetchedFiles)
     }
 
     override func startObservation() {
@@ -48,10 +48,6 @@ class LastModificationsViewModel: FileListViewModel {
         sortTypeObservation = nil
         sortType = .newer
         sortingChanged()
-    }
-
-    override func sortingChanged() {
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
