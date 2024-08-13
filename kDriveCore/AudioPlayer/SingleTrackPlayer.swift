@@ -18,10 +18,13 @@
 
 import Combine
 import InfomaniakCore
+import InfomaniakDI
 import MediaPlayer
 
 /// Track one file been played
 public final class SingleTrackPlayer {
+    @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
+
     let registeredCommands: [NowPlayableCommand] = [
         .togglePausePlay,
         .play,
@@ -33,12 +36,6 @@ public final class SingleTrackPlayer {
     ]
 
     private let driveFileManager: DriveFileManager
-
-    private var playerState: SingleTrackPlayer.State = .stopped {
-        didSet {
-            onPlayerStateChange.send(playerState)
-        }
-    }
 
     private var playableFileName: String?
 
@@ -60,6 +57,12 @@ public final class SingleTrackPlayer {
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
 
     var player: AVPlayer?
+
+    var playerState: SingleTrackPlayer.State = .stopped {
+        didSet {
+            onPlayerStateChange.send(playerState)
+        }
+    }
 
     public var progressPercentage: Double {
         player?.progressPercentage ?? 0.0
@@ -159,9 +162,9 @@ public final class SingleTrackPlayer {
         }
         nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
 
-        if let duration = player?.currentItem?.duration {
+        if let player = player, let duration = player.currentItem?.duration {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration.seconds)
-            let elapsedTime = player?.currentItem?.currentTime() ?? .zero
+            let elapsedTime = player.currentItem?.currentTime() ?? .zero
 
             let remainingTime = "−\((duration - elapsedTime).formattedText)"
             onRemainingTimeChange.send(remainingTime)
@@ -206,20 +209,29 @@ public final class SingleTrackPlayer {
     // MARK: - Observation
 
     private func setUpObservers() {
+        defer {
+            setUpRemoteControlEvents()
+        }
+
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
                                                                       object: AVAudioSession.sharedInstance(),
                                                                       queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
         startPlaybackObservationIfNeeded()
-        rateObserver = player?.observe(\.rate, options: .initial) { [weak self] _, _ in
+
+        guard let player else {
+            return
+        }
+
+        rateObserver = player.observe(\.rate, options: .initial) { [weak self] _, _ in
             self?.setNowPlayingPlaybackInfo()
         }
-        statusObserver = player?.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
+        statusObserver = player.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
             self?.setNowPlayingPlaybackInfo()
         }
 
-        if let currentItem = player?.currentItem {
+        if let currentItem = player.currentItem {
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(playerDidFinishPlaying),
@@ -227,7 +239,6 @@ public final class SingleTrackPlayer {
                 object: currentItem
             )
         }
-        setUpRemoteControlEvents()
     }
 
     private func removeAllObservers() {
@@ -260,12 +271,11 @@ public final class SingleTrackPlayer {
     }
 
     public func stopPlaybackObservation() {
-        guard let timeObserver = timeObserver,
-              let player = player else {
+        guard let timeObserver else {
             return
         }
 
-        player.removeTimeObserver(timeObserver)
+        player?.removeTimeObserver(timeObserver)
         self.timeObserver = nil
     }
 
@@ -280,9 +290,16 @@ public final class SingleTrackPlayer {
         if playerState == .stopped {
             setNowPlayingMetadata()
         }
+
+        guard let player else {
+            return
+        }
+
         playerState = .playing
         isInterrupted = false
-        player?.play()
+        player.play()
+
+        orchestrator.newPlaybackStarted(playable: self)
     }
 
     public func pause() {

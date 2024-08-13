@@ -78,11 +78,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func configureWith(file: File) {
-        assert(file.isFrozen, "file should be frozen for safe async work in the player")
+        // file should be safe for async work in the player
+        let frozenFile = file.freezeIfNeeded()
 
         Task {
             setUpPlayButtons()
-            await singleTrackPlayer.setup(with: file)
+            await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
             setupObservation()
         }
