@@ -242,12 +242,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         viewModel.$files.receiveOnMain(store: &bindStore) { [weak self] newContent in
-            guard let self else { return }
+            self?.reloadCollectionViewWith(files: newContent)
+        }
+    }
 
-            let changeSet = StagedChangeset(source: displayedFiles, target: newContent)
-            collectionView.reload(using: changeSet, interrupt: { $0.changeCount > 1000 }) { data in
-                self.displayedFiles = data
-            }
+    func reloadCollectionViewWith(files: [File]) {
+        let changeSet = StagedChangeset(source: displayedFiles, target: files)
+        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > Endpoint.itemsPerPage }) { data in
+            self.displayedFiles = data
         }
     }
 

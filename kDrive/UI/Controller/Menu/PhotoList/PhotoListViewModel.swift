@@ -50,9 +50,9 @@ class PhotoListViewModel: FileListViewModel {
         }
     }
 
-    private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
+    static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
-    var sections = emptySections
+    @Published var sections = emptySections
     private var moreComing: Bool {
         nextCursor != nil
     }
@@ -61,8 +61,6 @@ class PhotoListViewModel: FileListViewModel {
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { sortingChanged() }
     }
-
-    var onReloadWithChangeset: ((StagedChangeset<[PhotoListViewModel.Section]>, ([PhotoListViewModel.Section]) -> Void) -> Void)?
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         super.init(configuration: Configuration(normalFolderHierarchy: false,
@@ -105,35 +103,29 @@ class PhotoListViewModel: FileListViewModel {
 
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = observedFiles.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
-            guard let self else {
-                return
-            }
-
-            guard let onReloadWithChangeset else {
-                // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
-                realmObservationToken?.invalidate()
-                SentryDebug.viewModelObservationError()
-                return
-            }
-
-            switch change {
-            case .initial(let results):
-                files = Array(results.freezeIfNeeded())
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset(changeset) { newSections in
-                    self.sections = newSections
+        realmObservationToken = observedFiles
+            .observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
+                guard let self else {
+                    return
                 }
-            case .update(let results, deletions: _, insertions: _, modifications: _):
-                files = Array(results.freezeIfNeeded())
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset(changeset) { newSections in
-                    self.sections = newSections
+
+                let newResults: AnyRealmCollection<File>?
+                switch change {
+                case .initial(let results):
+                    newResults = results
+                case .update(let results, deletions: _, insertions: _, modifications: _):
+                    newResults = results
+                case .error(let error):
+                    newResults = nil
+                    DDLogError("[Realm Observation] Error \(error)")
                 }
-            case .error(let error):
-                DDLogError("[Realm Observation] Error \(error)")
+
+                guard let newResults else { return }
+                let frozenResults = newResults.freezeIfNeeded()
+                let newSections = insertAndSort(pictures: frozenResults)
+                sections = newSections
+                files = Array(frozenResults)
             }
-        }
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
@@ -174,7 +166,7 @@ class PhotoListViewModel: FileListViewModel {
         updateRealmObservation()
     }
 
-    private func insertAndSort(pictures: AnyRealmCollection<File>) -> StagedChangeset<[PhotoListViewModel.Section]> {
+    private func insertAndSort(pictures: AnyRealmCollection<File>) -> [PhotoListViewModel.Section] {
         var newSections = PhotoListViewModel.emptySections
         for picture in pictures {
             let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
@@ -191,6 +183,6 @@ class PhotoListViewModel: FileListViewModel {
             newSections[currentSectionIndex].elements.append(picture)
         }
 
-        return StagedChangeset(source: sections, target: newSections)
+        return newSections
     }
 }
