@@ -248,9 +248,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func reloadCollectionViewWith(files: [File]) {
         let changeSet = StagedChangeset(source: displayedFiles, target: files)
-        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > Endpoint.itemsPerPage }) { data in
-            self.displayedFiles = data
-        }
+        collectionView.reload(using: changeSet,
+                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                              setData: { self.displayedFiles = $0 })
+        showEmptyView()
     }
 
     private func bindUploadCardViewModel() {
@@ -289,33 +290,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
             self?.selectView?.setActions(actions)
         }
-    }
-
-    func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
-        guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else {
-            return
-        }
-
-        let reloadId = UUID().uuidString
-
-        collectionView.performBatchUpdates {
-            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates start")
-
-            // Always apply updates in the following order: deletions, insertions, then modifications.
-            // Handling insertions before deletions may result in unexpected behavior.
-            collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
-            collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
-            collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
-            for (source, target) in moved {
-                collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
-            }
-            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates end")
-        } completion: { success in
-            SentryDebug.updateFileListBreadcrumb(id: reloadId, step: "performBatchUpdates completion :\(success)")
-        }
-
-        // Reload corners (outside of batch to prevent incompatible operations)
-        reloadFileCorners(insertions: insertions, deletions: deletions)
     }
 
     private func toggleRefreshing(_ refreshing: Bool) {

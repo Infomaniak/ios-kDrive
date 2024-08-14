@@ -182,6 +182,7 @@ class SearchFilesViewModel: FileListViewModel {
     override func sortingChanged() {
         driveFileManager.removeSearchChildren()
         observedFiles = AnyRealmCollection(observedFiles.sorted(by: [sortType.value.sortDescriptor]))
+        updateRealmObservation()
         search()
     }
 

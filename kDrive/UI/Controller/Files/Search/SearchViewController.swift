@@ -168,18 +168,11 @@ class SearchViewController: FileListViewController {
         }
     }
 
-    override func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
+    override func showEmptyView() {
         guard searchViewModel.isDisplayingSearchResults else {
             return
         }
-        super.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
-    }
-
-    override func showEmptyView(_ isHidden: Bool) {
-        guard searchViewModel.isDisplayingSearchResults else {
-            return
-        }
-        super.showEmptyView(isHidden)
+        super.showEmptyView()
     }
 
     // MARK: - Collection view data source
