@@ -108,9 +108,9 @@ final class PhotoListViewController: FileListViewController {
 
     func reloadCollectionViewWith(sections: [PhotoListViewModel.Section]) {
         let changeSet = StagedChangeset(source: displayedSections, target: sections)
-        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > Endpoint.itemsPerPage }) { data in
-            self.displayedSections = data
-        }
+        collectionView.reload(using: changeSet,
+                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                              setData: { self.displayedSections = $0 })
 
         showEmptyView(.noImages)
         if let collectionView {
@@ -119,7 +119,7 @@ final class PhotoListViewController: FileListViewController {
     }
 
     override func reloadCollectionViewWith(files: [File]) {
-        self.displayedFiles = files
+        displayedFiles = files
         // We do not reload the collection view as it handles sections
     }
 

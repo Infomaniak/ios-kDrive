@@ -534,15 +534,16 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
-    func showEmptyView(_ isHidden: Bool) {
-        guard (collectionView.backgroundView == nil) != isHidden || headerView?.sortView.isHidden == isHidden else { return }
+    func showEmptyView() {
+        let isShowing = displayedFiles.isEmpty && viewModel.currentDirectory.lastCursor != nil
+        guard (collectionView.backgroundView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
         let emptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
         }
-        collectionView.backgroundView = isHidden ? nil : emptyView
+        collectionView.backgroundView = isShowing ? emptyView : nil
         if let headerView {
-            setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
+            setUpHeaderView(headerView, isEmptyViewHidden: !isShowing)
         }
     }
 
