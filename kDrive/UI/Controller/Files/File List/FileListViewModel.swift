@@ -116,6 +116,7 @@ class FileListViewModel: SelectDelegate {
     @Published var currentRightBarButtons: [FileListBarButtonType]?
     /// Public facing collection of observed files
     @Published var files: [File] = []
+    @Published var isShowingEmptyView = false
 
     var onPresentQuickActionPanel: PresentQuickActionPanelCallback? {
         didSet {
@@ -223,6 +224,7 @@ class FileListViewModel: SelectDelegate {
                 resultFiles.first?.isFirstInList = true
                 resultFiles.last?.isLastInList = true
                 files = resultFiles
+                isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
             }
     }
 
@@ -304,7 +306,8 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        let liveCurrentDirectory = getRefreshedCurrentDirectory()
+        currentDirectory = getRefreshedCurrentDirectory()
+        isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
     }
 
     func loadActivities() async throws {

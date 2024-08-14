@@ -485,15 +485,16 @@ public final class DriveFileManager {
         }
     }
 
-    public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
+    public func setLocalFiles(_ files: [File], root: File, hasMore: Bool, deleteOrphans: Bool) {
+        guard let liveRoot = root.thaw() else { return }
         try? database.writeTransaction { writableRealm in
-            for file in files {
-                keepCacheAttributesForFile(newFile: file, keepProperties: [.standard, .extras], writableRealm: writableRealm)
-                root.children.insert(file)
-                file.capabilities = Rights(value: file.capabilities)
-            }
-
-            writableRealm.add(root, update: .modified)
+            try writeChildrenToParent(
+                files,
+                liveParent: liveRoot,
+                responseAt: nil,
+                isInitialCursor: false,
+                writableRealm: writableRealm
+            )
 
             if deleteOrphans {
                 deleteOrphanFiles(root: root, newFiles: files, writableRealm: writableRealm)
@@ -523,7 +524,10 @@ public final class DriveFileManager {
             let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)
             let files = lastModifiedFilesResponse.validApiResponse.data
 
-            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: cursor == nil)
+            setLocalFiles(files,
+                          root: getManagedFile(from: DriveFileManager.lastModificationsRootFile),
+                          hasMore: lastModifiedFilesResponse.validApiResponse.hasMore,
+                          deleteOrphans: cursor == nil)
             return (files.map { $0.freeze() }, lastModifiedFilesResponse.validApiResponse.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
@@ -546,7 +550,13 @@ public final class DriveFileManager {
                 sortType: .newer
             )
             let files = lastPicturesResponse.validApiResponse.data
-            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: cursor == nil)
+            setLocalFiles(
+                files,
+                root: getManagedFile(from: DriveFileManager.lastPicturesRootFile),
+                hasMore: lastPicturesResponse.validApiResponse.hasMore,
+                deleteOrphans: cursor == nil
+            )
+
             return (files.map { $0.freeze() }, lastPicturesResponse.validApiResponse.cursor)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {

@@ -112,7 +112,6 @@ final class PhotoListViewController: FileListViewController {
                               interrupt: { $0.changeCount > Endpoint.itemsPerPage },
                               setData: { self.displayedSections = $0 })
 
-        showEmptyView(.noImages)
         if let collectionView {
             scrollViewDidScroll(collectionView)
         }
@@ -182,9 +181,9 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
-    func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
-        if displayedSections.isEmpty {
-            let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
+    override func showEmptyView(_ isShowing: Bool) {
+        if isShowing {
+            let background = EmptyTableView.instantiate(type: .noImages, button: false, setCenteringEnabled: true)
             background.actionHandler = { [weak self] _ in
                 self?.viewModel.forceRefresh()
             }

@@ -63,6 +63,7 @@ class PhotoListViewModel: FileListViewModel {
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let lastPicturesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.lastPicturesRootFile)
         super.init(configuration: Configuration(normalFolderHierarchy: false,
                                                 showUploadingFiles: false,
                                                 selectAllSupported: false,
@@ -71,7 +72,7 @@ class PhotoListViewModel: FileListViewModel {
                                                 rightBarButtons: [.search, .photoSort],
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
-                   currentDirectory: DriveFileManager.lastPicturesRootFile)
+                   currentDirectory: lastPicturesFakeRoot)
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
             lazyCollection
@@ -121,10 +122,12 @@ class PhotoListViewModel: FileListViewModel {
                 }
 
                 guard let newResults else { return }
+                currentDirectory = getRefreshedCurrentDirectory()
                 let frozenResults = newResults.freezeIfNeeded()
                 let newSections = insertAndSort(pictures: frozenResults)
                 sections = newSections
                 files = Array(frozenResults)
+                isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
             }
     }
 

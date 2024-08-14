@@ -23,6 +23,7 @@ import UIKit
 
 class LastModificationsViewModel: FileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let fakeRootLastModifications = driveFileManager.getManagedFile(from: DriveFileManager.lastModificationsRootFile)
         let configuration = Configuration(normalFolderHierarchy: false,
                                           selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle,
@@ -32,7 +33,7 @@ class LastModificationsViewModel: FileListViewModel {
         super.init(
             configuration: configuration,
             driveFileManager: driveFileManager,
-            currentDirectory: DriveFileManager.lastModificationsRootFile
+            currentDirectory: fakeRootLastModifications
         )
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in

@@ -244,6 +244,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewModel.$files.receiveOnMain(store: &bindStore) { [weak self] newContent in
             self?.reloadCollectionViewWith(files: newContent)
         }
+
+        viewModel.$isShowingEmptyView.receiveOnMain(store: &bindStore) { [weak self] isShowingEmptyView in
+            self?.showEmptyView(isShowingEmptyView)
+        }
     }
 
     func reloadCollectionViewWith(files: [File]) {
@@ -251,7 +255,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         collectionView.reload(using: changeSet,
                               interrupt: { $0.changeCount > Endpoint.itemsPerPage },
                               setData: { self.displayedFiles = $0 })
-        showEmptyView()
     }
 
     private func bindUploadCardViewModel() {
@@ -508,8 +511,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
-    func showEmptyView() {
-        let isShowing = displayedFiles.isEmpty && viewModel.currentDirectory.lastCursor != nil
+    func showEmptyView(_ isShowing: Bool) {
         guard (collectionView.backgroundView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
         let emptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
         emptyView.actionHandler = { [weak self] _ in
