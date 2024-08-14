@@ -397,10 +397,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         #endif
     }
 
-    private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
-        collectionView.reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.files.count)
-    }
-
     private func updateEmptyView(_ emptyBackground: EmptyTableView) {
         if UIDevice.current.orientation.isPortrait {
             emptyBackground.emptyImageFrameViewHeightConstant.constant = 200

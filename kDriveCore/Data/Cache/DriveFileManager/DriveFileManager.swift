@@ -485,7 +485,7 @@ public final class DriveFileManager {
         }
     }
 
-    public func setLocalFiles(_ files: [File], root: File, hasMore: Bool, deleteOrphans: Bool) {
+    public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
         guard let liveRoot = root.thaw() else { return }
         try? database.writeTransaction { writableRealm in
             try writeChildrenToParent(
@@ -526,7 +526,6 @@ public final class DriveFileManager {
 
             setLocalFiles(files,
                           root: getManagedFile(from: DriveFileManager.lastModificationsRootFile),
-                          hasMore: lastModifiedFilesResponse.validApiResponse.hasMore,
                           deleteOrphans: cursor == nil)
             return (files.map { $0.freeze() }, lastModifiedFilesResponse.validApiResponse.cursor)
         } catch {
@@ -553,7 +552,6 @@ public final class DriveFileManager {
             setLocalFiles(
                 files,
                 root: getManagedFile(from: DriveFileManager.lastPicturesRootFile),
-                hasMore: lastPicturesResponse.validApiResponse.hasMore,
                 deleteOrphans: cursor == nil
             )
 
