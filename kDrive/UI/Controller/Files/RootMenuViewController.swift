@@ -126,7 +126,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             return
         }
 
-        let rootChildren = root.children
+        let rootChildren = root.children.filter(NSPredicate(
+            format: "rawVisibility IN %@",
+            [FileVisibility.isPrivateSpace.rawValue, FileVisibility.isTeamSpace.rawValue]
+        ))
         rootChildrenObservationToken = rootChildren.observe { [weak self] changes in
             guard let self else { return }
             switch changes {
@@ -271,7 +274,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             )
         }
 
-        let destinationViewController = FileListViewController.instantiate(viewModel: destinationViewModel)
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         navigationController?.pushViewController(destinationViewController, animated: true)
     }
 

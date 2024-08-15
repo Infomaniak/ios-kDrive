@@ -22,7 +22,7 @@ import MaterialOutlinedTextField
 import UIKit
 
 class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
-    @IBOutlet var textField: MaterialOutlinedTextField!
+    @IBOutlet weak var textField: MaterialOutlinedTextField!
     var textDidChange: ((String?) -> Void)?
     var textDidEndEditing: ((String?) -> Void)?
 

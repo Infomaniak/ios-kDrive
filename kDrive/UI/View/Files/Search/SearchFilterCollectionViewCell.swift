@@ -26,9 +26,9 @@ protocol SearchFilterCellDelegate: AnyObject {
 }
 
 class SearchFilterCollectionViewCell: UICollectionViewCell {
-    @IBOutlet var iconImageView: UIImageView!
-    @IBOutlet var titleLabel: IKLabel!
-    @IBOutlet var removeButton: UIButton!
+    @IBOutlet weak var iconImageView: UIImageView!
+    @IBOutlet weak var titleLabel: IKLabel!
+    @IBOutlet weak var removeButton: UIButton!
 
     weak var delegate: SearchFilterCellDelegate?
 

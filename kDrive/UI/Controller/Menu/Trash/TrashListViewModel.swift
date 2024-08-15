@@ -50,10 +50,6 @@ class TrashListViewModel: InMemoryFileListViewModel {
         sortingChanged()
     }
 
-    override func sortingChanged() {
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
-    }
-
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         guard !isLoading || cursor != nil else { return }
 

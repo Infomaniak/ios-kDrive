@@ -113,6 +113,8 @@ class PreloadingViewController: UIViewController {
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
+                SentryDebug.logPreloadingAccountError(error: error, origin: "PreloadingViewController")
+                accountManager.removeTokenAndAccount(account: currentAccount)
                 self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }

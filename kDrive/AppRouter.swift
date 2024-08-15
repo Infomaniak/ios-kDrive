@@ -397,7 +397,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let photoSyncSettingsViewController = PhotoSyncSettingsViewController.instantiate()
+        let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
         navController.popToRootViewController(animated: false)
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
@@ -549,27 +549,30 @@ public struct AppRouter: AppNavigable {
         rootViewController.dismiss(animated: false) {
             rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
 
-            guard let navController = rootViewController.selectedViewController as? UINavigationController,
-                  let viewController = navController.topViewController as? FileListViewController else {
+            guard let navController = rootViewController.selectedViewController as? UINavigationController else {
                 return
             }
 
-            guard !file.isRoot && viewController.viewModel.currentDirectory.id != file.id else {
-                return
+            guard !file.isRoot else { return }
+
+            if let fileListViewController = navController.topViewController as? FileListViewController {
+                guard fileListViewController.viewModel.currentDirectory.id != file.id else {
+                    return
+                }
+
+                navController.popToRootViewController(animated: false)
             }
 
-            navController.popToRootViewController(animated: false)
-
-            guard let fileListViewController = navController.topViewController as? FileListViewController else {
+            guard let rootMenuViewController = navController.topViewController as? RootMenuViewController else {
                 return
             }
 
             if office {
                 OnlyOfficeViewController.open(driveFileManager: driveFileManager,
                                               file: file,
-                                              viewController: fileListViewController)
+                                              viewController: rootMenuViewController)
             } else {
-                let filePresenter = FilePresenter(viewController: fileListViewController)
+                let filePresenter = FilePresenter(viewController: rootMenuViewController)
                 filePresenter.present(for: file,
                                       files: [file],
                                       driveFileManager: driveFileManager,
@@ -607,6 +610,11 @@ public struct AppRouter: AppNavigable {
         navigationController: UINavigationController,
         animated: Bool
     ) {
+        guard index <= frozenFiles.count else {
+            Log.sceneDelegate("unable to presentPreviewViewController, invalid data", level: .error)
+            return
+        }
+
         let previewViewController = PreviewViewController.instantiate(files: frozenFiles,
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,

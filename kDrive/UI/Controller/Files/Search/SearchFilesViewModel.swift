@@ -84,7 +84,7 @@ class SearchFilesViewModel: FileListViewModel {
         filters = Filters()
         let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
-        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).sorted(by: [sortType.value.sortDescriptor]))
+        observedFiles = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).sorted(by: [sortType.value.sortDescriptor]))
     }
 
     override func startObservation() {
@@ -113,6 +113,7 @@ class SearchFilesViewModel: FileListViewModel {
                                                                         date: filters.date?.dateInterval,
                                                                         fileType: filters.fileType,
                                                                         categories: Array(filters.categories),
+                                                                        fileExtensions: filters.fileExtensions,
                                                                         belongToAllCategories: filters.belongToAllCategories,
                                                                         cursor: cursor,
                                                                         sortType: sortType)
@@ -143,10 +144,11 @@ class SearchFilesViewModel: FileListViewModel {
     }
 
     private func searchOffline() {
-        files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
+        observedFiles = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
                                                                   date: filters.date?.dateInterval,
                                                                   fileType: filters.fileType,
                                                                   categories: Array(filters.categories),
+                                                                  fileExtensions: filters.fileExtensions,
                                                                   belongToAllCategories: filters.belongToAllCategories,
                                                                   sortType: sortType))
         startObservation()
@@ -179,7 +181,8 @@ class SearchFilesViewModel: FileListViewModel {
 
     override func sortingChanged() {
         driveFileManager.removeSearchChildren()
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        observedFiles = AnyRealmCollection(observedFiles.sorted(by: [sortType.value.sortDescriptor]))
+        updateRealmObservation()
         search()
     }
 

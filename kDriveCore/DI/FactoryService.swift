@@ -155,6 +155,9 @@ public enum FactoryService {
             },
             Factory(type: DriveInfosManager.self) { _, _ in
                 DriveInfosManager()
+            },
+            Factory(type: MediaPlayerOrchestrator.self) { _, _ in
+                MediaPlayerOrchestrator()
             }
         ]
         return services

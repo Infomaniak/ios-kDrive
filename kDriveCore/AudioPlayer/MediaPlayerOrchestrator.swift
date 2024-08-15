@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import Foundation
 
-class ImportingTableViewCell: UITableViewCell {
-    @IBOutlet weak var importationProgressView: UIProgressView!
+/// A simple service to orchestrate between all the possibly existing media player objects in the app
+public final class MediaPlayerOrchestrator {
+    private weak var lastUsedPlayer: SingleTrackPlayer?
+
+    public init() {}
+
+    public func newPlaybackStarted(playable: SingleTrackPlayer) {
+        defer {
+            lastUsedPlayer = playable
+        }
+
+        guard let lastUsedPlayer,
+              !(lastUsedPlayer === playable),
+              lastUsedPlayer.playerState == .playing else {
+            return
+        }
+
+        lastUsedPlayer.pause()
+    }
 }

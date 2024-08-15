@@ -22,7 +22,7 @@ import UIKit
 import VisionKit
 
 class ScanTypeTableViewCell: UITableViewCell {
-    @IBOutlet var segmentedControl: IKSegmentedControl!
+    @IBOutlet weak var segmentedControl: IKSegmentedControl!
 
     var didSelectIndex: ((Int) -> Void)?
 

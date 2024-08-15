@@ -104,55 +104,7 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    /// Internal realm collection of Files observed
-    ///
-    /// They should be frozen by convention.
-    #if DEBUG
-    var _frozenFiles = AnyRealmCollection(List<File>()) {
-        willSet {
-            for item in newValue {
-                assert(item.isFrozen, "By convention this should be frozen: \(item)")
-            }
-        }
-    }
-    #else
-    var _frozenFiles = AnyRealmCollection(List<File>())
-    #endif
-
-    /// Public facing collection of observed files
-    ///
-    /// A set will restart internal observation for consistency
-    var files: AnyRealmCollection<File> {
-        get {
-            _frozenFiles
-        }
-        set {
-            let setIdentifier = UUID().uuidString
-            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "entry point")
-
-            // On change of observed files, we force to restart the realm observation to prevent a loss of sync
-            realmObservationToken?.invalidate()
-            realmObservationToken = nil
-
-            // Set an internal frozen representation
-            _frozenFiles = newValue.freezeIfNeeded()
-
-            // Execute the first update, if linked to a view controller.
-            // This may not be handled by observation alone
-            if let onFileListUpdated {
-                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre onFileListUpdated set")
-                onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && _frozenFiles.isEmpty, true)
-                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post onFileListUpdated set")
-            } else {
-                SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "onFileListUpdated nil")
-            }
-
-            // Restart observation
-            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "pre setup observation")
-            updateRealmObservation()
-            SentryDebug.setFileListViewModelBreadcrumb(id: setIdentifier, step: "post setup observation")
-        }
-    }
+    var observedFiles: AnyRealmCollection<File> = AnyRealmCollection(List<File>())
 
     var isLoading: Bool
 
@@ -162,8 +114,10 @@ class FileListViewModel: SelectDelegate {
     @Published var isRefreshing: Bool
     @Published var currentLeftBarButtons: [FileListBarButtonType]?
     @Published var currentRightBarButtons: [FileListBarButtonType]?
+    /// Public facing collection of observed files
+    @Published var files: [File] = []
+    @Published var isShowingEmptyView = false
 
-    var onFileListUpdated: FileListUpdatedCallback?
     var onPresentQuickActionPanel: PresentQuickActionPanelCallback? {
         didSet {
             multipleSelectionViewModel?.onPresentQuickActionPanel = onPresentQuickActionPanel
@@ -244,43 +198,33 @@ class FileListViewModel: SelectDelegate {
 
     func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files
+        realmObservationToken = observedFiles
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
                 guard let self,
                       !self.currentDirectory.isInvalidated else {
                     return
                 }
 
-                guard let onFileListUpdated else {
-                    // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
-                    realmObservationToken?.invalidate()
-                    SentryDebug.viewModelObservationError()
-                    return
-                }
-
+                let newResults: AnyRealmCollection<File>?
                 switch change {
                 case .initial(let results):
-                    // update observed realm objects directly
-                    currentDirectory = getRefreshedCurrentDirectory()
-                    _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
+                    newResults = results
                     SentryDebug.filesObservationBreadcrumb(state: "initial")
-                    onFileListUpdated([], [], [], [], currentDirectory.fullyDownloaded && results.isEmpty, true)
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    // update observed realm objects directly
-                    currentDirectory = getRefreshedCurrentDirectory()
-                    _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
+                case .update(let results, _, _, _):
+                    newResults = results
                     SentryDebug.filesObservationBreadcrumb(state: "update")
-                    onFileListUpdated(
-                        deletions,
-                        insertions,
-                        modifications,
-                        [],
-                        currentDirectory.fullyDownloaded && results.isEmpty,
-                        false
-                    )
                 case .error(let error):
                     DDLogError("[Realm Observation] Error \(error)")
+                    newResults = nil
                 }
+
+                guard let newResults else { return }
+                currentDirectory = getRefreshedCurrentDirectory()
+                let resultFiles = Array(newResults.freezeIfNeeded())
+                resultFiles.first?.isFirstInList = true
+                resultFiles.last?.isLastInList = true
+                files = resultFiles
+                isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
             }
     }
 
@@ -337,7 +281,8 @@ class FileListViewModel: SelectDelegate {
 
     /// Called when sortType is updated
     func sortingChanged() {
-        files = AnyRealmCollection(files.filesSorted(by: sortType))
+        observedFiles = AnyRealmCollection(observedFiles.filesSorted(by: sortType))
+        updateRealmObservation()
     }
 
     func showLoadingIndicatorIfNeeded() {
@@ -361,8 +306,8 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        let liveCurrentDirectory = getRefreshedCurrentDirectory()
-        onFileListUpdated?([], [], [], [], liveCurrentDirectory.fullyDownloaded && files.isEmpty, false)
+        currentDirectory = getRefreshedCurrentDirectory()
+        isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
     }
 
     func loadActivities() async throws {
@@ -432,8 +377,8 @@ class FileListViewModel: SelectDelegate {
         return file.freezeIfNeeded()
     }
 
-    func getAllFiles() -> [File] {
-        return Array(files.freeze())
+    func getAllFrozenFiles() -> [File] {
+        return Array(observedFiles.freeze())
     }
 
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {

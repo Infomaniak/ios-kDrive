@@ -50,18 +50,20 @@ class PhotoListViewModel: FileListViewModel {
         }
     }
 
-    private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
+    static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
-    var sections = emptySections
-    private var moreComing = false
+    @Published var sections = emptySections
+    private var moreComing: Bool {
+        nextCursor != nil
+    }
+
     private var nextCursor: String?
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { sortingChanged() }
     }
 
-    var onReloadWithChangeset: ((StagedChangeset<[PhotoListViewModel.Section]>, ([PhotoListViewModel.Section]) -> Void) -> Void)?
-
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let lastPicturesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.lastPicturesRootFile)
         super.init(configuration: Configuration(normalFolderHierarchy: false,
                                                 showUploadingFiles: false,
                                                 selectAllSupported: false,
@@ -70,14 +72,17 @@ class PhotoListViewModel: FileListViewModel {
                                                 rightBarButtons: [.search, .photoSort],
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
-                   currentDirectory: DriveFileManager.lastPicturesRootFile)
+                   currentDirectory: lastPicturesFakeRoot)
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-            lazyCollection.filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+            lazyCollection
+                .filter("ANY parentLink.id == %@", DriveFileManager.lastPicturesRootFile.id)
+                .filter("extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue])
+                .filter("ANY supportedBy CONTAINS %@", FileSupportedBy.thumbnail.rawValue)
                 .sorted(by: [SortType.newer.value.sortDescriptor])
         }
 
-        files = AnyRealmCollection(fetchedFiles)
+        observedFiles = AnyRealmCollection(fetchedFiles)
     }
 
     func loadNextPageIfNeeded() async throws {
@@ -99,35 +104,31 @@ class PhotoListViewModel: FileListViewModel {
 
     override func updateRealmObservation() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files.observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
-            guard let self else {
-                return
-            }
-
-            guard let onReloadWithChangeset else {
-                // We invalidate observation if we are not able to communicate with the view, as it would break diff sync.
-                realmObservationToken?.invalidate()
-                SentryDebug.viewModelObservationError()
-                return
-            }
-
-            switch change {
-            case .initial(let results):
-                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset(changeset) { newSections in
-                    self.sections = newSections
+        realmObservationToken = observedFiles
+            .observe(keyPaths: ["lastModifiedAt", "supportedBy"], on: .main) { [weak self] change in
+                guard let self else {
+                    return
                 }
-            case .update(let results, deletions: _, insertions: _, modifications: _):
-                _frozenFiles = AnyRealmCollection(results.freezeIfNeeded())
-                let changeset = insertAndSort(pictures: results.freeze())
-                onReloadWithChangeset(changeset) { newSections in
-                    self.sections = newSections
+
+                let newResults: AnyRealmCollection<File>?
+                switch change {
+                case .initial(let results):
+                    newResults = results
+                case .update(let results, deletions: _, insertions: _, modifications: _):
+                    newResults = results
+                case .error(let error):
+                    newResults = nil
+                    DDLogError("[Realm Observation] Error \(error)")
                 }
-            case .error(let error):
-                DDLogError("[Realm Observation] Error \(error)")
+
+                guard let newResults else { return }
+                currentDirectory = getRefreshedCurrentDirectory()
+                let frozenResults = newResults.freezeIfNeeded()
+                let newSections = insertAndSort(pictures: frozenResults)
+                sections = newSections
+                files = Array(frozenResults)
+                isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
             }
-        }
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
@@ -168,7 +169,7 @@ class PhotoListViewModel: FileListViewModel {
         updateRealmObservation()
     }
 
-    private func insertAndSort(pictures: AnyRealmCollection<File>) -> StagedChangeset<[PhotoListViewModel.Section]> {
+    private func insertAndSort(pictures: AnyRealmCollection<File>) -> [PhotoListViewModel.Section] {
         var newSections = PhotoListViewModel.emptySections
         for picture in pictures {
             let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
@@ -185,6 +186,6 @@ class PhotoListViewModel: FileListViewModel {
             newSections[currentSectionIndex].elements.append(picture)
         }
 
-        return StagedChangeset(source: sections, target: newSections)
+        return newSections
     }
 }

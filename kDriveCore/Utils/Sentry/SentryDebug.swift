@@ -73,6 +73,12 @@ public enum SentryDebug {
         }
     }
 
+    public static func logPreloadingAccountError(error: Error, origin: String) {
+        SentrySDK.capture(message: "Preloading error") { scope in
+            scope.setContext(value: ["Error": error, "Origin": origin], key: "Error details")
+        }
+    }
+
     // MARK: - View Model Observation
 
     public static func viewModelObservationError(_ function: String = #function) {

@@ -596,6 +596,7 @@ public extension Endpoint {
         query: String? = nil,
         date: DateInterval? = nil,
         fileTypes: [ConvertedType] = [],
+        fileExtensions: [String],
         categories: [Category],
         belongToAllCategories: Bool
     ) -> Endpoint {
@@ -613,6 +614,9 @@ public extension Endpoint {
         }
         for fileType in fileTypes {
             queryItems.append(URLQueryItem(name: "types[]", value: fileType.rawValue))
+        }
+        for fileExtension in fileExtensions {
+            queryItems.append(URLQueryItem(name: "extensions[]", value: fileExtension))
         }
         if !categories.isEmpty {
             let separator = belongToAllCategories ? "&" : "|"
@@ -660,7 +664,7 @@ public extension Endpoint {
     }
 
     static func trashThumbnail(file: AbstractFile, at date: Date) -> Endpoint {
-        return .trashedInfo(file: file).appending(path: "/thumbnail", queryItems: [
+        return .trashedInfoV2(file: file).appending(path: "/thumbnail", queryItems: [
             URLQueryItem(name: "t", value: "\(Int(date.timeIntervalSince1970))")
         ])
     }

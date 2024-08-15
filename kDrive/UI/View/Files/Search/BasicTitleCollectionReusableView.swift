@@ -19,5 +19,5 @@
 import UIKit
 
 class BasicTitleCollectionReusableView: UICollectionReusableView {
-    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel!
 }

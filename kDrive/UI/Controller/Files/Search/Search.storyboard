@@ -5,69 +5,15 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Search View Controller-->
-        <scene sceneID="5xB-eg-ZH7">
-            <objects>
-                <viewController storyboardIdentifier="SearchViewController" id="DMC-wj-wr8" customClass="SearchViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Sy2-R0-Z47">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="nQW-zP-jCE">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="MS5-W9-5Fy">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="DMC-wj-wr8" id="EXh-gQ-CBT"/>
-                                    <outlet property="delegate" destination="DMC-wj-wr8" id="GGa-Os-nHv"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="MSE-jU-LyO"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="MSE-jU-LyO" firstAttribute="trailing" secondItem="nQW-zP-jCE" secondAttribute="trailing" id="H6V-Mb-e5m"/>
-                            <constraint firstAttribute="bottom" secondItem="nQW-zP-jCE" secondAttribute="bottom" id="UB8-AX-aUJ"/>
-                            <constraint firstItem="nQW-zP-jCE" firstAttribute="leading" secondItem="MSE-jU-LyO" secondAttribute="leading" id="uNo-qs-x9U"/>
-                            <constraint firstItem="nQW-zP-jCE" firstAttribute="top" secondItem="Sy2-R0-Z47" secondAttribute="top" id="uOS-AF-L6P"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="bHj-0S-6hg">
-                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="6do-hS-jQm">
-                            <connections>
-                                <action selector="closeButtonPressed" destination="DMC-wj-wr8" id="MOV-f7-dTL"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="filter" id="YvK-Wa-M6p">
-                            <connections>
-                                <segue destination="Ia5-bK-Gtx" kind="presentation" identifier="filterSegue" id="KMm-AN-Flc"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="nQW-zP-jCE" id="S12-8U-QZR"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="0vw-j6-zWa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="656.52173913043487" y="50.892857142857139"/>
-        </scene>
         <!--Filtres-->
         <scene sceneID="xkb-7t-o8S">
             <objects>
                 <tableViewController storyboardIdentifier="SearchFiltersViewController" id="J5q-yn-jYo" customClass="SearchFiltersViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="22" sectionFooterHeight="-1" estimatedSectionFooterHeight="152" id="rQn-3w-wf1">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <connections>
@@ -96,7 +42,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Ia5-bK-Gtx" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="kJl-1N-gTN">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="108"/>
+                        <rect key="frame" x="0.0" y="48" width="414" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -110,7 +56,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="filter" width="24" height="24"/>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

@@ -28,11 +28,24 @@ import UIKit
 extension PhotoSortMode: Selectable {}
 
 final class PhotoListViewController: FileListViewController {
-    @IBOutlet var photoHeaderView: SelectView!
-    @IBOutlet var headerImageView: UIImageView!
-    @IBOutlet var headerTitleLabel: IKLabel!
+    var headerTitleLabel: IKLabel {
+        return photoHeaderView.titleLabel
+    }
 
-    private var isLargeTitle = true
+    lazy var headerImageView: UIImageView = {
+        let imageView = UIImageView(frame: .zero)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    lazy var photoHeaderView: SelectView = {
+        let selectView = SelectView.instantiate()
+        selectView.translatesAutoresizingMaskIntoConstraints = false
+        selectView.backgroundColor = .clear
+        selectView.buttonTint = .white
+
+        return selectView
+    }()
 
     private var numberOfColumns: Int {
         let screenWidth = collectionView.bounds.width
@@ -40,10 +53,12 @@ final class PhotoListViewController: FileListViewController {
         return max(minColumns, maxColumns)
     }
 
+    private var isLargeTitle = true
     private let minColumns = 3
     private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
     private let headerIdentifier = "PhotoSectionHeaderView"
+    private var displayedSections = PhotoListViewModel.emptySections
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return isLargeTitle ? .default : .lightContent
@@ -55,10 +70,23 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.addSubview(headerImageView)
+        view.addSubview(photoHeaderView)
+        selectView = photoHeaderView
 
-        headerTitleLabel.textColor = .white
-        photoHeaderView.buttonTint = .white
+        NSLayoutConstraint.activate([
+            photoHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            photoHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            photoHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
 
+            headerImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+            headerImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
+            headerImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            headerImageView.bottomAnchor.constraint(equalTo: photoHeaderView.bottomAnchor, constant: 0)
+        ])
+
+        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing = 4
+        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumLineSpacing = 4
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: photoHeaderView.frame.height, left: 0, bottom: 0, right: 0)
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self,
@@ -73,15 +101,25 @@ final class PhotoListViewController: FileListViewController {
     }
 
     private func bindPhotoListViewModel() {
-        photoListViewModel?.onReloadWithChangeset = { [weak self] changeset, completion in
-            self?.collectionView.reload(using: changeset,
-                                        interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                                        setData: completion)
-            self?.showEmptyView(.noImages)
-            if let collectionView = self?.collectionView {
-                self?.scrollViewDidScroll(collectionView)
-            }
+        photoListViewModel.$sections.receiveOnMain(store: &bindStore) { [weak self] newContent in
+            self?.reloadCollectionViewWith(sections: newContent)
         }
+    }
+
+    func reloadCollectionViewWith(sections: [PhotoListViewModel.Section]) {
+        let changeSet = StagedChangeset(source: displayedSections, target: sections)
+        collectionView.reload(using: changeSet,
+                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                              setData: { self.displayedSections = $0 })
+
+        if let collectionView {
+            scrollViewDidScroll(collectionView)
+        }
+    }
+
+    override func reloadCollectionViewWith(files: [File]) {
+        displayedFiles = files
+        // We do not reload the collection view as it handles sections
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -89,7 +127,6 @@ final class PhotoListViewController: FileListViewController {
 
         setPhotosNavigationBar()
         navigationItem.title = viewModel.title
-        applyGradient(view: headerImageView)
         Task {
             try await viewModel.loadFiles()
         }
@@ -103,7 +140,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        collectionView.collectionViewLayout.invalidateLayout()
+        applyGradient(view: headerImageView)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -144,9 +181,9 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
-    func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
-        if viewModel.files.isEmpty {
-            let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
+    override func showEmptyView(_ isShowing: Bool) {
+        if isShowing {
+            let background = EmptyTableView.instantiate(type: .noImages, button: false, setCenteringEnabled: true)
             background.actionHandler = { [weak self] _ in
                 self?.viewModel.forceRefresh()
             }
@@ -156,11 +193,11 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
-    override static func instantiate(viewModel: FileListViewModel) -> Self {
-        let viewController = Storyboard.menu
-            .instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
-        viewController.viewModel = viewModel
-        return viewController as! Self
+    @objc override func forceRefresh() {
+        Task {
+            driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
+            super.forceRefresh()
+        }
     }
 
     // MARK: - Multiple selection
@@ -193,11 +230,12 @@ final class PhotoListViewController: FileListViewController {
 
     // MARK: - Scroll view delegate
 
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
             (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         photoHeaderView.isHidden = isLargeTitle
+        headerImageView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()
@@ -215,8 +253,8 @@ final class PhotoListViewController: FileListViewController {
                 from: headerTitleLabel
             )) {
                 headerTitleLabel.text = viewModel.sections[indexPath.section].model.formattedDate
-            } else if !viewModel.sections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
-                headerTitleLabel.text = viewModel.sections[0].model.formattedDate
+            } else if !displayedSections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
+                headerTitleLabel.text = displayedSections[0].model.formattedDate
             }
         }
 
@@ -232,18 +270,22 @@ final class PhotoListViewController: FileListViewController {
 
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return photoListViewModel.sections.count
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return displayedSections.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photoListViewModel.sections[section].elements.count
+        return displayedSections[section].elements.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
+        guard let file = displayedSections[safe: indexPath.section]?.elements[indexPath.row] else {
+            return cell
+        }
+
         cell.configureWith(
-            file: viewModel.getFile(at: indexPath)!,
+            file: file,
             roundedCorners: false,
             selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
         )
@@ -307,7 +349,7 @@ final class PhotoListViewController: FileListViewController {
                 for: indexPath
             ) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
-                let yearMonth = photoListViewModel.sections[indexPath.section].model
+                let yearMonth = displayedSections[indexPath.section].model
                 photoSectionHeaderView.titleLabel.text = yearMonth.formattedDate
             }
             return photoSectionHeaderView

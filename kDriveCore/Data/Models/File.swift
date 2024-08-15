@@ -28,7 +28,21 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
-    case archive, audio, code, folder = "dir", font, form, image, pdf, presentation, spreadsheet, text, unknown, url, video
+    case archive
+    case audio
+    case code
+    case folder = "dir"
+    case font
+    case form
+    case image
+    case pdf
+    case presentation
+    case spreadsheet
+    case text
+    case unknown
+    case url
+    case video
+    case searchExtension
 
     public var icon: UIImage {
         switch self {
@@ -60,6 +74,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesAsset.url.image
         case .video:
             return KDriveResourcesAsset.fileVideo.image
+        case .searchExtension:
+            return KDriveResourcesAsset.search.image
         }
     }
 
@@ -98,6 +114,8 @@ public enum ConvertedType: String, CaseIterable {
             return ""
         case .video:
             return KDriveResourcesStrings.Localizable.allVideo
+        case .searchExtension:
+            return KDriveResourcesStrings.Localizable.searchForAnExtension
         }
     }
 
@@ -131,6 +149,8 @@ public enum ConvertedType: String, CaseIterable {
             return .internetShortcut
         case .video:
             return .movie
+        case .searchExtension:
+            return .item
         }
     }
 
@@ -282,7 +302,8 @@ public enum FileStatus: String {
 }
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
-    case waiting, inProgress, done, failed, canceling, canceled
+    // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
+    case waiting, inProgress = "in_progress", done, failed, canceling, canceled
 }
 
 public final class FileExternalImport: EmbeddedObject, Codable {
@@ -420,6 +441,10 @@ public final class File: Object, Codable {
     @Persisted public var versionCode: Int
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
+
+    // Used for corner diffing
+    public var isFirstInList = false
+    public var isLastInList = false
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -825,6 +850,8 @@ extension File: Differentiable {
                 && capabilities.isContentEqual(to: source.capabilities)
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color
+                && isFirstInList == source.isFirstInList
+                && isLastInList == source.isLastInList
         }
     }
 }

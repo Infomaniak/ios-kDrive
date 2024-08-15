@@ -57,7 +57,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
         let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
                                           driveFileManager: Self.driveFileManager,
                                           currentDirectory: mckFile)
-        let fileListViewModel = FileListViewController.instantiate(viewModel: viewModel)
+        let fileListViewModel = FileListViewController(viewModel: viewModel)
 
         // WHEN
         let metadata = fileListViewModel.currentSceneMetadata
@@ -152,7 +152,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
         let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
                                           driveFileManager: Self.driveFileManager,
                                           currentDirectory: mckFile)
-        let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
+        let photoListViewController = PhotoListViewController(viewModel: viewModel)
 
         // WHEN
         let metadata = photoListViewController.currentSceneMetadata

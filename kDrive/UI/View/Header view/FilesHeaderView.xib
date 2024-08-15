@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -62,50 +62,6 @@
                                 <constraint firstItem="E5v-a7-it7" firstAttribute="top" secondItem="ycy-fJ-CPK" secondAttribute="top" id="Owh-Po-33F"/>
                                 <constraint firstItem="E5v-a7-it7" firstAttribute="leading" secondItem="ycy-fJ-CPK" secondAttribute="leading" id="TXI-SK-8eD"/>
                             </constraints>
-                        </view>
-                        <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e6M-e1-pOF" customClass="SelectView" customModule="kDrive" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="272" height="44"/>
-                            <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                                    <rect key="frame" x="0.0" y="9" width="167.5" height="26.5"/>
-                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
-                                    <nil key="textColor"/>
-                                    <nil key="highlightedColor"/>
-                                    <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
-                                    </userDefinedRuntimeAttributes>
-                                </label>
-                                <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="2wa-8Z-vq0">
-                                    <rect key="frame" x="248" y="10" width="24" height="24"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XsA-NE-QKL">
-                                            <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="24" id="AGd-Ie-alj"/>
-                                                <constraint firstAttribute="height" constant="24" id="HjG-WL-njQ"/>
-                                            </constraints>
-                                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                            <state key="normal" title="Button" image="menu"/>
-                                        </button>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstAttribute="height" constant="24" id="krO-TL-byr"/>
-                                    </constraints>
-                                </stackView>
-                            </subviews>
-                            <color key="backgroundColor" name="backgroundColor"/>
-                            <constraints>
-                                <constraint firstItem="Ug6-Jg-W6r" firstAttribute="centerY" secondItem="e6M-e1-pOF" secondAttribute="centerY" id="E5N-Lt-Hh3"/>
-                                <constraint firstItem="2wa-8Z-vq0" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ug6-Jg-W6r" secondAttribute="trailing" constant="8" id="ORe-ka-PYr"/>
-                                <constraint firstItem="2wa-8Z-vq0" firstAttribute="centerY" secondItem="e6M-e1-pOF" secondAttribute="centerY" id="VyE-hd-0pA"/>
-                                <constraint firstAttribute="height" constant="44" id="l8a-Wt-PMq"/>
-                                <constraint firstAttribute="trailing" secondItem="2wa-8Z-vq0" secondAttribute="trailing" id="vhG-dF-7FR"/>
-                                <constraint firstItem="Ug6-Jg-W6r" firstAttribute="leading" secondItem="e6M-e1-pOF" secondAttribute="leading" id="zdT-zb-E4A"/>
-                            </constraints>
-                            <connections>
-                                <outlet property="actionsView" destination="2wa-8Z-vq0" id="qyy-pa-hdf"/>
-                                <outlet property="titleLabel" destination="Ug6-Jg-W6r" id="dGT-sM-YZQ"/>
-                            </connections>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rqf-ue-Zdn" customClass="FilterView" customModule="kDrive" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="45"/>
@@ -306,10 +262,10 @@
                 <outlet property="activityLabel" destination="ATr-sQ-1YC" id="PbY-91-QQR"/>
                 <outlet property="activityListView" destination="ZS5-h5-V8H" id="ch7-Cz-4uR"/>
                 <outlet property="commonDocumentsDescriptionLabel" destination="djO-ss-0Z2" id="nRf-Eb-ir6"/>
+                <outlet property="containerStackView" destination="78X-Zy-20d" id="CNV-XL-zPV"/>
                 <outlet property="filterView" destination="rqf-ue-Zdn" id="Cho-G7-C6L"/>
                 <outlet property="listOrGridButton" destination="Mhu-wK-ohw" id="sjM-LQ-jwD"/>
                 <outlet property="offlineView" destination="ycy-fJ-CPK" id="Xt5-lX-ucd"/>
-                <outlet property="selectView" destination="e6M-e1-pOF" id="BO0-S2-nem"/>
                 <outlet property="sortButton" destination="bAx-uw-yHB" id="EtT-hC-zAS"/>
                 <outlet property="sortView" destination="M4N-HE-jPw" id="4AD-gs-ort"/>
                 <outlet property="uploadCardView" destination="bvI-A7-USF" id="PGL-OM-pgZ"/>
@@ -323,9 +279,6 @@
         </designable>
         <designable name="ATr-sQ-1YC">
             <size key="intrinsicContentSize" width="33" height="16"/>
-        </designable>
-        <designable name="Ug6-Jg-W6r">
-            <size key="intrinsicContentSize" width="167.5" height="26.5"/>
         </designable>
         <designable name="YIY-ah-68A">
             <size key="intrinsicContentSize" width="38.5" height="18"/>
@@ -344,7 +297,6 @@
         <image name="chevron-down" width="24" height="24"/>
         <image name="chevron-right" width="24" height="24"/>
         <image name="list" width="24" height="24"/>
-        <image name="menu" width="24" height="24"/>
         <image name="offline" width="24" height="24"/>
         <image name="placeholder_avatar" width="512" height="512"/>
         <namedColor name="backgroundCardViewColor">
@@ -366,7 +318,7 @@
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
