@@ -40,7 +40,7 @@ class OfflineFilesViewModel: FileListViewModel {
             lazyCollection.filter("isAvailableOffline = true")
         }
 
-        files = AnyRealmCollection(results)
+        observedFiles = AnyRealmCollection(results)
     }
 
     override func forceRefresh() {

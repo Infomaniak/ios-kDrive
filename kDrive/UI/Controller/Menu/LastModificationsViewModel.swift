@@ -23,6 +23,7 @@ import UIKit
 
 class LastModificationsViewModel: FileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let fakeRootLastModifications = driveFileManager.getManagedFile(from: DriveFileManager.lastModificationsRootFile)
         let configuration = Configuration(normalFolderHierarchy: false,
                                           selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle,
@@ -32,14 +33,14 @@ class LastModificationsViewModel: FileListViewModel {
         super.init(
             configuration: configuration,
             driveFileManager: driveFileManager,
-            currentDirectory: DriveFileManager.lastModificationsRootFile
+            currentDirectory: fakeRootLastModifications
         )
 
         let fetchedFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
             lazyCollection.filter("rawType != \"dir\"")
         }
 
-        files = AnyRealmCollection(fetchedFiles)
+        observedFiles = AnyRealmCollection(fetchedFiles)
     }
 
     override func startObservation() {
@@ -48,10 +49,6 @@ class LastModificationsViewModel: FileListViewModel {
         sortTypeObservation = nil
         sortType = .newer
         sortingChanged()
-    }
-
-    override func sortingChanged() {
-        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
