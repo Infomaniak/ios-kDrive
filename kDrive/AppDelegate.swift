@@ -158,23 +158,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Log.appDelegate("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
     }
-
-    // MARK: - User activity
-
-    func application(_ application: UIApplication,
-                     continue userActivity: NSUserActivity,
-                     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        Log.appDelegate("application continue restorationHandler")
-        // Get URL components from the incoming user activity.
-        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-              let incomingURL = userActivity.webpageURL,
-              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
-            return false
-        }
-
-        // Check for specific URL components that you need.
-        return UniversalLinksHelper.handlePath(components.path)
-    }
 }
 
 // MARK: - User notification center delegate
