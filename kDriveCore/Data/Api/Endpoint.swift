@@ -748,9 +748,9 @@ public extension Endpoint {
 
     // Share link info
     // fun getShareLinkInfo(driveld: Int, linkUvid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
-    var shareLinkInfo(driveId: Int, linkUuid: String) -> Endpoint {
-        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/init")
-    }
+//    var shareLinkInfo(driveId: Int, linkUuid: String) -> Endpoint {
+//        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/init")
+//    }
 
     // Share link file
     // fun getShareLinkFile(driveld: Int, linkUvid: String, fileId: Int) = "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId"
@@ -760,10 +760,10 @@ public extension Endpoint {
 
     // Share link file children
     // fun getShareLinkFileChildren(driveld: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
-    func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int /* , sortType: SortType */ ) -> Endpoint {}
+//    func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int /* , sortType: SortType */ ) -> Endpoint {}
 
-    val orderQuery = "?order_by=${sortType.orderBy}&order=${sortType.order}"
-    return "$SHARE_URL_V3$driveId/share/$linkUvid/files/$fileId/files$orderQuery"
+//    val orderQuery = "?order_by=${sortType.orderBy}&order=${sortType.order}"
+//    return "$SHARE_URL_V3$driveId/share/$linkUvid/files/$fileId/files$orderQuery"
 
     // Share link file thumbnail
     // fun getShareLinkFileThumbnail(driveld: Int, linkUvid: String, file: File): String {
