@@ -29,6 +29,9 @@ public enum DriveFileManagerContext {
     /// Dedicated dataset to store shared with me
     case sharedWithMe
 
+    /// Dedicated in memory dataset for a public share link
+    case publicShare(shareId: String)
+
     func realmURL(driveId: Int, driveUserId: Int) -> URL {
         switch self {
         case .drive:
@@ -37,6 +40,8 @@ public enum DriveFileManagerContext {
             return DriveFileManager.constants.realmRootURL.appendingPathComponent("\(driveUserId)-shared.realm")
         case .fileProvider:
             return DriveFileManager.constants.realmRootURL.appendingPathComponent("\(driveUserId)-\(driveId)-fp.realm")
+        case .publicShare:
+            fatalError("noop")
         }
     }
 }
