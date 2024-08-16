@@ -23,6 +23,12 @@ import XCTest
 final class ITDrive: XCTestCase {
     // MARK: - Parsing
 
+    var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }
+
     private func freeDriveJson() -> Data? {
         JSONHelper.data(forResource: "free_drive", withExtension: "json")
     }
@@ -31,49 +37,43 @@ final class ITDrive: XCTestCase {
         JSONHelper.data(forResource: "paid_drive", withExtension: "json")
     }
 
-    /* FIXME: broken DI
-     func testFreeDriveIsFree() {
-         // GIVEN
-         guard let driveData = freeDriveJson(),
-               !driveData.isEmpty else {
-             XCTFail("Unable to load free drive JSON")
-             return
-         }
+    func testFreeDriveIsFree() {
+        // GIVEN
+        guard let driveData = freeDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load free drive JSON")
+            return
+        }
 
-         let decoder = JSONDecoder()
+        // WHEN
+        do {
+            let drive = try decoder.decode(Drive.self, from: driveData)
 
-         // WHEN
-         do {
-             let drive = try decoder.decode(Drive.self, from: driveData)
+            // THEN
+            XCTAssertTrue(drive.isFreePack, "We expect this drive to be free pack")
+            XCTAssertEqual(drive.pack.drivePackId, DrivePackId.free, "We expect this drive to be a free pack")
+        } catch {
+            XCTFail("Unexpected Error \(error)")
+        }
+    }
 
-             // THEN
-             XCTAssertTrue(drive.isFreePack, "We expect this drive to be free pack")
-             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.free, "We expect this drive to be a free pack")
-         } catch {
-             XCTFail("Unexpected Error \(error)")
-         }
-     }
+    func testPaidDriveIsPaid() {
+        // GIVEN
+        guard let driveData = paidDriveJson(),
+              !driveData.isEmpty else {
+            XCTFail("Unable to load paid drive JSON")
+            return
+        }
 
-     func testPaidDriveIsPaid() {
-         // GIVEN
-         guard let driveData = paidDriveJson(),
-               !driveData.isEmpty else {
-             XCTFail("Unable to load paid drive JSON")
-             return
-         }
+        // WHEN
+        do {
+            let drive = try decoder.decode(Drive.self, from: driveData)
 
-         let decoder = JSONDecoder()
-
-         // WHEN
-         do {
-             let drive = try decoder.decode(Drive.self, from: driveData)
-
-             // THEN
-             XCTAssertFalse(drive.isFreePack, "We expect this drive to be a paid pack")
-             XCTAssertEqual(drive.pack.drivePackId, DrivePackId.team, "We expect this drive to be a team pack")
-         } catch {
-             XCTFail("Unexpected Error \(error)")
-         }
-     }
-      */
+            // THEN
+            XCTAssertFalse(drive.isFreePack, "We expect this drive to be a paid pack")
+            XCTAssertEqual(drive.pack.drivePackId, DrivePackId.team, "We expect this drive to be a team pack")
+        } catch {
+            XCTFail("Unexpected Error \(error)")
+        }
+    }
 }
