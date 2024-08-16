@@ -253,20 +253,12 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     func reloadCollectionViewWith(files: [File]) {
         let changeSet = StagedChangeset(source: displayedFiles, target: files)
         collectionView.reload(using: changeSet,
-                              interrupt: { $0.changeCount > Endpoint.itemsPerPage }) {
-            self.displayedFiles = $0
+                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                              setData: { self.displayedFiles = $0 })
 
-            // We need recompute the size of the header cell right after the batch update so it reflects its state properly.
-            // State of the header cell can be updated during a diff update of the collection view.
-            Task {
-                let invalidationContext = UICollectionViewFlowLayoutInvalidationContext()
-                invalidationContext.invalidateSupplementaryElements(
-                    ofKind: UICollectionView.elementKindSectionHeader,
-                    at: [IndexPath(row: 0, section: 0)]
-                )
-                collectionView.collectionViewLayout.invalidateLayout(with: invalidationContext)
-            }
-        }
+        // We need recompute the size of the header cell right after the batch update so it reflects its state properly.
+        // State of the header cell can be updated during a diff update of the collection view.
+        collectionView.reloadItems(at: [IndexPath(row: 0, section: 0)])
     }
 
     private func bindUploadCardViewModel() {
