@@ -84,8 +84,17 @@ public final class DriveFileManager {
     /// Build a realm configuration for a specific Drive
     public static func configuration(context: DriveFileManagerContext, driveId: Int, driveUserId: Int) -> Realm.Configuration {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
+
+        let inMemoryIdentifier: String?
+        if case let .publicShare(identifier) = context {
+            inMemoryIdentifier = "inMemory:\(identifier)"
+        } else {
+            inMemoryIdentifier = nil
+        }
+
         return Realm.Configuration(
             fileURL: realmURL,
+            inMemoryIdentifier: inMemoryIdentifier,
             schemaVersion: RealmSchemaVersion.drive,
             migrationBlock: { migration, oldSchemaVersion in
                 let currentDriveSchemeVersion = RealmSchemaVersion.drive
