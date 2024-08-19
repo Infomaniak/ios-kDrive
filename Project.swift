@@ -23,11 +23,7 @@ import ProjectDescriptionHelpers
 let project = Project(name: "kDrive",
                       options: .options(
                           automaticSchemesOptions: .enabled(
-                            targetSchemesGrouping: .byNameSuffix(
-                              build: Set(["kDrive", "Extension"]),
-                              test: Set(["Tests"]),
-                              run: Set(["kDrive", "Extension"])
-                            )
+                              targetSchemesGrouping: .notGrouped
                           )
                       ),
                       targets: [
@@ -52,17 +48,11 @@ let project = Project(name: "kDrive",
                                   entitlements: "kDrive/Resources/kDrive.entitlements",
                                   scripts: [Constants.swiftlintScript],
                                   dependencies: [
-                                      .target(name: "kDriveFileProvider"),
                                       .target(name: "kDriveCore"),
+                                      .target(name: "kDriveCoreUI"),
+                                      .target(name: "kDriveFileProvider"),
                                       .target(name: "kDriveShareExtension"),
                                       .target(name: "kDriveActionExtension"),
-                                      .external(name: "FloatingPanel"),
-                                      .external(name: "Lottie"),
-                                      .external(name: "DropDown"),
-                                      .external(name: "HorizonCalendar"),
-                                      .external(name: "Kvitto"),
-                                      .external(name: "Highlightr"),
-                                      .external(name: "MarkdownKit"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
                                   settings: .settings(base: Constants.baseSettings),
@@ -111,7 +101,6 @@ let project = Project(name: "kDrive",
                                   sources: "kDriveUITests/**",
                                   dependencies: [
                                       .target(name: "kDrive"),
-                                      .target(name: "kDriveCore")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveResources",
@@ -159,6 +148,24 @@ let project = Project(name: "kDrive",
                                       .external(name: "VersionChecker"),
                                       .external(name: "LocalizeKit")
                                   ]),
+                          .target(name: "kDriveCoreUI",
+                                  destinations: Constants.destinations,
+                                  product: .framework,
+                                  bundleId: "com.infomaniak.drive.coreui",
+                                  deploymentTargets: Constants.deploymentTarget,
+                                  infoPlist: "kDriveCoreUI/Info.plist",
+                                  sources: "kDriveCoreUI/**",
+                                  dependencies: [
+                                      .target(name: "kDriveCore"),
+                                      .external(name: "FloatingPanel"),
+                                      .external(name: "Lottie"),
+                                      .external(name: "DropDown"),
+                                      .external(name: "HorizonCalendar"),
+                                      .external(name: "Kvitto"),
+                                      .external(name: "Highlightr"),
+                                      .external(name: "MarkdownKit"),
+                                  ],
+                                  settings: .settings(base: Constants.baseSettings)),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,
                                   product: .appExtension,
@@ -198,5 +205,12 @@ let project = Project(name: "kDrive",
                                                base: Constants.actionExtensionSettings,
                                                debug: Constants.debugActionExtensionSettings
                                            ))
+                      ],
+                      schemes: [
+                          .scheme(name: "kDrive",
+                                  shared: true,
+                                  buildAction: .buildAction(targets: ["kDrive"]),
+                                  testAction: .targets(["kDriveAPITests", "kDriveTests", "kDriveUITests"]),
+                                  runAction: .runAction(executable: "kDrive")),
                       ],
                       fileHeaderTemplate: .file("file-header-template.txt"))
