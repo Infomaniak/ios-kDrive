@@ -24,6 +24,19 @@ import InfomaniakLogin
 import RealmSwift
 import Sentry
 
+// TODO: Delete
+public class SomeRefreshTokenDelegate: RefreshTokenDelegate {
+    public init() {}
+
+    public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+        print("noop")
+    }
+
+    public func didFailRefreshToken(_ token: ApiToken) {
+        print("noop")
+    }
+}
+
 public protocol UpdateAccountDelegate: AnyObject {
     @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account)
 }
@@ -63,6 +76,10 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
+
+    /// Create on the fly an "in memory" DriveFileManager for a specific share
+    func getInMemoryDriveFileManager(for publicShareId: String) -> DriveFileManager
+
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
@@ -192,6 +209,22 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    public func getInMemoryDriveFileManager(for publicShareId: String) -> DriveFileManager {
+        if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
+            return inMemoryDriveFileManager
+        }
+
+        // Big hack, refactor to allow for non authenticated requests
+        guard let someToken = apiFetchers.values.first?.currentToken else {
+            fatalError("probably no account availlable")
+        }
+
+        let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
+        let context = DriveFileManagerContext.publicShare(shareId: publicShareId)
+        let noopDrive = Drive()
+        return DriveFileManager(drive: noopDrive, apiFetcher: apiFetcher, context: context)
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {

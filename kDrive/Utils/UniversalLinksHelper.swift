@@ -35,26 +35,44 @@ enum UniversalLinksHelper {
             regex: Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)!,
             displayMode: .file
         )
+
+        /// Matches a public share link
+        static let publicShareLink = Link(
+            regex: Regex(pattern: #"^/app/share/([0-9]+)/([a-z0-9-]+)$"#)!,
+            displayMode: .file
+        )
+
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
+
         /// Matches a file preview link
         static let filePreview = Link(
             regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!,
             displayMode: .file
         )
+
         /// Matches an office file link
         static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
 
-        static let all = [privateShareLink, directoryLink, filePreview, officeLink]
+        static let all = [privateShareLink, publicShareLink, directoryLink, filePreview, officeLink]
     }
 
     private enum DisplayMode {
         case office, file
     }
 
-    static func handlePath(_ path: String) -> Bool {
+    @discardableResult
+    static func handlePath(_ path: String) async -> Bool {
         DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
+        // Public share link regex
+        let shareLink = Link.publicShareLink
+        let matches = shareLink.regex.matches(in: path)
+        if await processPublicShareLink(matches: matches, displayMode: shareLink.displayMode) {
+            return true
+        }
+
+        // Common regex
         for link in Link.all {
             let matches = link.regex.matches(in: path)
             if processRegex(matches: matches, displayMode: link.displayMode) {
@@ -64,6 +82,28 @@ enum UniversalLinksHelper {
 
         DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
         return false
+    }
+
+    private static func processPublicShareLink(matches: [[String]], displayMode: DisplayMode) async -> Bool {
+        @InjectService var accountManager: AccountManageable
+
+        guard let firstMatch = matches.first,
+              let driveId = firstMatch[safe: 1],
+              let driveIdInt = Int(driveId),
+              let shareLinkUid = firstMatch[safe: 2] else {
+            return false
+        }
+
+        // request metadata
+        guard let metadata = try? await PublicShareApiFetcher().getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
+        else {
+            return false
+        }
+
+        // get file ID from metadata
+        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(for: shareLinkUid)
+        openFile(id: metadata.file_id, driveFileManager: publicShareDriveFileManager, office: displayMode == .office)
+        return true
     }
 
     private static func processRegex(matches: [[String]], displayMode: DisplayMode) -> Bool {

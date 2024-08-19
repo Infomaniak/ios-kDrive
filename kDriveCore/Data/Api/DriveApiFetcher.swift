@@ -52,6 +52,53 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
     }
 }
 
+public struct PublicShareMetadata: Decodable {
+    public let url: URL
+    public let fileId: Int
+    public let right: String
+    // public let validUntil: Date?
+    // public let capabilities: Rights
+
+//    public let createdBy: TimeInterval
+//    public let createdAt: TimeInterval
+//    public let updatedAt: TimeInterval
+//    public let accessBlocked: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case url
+        case fileId = "file_id"
+        case right
+        // case validUntil = "valid_until"
+        // case capabilities
+//        case createdBy = "created_by"
+//        case createdAt = "created_at"
+//        case updatedAt = "updated_at"
+//        case accessBlocked = "access_blocked"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        url = try container.decode(URL.self, forKey: .url)
+        fileId = try container.decode(Int.self, forKey: .fileId)
+        right = try container.decode(String.self, forKey: .right)
+    }
+}
+
+public class PublicShareApiFetcher: ApiFetcher {
+    override public init() {
+        super.init()
+    }
+
+    public func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
+        let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
+        let request = Session.default.request(shareLinkInfoUrl)
+        let metadata: PublicShareMetadata = try await perform(request: request)
+        print("metadata\(metadata)")
+        return metadata
+    }
+}
+
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable
