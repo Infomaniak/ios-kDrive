@@ -748,9 +748,9 @@ public extension Endpoint {
 
     // Share link info
     // fun getShareLinkInfo(driveld: Int, linkUvid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
-//    var shareLinkInfo(driveId: Int, linkUuid: String) -> Endpoint {
-//        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/init")
-//    }
+    static func shareLinkInfo(driveId: Int, shareLinkUid: String) -> Endpoint {
+        Self.shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+    }
 
     // Share link file
     // fun getShareLinkFile(driveld: Int, linkUvid: String, fileId: Int) = "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId"
