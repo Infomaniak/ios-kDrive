@@ -25,7 +25,6 @@ import kDriveCore
 import RealmSwift
 import XCTest
 
-/* FIXME: DI issues, check target
 final class DriveFileManagerTests: XCTestCase {
     static let defaultTimeout = 10.0
     static var driveFileManager: DriveFileManager!
@@ -159,6 +158,7 @@ final class DriveFileManagerTests: XCTestCase {
         _ = try await DriveFileManagerTests.driveFileManager.searchFile(
             query: file.name,
             categories: [],
+            fileExtensions: [],
             belongToAllCategories: true,
             sortType: .nameAZ
         )
@@ -350,4 +350,3 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 }
-*/
