@@ -23,156 +23,152 @@ import InfomaniakLogin
 @testable import kDriveCore
 import XCTest
 
-/* FIXME: broken DI
+/// Unit test metadata for each supported screen
+final class UTSceneRestorationMetadata: XCTestCase {
+    static var driveFileManager: DriveFileManager!
 
- /// Unit test metadata for each supported screen
- final class UTSceneRestorationMetadata: XCTestCase {
-     static var driveFileManager: DriveFileManager!
+    override class func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
 
-     override class func setUp() {
-         super.setUp()
-         MockingHelper.clearRegisteredTypes()
-         MockingHelper.registerConcreteTypes(configuration: .minimal)
+        @InjectService var driveInfosManager: DriveInfosManager
+        @InjectService var mckAccountManager: AccountManageable
 
-         @InjectService var driveInfosManager: DriveInfosManager
-         @InjectService var mckAccountManager: AccountManageable
+        let token = ApiToken(accessToken: Env.token,
+                             expiresIn: Int.max,
+                             refreshToken: "",
+                             scope: "",
+                             tokenType: "",
+                             userId: Env.userId,
+                             expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-         let token = ApiToken(accessToken: Env.token,
-                              expiresIn: Int.max,
-                              refreshToken: "",
-                              scope: "",
-                              tokenType: "",
-                              userId: Env.userId,
-                              expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
+        let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+        let drive = Drive()
+        drive.userId = Env.userId
+        driveFileManager = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
 
-         let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
-         let drive = Drive()
-         drive.userId = Env.userId
-         driveFileManager = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
+        mckAccountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
+    }
 
-         mckAccountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
-     }
+    @MainActor func testFileListViewModel() {
+        // GIVEN
+        let mckFile = File(id: 1337, name: "kernel.bin")
+        let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
+                                          driveFileManager: Self.driveFileManager,
+                                          currentDirectory: mckFile)
+        let fileListViewModel = FileListViewController(viewModel: viewModel)
 
-     @MainActor func testFileListViewModel() {
-         // GIVEN
-         let mckFile = File(id: 1337, name: "kernel.bin")
-         let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
-                                           driveFileManager: Self.driveFileManager,
-                                           currentDirectory: mckFile)
-         let fileListViewModel = FileListViewController.instantiate(viewModel: viewModel)
+        // WHEN
+        let metadata = fileListViewModel.currentSceneMetadata
 
-         // WHEN
-         let metadata = fileListViewModel.currentSceneMetadata
+        // THEN
+        XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
+        XCTAssertEqual(metadata["lastViewController"] as? String, "FileListViewController")
+        XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
+        XCTAssertEqual(metadata["fileId"] as? Int, Int(1337))
+    }
 
-         // THEN
-         XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
-         XCTAssertEqual(metadata["lastViewController"] as? String, "FileListViewController")
-         XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
-         XCTAssertEqual(metadata["fileId"] as? Int, Int(1337))
-     }
+    @MainActor func testPreviewViewController() {
+        // GIVEN
+        let mckFile = File(id: 1337, name: "kernel.bin")
+        let previewViewController = PreviewViewController.instantiate(
+            files: [mckFile],
+            index: 0,
+            driveFileManager: Self.driveFileManager,
+            normalFolderHierarchy: true,
+            fromActivities: true
+        )
 
-     @MainActor func testPreviewViewController() {
-         // GIVEN
-         let mckFile = File(id: 1337, name: "kernel.bin")
-         let previewViewController = PreviewViewController.instantiate(
-             files: [mckFile],
-             index: 0,
-             driveFileManager: Self.driveFileManager,
-             normalFolderHierarchy: true,
-             fromActivities: true
-         )
+        // WHEN
+        let metadata = previewViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = previewViewController.currentSceneMetadata
+        // THEN
+        XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
+        XCTAssertEqual(metadata["lastViewController"] as? String, "PreviewViewController")
+        XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
+        XCTAssertEqual(metadata["filesIds"] as? [Int], [1337])
+        XCTAssertEqual(metadata["currentIndex"] as? Int, Int(0))
+        XCTAssertEqual(metadata["normalFolderHierarchy"] as? Bool, true)
+        XCTAssertEqual(metadata["fromActivities"] as? Bool, true)
+    }
 
-         // THEN
-         XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
-         XCTAssertEqual(metadata["lastViewController"] as? String, "PreviewViewController")
-         XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
-         XCTAssertEqual(metadata["filesIds"] as? [Int], [1337])
-         XCTAssertEqual(metadata["currentIndex"] as? Int, Int(0))
-         XCTAssertEqual(metadata["normalFolderHierarchy"] as? Bool, true)
-         XCTAssertEqual(metadata["fromActivities"] as? Bool, true)
-     }
+    @MainActor func testFileDetailViewController() {
+        // GIVEN
+        let mckFile = File(id: 1337, name: "kernel.bin")
+        let fileDetailViewController = FileDetailViewController.instantiate(
+            driveFileManager: Self.driveFileManager,
+            file: mckFile
+        )
 
-     @MainActor func testFileDetailViewController() {
-         // GIVEN
-         let mckFile = File(id: 1337, name: "kernel.bin")
-         let fileDetailViewController = FileDetailViewController.instantiate(
-             driveFileManager: Self.driveFileManager,
-             file: mckFile
-         )
+        // WHEN
+        let metadata = fileDetailViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = fileDetailViewController.currentSceneMetadata
+        // THEN
+        XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
+        XCTAssertEqual(metadata["lastViewController"] as? String, "FileDetailViewController")
+        XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
+        XCTAssertEqual(metadata["fileId"] as? Int, Int(1337))
+    }
 
-         // THEN
-         XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
-         XCTAssertEqual(metadata["lastViewController"] as? String, "FileDetailViewController")
-         XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
-         XCTAssertEqual(metadata["fileId"] as? Int, Int(1337))
-     }
+    @MainActor func testStoreViewController() {
+        // GIVEN
+        let storeViewController = StoreViewController.instantiate(driveFileManager: Self.driveFileManager)
 
-     @MainActor func testStoreViewController() {
-         // GIVEN
-         let storeViewController = StoreViewController.instantiate(driveFileManager: Self.driveFileManager)
+        // WHEN
+        let metadata = storeViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = storeViewController.currentSceneMetadata
+        // THEN
+        XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
+        XCTAssertEqual(metadata["lastViewController"] as? String, "StoreViewController")
+        XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
+    }
 
-         // THEN
-         XCTAssertFalse(metadata.isEmpty, "Expecting some metadata")
-         XCTAssertEqual(metadata["lastViewController"] as? String, "StoreViewController")
-         XCTAssertEqual(metadata["driveId"] as? Int, Int(-1))
-     }
+    @MainActor func testRootMenuViewController() {
+        // GIVEN
+        let rootMenuViewController = RootMenuViewController(driveFileManager: Self.driveFileManager)
 
-     @MainActor func testRootMenuViewController() {
-         // GIVEN
-         let rootMenuViewController = RootMenuViewController(driveFileManager: Self.driveFileManager)
+        // WHEN
+        let metadata = rootMenuViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = rootMenuViewController.currentSceneMetadata
+        // THEN
+        XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
+    }
 
-         // THEN
-         XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
-     }
+    @MainActor func testHomeViewController() {
+        // GIVEN
+        let homeViewController = HomeViewController(driveFileManager: Self.driveFileManager)
 
-     @MainActor func testHomeViewController() {
-         // GIVEN
-         let homeViewController = HomeViewController(driveFileManager: Self.driveFileManager)
+        // WHEN
+        let metadata = homeViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = homeViewController.currentSceneMetadata
+        // THEN
+        XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
+    }
 
-         // THEN
-         XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
-     }
+    @MainActor func testPhotoListViewController() {
+        // GIVEN
+        let mckFile = File(id: 1337, name: "kernel.bin")
+        let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
+                                          driveFileManager: Self.driveFileManager,
+                                          currentDirectory: mckFile)
+        let photoListViewController = PhotoListViewController(viewModel: viewModel)
 
-     @MainActor func testPhotoListViewController() {
-         // GIVEN
-         let mckFile = File(id: 1337, name: "kernel.bin")
-         let viewModel = FileListViewModel(configuration: FileListViewModel.Configuration(emptyViewType: .emptyFolder),
-                                           driveFileManager: Self.driveFileManager,
-                                           currentDirectory: mckFile)
-         let photoListViewController = PhotoListViewController.instantiate(viewModel: viewModel)
+        // WHEN
+        let metadata = photoListViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = photoListViewController.currentSceneMetadata
+        // THEN
+        XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
+    }
 
-         // THEN
-         XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
-     }
+    @MainActor func testMenuViewController() {
+        // GIVEN
+        let photoListViewController = MenuViewController(driveFileManager: Self.driveFileManager)
 
-     @MainActor func testMenuViewController() {
-         // GIVEN
-         let photoListViewController = MenuViewController(driveFileManager: Self.driveFileManager)
+        // WHEN
+        let metadata = photoListViewController.currentSceneMetadata
 
-         // WHEN
-         let metadata = photoListViewController.currentSceneMetadata
-
-         // THEN
-         XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
-     }
- }
-
- */
+        // THEN
+        XCTAssertTrue(metadata.isEmpty, "Expecting empty metadata")
+    }
+}
