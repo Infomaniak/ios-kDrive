@@ -9,6 +9,7 @@ let packageSettings = PackageSettings(
     productTypes: [
         "RealmSwift": .staticLibrary,
         "Realm": .staticLibrary,
+        "InfomaniakDI": .framework,
     ]
 )
 
