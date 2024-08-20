@@ -44,7 +44,8 @@ public class Rights: EmbeddedObject, Codable {
     /// Right to use and give team access
     @Persisted public var canUseTeam: Bool
 
-    // Directory capabilities
+    // MARK: Directory capabilities
+
     /// Right to add new child directory
     @Persisted public var canCreateDirectory: Bool
     /// Right to add new child file
@@ -55,6 +56,21 @@ public class Rights: EmbeddedObject, Codable {
     @Persisted public var canMoveInto: Bool
     /// Right to use convert directory into dropbox
     @Persisted public var canBecomeDropbox: Bool
+
+    // MARK: Public share
+
+    /// Can edit
+    @Persisted public var canEdit: Bool
+    /// Can see stats
+    @Persisted public var canSeeStats: Bool
+    /// Can see info
+    @Persisted public var canSeeInfo: Bool
+    /// Can download
+    @Persisted public var canDownload: Bool
+    /// Can comment
+    @Persisted public var canComment: Bool
+    /// Can request access
+    @Persisted public var canRequestAccess: Bool
 
     enum CodingKeys: String, CodingKey {
         case canShow
@@ -73,26 +89,38 @@ public class Rights: EmbeddedObject, Codable {
         case canUpload
         case canMoveInto
         case canBecomeDropbox
+        case canEdit
+        case canSeeStats
+        case canSeeInfo
+        case canDownload
+        case canComment
+        case canRequestAccess
     }
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        canShow = try container.decode(Bool.self, forKey: .canShow)
-        canRead = try container.decode(Bool.self, forKey: .canRead)
-        canWrite = try container.decode(Bool.self, forKey: .canWrite)
-        canShare = try container.decode(Bool.self, forKey: .canShare)
-        canLeave = try container.decode(Bool.self, forKey: .canLeave)
-        canDelete = try container.decode(Bool.self, forKey: .canDelete)
-        canRename = try container.decode(Bool.self, forKey: .canRename)
-        canMove = try container.decode(Bool.self, forKey: .canMove)
-        canBecomeSharelink = try container.decode(Bool.self, forKey: .canBecomeSharelink)
-        canUseFavorite = try container.decode(Bool.self, forKey: .canUseFavorite)
-        canUseTeam = try container.decode(Bool.self, forKey: .canUseTeam)
+        canShow = try container.decodeIfPresent(Bool.self, forKey: .canShow) ?? true
+        canRead = try container.decodeIfPresent(Bool.self, forKey: .canRead) ?? true
+        canWrite = try container.decodeIfPresent(Bool.self, forKey: .canWrite) ?? false
+        canShare = try container.decodeIfPresent(Bool.self, forKey: .canShare) ?? false
+        canLeave = try container.decodeIfPresent(Bool.self, forKey: .canLeave) ?? false
+        canDelete = try container.decodeIfPresent(Bool.self, forKey: .canDelete) ?? false
+        canRename = try container.decodeIfPresent(Bool.self, forKey: .canRename) ?? false
+        canMove = try container.decodeIfPresent(Bool.self, forKey: .canMove) ?? false
+        canBecomeSharelink = try container.decodeIfPresent(Bool.self, forKey: .canBecomeSharelink) ?? false
+        canUseFavorite = try container.decodeIfPresent(Bool.self, forKey: .canUseFavorite) ?? false
+        canUseTeam = try container.decodeIfPresent(Bool.self, forKey: .canUseTeam) ?? false
         canCreateDirectory = try container.decodeIfPresent(Bool.self, forKey: .canCreateDirectory) ?? false
         canCreateFile = try container.decodeIfPresent(Bool.self, forKey: .canCreateFile) ?? false
         canUpload = try container.decodeIfPresent(Bool.self, forKey: .canUpload) ?? false
         canMoveInto = try container.decodeIfPresent(Bool.self, forKey: .canMoveInto) ?? false
         canBecomeDropbox = try container.decodeIfPresent(Bool.self, forKey: .canBecomeDropbox) ?? false
+        canEdit = try container.decodeIfPresent(Bool.self, forKey: .canEdit) ?? false
+        canSeeStats = try container.decodeIfPresent(Bool.self, forKey: .canSeeStats) ?? false
+        canSeeInfo = try container.decodeIfPresent(Bool.self, forKey: .canSeeInfo) ?? false
+        canDownload = try container.decodeIfPresent(Bool.self, forKey: .canDownload) ?? false
+        canComment = try container.decodeIfPresent(Bool.self, forKey: .canComment) ?? false
+        canRequestAccess = try container.decodeIfPresent(Bool.self, forKey: .canRequestAccess) ?? false
     }
 
     override public init() {
