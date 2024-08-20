@@ -32,4 +32,4 @@ jobs:
       - name: Build
         run: tuist install && tuist build --generate "kDrive"
       - name: Unit and Integration Test only
-        run: tuist test kDrive-Workspace --test-targets "kDriveTests"
+        run: tuist test kDriveTests

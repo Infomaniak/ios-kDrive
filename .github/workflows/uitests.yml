@@ -32,4 +32,4 @@ jobs:
       - name: Setup
         run: tuist install && tuist generate
       - name: UI tests
-        run: tuist test kDrive-Workspace --device "iPhone 15 Pro" --test-targets kDriveUITests
+        run: tuist test kDriveUITests
