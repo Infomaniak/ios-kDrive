@@ -102,7 +102,7 @@ enum UniversalLinksHelper {
 
         // get file ID from metadata
         let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(for: shareLinkUid)
-        openFile(id: metadata.fileId, driveFileManager: publicShareDriveFileManager, office: displayMode == .office)
+        openPublicShare(id: metadata.fileId, driveFileManager: publicShareDriveFileManager)
         return true
     }
 
@@ -121,6 +121,19 @@ enum UniversalLinksHelper {
         openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office)
 
         return true
+    }
+
+    private static func openPublicShare(id: Int, driveFileManager: DriveFileManager) {
+        Task {
+            do {
+                let file = try await driveFileManager.file(id: id)
+                @InjectService var appNavigable: AppNavigable
+                await appNavigable.present(file: file, driveFileManager: driveFileManager, office: false)
+            } catch {
+                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
+                await UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
     }
 
     private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
