@@ -1027,19 +1027,22 @@ public final class DriveFileManager {
     }
 
     func removeFileInDatabase(fileUid: String, cascade: Bool, writableRealm: Realm) {
-        if let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid), !file.isInvalidated {
-            if fileManager.fileExists(atPath: file.localContainerUrl.path) {
-                try? fileManager.removeItem(at: file.localContainerUrl) // Check that it was correctly removed?
-            }
-
-            if cascade {
-                for child in file.children.freeze() where !child.isInvalidated {
-                    removeFileInDatabase(fileUid: child.uid, cascade: cascade, writableRealm: writableRealm)
-                }
-            }
-
-            writableRealm.delete(file)
+        guard let liveFile = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid), !liveFile.isInvalidated else {
+            return
         }
+
+        let localContainerUrl = liveFile.localContainerUrl
+        if fileManager.fileExists(atPath: localContainerUrl.path) {
+            try? fileManager.removeItem(at: localContainerUrl) // Check that it was correctly removed?
+        }
+
+        if cascade {
+            for frozenChild in liveFile.children.freeze() where !frozenChild.isInvalidated {
+                removeFileInDatabase(fileUid: frozenChild.uid, cascade: cascade, writableRealm: writableRealm)
+            }
+        }
+
+        writableRealm.delete(liveFile)
     }
 
     private func deleteOrphanFiles(root: File..., newFiles: [File]? = nil, writableRealm: Realm) {

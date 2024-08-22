@@ -299,6 +299,9 @@ class SaveFileViewController: UIViewController {
     @IBAction func close(_ sender: Any) {
         importProgress?.cancel()
         dismiss(animated: true)
+        if let extensionContext {
+            extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
+        }
     }
 }
 
