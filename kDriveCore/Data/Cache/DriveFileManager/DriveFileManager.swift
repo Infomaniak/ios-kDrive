@@ -1023,21 +1023,22 @@ public final class DriveFileManager {
 
         while !fileUidsToProcess.isEmpty {
             let currentFileUid = fileUidsToProcess.removeLast()
+            guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: currentFileUid), !file.isInvalidated else {
+                continue
+            }
 
-            if let file = writableRealm.object(ofType: File.self, forPrimaryKey: currentFileUid), !file.isInvalidated {
-                if fileManager.fileExists(atPath: file.localContainerUrl.path) {
-                    try? fileManager.removeItem(at: file.localContainerUrl)
-                }
+            if fileManager.fileExists(atPath: file.localContainerUrl.path) {
+                try? fileManager.removeItem(at: file.localContainerUrl)
+            }
 
-                if cascade {
-                    let filesUidsToDelete = liveFilesToDelete.map { $0.uid }
-                    let liveChildren = file.children.filter { child in
-                        // A child should not be a circular reference to an ancestor
-                        return !child.isInvalidated && !filesUidsToDelete.contains(child.uid)
-                    }
-                    fileUidsToProcess.append(contentsOf: liveChildren.map { $0.uid })
-                    liveFilesToDelete.append(contentsOf: liveChildren)
+            if cascade {
+                let filesUidsToDelete = liveFilesToDelete.map { $0.uid }
+                let liveChildren = file.children.filter { child in
+                    // A child should not be a circular reference to an ancestor
+                    return !child.isInvalidated && !filesUidsToDelete.contains(child.uid)
                 }
+                fileUidsToProcess.append(contentsOf: liveChildren.map { $0.uid })
+                liveFilesToDelete.append(contentsOf: liveChildren)
             }
         }
 
