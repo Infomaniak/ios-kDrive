@@ -88,6 +88,11 @@ public extension DriveFileManager {
 
             let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
 
+            // FIXME: Temporary fix for back-end to prevent adding parent to itself
+            guard fileUid != directory.uid else {
+                continue
+            }
+
             switch fileAction.action {
             case .fileDelete, .fileTrash:
                 removeFileInDatabase(fileUid: fileUid, cascade: true, writableRealm: writableRealm)
