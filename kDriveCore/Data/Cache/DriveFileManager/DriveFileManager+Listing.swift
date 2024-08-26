@@ -114,7 +114,10 @@ public extension DriveFileManager {
                    let oldParent = existingFile.parent {
                     oldParent.children.remove(existingFile)
                 }
-                directory.children.insert(actionFile)
+
+                if fileUid != directory.uid {
+                    directory.children.insert(actionFile)
+                }
 
             case .fileRename,
                  .fileFavoriteCreate, .fileUpdate, .fileFavoriteRemove,
@@ -134,8 +137,12 @@ public extension DriveFileManager {
                     writableRealm: writableRealm
                 )
                 writableRealm.add(actionFile, update: .modified)
-                directory.children.insert(actionFile)
+
+                if fileUid != directory.uid {
+                    directory.children.insert(actionFile)
+                }
                 actionFile.applyLastModifiedDateToLocalFile()
+
             default:
                 break
             }
