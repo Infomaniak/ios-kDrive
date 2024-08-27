@@ -134,6 +134,11 @@ public extension DriveInfosManager {
 
     /// Insert or update Domains if necessary
     private func updateDomainsIfNecessary(updatedDomains: [NSFileProviderDomain], userId: Int) async throws {
+        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
+            Log.driveInfosManager("Skipping domain update as soft disabled", level: .warning)
+            return
+        }
+
         let existingDomainsForCurrentUser = try await existingDomains(for: userId)
 
         let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
@@ -159,6 +164,18 @@ public extension DriveInfosManager {
                 self.signalChanges(for: newDomain)
             }
         }
+    }
+
+    /// Clears all items in `Files.app`
+    func deleteAllDomains() async throws {
+        let allDomains = try await NSFileProviderManager.domains()
+        Log.driveInfosManager("Delete \(allDomains.count) domains")
+        for domain in allDomains {
+            try? await NSFileProviderManager.remove(domain)
+        }
+
+        try? await NSFileProviderManager.default.signalEnumerator(for: .rootContainer)
+        try? await NSFileProviderManager.default.signalEnumerator(for: .workingSet)
     }
 
     /// Delete Domains if necessary

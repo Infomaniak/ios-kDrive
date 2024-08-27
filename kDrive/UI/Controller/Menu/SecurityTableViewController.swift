@@ -74,7 +74,25 @@ class SecurityTableViewController: BaseGroupedTableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionTitle
             cell.detailsLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionDescription
             cell.switchHandler = { sender in
-                UserDefaults.shared.isFileProviderExtensionEnabled = sender.isOn
+                let toggleStatus = sender.isOn
+                cell.valueSwitch.isEnabled = false
+                Task {
+                    UserDefaults.shared.isFileProviderExtensionEnabled = toggleStatus
+
+                    if toggleStatus {
+                        // Force refresh accounts, to regenerate Files.app accounts
+                        @InjectService var accountManager: AccountManageable
+                        let accounts = accountManager.accounts.values
+                        for account in accounts {
+                            _ = try? await accountManager.updateUser(for: account, registerToken: true)
+                        }
+                    } else {
+                        @InjectService var driveInfosManager: DriveInfosManager
+                        try? await driveInfosManager.deleteAllDomains()
+                    }
+
+                    cell.valueSwitch.isEnabled = true
+                }
             }
             return cell
         }
