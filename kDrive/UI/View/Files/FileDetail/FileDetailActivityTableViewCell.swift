@@ -68,9 +68,9 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderCreate" : "fileDetailsActivityFileCreate"
         case .fileRename:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderRename" : "fileDetailsActivityFileRename"
-        case .fileTrash:
+        case .fileTrash, .fileTrashInherited:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderTrash" : "fileDetailsActivityFileTrash"
-        case .fileRestore:
+        case .fileRestore, .fileRestoreInherited:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderRestore" : "fileDetailsActivityFileRestore"
         case .fileDelete:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderDelete" : "fileDetailsActivityFileDelete"

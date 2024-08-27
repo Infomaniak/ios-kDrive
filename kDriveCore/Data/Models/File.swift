@@ -842,6 +842,7 @@ extension File: Differentiable {
         autoreleasepool {
             lastModifiedAt == source.lastModifiedAt
                 && sortedName == source.sortedName
+                && name == source.name
                 && isFavorite == source.isFavorite
                 && isAvailableOffline == source.isAvailableOffline
                 && visibility == source.visibility

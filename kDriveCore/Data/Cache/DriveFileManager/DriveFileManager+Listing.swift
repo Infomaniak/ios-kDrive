@@ -89,7 +89,7 @@ public extension DriveFileManager {
             let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
 
             switch fileAction.action {
-            case .fileDelete, .fileTrash:
+            case .fileDelete, .fileTrash, .fileTrashInherited:
                 removeFileInDatabase(fileUid: fileUid, cascade: true, writableRealm: writableRealm)
 
             case .fileMoveOut:
@@ -97,7 +97,8 @@ public extension DriveFileManager {
                       let oldParent = movedOutFile.parent else { continue }
 
                 oldParent.children.remove(movedOutFile)
-            case .fileMoveIn, .fileRestore, .fileCreate:
+
+            case .fileMoveIn, .fileRestore, .fileCreate, .fileRestoreInherited:
                 keepCacheAttributesForFile(
                     newFile: actionFile,
                     keepProperties: [.standard, .extras],
@@ -109,7 +110,10 @@ public extension DriveFileManager {
                    let oldParent = existingFile.parent {
                     oldParent.children.remove(existingFile)
                 }
-                directory.children.insert(actionFile)
+
+                if fileUid != directory.uid {
+                    directory.children.insert(actionFile)
+                }
 
             case .fileRename,
                  .fileFavoriteCreate, .fileUpdate, .fileFavoriteRemove,
@@ -129,8 +133,12 @@ public extension DriveFileManager {
                     writableRealm: writableRealm
                 )
                 writableRealm.add(actionFile, update: .modified)
-                directory.children.insert(actionFile)
+
+                if fileUid != directory.uid {
+                    directory.children.insert(actionFile)
+                }
                 actionFile.applyLastModifiedDateToLocalFile()
+
             default:
                 break
             }
