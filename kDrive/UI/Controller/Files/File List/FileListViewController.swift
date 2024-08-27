@@ -302,8 +302,13 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     private func toggleRefreshing(_ refreshing: Bool) {
         if refreshing {
             refreshControl.beginRefreshing()
-            let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
-            collectionView.setContentOffset(offsetPoint, animated: true)
+
+            // 200 is an arbitrary value that works fine.
+            // The goal is to prevent moving offset if the user already pulled down the control.
+            if collectionView.contentOffset.y >= -200 {
+                let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
+                collectionView.setContentOffset(offsetPoint, animated: true)
+            }
         } else {
             refreshControl.endRefreshing()
         }
