@@ -588,6 +588,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            return super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
+        }
+
         let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(
             ofKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: headerViewIdentifier,
@@ -775,14 +779,14 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
-        if headerView == nil {
-            headerView = self.collectionView(
-                collectionView,
-                viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
-                at: IndexPath(row: 0, section: section)
-            ) as? FilesHeaderView
+        guard let headerView = collectionView.supplementaryView(
+            forElementKind: UICollectionView.elementKindSectionHeader,
+            at: IndexPath(row: 0, section: section)
+        ) as? FilesHeaderView else {
+            return CGSize(width: collectionView.frame.width, height: 32)
         }
-        return headerView!.systemLayoutSizeFitting(
+
+        return headerView.systemLayoutSizeFitting(
             CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel

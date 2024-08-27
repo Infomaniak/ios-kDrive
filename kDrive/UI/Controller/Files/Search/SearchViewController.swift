@@ -174,7 +174,7 @@ class SearchViewController: FileListViewController {
         }
         super.reloadCollectionViewWith(files: files)
     }
-    
+
     override func showEmptyView(_ isShowing: Bool) {
         guard searchViewModel.isDisplayingSearchResults else {
             return
@@ -248,24 +248,26 @@ class SearchViewController: FileListViewController {
         layout collectionViewLayout: UICollectionViewLayout,
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
-        if searchViewModel.isDisplayingSearchResults {
+        guard searchViewModel.isDisplayingSearchResults else {
             return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
-        } else {
-            if recentSearchesViewModel.recentSearches.isEmpty {
-                return .zero
-            } else {
-                let view = self.collectionView(
-                    collectionView,
-                    viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
-                    at: IndexPath(row: 0, section: section)
-                )
-                return view.systemLayoutSizeFitting(
-                    CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
-                    withHorizontalFittingPriority: .required,
-                    verticalFittingPriority: .fittingSizeLevel
-                )
-            }
         }
+
+        guard recentSearchesViewModel.recentSearches.isEmpty else {
+            return .zero
+        }
+
+        guard let headerView = self.collectionView.supplementaryView(
+            forElementKind: UICollectionView.elementKindSectionHeader,
+            at: IndexPath(row: 0, section: section)
+        ) else {
+            return CGSize(width: collectionView.frame.width, height: 32)
+        }
+
+        return headerView.systemLayoutSizeFitting(
+            CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
     }
 
     // MARK: - Files header view delegate
