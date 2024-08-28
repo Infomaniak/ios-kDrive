@@ -25,7 +25,7 @@ import InfomaniakDI
 public extension DriveInfosManager {
     private typealias FilteredDomain = (new: NSFileProviderDomain, existing: NSFileProviderDomain?)
 
-    internal func initFileProviderDomains(frozenDrives: [Drive], user: InfomaniakCore.UserProfile) {
+    internal func initFileProviderDomains(frozenDrives: [Drive], user: InfomaniakUser) {
         // Clean file provider storage if needed
         if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
             do {
@@ -108,7 +108,7 @@ public extension DriveInfosManager {
     /// Diffing __NSFileProviderDomain__ for drives of a specified user, and propagate changes to the __NSFileProviderManager__
     ///
     /// Requires frozen drives as making use of async await
-    private func updateFileManagerDomains(frozenDrives: [Drive], user: InfomaniakCore.UserProfile) {
+    private func updateFileManagerDomains(frozenDrives: [Drive], user: InfomaniakUser) {
         let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
         Task {
@@ -134,6 +134,11 @@ public extension DriveInfosManager {
 
     /// Insert or update Domains if necessary
     private func updateDomainsIfNecessary(updatedDomains: [NSFileProviderDomain], userId: Int) async throws {
+        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
+            Log.driveInfosManager("Skipping domain update as soft disabled", level: .warning)
+            return
+        }
+
         let existingDomainsForCurrentUser = try await existingDomains(for: userId)
 
         let updatedDomainsForCurrentUser: [FilteredDomain] = updatedDomains.map { newDomain in
@@ -159,6 +164,38 @@ public extension DriveInfosManager {
                 self.signalChanges(for: newDomain)
             }
         }
+    }
+
+    /// Toggle on off kDrive within `Files.app`
+    func toggleDomains(enable: Bool) async throws {
+        if enable {
+            await setAllDomains()
+        } else {
+            try await deleteAllDomains()
+        }
+    }
+
+    /// Set all available drives in `Files.app`
+    private func setAllDomains() async {
+        @InjectService var accountManager: AccountManageable
+        let accounts = accountManager.accounts.values
+
+        for account in accounts {
+            let frozenDrives = Array(getDrives(for: account.userId).freezeIfNeeded())
+            updateFileManagerDomains(frozenDrives: frozenDrives, user: account.user)
+        }
+    }
+
+    /// Clears all drives in `Files.app`
+    private func deleteAllDomains() async throws {
+        let allDomains = try await NSFileProviderManager.domains()
+        Log.driveInfosManager("Delete \(allDomains.count) domains")
+        for domain in allDomains {
+            try? await NSFileProviderManager.remove(domain)
+        }
+
+        try? await NSFileProviderManager.default.signalEnumerator(for: .rootContainer)
+        try? await NSFileProviderManager.default.signalEnumerator(for: .workingSet)
     }
 
     /// Delete Domains if necessary
