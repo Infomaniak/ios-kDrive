@@ -74,7 +74,16 @@ class SecurityTableViewController: BaseGroupedTableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionTitle
             cell.detailsLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionDescription
             cell.switchHandler = { sender in
-                UserDefaults.shared.isFileProviderExtensionEnabled = sender.isOn
+                let toggleStatus = sender.isOn
+                cell.valueSwitch.isEnabled = false
+                Task {
+                    UserDefaults.shared.isFileProviderExtensionEnabled = toggleStatus
+
+                    @InjectService var driveInfosManager: DriveInfosManager
+                    try? await driveInfosManager.toggleDomains(enable: toggleStatus)
+
+                    cell.valueSwitch.isEnabled = true
+                }
             }
             return cell
         }

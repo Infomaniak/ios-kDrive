@@ -377,10 +377,6 @@ class FileListViewModel: SelectDelegate {
         return file.freezeIfNeeded()
     }
 
-    func getAllFrozenFiles() -> [File] {
-        return Array(observedFiles.freeze())
-    }
-
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
         if configuration.fromActivities || listStyle == .grid {
             return nil
