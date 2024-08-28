@@ -302,8 +302,13 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     private func toggleRefreshing(_ refreshing: Bool) {
         if refreshing {
             refreshControl.beginRefreshing()
-            let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
-            collectionView.setContentOffset(offsetPoint, animated: true)
+
+            // 200 is an arbitrary value that works fine.
+            // The goal is to prevent moving offset if the user already pulled down the control.
+            if collectionView.contentOffset.y >= -200 {
+                let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
+                collectionView.setContentOffset(offsetPoint, animated: true)
+            }
         } else {
             refreshControl.endRefreshing()
         }
@@ -461,7 +466,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     func onFilePresented(_ file: File) {
         #if !ISEXTENSION
         filePresenter.present(for: file,
-                              files: viewModel.getAllFrozenFiles(),
+                              files: viewModel.files,
                               driveFileManager: viewModel.driveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                               fromActivities: viewModel.configuration.fromActivities)
@@ -588,6 +593,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            return super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
+        }
+
         let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(
             ofKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: headerViewIdentifier,
@@ -775,14 +784,14 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
-        if headerView == nil {
-            headerView = self.collectionView(
-                collectionView,
-                viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
-                at: IndexPath(row: 0, section: section)
-            ) as? FilesHeaderView
+        guard let headerView = collectionView.supplementaryView(
+            forElementKind: UICollectionView.elementKindSectionHeader,
+            at: IndexPath(row: 0, section: section)
+        ) as? FilesHeaderView else {
+            return CGSize(width: collectionView.frame.width, height: 32)
         }
-        return headerView!.systemLayoutSizeFitting(
+
+        return headerView.systemLayoutSizeFitting(
             CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel

@@ -1027,22 +1027,31 @@ public final class DriveFileManager {
     }
 
     func removeFileInDatabase(fileUid: String, cascade: Bool, writableRealm: Realm) {
-        guard let liveFile = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid), !liveFile.isInvalidated else {
-            return
-        }
+        var fileUidsToProcess = [fileUid]
+        var liveFilesToDelete = [File]()
 
-        let localContainerUrl = liveFile.localContainerUrl
-        if fileManager.fileExists(atPath: localContainerUrl.path) {
-            try? fileManager.removeItem(at: localContainerUrl) // Check that it was correctly removed?
-        }
+        while !fileUidsToProcess.isEmpty {
+            let currentFileUid = fileUidsToProcess.removeLast()
+            guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: currentFileUid), !file.isInvalidated else {
+                continue
+            }
 
-        if cascade {
-            for frozenChild in liveFile.children.freeze() where !frozenChild.isInvalidated {
-                removeFileInDatabase(fileUid: frozenChild.uid, cascade: cascade, writableRealm: writableRealm)
+            if fileManager.fileExists(atPath: file.localContainerUrl.path) {
+                try? fileManager.removeItem(at: file.localContainerUrl)
+            }
+
+            if cascade {
+                let filesUidsToDelete = liveFilesToDelete.map { $0.uid }
+                let liveChildren = file.children.filter { child in
+                    // A child should not be a circular reference to an ancestor
+                    return !child.isInvalidated && !filesUidsToDelete.contains(child.uid)
+                }
+                fileUidsToProcess.append(contentsOf: liveChildren.map { $0.uid })
+                liveFilesToDelete.append(contentsOf: liveChildren)
             }
         }
 
-        writableRealm.delete(liveFile)
+        writableRealm.delete(liveFilesToDelete)
     }
 
     private func deleteOrphanFiles(root: File..., newFiles: [File]? = nil, writableRealm: Realm) {
