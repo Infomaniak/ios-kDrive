@@ -461,7 +461,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     func onFilePresented(_ file: File) {
         #if !ISEXTENSION
         filePresenter.present(for: file,
-                              files: viewModel.getAllFrozenFiles(),
+                              files: viewModel.files,
                               driveFileManager: viewModel.driveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                               fromActivities: viewModel.configuration.fromActivities)
