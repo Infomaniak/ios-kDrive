@@ -79,17 +79,8 @@ class SecurityTableViewController: BaseGroupedTableViewController {
                 Task {
                     UserDefaults.shared.isFileProviderExtensionEnabled = toggleStatus
 
-                    if toggleStatus {
-                        // Force refresh accounts, to regenerate Files.app accounts
-                        @InjectService var accountManager: AccountManageable
-                        let accounts = accountManager.accounts.values
-                        for account in accounts {
-                            _ = try? await accountManager.updateUser(for: account, registerToken: true)
-                        }
-                    } else {
-                        @InjectService var driveInfosManager: DriveInfosManager
-                        try? await driveInfosManager.deleteAllDomains()
-                    }
+                    @InjectService var driveInfosManager: DriveInfosManager
+                    try? await driveInfosManager.toggleDomains(enable: toggleStatus)
 
                     cell.valueSwitch.isEnabled = true
                 }

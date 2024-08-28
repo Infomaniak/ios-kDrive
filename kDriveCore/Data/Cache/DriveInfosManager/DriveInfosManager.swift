@@ -164,10 +164,14 @@ public final class DriveInfosManager: DriveInfosManagerQueryable {
         return Array(driveRemoved)
     }
 
-    private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakCore.UserProfile) {
-        let frozenNotSharedWithMe = liveDrives
+    private func updateFileProvider(withLiveDrives liveDrives: [Drive], user: InfomaniakUser) {
+        let frozenNotSharedWithMe = liveDrives.map { $0.freeze() }
+        updateFileProvider(withFrozenDrives: frozenNotSharedWithMe, user: user)
+    }
+
+    private func updateFileProvider(withFrozenDrives frozenDrives: [Drive], user: InfomaniakUser) {
+        let frozenNotSharedWithMe = frozenDrives
             .filter { !$0.sharedWithMe }
-            .map { $0.freeze() }
         initFileProviderDomains(frozenDrives: frozenNotSharedWithMe, user: user)
     }
 
