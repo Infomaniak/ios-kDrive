@@ -263,6 +263,8 @@ extension MainTabViewController: MainTabBarDelegate {
         selectedIndex = MainTabBarIndex.profile.rawValue
 
         router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
+
+        MatomoUtils.track(eventWithCategory: .account, name: "longPressDirectAccess")
     }
 
     func avatarDoubleTap() {
@@ -276,6 +278,8 @@ extension MainTabViewController: MainTabBarDelegate {
 
         _ = router.showMainViewController(driveFileManager: accountManager,
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
+
+        MatomoUtils.track(eventWithCategory: .account, name: "switchDoubleTap")
     }
 }
 
