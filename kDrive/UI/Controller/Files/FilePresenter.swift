@@ -132,6 +132,26 @@ final class FilePresenter {
         }
     }
 
+    public func presentPublicShareDirectory(
+        rootFolder: File,
+        rootViewController: UIViewController,
+        driveFileManager: DriveFileManager
+    ) {
+        let viewModel: FileListViewModel // TODO: use InMemoryFileListViewModel
+        viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: rootFolder)
+
+        // TODO: Fix access right
+//        guard !rootFolder.isDisabled else {
+//            return
+//        }
+
+        let nextVC = FileListViewController(viewModel: viewModel)
+        print("nextVC:\(nextVC) viewModel:\(viewModel) navigationController:\(navigationController)")
+//        navigationController?.pushViewController(nextVC, animated: true)
+        
+        rootViewController.present(nextVC, animated: true)
+    }
+
     public func presentDirectory(
         for file: File,
         driveFileManager: DriveFileManager,

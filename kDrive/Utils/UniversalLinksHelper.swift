@@ -95,14 +95,19 @@ enum UniversalLinksHelper {
         }
 
         // request metadata
-        guard let metadata = try? await PublicShareApiFetcher().getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
+        let apiFetcher = PublicShareApiFetcher()
+        guard let metadata = try? await apiFetcher.getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
         else {
             return false
         }
 
         // get file ID from metadata
         let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(for: shareLinkUid)
-        openPublicShare(id: metadata.fileId, driveFileManager: publicShareDriveFileManager)
+        openPublicShare(driveId: driveIdInt,
+                        linkUuid: shareLinkUid,
+                        fileId: metadata.fileId,
+                        driveFileManager: publicShareDriveFileManager,
+                        apiFetcher: apiFetcher)
         return true
     }
 
@@ -123,14 +128,20 @@ enum UniversalLinksHelper {
         return true
     }
 
-    private static func openPublicShare(id: Int, driveFileManager: DriveFileManager) {
+    private static func openPublicShare(driveId: Int,
+                                        linkUuid: String,
+                                        fileId: Int,
+                                        driveFileManager: DriveFileManager,
+                                        apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
-                let file = try await driveFileManager.file(id: id)
+                let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                                                                 linkUuid: linkUuid,
+                                                                 fileId: fileId)
                 @InjectService var appNavigable: AppNavigable
-                await appNavigable.present(file: file, driveFileManager: driveFileManager, office: false)
+                await appNavigable.presentPublicShare(rootFolder: rootFolder, driveFileManager: driveFileManager)
             } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
+                DDLogError("[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)")
                 await UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
