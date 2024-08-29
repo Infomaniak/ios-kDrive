@@ -52,8 +52,8 @@ public extension Endpoint {
     }
 
     /// Share link file
-    func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/files/\(fileId)")
+    static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+        Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }
 
     /// Share link file children
@@ -63,17 +63,17 @@ public extension Endpoint {
     }
 
     /// Share link file thumbnail
-    func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
     }
 
     /// Share mink file preview
-    func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
     }
 
     /// Download share link file
-    func downloadShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func downloadShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/download")
     }
 

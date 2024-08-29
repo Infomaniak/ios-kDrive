@@ -56,6 +56,9 @@ public protocol RouterFileNavigable {
     ///   - office: Open in only office
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 
+    /// Present a file list for a public share
+    @MainActor func presentPublicShare(rootFolder: File, driveFileManager: DriveFileManager)
+
     /// Present a list of files from a folder
     /// - Parameters:
     ///   - frozenFolder: Folder to display
