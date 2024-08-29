@@ -61,14 +61,15 @@ public enum FileActivityType: String, Codable, CaseIterable {
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
 
-    public static let fileActivities: [FileActivityType] = [
+    public static let displayedFileActivities: [FileActivityType] = [
         .fileCreate,
         .fileRename,
         .fileMoveIn,
         .fileMoveOut,
         .fileTrash,
-        .fileTrashInherited,
+        // .fileTrashInherited, FIXME: waiting for API fix
         .fileRestore,
+        // .fileRestoreInherited, FIXME: waiting for API fix
         .fileDelete,
         .fileUpdate,
         .fileCategorize,
@@ -88,8 +89,6 @@ public enum FileActivityType: String, Codable, CaseIterable {
         .fileColorUpdate,
         .fileColorDelete
     ]
-
-    public static let displayedFileActivities: [FileActivityType] = FileActivityType.allCases
 }
 
 public class FileActivity: Object, Decodable {

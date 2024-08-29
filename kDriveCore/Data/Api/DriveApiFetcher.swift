@@ -317,7 +317,7 @@ public class DriveApiFetcher: ApiFetcher {
             URLQueryItem(name: "depth", value: "children"),
             URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
         ]
-        queryItems.append(contentsOf: FileActivityType.fileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        queryItems.append(contentsOf: FileActivityType.displayedFileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
             .cursored(cursor)
