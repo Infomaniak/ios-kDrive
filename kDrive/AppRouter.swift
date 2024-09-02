@@ -537,7 +537,12 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
-    @MainActor public func presentPublicShare(rootFolder: File, driveFileManager: DriveFileManager) {
+    @MainActor public func presentPublicShare(
+        rootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
         // TODO: Present on top of existing views
         guard let window,
               let rootViewController = window.rootViewController else {
@@ -545,11 +550,11 @@ public struct AppRouter: AppNavigable {
         }
 
         let filePresenter = FilePresenter(viewController: rootViewController)
-        filePresenter.presentPublicShareDirectory(
-            rootFolder: rootFolder,
-            rootViewController: rootViewController,
-            driveFileManager: driveFileManager
-        )
+        filePresenter.presentPublicShareDirectory(publicShareProxy: publicShareProxy,
+                                                  rootFolder: rootFolder,
+                                                  rootViewController: rootViewController,
+                                                  driveFileManager: driveFileManager,
+                                                  apiFetcher: apiFetcher)
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {

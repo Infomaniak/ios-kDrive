@@ -133,12 +133,17 @@ final class FilePresenter {
     }
 
     public func presentPublicShareDirectory(
+        publicShareProxy: PublicShareProxy,
         rootFolder: File,
         rootViewController: UIViewController,
-        driveFileManager: DriveFileManager
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
     ) {
-        let viewModel: FileListViewModel // TODO: use InMemoryFileListViewModel
-        viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: rootFolder)
+        let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                             sortType: .nameAZ,
+                                             driveFileManager: driveFileManager,
+                                             currentDirectory: rootFolder,
+                                             apiFetcher: apiFetcher)
 
         // TODO: Fix access right
 //        guard !rootFolder.isDisabled else {
@@ -148,7 +153,7 @@ final class FilePresenter {
         let nextVC = FileListViewController(viewModel: viewModel)
         print("nextVC:\(nextVC) viewModel:\(viewModel) navigationController:\(navigationController)")
 //        navigationController?.pushViewController(nextVC, animated: true)
-        
+
         rootViewController.present(nextVC, animated: true)
     }
 

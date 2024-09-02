@@ -57,7 +57,12 @@ public protocol RouterFileNavigable {
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 
     /// Present a file list for a public share
-    @MainActor func presentPublicShare(rootFolder: File, driveFileManager: DriveFileManager)
+    @MainActor func presentPublicShare(
+        rootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    )
 
     /// Present a list of files from a folder
     /// - Parameters:

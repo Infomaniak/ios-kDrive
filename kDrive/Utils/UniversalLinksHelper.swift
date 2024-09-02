@@ -136,12 +136,20 @@ enum UniversalLinksHelper {
         Task {
             do {
                 let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
-                                                                 linkUuid: linkUuid,
-                                                                 fileId: fileId)
+                                                                       linkUuid: linkUuid,
+                                                                       fileId: fileId)
                 @InjectService var appNavigable: AppNavigable
-                await appNavigable.presentPublicShare(rootFolder: rootFolder, driveFileManager: driveFileManager)
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+                await appNavigable.presentPublicShare(
+                    rootFolder: rootFolder,
+                    publicShareProxy: publicShareProxy,
+                    driveFileManager: driveFileManager,
+                    apiFetcher: apiFetcher
+                )
             } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)")
+                DDLogError(
+                    "[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
+                )
                 await UIConstants.showSnackBarIfNeeded(error: error)
             }
         }

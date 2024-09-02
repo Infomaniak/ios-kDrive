@@ -100,26 +100,6 @@ public struct PublicShareMetadata: Decodable {
     }
 }
 
-public class PublicShareApiFetcher: ApiFetcher {
-    override public init() {
-        super.init()
-    }
-
-    public func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
-        let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
-        let request = Session.default.request(shareLinkInfoUrl)
-        let metadata: PublicShareMetadata = try await perform(request: request)
-        return metadata
-    }
-
-    public func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
-        let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
-        let request = Session.default.request(shareLinkFileUrl)
-        let shareLinkFile: File = try await perform(request: request)
-        return shareLinkFile
-    }
-}
-
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakTokenable

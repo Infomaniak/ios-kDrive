@@ -86,7 +86,7 @@ public final class DriveFileManager {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
 
         let inMemoryIdentifier: String?
-        if case let .publicShare(identifier) = context {
+        if case .publicShare(let identifier) = context {
             inMemoryIdentifier = "inMemory:\(identifier)"
         } else {
             inMemoryIdentifier = nil
@@ -379,6 +379,27 @@ public final class DriveFileManager {
                             let mySharedFiles = try await apiFetcher.sharedWithMeFiles(
                                 drive: drive,
                                 cursor: cursor,
+                                sortType: sortType
+                            )
+                            return mySharedFiles
+                        },
+                        cursor: cursor,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
+    }
+
+    public func publicShareFiles(rootProxy: ProxyFile,
+                                 publicShareProxy: PublicShareProxy,
+                                 cursor: String? = nil,
+                                 sortType: SortType = .nameAZ,
+                                 forceRefresh: Bool = false,
+                                 publicShareApiFetcher: PublicShareApiFetcher) async throws
+        -> (files: [File], nextCursor: String?) {
+        try await files(in: rootProxy,
+                        fetchFiles: {
+                            let mySharedFiles = try await publicShareApiFetcher.shareLinkFileChildren(
+                                publicShareProxy: publicShareProxy,
                                 sortType: sortType
                             )
                             return mySharedFiles
