@@ -182,6 +182,19 @@ public enum ConvertedType: String, CaseIterable {
     public static let ignoreThumbnailTypes = downloadableTypes
 }
 
+/// Minimal data needed to query a PublicShare
+public struct PublicShareProxy {
+    let driveId: Int
+    let fileId: Int
+    let shareLinkUid: String
+
+    public init(driveId: Int, fileId: Int, shareLinkUid: String) {
+        self.driveId = driveId
+        self.fileId = fileId
+        self.shareLinkUid = shareLinkUid
+    }
+}
+
 public enum SortType: String {
     case nameAZ
     case nameZA

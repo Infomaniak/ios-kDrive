@@ -23,7 +23,6 @@ import RealmSwift
 // MARK: - Share Links
 
 public extension Endpoint {
-    private static let sharedFileWithQuery = "with=capabilities,conversion_capabilities,supported_by"
 
     /// It is necessary to keep V1 here for backward compatibility of old links
     static var shareUrlV1: Endpoint {
@@ -57,9 +56,14 @@ public extension Endpoint {
     }
 
     /// Share link file children
-    func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType) -> Endpoint {
-        let orderQuery = "order_by=\(sortType.value.apiValue)&order=\(sortType.value.order)"
-        return Self.shareUrlV3.appending(path: "\(driveId)/share/\(linkUuid)/files?\(Self.sharedFileWithQuery)&\(orderQuery)")
+    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType) -> Endpoint {
+        let orderByQuery = URLQueryItem(name: "order_by", value: sortType.value.apiValue)
+        let orderQuery = URLQueryItem(name: "order", value: sortType.value.order)
+        let withQuery = URLQueryItem(name: "with", value: "capabilities,conversion_capabilities,supported_by")
+
+        let shareLinkQueryItems = [orderByQuery, orderQuery, withQuery]
+        let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files")
+        return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
     }
 
     /// Share link file thumbnail
@@ -78,10 +82,10 @@ public extension Endpoint {
     }
 
     func showOfficeShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return Self.shareUrlV1.appending(path: "share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
+        return Self.shareUrlV1.appending(path: "/share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
     }
 
     func importShareLinkFiles(driveId: Int) -> Endpoint {
-        return Self.shareUrlV2.appending(path: "\(driveId)/imports/sharelink")
+        return Self.shareUrlV2.appending(path: "/\(driveId)/imports/sharelink")
     }
 }
