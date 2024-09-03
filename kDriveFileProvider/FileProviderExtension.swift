@@ -217,8 +217,27 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func itemChanged(at url: URL) {
         Log.fileProvider("itemChanged at url:\(url)")
-        if let identifier = persistentIdentifierForItem(at: url),
-           let uploadItem = try? item(for: identifier) as? UploadFileProviderItem {
+        guard let identifier = persistentIdentifierForItem(at: url) else {
+            Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
+            return
+        }
+
+        let fileProviderItem = try? item(for: identifier)
+
+        if let fileItem = fileProviderItem as? FileProviderItem,
+           let parentDirectoryId = fileItem.parentItemIdentifier.toFileId() {
+            let uploadItem = UploadFileProviderItem(
+                uploadFileUUID: UUID().uuidString,
+                parentDirectoryId: parentDirectoryId,
+                userId: driveFileManager.drive.userId,
+                driveId: driveFileManager.drive.id,
+                sourceUrl: url,
+                conflictOption: .version,
+                driveError: nil
+            )
+            backgroundUpload(uploadItem)
+        } else if let uploadItem = fileProviderItem as? UploadFileProviderItem {
+            Log.fileProvider("itemChanged called with an already uploading item :\(url)", level: .warning)
             backgroundUpload(uploadItem)
         } else {
             Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
