@@ -44,10 +44,10 @@ extension FileProviderExtension {
                 continue
             }
 
-            // If we do not have `supportedBy` info, we try to load avatars anyway
+            // If we do not have `supportedBy` return nil data nil error, per documentation
             // Note: An freshly uploaded file will not have a .thumbnail before re-navigating to the parent folder
             guard file.supportedBy.contains(.thumbnail) else {
-                perThumbnailCompletionHandler(identifier, nil, NSError.featureUnsupported)
+                perThumbnailCompletionHandler(identifier, nil, nil)
                 progress.completedUnitCount += 1
                 if progress.isFinished {
                     completionHandler(nil)
