@@ -134,7 +134,7 @@ final class FilePresenter {
 
     public func presentPublicShareDirectory(
         publicShareProxy: PublicShareProxy,
-        rootFolder: File,
+        frozenRootFolder: File,
         rootViewController: UIViewController,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
@@ -142,7 +142,7 @@ final class FilePresenter {
         let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
                                              sortType: .nameAZ,
                                              driveFileManager: driveFileManager,
-                                             currentDirectory: rootFolder,
+                                             currentDirectory: frozenRootFolder,
                                              apiFetcher: apiFetcher)
 
         // TODO: Fix access right
@@ -150,6 +150,7 @@ final class FilePresenter {
 //            return
 //        }
 
+        // TODO: Build clean context aware navigation 
         let nextVC = FileListViewController(viewModel: viewModel)
         print("nextVC:\(nextVC) viewModel:\(viewModel) navigationController:\(navigationController)")
 //        navigationController?.pushViewController(nextVC, animated: true)

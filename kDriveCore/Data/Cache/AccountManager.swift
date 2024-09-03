@@ -216,15 +216,26 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return inMemoryDriveFileManager
         }
 
-        // Big hack, refactor to allow for non authenticated requests
+        // TODO: Big hack, refactor to allow for non authenticated requests
         guard let someToken = apiFetchers.values.first?.currentToken else {
-            fatalError("probably no account availlable")
+            fatalError("probably no account available")
         }
+
+        // FileViewModel K.O. without a valid drive in Realm, therefore add one
+        let publicShareDrive = Drive()
+        publicShareDrive.objectId = publicShareId
+        @LazyInjectService var driveInfosManager: DriveInfosManager
+        do {
+            try driveInfosManager.storePublicShareDrive(drive: publicShareDrive)
+        } catch {
+            fatalError("unable to update public share drive in base, \(error)")
+        }
+        let forzenPublicShareDrive = publicShareDrive.freeze()
 
         let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
         let context = DriveFileManagerContext.publicShare(shareId: publicShareId)
-        let noopDrive = Drive()
-        return DriveFileManager(drive: noopDrive, apiFetcher: apiFetcher, context: context)
+
+        return DriveFileManager(drive: forzenPublicShareDrive, apiFetcher: apiFetcher, context: context)
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {

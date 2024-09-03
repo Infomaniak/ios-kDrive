@@ -585,7 +585,7 @@ public struct AppRouter: AppNavigable {
     // MARK: RouterFileNavigable
 
     @MainActor public func presentPublicShare(
-        rootFolder: File,
+        frozenRootFolder: File,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
@@ -598,7 +598,7 @@ public struct AppRouter: AppNavigable {
 
         let filePresenter = FilePresenter(viewController: rootViewController)
         filePresenter.presentPublicShareDirectory(publicShareProxy: publicShareProxy,
-                                                  rootFolder: rootFolder,
+                                                  frozenRootFolder: frozenRootFolder,
                                                   rootViewController: rootViewController,
                                                   driveFileManager: driveFileManager,
                                                   apiFetcher: apiFetcher)
