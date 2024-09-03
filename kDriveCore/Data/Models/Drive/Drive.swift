@@ -186,8 +186,9 @@ public final class Drive: Object, Codable {
             // File is not managed by Realm: cannot use the `.sorted(by:)` method :(
             fileCategoriesIds = file.categories.sorted { $0.addedAt.compare($1.addedAt) == .orderedAscending }.map(\.categoryId)
         }
-        let filteredCategories = categories.filter(NSPredicate(format: "id IN %@", fileCategoriesIds))
+
         // Sort the categories
+        let filteredCategories = categories.filter("id IN %@", fileCategoriesIds)
         return fileCategoriesIds.compactMap { id in filteredCategories.first { $0.id == id } }
     }
 

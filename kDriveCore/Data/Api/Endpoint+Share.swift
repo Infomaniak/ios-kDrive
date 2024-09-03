@@ -62,7 +62,7 @@ public extension Endpoint {
         let withQuery = URLQueryItem(name: "with", value: "capabilities,conversion_capabilities,supported_by")
 
         let shareLinkQueryItems = [orderByQuery, orderQuery, withQuery]
-        let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files")
+        let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)/files")
         return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
     }
 

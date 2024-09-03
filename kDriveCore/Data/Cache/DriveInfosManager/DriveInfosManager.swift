@@ -134,6 +134,14 @@ public final class DriveInfosManager: DriveInfosManagerQueryable {
         drive.sharedWithMe = sharedWithMe
     }
 
+    // TODO: Add a flag that this drive can be cleaned
+    /// Store a specific public share Drive in realm for use by FileListViewControllers
+    public func storePublicShareDrive(drive: Drive) throws {
+        try driveInfoDatabase.writeTransaction { writableRealm in
+            writableRealm.add(drive, update: .modified)
+        }
+    }
+
     @discardableResult
     func storeDriveResponse(user: InfomaniakCore.UserProfile, driveResponse: DriveResponse) -> [Drive] {
         var driveList = [Drive]()

@@ -26,6 +26,21 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+// TODO: Move to core
+extension TransactionExecutor: CustomStringConvertible {
+    public var description: String {
+        var render = "TransactionExecutor: realm access issue"
+        try? writeTransaction { realm in
+            render = """
+            TransactionExecutor:
+            realmURL:\(realm.configuration.fileURL)
+            inMemory:\(realm.configuration.inMemoryIdentifier)
+            """
+        }
+        return render
+    }
+}
+
 // MARK: - Transactionable
 
 public final class DriveFileManager {
