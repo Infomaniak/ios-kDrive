@@ -1018,8 +1018,15 @@ public final class DriveFileManager {
     }
 
     func removeFileInDatabase(fileUid: String, cascade: Bool, writableRealm: Realm) {
-        var fileUidsToProcess = [fileUid]
-        var liveFilesToDelete = [File]()
+        guard let rootLiveFile = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid),
+              !rootLiveFile.isInvalidated else {
+            return
+        }
+
+        try? rootLiveFile.clearOnFileSystemIfNeeded()
+
+        var fileUidsToProcess: [String] = rootLiveFile.children.map(\.uid)
+        var liveFilesToDelete: [File] = [rootLiveFile]
 
         while !fileUidsToProcess.isEmpty {
             let currentFileUid = fileUidsToProcess.removeLast()
@@ -1027,9 +1034,7 @@ public final class DriveFileManager {
                 continue
             }
 
-            if fileManager.fileExists(atPath: file.localContainerUrl.path) {
-                try? fileManager.removeItem(at: file.localContainerUrl)
-            }
+            try? file.clearOnFileSystemIfNeeded()
 
             if cascade {
                 let filesUidsToDelete = liveFilesToDelete.map { $0.uid }
