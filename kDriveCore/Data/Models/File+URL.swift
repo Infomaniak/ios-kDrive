@@ -25,4 +25,11 @@ public extension File {
     func privateSharePath(host: String) -> String {
         "https://\(host)/app/drive/\(driveId)/redirect/\(id)"
     }
+
+    /// Remove file from FS if present at expected path
+    func clearOnFileSystemIfNeeded() throws {
+        if FileManager.default.fileExists(atPath: localContainerUrl.path) {
+            try FileManager.default.removeItem(at: localContainerUrl)
+        }
+    }
 }
