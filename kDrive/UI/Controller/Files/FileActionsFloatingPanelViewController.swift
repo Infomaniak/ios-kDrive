@@ -206,6 +206,10 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActions: [FloatingPanelAction] {
+        return [manageCategories, favorite, offline, download, move, duplicate].map { $0.reset() }
+    }
+
+    static var multipleSelectionActionsOnlyFolders: [FloatingPanelAction] {
         return [manageCategories, favorite, folderColor, offline, download, move, duplicate].map { $0.reset() }
     }
 
