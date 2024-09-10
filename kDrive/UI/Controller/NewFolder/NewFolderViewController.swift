@@ -96,10 +96,7 @@ class NewFolderViewController: UIViewController {
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
         navigationItem.hideBackButtonText()
 
-        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyCurrentDirectory)
-            self.setupTableViewRows()
-        }
+        fetchAccessIfNeeded()
         setupTableViewRows()
         NotificationCenter.default.addObserver(
             self,
@@ -113,6 +110,15 @@ class NewFolderViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
+    }
+
+    func fetchAccessIfNeeded() {
+        guard currentDirectory.visibility != .isInSharedSpace else { return }
+
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyCurrentDirectory)
+            self.setupTableViewRows()
+        }
     }
 
     deinit {
