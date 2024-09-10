@@ -103,8 +103,25 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        folders = files
-            .compactMap { accountManager.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
+        folders = files.compactMap { tuple in
+            let parentId = tuple.parentId
+            let driveId = tuple.driveId
+
+            guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
+                Log.fileList("Unable to fetch a linked driveFileManager for driveId:\(driveId) userId:\(userId)", level: .error)
+                return nil
+            }
+
+            // FIXME: orphan files not displayed
+            guard let folder = driveFileManager.getCachedFile(id: parentId) else {
+                let metadata = ["parentId": "\(parentId)", "driveId": "\(driveId)"]
+                Log.fileList("Unable to fetch parent folder to display file", metadata: metadata, level: .error)
+                return nil
+            }
+
+            return folder
+        }
+
         // (Pop view controller if nothing to show)
         if folders.isEmpty {
             Task { @MainActor in
