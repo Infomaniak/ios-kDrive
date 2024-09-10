@@ -72,6 +72,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             if files.contains(where: { $0.parentId != files.first?.parentId }) {
                 actions.removeAll { $0 == .download }
             }
+        } else if presentingParent is PhotoListViewController {
+            actions = FloatingPanelAction.multipleSelectionPhotosListActions
         } else {
             if files.contains { !$0.isDirectory } {
                 actions = FloatingPanelAction.multipleSelectionActions

@@ -217,6 +217,10 @@ public class FloatingPanelAction: Equatable {
         return [download].map { $0.reset() }
     }
 
+    static var multipleSelectionPhotosListActions: [FloatingPanelAction] {
+        return [manageCategories, favorite, download, move, duplicate].map { $0.reset() }
+    }
+
     static var multipleSelectionBulkActions: [FloatingPanelAction] {
         return [offline, download, move, duplicate].map { $0.reset() }
     }
