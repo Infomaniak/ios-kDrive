@@ -603,10 +603,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             .instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
         previewPageViewController.previewFiles = files
         previewPageViewController.driveFileManager = driveFileManager
-        previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.fromActivities = fromActivities
         previewPageViewController.fromPhotoList = fromPhotoList
+        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the function returns
+        // this should be fixed in the future with the refactor of the init
+        previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         return previewPageViewController
     }
 
