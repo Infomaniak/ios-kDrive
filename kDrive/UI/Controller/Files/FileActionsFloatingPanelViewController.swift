@@ -250,7 +250,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     var sharedWithMe: Bool {
-        return driveFileManager?.drive.sharedWithMe ?? false
+        return file.visibility == .inInSharedSpace
     }
 
     enum Section: CaseIterable {
