@@ -77,7 +77,7 @@ extension FileActionsFloatingPanelViewController {
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
-                return !sharedWithMe
+                return !sharedWithMe && !isFromPhotoList
             case .download:
                 return file.capabilities.canRead
             case .move:

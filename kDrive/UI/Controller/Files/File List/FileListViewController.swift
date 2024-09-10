@@ -469,7 +469,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                               files: viewModel.files,
                               driveFileManager: viewModel.driveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
-                              fromActivities: viewModel.configuration.fromActivities)
+                              fromActivities: viewModel.configuration.fromActivities,
+                              fromPhotoList: viewModel.configuration.fromPhotoList)
         #endif
     }
 

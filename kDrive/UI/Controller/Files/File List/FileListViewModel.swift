@@ -71,6 +71,8 @@ class FileListViewModel: SelectDelegate {
         var isRefreshControlEnabled = true
         /// Is displayed from activities
         var fromActivities = false
+        /// Is displayed from photoList
+        var fromPhotoList = false
         /// Does this folder support "select all" action (no effect if multiple selection is disabled)
         var selectAllSupported = true
         /// Root folder title

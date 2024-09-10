@@ -400,4 +400,15 @@ final class PhotoListViewController: FileListViewController {
     override var currentSceneMetadata: [AnyHashable: Any] {
         [:]
     }
+
+    override func onFilePresented(_ file: File) {
+        #if !ISEXTENSION
+        filePresenter.present(for: file,
+                              files: viewModel.files,
+                              driveFileManager: viewModel.driveFileManager,
+                              normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
+                              fromPhotoList: viewModel.configuration.fromPhotoList)
+
+        #endif
+    }
 }

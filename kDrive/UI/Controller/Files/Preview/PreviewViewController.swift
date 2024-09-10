@@ -76,6 +76,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var normalFolderHierarchy = true
     private var initialLoading = true
     private var fromActivities = false
+    private var fromPhotoList = false
     private var centerIndexPathBeforeRotate: IndexPath?
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
@@ -128,6 +129,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController = FileActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
+        fileInformationsViewController.isFromPhotoList = fromPhotoList
+
         floatingPanelViewController.set(contentViewController: fileInformationsViewController)
         floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
         floatingPanelViewController.delegate = self
@@ -593,7 +596,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool
+        fromActivities: Bool,
+        fromPhotoList: Bool
     ) -> PreviewViewController {
         let previewPageViewController = Storyboard.files
             .instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
@@ -602,6 +606,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.fromActivities = fromActivities
+        previewPageViewController.fromPhotoList = fromPhotoList
         return previewPageViewController
     }
 

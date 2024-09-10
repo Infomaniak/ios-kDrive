@@ -284,7 +284,8 @@ public struct AppRouter: AppNavigable {
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
+              let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool,
+              let fromPhotoList = sceneUserInfo[SceneRestorationValues.Carousel.fromPhotoList.rawValue] as? Bool else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
@@ -304,6 +305,7 @@ public struct AppRouter: AppNavigable {
             driveFileManager: driveFileManager,
             normalFolderHierarchy: normalFolderHierarchy,
             fromActivities: fromActivities,
+            fromPhotoList: fromPhotoList,
             navigationController: navigationController,
             animated: false
         )
@@ -654,6 +656,7 @@ public struct AppRouter: AppNavigable {
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
         fromActivities: Bool,
+        fromPhotoList: Bool,
         navigationController: UINavigationController,
         animated: Bool
     ) {
@@ -666,7 +669,8 @@ public struct AppRouter: AppNavigable {
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,
                                                                       normalFolderHierarchy: normalFolderHierarchy,
-                                                                      fromActivities: fromActivities)
+                                                                      fromActivities: fromActivities,
+                                                                      fromPhotoList: fromPhotoList)
         navigationController.pushViewController(previewViewController, animated: animated)
     }
 

@@ -87,6 +87,7 @@ final class FilePresenter {
                  driveFileManager: DriveFileManager,
                  normalFolderHierarchy: Bool,
                  fromActivities: Bool = false,
+                 fromPhotoList: Bool = false,
                  animated: Bool = true,
                  completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
@@ -100,6 +101,7 @@ final class FilePresenter {
                 driveFileManager: driveFileManager,
                 normalFolderHierarchy: normalFolderHierarchy,
                 fromActivities: fromActivities,
+                fromPhotoList: fromPhotoList,
                 animated: animated,
                 completion: completion
             )
@@ -111,6 +113,7 @@ final class FilePresenter {
                              driveFileManager: DriveFileManager,
                              normalFolderHierarchy: Bool,
                              fromActivities: Bool,
+                             fromPhotoList: Bool,
                              animated: Bool,
                              completion: ((Bool) -> Void)?) {
         // Show file preview
@@ -121,7 +124,8 @@ final class FilePresenter {
                 index: Int(index),
                 driveFileManager: driveFileManager,
                 normalFolderHierarchy: normalFolderHierarchy,
-                fromActivities: fromActivities
+                fromActivities: fromActivities,
+                fromPhotoList: fromPhotoList
             )
             navigationController?.pushViewController(previewViewController, animated: animated)
             completion?(true)

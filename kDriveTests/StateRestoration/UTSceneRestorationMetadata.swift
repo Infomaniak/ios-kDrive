@@ -77,7 +77,8 @@ final class UTSceneRestorationMetadata: XCTestCase {
             index: 0,
             driveFileManager: Self.driveFileManager,
             normalFolderHierarchy: true,
-            fromActivities: true
+            fromActivities: true,
+            fromPhotoList: true
         )
 
         // WHEN
@@ -91,6 +92,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
         XCTAssertEqual(metadata["currentIndex"] as? Int, Int(0))
         XCTAssertEqual(metadata["normalFolderHierarchy"] as? Bool, true)
         XCTAssertEqual(metadata["fromActivities"] as? Bool, true)
+        XCTAssertEqual(metadata["fromPhotoList"] as? Bool, true)
     }
 
     @MainActor func testFileDetailViewController() {

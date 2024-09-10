@@ -241,6 +241,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
     var normalFolderHierarchy = true
+    var isFromPhotoList = false
     weak var presentingParent: UIViewController?
     var matomoCategory: MatomoUtils.EventCategory {
         if presentingParent is PhotoListViewController {
