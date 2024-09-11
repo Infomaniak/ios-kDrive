@@ -69,10 +69,8 @@ class FileListViewModel: SelectDelegate {
         var isMultipleSelectionEnabled = true
         /// Enable or disable refresh control (enabled by default)
         var isRefreshControlEnabled = true
-        /// Is displayed from activities
-        var fromActivities = false
-        /// Is displayed from photoList
-        var fromPhotoList = false
+        /// To know from which view it is displayed
+        var presentationOrigin = PresentationOrigin.fileList
         /// Does this folder support "select all" action (no effect if multiple selection is disabled)
         var selectAllSupported = true
         /// Root folder title
@@ -380,7 +378,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || listStyle == .grid {
+        if configuration.presentationOrigin == .activities || listStyle == .grid {
             return nil
         }
         var actions = [SwipeCellAction]()

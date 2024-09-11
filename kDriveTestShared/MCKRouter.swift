@@ -103,8 +103,7 @@ public final class MCKRouter: AppNavigable {
         index: Int,
         driveFileManager: kDriveCore.DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
-        fromPhotoList: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     ) {

@@ -90,8 +90,7 @@ public protocol RouterFileNavigable {
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
-        fromPhotoList: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     )

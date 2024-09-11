@@ -66,7 +66,7 @@ class PhotoListViewModel: FileListViewModel {
         let lastPicturesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.lastPicturesRootFile)
         super.init(configuration: Configuration(normalFolderHierarchy: false,
                                                 showUploadingFiles: false,
-                                                fromPhotoList: true,
+                                                presentationOrigin: PresentationOrigin.photoList,
                                                 selectAllSupported: false,
                                                 rootTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                                                 emptyViewType: .noImages,

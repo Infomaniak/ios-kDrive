@@ -469,8 +469,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                               files: viewModel.files,
                               driveFileManager: viewModel.driveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
-                              fromActivities: viewModel.configuration.fromActivities,
-                              fromPhotoList: viewModel.configuration.fromPhotoList)
+                              presentationOrigin: viewModel.configuration.presentationOrigin)
         #endif
     }
 
@@ -635,7 +634,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             cell.setEnabled(true)
         }
 
-        if viewModel.configuration.fromActivities {
+        if viewModel.configuration.presentationOrigin == PresentationOrigin.activities {
             cell.moreButton.isHidden = true
         }
 

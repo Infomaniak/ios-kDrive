@@ -241,7 +241,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
     var normalFolderHierarchy = true
-    var isFromPhotoList = false
+    var presentationOrigin = PresentationOrigin.fileList
     weak var presentingParent: UIViewController?
     var matomoCategory: MatomoUtils.EventCategory {
         if presentingParent is PhotoListViewController {
@@ -251,7 +251,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     var sharedWithMe: Bool {
-        return file.visibility == .inInSharedSpace
+        return file.visibility == .isInSharedSpace
     }
 
     enum Section: CaseIterable {
