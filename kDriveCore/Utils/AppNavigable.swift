@@ -39,6 +39,10 @@ public protocol RouterAppNavigable {
     @MainActor func showUpdateRequired()
 
     @MainActor func showPhotoSyncSettings()
+
+    @MainActor func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
+
+    @MainActor func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
 }
 
 /// Something that can present a File within the app
@@ -155,9 +159,9 @@ public protocol RouterActionable {
 }
 
 /// Something that can navigate within the kDrive app
-public typealias AppNavigable = RouterActionable
+public typealias AppNavigable = Routable
+    & RouterActionable
     & RouterAppNavigable
     & RouterFileNavigable
     & RouterRootNavigable
     & TopmostViewControllerFetchable
-    & NavigationManageable

@@ -64,6 +64,45 @@ public struct AppRouter: AppNavigable {
         return userInfo
     }
 
+    // MARK: Routable
+
+    public func navigate(to route: NavigationRoutes) {
+        #if ISEXTENSION
+        Log.sceneDelegate("NavigationManager: navigate(to:) NOOP in extension mode", level: .error)
+        #else
+        guard let rootViewController = window?.rootViewController else {
+            SentryDebug.captureNoWindow()
+            Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
+            return
+        }
+
+        // Get presented view controller
+        var viewController = rootViewController
+        while let presentedViewController = viewController.presentedViewController {
+            viewController = presentedViewController
+        }
+
+        switch route {
+        case .saveFile(let file):
+            guard let driveFileManager = accountManager.currentDriveFileManager else {
+                Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
+                return
+            }
+
+            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
+
+        case .store(let driveId, let userId):
+            guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
+                Log.sceneDelegate("NavigationManager: Unable to navigate to .store without a DriveFileManager", level: .error)
+                return
+            }
+
+            // Show store
+            showStore(from: viewController, driveFileManager: driveFileManager)
+        }
+        #endif
+    }
+
     // MARK: TopmostViewControllerFetchable
 
     @MainActor public var topMostViewController: UIViewController? {
@@ -402,6 +441,27 @@ public struct AppRouter: AppNavigable {
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
+    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
+        #if ISEXTENSION
+        UIConstants.openUrl(
+            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
+            from: viewController
+        )
+        #else
+        let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+        viewController.present(storeViewController, animated: true)
+        #endif
+    }
+
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+        #if ISEXTENSION
+        Log.sceneDelegate("NavigationManager: showSaveFileVC(from:) NOOP in extension mode", level: .error)
+        #else
+        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+        viewController.present(vc, animated: true)
+        #endif
+    }
+
     // MARK: RouterActionable
 
     public func askUserToRemovePicturesIfNecessary() async {
@@ -654,65 +714,5 @@ public struct AppRouter: AppNavigable {
     ) {
         let accountViewController = SwitchUserViewController.instantiate()
         navigationController.pushViewController(accountViewController, animated: animated)
-    }
-
-    // MARK: NavigationManageable
-
-    public func navigate(to route: NavigationRoutes) {
-        #if ISEXTENSION
-        Log.sceneDelegate("NavigationManager: navigate(to:) NOOP in extension mode", level: .error)
-        #else
-        guard let rootViewController = window?.rootViewController else {
-            SentryDebug.captureNoWindow()
-            Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
-            return
-        }
-
-        // Get presented view controller
-        var viewController = rootViewController
-        while let presentedViewController = viewController.presentedViewController {
-            viewController = presentedViewController
-        }
-
-        switch route {
-        case .saveFile(let file):
-            guard let driveFileManager = accountManager.currentDriveFileManager else {
-                Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
-                return
-            }
-
-            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
-
-        case .store(let driveId, let userId):
-            guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-                Log.sceneDelegate("NavigationManager: Unable to navigate to .store without a DriveFileManager", level: .error)
-                return
-            }
-
-            // Show store
-            showStore(from: viewController, driveFileManager: driveFileManager)
-        }
-        #endif
-    }
-
-    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
-        #if ISEXTENSION
-        UIConstants.openUrl(
-            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
-            from: viewController
-        )
-        #else
-        let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-        viewController.present(storeViewController, animated: true)
-        #endif
-    }
-
-    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
-        #if ISEXTENSION
-        Log.sceneDelegate("NavigationManager: showSaveFileVC(from:) NOOP in extension mode", level: .error)
-        #else
-        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
-        viewController.present(vc, animated: true)
-        #endif
     }
 }
