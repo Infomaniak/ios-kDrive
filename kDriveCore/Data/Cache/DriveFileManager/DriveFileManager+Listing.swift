@@ -61,6 +61,11 @@ public extension DriveFileManager {
                 writableRealm: writableRealm
             )
 
+            // post `handleActions` managedParent may be invalidated in current context
+            guard !managedParent.isInvalidated else {
+                return
+            }
+
             managedParent.lastCursor = nextCursor
             managedParent.versionCode = DriveFileManager.constants.currentVersionCode
             managedParent.fullyDownloaded = !hasMore
