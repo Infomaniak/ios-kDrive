@@ -619,11 +619,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
-
         let file = displayedFiles[indexPath.row]
-        guard !file.isInvalidated else {
-            return cell
-        }
 
         cell.initStyle(isFirst: file.isFirstInList, isLast: file.isLastInList)
         cell.configureWith(
