@@ -159,6 +159,7 @@ let project = Project(name: "kDrive",
                                   sources: [
                                       "kDriveFileProvider/**",
                                       "kDrive/Utils/AppFactoryService.swift",
+                                      "kDrive/Utils/AppExtensionRouter.swift",
                                       "kDrive/Utils/NavigationManager.swift"
                                   ],
                                   resources: [

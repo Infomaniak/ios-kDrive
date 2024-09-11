@@ -29,6 +29,9 @@ public struct EarlyDIHook {
         var extraDependencies = [
             Factory(type: AppContextServiceable.self) { _, _ in
                 AppContextService(context: context)
+            },
+            Factory(type: AppExtensionRoutable.self) { _, _ in
+                AppExtensionRouter()
             }
         ]
 

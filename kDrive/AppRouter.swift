@@ -26,6 +26,7 @@ import UIKit
 import VersionChecker
 
 public struct AppRouter: AppNavigable {
+    @LazyInjectService private var appExtensionRouter: AppExtensionRoutable
     @LazyInjectService private var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var keychainHelper: KeychainHelper
@@ -441,25 +442,15 @@ public struct AppRouter: AppNavigable {
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
-    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
-        #if ISEXTENSION
-        UIConstants.openUrl(
-            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
-            from: viewController
-        )
-        #else
-        let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-        viewController.present(storeViewController, animated: true)
-        #endif
-    }
-
     public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
-        #if ISEXTENSION
-        Log.sceneDelegate("NavigationManager: showSaveFileVC(from:) NOOP in extension mode", level: .error)
-        #else
         let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
         viewController.present(vc, animated: true)
-        #endif
+    }
+
+    // MARK: AppExtensionRouter
+
+    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
+        appExtensionRouter.showStore(from: viewController, driveFileManager: driveFileManager)
     }
 
     // MARK: RouterActionable
