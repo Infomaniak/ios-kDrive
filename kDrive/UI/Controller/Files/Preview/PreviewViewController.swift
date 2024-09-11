@@ -351,7 +351,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 setNavbarStandard()
             }
         case .text, .presentation, .spreadsheet, .form:
-            if currentFile.capabilities.canWrite {
+            if currentFile.isOfficeFile && currentFile.capabilities.canWrite {
                 setNavbarForEditing()
             } else {
                 setNavbarStandard()
