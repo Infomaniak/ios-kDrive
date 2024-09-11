@@ -217,6 +217,35 @@ public enum Log {
               tag: tag)
     }
 
+    /// shorthand for ABLog, with "FileList" category
+    public static func fileList(_ message: @autoclosure () -> Any,
+                                metadata: [String: String] = [:],
+                                level: AbstractLogLevel = .debug,
+                                context: Int = 0,
+                                file: StaticString = #file,
+                                function: StaticString = #function,
+                                line: UInt = #line,
+                                tag: Any? = nil) {
+        let category = "FileList"
+        let messageString = "\(message())"
+        var metadata = metadata
+        metadata["message"] = messageString
+
+        if level == .error {
+            // Add a breadcrumb only for .errors only
+            SentryDebug.loggerBreadcrumb(caller: "\(function)", metadata: metadata)
+        }
+
+        ABLog(messageString,
+              category: category,
+              level: level,
+              context: context,
+              file: file,
+              function: function,
+              line: line,
+              tag: tag)
+    }
+
     /// Shorthand for ABLog, with "DriveInfosManager" category.
     ///
     /// Sentry tracking enabled when level == .error
