@@ -73,7 +73,10 @@ public final class DriveFileManager {
     }
 
     public let realmConfiguration: Realm.Configuration
+
+    // TODO: Fetch a drive with a computed property instead of tracking a Realm object
     public private(set) var drive: Drive
+
     public let apiFetcher: DriveApiFetcher
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
