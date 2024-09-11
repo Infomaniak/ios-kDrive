@@ -108,7 +108,8 @@ final class UploadQueueFoldersViewController: UITableViewController {
             let driveId = tuple.driveId
 
             guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-                Log.fileList("Unable to fetch a linked driveFileManager for driveId:\(driveId) userId:\(userId)", level: .error)
+                let metadata = ["parentId": "\(parentId)", "driveId": "\(driveId)", "userId": "\(userId)"]
+                Log.fileList("Unable to fetch a driveFileManager to display a file", metadata: metadata, level: .error)
                 return nil
             }
 
