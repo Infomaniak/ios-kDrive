@@ -22,10 +22,11 @@ import kDriveResources
 import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
+    @LazyInjectService private var router: AppNavigable
+
     @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService private var navigationManager: NavigationManageable
 
     var driveFileManager: DriveFileManager!
 
@@ -258,7 +259,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
                 floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) {
-                        self.navigationManager.showStore(from: self, driveFileManager: self.driveFileManager)
+                        self.router.showStore(from: self, driveFileManager: self.driveFileManager)
                     }
                 }
                 present(driveFloatingPanelController, animated: true)

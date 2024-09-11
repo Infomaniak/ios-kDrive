@@ -38,10 +38,10 @@ public enum NavigationRoutes: Equatable {
 
 /// Something that abstracts the navigation within the app
 public protocol NavigationManageable {
-    func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
+    @MainActor func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
 
-    func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
+    @MainActor func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
 
     /// Navigate to a specified abstracted location
-    func navigate(to route: NavigationRoutes)
+    @MainActor func navigate(to route: NavigationRoutes)
 }

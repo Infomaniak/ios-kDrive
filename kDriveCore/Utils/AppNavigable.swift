@@ -160,3 +160,4 @@ public typealias AppNavigable = RouterActionable
     & RouterFileNavigable
     & RouterRootNavigable
     & TopmostViewControllerFetchable
+    & NavigationManageable
