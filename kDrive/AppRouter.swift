@@ -68,9 +68,6 @@ public struct AppRouter: AppNavigable {
     // MARK: Routable
 
     public func navigate(to route: NavigationRoutes) {
-        #if ISEXTENSION
-        Log.sceneDelegate("NavigationManager: navigate(to:) NOOP in extension mode", level: .error)
-        #else
         guard let rootViewController = window?.rootViewController else {
             SentryDebug.captureNoWindow()
             Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
@@ -101,7 +98,6 @@ public struct AppRouter: AppNavigable {
             // Show store
             showStore(from: viewController, driveFileManager: driveFileManager)
         }
-        #endif
     }
 
     // MARK: TopmostViewControllerFetchable
