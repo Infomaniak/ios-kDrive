@@ -742,9 +742,6 @@
 /* loco:6049df4d5c2c3a04bc397997 */
 "errorDelete" = "Deletion error";
 
-/* loco:605cacde72147f269369e484 */
-"errorDestinationAlreadyExists" = "Destination already exists";
-
 /* loco:60a693f631a0a90e163445f2 */
 "errorDeviceStorage" = "Insufficient device storage";
 
@@ -760,8 +757,8 @@
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Duplication error";
 
-/* loco:6049df4d5c2c3a04bc39799a */
-"errorFileCreate" = "Error when creating file. Check the name of the file and your rights to the folder.";
+/* loco:605cacde72147f269369e484 */
+"errorFileAlreadyExists" = "File or folder already exists";
 
 /* loco:60e2d1ed77622d4af14f5a72 */
 "errorFileLocked" = "This file is currently opened by another user and cannot be modified";
