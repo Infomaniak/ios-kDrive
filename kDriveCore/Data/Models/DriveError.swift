@@ -155,13 +155,10 @@ public struct DriveError: Error, Equatable {
     public static let objectNotFound = DriveError(type: .serverError,
                                                   code: "object_not_found",
                                                   localizedString: KDriveResourcesStrings.Localizable.uploadFolderNotFoundError)
-    public static let cannotCreateFileHere = DriveError(type: .serverError,
-                                                        code: "can_not_create_file_here_error",
-                                                        localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
     public static let destinationAlreadyExists = DriveError(type: .serverError,
                                                             code: "destination_already_exists",
                                                             localizedString: KDriveResourcesStrings.Localizable
-                                                                .errorDestinationAlreadyExists)
+                                                                .errorFileAlreadyExists)
     public static let forbidden = DriveError(type: .serverError,
                                              code: "forbidden_error",
                                              localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
@@ -243,7 +240,6 @@ public struct DriveError: Error, Equatable {
                                                   quotaExceeded,
                                                   shareLinkAlreadyExists,
                                                   objectNotFound,
-                                                  cannotCreateFileHere,
                                                   destinationAlreadyExists,
                                                   forbidden,
                                                   noDrive,
