@@ -19,23 +19,29 @@
 import InfomaniakDI
 import SwiftUI
 
-public struct DeeplinkParser {
+/// Deeplink entrypoint
+public protocol DeeplinkParsable {
+    /// Parse a deeplink and navigate to the desired location
+    func parse(url: URL) async -> Bool
+}
+
+public struct DeeplinkParser: DeeplinkParsable {
     private enum DeeplinkPath: String {
         case store
         case file
     }
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var navigationManager: NavigationManageable
+    @LazyInjectService var router: AppNavigable
 
     public init() {
         // META: keep SonarCloud happy
     }
 
-    public func parse(url: URL) -> Bool {
+    public func parse(url: URL) async -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            Log.appDelegate("Failed to open URL: Invalid URL", level: .error)
+            Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
         }
 
@@ -43,18 +49,18 @@ public struct DeeplinkParser {
            let userId = params.first(where: { $0.name == "userId" })?.value,
            let driveId = params.first(where: { $0.name == "driveId" })?.value,
            let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
-            navigationManager.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
+            await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
             return true
 
         } else if components.host == DeeplinkPath.file.rawValue,
                   let filePath = params.first(where: { $0.name == "url" })?.value {
             let fileUrl = URL(fileURLWithPath: filePath)
             let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
-            navigationManager.navigate(to: .saveFile(file: file))
+            await router.navigate(to: .saveFile(file: file))
             return true
         }
 
-        Log.appDelegate("unable to parse deeplink URL: \(url)", level: .error)
+        Log.sceneDelegate("unable to parse deeplink URL: \(url)", level: .error)
         return false
     }
 }

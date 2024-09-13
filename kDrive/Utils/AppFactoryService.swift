@@ -27,11 +27,11 @@ public struct EarlyDIHook {
         os_log("EarlyDIHook")
 
         var extraDependencies = [
-            Factory(type: NavigationManageable.self) { _, _ in
-                NavigationManager()
-            },
             Factory(type: AppContextServiceable.self) { _, _ in
                 AppContextService(context: context)
+            },
+            Factory(type: AppExtensionRoutable.self) { _, _ in
+                AppExtensionRouter()
             }
         ]
 

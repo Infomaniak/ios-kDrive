@@ -39,6 +39,14 @@ public protocol RouterAppNavigable {
     @MainActor func showUpdateRequired()
 
     @MainActor func showPhotoSyncSettings()
+
+    @MainActor func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
+}
+
+/// Routing methods available from both the AppExtension mode and App
+public protocol AppExtensionRoutable {
+    /// Show native appstore inapp upsale in context
+    @MainActor func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager)
 }
 
 /// Something that can present a File within the app
@@ -155,7 +163,9 @@ public protocol RouterActionable {
 }
 
 /// Something that can navigate within the kDrive app
-public typealias AppNavigable = RouterActionable
+public typealias AppNavigable = AppExtensionRoutable
+    & Routable
+    & RouterActionable
     & RouterAppNavigable
     & RouterFileNavigable
     & RouterRootNavigable

@@ -232,7 +232,7 @@ public class FloatingPanelAction: Equatable {
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var navigationManager: NavigationManageable
+    @LazyInjectService var router: AppNavigable
 
     var driveFileManager: DriveFileManager!
     var file: File!

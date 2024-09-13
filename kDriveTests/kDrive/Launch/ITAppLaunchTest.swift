@@ -93,6 +93,9 @@ final class ITAppLaunchTest: XCTestCase {
             Factory(type: AppNavigable.self) { _, _ in
                 AppRouter()
             },
+            Factory(type: AppExtensionRoutable.self) { _, _ in
+                AppExtensionRouter()
+            },
             Factory(type: AvailableOfflineManageable.self) { _, _ in
                 MCKAvailableOfflineManager()
             }
