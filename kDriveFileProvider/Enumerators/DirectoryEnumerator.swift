@@ -201,7 +201,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     }
 
                     for deletedChild in deletedFiles {
-                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.id) else {
+                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.uid) else {
                             continue
                         }
 
