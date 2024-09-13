@@ -265,6 +265,9 @@ final class FileProviderExtension: NSFileProviderExtension {
         if fileStorageIsCurrent(item: item, file: file) {
             // File is in the file provider and is the same, nothing to do...
             completionHandler(nil)
+        } else if file.isDirectory {
+            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+            completionHandler(nil)
         } else {
             downloadRemoteFile(file, for: item, completion: completionHandler)
         }
