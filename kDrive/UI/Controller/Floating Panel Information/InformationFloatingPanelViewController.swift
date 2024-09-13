@@ -36,8 +36,8 @@ class InformationFloatingPanelViewController: UIViewController {
 
     var floatingPanelViewController: DriveFloatingPanelController!
 
-    var cancelHandler: (@MainActor (UIButton) -> Void)?
-    var actionHandler: (@MainActor (UIButton) -> Void)?
+    var cancelHandler: ((UIButton) -> Void)?
+    var actionHandler: ((UIButton) -> Void)?
 
     var drive: Drive?
 
