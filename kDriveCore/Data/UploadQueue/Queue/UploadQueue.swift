@@ -167,7 +167,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
                 Log.uploadQueue("MemoryPressureEvent critical", level: .error)
                 self.rescheduleRunningOperations()
             default:
-                Log.uploadQueue("unknown MemoryPressureEvent \(event)", level: .error)
+                break
             }
         }
         source.resume()
