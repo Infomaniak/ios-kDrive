@@ -115,7 +115,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
     }
 
     override func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || listStyle == .grid {
+        if configuration.presentationOrigin == .activities || listStyle == .grid {
             return nil
         }
         return [.delete]

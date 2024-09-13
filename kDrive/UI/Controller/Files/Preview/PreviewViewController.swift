@@ -75,7 +75,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
-    private var fromActivities = false
+    private var presentationOrigin = PresentationOrigin.fileList
     private var centerIndexPathBeforeRotate: IndexPath?
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
@@ -128,11 +128,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController = FileActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
+        fileInformationsViewController.presentationOrigin = presentationOrigin
+
         floatingPanelViewController.set(contentViewController: fileInformationsViewController)
         floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
         floatingPanelViewController.delegate = self
 
-        if fromActivities {
+        if presentationOrigin == .activities {
             floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
         }
 
@@ -593,15 +595,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool
+        presentationOrigin: PresentationOrigin
     ) -> PreviewViewController {
         let previewPageViewController = Storyboard.files
             .instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
         previewPageViewController.previewFiles = files
         previewPageViewController.driveFileManager = driveFileManager
-        previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
-        previewPageViewController.fromActivities = fromActivities
+        previewPageViewController.presentationOrigin = presentationOrigin
+        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the function returns
+        // this should be fixed in the future with the refactor of the init
+        previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         return previewPageViewController
     }
 
@@ -620,7 +624,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             SceneRestorationValues.Carousel.filesIds.rawValue: allFilesIds,
             SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndexRow,
             SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
-            SceneRestorationValues.Carousel.fromActivities.rawValue: fromActivities
+            SceneRestorationValues.Carousel.presentationOrigin.rawValue: presentationOrigin.rawValue,
         ]
     }
 }
@@ -775,7 +779,7 @@ extension PreviewViewController: UICollectionViewDelegate {}
 
 extension PreviewViewController: FloatingPanelControllerDelegate {
     func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
-        return !fromActivities
+        return presentationOrigin != .activities
     }
 }
 

@@ -35,7 +35,7 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
                                           showUploadingFiles: false,
                                           isMultipleSelectionEnabled: false,
                                           isRefreshControlEnabled: false,
-                                          fromActivities: true,
+                                          presentationOrigin: .activities,
                                           rootTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
                                           emptyViewType: .emptyFolder)
         super.init(
@@ -50,7 +50,7 @@ class RecentActivityFilesViewController: FileListViewController {
     private var activityViewModel: RecentActivityFilesViewModel! {
         return viewModel as? RecentActivityFilesViewModel
     }
-    
+
     init(activities: [FileActivity], driveFileManager: DriveFileManager) {
         super.init(viewModel: RecentActivityFilesViewModel(driveFileManager: driveFileManager, activities: activities))
     }
@@ -101,7 +101,7 @@ class RecentActivityFilesViewController: FileListViewController {
                                   files: viewModel.files,
                                   driveFileManager: viewModel.driveFileManager,
                                   normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
-                                  fromActivities: viewModel.configuration.fromActivities)
+                                  presentationOrigin: viewModel.configuration.presentationOrigin)
         } else {
             super.onFilePresented(file)
         }

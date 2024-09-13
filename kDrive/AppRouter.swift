@@ -284,7 +284,7 @@ public struct AppRouter: AppNavigable {
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
+              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
@@ -303,7 +303,7 @@ public struct AppRouter: AppNavigable {
             index: currentIndex,
             driveFileManager: driveFileManager,
             normalFolderHierarchy: normalFolderHierarchy,
-            fromActivities: fromActivities,
+            presentationOrigin: presentationOrigin,
             navigationController: navigationController,
             animated: false
         )
@@ -653,7 +653,7 @@ public struct AppRouter: AppNavigable {
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     ) {
@@ -666,7 +666,7 @@ public struct AppRouter: AppNavigable {
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,
                                                                       normalFolderHierarchy: normalFolderHierarchy,
-                                                                      fromActivities: fromActivities)
+                                                                      presentationOrigin: presentationOrigin)
         navigationController.pushViewController(previewViewController, animated: animated)
     }
 

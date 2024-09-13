@@ -55,6 +55,6 @@ public enum SceneRestorationValues: String {
         case filesIds
         case currentIndex
         case normalFolderHierarchy
-        case fromActivities
+        case presentationOrigin
     }
 }

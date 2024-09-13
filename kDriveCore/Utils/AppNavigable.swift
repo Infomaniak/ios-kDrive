@@ -82,6 +82,7 @@ public protocol RouterFileNavigable {
     ///   - driveFileManager: The driveFileManager
     ///   - normalFolderHierarchy: See FileListViewModel.Configuration for details
     ///   - fromActivities: Opening from an activity
+    ///   - fromPhotoList: Opening from an photoList
     ///   - navigationController: The navigation controller to use
     ///   - animated: Should be animated
     @MainActor func presentPreviewViewController(
@@ -89,7 +90,7 @@ public protocol RouterFileNavigable {
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     )
