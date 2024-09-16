@@ -284,7 +284,8 @@ public struct AppRouter: AppNavigable {
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
+              let presentationOrigin =
+              sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
@@ -596,12 +597,33 @@ public struct AppRouter: AppNavigable {
             fatalError("TODO: lazy load a rootViewController")
         }
 
-        let filePresenter = FilePresenter(viewController: rootViewController)
-        filePresenter.presentPublicShareDirectory(publicShareProxy: publicShareProxy,
-                                                  frozenRootFolder: frozenRootFolder,
-                                                  rootViewController: rootViewController,
-                                                  driveFileManager: driveFileManager,
-                                                  apiFetcher: apiFetcher)
+        guard let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("Root is not a MainTabViewController")
+            return
+        }
+
+        // TODO: Fix access right
+        //        guard !rootFolder.isDisabled else {
+        //            return
+        //        }
+
+        rootViewController.dismiss(animated: false) {
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                                 sortType: .nameAZ,
+                                                 driveFileManager: driveFileManager,
+                                                 currentDirectory: frozenRootFolder,
+                                                 apiFetcher: apiFetcher)
+            let viewController = FileListViewController(viewModel: viewModel)
+            print("viewController:\(viewController) viewModel:\(viewModel) navigationController:\(navigationController)")
+
+            navigationController.pushViewController(viewController, animated: true)
+        }
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
