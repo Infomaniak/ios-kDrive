@@ -36,7 +36,10 @@ public class PublicShareApiFetcher: ApiFetcher {
 
     public func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
         let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
-        let request = Session.default.request(shareLinkFileUrl)
+        let requestParameters: [String: String] = [
+            APIUploadParameter.with.rawValue: FileWith.capabilities.rawValue
+        ]
+        let request = Session.default.request(shareLinkFileUrl, parameters: requestParameters)
         let shareLinkFile: File = try await perform(request: request)
         return shareLinkFile
     }
