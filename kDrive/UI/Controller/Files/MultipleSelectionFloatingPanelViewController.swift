@@ -27,15 +27,15 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
 
-    var driveFileManager: DriveFileManager!
-    var files = [File]()
-    var allItemsSelected = false
-    var exceptFileIds: [Int]?
-    var currentDirectory: File!
+    let driveFileManager: DriveFileManager
+    var files: [File]
+    let allItemsSelected: Bool
+    let exceptFileIds: [Int]?
+    let currentDirectory: File
+    let reloadAction: (() -> Void)?
+
     var changedFiles: [File]? = []
     var downloadInProgress = false
-    var reloadAction: (() -> Void)?
-
     var downloadedArchiveUrl: URL?
     var success = true
     var addAction = true
@@ -50,8 +50,28 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
-    convenience init() {
-        self.init(collectionViewLayout: MultipleSelectionFloatingPanelViewController.createLayout())
+    init(
+        driveFileManager: DriveFileManager,
+        currentDirectory: File,
+        files: [File],
+        allItemsSelected: Bool,
+        exceptFileIds: [Int]?,
+        reloadAction: (() -> Void)?,
+        presentingParent: UIViewController?
+    ) {
+        self.driveFileManager = driveFileManager
+        self.currentDirectory = currentDirectory
+        self.files = files
+        self.allItemsSelected = allItemsSelected
+        self.exceptFileIds = exceptFileIds
+        self.reloadAction = reloadAction
+        self.presentingParent = presentingParent
+        super.init(collectionViewLayout: MultipleSelectionFloatingPanelViewController.createLayout())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
@@ -75,7 +95,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         } else if presentingParent is PhotoListViewController {
             actions = FloatingPanelAction.multipleSelectionPhotosListActions
         } else {
-            if files.contains { !$0.isDirectory } {
+            if files.contains(where: { !$0.isDirectory }) {
                 actions = FloatingPanelAction.multipleSelectionActions
             } else {
                 actions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
