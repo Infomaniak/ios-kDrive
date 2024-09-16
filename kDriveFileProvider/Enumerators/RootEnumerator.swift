@@ -92,11 +92,13 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
         Task {
             do {
                 let (files, nextCursor) = try await self.fetchRoot(page: page)
-                observer.didEnumerate(files.map { $0.toFileProviderItem(
-                    parent: .rootContainer,
-                    drive: driveFileManager.drive,
-                    domain: domain
-                ) })
+                observer.didEnumerate(files
+                    .filter { $0.visibility == .isPrivateSpace || $0.visibility == .isTeamSpace }
+                    .map { $0.toFileProviderItem(
+                        parent: .rootContainer,
+                        drive: driveFileManager.drive,
+                        domain: domain
+                    ) })
 
                 // there should never be more cursors but still implement next page logic just in case
                 if let nextCursor {

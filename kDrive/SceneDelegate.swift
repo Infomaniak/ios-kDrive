@@ -208,6 +208,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         return true
     }
 
+    // MARK: - Deeplink
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else {
+            Log.sceneDelegate("scene unable to navigate to url", level: .error)
+            return
+        }
+
+        Task {
+            let success = await DeeplinkParser().parse(url: url)
+            Log.sceneDelegate("scene open url\(url) success:\(success)")
+        }
+    }
+
     // MARK: - Handoff support
 
     func scene(_ scene: UIScene, willContinueUserActivityWithType userActivityType: String) {

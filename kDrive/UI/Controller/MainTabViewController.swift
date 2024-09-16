@@ -49,6 +49,19 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     let driveFileManager: DriveFileManager
 
+    lazy var legacyTabBarActive: Bool = {
+        if #available(iOS 18.0, *),
+           UIDevice.current.userInterfaceIdiom == .pad {
+            self.isTabBarHidden = true
+            return true
+        }
+        return false
+    }()
+
+    var tabBarHeightConstraint: NSLayoutConstraint?
+
+    lazy var legacyTabBar = MainTabBar()
+
     init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
         self.driveFileManager = driveFileManager
         var rootViewControllers = [UIViewController]()
@@ -72,6 +85,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        addLegacyTabBarIfNeeded()
+
         restorationIdentifier = defaultRestorationIdentifier
 
         setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
@@ -82,8 +97,16 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         photoPickerDelegate.viewController = self
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+
+        willLayoutLegacyTabBarIfNeeded()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+
+        didLayoutLegacyTabBarIfNeeded()
 
         if view.safeAreaInsets.bottom == 0 {
             let newFrame = CGRect(
@@ -263,6 +286,8 @@ extension MainTabViewController: MainTabBarDelegate {
         selectedIndex = MainTabBarIndex.profile.rawValue
 
         router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
+
+        MatomoUtils.track(eventWithCategory: .account, name: "longPressDirectAccess")
     }
 
     func avatarDoubleTap() {
@@ -276,6 +301,8 @@ extension MainTabViewController: MainTabBarDelegate {
 
         _ = router.showMainViewController(driveFileManager: accountManager,
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
+
+        MatomoUtils.track(eventWithCategory: .account, name: "switchDoubleTap")
     }
 }
 

@@ -179,6 +179,10 @@ public final class Drive: Object, Codable {
     }
 
     public func categories(for file: File) -> [Category] {
+        guard !isInvalidated else {
+            return []
+        }
+
         let fileCategoriesIds: [Int]
         if file.isManagedByRealm {
             fileCategoriesIds = Array(file.categories.sorted(by: \.addedAt, ascending: true)).map(\.categoryId)

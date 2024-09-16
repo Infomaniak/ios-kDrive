@@ -28,17 +28,16 @@ class FooterButtonView: UITableViewHeaderFooterView {
     @IBOutlet var background: UIView!
     weak var delegate: FooterButtonDelegate?
 
-    override class func awakeFromNib() {
-        super.awakeFromNib()
-    }
-
     @IBAction func buttonClicked(_ sender: IKLargeButton) {
         delegate?.didClickOnButton(sender)
     }
 
     class func instantiate(title: String = "") -> FooterButtonView {
         let view = Bundle.main.loadNibNamed("FooterButtonView", owner: nil, options: nil)![0] as! FooterButtonView
-        view.footerButton.setTitle(title, for: .normal)
+        UIView.performWithoutAnimation {
+            view.footerButton.setTitle(title, for: .normal)
+            view.footerButton.layoutIfNeeded()
+        }
         return view
     }
 }

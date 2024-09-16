@@ -742,9 +742,6 @@
 /* loco:6049df4d5c2c3a04bc397997 */
 "errorDelete" = "Fehler beim Löschen";
 
-/* loco:605cacde72147f269369e484 */
-"errorDestinationAlreadyExists" = "Das Ziel existiert bereits";
-
 /* loco:60a693f631a0a90e163445f2 */
 "errorDeviceStorage" = "Unzureichender Gerätespeicher";
 
@@ -760,8 +757,8 @@
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Fehler beim Duplizieren";
 
-/* loco:6049df4d5c2c3a04bc39799a */
-"errorFileCreate" = "Fehler bei der Erstellung der Datei. Überprüfen Sie den Namen der Datei und Ihre Rechte am Ordner.";
+/* loco:605cacde72147f269369e484 */
+"errorFileAlreadyExists" = "Datei oder Ordner existiert bereits";
 
 /* loco:60e2d1ed77622d4af14f5a72 */
 "errorFileLocked" = "Diese Datei ist bereits von einem Benutzer geöffnet und kann nicht verändert werden";

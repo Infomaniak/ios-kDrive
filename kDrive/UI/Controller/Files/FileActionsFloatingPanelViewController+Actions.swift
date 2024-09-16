@@ -77,7 +77,7 @@ extension FileActionsFloatingPanelViewController {
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
-                return !sharedWithMe
+                return !sharedWithMe && presentationOrigin != .photoList
             case .download:
                 return file.capabilities.canRead
             case .move:
@@ -268,7 +268,7 @@ extension FileActionsFloatingPanelViewController {
             floatingPanelViewController?.actionHandler = { [weak self] _ in
                 driveFloatingPanelController.dismiss(animated: true) {
                     guard let self else { return }
-                    self.navigationManager.showStore(from: self, driveFileManager: self.driveFileManager)
+                    self.router.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
             }
             present(driveFloatingPanelController, animated: true)

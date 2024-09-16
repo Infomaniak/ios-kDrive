@@ -32,6 +32,10 @@ public final class MCKRouter: AppNavigable {
         print("MCKRouter: NOOP \(function) called")
     }
 
+    public func navigate(to route: NavigationRoutes) {
+        logNoop()
+    }
+
     public func askForReview() async {
         logNoop()
     }
@@ -99,7 +103,7 @@ public final class MCKRouter: AppNavigable {
         index: Int,
         driveFileManager: kDriveCore.DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     ) {
@@ -136,4 +140,12 @@ public final class MCKRouter: AppNavigable {
     }
 
     public var topMostViewController: UIViewController?
+
+    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
+        logNoop()
+    }
+
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+        logNoop()
+    }
 }

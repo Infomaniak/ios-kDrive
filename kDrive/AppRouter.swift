@@ -26,6 +26,7 @@ import UIKit
 import VersionChecker
 
 public struct AppRouter: AppNavigable {
+    @LazyInjectService private var appExtensionRouter: AppExtensionRoutable
     @LazyInjectService private var appRestorationService: AppRestorationServiceable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var keychainHelper: KeychainHelper
@@ -62,6 +63,41 @@ public struct AppRouter: AppNavigable {
         }
 
         return userInfo
+    }
+
+    // MARK: Routable
+
+    public func navigate(to route: NavigationRoutes) {
+        guard let rootViewController = window?.rootViewController else {
+            SentryDebug.captureNoWindow()
+            Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
+            return
+        }
+
+        // Get presented view controller
+        var viewController = rootViewController
+        while let presentedViewController = viewController.presentedViewController {
+            viewController = presentedViewController
+        }
+
+        switch route {
+        case .saveFile(let file):
+            guard let driveFileManager = accountManager.currentDriveFileManager else {
+                Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
+                return
+            }
+
+            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
+
+        case .store(let driveId, let userId):
+            guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
+                Log.sceneDelegate("NavigationManager: Unable to navigate to .store without a DriveFileManager", level: .error)
+                return
+            }
+
+            // Show store
+            showStore(from: viewController, driveFileManager: driveFileManager)
+        }
     }
 
     // MARK: TopmostViewControllerFetchable
@@ -248,7 +284,7 @@ public struct AppRouter: AppNavigable {
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let fromActivities = sceneUserInfo[SceneRestorationValues.Carousel.fromActivities.rawValue] as? Bool else {
+              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
@@ -267,7 +303,7 @@ public struct AppRouter: AppNavigable {
             index: currentIndex,
             driveFileManager: driveFileManager,
             normalFolderHierarchy: normalFolderHierarchy,
-            fromActivities: fromActivities,
+            presentationOrigin: presentationOrigin,
             navigationController: navigationController,
             animated: false
         )
@@ -400,6 +436,17 @@ public struct AppRouter: AppNavigable {
         let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
         navController.popToRootViewController(animated: false)
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
+    }
+
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+        viewController.present(vc, animated: true)
+    }
+
+    // MARK: AppExtensionRouter
+
+    public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
+        appExtensionRouter.showStore(from: viewController, driveFileManager: driveFileManager)
     }
 
     // MARK: RouterActionable
@@ -626,7 +673,7 @@ public struct AppRouter: AppNavigable {
         index: Int,
         driveFileManager: DriveFileManager,
         normalFolderHierarchy: Bool,
-        fromActivities: Bool,
+        presentationOrigin: PresentationOrigin,
         navigationController: UINavigationController,
         animated: Bool
     ) {
@@ -639,7 +686,7 @@ public struct AppRouter: AppNavigable {
                                                                       index: index,
                                                                       driveFileManager: driveFileManager,
                                                                       normalFolderHierarchy: normalFolderHierarchy,
-                                                                      fromActivities: fromActivities)
+                                                                      presentationOrigin: presentationOrigin)
         navigationController.pushViewController(previewViewController, animated: animated)
     }
 

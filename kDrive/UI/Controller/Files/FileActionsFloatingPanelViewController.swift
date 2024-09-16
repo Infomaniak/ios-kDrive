@@ -206,11 +206,19 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActions: [FloatingPanelAction] {
+        return [manageCategories, favorite, offline, download, move, duplicate].map { $0.reset() }
+    }
+
+    static var multipleSelectionActionsOnlyFolders: [FloatingPanelAction] {
         return [manageCategories, favorite, folderColor, offline, download, move, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
         return [download].map { $0.reset() }
+    }
+
+    static var multipleSelectionPhotosListActions: [FloatingPanelAction] {
+        return [manageCategories, favorite, download, move, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionBulkActions: [FloatingPanelAction] {
@@ -228,11 +236,12 @@ public class FloatingPanelAction: Equatable {
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var navigationManager: NavigationManageable
+    @LazyInjectService var router: AppNavigable
 
     var driveFileManager: DriveFileManager!
     var file: File!
     var normalFolderHierarchy = true
+    var presentationOrigin = PresentationOrigin.fileList
     weak var presentingParent: UIViewController?
     var matomoCategory: MatomoUtils.EventCategory {
         if presentingParent is PhotoListViewController {
@@ -242,7 +251,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     var sharedWithMe: Bool {
-        return driveFileManager?.drive.sharedWithMe ?? false
+        return file.visibility == .isInSharedSpace
     }
 
     enum Section: CaseIterable {

@@ -157,12 +157,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        Log.appDelegate("application app open url\(url)")
-
-        return DeeplinkParser().parse(url: url)
-    }
-
     func application(_ application: UIApplication,
                      open url: URL,
                      sourceApplication: String?,

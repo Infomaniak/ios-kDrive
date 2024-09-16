@@ -35,7 +35,7 @@ public extension File {
 
         public func format(_ value: File) -> String {
             switch value.visibility {
-            case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder:
+            case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder, .isInSharedSpace:
                 return value.name
             case .isPrivateSpace:
                 if isIndividualDrive {

@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2023 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,18 +18,8 @@
 
 import Foundation
 
-public extension File {
-    /// Formats the private share link of a file
-    ///
-    /// https://kdrive.infomaniak.com/app/drive/123/redirect/456
-    func privateSharePath(host: String) -> String {
-        "https://\(host)/app/drive/\(driveId)/redirect/\(id)"
-    }
-
-    /// Remove file from FS if present at expected path
-    func clearOnFileSystemIfNeeded() throws {
-        if FileManager.default.fileExists(atPath: localContainerUrl.path) {
-            try FileManager.default.removeItem(at: localContainerUrl)
-        }
-    }
+public enum PresentationOrigin: String, Equatable {
+    case fileList
+    case activities
+    case photoList
 }

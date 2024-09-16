@@ -29,7 +29,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private static let loadingCellCount = 12
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var navigationManager: NavigationManageable
+    @LazyInjectService var router: AppNavigable
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
@@ -363,7 +363,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    navigationManager.showStore(from: self, driveFileManager: driveFileManager)
+                    router.showStore(from: self, driveFileManager: driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }

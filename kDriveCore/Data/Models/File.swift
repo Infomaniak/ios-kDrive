@@ -300,6 +300,7 @@ public enum SortType: String {
 public enum FileVisibility: String {
     case root = "is_root"
     case isSharedSpace = "is_shared_space"
+    case isInSharedSpace = "is_in_shared_space"
     case isTeamSpace = "is_team_space"
     case isTeamSpaceFolder = "is_team_space_folder"
     case isInTeamSpaceFolder = "is_in_team_space_folder"

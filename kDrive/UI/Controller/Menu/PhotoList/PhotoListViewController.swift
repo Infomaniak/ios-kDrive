@@ -199,7 +199,17 @@ final class PhotoListViewController: FileListViewController {
             super.forceRefresh()
         }
     }
-
+    
+    override func onFilePresented(_ file: File) {
+        #if !ISEXTENSION
+        filePresenter.present(for: file,
+                              files: viewModel.files,
+                              driveFileManager: viewModel.driveFileManager,
+                              normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
+                              presentationOrigin: viewModel.configuration.presentationOrigin)
+        #endif
+    }
+    
     // MARK: - Multiple selection
 
     override func toggleMultipleSelection(_ on: Bool) {

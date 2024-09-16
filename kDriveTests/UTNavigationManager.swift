@@ -21,7 +21,7 @@
 @testable import kDriveCore
 import XCTest
 
-final class MckNavigationManageable_navigate: NavigationManageable {
+final class MckRoutable_navigate: Routable {
     func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
         XCTFail("unexpected call to \(#function)")
     }
@@ -46,19 +46,19 @@ final class UTNavigationManager: XCTestCase {
 
     // MARK: - Upload observation
 
-    func testDeeplinkFileSharing() {
+    @MainActor func testDeeplinkFileSharing() {
         // GIVEN
-        let mckNavigation = MckNavigationManageable_navigate()
-        let navigationManagerFactory = Factory(type: NavigationManageable.self) { _, _ in
+        let mckNavigation = MckRoutable_navigate()
+        let routerFactory = Factory(type: Routable.self) { _, _ in
             return mckNavigation
         }
-        SimpleResolver.sharedResolver.store(factory: navigationManagerFactory)
+        SimpleResolver.sharedResolver.store(factory: routerFactory)
         let expectedFile = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
         let expectedRoute = NavigationRoutes.saveFile(file: expectedFile)
 
         // WHEN
-        @InjectService var navigationManager: NavigationManageable
-        navigationManager.navigate(to: expectedRoute)
+        @InjectService var router: Routable
+        router.navigate(to: expectedRoute)
 
         // THEN
         XCTAssertEqual(mckNavigation.navigateToCount, 1, "navigate method should be called once")
@@ -69,18 +69,18 @@ final class UTNavigationManager: XCTestCase {
         XCTAssertEqual(fetchedRoute, expectedRoute, "should be the same route")
     }
 
-    func testDeeplinkStore() {
+    @MainActor func testDeeplinkStore() {
         // GIVEN
-        let mckNavigation = MckNavigationManageable_navigate()
-        let navigationManagerFactory = Factory(type: NavigationManageable.self) { _, _ in
+        let mckNavigation = MckRoutable_navigate()
+        let routerFactory = Factory(type: Routable.self) { _, _ in
             return mckNavigation
         }
-        SimpleResolver.sharedResolver.store(factory: navigationManagerFactory)
+        SimpleResolver.sharedResolver.store(factory: routerFactory)
         let expectedRoute = NavigationRoutes.store(driveId: 123, userId: 456)
 
         // WHEN
-        @InjectService var navigationManager: NavigationManageable
-        navigationManager.navigate(to: expectedRoute)
+        @InjectService var router: Routable
+        router.navigate(to: expectedRoute)
 
         // THEN
         XCTAssertEqual(mckNavigation.navigateToCount, 1, "navigate method should be called once")
