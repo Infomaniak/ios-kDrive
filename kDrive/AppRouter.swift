@@ -603,9 +603,10 @@ public struct AppRouter: AppNavigable {
         }
 
         // TODO: Fix access right
-        //        guard !rootFolder.isDisabled else {
-        //            return
-        //        }
+        guard !frozenRootFolder.isDisabled else {
+            fatalError("isDisabled")
+            return
+        }
 
         rootViewController.dismiss(animated: false) {
             rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
