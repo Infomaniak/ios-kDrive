@@ -158,6 +158,7 @@ final class DriveFileManagerTests: XCTestCase {
         _ = try await DriveFileManagerTests.driveFileManager.searchFile(
             query: file.name,
             categories: [],
+            fileExtensions: [],
             belongToAllCategories: true,
             sortType: .nameAZ
         )

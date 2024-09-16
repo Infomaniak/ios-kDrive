@@ -23,6 +23,12 @@ import XCTest
 final class ITDrive: XCTestCase {
     // MARK: - Parsing
 
+    var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }
+
     private func freeDriveJson() -> Data? {
         JSONHelper.data(forResource: "free_drive", withExtension: "json")
     }
@@ -38,8 +44,6 @@ final class ITDrive: XCTestCase {
             XCTFail("Unable to load free drive JSON")
             return
         }
-
-        let decoder = JSONDecoder()
 
         // WHEN
         do {
@@ -60,8 +64,6 @@ final class ITDrive: XCTestCase {
             XCTFail("Unable to load paid drive JSON")
             return
         }
-
-        let decoder = JSONDecoder()
 
         // WHEN
         do {

@@ -105,10 +105,7 @@ public extension Target {
                        scripts: [Constants.swiftlintScript],
                        dependencies: [
                            .target(name: "kDriveCore"),
-                           .external(name: "FloatingPanel"),
-                           .external(name: "Lottie"),
-                           .external(name: "DropDown"),
-                           .external(name: "HorizonCalendar"),
+                           .target(name: "kDriveCoreUI")
                        ],
                        settings: settings)
     }
