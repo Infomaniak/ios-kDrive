@@ -45,7 +45,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     weak var presentingParent: UIViewController?
 
     var sharedWithMe: Bool {
-        return driveFileManager?.drive.sharedWithMe ?? false
+        return currentDirectory.visibility == .isInSharedSpace
     }
 
     var actions = FloatingPanelAction.listActions
