@@ -19,7 +19,7 @@
 import Foundation
 
 @frozen public struct PartialFileActivity: Codable {
-    let lastAction: FileActivityType
+    let lastAction: FileActivityType?
     let fileId: Int
     let lastActionAt: Int?
     let file: File?
