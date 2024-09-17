@@ -158,7 +158,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             PHAssetResourceManager.default().requestData(for: bestResource,
                                                          options: options) { data in
                 hasher.update(data)
-            } completionHandler: { error in
+            } completionHandler: { _ in
                 hasher.finalize()
                 group.leave()
             }

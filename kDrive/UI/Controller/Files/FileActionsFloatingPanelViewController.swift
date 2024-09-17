@@ -258,7 +258,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         case header, quickActions, actions
     }
 
-    class var sections: [Section] {
+    static var sections: [Section] {
         return Section.allCases
     }
 

@@ -212,11 +212,13 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     parentDirectory.lastCursor = response.cursor
                 }
 
-                observer.didUpdate(updatedItems.map { $0.toFileProviderItem(
-                    parent: nil,
-                    drive: driveFileManager.drive,
-                    domain: domain
-                ) })
+                observer.didUpdate(updatedItems.map {
+                    $0.toFileProviderItem(
+                        parent: nil,
+                        drive: driveFileManager.drive,
+                        domain: domain
+                    )
+                })
                 observer.didDeleteItems(withIdentifiers: deletedItems)
 
                 guard let newLastCursor = response.cursor,

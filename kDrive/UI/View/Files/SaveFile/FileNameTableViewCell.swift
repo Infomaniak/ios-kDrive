@@ -22,7 +22,7 @@ import MaterialOutlinedTextField
 import UIKit
 
 class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
-    @IBOutlet weak var textField: MaterialOutlinedTextField!
+    @IBOutlet var textField: MaterialOutlinedTextField!
     var textDidChange: ((String?) -> Void)?
     var textDidEndEditing: ((String?) -> Void)?
 
@@ -53,8 +53,7 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         guard let fileName = textField.text else { return }
-        textFieldConfiguration.selectedRange = fileName
-            .startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
+        textFieldConfiguration.selectedRange = fileName.startIndex ..< (fileName.lastIndex { $0 == "." } ?? fileName.endIndex)
         textFieldConfiguration.selectText(in: textField)
     }
 

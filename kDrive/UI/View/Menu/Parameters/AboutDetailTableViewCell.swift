@@ -21,9 +21,4 @@ import UIKit
 
 class AboutDetailTableViewCell: InsetTableViewCell {
     @IBOutlet var detailLabel: UILabel!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
 }

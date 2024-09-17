@@ -22,9 +22,4 @@ class NewFolderLocationCollectionViewCell: UICollectionViewCell {
     @IBOutlet var accessoryImage: UIImageView!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var chevronImage: UIImageView!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
 }

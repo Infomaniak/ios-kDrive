@@ -276,7 +276,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem()]
 
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, layoutEnvironment in
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, _ in
             guard let self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:

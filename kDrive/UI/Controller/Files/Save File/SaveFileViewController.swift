@@ -429,7 +429,7 @@ extension SaveFileViewController: UITableViewDelegate {
                 }
                 alert.textFieldConfiguration = .fileNameConfiguration
                 alert.textFieldConfiguration.selectedRange = item.name
-                    .startIndex ..< (item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
+                    .startIndex ..< (item.name.lastIndex { $0 == "." } ?? item.name.endIndex)
                 present(alert, animated: true)
             }
         case .driveSelection:
