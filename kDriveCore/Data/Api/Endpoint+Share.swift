@@ -23,7 +23,6 @@ import RealmSwift
 // MARK: - Share Links
 
 public extension Endpoint {
-
     /// It is necessary to keep V1 here for backward compatibility of old links
     static var shareUrlV1: Endpoint {
         return Endpoint(hostKeypath: \.driveHost, path: "/app")
@@ -52,7 +51,12 @@ public extension Endpoint {
 
     /// Share link file
     static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+        shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+    }
+
+    /// Some legacy calls like thumbnails require a V2 call
+    static func shareLinkFileV2(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+        shareUrlV2.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }
 
     /// Share link file children
@@ -68,7 +72,7 @@ public extension Endpoint {
 
     /// Share link file thumbnail
     static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
     }
 
     /// Share mink file preview
