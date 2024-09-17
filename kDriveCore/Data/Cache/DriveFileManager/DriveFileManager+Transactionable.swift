@@ -30,7 +30,7 @@ public enum DriveFileManagerContext {
     case sharedWithMe
 
     /// Dedicated in memory dataset for a public share link
-    case publicShare(shareId: String)
+    case publicShare(shareId: String, driveId: Int, rootFileId: Int)
 
     func realmURL(driveId: Int, driveUserId: Int) -> URL? {
         switch self {

@@ -99,6 +99,9 @@ public final class DriveFileManager {
     /// Fetch and write into DB with this object
     public let database: Transactionable
 
+    /// Context this object was initialized with
+    public let context: DriveFileManagerContext
+
     /// Build a realm configuration for a specific Drive
     public static func configuration(context: DriveFileManagerContext, driveId: Int, driveUserId: Int) -> Realm.Configuration {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
@@ -215,9 +218,50 @@ public final class DriveFileManager {
         )
     }
 
+    public var isPublicShare: Bool {
+        switch context {
+        case .drive:
+            return false
+        case .fileProvider:
+            return false
+        case .sharedWithMe:
+            return false
+        case .publicShare(let shareId):
+            return true
+        }
+    }
+
+    public var publicShareId: String? {
+        switch context {
+        case .publicShare(let shareId, _, _):
+            return shareId
+        default:
+            return nil
+        }
+    }
+
+    public var publicDriveId: Int? {
+        switch context {
+        case .publicShare(_, let driveId, _):
+            return driveId
+        default:
+            return nil
+        }
+    }
+
+    public var publicRootFileId: Int? {
+        switch context {
+        case .publicShare(_, _, let rootFileId):
+            return rootFileId
+        default:
+            return nil
+        }
+    }
+
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
+        self.context = context
         realmConfiguration = Self.configuration(context: context, driveId: drive.id, driveUserId: drive.userId)
 
         let realmURL = context.realmURL(driveId: drive.id, driveUserId: drive.userId)

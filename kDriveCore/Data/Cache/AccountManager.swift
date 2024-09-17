@@ -78,8 +78,7 @@ public protocol AccountManageable: AnyObject {
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
 
     /// Create on the fly an "in memory" DriveFileManager for a specific share
-    func getInMemoryDriveFileManager(for publicShareId: String) -> DriveFileManager
-
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
@@ -211,7 +210,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    public func getInMemoryDriveFileManager(for publicShareId: String) -> DriveFileManager {
+    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager {
         if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
             return inMemoryDriveFileManager
         }
@@ -233,7 +232,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let forzenPublicShareDrive = publicShareDrive.freeze()
 
         let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
-        let context = DriveFileManagerContext.publicShare(shareId: publicShareId)
+        let context = DriveFileManagerContext.publicShare(shareId: publicShareId,
+                                                          driveId: driveId,
+                                                          rootFileId: rootFileId)
 
         return DriveFileManager(drive: forzenPublicShareDrive, apiFetcher: apiFetcher, context: context)
     }

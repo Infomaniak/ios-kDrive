@@ -102,7 +102,11 @@ enum UniversalLinksHelper {
         }
 
         // get file ID from metadata
-        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(for: shareLinkUid)
+        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
+            for: shareLinkUid,
+            driveId: driveIdInt,
+            rootFileId: metadata.fileId
+        )
         openPublicShare(driveId: driveIdInt,
                         linkUuid: shareLinkUid,
                         fileId: metadata.fileId,

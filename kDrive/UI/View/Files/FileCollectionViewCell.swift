@@ -48,6 +48,16 @@ protocol FileCellDelegate: AnyObject {
     var file: File
     var selectionMode: Bool
     var isSelected = false
+
+    /// UUID of the public share if file exists within a public share
+    let publicShareId: String?
+
+    /// Drive ID of the public share if file exists within a public share
+    let publicDriveId: Int?
+
+    /// Root file ID of the public share if file exists within a public share
+    let publicRootFileId: Int?
+
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
@@ -114,6 +124,10 @@ protocol FileCellDelegate: AnyObject {
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
         self.file = file
         self.selectionMode = selectionMode
+        publicShareId = driveFileManager.publicShareId
+        publicDriveId = driveFileManager.publicDriveId
+        publicRootFileId = driveFileManager.publicRootFileId
+
         categories = driveFileManager.drive.categories(for: file)
     }
 
@@ -138,26 +152,53 @@ protocol FileCellDelegate: AnyObject {
     }
 
     func setThumbnail(on imageView: UIImageView) {
+        // check if public share / use specific endpoint
         guard !file.isInvalidated,
-              (file.convertedType == .image || file.convertedType == .video) && file.supportedBy.contains(.thumbnail)
-        else { return }
+              (file.convertedType == .image || file.convertedType == .video) && file.supportedBy.contains(.thumbnail) else {
+            return
+        }
+
         // Configure placeholder
         imageView.image = nil
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = UIConstants.imageCornerRadius
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
-        // Fetch thumbnail
-        thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
-            guard let self,
-                  !self.file.isInvalidated,
-                  !self.isSelected else {
-                return
+
+        if let publicShareId = publicShareId,
+           let publicDriveId = publicDriveId {
+            // Fetch public share thumbnail
+            thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareId,
+                                                                 publicDriveId: publicDriveId,
+                                                                 publicFileId: file.id) { [
+                requestFileId = file.id,
+                weak self
+            ] image, _ in
+                guard let self,
+                      !self.file.isInvalidated,
+                      !self.isSelected else {
+                    return
+                }
+
+                if file.id == requestFileId {
+                    imageView.image = image
+                    imageView.backgroundColor = nil
+                }
             }
 
-            if file.id == requestFileId {
-                imageView.image = image
-                imageView.backgroundColor = nil
+        } else {
+            // Fetch thumbnail
+            thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
+                guard let self,
+                      !self.file.isInvalidated,
+                      !self.isSelected else {
+                    return
+                }
+
+                if file.id == requestFileId {
+                    imageView.image = image
+                    imageView.backgroundColor = nil
+                }
             }
         }
     }
@@ -302,7 +343,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configure(with viewModel: FileViewModel) {
         self.viewModel = viewModel
-        configureLogoImage()
+        configureLogoImage(viewModel: viewModel)
         titleLabel.text = viewModel.title
         detailLabel?.text = viewModel.subtitle
         favoriteImageView?.isHidden = !viewModel.isFavorite
@@ -321,7 +362,12 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        configure(with: FileViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
+        let fileViewModel = FileViewModel(
+            driveFileManager: driveFileManager,
+            file: file,
+            selectionMode: selectionMode
+        )
+        configure(with: fileViewModel)
     }
 
     /// Update the cell selection mode.
@@ -333,18 +379,20 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureForSelection() {
-        guard viewModel?.selectionMode == true else { return }
+        guard let viewModel,
+              viewModel.selectionMode == true else {
+            return
+        }
 
         if isSelected {
             configureCheckmarkImage()
             configureImport(shouldDisplay: false)
         } else {
-            configureLogoImage()
+            configureLogoImage(viewModel: viewModel)
         }
     }
 
-    private func configureLogoImage() {
-        guard let viewModel else { return }
+    private func configureLogoImage(viewModel: FileViewModel) {
         logoImage.isAccessibilityElement = true
         logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
         logoImage.image = viewModel.icon
