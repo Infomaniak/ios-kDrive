@@ -435,9 +435,14 @@ public final class FileActionsHelper {
     }
 
     @discardableResult
-    public static func offline(files: [File], driveFileManager: DriveFileManager, group: DispatchGroup? = nil,
-                               filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
-        let areAvailableOffline = files.allSatisfy(\.isAvailableOffline)
+    public static func offline(files: [File],
+                               driveFileManager: DriveFileManager,
+                               group: DispatchGroup? = nil,
+                               filesNotAvailable: (() -> Void)?,
+                               completion: @escaping (File, Error?) -> Void) -> Bool {
+        let onlyFiles = files.filter { !$0.isDirectory }
+
+        let areAvailableOffline = onlyFiles.allSatisfy(\.isAvailableOffline)
         let makeFilesAvailableOffline = !areAvailableOffline
         if makeFilesAvailableOffline {
             filesNotAvailable?()
@@ -446,7 +451,7 @@ public final class FileActionsHelper {
             offlineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         }
 
-        for file in files where !file.isDirectory && file.isAvailableOffline == areAvailableOffline {
+        for file in onlyFiles where file.isAvailableOffline == areAvailableOffline {
             group?.enter()
             driveFileManager.setFileAvailableOffline(file: file, available: makeFilesAvailableOffline) { error in
                 completion(file, error)
