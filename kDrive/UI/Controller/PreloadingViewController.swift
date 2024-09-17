@@ -79,7 +79,7 @@ class PreloadingViewController: UIViewController {
         view.addSubview(progressView)
         NSLayoutConstraint.activate([
             progressView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            progressView.topAnchor.constraint(equalTo: driveImageView.bottomAnchor, constant: 16),
+            progressView.topAnchor.constraint(equalTo: driveImageView.bottomAnchor, constant: 16)
         ])
 
         view.addSubview(splashscreenInfomaniakImageView)

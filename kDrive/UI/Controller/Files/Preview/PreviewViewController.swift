@@ -624,7 +624,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             SceneRestorationValues.Carousel.filesIds.rawValue: allFilesIds,
             SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndexRow,
             SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
-            SceneRestorationValues.Carousel.presentationOrigin.rawValue: presentationOrigin.rawValue,
+            SceneRestorationValues.Carousel.presentationOrigin.rawValue: presentationOrigin.rawValue
         ]
     }
 }

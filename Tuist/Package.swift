@@ -8,7 +8,7 @@ import ProjectDescriptionHelpers
 let packageSettings = PackageSettings(
     productTypes: [
         "RealmSwift": .staticLibrary,
-        "Realm": .staticLibrary,
+        "Realm": .staticLibrary
     ]
 )
 
@@ -42,6 +42,6 @@ let package = Package(
         .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
         .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
-        .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),
+        .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1"))
     ]
 )
