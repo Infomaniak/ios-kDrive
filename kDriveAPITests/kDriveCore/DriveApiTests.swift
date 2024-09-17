@@ -37,13 +37,13 @@ final class DriveApiTests: XCTestCase {
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
 
-    override class func setUp() {
+    override static func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes(configuration: .realApp)
     }
 
-    override class func tearDown() {
+    override static func tearDown() {
         let group = DispatchGroup()
         group.enter()
         Task {

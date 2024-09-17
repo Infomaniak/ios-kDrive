@@ -36,7 +36,7 @@ final class FilePresenter {
         self.viewController = viewController
     }
 
-    class func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
+    static func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
         guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
             return
         }

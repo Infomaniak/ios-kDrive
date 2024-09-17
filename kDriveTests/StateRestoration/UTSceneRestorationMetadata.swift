@@ -27,7 +27,7 @@ import XCTest
 final class UTSceneRestorationMetadata: XCTestCase {
     static var driveFileManager: DriveFileManager!
 
-    override class func setUp() {
+    override static func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes(configuration: .minimal)

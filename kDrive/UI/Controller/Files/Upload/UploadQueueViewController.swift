@@ -120,7 +120,7 @@ final class UploadQueueViewController: UIViewController {
                                        driveId: currentDirectory.driveId)
     }
 
-    class func instantiate() -> UploadQueueViewController {
+    static func instantiate() -> UploadQueueViewController {
         return Storyboard.files
             .instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
     }

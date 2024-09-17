@@ -590,7 +590,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         )
     }
 
-    class func instantiate(
+    static func instantiate(
         files: [File],
         index: Int,
         driveFileManager: DriveFileManager,
