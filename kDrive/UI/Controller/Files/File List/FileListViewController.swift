@@ -385,7 +385,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             let selectedFiles: [File]
             if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                 allItemsSelected = true
-                selectedFiles = []
+                selectedFiles = displayedFiles
                 exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
             } else {
                 allItemsSelected = false
