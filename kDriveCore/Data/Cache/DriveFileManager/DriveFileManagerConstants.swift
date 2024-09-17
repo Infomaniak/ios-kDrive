@@ -196,7 +196,7 @@ public class DriveFileManagerConstants {
 
         // Migration for APIV3
         if oldSchemaVersion < 20 {
-            migration.enumerateObjects(ofType: UploadFile.className()) { oldObject, newObject in
+            migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
                 guard let newObject else {
                     return
                 }
