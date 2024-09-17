@@ -380,23 +380,32 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
                 .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
         case .multipleSelection:
-            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-            let selectViewController = MultipleSelectionFloatingPanelViewController()
-            selectViewController.presentingParent = self
-            selectViewController.currentDirectory = viewModel.currentDirectory
-
+            let allItemsSelected: Bool
+            let exceptFileIds: [Int]?
+            let selectedFiles: [File]
             if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
-                selectViewController.allItemsSelected = true
-                selectViewController.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
+                allItemsSelected = true
+                selectedFiles = []
+                exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
             } else {
-                selectViewController.allItemsSelected = false
-                selectViewController.files = files
-            }
-            selectViewController.driveFileManager = driveFileManager
-            selectViewController.reloadAction = { [weak self] in
-                self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+                allItemsSelected = false
+                selectedFiles = files
+                exceptFileIds = nil
             }
 
+            let selectViewController = MultipleSelectionFloatingPanelViewController(
+                driveFileManager: driveFileManager,
+                currentDirectory: viewModel.currentDirectory,
+                files: selectedFiles,
+                allItemsSelected: allItemsSelected,
+                exceptFileIds: exceptFileIds,
+                reloadAction: { [weak self] in
+                    self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+                },
+                presentingParent: self
+            )
+
+            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             floatingPanelViewController.set(contentViewController: selectViewController)
             (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
                 .trackAndObserve(scrollView: selectViewController.collectionView)
