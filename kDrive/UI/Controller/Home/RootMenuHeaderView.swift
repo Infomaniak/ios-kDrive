@@ -124,7 +124,7 @@ class RootMenuHeaderView: UICollectionReusableView {
         guard let collectionView else { return }
         UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
             let sectionHeaderContext = UICollectionViewLayoutInvalidationContext()
-            sectionHeaderContext.invalidateDecorationElements(
+            sectionHeaderContext.invalidateSupplementaryElements(
                 ofKind: RootMenuHeaderView.kind.rawValue,
                 at: [IndexPath(item: 0, section: 0)]
             )
