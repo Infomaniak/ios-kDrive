@@ -381,7 +381,7 @@ extension FileActionsFloatingPanelViewController {
         alert.textFieldConfiguration = .fileNameConfiguration
         if !file.isDirectory {
             alert.textFieldConfiguration.selectedRange = fileName
-                .startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
+                .startIndex ..< (fileName.lastIndex { $0 == "." } ?? fileName.endIndex)
         }
         present(alert, animated: true)
     }
@@ -407,7 +407,7 @@ extension FileActionsFloatingPanelViewController {
         alert.textFieldConfiguration = .fileNameConfiguration
         if !file.isDirectory {
             alert.textFieldConfiguration.selectedRange = file.name
-                .startIndex ..< (file.name.lastIndex(where: { $0 == "." }) ?? file.name.endIndex)
+                .startIndex ..< (file.name.lastIndex { $0 == "." } ?? file.name.endIndex)
         }
         present(alert, animated: true)
     }
