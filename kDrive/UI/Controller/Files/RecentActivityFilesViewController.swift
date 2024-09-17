@@ -67,6 +67,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
         if let user = activity.user {
             var text = user.displayName + " "
+            // swiftlint:disable void_function_in_ternary
             switch activity.action {
             case .fileCreate:
                 text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings
@@ -84,6 +85,7 @@ class RecentActivityFilesViewController: FileListViewController {
             default:
                 text += KDriveResourcesStrings.Localizable.fileActivityUnknown(count)
             }
+            // swiftlint:enable void_function_in_ternary
 
             headerView.activityLabel.text = text
 
