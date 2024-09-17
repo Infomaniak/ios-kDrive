@@ -94,11 +94,13 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
                 let (files, nextCursor) = try await self.fetchRoot(page: page)
                 observer.didEnumerate(files
                     .filter { $0.visibility == .isPrivateSpace || $0.visibility == .isTeamSpace }
-                    .map { $0.toFileProviderItem(
-                        parent: .rootContainer,
-                        drive: driveFileManager.drive,
-                        domain: domain
-                    ) })
+                    .map {
+                        $0.toFileProviderItem(
+                            parent: .rootContainer,
+                            drive: driveFileManager.drive,
+                            domain: domain
+                        )
+                    })
 
                 // there should never be more cursors but still implement next page logic just in case
                 if let nextCursor {
@@ -167,11 +169,13 @@ class RootEnumerator: NSObject, NSFileProviderEnumerator {
                 let deletedIds = childIdsAfterUpdate.subtracting(childIdsBeforeUpdate)
 
                 let updatedFiles = liveParentDirectory.children + [liveParentDirectory]
-                observer.didUpdate(updatedFiles.map { $0.toFileProviderItem(
-                    parent: .rootContainer,
-                    drive: driveFileManager.drive,
-                    domain: domain
-                ) })
+                observer.didUpdate(updatedFiles.map {
+                    $0.toFileProviderItem(
+                        parent: .rootContainer,
+                        drive: driveFileManager.drive,
+                        domain: domain
+                    )
+                })
                 observer.didDeleteItems(withIdentifiers: deletedIds.map { NSFileProviderItemIdentifier($0) })
                 observer.finishEnumeratingChanges(
                     upTo: syncAnchor,
