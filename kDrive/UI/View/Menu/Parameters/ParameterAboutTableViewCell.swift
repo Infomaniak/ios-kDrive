@@ -19,9 +19,4 @@
 import InfomaniakCoreUI
 import UIKit
 
-class ParameterAboutTableViewCell: InsetTableViewCell {
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-}
+class ParameterAboutTableViewCell: InsetTableViewCell {}

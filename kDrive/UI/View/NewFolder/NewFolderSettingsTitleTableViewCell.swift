@@ -19,15 +19,4 @@
 import InfomaniakCoreUI
 import UIKit
 
-class NewFolderSettingsTitleTableViewCell: InsetTableViewCell {
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
-}
+class NewFolderSettingsTitleTableViewCell: InsetTableViewCell {}

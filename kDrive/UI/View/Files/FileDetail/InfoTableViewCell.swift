@@ -21,10 +21,6 @@ import UIKit
 class InfoTableViewCell: UITableViewCell {
     var actionHandler: ((UIButton) -> Void)?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-
     @IBAction func buttonPressed(_ sender: UIButton) {
         actionHandler?(sender)
     }
