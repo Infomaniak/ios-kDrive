@@ -184,9 +184,9 @@ public enum ConvertedType: String, CaseIterable {
 
 /// Minimal data needed to query a PublicShare
 public struct PublicShareProxy {
-    let driveId: Int
-    let fileId: Int
-    let shareLinkUid: String
+    public let driveId: Int
+    public let fileId: Int
+    public let shareLinkUid: String
 
     public init(driveId: Int, fileId: Int, shareLinkUid: String) {
         self.driveId = driveId
