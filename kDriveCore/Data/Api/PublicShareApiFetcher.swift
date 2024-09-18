@@ -29,6 +29,7 @@ public class PublicShareApiFetcher: ApiFetcher {
 
     public func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
         let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
+        // TODO: Use authenticated token if availlable
         let request = Session.default.request(shareLinkInfoUrl)
         let metadata: PublicShareMetadata = try await perform(request: request)
         return metadata
@@ -45,13 +46,14 @@ public class PublicShareApiFetcher: ApiFetcher {
     }
 
     /// Query a specific page
-    public func shareLinkFileChildren(publicShareProxy: PublicShareProxy,
+    public func shareLinkFileChildren(rootFolderId: Int,
+                                      publicShareProxy: PublicShareProxy,
                                       sortType: SortType,
                                       cursor: String? = nil) async throws -> ValidServerResponse<[File]> {
         let shareLinkFileChildren = Endpoint.shareLinkFileChildren(
             driveId: publicShareProxy.driveId,
             linkUuid: publicShareProxy.shareLinkUid,
-            fileId: publicShareProxy.fileId,
+            fileId: rootFolderId,
             sortType: sortType
         )
         .cursored(cursor)

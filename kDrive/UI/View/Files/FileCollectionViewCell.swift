@@ -49,14 +49,8 @@ protocol FileCellDelegate: AnyObject {
     var selectionMode: Bool
     var isSelected = false
 
-    /// UUID of the public share if file exists within a public share
-    let publicShareId: String?
-
-    /// Drive ID of the public share if file exists within a public share
-    let publicDriveId: Int?
-
-    /// Root file ID of the public share if file exists within a public share
-    let publicRootFileId: Int?
+    /// Public share data if file exists within a public share
+    let publicShareProxy: PublicShareProxy?
 
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
@@ -124,10 +118,7 @@ protocol FileCellDelegate: AnyObject {
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
         self.file = file
         self.selectionMode = selectionMode
-        publicShareId = driveFileManager.publicShareId
-        publicDriveId = driveFileManager.publicDriveId
-        publicRootFileId = driveFileManager.publicRootFileId
-
+        publicShareProxy = driveFileManager.publicShareProxy
         categories = driveFileManager.drive.categories(for: file)
     }
 
@@ -165,11 +156,10 @@ protocol FileCellDelegate: AnyObject {
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
 
-        if let publicShareId = publicShareId,
-           let publicDriveId = publicDriveId {
+        if let publicShareProxy = publicShareProxy {
             // Fetch public share thumbnail
-            thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareId,
-                                                                 publicDriveId: publicDriveId,
+            thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
+                                                                 publicDriveId: publicShareProxy.driveId,
                                                                  publicFileId: file.id) { [
                 requestFileId = file.id,
                 weak self

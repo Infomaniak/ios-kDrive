@@ -220,39 +220,17 @@ public final class DriveFileManager {
 
     public var isPublicShare: Bool {
         switch context {
-        case .drive:
-            return false
-        case .fileProvider:
-            return false
-        case .sharedWithMe:
-            return false
-        case .publicShare(let shareId):
+        case .publicShare:
             return true
-        }
-    }
-
-    public var publicShareId: String? {
-        switch context {
-        case .publicShare(let shareId, _, _):
-            return shareId
         default:
-            return nil
+            return false
         }
     }
 
-    public var publicDriveId: Int? {
+    public var publicShareProxy: PublicShareProxy? {
         switch context {
-        case .publicShare(_, let driveId, _):
-            return driveId
-        default:
-            return nil
-        }
-    }
-
-    public var publicRootFileId: Int? {
-        switch context {
-        case .publicShare(_, _, let rootFileId):
-            return rootFileId
+        case .publicShare(let shareProxy):
+            return shareProxy
         default:
             return nil
         }
@@ -461,6 +439,7 @@ public final class DriveFileManager {
         try await files(in: rootProxy,
                         fetchFiles: {
                             let mySharedFiles = try await publicShareApiFetcher.shareLinkFileChildren(
+                                rootFolderId: rootProxy.id,
                                 publicShareProxy: publicShareProxy,
                                 sortType: sortType
                             )

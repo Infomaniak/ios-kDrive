@@ -232,9 +232,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let forzenPublicShareDrive = publicShareDrive.freeze()
 
         let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
-        let context = DriveFileManagerContext.publicShare(shareId: publicShareId,
-                                                          driveId: driveId,
-                                                          rootFileId: rootFileId)
+        let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: rootFileId, shareLinkUid: publicShareId)
+        let context = DriveFileManagerContext.publicShare(shareProxy: publicShareProxy)
 
         return DriveFileManager(drive: forzenPublicShareDrive, apiFetcher: apiFetcher, context: context)
     }
