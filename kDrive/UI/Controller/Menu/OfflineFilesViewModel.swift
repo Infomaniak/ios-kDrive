@@ -49,4 +49,8 @@ class OfflineFilesViewModel: FileListViewModel {
             endRefreshing()
         }
     }
+
+    override func shouldShowEmptyView() -> Bool {
+        files.isEmpty
+    }
 }
