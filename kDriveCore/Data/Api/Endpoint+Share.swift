@@ -77,7 +77,7 @@ public extension Endpoint {
 
     /// Share mink file preview
     static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
     }
 
     /// Download share link file
