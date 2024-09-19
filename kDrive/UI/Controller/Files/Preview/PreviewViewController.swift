@@ -644,7 +644,11 @@ extension PreviewViewController: UICollectionViewDataSource {
     ) {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
-            cell.progressiveLoadingForFile(file)
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                cell.progressiveLoadingForPublicShareFile(file, publicShareProxy: publicShareProxy)
+            } else {
+                cell.progressiveLoadingForFile(file)
+            }
         }
     }
 

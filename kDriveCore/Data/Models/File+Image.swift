@@ -27,8 +27,7 @@ public extension File {
                                  publicDriveId: Int,
                                  publicFileId: Int,
                                  completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        guard supportedBy.contains(.thumbnail),
-              let currentDriveFileManager = accountManager.currentDriveFileManager else {
+        guard supportedBy.contains(.thumbnail) else {
             completion(icon, false)
             return nil
         }
@@ -72,22 +71,40 @@ public extension File {
     }
 
     @discardableResult
-    func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        if let currentDriveFileManager = accountManager.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
-                                                          options: [
-                                                              .requestModifier(currentDriveFileManager.apiFetcher
-                                                                  .authenticatedKF),
-                                                              .preloadAllAnimationData
-                                                          ]) { result in
-                if let image = try? result.get().image {
-                    completion(image)
-                } else {
-                    completion(nil)
-                }
+    func getPublicSharePreview(publicShareId: String,
+                               publicDriveId: Int,
+                               publicFileId: Int,
+                               completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
+        let previewURL = Endpoint.shareLinkFilePreview(driveId: publicDriveId,
+                                                       linkUuid: publicShareId,
+                                                       fileId: publicFileId).url
+
+        return KingfisherManager.shared.retrieveImage(with: previewURL) { result in
+            if let image = try? result.get().image {
+                completion(image)
+            } else {
+                completion(nil)
             }
-        } else {
+        }
+    }
+
+    @discardableResult
+    func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
+        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
             return nil
+        }
+
+        return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
+                                                      options: [
+                                                          .requestModifier(currentDriveFileManager.apiFetcher
+                                                              .authenticatedKF),
+                                                          .preloadAllAnimationData
+                                                      ]) { result in
+            if let image = try? result.get().image {
+                completion(image)
+            } else {
+                completion(nil)
+            }
         }
     }
 }
