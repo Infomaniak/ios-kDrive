@@ -75,14 +75,14 @@ public extension Endpoint {
         return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
     }
 
-    /// Share mink file preview
+    /// Share link file preview
     static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
     }
 
     /// Download share link file
     static func downloadShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/download")
+        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/download")
     }
 
     func showOfficeShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {

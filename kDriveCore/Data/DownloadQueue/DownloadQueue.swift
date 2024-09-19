@@ -112,6 +112,41 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     // MARK: - Public methods
 
+    public func addPublicShareToQueue(file: File,
+                                      userId: Int,
+                                      driveFileManager: DriveFileManager,
+                                      publicShareProxy: PublicShareProxy,
+                                      itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+        Log.downloadQueue("addPublicShareToQueue file:\(file.id)")
+        let file = file.freezeIfNeeded()
+
+        dispatchQueue.async {
+            guard !self.hasOperation(for: file.id) else {
+                Log.downloadQueue("Already in download queue, skipping \(file.id)", level: .error)
+                return
+            }
+
+            OperationQueueHelper.disableIdleTimer(true)
+
+            let operation = DownloadOperation(
+                file: file,
+                driveFileManager: driveFileManager,
+                urlSession: self.bestSession,
+                publicShareProxy: publicShareProxy,
+                itemIdentifier: itemIdentifier
+            )
+            operation.completionBlock = {
+                self.dispatchQueue.async {
+                    self.operationsInQueue.removeValue(forKey: file.id)
+                    self.publishFileDownloaded(fileId: file.id, error: operation.error)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                }
+            }
+            self.operationQueue.addOperation(operation)
+            self.operationsInQueue[file.id] = operation
+        }
+    }
+
     public func addToQueue(file: File,
                            userId: Int,
                            itemIdentifier: NSFileProviderItemIdentifier? = nil) {

@@ -388,7 +388,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         present(activityViewController, animated: true)
     }
 
-    func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
+    func downloadFile(action: FloatingPanelAction,
+                      indexPath: IndexPath,
+                      completion: @escaping () -> Void) {
         guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
@@ -405,7 +407,16 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                 }
             }
-        DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            DownloadQueue.instance.addPublicShareToQueue(file: file,
+                                                         userId: accountManager.currentUserId,
+                                                         driveFileManager: driveFileManager,
+                                                         publicShareProxy: publicShareProxy)
+        } else {
+            DownloadQueue.instance.addToQueue(file: file,
+                                              userId: accountManager.currentUserId)
+        }
     }
 
     func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
