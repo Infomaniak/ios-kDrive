@@ -224,8 +224,12 @@ class FileListViewModel: SelectDelegate {
                 resultFiles.first?.isFirstInList = true
                 resultFiles.last?.isLastInList = true
                 files = resultFiles
-                isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
+                isShowingEmptyView = shouldShowEmptyView()
             }
+    }
+
+    func shouldShowEmptyView() -> Bool {
+        currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
     }
 
     func startObservation() {
