@@ -58,6 +58,11 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func setupActions() {
+        guard !driveFileManager.isPublicShare else {
+            actions = []
+            return
+        }
+
         actions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action in
             switch action {
             case .openWith:
@@ -175,7 +180,8 @@ extension FileActionsFloatingPanelViewController {
         if file.isMostRecentDownloaded {
             presentShareSheet(from: indexPath)
         } else {
-            downloadFile(action: action, indexPath: indexPath) { [weak self] in
+            downloadFile(action: action,
+                         indexPath: indexPath) { [weak self] in
                 self?.presentShareSheet(from: indexPath)
             }
         }
