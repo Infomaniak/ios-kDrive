@@ -93,6 +93,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     var realmObservationToken: NotificationToken?
+    var currentDirectoryObservationToken: NotificationToken?
 
     var currentDirectory: File
     var driveFileManager: DriveFileManager {
@@ -226,10 +227,28 @@ class FileListViewModel: SelectDelegate {
                 files = resultFiles
                 isShowingEmptyView = shouldShowEmptyView()
             }
+
+        currentDirectoryObservationToken?.invalidate()
+        guard currentDirectory.isManagedByRealm,
+              !currentDirectory.isInvalidated,
+              let liveCurrentDirectory = currentDirectory.thaw() else { return }
+        currentDirectoryObservationToken = liveCurrentDirectory
+            .observe(keyPaths: ["lastCursor", "fullyDownloaded"],
+                     on: .main) { [weak self] change in
+                guard let self else { return }
+
+                switch change {
+                case .change:
+                    currentDirectory = getRefreshedCurrentDirectory()
+                    isShowingEmptyView = shouldShowEmptyView()
+                default:
+                    break
+                }
+            }
     }
 
     func shouldShowEmptyView() -> Bool {
-        currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
+        files.isEmpty && currentDirectory.fullyDownloaded
     }
 
     func startObservation() {
