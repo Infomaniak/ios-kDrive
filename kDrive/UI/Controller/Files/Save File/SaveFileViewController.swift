@@ -166,8 +166,8 @@ class SaveFileViewController: UIViewController {
 
         guard let selectedDriveFileManager else { return nil }
 
-        let myFilesDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { files in
-            files.filter(NSPredicate(format: "rawVisibility = %@", FileVisibility.isPrivateSpace.rawValue))
+        let myFilesDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter("rawVisibility = %@", FileVisibility.isPrivateSpace.rawValue)
         }.first
 
         if let myFilesDirectory {
@@ -177,8 +177,8 @@ class SaveFileViewController: UIViewController {
         // If we are in a shared with me, we only have access to some folders that are shared with the user
         guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
 
-        let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { files in
-            files.filter(NSPredicate(format: "rawVisibility = %@ AND driveId == %d", FileVisibility.isInSharedSpace.rawValue, selectedDriveFileManager.drive.id))
+        let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter("rawVisibility = %@ AND driveId == %d", FileVisibility.isInSharedSpace.rawValue, selectedDriveFileManager.drive.id)
         }.first
         return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
     }
