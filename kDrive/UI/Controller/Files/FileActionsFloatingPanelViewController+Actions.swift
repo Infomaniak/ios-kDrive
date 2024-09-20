@@ -36,7 +36,14 @@ extension FileActionsFloatingPanelViewController {
     private func setupQuickActions() {
         let offline = ReachabilityListener.instance.currentStatus == .offline
 
-        quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
+        if driveFileManager.isPublicShare {
+            quickActions = []
+        } else if file.isDirectory {
+            quickActions = FloatingPanelAction.folderQuickActions
+        } else {
+            quickActions = FloatingPanelAction.quickActions
+        }
+
         for action in quickActions {
             switch action {
             case .shareAndRights:
@@ -59,7 +66,11 @@ extension FileActionsFloatingPanelViewController {
 
     private func setupActions() {
         guard !driveFileManager.isPublicShare else {
-            actions = []
+            if file.isDirectory {
+                actions = FloatingPanelAction.publicShareFolderActions
+            } else {
+                actions = FloatingPanelAction.publicShareActions
+            }
             return
         }
 

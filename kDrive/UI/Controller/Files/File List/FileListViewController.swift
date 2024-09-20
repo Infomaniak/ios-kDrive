@@ -25,6 +25,7 @@ import kDriveCore
 import kDriveResources
 import RealmSwift
 import UIKit
+import FloatingPanel
 
 extension SwipeCellAction {
     static let share = SwipeCellAction(
@@ -348,6 +349,30 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
+    private func fileLayout(files: [File]) -> FloatingPanelLayout {
+        guard driveFileManager.isPublicShare else {
+            return FileFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        }
+
+        if files.first?.isDirectory ?? false {
+            return PublicShareFolderFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        } else {
+            return PublicShareFileFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        }
+    }
+
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
         var floatingPanelViewController: DriveFloatingPanelController
@@ -359,11 +384,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-            floatingPanelViewController.layout = FileFloatingPanelLayout(
-                initialState: .half,
-                hideTip: true,
-                backdropAlpha: 0.2
-            )
+            floatingPanelViewController.layout = fileLayout(files: files)
 
             if let file = files.first {
                 fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)

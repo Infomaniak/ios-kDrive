@@ -205,6 +205,14 @@ public class FloatingPanelAction: Equatable {
         return [informations, add, shareAndRights, shareLink].map { $0.reset() }
     }
 
+    static var publicShareActions: [FloatingPanelAction] {
+        return [openWith, sendCopy, download].map { $0.reset() }
+    }
+
+    static var publicShareFolderActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+
     static var multipleSelectionActions: [FloatingPanelAction] {
         return [manageCategories, favorite, offline, download, move, duplicate].map { $0.reset() }
     }
