@@ -82,15 +82,13 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
                 iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
             }
         case .offline:
-            let filesAvailableOffline = files.allSatisfy(\.isAvailableOffline)
+            let onlyFiles = files.filter { !$0.isDirectory }
+            let filesAvailableOffline = onlyFiles.allSatisfy(\.isAvailableOffline)
             switchView.isHidden = false
             iconImageView.image = filesAvailableOffline ? KDriveResourcesAsset.check.image : action.image
             iconImageView.tintColor = filesAvailableOffline ? KDriveResourcesAsset.greenColor.color : action.tintColor
             switchView.isOn = filesAvailableOffline
             setProgress(showProgress ? -1 : nil)
-            // Disable cell if all selected items are folders
-            let filesAreDirectory = files.allSatisfy(\.isDirectory)
-            setEnabled(!filesAreDirectory)
         case .download:
             if let archiveId {
                 observeProgress(showProgress, archiveId: archiveId)

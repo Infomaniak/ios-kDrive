@@ -125,9 +125,7 @@ class SaveFileViewController: UIViewController {
             ) {
                 selectedDriveFileManager = driveFileManager
             }
-            selectedDirectory = lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id
-                ? lastSelectedDirectory
-                : selectedDriveFileManager?.getCachedRootFile()
+            selectedDirectory = getBestDirectory()
         }
 
         closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
@@ -159,6 +157,30 @@ class SaveFileViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
+    }
+
+    func getBestDirectory() -> File? {
+        if lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id {
+            return lastSelectedDirectory
+        }
+
+        guard let selectedDriveFileManager else { return nil }
+
+        let myFilesDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter("rawVisibility = %@", FileVisibility.isPrivateSpace.rawValue)
+        }.first
+
+        if let myFilesDirectory {
+            return myFilesDirectory.freezeIfNeeded()
+        }
+
+        // If we are in a shared with me, we only have access to some folders that are shared with the user
+        guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
+
+        let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter("rawVisibility = %@ AND driveId == %d", FileVisibility.isInSharedSpace.rawValue, selectedDriveFileManager.drive.id)
+        }.first
+        return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -429,7 +451,7 @@ extension SaveFileViewController: UITableViewDelegate {
                 }
                 alert.textFieldConfiguration = .fileNameConfiguration
                 alert.textFieldConfiguration.selectedRange = item.name
-                    .startIndex ..< (item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
+                    .startIndex ..< (item.name.lastIndex { $0 == "." } ?? item.name.endIndex)
                 present(alert, animated: true)
             }
         case .driveSelection:
@@ -476,7 +498,7 @@ extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) {
             self.selectedDriveFileManager = selectedDriveFileManager
-            selectedDirectory = selectedDriveFileManager.getCachedRootFile()
+            selectedDirectory = getBestDirectory()
             sections = [.fileName, .driveSelection, .directorySelection]
             if itemProvidersContainHeicPhotos {
                 sections.append(.photoFormatOption)

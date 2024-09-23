@@ -113,7 +113,7 @@ public final class DriveInfosManager: DriveInfosManagerQueryable {
         ]
     )
 
-    private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
+    private static func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
         migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
             guard let newObject, let objectId = oldObject?["objectId"] as? String else { return }
             if !ids.contains(objectId) {

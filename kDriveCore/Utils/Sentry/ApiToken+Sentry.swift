@@ -41,7 +41,7 @@ public extension ApiToken {
             "User id": userId,
             "Expiration date": expirationDate?.timeIntervalSince1970 ?? "infinite",
             "Access Token": truncatedAccessToken,
-            "Refresh Token": truncatedRefreshToken,
+            "Refresh Token": truncatedRefreshToken
         ]
     }
 }

@@ -215,13 +215,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     func observeFileUpdated() {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
-            guard let self,
-                  self.currentFile.id == file.id else {
-                return
-            }
-
-            self.currentFile = file
             Task { @MainActor in
+                guard let self,
+                      self.currentFile.id == file.id else {
+                    return
+                }
+
+                self.currentFile = file
+
                 self.collectionView.endEditing(true)
                 self.collectionView.reloadItems(at: [self.currentIndex])
             }
@@ -590,7 +591,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         )
     }
 
-    class func instantiate(
+    static func instantiate(
         files: [File],
         index: Int,
         driveFileManager: DriveFileManager,
@@ -625,7 +626,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             SceneRestorationValues.Carousel.filesIds.rawValue: allFilesIds,
             SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndexRow,
             SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
-            SceneRestorationValues.Carousel.presentationOrigin.rawValue: presentationOrigin.rawValue,
+            SceneRestorationValues.Carousel.presentationOrigin.rawValue: presentationOrigin.rawValue
         ]
     }
 }

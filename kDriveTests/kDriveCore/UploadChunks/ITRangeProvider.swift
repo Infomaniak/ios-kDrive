@@ -21,7 +21,7 @@ import XCTest
 
 /// Integration Tests of the RangeProvider
 final class ITRangeProvider: XCTestCase {
-    override class func setUp() {
+    override static func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes(configuration: .minimal)

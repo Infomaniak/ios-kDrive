@@ -348,10 +348,9 @@ final class ManageCategoriesViewController: UITableViewController {
 extension ManageCategoriesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         if let searchText {
-            filteredCategories = categories.filter { $0.localizedName.range(
-                of: searchText,
-                options: [.caseInsensitive, .diacriticInsensitive]
-            ) != nil }
+            filteredCategories = categories.filter {
+                $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+            }
             // Append dummy category to show creation cell if the category doesn't exist yet
             if userCanCreateAndEditCategories && !categories
                 .contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {

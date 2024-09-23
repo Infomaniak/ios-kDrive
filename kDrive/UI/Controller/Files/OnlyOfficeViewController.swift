@@ -33,7 +33,7 @@ final class OnlyOfficeViewController: UIViewController {
 
     private var progressObserver: NSKeyValueObservation?
 
-    class func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
+    static func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
         guard file.isOfficeFile else { return }
 
         if let newExtension = file.conversion?.onylofficeExtension {
@@ -88,7 +88,7 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
-    class func instantiate(driveFileManager: DriveFileManager, file: File,
+    static func instantiate(driveFileManager: DriveFileManager, file: File,
                            previewParent: PreviewViewController?) -> OnlyOfficeViewController {
         let onlyOfficeViewController = OnlyOfficeViewController()
         onlyOfficeViewController.driveFileManager = driveFileManager

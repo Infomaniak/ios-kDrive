@@ -401,7 +401,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // Observe queue for upload completion
         var observationToken: ObservationToken?
-        observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { uploadedFile, _ in
+        observationToken = uploadQueueObservable.observeFileUploaded(self, fileId: uploadFile.id) { _, _ in
             observationToken?.cancel()
             observationToken = nil
 
