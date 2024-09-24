@@ -34,6 +34,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        textView.text = ""
         textView.textContainerInset = UIEdgeInsets(top: 8, left: 3, bottom: 8, right: 3)
         markdownParser.code.font = UIFont.monospacedSystemFont(
             ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize),
