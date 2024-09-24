@@ -23,14 +23,36 @@ import kDriveResources
 import MarkdownKit
 import UIKit
 
+/// Something to read a file outside of the main actor
+struct CodePreviewWorker {
+    func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
+        let data = try Data(contentsOf: localUrl, options: .alwaysMapped)
+        var maybeString: NSString?
+
+        NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
+        guard let maybeString else {
+            throw DriveError.unknownError
+        }
+
+        return maybeString as String
+    }
+}
+
 class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet var textView: UITextView!
+    private let codePreviewWorker = CodePreviewWorker()
+    private let activityView: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
 
     private let highlightr = Highlightr()
     private let markdownParser = MarkdownParser(font: UIFontMetrics.default.scaledFont(for: MarkdownParser.defaultFont),
                                                 color: .label,
                                                 enabledElements: .disabledAutomaticLink)
     private var isCode = true
+
+    @IBOutlet var textView: UITextView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -41,6 +63,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             weight: .regular
         )
         markdownParser.code.textBackgroundColor = KDriveResourcesAsset.backgroundColor.color
+        setupActivityView()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -49,6 +72,18 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             // Update content
             displayCode(for: textView.text)
         }
+    }
+
+    private func setupActivityView() {
+        contentView.addSubview(activityView)
+        contentView.bringSubviewToFront(activityView)
+
+        activityView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            activityView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            activityView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+        ])
     }
 
     private func setTheme() {
@@ -65,29 +100,31 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func configure(with file: File) {
-        do {
-            // Read file
-            let data = try Data(contentsOf: file.localUrl, options: .alwaysMapped)
-            var maybeString: NSString?
+        textView.text = ""
+        activityView.startAnimating()
 
-            NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
-            guard let maybeString else {
-                throw DriveError.unknownError
+        let localUrl = file.localUrl
+        let fileId = file.id
+
+        Task {
+            do {
+                let contentString = try await codePreviewWorker.readDataToStringInferEncoding(localUrl: localUrl)
+                displayContent(with: file, content: contentString)
+            } catch {
+                DDLogError("Failed to read file content: \(error)")
+                previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
             }
+        }
+    }
 
-            let content = maybeString as String
-
-            // Display content
-            if file.extension == "md" || file.extension == "markdown" {
-                displayMarkdown(for: content)
-                isCode = false
-            } else {
-                displayCode(for: content)
-                isCode = true
-            }
-        } catch {
-            DDLogError("Failed to read file content: \(error)")
-            previewDelegate?.errorWhilePreviewing(fileId: file.id, error: error)
+    private func displayContent(with file: File, content: String) {
+        activityView.stopAnimating()
+        if file.extension == "md" || file.extension == "markdown" {
+            displayMarkdown(for: content)
+            isCode = false
+        } else {
+            displayCode(for: content)
+            isCode = true
         }
     }
 

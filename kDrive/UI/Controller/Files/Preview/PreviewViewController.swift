@@ -26,7 +26,7 @@ import SafariServices
 import Sentry
 import UIKit
 
-protocol PreviewContentCellDelegate: AnyObject {
+@MainActor protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
@@ -609,7 +609,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previewPageViewController.driveFileManager = driveFileManager
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.presentationOrigin = presentationOrigin
-        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the function returns
+        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the
+        // function returns
         // this should be fixed in the future with the refactor of the init
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         return previewPageViewController
