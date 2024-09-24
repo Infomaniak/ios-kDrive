@@ -40,14 +40,19 @@ struct CodePreviewWorker {
 
 class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     private let codePreviewWorker = CodePreviewWorker()
-
-    @IBOutlet var textView: UITextView!
+    private let activityView: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
 
     private let highlightr = Highlightr()
     private let markdownParser = MarkdownParser(font: UIFontMetrics.default.scaledFont(for: MarkdownParser.defaultFont),
                                                 color: .label,
                                                 enabledElements: .disabledAutomaticLink)
     private var isCode = true
+
+    @IBOutlet var textView: UITextView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -58,6 +63,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             weight: .regular
         )
         markdownParser.code.textBackgroundColor = KDriveResourcesAsset.backgroundColor.color
+        setupActivityView()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -66,6 +72,19 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             // Update content
             displayCode(for: textView.text)
         }
+    }
+
+    private func setupActivityView() {
+        contentView.addSubview(activityView)
+        contentView.bringSubviewToFront(activityView)
+
+        activityView.translatesAutoresizingMaskIntoConstraints = false
+        activityView.isHidden = true
+
+        NSLayoutConstraint.activate([
+            activityView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            activityView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+        ])
     }
 
     private func setTheme() {
@@ -99,6 +118,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
     private func displayContent(with file: File, content: String) {
+        activityView.stopAnimating()
         if file.extension == "md" || file.extension == "markdown" {
             displayMarkdown(for: content)
             isCode = false
@@ -109,9 +129,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
     private func displayLoading() {
-        textView
-            .attributedText =
-            NSAttributedString(string: "\n\t\t\(KDriveResourcesStrings.Localizable.previewDownloadIndication)")
+        activityView.startAnimating()
     }
 
     private func displayMarkdown(for content: String) {
