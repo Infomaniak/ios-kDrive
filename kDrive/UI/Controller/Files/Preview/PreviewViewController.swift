@@ -505,7 +505,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             }
         }
         previewErrors[fileId] = previewError
-        collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+
+        // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
+        // cellForItemAt and iOS 18 seems unhappy about this.
+        Task { @MainActor [weak self] in
+            self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+        }
     }
 
     func openWith(from: UIView) {

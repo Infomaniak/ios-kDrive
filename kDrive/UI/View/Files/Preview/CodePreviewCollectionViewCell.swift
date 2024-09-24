@@ -34,6 +34,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        textView.text = ""
         textView.textContainerInset = UIEdgeInsets(top: 8, left: 3, bottom: 8, right: 3)
         markdownParser.code.font = UIFont.monospacedSystemFont(
             ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize),
@@ -66,7 +67,16 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     func configure(with file: File) {
         do {
             // Read file
-            let content = try String(contentsOf: file.localUrl)
+            let data = try Data(contentsOf: file.localUrl, options: .alwaysMapped)
+            var maybeString: NSString?
+
+            NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
+            guard let maybeString else {
+                throw DriveError.unknownError
+            }
+
+            let content = maybeString as String
+
             // Display content
             if file.extension == "md" || file.extension == "markdown" {
                 displayMarkdown(for: content)
