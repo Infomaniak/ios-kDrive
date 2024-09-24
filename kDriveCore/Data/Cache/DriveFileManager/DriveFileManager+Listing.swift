@@ -142,7 +142,6 @@ public extension DriveFileManager {
                 if fileUid != directory.uid {
                     directory.children.insert(actionFile)
                 }
-                actionFile.applyLastModifiedDateToLocalFile()
 
             default:
                 break
