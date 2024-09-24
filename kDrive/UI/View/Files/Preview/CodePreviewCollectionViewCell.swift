@@ -23,7 +23,24 @@ import kDriveResources
 import MarkdownKit
 import UIKit
 
+/// Something to read a file outside of the main actor
+struct CodePreviewWorker {
+    func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
+        let data = try Data(contentsOf: localUrl, options: .alwaysMapped)
+        var maybeString: NSString?
+
+        NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
+        guard let maybeString else {
+            throw DriveError.unknownError
+        }
+
+        return maybeString as String
+    }
+}
+
 class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
+    private let codePreviewWorker = CodePreviewWorker()
+
     @IBOutlet var textView: UITextView!
 
     private let highlightr = Highlightr()
@@ -65,30 +82,36 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func configure(with file: File) {
-        do {
-            // Read file
-            let data = try Data(contentsOf: file.localUrl, options: .alwaysMapped)
-            var maybeString: NSString?
+        let localUrl = file.localUrl
+        let fileId = file.id
 
-            NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
-            guard let maybeString else {
-                throw DriveError.unknownError
+        displayLoading()
+
+        Task {
+            do {
+                let contentString = try await codePreviewWorker.readDataToStringInferEncoding(localUrl: localUrl)
+                displayContent(with: file, content: contentString)
+            } catch {
+                DDLogError("Failed to read file content: \(error)")
+                previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
             }
-
-            let content = maybeString as String
-
-            // Display content
-            if file.extension == "md" || file.extension == "markdown" {
-                displayMarkdown(for: content)
-                isCode = false
-            } else {
-                displayCode(for: content)
-                isCode = true
-            }
-        } catch {
-            DDLogError("Failed to read file content: \(error)")
-            previewDelegate?.errorWhilePreviewing(fileId: file.id, error: error)
         }
+    }
+
+    private func displayContent(with file: File, content: String) {
+        if file.extension == "md" || file.extension == "markdown" {
+            displayMarkdown(for: content)
+            isCode = false
+        } else {
+            displayCode(for: content)
+            isCode = true
+        }
+    }
+
+    private func displayLoading() {
+        textView
+            .attributedText =
+            NSAttributedString(string: "\n\t\t\(KDriveResourcesStrings.Localizable.previewDownloadIndication)")
     }
 
     private func displayMarkdown(for content: String) {
