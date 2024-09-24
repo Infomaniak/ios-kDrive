@@ -243,16 +243,16 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 cell.valueLabel.text = getNotificationText()
             }
             return cell
-        case .wifi:
-            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
-            cell.switchHandler = { sender in
-                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
-                UserDefaults.shared.isWifiOnly = sender.isOn
-            }
-            return cell
-        case .security, .storage, .about, .joinBeta, .deleteAccount:
+//        case .wifi:
+//            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
+//            cell.initWithPositionAndShadow()
+//            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
+//            cell.switchHandler = { sender in
+//                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
+//                UserDefaults.shared.isWifiOnly = sender.isOn
+//            }
+//            return cell
+        case .wifi, .security, .storage, .about, .joinBeta, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
@@ -326,7 +326,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
         case .wifi:
-            break
+            navigationController?.pushViewController(WifiSyncSettingsViewController(), animated: true)
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .joinBeta:

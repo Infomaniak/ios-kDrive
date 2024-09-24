@@ -49,6 +49,7 @@ public extension UserDefaults.Keys {
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
     static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
     static let importPhotoFormat = UserDefaults.Keys(rawValue: "importPhotoFormat")
+    static let syncMod = UserDefaults.Keys(rawValue: "syncMod")
     static let matomoAuthorized = UserDefaults.Keys(rawValue: "matomoAuthorized")
     static let sentryAuthorized = UserDefaults.Keys(rawValue: "sentryAuthorized")
 }
@@ -336,6 +337,19 @@ public extension UserDefaults {
         }
         set {
             set(newValue.rawValue, forKey: key(.importPhotoFormat))
+        }
+    }
+
+    var syncMod: SyncMod {
+        get {
+            if let rawValue = object(forKey: key(.syncMod)) as? String,
+               let mod = SyncMod(rawValue: rawValue) {
+                return mod
+            }
+            return .onlyWifi
+        }
+        set {
+            set(newValue.rawValue, forKey: key(.syncMod))
         }
     }
 
