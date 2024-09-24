@@ -79,7 +79,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         contentView.bringSubviewToFront(activityView)
 
         activityView.translatesAutoresizingMaskIntoConstraints = false
-        activityView.isHidden = true
 
         NSLayoutConstraint.activate([
             activityView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -101,10 +100,11 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func configure(with file: File) {
+        textView.text = ""
+        activityView.startAnimating()
+
         let localUrl = file.localUrl
         let fileId = file.id
-
-        displayLoading()
 
         Task {
             do {
@@ -126,10 +126,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             displayCode(for: content)
             isCode = true
         }
-    }
-
-    private func displayLoading() {
-        activityView.startAnimating()
     }
 
     private func displayMarkdown(for content: String) {
