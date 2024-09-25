@@ -101,6 +101,16 @@ enum UniversalLinksHelper {
             return false
         }
 
+        let trackerName: String
+        if metadata.isPasswordNeeded {
+            trackerName = "publicShareWithPassword"
+        } else if metadata.isExpired {
+            trackerName = "publicShareExpired"
+        } else {
+            trackerName = "publicShare"
+        }
+        MatomoUtils.trackDeeplink(name: trackerName)
+
         // get file ID from metadata
         let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,
