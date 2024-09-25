@@ -496,7 +496,17 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
-        MatomoUtils.trackFileAction(action: action, file: file, fromPhotoList: presentingParent is PhotoListViewController)
+
+        let eventCategory: MatomoUtils.EventCategory
+        if presentingParent is PhotoListViewController {
+            eventCategory = .picturesFileAction
+        } else if driveFileManager.isPublicShare {
+            eventCategory = .publicShareAction
+        } else {
+            eventCategory = .fileListFileAction
+        }
+
+        MatomoUtils.trackFileAction(action: action, file: file, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }
