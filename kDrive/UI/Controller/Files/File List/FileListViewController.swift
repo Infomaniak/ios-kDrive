@@ -259,6 +259,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         // We need recompute the size of the header cell right after the batch update so it reflects its state properly.
         // State of the header cell can be updated during a diff update of the collection view.
         collectionView.reloadItems(at: [IndexPath(row: 0, section: 0)])
+
+        if let headerView {
+            setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isShowingEmptyView)
+        }
     }
 
     private func bindUploadCardViewModel() {
