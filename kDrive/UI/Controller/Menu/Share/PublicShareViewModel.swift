@@ -96,6 +96,9 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             return
         }
 
+        let button = sender as? UIButton
+        button?.isEnabled = false
+
         // TODO: Abstract sheet presentation
         @InjectService var appNavigable: AppNavigable
         guard let topMostViewController = appNavigable.topMostViewController else {
@@ -105,6 +108,10 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
                 Task { @MainActor in
+                    defer {
+                        button?.isEnabled = true
+                    }
+
                     guard let self = self else {
                         return
                     }
@@ -112,10 +119,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                     defer {
                         self.downloadObserver?.cancel()
                         self.downloadObserver = nil
-                    }
-
-                    guard let senderItem = sender as? UIBarButtonItem else {
-                        return
                     }
 
                     guard error == nil else {
@@ -129,7 +132,14 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                         applicationActivities: nil
                     )
 
-                    activityViewController.popoverPresentationController?.barButtonItem = senderItem
+                    if let senderItem = sender as? UIBarButtonItem {
+                        activityViewController.popoverPresentationController?.barButtonItem = senderItem
+                    } else if let button = button {
+                        activityViewController.popoverPresentationController?.sourceRect = button.frame
+                    } else {
+                        fatalError("No sender button")
+                    }
+
                     topMostViewController.present(activityViewController, animated: true)
                 }
             }
