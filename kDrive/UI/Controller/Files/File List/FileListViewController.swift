@@ -259,7 +259,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         let addToKDriveButton = IKButton(type: .custom)
         addToKDriveButton.setTitle("Add to My kDrive", for: .normal)
-        addToKDriveButton.addTarget(self, action: #selector(addToMyDriveButtonTapped), for: .touchUpInside)
+        addToKDriveButton.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
         addToKDriveButton.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
         addToKDriveButton.translatesAutoresizingMaskIntoConstraints = false
         addToKDriveButton.cornerRadius = 8.0
@@ -288,8 +288,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         ])
     }
 
-    @objc func addToMyDriveButtonTapped() {
-        print("TODO: addToMyDriveButtonTapped")
+    @objc func addToMyDriveButtonTapped(_ sender: UIView?) {
+        viewModel.barButtonPressed(sender: sender, type: .downloadAll)
     }
 
     func reloadCollectionViewWith(files: [File]) {
