@@ -320,10 +320,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     private func updateListStyle(_ listStyle: ListStyle) {
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
-        UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-            self.collectionView.reloadData()
-            self.setSelectedCells()
-        }
+        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        setSelectedCells()
     }
 
     private func present(_ viewController: UIViewController, presentationType: ControllerPresentationType, animated: Bool) {
