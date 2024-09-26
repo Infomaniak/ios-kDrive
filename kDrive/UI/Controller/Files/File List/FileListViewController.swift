@@ -258,7 +258,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         let addToKDriveButton = IKButton(type: .custom)
-        addToKDriveButton.setTitle("Add to My Drive", for: .normal)
+        addToKDriveButton.setTitle("Add to My kDrive", for: .normal)
         addToKDriveButton.addTarget(self, action: #selector(addToMyDriveButtonTapped), for: .touchUpInside)
         addToKDriveButton.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
         addToKDriveButton.translatesAutoresizingMaskIntoConstraints = false
@@ -289,7 +289,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     @objc func addToMyDriveButtonTapped() {
-        print("button tapped")
+        print("TODO: addToMyDriveButtonTapped")
     }
 
     func reloadCollectionViewWith(files: [File]) {
@@ -525,7 +525,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     @objc func barButtonPressed(_ sender: FileListBarButton) {
-        viewModel.barButtonPressed(type: sender.type)
+        viewModel.barButtonPressed(sender: sender, type: sender.type)
     }
 
     @objc func forceRefresh() {

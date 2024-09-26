@@ -554,7 +554,8 @@ public final class File: Object, Codable {
 
     public var isDownloaded: Bool {
         let localPath = localUrl.path
-        guard fileManager.fileExists(atPath: localPath) else {
+        let temporaryPath = temporaryUrl.path
+        guard fileManager.fileExists(atPath: localPath) || fileManager.fileExists(atPath: temporaryPath) else {
             DDLogError("[File] no local copy to read from")
             return false
         }

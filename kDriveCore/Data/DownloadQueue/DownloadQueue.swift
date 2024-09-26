@@ -113,7 +113,6 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     // MARK: - Public methods
 
     public func addPublicShareToQueue(file: File,
-                                      userId: Int,
                                       driveFileManager: DriveFileManager,
                                       publicShareProxy: PublicShareProxy,
                                       itemIdentifier: NSFileProviderItemIdentifier? = nil) {

@@ -418,7 +418,6 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         if let publicShareProxy = driveFileManager.publicShareProxy {
             DownloadQueue.instance.addPublicShareToQueue(file: file,
-                                                         userId: accountManager.currentUserId,
                                                          driveFileManager: driveFileManager,
                                                          publicShareProxy: publicShareProxy)
         } else {

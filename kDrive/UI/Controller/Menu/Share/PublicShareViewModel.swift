@@ -16,12 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import RealmSwift
 import UIKit
 
 /// Public share view model, loading content from memory realm
 final class PublicShareViewModel: InMemoryFileListViewModel {
+    private var downloadObserver: ObservationToken?
+
     var publicShareProxy: PublicShareProxy?
     let rootProxy: ProxyFile
     var publicShareApiFetcher: PublicShareApiFetcher?
@@ -36,6 +40,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                                           rootTitle: "public share",
                                           emptyViewType: .emptyFolder,
                                           supportsDrop: false,
+                                          rightBarButtons: [.downloadAll],
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "publicShare"])
 
         rootProxy = currentDirectory.proxify()
@@ -78,5 +83,59 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         if let nextCursor {
             try await loadFiles(cursor: nextCursor)
         }
+    }
+
+    // TODO: Move away from view model
+    override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
+        guard downloadObserver == nil else {
+            return
+        }
+
+        guard type == .downloadAll,
+              let publicShareProxy = publicShareProxy else {
+            return
+        }
+
+        // TODO: Abstract sheet presentation
+        @InjectService var appNavigable: AppNavigable
+        guard let topMostViewController = appNavigable.topMostViewController else {
+            return
+        }
+
+        downloadObserver = DownloadQueue.instance
+            .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
+                Task { @MainActor in
+                    guard let self = self else {
+                        return
+                    }
+
+                    defer {
+                        self.downloadObserver?.cancel()
+                        self.downloadObserver = nil
+                    }
+
+                    guard let senderItem = sender as? UIBarButtonItem else {
+                        return
+                    }
+
+                    guard error == nil else {
+                        UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
+                        return
+                    }
+
+                    // present share sheet
+                    let activityViewController = UIActivityViewController(
+                        activityItems: [self.currentDirectory.localUrl],
+                        applicationActivities: nil
+                    )
+
+                    activityViewController.popoverPresentationController?.barButtonItem = senderItem
+                    topMostViewController.present(activityViewController, animated: true)
+                }
+            }
+
+        DownloadQueue.instance.addPublicShareToQueue(file: currentDirectory,
+                                                     driveFileManager: driveFileManager,
+                                                     publicShareProxy: publicShareProxy)
     }
 }
