@@ -137,11 +137,11 @@ public enum MatomoUtils {
     // MARK: - Public Share
 
     public static func trackAddToMykDrive() {
-        track(eventWithCategory: .publicShareAction, name: "addToMykDrive")
+        track(eventWithCategory: .publicShareAction, name: "saveToKDrive")
     }
 
     public static func trackAddBulkToMykDrive() {
-        track(eventWithCategory: .publicShareAction, name: "bulkaddToMykDrive")
+        track(eventWithCategory: .publicShareAction, name: "bulkSaveToKDrive")
     }
 
     public static func trackPublicSharePasswordAction() {
