@@ -16,14 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUIKit
-import UIKit
+import InfomaniakCoreUI
 import kDriveResources
+import UIKit
 
 class ParameterSyncTableViewCell: InsetTableViewCell {
     @IBOutlet var syncTitleLabel: UILabel!
     @IBOutlet var syncDetailLabel: UILabel!
-    
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
