@@ -17,13 +17,13 @@
  */
 
 import InfomaniakCoreUI
-import UIKit
 import kDriveResources
+import UIKit
 
 class ParameterSyncTableViewCell: InsetTableViewCell {
     @IBOutlet var syncTitleLabel: UILabel!
     @IBOutlet var syncDetailLabel: UILabel!
-    
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

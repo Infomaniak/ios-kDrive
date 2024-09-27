@@ -35,7 +35,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case theme
         case notifications
         case security
-        case wifi
+        case offlineSync
         case storage
         case about
         case deleteAccount
@@ -50,7 +50,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.notificationTitle
             case .security:
                 return KDriveResourcesStrings.Localizable.securityTitle
-            case .wifi:
+            case .offlineSync:
                 return KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
             case .storage:
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
@@ -137,11 +137,11 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             cell.titleLabel.text = row.title
             return cell
 
-        case .wifi:
+        case .offlineSync:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
-            cell.titleLabel.text = UserDefaults.shared.syncMod.title
-            cell.detailLabel.text = UserDefaults.shared.syncMod.selectionTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+            cell.detailLabel.text = UserDefaults.shared.syncOfflineMod.title
             return cell
         }
     }
@@ -161,8 +161,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-        case .wifi:
-            navigationController?.pushViewController(WifiSyncSettingsViewController(), animated: true)
+        case .offlineSync:
+            navigationController?.pushViewController(OfflineSyncSettingsViewController(), animated: true)
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .deleteAccount:
