@@ -209,6 +209,16 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let action = actions[indexPath.item]
         handleAction(action, at: indexPath)
-        MatomoUtils.trackBuklAction(action: action, files: files, fromPhotoList: presentingParent is PhotoListViewController)
+
+        let eventCategory: MatomoUtils.EventCategory
+        if presentingParent is PhotoListViewController {
+            eventCategory = .picturesFileAction
+        } else if driveFileManager.isPublicShare {
+            eventCategory = .publicShareAction
+        } else {
+            eventCategory = .fileListFileAction
+        }
+
+        MatomoUtils.trackBuklAction(action: action, files: files, category: eventCategory)
     }
 }

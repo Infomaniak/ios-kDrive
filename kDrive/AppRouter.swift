@@ -591,7 +591,6 @@ public struct AppRouter: AppNavigable {
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
     ) {
-        // TODO: Present on top of existing views
         guard let window,
               let rootViewController = window.rootViewController else {
             fatalError("TODO: lazy load a rootViewController")
@@ -621,9 +620,11 @@ public struct AppRouter: AppNavigable {
                                                  currentDirectory: frozenRootFolder,
                                                  apiFetcher: apiFetcher)
             let viewController = FileListViewController(viewModel: viewModel)
-            print("viewController:\(viewController) viewModel:\(viewModel) navigationController:\(navigationController)")
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-            navigationController.pushViewController(viewController, animated: true)
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
         }
     }
 
