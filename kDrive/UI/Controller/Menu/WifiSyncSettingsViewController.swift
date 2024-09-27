@@ -22,21 +22,32 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+protocol WifiSyncSettingsDelegate: AnyObject {
+    func didSelectSyncMod(_ mod: SyncMod)
+}
+
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [SyncMod] = SyncMod.allCases
     private var selectedMod: SyncMod!
+    weak var delegate: WifiSyncSettingsDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveResourcesStrings.Localizable.themeSettingsTitle
+        title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
 
-        tableView.register(cellView: SelectionTableViewCell.self)
+        tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
 
-//        selectedMod = UserDefaults.shared.syncMod
+        selectedMod = UserDefaults.shared.syncMod
+    }
+
+    static func instantiate(selectedMod: SyncMod) -> WifiSyncSettingsViewController {
+        let viewController = WifiSyncSettingsViewController()
+        viewController.selectedMod = selectedMod
+        return viewController
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -53,12 +64,14 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
+        let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
+        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         let currentMod = tableContent[indexPath.row]
         if currentMod == selectedMod {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        cell.label.text = currentMod.selectionTitle
+        cell.syncTitleLabel.text = currentMod.title
+        cell.syncDetailLabel.text = currentMod.selectionTitle
         return cell
     }
 
@@ -66,6 +79,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         let mod = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mod.rawValue.capitalized)")
         UserDefaults.shared.syncMod = mod
+        delegate?.didSelectSyncMod(tableContent[indexPath.row])
         navigationController?.popViewController(animated: true)
     }
 }
