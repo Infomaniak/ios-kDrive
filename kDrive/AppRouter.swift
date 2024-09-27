@@ -584,6 +584,26 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
+    @MainActor public func presentPublicShare(
+        rootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        // TODO: Present on top of existing views
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            fatalError("TODO: lazy load a rootViewController")
+        }
+
+        let filePresenter = FilePresenter(viewController: rootViewController)
+        filePresenter.presentPublicShareDirectory(publicShareProxy: publicShareProxy,
+                                                  rootFolder: rootFolder,
+                                                  rootViewController: rootViewController,
+                                                  driveFileManager: driveFileManager,
+                                                  apiFetcher: apiFetcher)
+    }
+
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
         present(file: file, driveFileManager: driveFileManager, office: false)
     }

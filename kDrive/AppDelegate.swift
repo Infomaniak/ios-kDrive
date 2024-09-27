@@ -103,6 +103,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         application.registerForRemoteNotifications()
 
+        // swiftlint:disable force_try
+        Task {
+            try! await Task.sleep(nanoseconds:5_000_000_000)
+            print("coucou")
+            let somePublicShare = URL(string: "")
+            //await UIApplication.shared.open(somePublicShare!) // opens safari
+            
+            let components = URLComponents(url: somePublicShare!, resolvingAgainstBaseURL: true)
+            await UniversalLinksHelper.handlePath(components!.path)
+        }
+
+        
         return true
     }
 
