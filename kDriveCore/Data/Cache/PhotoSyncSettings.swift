@@ -50,6 +50,7 @@ public final class PhotoSyncSettings: Object {
     @Persisted public var createDatedSubFolders = false
     @Persisted public var deleteAssetsAfterImport = false
     @Persisted public var photoFormat: PhotoFileFormat = .jpg
+    @Persisted public var wifiSync: SyncMod = .wifiAndMobileData
 
     public init(userId: Int,
                 driveId: Int,
@@ -62,7 +63,8 @@ public final class PhotoSyncSettings: Object {
                 syncScreenshots: Bool,
                 createDatedSubFolders: Bool,
                 deleteAssetsAfterImport: Bool,
-                photoFormat: PhotoFileFormat) {
+                photoFormat: PhotoFileFormat,
+                wifiSync: SyncMod) {
         super.init()
         self.userId = userId
         self.driveId = driveId
@@ -76,6 +78,7 @@ public final class PhotoSyncSettings: Object {
         self.createDatedSubFolders = createDatedSubFolders
         self.deleteAssetsAfterImport = deleteAssetsAfterImport
         self.photoFormat = photoFormat
+        self.wifiSync = wifiSync
     }
 
     override public init() {
@@ -95,6 +98,7 @@ public final class PhotoSyncSettings: Object {
             deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
             syncMode == settings.syncMode &&
             fromDate == settings.fromDate &&
-            photoFormat == settings.photoFormat
+            photoFormat == settings.photoFormat &&
+            wifiSync == settings.wifiSync
     }
 }
