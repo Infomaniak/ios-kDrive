@@ -18,35 +18,27 @@
 
 import kDriveResources
 import UIKit
+import RealmSwift
 
-public enum SyncMod: String, CaseIterable {
+public enum SyncMod: String, CaseIterable, PersistableEnum {
     case onlyWifi
     case wifiAndMobileData
-
-//    public var interfaceStyle: UIUserInterfaceStyle {
-//        let styles: [Theme: UIUserInterfaceStyle] = [
-//            .light: .light,
-//            .dark: .dark,
-//            .system: .unspecified
-//        ]
-//        return styles[self] ?? .unspecified
-//    }
 
     public var title: String {
         switch self {
         case .onlyWifi:
-            return KDriveResourcesStrings.Localizable.themeSettingsLightLabel
+            return KDriveResourcesStrings.Localizable.syncOnlyWifiTitle
         case .wifiAndMobileData:
-            return KDriveResourcesStrings.Localizable.themeSettingsDarkLabel
+            return KDriveResourcesStrings.Localizable.syncWifiAndMobileDataTitle
         }
     }
 
     public var selectionTitle: String {
         switch self {
         case .onlyWifi:
-            return KDriveResourcesStrings.Localizable.settingsOnlyWifiSyncDescription
+            return KDriveResourcesStrings.Localizable.syncOnlyWifiDescription
         case .wifiAndMobileData:
-            return "Wifi et données mobiles (à changer)"
+            return KDriveResourcesStrings.Localizable.syncWifiAndMobileDataDescription
         }
     }
 }
