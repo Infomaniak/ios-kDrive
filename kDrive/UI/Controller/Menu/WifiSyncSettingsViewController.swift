@@ -68,12 +68,12 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let currentMode = tableContent[indexPath.row]
-        if currentMode == selectedMode {
+        let currentMod = tableContent[indexPath.row]
+        cell.syncTitleLabel.text = currentMod.title
+        cell.syncDetailLabel.text = currentMod.selectionTitle
+        if currentMod == selectedMod {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        cell.syncTitleLabel.text = currentMode.title
-        cell.syncDetailLabel.text = currentMode.selectionTitle
         return cell
     }
 
