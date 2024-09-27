@@ -132,31 +132,6 @@ final class FilePresenter {
         }
     }
 
-    public func presentPublicShareDirectory(
-        publicShareProxy: PublicShareProxy,
-        rootFolder: File,
-        rootViewController: UIViewController,
-        driveFileManager: DriveFileManager,
-        apiFetcher: PublicShareApiFetcher
-    ) {
-        let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
-                                             sortType: .nameAZ,
-                                             driveFileManager: driveFileManager,
-                                             currentDirectory: rootFolder,
-                                             apiFetcher: apiFetcher)
-
-        // TODO: Fix access right
-//        guard !rootFolder.isDisabled else {
-//            return
-//        }
-
-        let nextVC = FileListViewController(viewModel: viewModel)
-        print("nextVC:\(nextVC) viewModel:\(viewModel) navigationController:\(navigationController)")
-//        navigationController?.pushViewController(nextVC, animated: true)
-
-        rootViewController.present(nextVC, animated: true)
-    }
-
     public func presentDirectory(
         for file: File,
         driveFileManager: DriveFileManager,
@@ -170,6 +145,12 @@ final class FilePresenter {
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                             sortType: .nameAZ,
+                                             driveFileManager: driveFileManager,
+                                             currentDirectory: file,
+                                             apiFetcher: PublicShareApiFetcher())
         } else if file.isTrashed || file.deletedAt != nil {
             viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         } else {

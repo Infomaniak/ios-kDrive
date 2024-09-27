@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         guard let currentDirectory else {
-            fatalError("woops")
+            fatalError("PublicShareViewModel requires a currentDirectory to work")
         }
 
+        // TODO: i18n
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: "public share",
                                           emptyViewType: .emptyFolder,
@@ -40,7 +41,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         rootProxy = currentDirectory.proxify()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         observedFiles = AnyRealmCollection(currentDirectory.children)
-        print("• observedFiles :\(observedFiles.count)")
     }
 
     convenience init(
@@ -57,7 +57,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
-        print("• loadFiles:\(cursor):\(forceRefresh)")
         guard !isLoading || cursor != nil,
               let publicShareProxy,
               let publicShareApiFetcher else {
@@ -75,39 +74,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         let (_, nextCursor) = try await driveFileManager.publicShareFiles(rootProxy: rootProxy,
                                                                           publicShareProxy: publicShareProxy,
                                                                           publicShareApiFetcher: publicShareApiFetcher)
-        print("• nextCursor:\(nextCursor)")
-        endRefreshing()
-        if let nextCursor {
-            try await loadFiles(cursor: nextCursor)
-        }
-    }
-}
-
-class SharedWithMeViewModel: FileListViewModel {
-    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        let sharedWithMeRootFile = driveFileManager.getManagedFile(from: DriveFileManager.sharedWithMeRootFile)
-        let configuration = Configuration(selectAllSupported: false,
-                                          rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
-                                          emptyViewType: .noSharedWithMe,
-                                          supportsDrop: false,
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "SharedWithMe"])
-
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: sharedWithMeRootFile)
-        observedFiles = AnyRealmCollection(AnyRealmCollection(sharedWithMeRootFile.children).filesSorted(by: sortType))
-    }
-
-    override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
-        guard !isLoading || cursor != nil else { return }
-
-        // Only show loading indicator if we have nothing in cache
-        if !currentDirectory.canLoadChildrenFromCache {
-            startRefreshing(cursor: cursor)
-        }
-        defer {
-            endRefreshing()
-        }
-
-        let (_, nextCursor) = try await driveFileManager.sharedWithMeFiles(cursor: cursor, sortType: sortType, forceRefresh: true)
         endRefreshing()
         if let nextCursor {
             try await loadFiles(cursor: nextCursor)
