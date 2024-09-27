@@ -25,7 +25,7 @@ import RealmSwift
 /// Something to centralize schema versioning
 public enum RealmSchemaVersion {
     /// Current version of the Upload Realm
-    static let upload: UInt64 = 21
+    static let upload: UInt64 = 22
 
     /// Current version of the Drive Realm
     static let drive: UInt64 = 11
@@ -202,6 +202,20 @@ public class DriveFileManagerConstants {
                 }
 
                 newObject["uploadingSession"] = nil
+            }
+        }
+
+        // Migration to add syncWifi
+        if oldSchemaVersion < 22 {
+            migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
+                guard let newObject else {
+                    return
+                }
+                if UserDefaults.shared.isWifiOnly {
+                    newObject["wifiSync"] = SyncMod.onlyWifi
+                } else {
+                    newObject["wifiSync"] = SyncMod.wifiAndMobileData
+                }
             }
         }
     }

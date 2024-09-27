@@ -54,6 +54,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         case createDatedSubFolders
         case deleteAssetsAfterImport
         case photoFormat
+        case wifiSync
     }
 
     private enum PhotoSyncDeniedRows: CaseIterable {
@@ -109,6 +110,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
         tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
+        tableView.register(cellView: AboutDetailTableViewCell.self)
 
         let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.delegate = self
@@ -428,6 +430,12 @@ extension PhotoSyncSettingsViewController {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.configure(with: newSyncSettings.photoFormat)
                 return cell
+            case .wifiSync:
+                let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
+                cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
+                cell.detailLabel.text = UserDefaults.shared.syncMod.title
+                return cell
             }
         case .syncDenied:
             switch deniedRows[indexPath.row] {
@@ -485,6 +493,11 @@ extension PhotoSyncSettingsViewController {
                     .instantiate(selectedFormat: newSyncSettings.photoFormat)
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
+            case .wifiSync:
+                let wifiSyncSettingsViewController = WifiSyncSettingsViewController
+                    .instantiate(selectedMod: newSyncSettings.wifiSync)
+                wifiSyncSettingsViewController.delegate = self
+                navigationController?.pushViewController(wifiSyncSettingsViewController, animated: true)
             default:
                 break
             }
@@ -519,7 +532,7 @@ extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         newSyncSettings.photoFormat = format
         updateSaveButtonState()
-        tableView.reloadData()
+        tableView.reloadRows(at: [IndexPath(row: 6, section: 2)], with: .fade)
     }
 }
 
@@ -549,5 +562,12 @@ extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegat
     func didSelectDate(date: Date) {
         newSyncSettings.fromDate = date
         updateSaveButtonState()
+    }
+}
+
+extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
+    func didSelectSyncMod(_ mod: SyncMod) {
+        newSyncSettings.wifiSync = mod
+        tableView.reloadRows(at: [IndexPath(row: 7, section: 2)], with: .fade)
     }
 }
