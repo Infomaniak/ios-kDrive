@@ -395,7 +395,7 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
-                cell.detailLabel.text = UserDefaults.shared.syncMode.title
+                cell.detailLabel.text = newSyncSettings.wifiSync.title
                 return cell
             }
         case .syncDenied:
