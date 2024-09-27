@@ -49,7 +49,7 @@ extension SortType: Selectable {
 }
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable, ViewControllerDismissable {
     @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants
@@ -60,6 +60,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
     private let headerViewIdentifier = "FilesHeaderView"
+    private var addToKDriveButton: IKButton?
 
     // MARK: - Properties
 
@@ -257,33 +258,35 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             return
         }
 
-        let addToKDriveButton = IKButton(type: .custom)
-        addToKDriveButton.setTitle("Add to My kDrive", for: .normal)
-        addToKDriveButton.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
-        addToKDriveButton.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
-        addToKDriveButton.translatesAutoresizingMaskIntoConstraints = false
-        addToKDriveButton.cornerRadius = 8.0
-        addToKDriveButton.clipsToBounds = true
+        let addToKDrive = IKButton(type: .custom)
+        addToKDriveButton = addToKDrive
 
-        view.addSubview(addToKDriveButton)
-        view.bringSubviewToFront(addToKDriveButton)
+        addToKDrive.setTitle("Add to My kDrive", for: .normal)
+        addToKDrive.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
+        addToKDrive.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
+        addToKDrive.translatesAutoresizingMaskIntoConstraints = false
+        addToKDrive.cornerRadius = 8.0
+        addToKDrive.clipsToBounds = true
 
-        let leadingConstraint = addToKDriveButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
-                                                                           constant: 16)
+        view.addSubview(addToKDrive)
+        view.bringSubviewToFront(addToKDrive)
+
+        let leadingConstraint = addToKDrive.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                                                     constant: 16)
         leadingConstraint.priority = .defaultHigh
-        let trailingConstraint = addToKDriveButton.trailingAnchor.constraint(
+        let trailingConstraint = addToKDrive.trailingAnchor.constraint(
             greaterThanOrEqualTo: view.trailingAnchor,
             constant: -16
         )
         trailingConstraint.priority = .defaultHigh
-        let widthConstraint = addToKDriveButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
+        let widthConstraint = addToKDrive.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
 
         NSLayoutConstraint.activate([
-            addToKDriveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            addToKDrive.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             leadingConstraint,
             trailingConstraint,
-            addToKDriveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addToKDriveButton.heightAnchor.constraint(equalToConstant: 60),
+            addToKDrive.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            addToKDrive.heightAnchor.constraint(equalToConstant: 60),
             widthConstraint
         ])
     }
@@ -614,6 +617,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
+            addToKDriveButton?.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -623,6 +627,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
+            addToKDriveButton?.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true

@@ -67,6 +67,8 @@ class MultipleSelectionFileListViewModel {
                 leftBarButtons = [.cancel]
                 if configuration.selectAllSupported {
                     rightBarButtons = [.selectAll]
+                } else {
+                    rightBarButtons = []
                 }
             } else {
                 leftBarButtons = nil
