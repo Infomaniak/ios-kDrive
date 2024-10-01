@@ -58,6 +58,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         case operationFinished
         /// Cannot decrease further retry count, already zero
         case retryCountIsZero
+        /// Cannot upload image because we are not in wifi
+        case uploadOverDataRestrictedError
     }
 
     // MARK: - Attributes
@@ -126,6 +128,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
             // Clean existing error if any
             try self.cleanUploadFileError()
+
+            // Pause the upload depending on the status
+            try self.checkForRestrictedUploadOverDataMode()
 
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()

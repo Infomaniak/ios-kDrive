@@ -17,9 +17,22 @@
  */
 
 import InfomaniakCoreUI
+import kDriveResources
 import UIKit
 
 class ParameterSyncTableViewCell: InsetTableViewCell {
     @IBOutlet var syncTitleLabel: UILabel!
     @IBOutlet var syncDetailLabel: UILabel!
+
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        if selected {
+            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
+            contentInsetView.borderWidth = 2
+        } else {
+            contentInsetView.borderWidth = 0
+        }
+    }
 }
