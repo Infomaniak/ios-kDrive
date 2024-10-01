@@ -71,25 +71,25 @@ extension SaveFileViewController: FooterButtonDelegate {
         let addToQueue = !appContextService.isExtension
         try await fileImportHelper.saveForUpload(files, in: directory, drive: drive, addToQueue: addToQueue)
         #if ISEXTENSION
-        showOpenAppToContinueNotification()
+        await showOpenAppToContinueNotification()
         #endif
     }
 
     #if ISEXTENSION
     //  Dynamic hook to open an URL within an extension
-    @objc func openURL(_ url: URL) -> Bool {
+    func openURL(_ url: URL) async -> Bool {
         var responder: UIResponder? = self
         while responder != nil {
             if let application = responder as? UIApplication {
-                return application.perform(#selector(openURL(_:)), with: url) != nil
+                return await application.open(url)
             }
             responder = responder?.next
         }
         return false
     }
 
-    func showOpenAppToContinueNotification() {
-        guard openURL(URLConstants.kDriveRedirection.url) else {
+    func showOpenAppToContinueNotification() async {
+        guard await openURL(URLConstants.kDriveRedirection.url) else {
             // Fallback on a local notification if failure to open URL
             @InjectService var notificationHelper: NotificationsHelpable
             notificationHelper.sendPausedUploadQueueNotification()
