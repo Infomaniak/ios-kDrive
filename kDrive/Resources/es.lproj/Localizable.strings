@@ -1,10 +1,10 @@
 /*
- * Loco ios export: iOS Localizable.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Thu, 26 Sep 2024 10:46:53 +0200
+ * Exported at: Tue, 01 Oct 2024 12:54:40 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -2148,6 +2148,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "A la espera de red WiFi";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "A la espera de Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Algunas subidas siguen en curso en kDrive. Abre la aplicación y mantén el dispositivo conectado para acelerar la carga.";
