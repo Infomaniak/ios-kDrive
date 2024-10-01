@@ -127,6 +127,8 @@ extension UploadOperation {
                     // Silently stop if an UploadFile is no longer in base
                     // _not_ overriding file.error
                     self.cancel()
+                case .uploadOverDataRestrictedError:
+                    file.error = DriveError.uploadOverDataRestrictedError
                 }
 
                 errorHandled = true
