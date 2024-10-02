@@ -289,6 +289,11 @@ public final class SingleTrackPlayer {
     public func play() {
         if playerState == .stopped {
             setNowPlayingMetadata()
+            do {
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                SentryDebug.capture(error: error)
+            }
         }
 
         guard let player else {
