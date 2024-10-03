@@ -19,6 +19,7 @@
 import Combine
 import InfomaniakCore
 import InfomaniakDI
+import kDriveResources
 import MediaPlayer
 
 /// Track one file been played
@@ -38,6 +39,8 @@ public final class SingleTrackPlayer {
     private let driveFileManager: DriveFileManager
 
     private var playableFileName: String?
+
+    private var trackMetadata: TrackMetadata?
 
     // MARK: Player Observation
 
@@ -87,6 +90,33 @@ public final class SingleTrackPlayer {
         reset()
     }
 
+    private func extractTrackMetadata(from asset: AVAsset) -> TrackMetadata {
+        var title: String = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
+        var artist = KDriveResourcesStrings.Localizable.unknownArtist
+        var artwork: UIImage? = nil
+
+        let metadata = asset.commonMetadata
+
+        for item in metadata {
+            if let commonKey = item.commonKey {
+                switch commonKey {
+                case .commonKeyTitle:
+                    title = item.value as? String ?? title
+                case .commonKeyArtist:
+                    artist = item.value as? String ?? artist
+                case .commonKeyArtwork:
+                    if let data = item.value as? Data {
+                        artwork = UIImage(data: data)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+
+        return TrackMetadata(title: title, artist: artist, artwork: artwork)
+    }
+
     // MARK: - Load
 
     /// Load internal structures to play a single track
@@ -96,6 +126,8 @@ public final class SingleTrackPlayer {
         playableFileName = playableFile.name
 
         if !playableFile.isLocalVersionOlderThanRemote {
+            let asset = AVAsset(url: playableFile.localUrl)
+            trackMetadata = extractTrackMetadata(from: asset)
             player = AVPlayer(url: playableFile.localUrl)
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -105,6 +137,7 @@ public final class SingleTrackPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task {
+                        self.trackMetadata = self.extractTrackMetadata(from: asset)
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
@@ -130,7 +163,17 @@ public final class SingleTrackPlayer {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+
+        if let metadata = trackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
+            if let artwork = metadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
@@ -151,11 +194,6 @@ public final class SingleTrackPlayer {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
         if let position = player?.currentItem?.currentTime() {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position.seconds)
-
-            let remainingTime = position.formattedText
-            onRemainingTimeChange.send(remainingTime)
-            let positionSlider = Float(position.seconds)
-            onPositionChange.send(positionSlider)
         }
         if let rate = player?.rate {
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = rate
@@ -164,12 +202,6 @@ public final class SingleTrackPlayer {
 
         if let player = player, let duration = player.currentItem?.duration {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration.seconds)
-            let elapsedTime = player.currentItem?.currentTime() ?? .zero
-
-            let remainingTime = "−\((duration - elapsedTime).formattedText)"
-            onRemainingTimeChange.send(remainingTime)
-            let maximumPosition = duration.seconds.isFinite ? Float(duration.seconds) : 1
-            onPositionMaximumChange.send(maximumPosition)
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
