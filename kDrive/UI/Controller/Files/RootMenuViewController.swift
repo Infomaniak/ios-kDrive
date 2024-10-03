@@ -24,6 +24,83 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
+class SidebarViewController: UITableViewController {
+    private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+
+    private enum RootMenuSection {
+        case main
+    }
+
+    private struct RootMenuItem: Equatable, Hashable {
+        var id: Int {
+            return destinationFile.id
+        }
+
+        let name: String
+        let image: UIImage
+        let destinationFile: File
+        var isFirst = false
+        var isLast = false
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(isFirst)
+            hasher.combine(isLast)
+        }
+    }
+
+    private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
+                                                                 image: KDriveResourcesAsset.favorite.image,
+                                                                 destinationFile: DriveFileManager.favoriteRootFile),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
+                                                                 image: KDriveResourcesAsset.clock.image,
+                                                                 destinationFile: DriveFileManager.lastModificationsRootFile),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+                                                                 image: KDriveResourcesAsset.folderSelect2.image,
+                                                                 destinationFile: DriveFileManager.sharedWithMeRootFile),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
+                                                                 image: KDriveResourcesAsset.folderSelect.image,
+                                                                 destinationFile: DriveFileManager.mySharedRootFile),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                                                                 image: KDriveResourcesAsset.availableOffline.image,
+                                                                 destinationFile: DriveFileManager.offlineRoot),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
+                                                                 image: KDriveResourcesAsset.delete.image,
+                                                                 destinationFile: DriveFileManager.trashRootFile)]
+
+    weak var delegate: SidebarViewControllerDelegate?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+    }
+
+    // MARK: - UITableViewDataSource
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return SidebarViewController.baseItems.count
+    }
+
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = SidebarViewController.baseItems[indexPath.row].name
+        return cell
+    }
+
+    // MARK: - UITableViewDelegate
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let selectedItem = SidebarViewController.baseItems[indexPath.row]
+        delegate?.didSelectItem(named: selectedItem.id)
+    }
+}
+
+protocol SidebarViewControllerDelegate: AnyObject {
+    func didSelectItem(named: Int)
+}
+
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
