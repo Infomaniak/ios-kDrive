@@ -183,42 +183,42 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            let selectedIndex = tabBarViewController.selectedIndex
-            let viewControllers = tabBarViewController.viewControllers
-            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
-                Log.sceneDelegate("unable to access navigationController", level: .error)
-                return
-            }
-
-            switch lastViewController {
-            case .FileDetailViewController:
-                await restoreFileDetailViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .FileListViewController:
-                await restoreFileListViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .PreviewViewController:
-                await restorePreviewViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .StoreViewController:
-                await restoreStoreViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-            }
+//            let selectedIndex = tabBarViewController.selectedIndex
+//            let viewControllers = tabBarViewController.viewControllers
+//            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
+//                Log.sceneDelegate("unable to access navigationController", level: .error)
+//                return
+//            }
+//
+//            switch lastViewController {
+//            case .FileDetailViewController:
+//                await restoreFileDetailViewController(
+//                    driveFileManager: driveFileManager,
+//                    navigationController: rootNavigationController,
+//                    sceneUserInfo: sceneUserInfo
+//                )
+//
+//            case .FileListViewController:
+//                await restoreFileListViewController(
+//                    driveFileManager: driveFileManager,
+//                    navigationController: rootNavigationController,
+//                    sceneUserInfo: sceneUserInfo
+//                )
+//
+//            case .PreviewViewController:
+//                await restorePreviewViewController(
+//                    driveFileManager: driveFileManager,
+//                    navigationController: rootNavigationController,
+//                    sceneUserInfo: sceneUserInfo
+//                )
+//
+//            case .StoreViewController:
+//                await restoreStoreViewController(
+//                    driveFileManager: driveFileManager,
+//                    navigationController: rootNavigationController,
+//                    sceneUserInfo: sceneUserInfo
+//                )
+//            }
         }
     }
 
@@ -339,19 +339,18 @@ public struct AppRouter: AppNavigable {
 
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) -> UITabBarController? {
+                                                  selectedIndex: Int?) -> UISplitViewController? {
         guard let window else {
             SentryDebug.captureNoWindow()
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+        let currentDriveObjectId = (window.rootViewController as? RootViewController)?.driveFileManager.drive.objectId
         guard currentDriveObjectId != driveFileManager.drive.objectId else {
             return nil
         }
 
-        let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager,
-                                                         selectedIndex: selectedIndex)
+        let tabBarViewController = RootViewController(driveFileManager: driveFileManager)
 
         window.rootViewController = tabBarViewController
         window.makeKeyAndVisible()
