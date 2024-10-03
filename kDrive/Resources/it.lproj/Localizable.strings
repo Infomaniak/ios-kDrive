@@ -1,10 +1,10 @@
 /*
- * Loco ios export: iOS Localizable.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
+ * Exported by: Matthieu Déglon
+ * Exported at: Thu, 03 Oct 2024 08:22:20 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -2052,6 +2052,12 @@
 
 /* loco:62344c023cb45e6fcb219b43 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d elementi ipristinati nell’ubicazione di origine";
+
+/* loco:66fe3560501931dbfb04f0c8 */
+"unknownArtist" = "Artista sconosciuto";
+
+/* loco:66fe3634a0cfdc15cf0c1a94 */
+"unknownTitle" = "Titolo sconosciuto";
 
 /* loco:6049df4d5c2c3a04bc397a7d */
 "updateAvailableDescription" = "Per vivere la migliore esperienza con kDrive, ti consigliamo di aggiornare la tua applicazione.";
