@@ -194,7 +194,12 @@ public final class SingleTrackPlayer {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
         if let position = player?.currentItem?.currentTime() {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position.seconds)
+            let remainingTime = position.formattedText
+            onRemainingTimeChange.send(remainingTime)
+            let positionSlider = Float(position.seconds)
+            onPositionChange.send(positionSlider)
         }
+
         if let rate = player?.rate {
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = rate
         }
@@ -202,6 +207,12 @@ public final class SingleTrackPlayer {
 
         if let player = player, let duration = player.currentItem?.duration {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration.seconds)
+            let elapsedTime = player.currentItem?.currentTime() ?? .zero
+
+            let remainingTime = "−\((duration - elapsedTime).formattedText)"
+            onRemainingTimeChange.send(remainingTime)
+            let maximumPosition = duration.seconds.isFinite ? Float(duration.seconds) : 1
+            onPositionMaximumChange.send(maximumPosition)
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
