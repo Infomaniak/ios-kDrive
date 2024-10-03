@@ -28,7 +28,7 @@ public enum Constants {
         .currentProjectVersion("1")
         .marketingVersion("5.0.1")
 
-    public static let deploymentTarget = DeploymentTargets.iOS("13.4")
+    public static let deploymentTarget = DeploymentTargets.iOS("14.0")
     public static let destinations = Set<Destination>([.iPhone, .iPad])
 
     public static let fileProviderSettings = baseSettings

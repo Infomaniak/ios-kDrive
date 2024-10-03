@@ -26,7 +26,7 @@ public protocol RouterAppNavigable {
     /// - Parameters:
     ///   - driveFileManager: driveFileManager to use
     ///   - selectedIndex: Nil will try to use state restoration if available
-    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UITabBarController?
+    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UISplitViewController?
 
     @MainActor func showPreloading(currentAccount: Account)
 
