@@ -28,10 +28,189 @@ import UIKit
 
 /// Enum to explicit tab names
 public enum MainTabBarIndex: Int {
-    case home = 0
-    case files = 1
+    case files = 0
+    case home = 1
     case gallery = 3
     case profile = 4
+}
+
+// class RootViewController: UISplitViewController {
+//    @LazyInjectService var router: AppNavigable
+//    let driveFileManager: DriveFileManager
+//
+//    init(driveFileManager: DriveFileManager) {
+//        self.driveFileManager = driveFileManager
+//        var rootViewControllers = [UIViewController]()
+//        rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
+////        rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
+////        rootViewControllers.append(Self.initFakeViewController())
+////        rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager:
+/// driveFileManager)))
+////        rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
+//        super.init(style: .doubleColumn)
+//        preferredDisplayMode = .oneBesideSecondary
+//        viewControllers = rootViewControllers
+//    }
+//
+//    @available(*, unavailable)
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//
+//    private static func generateProfileTabImages(image: UIImage) -> (UIImage, UIImage) {
+//        let iconSize = 28.0
+//
+//        let selectedImage = image
+//            .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
+//            .maskImageWithRoundedRect(
+//                cornerRadius: CGFloat((iconSize + 2) / 2),
+//                borderWidth: 2,
+//                borderColor: KDriveResourcesAsset.infomaniakColor.color
+//            )
+//            .withRenderingMode(.alwaysOriginal)
+//
+//        let image = image
+//            .resize(size: CGSize(width: iconSize, height: iconSize))
+//            .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
+//            .withRenderingMode(.alwaysOriginal)
+//        return (image, selectedImage)
+//    }
+//
+//    private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.restorationIdentifier = String(describing: HomeViewController.self)
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
+//        return navigationViewController
+//    }
+//
+//    private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let homeViewController = SidebarViewController()
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.folder.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.folderFilledTab.image
+//        return navigationViewController
+//    }
+//
+//    private static func initMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: menuViewController)
+//        let (placeholder, placeholderSelected) = generateProfileTabImages(image: KDriveResourcesAsset.placeholderAvatar.image)
+//        navigationViewController.restorationIdentifier = String(describing: MenuViewController.self)
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
+//        navigationViewController.tabBarItem.image = placeholder
+//        navigationViewController.tabBarItem.selectedImage = placeholderSelected
+//        return navigationViewController
+//    }
+//
+//    private static func initFakeViewController() -> UIViewController {
+//        let fakeViewController = UIViewController()
+//        fakeViewController.tabBarItem.isEnabled = false
+//        return fakeViewController
+//    }
+//
+//    private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
+//        let photoListViewController = PhotoListViewController(viewModel: viewModel)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
+//        navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.mediaInline.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.mediaBold.image
+//        return navigationViewController
+//    }
+// }
+
+class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
+    let sidebarViewController = SidebarViewController()
+    let detailViewController = DetailViewController()
+    let driveFileManager: DriveFileManager
+
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init(style: .doubleColumn)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        sidebarViewController.delegate = self
+
+        let sidebarNav = UINavigationController(rootViewController: sidebarViewController)
+        let detailNav = UINavigationController(rootViewController: detailViewController)
+
+        viewControllers = [sidebarNav, detailNav]
+        preferredDisplayMode = .oneBesideSecondary
+    }
+
+    // MARK: - SidebarViewControllerDelegate
+
+    func didSelectItem(named folderName: Int) {
+        
+        let destinationViewModel: FileListViewModel
+        switch folderName {
+        case DriveFileManager.favoriteRootFile.id:
+            destinationViewModel = FavoritesViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.lastModificationsRootFile.id:
+            destinationViewModel = LastModificationsViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.sharedWithMeRootFile.id:
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
+        case DriveFileManager.offlineRoot.id:
+            destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.trashRootFile.id:
+            destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.mySharedRootFile.id:
+            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager)
+        default:
+            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager) // à changer
+        }
+
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+
+        if let detailNav = viewControllers.last as? UINavigationController {
+            detailNav.setViewControllers([destinationViewController], animated: true)
+        }
+    }
+
+//    func didSelectItem(named: String) {
+//        detailViewController.updateDetail(with: named)
+//    }
+}
+
+class DetailViewController: UIViewController {
+    private var label = UILabel()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = .white
+        label.text = "Select a folder"
+        label.textAlignment = .center
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+
+        // Contraintes pour centrer le texte
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+
+    func updateDetail(with item: String) {
+        label.text = "You selected: \(item)"
+    }
 }
 
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {

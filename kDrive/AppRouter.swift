@@ -363,19 +363,18 @@ public struct AppRouter: AppNavigable {
 
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) -> UITabBarController? {
+                                                  selectedIndex: Int?) -> UISplitViewController? {
         guard let window else {
             SentryDebug.captureNoWindow()
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+        let currentDriveObjectId = (window.rootViewController as? RootViewController)?.driveFileManager.drive.objectId
         guard currentDriveObjectId != driveFileManager.drive.objectId else {
             return nil
         }
 
-        let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager,
-                                                         selectedIndex: selectedIndex)
+        let tabBarViewController = RootViewController(driveFileManager: driveFileManager)
 
         window.rootViewController = tabBarViewController
         window.makeKeyAndVisible()
