@@ -42,6 +42,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let destinationFile: File
         var isFirst = false
         var isLast = false
+        var priority = 0
 
         func hash(into hasher: inout Hasher) {
             hasher.combine(id)
@@ -52,7 +53,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
                                                                  image: KDriveResourcesAsset.house.image,
-                                                                 destinationFile: DriveFileManager.favoriteRootFile),
+                                                                 destinationFile: DriveFileManager.favoriteRootFile,
+                                                                 priority: 3),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                  image: KDriveResourcesAsset.favorite.image,
                                                                  destinationFile: DriveFileManager.favoriteRootFile),
@@ -73,7 +75,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                  destinationFile: DriveFileManager.trashRootFile),
                                                     RootMenuItem(name: "Images",
                                                                  image: KDriveResourcesAsset.mediaInline.image,
-                                                                 destinationFile: DriveFileManager.trashRootFile)]
+                                                                 destinationFile: DriveFileManager.trashRootFile,
+                                                                 priority: 2)]
 
     weak var delegate: SidebarViewControllerDelegate?
     @LazyInjectService private var accountManager: AccountManageable
@@ -85,10 +88,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
+            RootMenuItem(
+                name: $0.formattedLocalizedName(drive: driveFileManager.drive),
+                image: $0.icon,
+                destinationFile: $0,
+                priority: 1
+            )
         } ?? []
 
-        var menuItems = userRootFolders + SidebarViewController.baseItems
+        var menuItems = (userRootFolders + SidebarViewController.baseItems).sorted { $0.priority > $1.priority }
         if !menuItems.isEmpty {
             menuItems[0].isFirst = true
             menuItems[menuItems.count - 1].isLast = true
@@ -267,13 +275,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 currentDirectory: selectedRootFile
             )
         }
-        
+
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
         } ?? []
-        let menuItems = userRootFolders + SidebarViewController.baseItems
+        let menuItems = (userRootFolders + SidebarViewController.baseItems).sorted { $0.priority > $1.priority }
         let selectedItemName = menuItems[indexPath.row].name
-
         delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
     }
 }
