@@ -160,7 +160,6 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         let homeViewController = HomeViewController(driveFileManager: driveFileManager)
         let photoListViewController = PhotoListViewController(viewModel: PhotoListViewModel(driveFileManager: driveFileManager))
-        
         if let detailNav = viewControllers.last as? UINavigationController {
             if name == KDriveResourcesStrings.Localizable.homeTitle {
                 detailNav.setViewControllers([homeViewController], animated: true)
