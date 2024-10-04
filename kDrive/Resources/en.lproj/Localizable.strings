@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: en, English
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
+ * Exported by: Baptiste Griva
+ * Exported at: Thu, 26 Sep 2024 10:46:53 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1939,6 +1939,12 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Save your memories in a safe place";
 
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Offline files will be only synchronized with Wi-Fi";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "With Wi-Fi only";
+
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Enable automatic backup";
 
@@ -1998,6 +2004,18 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Photo backup";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Mobile data usage charges may apply";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "With Wi-Fi and mobile data";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Synchronize photos and videos";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Synchronize offline files";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporary files";
