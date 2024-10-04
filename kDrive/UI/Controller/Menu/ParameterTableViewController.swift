@@ -140,8 +140,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .wifi:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
-            cell.titleLabel.text = UserDefaults.shared.syncMod.title
-            cell.detailLabel.text = UserDefaults.shared.syncMod.selectionTitle
+            cell.titleLabel.text = UserDefaults.shared.syncMode.title
+            cell.detailLabel.text = UserDefaults.shared.syncMode.selectionTitle
             return cell
         }
     }
