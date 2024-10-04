@@ -20,7 +20,7 @@ import kDriveResources
 import UIKit
 import RealmSwift
 
-public enum SyncMod: String, CaseIterable, PersistableEnum {
+public enum SyncMode: String, CaseIterable, PersistableEnum {
     case onlyWifi
     case wifiAndMobileData
 

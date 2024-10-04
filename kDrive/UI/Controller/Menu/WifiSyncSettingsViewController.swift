@@ -23,14 +23,14 @@ import kDriveResources
 import UIKit
 
 protocol WifiSyncSettingsDelegate: AnyObject {
-    func didSelectSyncMod(_ mod: SyncMod)
+    func didSelectSyncMode(_ mod: SyncMode)
 }
 
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
-    private var tableContent: [SyncMod] = SyncMod.allCases
-    private var selectedMod: SyncMod!
+    private var tableContent: [SyncMode] = SyncMode.allCases
+    private var selectedMod: SyncMode!
     weak var delegate: WifiSyncSettingsDelegate?
 
     override func viewDidLoad() {
@@ -41,10 +41,10 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
 
-        selectedMod = UserDefaults.shared.syncMod
+        selectedMod = UserDefaults.shared.syncMode
     }
 
-    static func instantiate(selectedMod: SyncMod) -> WifiSyncSettingsViewController {
+    static func instantiate(selectedMod: SyncMode) -> WifiSyncSettingsViewController {
         let viewController = WifiSyncSettingsViewController()
         viewController.selectedMod = selectedMod
         return viewController
@@ -76,10 +76,10 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let mod = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mod.rawValue.capitalized)")
-        UserDefaults.shared.syncMod = mod
-        delegate?.didSelectSyncMod(tableContent[indexPath.row])
+        let mode = tableContent[indexPath.row]
+        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
+        UserDefaults.shared.syncMode = mode
+        delegate?.didSelectSyncMode(tableContent[indexPath.row])
         navigationController?.popViewController(animated: true)
     }
 }
