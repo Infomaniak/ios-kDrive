@@ -24,8 +24,9 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class SidebarViewController: UITableViewController {
+class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
     private enum RootMenuSection {
         case main
@@ -49,7 +50,10 @@ class SidebarViewController: UITableViewController {
         }
     }
 
-    private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
+    private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
+                                                                 image: KDriveResourcesAsset.house.image,
+                                                                 destinationFile: DriveFileManager.favoriteRootFile),
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                  image: KDriveResourcesAsset.favorite.image,
                                                                  destinationFile: DriveFileManager.favoriteRootFile),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
@@ -66,39 +70,216 @@ class SidebarViewController: UITableViewController {
                                                                  destinationFile: DriveFileManager.offlineRoot),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                  image: KDriveResourcesAsset.delete.image,
+                                                                 destinationFile: DriveFileManager.trashRootFile),
+                                                    RootMenuItem(name: "Images",
+                                                                 image: KDriveResourcesAsset.mediaInline.image,
                                                                  destinationFile: DriveFileManager.trashRootFile)]
 
     weak var delegate: SidebarViewControllerDelegate?
+    @LazyInjectService private var accountManager: AccountManageable
+    let driveFileManager: DriveFileManager
+    private var rootChildrenObservationToken: NotificationToken?
+    private var rootViewChildren: [File]?
+    private var dataSource: MenuDataSource?
+    private let refreshControl = UIRefreshControl()
+
+    private var itemsSnapshot: DataSourceSnapshot {
+        let userRootFolders = rootViewChildren?.compactMap {
+            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
+        } ?? []
+
+        var menuItems = userRootFolders + SidebarViewController.baseItems
+        if !menuItems.isEmpty {
+            menuItems[0].isFirst = true
+            menuItems[menuItems.count - 1].isLast = true
+        }
+
+        var snapshot = DataSourceSnapshot()
+        snapshot.appendSections([RootMenuSection.main])
+        snapshot.appendItems(menuItems)
+        return snapshot
+    }
+
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init(collectionViewLayout: SidebarViewController.createListLayout())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = driveFileManager.drive.name
+        navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
 
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.refreshControl = refreshControl
+
+        collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
+        collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+
+        configureDataSource()
+
+        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+        guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
+            return
+        }
+
+        let rootChildren = root.children.filter(NSPredicate(
+            format: "rawVisibility IN %@",
+            [FileVisibility.isPrivateSpace.rawValue, FileVisibility.isTeamSpace.rawValue]
+        ))
+        rootChildrenObservationToken = rootChildren.observe { [weak self] changes in
+            guard let self else { return }
+            switch changes {
+            case .initial(let children):
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
+                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+            case .update(let children, _, _, _):
+                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
+                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
+            case .error:
+                break
+            }
+        }
     }
 
-    // MARK: - UITableViewDataSource
+    func configureDataSource() {
+        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
+            guard let rootMenuCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: RootMenuCell.identifier,
+                for: indexPath
+            ) as? RootMenuCell else {
+                fatalError("Failed to dequeue cell")
+            }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return SidebarViewController.baseItems.count
+            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+            return rootMenuCell
+        }
+
+        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard let self else { return UICollectionReusableView() }
+
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: HomeLargeTitleHeaderView.self,
+                    for: indexPath
+                )
+
+                homeLargeTitleHeaderView.configureForDriveSwitch(
+                    accountManager: accountManager,
+                    driveFileManager: driveFileManager,
+                    presenter: self
+                )
+
+                headerViewHeight = homeLargeTitleHeaderView.frame.height
+                return homeLargeTitleHeaderView
+            case RootMenuHeaderView.kind.rawValue:
+                let headerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    view: RootMenuHeaderView.self,
+                    for: indexPath
+                )
+
+                headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
+                return headerView
+            default:
+                fatalError("Unhandled kind \(kind)")
+            }
+        }
+
+        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = SidebarViewController.baseItems[indexPath.row].name
-        return cell
+    static func createListLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                              heightDimension: .estimated(60))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                               heightDimension: .estimated(60))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                       subitems: [item])
+
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: RootMenuHeaderView.kind.rawValue,
+            alignment: .top
+        )
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        sectionHeaderItem.pinToVisibleBounds = true
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [sectionHeaderItem]
+
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.boundarySupplementaryItems = [generateHeaderItem()]
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
+        return layout
     }
 
-    // MARK: - UITableViewDelegate
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let selectedItem = SidebarViewController.baseItems[indexPath.row]
-        delegate?.didSelectItem(named: selectedItem.id)
+    @objc func presentSearch() {
+        let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+        let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+        present(searchViewController, animated: true)
+    }
+
+    @objc func forceRefresh() {
+        Task {
+            try? await driveFileManager.initRoot()
+            refreshControl.endRefreshing()
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
+
+        let destinationViewModel: FileListViewModel
+        switch selectedRootFile.id {
+        case DriveFileManager.favoriteRootFile.id:
+            destinationViewModel = FavoritesViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.lastModificationsRootFile.id:
+            destinationViewModel = LastModificationsViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.sharedWithMeRootFile.id:
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
+        case DriveFileManager.offlineRoot.id:
+            destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.trashRootFile.id:
+            destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
+        case DriveFileManager.mySharedRootFile.id:
+            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager)
+        default:
+            destinationViewModel = ConcreteFileListViewModel(
+                driveFileManager: driveFileManager,
+                currentDirectory: selectedRootFile
+            )
+        }
+        
+        let userRootFolders = rootViewChildren?.compactMap {
+            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
+        } ?? []
+        let menuItems = userRootFolders + SidebarViewController.baseItems
+        let selectedItemName = menuItems[indexPath.row].name
+
+        delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
     }
 }
 
 protocol SidebarViewControllerDelegate: AnyObject {
-    func didSelectItem(named: Int)
+    func didSelectItem(destinationViewModel: FileListViewModel, name: String)
 }
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
