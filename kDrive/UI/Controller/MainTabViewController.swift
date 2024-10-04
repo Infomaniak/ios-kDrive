@@ -125,8 +125,6 @@ public enum MainTabBarIndex: Int {
 // }
 
 class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
-    let sidebarViewController = SidebarViewController()
-    let detailViewController = DetailViewController()
     let driveFileManager: DriveFileManager
 
     init(driveFileManager: DriveFileManager) {
@@ -142,6 +140,9 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let sidebarViewController = SidebarViewController(driveFileManager: driveFileManager)
+        let detailViewController = DetailViewController()
+
         sidebarViewController.delegate = self
 
         let sidebarNav = UINavigationController(rootViewController: sidebarViewController)
@@ -153,37 +154,21 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
 
     // MARK: - SidebarViewControllerDelegate
 
-    func didSelectItem(named folderName: Int) {
-        
-        let destinationViewModel: FileListViewModel
-        switch folderName {
-        case DriveFileManager.favoriteRootFile.id:
-            destinationViewModel = FavoritesViewModel(driveFileManager: driveFileManager)
-        case DriveFileManager.lastModificationsRootFile.id:
-            destinationViewModel = LastModificationsViewModel(driveFileManager: driveFileManager)
-        case DriveFileManager.sharedWithMeRootFile.id:
-            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
-            destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
-        case DriveFileManager.offlineRoot.id:
-            destinationViewModel = OfflineFilesViewModel(driveFileManager: driveFileManager)
-        case DriveFileManager.trashRootFile.id:
-            destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
-        case DriveFileManager.mySharedRootFile.id:
-            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager)
-        default:
-            destinationViewModel = MySharesViewModel(driveFileManager: driveFileManager) // à changer
-        }
-
+    func didSelectItem(destinationViewModel: FileListViewModel, name: String) {
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-
+        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+        let photoListViewController = PhotoListViewController(viewModel: PhotoListViewModel(driveFileManager: driveFileManager))
+        
         if let detailNav = viewControllers.last as? UINavigationController {
-            detailNav.setViewControllers([destinationViewController], animated: true)
+            if name == KDriveResourcesStrings.Localizable.homeTitle {
+                detailNav.setViewControllers([homeViewController], animated: true)
+            } else if name == "Images" {
+                detailNav.setViewControllers([photoListViewController], animated: true)
+            } else {
+                detailNav.setViewControllers([destinationViewController], animated: true)
+            }
         }
     }
-
-//    func didSelectItem(named: String) {
-//        detailViewController.updateDetail(with: named)
-//    }
 }
 
 class DetailViewController: UIViewController {
@@ -199,15 +184,10 @@ class DetailViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
 
-        // Contraintes pour centrer le texte
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-    }
-
-    func updateDetail(with item: String) {
-        label.text = "You selected: \(item)"
     }
 }
 
