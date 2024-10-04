@@ -31,6 +31,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet var playButton: UIButton!
     @IBOutlet var landscapePlayButton: UIButton!
     @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var songTitleLabel: UILabel!
+    @IBOutlet weak var artistNameLabel: UILabel!
 
     var driveFileManager: DriveFileManager!
 
@@ -75,14 +77,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         super.prepareForReuse()
         setControls(enabled: false)
         singleTrackPlayer.reset()
+        songTitleLabel.text = "tre"
+        artistNameLabel.text = "tre"
+        iconImageView.image = nil
     }
 
     override func configureWith(file: File) {
-        // file should be safe for async work in the player
         let frozenFile = file.freezeIfNeeded()
+        setUpPlayButtons()
 
-        Task {
-            setUpPlayButtons()
+        Task { @MainActor in
             await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
             setupObservation()
@@ -140,6 +144,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .receive(on: DispatchQueue.main)
             .sink { sliderMaximum in
                 self.positionSlider.maximumValue = sliderMaximum
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onCurrentTrackMetadata
+            .receive(on: DispatchQueue.main)
+            .sink { metadata in
+                self.iconImageView.image = metadata.artwork
+                self.artistNameLabel.text = metadata.artist
+                self.songTitleLabel.text = metadata.title
             }
             .store(in: &cancellables)
     }

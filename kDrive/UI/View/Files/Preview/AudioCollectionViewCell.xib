@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_3" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,10 +19,10 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JwS-de-Pn7">
-                        <rect key="frame" x="24" y="246.5" width="458" height="334"/>
+                        <rect key="frame" x="24" y="188.99999999999997" width="458" height="449.33333333333326"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="36" translatesAutoresizingMaskIntoConstraints="NO" id="RQC-MS-Xpl">
-                                <rect key="frame" x="0.0" y="0.0" width="458" height="302"/>
+                                <rect key="frame" x="0.0" y="0.0" width="458" height="417.33333333333331"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="music" translatesAutoresizingMaskIntoConstraints="NO" id="W9a-yf-gb4">
                                         <rect key="frame" x="169" y="0.0" width="120" height="120"/>
@@ -31,8 +31,20 @@
                                             <constraint firstAttribute="height" constant="120" id="SGq-zm-Qis"/>
                                         </constraints>
                                     </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l45-mr-rI7" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                        <rect key="frame" x="189" y="156" width="80.333333333333314" height="23"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                        <color key="textColor" name="backgroundCardView"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I2u-ME-J8U" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                        <rect key="frame" x="208.66666666666666" y="215" width="41" height="20.333333333333343"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" name="backgroundCardView"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Stm-WL-vWh">
-                                        <rect key="frame" x="5" y="156" width="448" height="40"/>
+                                        <rect key="frame" x="5" y="271.33333333333331" width="448" height="40"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q1t-cA-X5f">
                                                 <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
@@ -78,7 +90,7 @@
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nEX-wd-Ij8">
-                                        <rect key="frame" x="194" y="232" width="70" height="70"/>
+                                        <rect key="frame" x="194" y="347.33333333333337" width="70" height="70"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="70" id="PVE-gP-cBs"/>
                                             <constraint firstAttribute="width" constant="70" id="cfr-Lz-2Q8"/>
@@ -113,6 +125,7 @@
             </constraints>
             <size key="customSize" width="506" height="827"/>
             <connections>
+                <outlet property="artistNameLabel" destination="I2u-ME-J8U" id="SAn-0a-1QQ"/>
                 <outlet property="elapsedTimeLabel" destination="8sR-5A-U2n" id="FNe-ZD-WTw"/>
                 <outlet property="iconHeightConstraint" destination="SGq-zm-Qis" id="4mQ-eH-uYF"/>
                 <outlet property="iconImageView" destination="W9a-yf-gb4" id="Pfh-2f-8LB"/>
@@ -120,8 +133,9 @@
                 <outlet property="playButton" destination="nEX-wd-Ij8" id="uAY-1X-0fZ"/>
                 <outlet property="positionSlider" destination="43x-AW-wg9" id="2gc-jE-Usy"/>
                 <outlet property="remainingTimeLabel" destination="1Ga-6s-Xxf" id="Pl6-EM-Orh"/>
+                <outlet property="songTitleLabel" destination="l45-mr-rI7" id="NyL-Lf-eST"/>
             </connections>
-            <point key="canvasLocation" x="421.73913043478262" y="320.42410714285711"/>
+            <point key="canvasLocation" x="420.8955223880597" y="320.25171624713954"/>
         </collectionViewCell>
     </objects>
     <resources>

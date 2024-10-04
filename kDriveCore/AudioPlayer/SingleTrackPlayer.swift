@@ -40,7 +40,7 @@ public final class SingleTrackPlayer {
 
     private var playableFileName: String?
 
-    private var trackMetadata: TrackMetadata?
+    public private(set) var currentTrackMetadata: TrackMetadata?
 
     // MARK: Player Observation
 
@@ -58,6 +58,7 @@ public final class SingleTrackPlayer {
     public let onRemainingTimeChange = PassthroughSubject<String, Never>()
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
+    public let onCurrentTrackMetadata = PassthroughSubject<TrackMetadata, Never>()
 
     var player: AVPlayer?
 
@@ -127,8 +128,8 @@ public final class SingleTrackPlayer {
 
         if !playableFile.isLocalVersionOlderThanRemote {
             let asset = AVAsset(url: playableFile.localUrl)
-            trackMetadata = extractTrackMetadata(from: asset)
             player = AVPlayer(url: playableFile.localUrl)
+            onCurrentTrackMetadata.send(extractTrackMetadata(from: asset))
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -136,8 +137,8 @@ public final class SingleTrackPlayer {
                     let url = Endpoint.download(file: playableFile).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task {
-                        self.trackMetadata = self.extractTrackMetadata(from: asset)
+                    Task { @MainActor in
+                        self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: asset))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
@@ -273,6 +274,7 @@ public final class SingleTrackPlayer {
         statusObserver = player.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
             self?.setNowPlayingPlaybackInfo()
         }
+
 
         if let currentItem = player.currentItem {
             NotificationCenter.default.addObserver(
