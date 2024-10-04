@@ -55,6 +55,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                  image: KDriveResourcesAsset.house.image,
                                                                  destinationFile: DriveFileManager.favoriteRootFile,
                                                                  priority: 3),
+                                                    RootMenuItem(name: "Images",
+                                                                 image: KDriveResourcesAsset.mediaInline.image,
+                                                                 destinationFile: DriveFileManager.trashRootFile,
+                                                                 priority: 2),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                  image: KDriveResourcesAsset.favorite.image,
                                                                  destinationFile: DriveFileManager.favoriteRootFile),
@@ -73,10 +77,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                  image: KDriveResourcesAsset.delete.image,
                                                                  destinationFile: DriveFileManager.trashRootFile),
-                                                    RootMenuItem(name: "Images",
-                                                                 image: KDriveResourcesAsset.mediaInline.image,
-                                                                 destinationFile: DriveFileManager.trashRootFile,
-                                                                 priority: 2)]
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.menuTitle,
+                                                                 image: generateProfileTabImages(image: KDriveResourcesAsset
+                                                                     .placeholderAvatar.image),
+                                                                 destinationFile: DriveFileManager.trashRootFile)]
 
     weak var delegate: SidebarViewControllerDelegate?
     @LazyInjectService private var accountManager: AccountManageable
@@ -157,6 +161,25 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 break
             }
         }
+    }
+
+    private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
+        let iconSize = 28.0
+
+        let selectedImage = image
+            .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
+            .maskImageWithRoundedRect(
+                cornerRadius: CGFloat((iconSize + 2) / 2),
+                borderWidth: 2,
+                borderColor: KDriveResourcesAsset.infomaniakColor.color
+            )
+            .withRenderingMode(.alwaysOriginal)
+
+        let image = image
+            .resize(size: CGSize(width: iconSize, height: iconSize))
+            .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
+            .withRenderingMode(.alwaysOriginal)
+        return image
     }
 
     func configureDataSource() {
