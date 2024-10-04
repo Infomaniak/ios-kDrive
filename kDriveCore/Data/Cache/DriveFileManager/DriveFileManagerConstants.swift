@@ -212,9 +212,9 @@ public class DriveFileManagerConstants {
                     return
                 }
                 if UserDefaults.shared.isWifiOnly {
-                    newObject["wifiSync"] = SyncMod.onlyWifi
+                    newObject["wifiSync"] = SyncMode.onlyWifi
                 } else {
-                    newObject["wifiSync"] = SyncMod.wifiAndMobileData
+                    newObject["wifiSync"] = SyncMode.wifiAndMobileData
                 }
             }
         }
