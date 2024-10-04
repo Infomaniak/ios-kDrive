@@ -395,7 +395,7 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
-                cell.detailLabel.text = UserDefaults.shared.syncMod.title
+                cell.detailLabel.text = UserDefaults.shared.syncMode.title
                 return cell
             }
         case .syncDenied:
@@ -536,7 +536,7 @@ extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegat
 }
 
 extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
-    func didSelectSyncMod(_ mod: SyncMod) {
+    func didSelectSyncMode(_ mod: SyncMode) {
         newSyncSettings.wifiSync = mod
         tableView.reloadRows(at: [IndexPath(row: 7, section: 2)], with: .fade)
     }
