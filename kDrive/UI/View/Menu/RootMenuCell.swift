@@ -16,7 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import RealmSwift

@@ -17,7 +17,7 @@
  */
 
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 @testable import InfomaniakDI
 import InfomaniakLogin
 @testable import kDrive
