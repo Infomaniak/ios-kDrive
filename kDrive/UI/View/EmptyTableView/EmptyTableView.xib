@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -34,8 +34,8 @@
                         <constraint firstAttribute="height" constant="200" id="uhM-CR-9rl"/>
                     </constraints>
                 </view>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                    <rect key="frame" x="24" y="335" width="366" height="21.5"/>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                    <rect key="frame" x="24" y="335" width="366" height="21"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                     <color key="textColor" name="titleColor"/>
                     <nil key="highlightedColor"/>
@@ -43,8 +43,8 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                     </userDefinedRuntimeAttributes>
                 </label>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Details" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I0w-c4-6se" customClass="IKLabel" customModule="InfomaniakCoreUI">
-                    <rect key="frame" x="24" y="372.5" width="366" height="17"/>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Details" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I0w-c4-6se" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                    <rect key="frame" x="24" y="372" width="366" height="0.0"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <color key="textColor" name="primaryTextColor"/>
                     <nil key="highlightedColor"/>
@@ -53,7 +53,7 @@
                     </userDefinedRuntimeAttributes>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Jv-j5-tP1" customClass="IKLargeButton" customModule="kDriveCore">
-                    <rect key="frame" x="24" y="414" width="366" height="60"/>
+                    <rect key="frame" x="24" y="380" width="366" height="60"/>
                     <color key="backgroundColor" name="infomaniakColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="60" id="Q1i-17-MV7"/>
@@ -111,30 +111,19 @@
             <point key="canvasLocation" x="131.8840579710145" y="283.25892857142856"/>
         </view>
     </objects>
-    <designables>
-        <designable name="0Jv-j5-tP1">
-            <size key="intrinsicContentSize" width="83" height="34"/>
-        </designable>
-        <designable name="I0w-c4-6se">
-            <size key="intrinsicContentSize" width="44.5" height="17"/>
-        </designable>
-        <designable name="zQB-Y1-YO0">
-            <size key="intrinsicContentSize" width="74.5" height="21.5"/>
-        </designable>
-    </designables>
     <resources>
         <image name="folder-filled" width="24" height="24"/>
         <namedColor name="iconColor">
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
