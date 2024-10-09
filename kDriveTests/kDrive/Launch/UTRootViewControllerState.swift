@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 @testable import InfomaniakDI
 import InfomaniakLogin
@@ -68,12 +69,6 @@ final class UTRootViewControllerState: XCTestCase {
             },
             Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
                 try resolver.resolve(type: InfomaniakNetworkLogin.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: InfomaniakTokenable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakLoginable.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)
