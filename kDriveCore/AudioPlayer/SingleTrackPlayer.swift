@@ -19,6 +19,7 @@
 import Combine
 import InfomaniakCore
 import InfomaniakDI
+import kDriveResources
 import MediaPlayer
 
 /// Track one file been played
@@ -39,6 +40,8 @@ public final class SingleTrackPlayer {
 
     private var playableFileName: String?
 
+    public private(set) var currentTrackMetadata: TrackMetadata?
+
     // MARK: Player Observation
 
     private var interruptionObserver: NSObjectProtocol?
@@ -55,6 +58,7 @@ public final class SingleTrackPlayer {
     public let onRemainingTimeChange = PassthroughSubject<String, Never>()
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
+    public let onCurrentTrackMetadata = PassthroughSubject<TrackMetadata, Never>()
 
     var player: AVPlayer?
 
@@ -87,6 +91,33 @@ public final class SingleTrackPlayer {
         reset()
     }
 
+    private func extractTrackMetadata(from asset: AVAsset) -> TrackMetadata {
+        var title: String = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
+        var artist = KDriveResourcesStrings.Localizable.unknownArtist
+        var artwork: UIImage? = nil
+
+        let metadata = asset.commonMetadata
+
+        for item in metadata {
+            if let commonKey = item.commonKey {
+                switch commonKey {
+                case .commonKeyTitle:
+                    title = item.value as? String ?? title
+                case .commonKeyArtist:
+                    artist = item.value as? String ?? artist
+                case .commonKeyArtwork:
+                    if let data = item.value as? Data {
+                        artwork = UIImage(data: data)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+
+        return TrackMetadata(title: title, artist: artist, artwork: artwork)
+    }
+
     // MARK: - Load
 
     /// Load internal structures to play a single track
@@ -96,7 +127,9 @@ public final class SingleTrackPlayer {
         playableFileName = playableFile.name
 
         if !playableFile.isLocalVersionOlderThanRemote {
+            let asset = AVAsset(url: playableFile.localUrl)
             player = AVPlayer(url: playableFile.localUrl)
+            onCurrentTrackMetadata.send(extractTrackMetadata(from: asset))
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -104,7 +137,8 @@ public final class SingleTrackPlayer {
                     let url = Endpoint.download(file: playableFile).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task {
+                    Task { @MainActor in
+                        self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: asset))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
@@ -130,7 +164,17 @@ public final class SingleTrackPlayer {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+
+        if let metadata = currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
+            if let artwork = metadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
@@ -151,12 +195,12 @@ public final class SingleTrackPlayer {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
         if let position = player?.currentItem?.currentTime() {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position.seconds)
-
             let remainingTime = position.formattedText
             onRemainingTimeChange.send(remainingTime)
             let positionSlider = Float(position.seconds)
             onPositionChange.send(positionSlider)
         }
+
         if let rate = player?.rate {
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = rate
         }
@@ -231,6 +275,7 @@ public final class SingleTrackPlayer {
             self?.setNowPlayingPlaybackInfo()
         }
 
+
         if let currentItem = player.currentItem {
             NotificationCenter.default.addObserver(
                 self,
@@ -289,6 +334,11 @@ public final class SingleTrackPlayer {
     public func play() {
         if playerState == .stopped {
             setNowPlayingMetadata()
+            do {
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                SentryDebug.capture(error: error)
+            }
         }
 
         guard let player else {
