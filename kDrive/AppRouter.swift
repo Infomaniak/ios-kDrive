@@ -284,7 +284,8 @@ public struct AppRouter: AppNavigable {
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
+              let rawPresentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? String,
+              let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
