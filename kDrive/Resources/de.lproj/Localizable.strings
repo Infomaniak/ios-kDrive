@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: de, German
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
+ * Exported by: Baptiste Griva
+ * Exported at: Thu, 26 Sep 2024 10:46:53 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1939,6 +1939,12 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Speichern Sie Ihre Erinnerungen an einem sicheren Ort";
 
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Offline-Dateien werden nur mit Wi-Fi synchronisiert";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "Nur mit Wi-Fi";
+
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Automatische Sicherung aktivieren";
 
@@ -1998,6 +2004,18 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Sicherung der Fotos";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Für die mobile Datennutzung können Gebühren anfallen";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "Mit Wi-Fi und mobilen Daten";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Fotos und Videos synchronisieren";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Offline-Dateien synchronisieren";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporäre Dateien";
