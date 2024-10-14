@@ -22,7 +22,7 @@ import UIKit
 /// Abstract `Routes` that can be navigated to
 public enum NavigationRoutes: Equatable {
     case store(driveId: Int, userId: Int)
-    case saveFile(file: ImportedFile)
+    case saveFile(file: [ImportedFile])
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {

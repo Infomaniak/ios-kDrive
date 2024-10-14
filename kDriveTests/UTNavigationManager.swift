@@ -26,7 +26,7 @@ final class MckRoutable_navigate: Routable {
         XCTFail("unexpected call to \(#function)")
     }
 
-    func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+    func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
         XCTFail("unexpected call to \(#function)")
     }
 
