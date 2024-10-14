@@ -31,8 +31,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet var playButton: UIButton!
     @IBOutlet var landscapePlayButton: UIButton!
     @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var songTitleLabel: UILabel!
-    @IBOutlet weak var artistNameLabel: UILabel!
+    @IBOutlet var songTitleLabel: UILabel!
+    @IBOutlet var artistNameLabel: UILabel!
 
     var driveFileManager: DriveFileManager!
 
