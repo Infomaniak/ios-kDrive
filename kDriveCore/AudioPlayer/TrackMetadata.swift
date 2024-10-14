@@ -1,4 +1,3 @@
-//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2024 Infomaniak Network SA

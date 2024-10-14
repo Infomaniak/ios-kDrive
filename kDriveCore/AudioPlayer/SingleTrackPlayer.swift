@@ -91,26 +91,26 @@ public final class SingleTrackPlayer {
     }
 
     private func extractTrackMetadata(from asset: AVAsset) -> TrackMetadata {
-        var title: String = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
+        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage? = nil
 
         let metadata = asset.commonMetadata
 
         for item in metadata {
-            if let commonKey = item.commonKey {
-                switch commonKey {
-                case .commonKeyTitle:
-                    title = item.value as? String ?? title
-                case .commonKeyArtist:
-                    artist = item.value as? String ?? artist
-                case .commonKeyArtwork:
-                    if let data = item.value as? Data {
-                        artwork = UIImage(data: data)
-                    }
-                default:
-                    break
+            guard let commonKey = item.commonKey else { continue }
+
+            switch commonKey {
+            case .commonKeyTitle:
+                title = item.value as? String ?? title
+            case .commonKeyArtist:
+                artist = item.value as? String ?? artist
+            case .commonKeyArtwork:
+                if let data = item.value as? Data {
+                    artwork = UIImage(data: data)
                 }
+            default:
+                break
             }
         }
 
@@ -164,10 +164,10 @@ public final class SingleTrackPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let metadata = trackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
-            if let artwork = metadata.artwork {
+        if let trackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = trackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = trackMetadata.artist
+            if let artwork = trackMetadata.artwork {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
             }
