@@ -93,7 +93,7 @@ public final class SingleTrackPlayer {
     private func extractTrackMetadata(from asset: AVAsset) -> TrackMetadata {
         var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
-        var artwork: UIImage? = nil
+        var artwork: UIImage?
 
         let metadata = asset.commonMetadata
 
