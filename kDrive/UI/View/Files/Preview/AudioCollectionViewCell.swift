@@ -51,6 +51,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             ctx.cgContext.addEllipse(in: rect)
             ctx.cgContext.drawPath(using: .fill)
         }
+        songTitleLabel.text = ""
+        artistNameLabel.text = ""
         elapsedTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         positionSlider.setThumbImage(circleImage, for: .normal)
