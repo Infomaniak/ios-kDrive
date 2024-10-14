@@ -77,8 +77,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         super.prepareForReuse()
         setControls(enabled: false)
         singleTrackPlayer.reset()
-        songTitleLabel.text = "tre"
-        artistNameLabel.text = "tre"
+        songTitleLabel.text = ""
+        artistNameLabel.text = ""
         iconImageView.image = nil
     }
 

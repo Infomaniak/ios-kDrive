@@ -165,10 +165,10 @@ public final class SingleTrackPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let trackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = trackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = trackMetadata.artist
-            if let artwork = trackMetadata.artwork {
+        if let currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+            if let artwork = currentTrackMetadata.artwork {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
             }
