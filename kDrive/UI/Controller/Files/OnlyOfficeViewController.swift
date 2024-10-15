@@ -88,8 +88,9 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
-    static func instantiate(driveFileManager: DriveFileManager, file: File,
-                           previewParent: PreviewViewController?) -> OnlyOfficeViewController {
+    static func instantiate(driveFileManager: DriveFileManager,
+                            file: File,
+                            previewParent: PreviewViewController?) -> OnlyOfficeViewController {
         let onlyOfficeViewController = OnlyOfficeViewController()
         onlyOfficeViewController.driveFileManager = driveFileManager
         onlyOfficeViewController.file = file

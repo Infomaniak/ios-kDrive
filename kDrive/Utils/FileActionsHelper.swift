@@ -198,6 +198,7 @@ public final class FileActionsHelper {
         presentViewController(selectFolderNavigationController)
     }
 
+    // swiftlint:disable:next function_parameter_count
     private static func moveToDestination(_ destinationDirectory: File,
                                           from currentDirectory: File,
                                           files: [File],

@@ -21,12 +21,12 @@ import UIKit
 
 @IBDesignable public class IKLargeButton: UIButton {
     /// Toggle shadow elevation.
-    @IBInspectable public var elevated = false {
+    @IBInspectable public var elevated: Bool = false {
         didSet { setElevation() }
     }
 
     /// Set elevation value.
-    @IBInspectable public var elevation = 1 {
+    @IBInspectable public var elevation: Int = 1 {
         didSet { setElevation() }
     }
 
