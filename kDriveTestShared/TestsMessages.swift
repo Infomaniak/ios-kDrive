@@ -19,7 +19,7 @@
 import Foundation
 
 /// XCTAssert messages
-struct TestsMessages {
+enum TestsMessages {
     static let noError = "There should be no error"
     static let shouldReturnTrue = "API should return true"
 

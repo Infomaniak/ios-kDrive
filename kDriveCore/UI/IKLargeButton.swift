@@ -19,6 +19,7 @@
 import kDriveResources
 import UIKit
 
+// swiftformat:disable redundanttype
 @IBDesignable public class IKLargeButton: UIButton {
     /// Toggle shadow elevation.
     @IBInspectable public var elevated: Bool = false {
@@ -141,3 +142,5 @@ import UIKit
         setBackgroundColor()
     }
 }
+
+// swiftformat:enable redundanttype

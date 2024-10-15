@@ -105,7 +105,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     }
 
     private func setupContent() {
-        actions.forEach { action in
+        for action in actions {
             switch action {
             case .edit:
                 action.isEnabled = driveFileManager.drive.categoryRights.canEdit

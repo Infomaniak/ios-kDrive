@@ -178,7 +178,11 @@ class SaveFileViewController: UIViewController {
         guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
 
         let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
-            lazyFiles.filter("rawVisibility = %@ AND driveId == %d", FileVisibility.isInSharedSpace.rawValue, selectedDriveFileManager.drive.id)
+            lazyFiles.filter(
+                "rawVisibility = %@ AND driveId == %d",
+                FileVisibility.isInSharedSpace.rawValue,
+                selectedDriveFileManager.drive.id
+            )
         }.first
         return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
     }

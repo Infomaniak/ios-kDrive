@@ -419,8 +419,13 @@ public final class FileActionsHelper {
         return areFavored
     }
 
-    public static func manageCategories(frozenFiles: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
-                                        group: DispatchGroup? = nil, presentingParent: UIViewController?) {
+    public static func manageCategories(
+        frozenFiles: [File],
+        driveFileManager: DriveFileManager,
+        from viewController: UIViewController,
+        group: DispatchGroup? = nil,
+        presentingParent: UIViewController?
+    ) {
         group?.enter()
         let navigationManageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(
             frozenFiles: frozenFiles,

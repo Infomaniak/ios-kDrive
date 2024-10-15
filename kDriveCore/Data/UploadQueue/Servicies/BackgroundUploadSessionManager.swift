@@ -167,7 +167,9 @@ public final class BackgroundUploadSessionManager: NSObject,
     // MARK: - URLSessionDelegate
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        Log.bgSessionManager("urlSession session:\(session) didCompleteWithError:\(error as Error?) identifier:\(session.identifier)")
+        Log.bgSessionManager(
+            "urlSession session:\(session) didCompleteWithError:\(error as Error?) identifier:\(session.identifier)"
+        )
     }
 
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
