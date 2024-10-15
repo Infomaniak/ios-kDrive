@@ -24,13 +24,15 @@ import MediaPlayer
 import UIKit
 
 final class AudioCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var artworkImageView: UIImageView!
     @IBOutlet var elapsedTimeLabel: UILabel!
     @IBOutlet var remainingTimeLabel: UILabel!
     @IBOutlet var positionSlider: UISlider!
     @IBOutlet var playButton: UIButton!
     @IBOutlet var landscapePlayButton: UIButton!
     @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var songTitleLabel: UILabel!
+    @IBOutlet var artistNameLabel: UILabel!
 
     var driveFileManager: DriveFileManager!
 
@@ -49,6 +51,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             ctx.cgContext.addEllipse(in: rect)
             ctx.cgContext.drawPath(using: .fill)
         }
+        songTitleLabel.text = ""
+        artistNameLabel.text = ""
         elapsedTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         positionSlider.setThumbImage(circleImage, for: .normal)
@@ -75,14 +79,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         super.prepareForReuse()
         setControls(enabled: false)
         singleTrackPlayer.reset()
+        songTitleLabel.text = ""
+        artistNameLabel.text = ""
+        artworkImageView.image = KDriveResourcesAsset.music.image
     }
 
     override func configureWith(file: File) {
-        // file should be safe for async work in the player
         let frozenFile = file.freezeIfNeeded()
+        setUpPlayButtons()
 
-        Task {
-            setUpPlayButtons()
+        Task { @MainActor in
             await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
             setupObservation()
@@ -140,6 +146,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .receive(on: DispatchQueue.main)
             .sink { sliderMaximum in
                 self.positionSlider.maximumValue = sliderMaximum
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onCurrentTrackMetadata
+            .receive(on: DispatchQueue.main)
+            .sink { metadata in
+                self.artworkImageView.image = metadata.artwork
+                self.artistNameLabel.text = metadata.artist
+                self.songTitleLabel.text = metadata.title
             }
             .store(in: &cancellables)
     }
