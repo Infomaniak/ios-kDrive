@@ -40,7 +40,7 @@ public final class SingleTrackPlayer {
 
     private var playableFileName: String?
 
-    public private(set) var currentTrackMetadata: TrackMetadata?
+    private var currentTrackMetadata: TrackMetadata?
 
     // MARK: Player Observation
 

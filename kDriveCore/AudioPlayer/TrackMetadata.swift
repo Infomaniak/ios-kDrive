@@ -19,7 +19,7 @@
 import UIKit
 
 public struct TrackMetadata {
-    public var title: String
-    public var artist: String
-    public var artwork: UIImage?
+    public let title: String
+    public let artist: String
+    public let artwork: UIImage?
 }

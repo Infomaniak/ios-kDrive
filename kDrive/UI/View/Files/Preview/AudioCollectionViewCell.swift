@@ -24,7 +24,7 @@ import MediaPlayer
 import UIKit
 
 final class AudioCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet var iconImageView: UIImageView!
+    @IBOutlet var artworkImageView: UIImageView!
     @IBOutlet var elapsedTimeLabel: UILabel!
     @IBOutlet var remainingTimeLabel: UILabel!
     @IBOutlet var positionSlider: UISlider!
@@ -81,7 +81,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         singleTrackPlayer.reset()
         songTitleLabel.text = ""
         artistNameLabel.text = ""
-        iconImageView.image = nil
+        artworkImageView.image = KDriveResourcesAsset.music.image
     }
 
     override func configureWith(file: File) {
@@ -153,7 +153,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onCurrentTrackMetadata
             .receive(on: DispatchQueue.main)
             .sink { metadata in
-                self.iconImageView.image = metadata.artwork
+                self.artworkImageView.image = metadata.artwork
                 self.artistNameLabel.text = metadata.artist
                 self.songTitleLabel.text = metadata.title
             }
