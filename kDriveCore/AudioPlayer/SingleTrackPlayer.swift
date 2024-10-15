@@ -277,7 +277,6 @@ public final class SingleTrackPlayer {
             self?.setNowPlayingPlaybackInfo()
         }
 
-
         if let currentItem = player.currentItem {
             NotificationCenter.default.addObserver(
                 self,
