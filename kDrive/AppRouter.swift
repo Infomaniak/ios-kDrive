@@ -41,7 +41,7 @@ public struct AppRouter: AppNavigable {
     @MainActor private var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
-                  delegate as? SceneDelegate != nil else {
+                  delegate is SceneDelegate else {
                 return false
             }
 
@@ -280,7 +280,7 @@ public struct AppRouter: AppNavigable {
     private func restorePreviewViewController(driveFileManager: DriveFileManager,
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
-        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int != nil,
+        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] is Int,
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
