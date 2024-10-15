@@ -26,11 +26,11 @@ final class UTPersistableEnumDecoding: XCTestCase {
 
     func testDecodingSnakeCase() throws {
         // GIVEN
-        let jsonToDecode = """
+        let jsonToDecode = Data("""
         {
         "maintenance_reason": "invoice_overdue"
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase

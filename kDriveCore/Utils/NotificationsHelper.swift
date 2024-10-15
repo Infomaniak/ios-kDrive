@@ -226,7 +226,7 @@ public struct NotificationsHelper: NotificationsHelpable {
             if isInBackground {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
-                UNUserNotificationCenter.current().add(request)
+                try? await UNUserNotificationCenter.current().add(request)
             } else {
                 UIConstants.showSnackBar(message: notification.body, duration: .lengthLong, action: action)
             }

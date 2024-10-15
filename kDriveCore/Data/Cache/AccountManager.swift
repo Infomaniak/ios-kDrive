@@ -489,7 +489,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         networkLogin.deleteApiToken(token: removedToken) { result in
             switch result {
-            case .success(let success):
+            case .success:
                 break
             case .failure(let error):
                 DDLogError("Failed to delete api token: \(error.localizedDescription)")

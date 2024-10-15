@@ -198,6 +198,7 @@ public final class FileActionsHelper {
         presentViewController(selectFolderNavigationController)
     }
 
+    // swiftlint:disable:next function_parameter_count
     private static func moveToDestination(_ destinationDirectory: File,
                                           from currentDirectory: File,
                                           files: [File],
@@ -418,8 +419,13 @@ public final class FileActionsHelper {
         return areFavored
     }
 
-    public static func manageCategories(frozenFiles: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
-                                        group: DispatchGroup? = nil, presentingParent: UIViewController?) {
+    public static func manageCategories(
+        frozenFiles: [File],
+        driveFileManager: DriveFileManager,
+        from viewController: UIViewController,
+        group: DispatchGroup? = nil,
+        presentingParent: UIViewController?
+    ) {
         group?.enter()
         let navigationManageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(
             frozenFiles: frozenFiles,
