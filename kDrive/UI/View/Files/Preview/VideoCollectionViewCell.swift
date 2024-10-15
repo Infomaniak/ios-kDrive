@@ -22,6 +22,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import MediaPlayer
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell {
@@ -41,6 +42,9 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var parentViewController: UIViewController?
     weak var floatingPanelController: FloatingPanelController?
 
+    private var playableFileName: String?
+
+    private var currentVideoMetadata: MediaMetadata?
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
     private var player: AVPlayer? {
@@ -66,6 +70,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
 
         self.file = file
+        self.playableFileName = file.name
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
@@ -100,6 +105,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
 
+        setNowPlayingMetadata()
+
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
 
@@ -124,5 +131,31 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }
+    }
+
+    private func setNowPlayingMetadata() {
+        var nowPlayingInfo = [String: Any]()
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+
+        if let currentVideoMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentVideoMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentVideoMetadata.artist
+
+            if let artwork = currentVideoMetadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        }
+
+        if let player = player, let currentItem = player.currentItem {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.asset.duration)
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }
