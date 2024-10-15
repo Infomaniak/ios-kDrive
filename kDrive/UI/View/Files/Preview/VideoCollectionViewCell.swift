@@ -70,7 +70,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
 
         self.file = file
-        self.playableFileName = file.name
+        playableFileName = file.name
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
