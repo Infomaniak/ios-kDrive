@@ -40,7 +40,7 @@ public final class SingleTrackPlayer {
 
     private var playableFileName: String?
 
-    private var trackMetadata: TrackMetadata?
+    private var currentTrackMetadata: TrackMetadata?
 
     // MARK: Player Observation
 
@@ -58,6 +58,7 @@ public final class SingleTrackPlayer {
     public let onRemainingTimeChange = PassthroughSubject<String, Never>()
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
+    public let onCurrentTrackMetadata = PassthroughSubject<TrackMetadata, Never>()
 
     var player: AVPlayer?
 
@@ -90,7 +91,7 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    private func extractTrackMetadata(from asset: AVAsset) -> TrackMetadata {
+    private func extractTrackMetadata(from asset: AVAsset) async -> TrackMetadata {
         var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage?
@@ -127,8 +128,10 @@ public final class SingleTrackPlayer {
 
         if !playableFile.isLocalVersionOlderThanRemote {
             let asset = AVAsset(url: playableFile.localUrl)
-            trackMetadata = extractTrackMetadata(from: asset)
             player = AVPlayer(url: playableFile.localUrl)
+            Task { @MainActor in
+                await onCurrentTrackMetadata.send(extractTrackMetadata(from: asset))
+            }
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -136,8 +139,8 @@ public final class SingleTrackPlayer {
                     let url = Endpoint.download(file: playableFile).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task {
-                        self.trackMetadata = self.extractTrackMetadata(from: asset)
+                    Task { @MainActor in
+                        await self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: asset))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
@@ -164,10 +167,10 @@ public final class SingleTrackPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let trackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = trackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = trackMetadata.artist
-            if let artwork = trackMetadata.artwork {
+        if let currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+            if let artwork = currentTrackMetadata.artwork {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
             }
