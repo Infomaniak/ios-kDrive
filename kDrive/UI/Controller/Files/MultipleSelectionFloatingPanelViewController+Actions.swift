@@ -39,8 +39,6 @@ extension MultipleSelectionFloatingPanelViewController {
             favoriteAction(group: group)
         case .manageCategories:
             manageCategoriesAction(group: group)
-        case .folderColor:
-            folderColorAction(group: group)
         case .download:
             downloadAction(group: group, at: indexPath)
         case .move:
