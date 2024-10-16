@@ -820,17 +820,18 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String, driveId: Int? = nil) {
-        self.init()
-        self.id = id
-        self.name = name
-        if let driveId {
-            self.driveId = driveId
-            uid = File.uid(driveId: driveId, fileId: id)
+    convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
+            self.init()
+            self.id = id
+            self.name = name
+            if let driveId {
+                self.driveId = driveId
+                uid = File.uid(driveId: driveId, fileId: id)
+            }
+            rawType = "dir"
+            rawVisibility = visibility?.rawValue ?? ""
+            children = MutableSet<File>()
         }
-        rawType = "dir"
-        children = MutableSet<File>()
-    }
 }
 
 extension File: Differentiable {

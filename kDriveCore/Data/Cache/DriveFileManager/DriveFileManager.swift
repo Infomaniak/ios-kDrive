@@ -43,7 +43,7 @@ public final class DriveFileManager {
     }
 
     public static var sharedWithMeRootFile: File {
-        return File(id: -3, name: "Shared with me")
+        return File(id: -10, name: "Shared with me", visibility: .isSharedSpace)
     }
 
     public static var mySharedRootFile: File {
@@ -184,6 +184,11 @@ public final class DriveFileManager {
                         } else if let newObject {
                             migration.delete(newObject)
                         }
+                    }
+                }
+                if oldSchemaVersion < 12 {
+                    migration.enumerateObjects(ofType: Rights.className()) { _, newObject in
+                        newObject?["canColor"] = false
                     }
                 }
             },

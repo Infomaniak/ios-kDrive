@@ -45,7 +45,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     weak var presentingParent: UIViewController?
 
     var sharedWithMe: Bool {
-        return currentDirectory.visibility == .isInSharedSpace
+        return currentDirectory.visibility == .isInSharedSpace || currentDirectory.visibility == .isSharedSpace
     }
 
     var actions = FloatingPanelAction.listActions

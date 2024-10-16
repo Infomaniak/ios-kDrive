@@ -73,7 +73,7 @@ extension FileActionsFloatingPanelViewController {
             case .manageDropbox:
                 return file.isDropbox
             case .folderColor:
-                return file.canBeColored
+                return file.capabilities.canColor
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
