@@ -97,7 +97,6 @@ public class Rights: EmbeddedObject, Codable {
         canMoveInto = try container.decodeIfPresent(Bool.self, forKey: .canMoveInto) ?? false
         canBecomeDropbox = try container.decodeIfPresent(Bool.self, forKey: .canBecomeDropbox) ?? false
         canColor = try container.decodeIfPresent(Bool.self, forKey: .canColor) ?? false
-
     }
 
     override public init() {
