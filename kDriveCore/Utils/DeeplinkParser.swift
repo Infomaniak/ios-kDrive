@@ -59,7 +59,7 @@ public struct DeeplinkParser: DeeplinkParsable {
 
                 return ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
             }
-            await router.navigate(to: .saveFile(file: files))
+            await router.navigate(to: .saveFiles(files: files))
             return true
         }
 

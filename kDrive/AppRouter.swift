@@ -81,7 +81,7 @@ public struct AppRouter: AppNavigable {
         }
 
         switch route {
-        case .saveFile(let files):
+        case .saveFiles(let files):
             guard let driveFileManager = accountManager.currentDriveFileManager else {
                 Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
                 return
