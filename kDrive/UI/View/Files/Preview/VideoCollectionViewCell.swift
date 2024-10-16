@@ -44,7 +44,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     private var playableFileName: String?
 
-    private var currentVideoMetadata: MediaMetadata?
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
     private var player: AVPlayer? {
@@ -56,6 +55,12 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerDidPlayToEnd),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: player?.currentItem
+        )
     }
 
     override func prepareForReuse() {
@@ -100,12 +105,14 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
     }
 
+    @objc private func playerDidPlayToEnd() {
+        setNowPlayingMetadata()
+    }
+
     @IBAction func playVideoPressed(_ sender: Any) {
         guard let player else { return }
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
-
-        setNowPlayingMetadata()
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
@@ -130,6 +137,10 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         floatingPanelController?.dismiss(animated: true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
+            let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
+                self?.setNowPlayingMetadata()
+            }
         }
     }
 
@@ -138,18 +149,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-
-        if let currentVideoMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = currentVideoMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = currentVideoMetadata.artist
-
-            if let artwork = currentVideoMetadata.artwork {
-                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-            }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
-        }
+        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName
 
         if let player = player, let currentItem = player.currentItem {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.asset.duration)
