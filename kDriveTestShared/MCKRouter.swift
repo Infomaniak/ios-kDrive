@@ -145,7 +145,7 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
         logNoop()
     }
 }

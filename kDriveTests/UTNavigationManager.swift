@@ -26,7 +26,7 @@ final class MckRoutable_navigate: Routable {
         XCTFail("unexpected call to \(#function)")
     }
 
-    func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
+    func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
         XCTFail("unexpected call to \(#function)")
     }
 
@@ -54,7 +54,7 @@ final class UTNavigationManager: XCTestCase {
         }
         SimpleResolver.sharedResolver.store(factory: routerFactory)
         let expectedFile = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
-        let expectedRoute = NavigationRoutes.saveFile(file: expectedFile)
+        let expectedRoute = NavigationRoutes.saveFiles(files: [expectedFile])
 
         // WHEN
         @InjectService var router: Routable
@@ -104,8 +104,8 @@ final class UTNavigationRoutes: XCTestCase {
     func testRouteEqual_File() {
         // GIVEN
         let expectedFile = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
-        let routeA = NavigationRoutes.saveFile(file: expectedFile)
-        let routeB = NavigationRoutes.saveFile(file: expectedFile)
+        let routeA = NavigationRoutes.saveFiles(files: [expectedFile])
+        let routeB = NavigationRoutes.saveFiles(files: [expectedFile])
 
         // THEN
         XCTAssertEqual(routeA, routeB)
@@ -115,8 +115,8 @@ final class UTNavigationRoutes: XCTestCase {
         // GIVEN
         let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
         let fileB = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
-        let routeA = NavigationRoutes.saveFile(file: fileA)
-        let routeB = NavigationRoutes.saveFile(file: fileB)
+        let routeA = NavigationRoutes.saveFiles(files: [fileA])
+        let routeB = NavigationRoutes.saveFiles(files: [fileB])
 
         // THEN
         XCTAssertNotEqual(routeA, routeB)
@@ -126,8 +126,8 @@ final class UTNavigationRoutes: XCTestCase {
         // GIVEN
         let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
         let fileB = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.ch")!, uti: .jpeg)
-        let routeA = NavigationRoutes.saveFile(file: fileA)
-        let routeB = NavigationRoutes.saveFile(file: fileB)
+        let routeA = NavigationRoutes.saveFiles(files: [fileA])
+        let routeB = NavigationRoutes.saveFiles(files: [fileB])
 
         // THEN
         XCTAssertNotEqual(routeA, routeB)
@@ -137,8 +137,8 @@ final class UTNavigationRoutes: XCTestCase {
         // GIVEN
         let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
         let fileB = ImportedFile(name: "another", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
-        let routeA = NavigationRoutes.saveFile(file: fileA)
-        let routeB = NavigationRoutes.saveFile(file: fileB)
+        let routeA = NavigationRoutes.saveFiles(files: [fileA])
+        let routeB = NavigationRoutes.saveFiles(files: [fileB])
 
         // THEN
         XCTAssertNotEqual(routeA, routeB)

@@ -40,7 +40,11 @@ public protocol RouterAppNavigable {
 
     @MainActor func showPhotoSyncSettings()
 
-    @MainActor func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
+    @MainActor func showSaveFileVC(
+        from viewController: UIViewController,
+        driveFileManager: DriveFileManager,
+        files: [ImportedFile]
+    )
 }
 
 /// Routing methods available from both the AppExtension mode and App
