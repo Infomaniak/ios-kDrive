@@ -42,10 +42,6 @@ public final class DriveFileManager {
         return File(id: -2, name: "Trash")
     }
 
-    public static var sharedWithMeRootFile: File {
-        return File(id: -10, name: "Shared with me", visibility: .isSharedSpace)
-    }
-
     public static var mySharedRootFile: File {
         return File(id: -4, name: "My shares")
     }
@@ -70,6 +66,11 @@ public final class DriveFileManager {
         let offlineRoot = File(id: -9, name: "Offline")
         offlineRoot.fullyDownloaded = true
         return offlineRoot
+    }
+
+    public static var sharedWithMeRootFile: File {
+        // Default value is -3
+        return File(id: -10, name: "Shared with me", visibility: .isSharedSpace)
     }
 
     public let realmConfiguration: Realm.Configuration
