@@ -153,7 +153,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onCurrentTrackMetadata
             .receive(on: DispatchQueue.main)
             .sink { metadata in
-                self.artworkImageView.image = metadata.artwork
+                self.artworkImageView.image = metadata.artwork ?? UIImage(resource: .music)
                 self.artistNameLabel.text = metadata.artist
                 self.songTitleLabel.text = metadata.title
             }
