@@ -22,6 +22,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import MediaPlayer
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell {
@@ -41,6 +42,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var parentViewController: UIViewController?
     weak var floatingPanelController: FloatingPanelController?
 
+    private var playableFileName: String?
+
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
     private var player: AVPlayer? {
@@ -52,6 +55,12 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerDidPlayToEnd),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: player?.currentItem
+        )
     }
 
     override func prepareForReuse() {
@@ -66,6 +75,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
 
         self.file = file
+        playableFileName = file.name
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
@@ -93,6 +103,10 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func didEndDisplaying() {
         MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
+    }
+
+    @objc private func playerDidPlayToEnd() {
+        setNowPlayingMetadata()
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
@@ -123,6 +137,25 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         floatingPanelController?.dismiss(animated: true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
+            let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
+                self?.setNowPlayingMetadata()
+            }
         }
+    }
+
+    private func setNowPlayingMetadata() {
+        var nowPlayingInfo = [String: Any]()
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName
+
+        if let player = player, let currentItem = player.currentItem {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.asset.duration)
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }
