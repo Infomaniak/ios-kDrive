@@ -820,7 +820,7 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String, driveId: Int? = nil) {
+    convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
         self.init()
         self.id = id
         self.name = name
@@ -829,6 +829,7 @@ public final class File: Object, Codable {
             uid = File.uid(driveId: driveId, fileId: id)
         }
         rawType = "dir"
+        rawVisibility = visibility?.rawValue ?? ""
         children = MutableSet<File>()
     }
 }
