@@ -18,7 +18,7 @@
 
 import UIKit
 
-public struct TrackMetadata {
+public struct MediaMetadata {
     public let title: String
     public let artist: String
     public let artwork: UIImage?

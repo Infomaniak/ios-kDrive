@@ -40,7 +40,7 @@ public final class SingleTrackPlayer {
 
     private var playableFileName: String?
 
-    private var currentTrackMetadata: TrackMetadata?
+    private var currentTrackMetadata: MediaMetadata?
 
     // MARK: Player Observation
 
@@ -58,7 +58,7 @@ public final class SingleTrackPlayer {
     public let onRemainingTimeChange = PassthroughSubject<String, Never>()
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
-    public let onCurrentTrackMetadata = PassthroughSubject<TrackMetadata, Never>()
+    public let onCurrentTrackMetadata = PassthroughSubject<MediaMetadata, Never>()
 
     var player: AVPlayer?
 
@@ -91,7 +91,7 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    private func extractTrackMetadata(from asset: AVAsset) async -> TrackMetadata {
+    private func extractTrackMetadata(from asset: AVAsset) async -> MediaMetadata {
         var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage?
@@ -115,7 +115,7 @@ public final class SingleTrackPlayer {
             }
         }
 
-        return TrackMetadata(title: title, artist: artist, artwork: artwork)
+        return MediaMetadata(title: title, artist: artist, artwork: artwork)
     }
 
     // MARK: - Load
