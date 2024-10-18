@@ -75,7 +75,7 @@ public class Rights: EmbeddedObject, Codable {
         case canUpload
         case canMoveInto
         case canBecomeDropbox
-        case canColor
+        case canColor = "colorable"
     }
 
     public required init(from decoder: Decoder) throws {
