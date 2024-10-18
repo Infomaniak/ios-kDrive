@@ -45,6 +45,7 @@ public final class SingleTrackPlayer: Pausable {
     private var timeObserver: Any?
     private var rateObserver: NSKeyValueObservation?
     private var statusObserver: NSKeyValueObservation?
+    private var currentItemStatusObserver: NSKeyValueObservation?
     private var isInterrupted = false
 
     // MARK: Data flow
@@ -113,6 +114,12 @@ public final class SingleTrackPlayer: Pausable {
                     self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                     await self.setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
                     self.setUpObservers()
+
+                    self.currentItemStatusObserver = self.player?.observe(\.currentItem?.status) { player, _ in
+                        guard let error = player.currentItem?.error,
+                              let avError = error as? AVError,
+                              avError.code == .fileFormatNotRecognized else { return }
+                    }
                 }
             }
         } else {
