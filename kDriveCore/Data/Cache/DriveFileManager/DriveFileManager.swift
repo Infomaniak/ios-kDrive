@@ -69,7 +69,7 @@ public final class DriveFileManager {
     }
 
     public static var sharedWithMeRootFile: File {
-        // Default value is -3
+        // We can't migrate fake roots. Previous sharedWithMeRootFile.id was -3
         return File(id: -10, name: "Shared with me", visibility: .isSharedSpace)
     }
 
