@@ -137,10 +137,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         floatingPanelController?.dismiss(animated: true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
-            let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
-                self?.setNowPlayingMetadata()
-            }
         }
     }
 
