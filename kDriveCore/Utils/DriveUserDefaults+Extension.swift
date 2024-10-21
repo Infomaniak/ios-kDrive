@@ -343,8 +343,8 @@ public extension UserDefaults {
     var syncMode: SyncMode {
         get {
             if let rawValue = object(forKey: key(.syncMode)) as? String,
-               let mod = SyncMode(rawValue: rawValue) {
-                return mod
+               let mode = SyncMode(rawValue: rawValue) {
+                return mode
             }
             return .onlyWifi
         }
