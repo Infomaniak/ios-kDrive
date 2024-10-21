@@ -23,14 +23,14 @@ import kDriveResources
 import UIKit
 
 protocol WifiSyncSettingsDelegate: AnyObject {
-    func didSelectSyncMode(_ mod: SyncMode)
+    func didSelectSyncMode(_ mode: SyncMode)
 }
 
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedMod: SyncMode!
+    private var selectedMode: SyncMode!
     weak var delegate: WifiSyncSettingsDelegate?
 
     override func viewDidLoad() {
@@ -41,12 +41,12 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
 
-        selectedMod = UserDefaults.shared.syncMode
+        selectedMode = UserDefaults.shared.syncMode
     }
 
-    static func instantiate(selectedMod: SyncMode) -> WifiSyncSettingsViewController {
+    static func instantiate(selectedMode: SyncMode) -> WifiSyncSettingsViewController {
         let viewController = WifiSyncSettingsViewController()
-        viewController.selectedMod = selectedMod
+        viewController.selectedMode = selectedMode
         return viewController
     }
 
@@ -66,18 +66,18 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let currentMod = tableContent[indexPath.row]
-        if currentMod == selectedMod {
+        let currentMode = tableContent[indexPath.row]
+        if currentMode == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        cell.syncTitleLabel.text = currentMod.title
-        cell.syncDetailLabel.text = currentMod.selectionTitle
+        cell.syncTitleLabel.text = currentMode.title
+        cell.syncDetailLabel.text = currentMode.selectionTitle
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
+        MatomoUtils.track(eventWithCategory: .settings, name: "mode\(mode.rawValue.capitalized)")
         UserDefaults.shared.syncMode = mode
         delegate?.didSelectSyncMode(tableContent[indexPath.row])
         navigationController?.popViewController(animated: true)
