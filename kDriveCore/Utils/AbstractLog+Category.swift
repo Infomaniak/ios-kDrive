@@ -330,6 +330,7 @@ public enum Log {
         }
     }
 
+    // swiftlint:disable:next function_parameter_count
     private static func defaultLogHandler(_ message: @autoclosure () -> Any,
                                           category: String,
                                           level: AbstractLogLevel,

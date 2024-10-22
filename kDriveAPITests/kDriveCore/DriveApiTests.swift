@@ -645,6 +645,7 @@ final class DriveApiTests: XCTestCase {
         let files = try await currentApiFetcher.searchFiles(
             drive: proxyDrive,
             query: "officeFile",
+            fileExtensions: [],
             categories: [],
             belongToAllCategories: true,
             sortType: .newer

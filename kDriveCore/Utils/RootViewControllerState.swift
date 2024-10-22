@@ -18,7 +18,7 @@
 
 import Foundation
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 
 public enum RootViewControllerState {

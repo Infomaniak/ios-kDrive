@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUIKit
 import UIKit
 
-class FolderTypeTableViewCell: InsetTableViewCell {
-    @IBOutlet var descriptionLabel: UILabel!
+public struct TrackMetadata {
+    public let title: String
+    public let artist: String
+    public let artwork: UIImage?
 }
