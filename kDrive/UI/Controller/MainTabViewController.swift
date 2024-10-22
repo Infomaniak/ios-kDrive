@@ -149,6 +149,7 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         let detailNav = UINavigationController(rootViewController: detailViewController)
 
         viewControllers = [sidebarNav, detailNav]
+        setViewController(MainTabViewController(driveFileManager: driveFileManager), for: .compact)
         preferredDisplayMode = .oneBesideSecondary
     }
 
