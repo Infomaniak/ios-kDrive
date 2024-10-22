@@ -38,7 +38,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
 
         let name: String
-        let image: UIImage
+        var image: UIImage
         let destinationFile: File
         var isFirst = false
         var isLast = false
@@ -51,7 +51,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    private static let baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
+    private static var baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
                                                                  image: KDriveResourcesAsset.house.image,
                                                                  destinationFile: DriveFileManager.favoriteRootFile,
                                                                  priority: 3),
@@ -138,6 +138,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         configureDataSource()
+        updateProfilePicture()
 
         let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
@@ -163,17 +164,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
+    func updateProfilePicture() {
+        accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+            SidebarViewController.baseItems[8].image = SidebarViewController.generateProfileTabImages(image: image)
+        }
+    }
+
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
         let iconSize = 28.0
-
-        let selectedImage = image
-            .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
-            .maskImageWithRoundedRect(
-                cornerRadius: CGFloat((iconSize + 2) / 2),
-                borderWidth: 2,
-                borderColor: KDriveResourcesAsset.infomaniakColor.color
-            )
-            .withRenderingMode(.alwaysOriginal)
 
         let image = image
             .resize(size: CGSize(width: iconSize, height: iconSize))
