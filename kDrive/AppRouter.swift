@@ -621,8 +621,6 @@ public struct AppRouter: AppNavigable {
                                                  currentDirectory: frozenRootFolder,
                                                  apiFetcher: apiFetcher)
             let viewController = FileListViewController(viewModel: viewModel)
-            print("viewController:\(viewController) viewModel:\(viewModel) navigationController:\(navigationController)")
-
             navigationController.pushViewController(viewController, animated: true)
         }
     }

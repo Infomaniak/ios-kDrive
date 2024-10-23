@@ -31,9 +31,8 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             fatalError("PublicShareViewModel requires a currentDirectory to work")
         }
 
-        // TODO: i18n
         let configuration = Configuration(selectAllSupported: false,
-                                          rootTitle: "public share",
+                                          rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
                                           emptyViewType: .emptyFolder,
                                           supportsDrop: false,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "publicShare"])
