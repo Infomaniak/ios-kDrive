@@ -180,14 +180,22 @@ public extension Endpoint {
         ])
     }
 
-    static func download(file: AbstractFile, as asType: String? = nil) -> Endpoint {
+    static func download(file: AbstractFile,
+                         publicShareProxy: PublicShareProxy? = nil,
+                         as asType: String? = nil) -> Endpoint {
         let queryItems: [URLQueryItem]?
         if let asType {
             queryItems = [URLQueryItem(name: "as", value: asType)]
         } else {
             queryItems = nil
         }
-        return .fileInfoV2(file).appending(path: "/download", queryItems: queryItems)
+        if let publicShareProxy {
+            return .downloadShareLinkFile(driveId: publicShareProxy.driveId,
+                                          linkUuid: publicShareProxy.shareLinkUid,
+                                          fileId: file.id)
+        } else {
+            return .fileInfoV2(file).appending(path: "/download", queryItems: queryItems)
+        }
     }
 
     static func convert(file: AbstractFile) -> Endpoint {

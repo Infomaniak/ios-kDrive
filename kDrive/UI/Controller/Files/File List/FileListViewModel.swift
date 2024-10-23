@@ -34,6 +34,7 @@ enum FileListBarButtonType {
     case searchFilters
     case photoSort
     case addFolder
+    case downloadAll
 }
 
 enum FileListQuickActionType {
@@ -279,7 +280,7 @@ class FileListViewModel: SelectDelegate {
         }.store(in: &bindStore)
     }
 
-    func barButtonPressed(type: FileListBarButtonType) {
+    func barButtonPressed(sender: Any? = nil, type: FileListBarButtonType) {
         if multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             multipleSelectionViewModel?.barButtonPressed(type: type)
         }

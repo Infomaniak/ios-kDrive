@@ -59,6 +59,10 @@ public struct PublicShareMetadata: Decodable {
 
     public let validUntil: TimeInterval?
     public let capabilities: Rights
+    
+    // TODO: Test parsing
+    public let isPasswordNeeded: Bool = false
+    public let isExpired: Bool = false
 
     public let createdBy: TimeInterval
     public let createdAt: TimeInterval

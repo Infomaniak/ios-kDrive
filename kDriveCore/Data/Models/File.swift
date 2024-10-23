@@ -553,14 +553,30 @@ public final class File: Object, Codable {
 
     public var isDownloaded: Bool {
         let localPath = localUrl.path
-        guard fileManager.fileExists(atPath: localPath) else {
+        let temporaryPath = temporaryUrl.path
+
+        let pathToUse: String
+        if fileManager.fileExists(atPath: localPath) {
+            pathToUse = localPath
+        } else if fileManager.fileExists(atPath: temporaryPath) {
+            pathToUse = temporaryPath
+        } else {
             DDLogError("[File] no local copy to read from")
             return false
         }
 
+        return isDownloaded(atPath: pathToUse)
+    }
+
+    private func isDownloaded(atPath path: String) -> Bool {
+        // Skip metadata validation for a zipped folder on local storage
+        guard !isDirectory else {
+            return true
+        }
+
         // Check that size on disk matches, if available
         do {
-            let attributes = try fileManager.attributesOfItem(atPath: localPath)
+            let attributes = try fileManager.attributesOfItem(atPath: path)
             if let remoteSize = size,
                let metadataSize = attributes[FileAttributeKey.size] as? NSNumber,
                metadataSize.intValue != remoteSize {

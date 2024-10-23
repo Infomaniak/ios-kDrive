@@ -234,6 +234,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
                   let incomingURL = userActivity.webpageURL,
                   let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+                Log.sceneDelegate("scene continue userActivity - invalid activity", level: .error)
                 return
             }
 
