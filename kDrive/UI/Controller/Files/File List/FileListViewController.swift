@@ -60,7 +60,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
     private let headerViewIdentifier = "FilesHeaderView"
-    private var addToKDriveButton: IKButton?
 
     // MARK: - Properties
 
@@ -92,6 +91,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     var driveFileManager: DriveFileManager {
         viewModel.driveFileManager
     }
+
+    lazy var addToKDriveButton: IKLargeButton = {
+        let button = IKLargeButton(frame: .zero)
+        button.setTitle(KDriveCoreStrings.Localizable.buttonAddToKDrive, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
+        return button
+    }()
 
     // MARK: - View controller lifecycle
 
@@ -254,39 +261,27 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func setupFooterIfNeeded() {
-        guard driveFileManager.isPublicShare else {
-            return
-        }
+        guard driveFileManager.isPublicShare else { return }
 
-        let addToKDrive = IKButton(type: .custom)
-        addToKDriveButton = addToKDrive
+        view.addSubview(addToKDriveButton)
+        view.bringSubviewToFront(addToKDriveButton)
 
-        addToKDrive.setTitle("Add to My kDrive", for: .normal)
-        addToKDrive.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
-        addToKDrive.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
-        addToKDrive.translatesAutoresizingMaskIntoConstraints = false
-        addToKDrive.cornerRadius = 8.0
-        addToKDrive.clipsToBounds = true
-
-        view.addSubview(addToKDrive)
-        view.bringSubviewToFront(addToKDrive)
-
-        let leadingConstraint = addToKDrive.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
-                                                                     constant: 16)
+        let leadingConstraint = addToKDriveButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                                                           constant: 16)
         leadingConstraint.priority = .defaultHigh
-        let trailingConstraint = addToKDrive.trailingAnchor.constraint(
+        let trailingConstraint = addToKDriveButton.trailingAnchor.constraint(
             greaterThanOrEqualTo: view.trailingAnchor,
             constant: -16
         )
         trailingConstraint.priority = .defaultHigh
-        let widthConstraint = addToKDrive.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
+        let widthConstraint = addToKDriveButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
 
         NSLayoutConstraint.activate([
-            addToKDrive.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            addToKDriveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             leadingConstraint,
             trailingConstraint,
-            addToKDrive.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addToKDrive.heightAnchor.constraint(equalToConstant: 60),
+            addToKDriveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            addToKDriveButton.heightAnchor.constraint(equalToConstant: 60),
             widthConstraint
         ])
     }
@@ -393,7 +388,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
-    private func fileLayout(files: [File]) -> FloatingPanelLayout {
+    private func fileFloatingPanelLayout(files: [File]) -> FloatingPanelLayout {
         guard driveFileManager.isPublicShare else {
             return FileFloatingPanelLayout(
                 initialState: .half,
@@ -402,7 +397,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             )
         }
 
-        if files.first?.isDirectory ?? false {
+        if files.first?.isDirectory == true {
             return PublicShareFolderFloatingPanelLayout(
                 initialState: .half,
                 hideTip: true,
@@ -428,7 +423,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-            floatingPanelViewController.layout = fileLayout(files: files)
+            floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
 
             if let file = files.first {
                 fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
@@ -617,7 +612,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
-            addToKDriveButton?.isHidden = true
+            addToKDriveButton.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -627,7 +622,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
-            addToKDriveButton?.isHidden = false
+            addToKDriveButton.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
@@ -960,41 +955,6 @@ extension FileListViewController: UICollectionViewDropDelegate {
             }
 
             droppableViewModel.performDrop(with: coordinator, in: collectionView, destinationDirectory: destinationDirectory)
-        }
-    }
-}
-
-// Move to CoreUIKit or use something else ?
-extension UIImage {
-    convenience init?(color: UIColor) {
-        let size = CGSize(width: 1, height: 1)
-        UIGraphicsBeginImageContext(size)
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-
-        context.setFillColor(color.cgColor)
-        context.fill(CGRect(origin: .zero, size: size))
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        guard let cgImage = image.cgImage else {
-            return nil
-        }
-
-        self.init(cgImage: cgImage)
-    }
-}
-
-// Move to CoreUIKit or use something else ?
-extension IKButton {
-    func setBackgroundColors(normal normalColor: UIColor, highlighted highlightedColor: UIColor) {
-        if let normalImage = UIImage(color: normalColor) {
-            setBackgroundImage(normalImage, for: .normal)
-        }
-
-        if let highlightedImage = UIImage(color: highlightedColor) {
-            setBackgroundImage(highlightedImage, for: .highlighted)
         }
     }
 }

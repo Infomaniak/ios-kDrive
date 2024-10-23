@@ -220,13 +220,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } catch {
             fatalError("unable to update public share drive in base, \(error)")
         }
-        let forzenPublicShareDrive = publicShareDrive.freeze()
+        let frozenPublicShareDrive = publicShareDrive.freeze()
 
         let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
         let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: rootFileId, shareLinkUid: publicShareId)
         let context = DriveFileManagerContext.publicShare(shareProxy: publicShareProxy)
 
-        return DriveFileManager(drive: forzenPublicShareDrive, apiFetcher: apiFetcher, context: context)
+        return DriveFileManager(drive: frozenPublicShareDrive, apiFetcher: apiFetcher, context: context)
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
