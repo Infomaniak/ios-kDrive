@@ -30,7 +30,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         guard let currentDirectory else {
             fatalError("PublicShareViewModel requires a currentDirectory to work")
         }
-
+ 
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
                                           emptyViewType: .emptyFolder,
