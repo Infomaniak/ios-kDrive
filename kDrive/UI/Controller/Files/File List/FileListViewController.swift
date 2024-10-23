@@ -92,6 +92,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewModel.driveFileManager
     }
 
+    lazy var addToKDriveButton: IKLargeButton = {
+        let button = IKLargeButton(frame: .zero)
+        button.setTitle(KDriveCoreStrings.Localizable.buttonAddToKDrive, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
+        return button
+    }()
+
     // MARK: - View controller lifecycle
 
     deinit {
@@ -257,14 +265,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             return
         }
 
-        let addToKDriveButton = IKButton(type: .custom)
-        addToKDriveButton.setTitle("Add to My kDrive", for: .normal)
-        addToKDriveButton.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
-        addToKDriveButton.setBackgroundColors(normal: .systemBlue, highlighted: .darkGray)
-        addToKDriveButton.translatesAutoresizingMaskIntoConstraints = false
-        addToKDriveButton.cornerRadius = 8.0
-        addToKDriveButton.clipsToBounds = true
-
         view.addSubview(addToKDriveButton)
         view.bringSubviewToFront(addToKDriveButton)
 
@@ -390,7 +390,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
-    private func fileLayout(files: [File]) -> FloatingPanelLayout {
+    private func fileFloatingPanelLayout(files: [File]) -> FloatingPanelLayout {
         guard driveFileManager.isPublicShare else {
             return FileFloatingPanelLayout(
                 initialState: .half,
@@ -399,7 +399,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             )
         }
 
-        if files.first?.isDirectory ?? false {
+        if files.first?.isDirectory == true {
             return PublicShareFolderFloatingPanelLayout(
                 initialState: .half,
                 hideTip: true,
@@ -425,7 +425,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-            floatingPanelViewController.layout = fileLayout(files: files)
+            floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
 
             if let file = files.first {
                 fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
@@ -955,41 +955,6 @@ extension FileListViewController: UICollectionViewDropDelegate {
             }
 
             droppableViewModel.performDrop(with: coordinator, in: collectionView, destinationDirectory: destinationDirectory)
-        }
-    }
-}
-
-// Move to CoreUIKit or use something else ?
-extension UIImage {
-    convenience init?(color: UIColor) {
-        let size = CGSize(width: 1, height: 1)
-        UIGraphicsBeginImageContext(size)
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-
-        context.setFillColor(color.cgColor)
-        context.fill(CGRect(origin: .zero, size: size))
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        guard let cgImage = image.cgImage else {
-            return nil
-        }
-
-        self.init(cgImage: cgImage)
-    }
-}
-
-// Move to CoreUIKit or use something else ?
-extension IKButton {
-    func setBackgroundColors(normal normalColor: UIColor, highlighted highlightedColor: UIColor) {
-        if let normalImage = UIImage(color: normalColor) {
-            setBackgroundImage(normalImage, for: .normal)
-        }
-
-        if let highlightedImage = UIImage(color: highlightedColor) {
-            setBackgroundImage(highlightedImage, for: .highlighted)
         }
     }
 }
