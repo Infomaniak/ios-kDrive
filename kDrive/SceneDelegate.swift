@@ -230,13 +230,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         Log.sceneDelegate("scene continue userActivity")
-        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-              let incomingURL = userActivity.webpageURL,
-              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
-            return
-        }
+        Task {
+            guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+                  let incomingURL = userActivity.webpageURL,
+                  let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+                Log.sceneDelegate("scene continue userActivity - invalid activity", level: .error)
+                return
+            }
 
-        UniversalLinksHelper.handlePath(components.path)
+            await UniversalLinksHelper.handlePath(components.path)
+        }
     }
 
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {

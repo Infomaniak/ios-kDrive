@@ -585,6 +585,49 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
+    @MainActor public func presentPublicShare(
+        frozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            fatalError("TODO: lazy load a rootViewController")
+        }
+
+        guard let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("Root is not a MainTabViewController")
+            return
+        }
+
+        // TODO: Fix access right
+        guard !frozenRootFolder.isDisabled else {
+            fatalError("isDisabled")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                                 sortType: .nameAZ,
+                                                 driveFileManager: driveFileManager,
+                                                 currentDirectory: frozenRootFolder,
+                                                 apiFetcher: apiFetcher)
+            let viewController = FileListViewController(viewModel: viewModel)
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
         present(file: file, driveFileManager: driveFileManager, office: false)
     }
