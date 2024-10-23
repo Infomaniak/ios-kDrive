@@ -102,7 +102,11 @@ enum UniversalLinksHelper {
         }
 
         // get file ID from metadata
-        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(for: shareLinkUid)
+        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
+            for: shareLinkUid,
+            driveId: driveIdInt,
+            rootFileId: metadata.fileId
+        )
         openPublicShare(driveId: driveIdInt,
                         linkUuid: shareLinkUid,
                         fileId: metadata.fileId,
@@ -138,10 +142,17 @@ enum UniversalLinksHelper {
                 let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                        linkUuid: linkUuid,
                                                                        fileId: fileId)
+                // Root folder must be in database for the FileListViewModel to work
+                try driveFileManager.database.writeTransaction { writableRealm in
+                    writableRealm.add(rootFolder)
+                }
+
+                let frozenRootFolder = rootFolder.freeze()
+
                 @InjectService var appNavigable: AppNavigable
                 let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
                 await appNavigable.presentPublicShare(
-                    rootFolder: rootFolder,
+                    frozenRootFolder: frozenRootFolder,
                     publicShareProxy: publicShareProxy,
                     driveFileManager: driveFileManager,
                     apiFetcher: apiFetcher
