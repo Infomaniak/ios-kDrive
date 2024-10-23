@@ -93,6 +93,9 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
+    /// Tracking a way to dismiss the current stack
+    weak var viewControllerDismissable: ViewControllerDismissable?
+
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 

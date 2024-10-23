@@ -49,7 +49,7 @@ extension SortType: Selectable {
 }
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable, ViewControllerDismissable {
     @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants
@@ -261,9 +261,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func setupFooterIfNeeded() {
-        guard driveFileManager.isPublicShare else {
-            return
-        }
+        guard driveFileManager.isPublicShare else { return }
 
         view.addSubview(addToKDriveButton)
         view.bringSubviewToFront(addToKDriveButton)
@@ -614,6 +612,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
+            addToKDriveButton.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -623,6 +622,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
+            addToKDriveButton.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
