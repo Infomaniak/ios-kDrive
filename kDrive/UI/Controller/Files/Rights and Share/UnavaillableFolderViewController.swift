@@ -16,11 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class LockedFolderViewController: UIViewController {
+class UnavaillableFolderViewController: UIViewController {
     viewDidLoad() {
         super.viewDidLoad()
-        title = "Locked Folder"
+        title = "Content Unavailable"
     }
 }
-
-
