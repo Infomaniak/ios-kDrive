@@ -19,8 +19,8 @@
 import BackgroundTasks
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
-import InfomaniakCoreUI
 import InfomaniakDI
 import InfomaniakLogin
 import os.log
@@ -55,12 +55,6 @@ public enum FactoryService {
             },
             Factory(type: InfomaniakLoginable.self) { _, _ in
                 InfomaniakLogin(config: loginConfig)
-            },
-            Factory(type: InfomaniakTokenable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakLoginable.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
             },
             Factory(type: AccountManageable.self) { _, _ in
                 AccountManager()

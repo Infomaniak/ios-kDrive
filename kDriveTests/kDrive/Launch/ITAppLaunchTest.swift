@@ -17,7 +17,8 @@
  */
 
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 @testable import InfomaniakDI
 import InfomaniakLogin
 @testable import kDrive
@@ -68,12 +69,6 @@ final class ITAppLaunchTest: XCTestCase {
             },
             Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
                 try resolver.resolve(type: InfomaniakNetworkLogin.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: InfomaniakTokenable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakLoginable.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)
@@ -131,7 +126,7 @@ final class ITAppLaunchTest: XCTestCase {
         let rootViewController = window?.rootViewController
         XCTAssertNotNil(
             rootViewController as? LockedAppViewController,
-            "Should be a LockedAppViewController, got \(rootViewController)"
+            "Should be a LockedAppViewController, got \(rootViewController as UIViewController?)"
         )
 
         // WHEN
@@ -145,6 +140,6 @@ final class ITAppLaunchTest: XCTestCase {
         }
 
         let lockView = rootViewControllerRefresh as? LockedAppViewController
-        XCTAssertNil(lockView, "no longer expecting a lock view, got \(lockView)")
+        XCTAssertNil(lockView, "no longer expecting a lock view, got \(lockView as LockedAppViewController?)")
     }
 }

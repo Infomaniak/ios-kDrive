@@ -106,7 +106,7 @@ public struct PublicShareMetadata: Decodable {
 
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var tokenable: InfomaniakTokenable
+    @LazyInjectService var tokenable: InfomaniakNetworkLoginable
 
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
@@ -369,7 +369,12 @@ public class DriveApiFetcher: ApiFetcher {
             URLQueryItem(name: "depth", value: "children"),
             URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
         ]
-        queryItems.append(contentsOf: FileActivityType.displayedFileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        queryItems.append(contentsOf: FileActivityType.displayedFileActivities.map {
+            URLQueryItem(
+                name: "actions[]",
+                value: $0.rawValue
+            )
+        })
         let endpoint = Endpoint.fileActivities(file: file)
             .appending(path: "", queryItems: queryItems)
             .cursored(cursor)
@@ -405,11 +410,12 @@ public class DriveApiFetcher: ApiFetcher {
 
             let group = DispatchGroup()
             group.enter()
-            self.tokenable.refreshToken(token: reloadedToken) { newToken, error in
-                if let newToken {
+            self.tokenable.refreshToken(token: reloadedToken) { result in
+                switch result {
+                case .success(let newToken):
                     self.accountManager.didUpdateToken(newToken: newToken, oldToken: reloadedToken)
                     request(newToken, nil)
-                } else {
+                case .failure(let error):
                     request(nil, error)
                 }
                 group.leave()
@@ -551,7 +557,7 @@ public class DriveApiFetcher: ApiFetcher {
 
 class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var tokenable: InfomaniakTokenable
+    @LazyInjectService var tokenable: InfomaniakNetworkLoginable
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var keychainHelper: KeychainHelper
 
@@ -660,9 +666,10 @@ class SyncedAuthenticator: OAuthAuthenticator {
             // It is necessary that the app stays awake while we refresh the token
             let expiringActivity = ExpiringActivity()
             expiringActivity.start()
-            self.tokenable.refreshToken(token: credential) { token, error in
+            self.tokenable.refreshToken(token: credential) { result in
                 // New token has been fetched correctly
-                if let token {
+                switch result {
+                case .success(let token):
                     Log.tokenAuthentication(
                         "Refreshing token - Success with remote",
                         oldToken: credential,
@@ -672,8 +679,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
 
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))
-                } else {
-                    completion(self.handleFailedRefreshingToken(oldToken: credential, newToken: token, error: error))
+                case .failure(let error):
+                    completion(self.handleFailedRefreshingToken(oldToken: credential, newToken: nil, error: error))
                 }
                 expiringActivity.endAll()
             }

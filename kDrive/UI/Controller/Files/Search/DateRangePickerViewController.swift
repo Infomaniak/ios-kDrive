@@ -17,7 +17,8 @@
  */
 
 import HorizonCalendar
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import UIKit

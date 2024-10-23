@@ -37,7 +37,7 @@ public enum SceneRestorationKeys: String {
     /// The selected index of the MainViewController that should be restored
     case selectedIndex
 
-    /// Array representing the stack of view controllers that should be restored
+    // Array representing the stack of view controllers that should be restored
     // TODO: Implement stack restoration
     // case fileViewStack
 

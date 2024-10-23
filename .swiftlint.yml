@@ -8,7 +8,9 @@ disabled_rules:
  - force_cast
  - cyclomatic_complexity
  - closure_parameter_position
- - non_optional_string_data_conversion
+ - inclusive_language
+ - for_where
+ - optional_data_string_conversion
 opt_in_rules:
  - strong_iboutlet
  - closure_end_indentation
