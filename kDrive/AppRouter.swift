@@ -17,7 +17,7 @@
  */
 
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -41,7 +41,7 @@ public struct AppRouter: AppNavigable {
     @MainActor private var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
-                  delegate as? SceneDelegate != nil else {
+                  delegate is SceneDelegate else {
                 return false
             }
 
@@ -280,11 +280,12 @@ public struct AppRouter: AppNavigable {
     private func restorePreviewViewController(driveFileManager: DriveFileManager,
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
-        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int != nil,
+        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] is Int,
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
+              let rawPresentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? String,
+              let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }

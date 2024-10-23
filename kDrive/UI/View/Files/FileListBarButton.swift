@@ -17,8 +17,8 @@
  */
 
 import Foundation
-import UIKit
 import kDriveResources
+import UIKit
 
 final class FileListBarButton: UIBarButtonItem {
     private(set) var type: FileListBarButtonType = .cancel

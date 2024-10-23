@@ -47,16 +47,8 @@ public protocol AccountManagerDelegate: AnyObject {
 
 public extension InfomaniakLogin {
     static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
-        try await withCheckedThrowingContinuation { continuation in
-            @InjectService var tokenable: InfomaniakTokenable
-            tokenable.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
-                if let token {
-                    continuation.resume(returning: token)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        @InjectService var tokenable: InfomaniakNetworkLoginable
+        return try await tokenable.apiTokenUsing(code: code, codeVerifier: codeVerifier)
     }
 }
 
@@ -104,7 +96,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenStore: TokenStore
-    @LazyInjectService var tokenable: InfomaniakTokenable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
@@ -313,9 +304,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
-            networkLogin.deleteApiToken(token: token) { error in
-                DDLogError("Failed to delete api token: \(error.localizedDescription)")
-            }
+            try? await networkLogin.deleteApiToken(token: token)
             throw DriveError.noDrive
         }
 
@@ -531,8 +520,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         guard let removedToken else { return }
 
-        tokenable.deleteApiToken(token: removedToken) { error in
-            DDLogError("Failed to delete api token: \(error.localizedDescription)")
+        networkLogin.deleteApiToken(token: removedToken) { result in
+            switch result {
+            case .success:
+                break
+            case .failure(let error):
+                DDLogError("Failed to delete api token: \(error.localizedDescription)")
+            }
         }
     }
 

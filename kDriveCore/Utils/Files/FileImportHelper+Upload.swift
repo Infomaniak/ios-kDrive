@@ -125,7 +125,7 @@ public extension FileImportHelper {
             pageSize = freedomPageSize
         }
 
-        let pageRect = CGRect(origin: CGPoint(x: 0, y: 0), size: pageSize)
+        let pageRect = CGRect(origin: .zero, size: pageSize)
         return pageRect
     }
 

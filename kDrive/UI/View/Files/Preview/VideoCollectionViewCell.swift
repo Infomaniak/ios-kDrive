@@ -102,6 +102,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
+
+        if #available(iOS 14.2, *) {
+            playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
+        }
+
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")

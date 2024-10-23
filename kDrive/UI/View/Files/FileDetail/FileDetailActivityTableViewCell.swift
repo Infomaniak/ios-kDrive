@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import LocalizeKit
@@ -68,9 +68,9 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderCreate" : "fileDetailsActivityFileCreate"
         case .fileRename:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderRename" : "fileDetailsActivityFileRename"
-        case .fileTrash, .fileTrashInherited:
+        case .fileTrash:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderTrash" : "fileDetailsActivityFileTrash"
-        case .fileRestore, .fileRestoreInherited:
+        case .fileRestore:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderRestore" : "fileDetailsActivityFileRestore"
         case .fileDelete:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderDelete" : "fileDetailsActivityFileDelete"

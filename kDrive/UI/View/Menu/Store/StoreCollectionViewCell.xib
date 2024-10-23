@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -25,7 +25,7 @@
                             <constraint firstAttribute="height" constant="30" id="jt9-IA-d3K"/>
                         </constraints>
                     </imageView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HMm-XV-G0e" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HMm-XV-G0e" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="60" y="27" width="253" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
@@ -34,7 +34,7 @@
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EVY-6R-JpA" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EVY-6R-JpA" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="20" y="72" width="293" height="41"/>
                         <string key="text">1 utilisateur maximum
 2 To de stockage</string>
@@ -45,7 +45,7 @@
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CHF 5.95 par mois" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Zf-mp-FnH" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CHF 5.95 par mois" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Zf-mp-FnH" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="20" y="127" width="293" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
@@ -110,20 +110,6 @@
             <point key="canvasLocation" x="138.40579710144928" y="79.6875"/>
         </collectionViewCell>
     </objects>
-    <designables>
-        <designable name="0y2-ji-vxm">
-            <size key="intrinsicContentSize" width="87" height="30"/>
-        </designable>
-        <designable name="5Zf-mp-FnH">
-            <size key="intrinsicContentSize" width="141.5" height="20.5"/>
-        </designable>
-        <designable name="EVY-6R-JpA">
-            <size key="intrinsicContentSize" width="164.5" height="41"/>
-        </designable>
-        <designable name="HMm-XV-G0e">
-            <size key="intrinsicContentSize" width="33.5" height="20.5"/>
-        </designable>
-    </designables>
     <resources>
         <image name="circle-tag" width="35" height="35"/>
         <namedColor name="backgroundCardView">

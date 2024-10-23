@@ -18,7 +18,7 @@
 
 import FloatingPanel
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -259,8 +259,7 @@ extension MainTabViewController: MainTabBarDelegate {
         guard let currentDirectory else { return }
 
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-        let fromFileList = (selectedViewController as? UINavigationController)?
-            .topViewController as? FileListViewController != nil
+        let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
@@ -325,7 +324,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
         if tabBarController.selectedViewController == viewController {
             // Detect double tap on menu
-            if topViewController as? MenuViewController != nil,
+            if topViewController is MenuViewController,
                let lastDate = lastInteraction,
                Date().timeIntervalSince(lastDate) <= Self.doubleTapInterval {
                 avatarDoubleTap()

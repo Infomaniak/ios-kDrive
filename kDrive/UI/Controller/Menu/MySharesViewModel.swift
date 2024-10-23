@@ -31,8 +31,9 @@ class MySharesViewModel: FileListViewModel {
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "MyShares"])
         let mySharesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.mySharedRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: mySharesFakeRoot)
-        observedFiles = AnyRealmCollection(AnyRealmCollection(mySharesFakeRoot.children.filter(NSPredicate(format: "users.@count > 0")))
-            .filesSorted(by: sortType))
+        observedFiles =
+            AnyRealmCollection(AnyRealmCollection(mySharesFakeRoot.children.filter(NSPredicate(format: "users.@count > 0")))
+                    .filesSorted(by: sortType))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
