@@ -310,7 +310,6 @@ public enum FileVisibility: String {
 public enum FileStatus: String {
     case erasing
     case locked
-    case trashInherited = "trash_inherited"
     case trashed
     case uploading
 }
@@ -514,7 +513,7 @@ public final class File: Object, Codable {
     }
 
     public var isTrashed: Bool {
-        return status == .trashed || status == .trashInherited
+        return status == .trashed
     }
 
     public var isDisabled: Bool {
@@ -555,14 +554,29 @@ public final class File: Object, Codable {
     public var isDownloaded: Bool {
         let localPath = localUrl.path
         let temporaryPath = temporaryUrl.path
-        guard fileManager.fileExists(atPath: localPath) || fileManager.fileExists(atPath: temporaryPath) else {
+
+        let pathToUse: String
+        if fileManager.fileExists(atPath: localPath) {
+            pathToUse = localPath
+        } else if fileManager.fileExists(atPath: temporaryPath) {
+            pathToUse = temporaryPath
+        } else {
             DDLogError("[File] no local copy to read from")
             return false
         }
 
+        return isDownloaded(atPath: pathToUse)
+    }
+
+    private func isDownloaded(atPath path: String) -> Bool {
+        // Skip metadata validation for a zipped folder on local storage
+        guard !isDirectory else {
+            return true
+        }
+
         // Check that size on disk matches, if available
         do {
-            let attributes = try fileManager.attributesOfItem(atPath: localPath)
+            let attributes = try fileManager.attributesOfItem(atPath: path)
             if let remoteSize = size,
                let metadataSize = attributes[FileAttributeKey.size] as? NSNumber,
                metadataSize.intValue != remoteSize {
@@ -835,7 +849,7 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String, driveId: Int? = nil) {
+    convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
         self.init()
         self.id = id
         self.name = name
@@ -844,6 +858,7 @@ public final class File: Object, Codable {
             uid = File.uid(driveId: driveId, fileId: id)
         }
         rawType = "dir"
+        rawVisibility = visibility?.rawValue ?? ""
         children = MutableSet<File>()
     }
 }

@@ -79,7 +79,7 @@ final class RealmAccessor: RealmAccessible {
             try realmURL.setResourceValues(metadata)
             DDLogInfo("Excluding realm URL from backup: \(realmURL)")
         } catch {
-            DDLogError(error)
+            DDLogError("Error excluding realm URL from backup: \(realmURL) \(error)")
         }
     }
 }

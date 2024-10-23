@@ -42,7 +42,7 @@ final class KeyedUploadOperationable {
     }
 
     public func removeObject(forKey key: String) {
-        queue.sync {
+        _ = queue.sync {
             self.operationsInQueue.removeValue(forKey: key)
         }
     }

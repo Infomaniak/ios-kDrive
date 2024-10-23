@@ -19,7 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveResources
 import PDFKit

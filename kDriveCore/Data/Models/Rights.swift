@@ -43,6 +43,8 @@ public class Rights: EmbeddedObject, Codable {
     @Persisted public var canUseFavorite: Bool
     /// Right to use and give team access
     @Persisted public var canUseTeam: Bool
+    /// Right to color a folder
+    @Persisted public var canColor: Bool
 
     // MARK: Directory capabilities
 
@@ -95,6 +97,7 @@ public class Rights: EmbeddedObject, Codable {
         case canDownload
         case canComment
         case canRequestAccess
+        case canColor = "colorable"
     }
 
     public required init(from decoder: Decoder) throws {
@@ -121,6 +124,7 @@ public class Rights: EmbeddedObject, Codable {
         canDownload = try container.decodeIfPresent(Bool.self, forKey: .canDownload) ?? false
         canComment = try container.decodeIfPresent(Bool.self, forKey: .canComment) ?? false
         canRequestAccess = try container.decodeIfPresent(Bool.self, forKey: .canRequestAccess) ?? false
+        canColor = try container.decodeIfPresent(Bool.self, forKey: .canColor) ?? false
     }
 
     override public init() {
@@ -147,5 +151,6 @@ extension Rights: ContentEquatable {
             && canUpload == source.canUpload
             && canMoveInto == source.canMoveInto
             && canBecomeDropbox == source.canBecomeDropbox
+            && canColor == source.canColor
     }
 }

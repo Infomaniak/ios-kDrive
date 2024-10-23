@@ -19,8 +19,8 @@
 import BackgroundTasks
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
-import kDriveCore
 
 /* To debug background tasks:
   Launch ->

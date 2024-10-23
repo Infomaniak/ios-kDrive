@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -41,7 +41,7 @@
                                             <constraint firstAttribute="height" constant="150" id="UvD-X0-Sdb"/>
                                         </constraints>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="174" width="366" height="41"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -51,7 +51,7 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="storeSuccessTitle"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="231" width="366" height="61"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -136,7 +136,7 @@
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="cT4-aO-YYD"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="298" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
@@ -154,7 +154,7 @@
                                     <constraint firstAttribute="width" constant="46" id="n0g-dM-Pfd"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="356" width="350" height="81.5"/>
                                 <string key="text">Consulter les notifications de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -267,7 +267,7 @@
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="Lbz-PD-KrR"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="318" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
@@ -285,7 +285,7 @@
                                     <constraint firstAttribute="height" constant="2" id="LyE-D9-gFr"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="376" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -298,7 +298,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="32" y="489.5" width="350" height="80"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="16" y="30.5" width="261" height="19.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <color key="textColor" name="titleColor"/>
@@ -379,32 +379,6 @@
             <point key="canvasLocation" x="3217" y="921"/>
         </scene>
     </scenes>
-    <designables>
-        <designable name="0Ow-gT-FNm">
-            <size key="intrinsicContentSize" width="66.5" height="24"/>
-        </designable>
-        <designable name="Bwo-OH-mV3">
-            <size key="intrinsicContentSize" width="852.5" height="20.5"/>
-        </designable>
-        <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="123" height="30"/>
-        </designable>
-        <designable name="Orz-m0-bIR">
-            <size key="intrinsicContentSize" width="188.5" height="24"/>
-        </designable>
-        <designable name="Yth-Zq-eKV">
-            <size key="intrinsicContentSize" width="610.5" height="20.5"/>
-        </designable>
-        <designable name="ahf-mt-ZbI">
-            <size key="intrinsicContentSize" width="987" height="20.5"/>
-        </designable>
-        <designable name="gJI-rA-NpO">
-            <size key="intrinsicContentSize" width="916.5" height="20.5"/>
-        </designable>
-        <designable name="xyY-1J-PGU">
-            <size key="intrinsicContentSize" width="208" height="19.5"/>
-        </designable>
-    </designables>
     <resources>
         <image name="add_user" width="512" height="512"/>
         <image name="face_id_edit" width="512" height="434"/>
@@ -423,10 +397,10 @@
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

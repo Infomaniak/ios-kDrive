@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
@@ -122,11 +122,12 @@
                                                         <rect key="frame" x="23" y="9.5" width="16" height="16"/>
                                                         <color key="tintColor" name="greenColor"/>
                                                         <constraints>
+                                                            <constraint firstAttribute="width" secondItem="mG7-uH-Lkm" secondAttribute="height" multiplier="1:1" id="1vf-Y4-lKb"/>
                                                             <constraint firstAttribute="height" constant="16" id="BCR-q6-Koi"/>
                                                             <constraint firstAttribute="width" secondItem="mG7-uH-Lkm" secondAttribute="height" multiplier="1:1" id="zWr-DT-ubJ"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzB-wT-0Da" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzB-wT-0Da" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="27" y="9" width="111" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <color key="textColor" name="titleColor"/>
@@ -144,9 +145,6 @@
                                                         </constraints>
                                                     </imageView>
                                                 </subviews>
-                                                <constraints>
-                                                    <constraint firstItem="mG7-uH-Lkm" firstAttribute="width" secondItem="mG7-uH-Lkm" secondAttribute="height" multiplier="1:1" id="1vf-Y4-lKb"/>
-                                                </constraints>
                                             </stackView>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -217,11 +215,6 @@
             <point key="canvasLocation" x="37.681159420289859" y="181.47321428571428"/>
         </collectionViewCell>
     </objects>
-    <designables>
-        <designable name="IzB-wT-0Da">
-            <size key="intrinsicContentSize" width="36" height="17"/>
-        </designable>
-    </designables>
     <resources>
         <image name="check" width="24" height="24"/>
         <image name="favorite" width="24" height="24"/>
@@ -244,7 +237,7 @@
             <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

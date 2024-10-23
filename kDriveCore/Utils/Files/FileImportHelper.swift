@@ -20,7 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakConcurrency
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveResources
 import Photos

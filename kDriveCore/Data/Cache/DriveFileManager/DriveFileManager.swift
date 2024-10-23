@@ -57,10 +57,6 @@ public final class DriveFileManager {
         return File(id: -2, name: "Trash")
     }
 
-    public static var sharedWithMeRootFile: File {
-        return File(id: -3, name: "Shared with me")
-    }
-
     public static var mySharedRootFile: File {
         return File(id: -4, name: "My shares")
     }
@@ -85,6 +81,11 @@ public final class DriveFileManager {
         let offlineRoot = File(id: -9, name: "Offline")
         offlineRoot.fullyDownloaded = true
         return offlineRoot
+    }
+
+    public static var sharedWithMeRootFile: File {
+        // We can't migrate fake roots. Previous sharedWithMeRootFile.id was -3
+        return File(id: -10, name: "Shared with me", visibility: .isSharedSpace)
     }
 
     public let realmConfiguration: Realm.Configuration
@@ -211,6 +212,11 @@ public final class DriveFileManager {
                         } else if let newObject {
                             migration.delete(newObject)
                         }
+                    }
+                }
+                if oldSchemaVersion < 12 {
+                    migration.enumerateObjects(ofType: Rights.className()) { _, newObject in
+                        newObject?["canColor"] = false
                     }
                 }
             },

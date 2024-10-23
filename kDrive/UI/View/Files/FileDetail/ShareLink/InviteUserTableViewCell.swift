@@ -17,7 +17,7 @@
  */
 
 import DropDown
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import UIKit

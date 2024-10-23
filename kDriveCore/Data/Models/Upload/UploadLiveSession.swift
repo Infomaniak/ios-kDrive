@@ -55,7 +55,7 @@ public struct UploadedLiveChunk: Decodable {
     }
 
     public func toRealmObject() -> UploadedChunk {
-        var chunk = UploadedChunk()
+        let chunk = UploadedChunk()
         chunk.number = number
         chunk.status = status.rawValue
         chunk.createdAt = createdAt

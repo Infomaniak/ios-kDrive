@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 extension UploadOperation: ExpiringActivityDelegate {
     public func backgroundActivityExpiring() {

@@ -20,7 +20,8 @@ import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import UIKit

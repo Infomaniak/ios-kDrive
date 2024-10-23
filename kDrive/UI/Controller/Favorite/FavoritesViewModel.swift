@@ -33,8 +33,9 @@ class FavoritesViewModel: FileListViewModel {
                                           matomoViewPath: ["Favorite"])
         let favoritesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.favoriteRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: favoritesFakeRoot)
-        observedFiles = AnyRealmCollection(AnyRealmCollection(favoritesFakeRoot.children.filter(NSPredicate(format: "isFavorite = true")))
-            .filesSorted(by: sortType))
+        observedFiles =
+            AnyRealmCollection(AnyRealmCollection(favoritesFakeRoot.children.filter(NSPredicate(format: "isFavorite = true")))
+                    .filesSorted(by: sortType))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
