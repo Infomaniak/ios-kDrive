@@ -85,8 +85,6 @@ enum UniversalLinksHelper {
     }
 
     private static func processPublicShareLink(matches: [[String]], displayMode: DisplayMode) async -> Bool {
-        @InjectService var accountManager: AccountManageable
-
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
@@ -96,32 +94,59 @@ enum UniversalLinksHelper {
 
         // request metadata
         let apiFetcher = PublicShareApiFetcher()
-        guard let metadata = try? await apiFetcher.getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
-        else {
-            return false
+        do {
+            let metadata = try await apiFetcher.getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
+            return await processPublicShareMetadata(
+                metadata,
+                driveId: driveIdInt,
+                shareLinkUid: shareLinkUid,
+                apiFetcher: apiFetcher
+            )
+        } catch {
+            return await processPublicShareMetadataError(error)
         }
+    }
 
-        let trackerName: String
-        if metadata.isPasswordNeeded {
-            trackerName = "publicShareWithPassword"
-        } else if metadata.isExpired {
-            trackerName = "publicShareExpired"
-        } else {
-            trackerName = "publicShare"
-        }
-        MatomoUtils.trackDeeplink(name: trackerName)
+    private static func processPublicShareMetadataError(_ error: Error) async -> Bool {
+        @InjectService var accountManager: AccountManageable
 
-        // get file ID from metadata
+        print("•• woops \(error)")
+        // TODO: Switch on error
+//        if isPasswordNeeded {
+        MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
+        @InjectService var appNavigable: AppNavigable
+        await appNavigable.presentPublicShareExpired()
+//        }
+
+//        if .isExpired {
+//            MatomoUtils.trackDeeplink(name: "publicShareExpired")
+//            @InjectService var appNavigable: AppNavigable
+//            await appNavigable.presentPublicShareLocked()
+//        }
+
+        return true
+    }
+
+    private static func processPublicShareMetadata(_ metadata: PublicShareMetadata,
+                                                   driveId: Int,
+                                                   shareLinkUid: String,
+                                                   apiFetcher: PublicShareApiFetcher) async -> Bool {
+        @InjectService var accountManager: AccountManageable
+
+        MatomoUtils.trackDeeplink(name: "publicShare")
+
         let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,
-            driveId: driveIdInt,
+            driveId: driveId,
             rootFileId: metadata.fileId
         )
-        openPublicShare(driveId: driveIdInt,
+
+        openPublicShare(driveId: driveId,
                         linkUuid: shareLinkUid,
                         fileId: metadata.fileId,
                         driveFileManager: publicShareDriveFileManager,
                         apiFetcher: apiFetcher)
+
         return true
     }
 
