@@ -23,6 +23,7 @@ import kDriveResources
 import UIKit
 
 class FileDetailViewController: UIViewController, SceneStateRestorable {
+    // swiftlint:disable:next large_tuple
     private typealias ActivitiesInfo = (cursor: String?, hasNextPage: Bool, isLoading: Bool)
     @IBOutlet var tableView: UITableView!
     @IBOutlet var commentButton: UIButton!

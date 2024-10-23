@@ -139,7 +139,7 @@ public final class BackgroundUploadSessionManager: NSObject,
     }
 
     public func scheduled(task: URLSessionDataTask?, fileUrl: URL?) {
-        Log.bgSessionManager("scheduled task:\(task)")
+        Log.bgSessionManager("scheduled task:\(task as URLSessionDataTask?)")
     }
 
     public func rescheduleForBackground(task: URLSessionDataTask, fileUrl: URL) -> String? {
@@ -167,7 +167,9 @@ public final class BackgroundUploadSessionManager: NSObject,
     // MARK: - URLSessionDelegate
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        Log.bgSessionManager("urlSession session:\(session) didCompleteWithError:\(error) identifier:\(session.identifier)")
+        Log.bgSessionManager(
+            "urlSession session:\(session) didCompleteWithError:\(error as Error?) identifier:\(session.identifier)"
+        )
     }
 
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {

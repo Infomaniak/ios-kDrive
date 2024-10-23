@@ -310,7 +310,6 @@ public enum FileVisibility: String {
 public enum FileStatus: String {
     case erasing
     case locked
-    case trashInherited = "trash_inherited"
     case trashed
     case uploading
 }
@@ -514,7 +513,7 @@ public final class File: Object, Codable {
     }
 
     public var isTrashed: Bool {
-        return status == .trashed || status == .trashInherited
+        return status == .trashed
     }
 
     public var isDisabled: Bool {
@@ -834,7 +833,7 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String, driveId: Int? = nil) {
+    convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
         self.init()
         self.id = id
         self.name = name
@@ -843,6 +842,7 @@ public final class File: Object, Codable {
             uid = File.uid(driveId: driveId, fileId: id)
         }
         rawType = "dir"
+        rawVisibility = visibility?.rawValue ?? ""
         children = MutableSet<File>()
     }
 }

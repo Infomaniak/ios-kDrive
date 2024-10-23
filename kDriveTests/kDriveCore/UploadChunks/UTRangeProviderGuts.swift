@@ -447,7 +447,7 @@ final class UTRangeProviderGuts: XCTestCase {
             // THEN
             XCTFail("Unexpected")
         } catch {
-            guard error as? UTRangeProviderGuts.DomainError != nil else {
+            guard error is UTRangeProviderGuts.DomainError else {
                 XCTFail("Unexpected")
                 return
             }

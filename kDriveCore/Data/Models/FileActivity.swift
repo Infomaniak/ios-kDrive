@@ -29,9 +29,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
     case fileMoveIn = "file_move"
     case fileMoveOut = "file_move_out"
     case fileTrash = "file_trash"
-    case fileTrashInherited = "file_trash_inherited"
     case fileRestore = "file_restore"
-    case fileRestoreInherited = "file_restore_inherited"
     case fileDelete = "file_delete"
     case fileUpdate = "file_update"
     case fileCategorize = "file_categorize"
@@ -67,9 +65,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
         .fileMoveIn,
         .fileMoveOut,
         .fileTrash,
-        // .fileTrashInherited, FIXME: waiting for API fix
         .fileRestore,
-        // .fileRestoreInherited, FIXME: waiting for API fix
         .fileDelete,
         .fileUpdate,
         .fileCategorize,

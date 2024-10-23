@@ -148,7 +148,7 @@ extension UploadOperation {
 
                 for distantChunk in distantChunksInSuccess {
                     let distantNumber = distantChunk.number
-                    guard let chunkTask = uploadingSessionTask.chunkTasks.filter({ $0.chunkNumber == distantNumber }).first else {
+                    guard let chunkTask = uploadingSessionTask.chunkTasks.first(where: { $0.chunkNumber == distantNumber }) else {
                         Log.uploadOperation("mismatch unable to resolve :\(distantNumber)", level: .error)
                         return
                     }

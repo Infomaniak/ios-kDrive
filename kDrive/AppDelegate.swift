@@ -21,7 +21,7 @@ import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore

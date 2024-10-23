@@ -1,0 +1,25 @@
+name: SwiftLint
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: SwiftLint
+    runs-on: [ self-hosted, iOS ]
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: jdx/mise-action@v2
+        with:
+          cache: false
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: SwiftLint
+        run: swiftlint --config .swiftlint.yml --config .swiftlint-ci.yml --reporter github-actions-logging .
