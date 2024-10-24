@@ -28,14 +28,15 @@ import VisionKit
 struct OpenMediaHelper {
     var currentDirectory: File?
     var driveFileManager: DriveFileManager
+    var photoPickerDelegate = PhotoPickerDelegate()
 
     enum Media {
         case library, camera
     }
 
-    func openMedia(_ mainTabViewController: MainTabViewController, _ media: Media) {
-        mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-        mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory?.freezeIfNeeded()
+    func openMedia(_ mainTabViewController: UIViewController, _ media: Media) {
+        photoPickerDelegate.driveFileManager = driveFileManager
+        photoPickerDelegate.currentDirectory = currentDirectory?.freezeIfNeeded()
 
         if #available(iOS 14, *), media == .library {
             // Check permission
@@ -46,7 +47,7 @@ struct OpenMediaHelper {
                         configuration.selectionLimit = 0
 
                         let picker = PHPickerViewController(configuration: configuration)
-                        picker.delegate = mainTabViewController.photoPickerDelegate
+                        picker.delegate = photoPickerDelegate
                         mainTabViewController.present(picker, animated: true)
                     }
                 } else {
@@ -85,14 +86,14 @@ struct OpenMediaHelper {
 
             let picker = UIImagePickerController()
             picker.sourceType = sourceType
-            picker.delegate = mainTabViewController.photoPickerDelegate
+            picker.delegate = photoPickerDelegate
             picker.mediaTypes = UIImagePickerController
                 .availableMediaTypes(for: sourceType) ?? [UTI.image.identifier, UTI.movie.identifier]
             mainTabViewController.present(picker, animated: true)
         }
     }
 
-    func openScan(_ mainTabViewController: MainTabViewController, _ presentedAboveFileList: Bool) {
+    func openScan(_ mainTabViewController: UIViewController, _ presentedAboveFileList: Bool) {
         guard VNDocumentCameraViewController.isSupported else {
             DDLogError("VNDocumentCameraViewController is not supported on this device")
             return

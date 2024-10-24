@@ -201,8 +201,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     /// Time between two tap events that feels alright for a double tap
     private static let doubleTapInterval = TimeInterval(0.350)
 
-    // swiftlint:disable:next weak_delegate
-    var photoPickerDelegate = PhotoPickerDelegate()
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadQueue: UploadQueue
