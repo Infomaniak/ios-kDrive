@@ -64,6 +64,12 @@ public protocol RouterFileNavigable {
     ///   - office: Open in only office
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 
+    /// Present the public share locked screen
+    @MainActor func presentPublicShareLocked()
+
+    /// Present the public share expired screen
+    @MainActor func presentPublicShareExpired()
+
     /// Present a file list for a public share, regardless of authenticated state
     @MainActor func presentPublicShare(
         frozenRootFolder: File,

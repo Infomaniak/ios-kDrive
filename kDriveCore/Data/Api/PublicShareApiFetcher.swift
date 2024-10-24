@@ -17,25 +17,54 @@
  */
 
 import Alamofire
+import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import Kingfisher
+
+/// Server can notify us of publicShare limitations.
+public enum PublicShareLimitation: String {
+    case passwordProtected = "password_not_valid"
+    case expired // TODO:
+}
 
 public class PublicShareApiFetcher: ApiFetcher {
     override public init() {
         super.init()
     }
 
-    public func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
+    /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
+    private static var handledHttpStatus: Set<Int> = {
+        var allStatus = Set(200 ... 500)
+        return allStatus
+    }()
+
+    override public func perform<T: Decodable>(request: DataRequest,
+                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {
+        let validatedRequest = request.validate(statusCode: PublicShareApiFetcher.handledHttpStatus)
+        let dataResponse = await validatedRequest.serializingDecodable(ApiResponse<T>.self,
+                                                                       automaticallyCancelling: true,
+                                                                       decoder: decoder).response
+        return try handleApiResponse(dataResponse)
+    }
+}
+
+public extension PublicShareApiFetcher {
+    func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
         let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
         // TODO: Use authenticated token if availlable
         let request = Session.default.request(shareLinkInfoUrl)
-        let metadata: PublicShareMetadata = try await perform(request: request)
-        return metadata
+
+        do {
+            let metadata: PublicShareMetadata = try await perform(request: request)
+            return metadata
+        } catch InfomaniakError.apiError(let apiError) {
+            throw apiError
+        }
     }
 
-    public func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
+    func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
         let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
         let requestParameters: [String: String] = [
             APIUploadParameter.with.rawValue: FileWith.capabilities.rawValue
@@ -46,10 +75,10 @@ public class PublicShareApiFetcher: ApiFetcher {
     }
 
     /// Query a specific page
-    public func shareLinkFileChildren(rootFolderId: Int,
-                                      publicShareProxy: PublicShareProxy,
-                                      sortType: SortType,
-                                      cursor: String? = nil) async throws -> ValidServerResponse<[File]> {
+    func shareLinkFileChildren(rootFolderId: Int,
+                               publicShareProxy: PublicShareProxy,
+                               sortType: SortType,
+                               cursor: String? = nil) async throws -> ValidServerResponse<[File]> {
         let shareLinkFileChildren = Endpoint.shareLinkFileChildren(
             driveId: publicShareProxy.driveId,
             linkUuid: publicShareProxy.shareLinkUid,
