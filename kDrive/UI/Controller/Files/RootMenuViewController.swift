@@ -27,6 +27,7 @@ import UIKit
 class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+    private var selectedIndexPath: IndexPath?
 
     private enum RootMenuSection {
         case main
@@ -60,30 +61,37 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.allPictures,
                                                                  image: KDriveResourcesAsset.mediaInline.image,
                                                                  destinationFile: DriveFileManager.trashRootFile,
-                                                                 priority: 2)]
+                                                                 priority: 2),
+                                                    RootMenuItem(
+                                                        name: KDriveResourcesStrings.Localizable.favoritesTitle,
+                                                        image: KDriveResourcesAsset.favorite.image,
+                                                        destinationFile: DriveFileManager.favoriteRootFile
+                                                    ),
+                                                    RootMenuItem(
+                                                        name: KDriveResourcesStrings.Localizable
+                                                            .lastEditsTitle,
+                                                        image: KDriveResourcesAsset.clock.image,
+                                                        destinationFile: DriveFileManager
+                                                            .lastModificationsRootFile
+                                                    ),
+                                                    RootMenuItem(
+                                                        name: KDriveResourcesStrings.Localizable
+                                                            .offlineFileTitle,
+                                                        image: KDriveResourcesAsset.availableOffline
+                                                            .image,
+                                                        destinationFile: DriveFileManager.offlineRoot
+                                                    )]
 
-    private static var secondSectionItems: [RootMenuItem] = [RootMenuItem(
-        name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
-        image: KDriveResourcesAsset.folderSelect2.image,
-        destinationFile: DriveFileManager.sharedWithMeRootFile
-    ),
-    RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
-                 image: KDriveResourcesAsset.folderSelect.image,
-                 destinationFile: DriveFileManager.mySharedRootFile)]
+    private static var secondSectionItems: [RootMenuItem] = [
+        RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+                     image: KDriveResourcesAsset.folderSelect2.image,
+                     destinationFile: DriveFileManager.sharedWithMeRootFile),
+        RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
+                     image: KDriveResourcesAsset.folderSelect.image,
+                     destinationFile: DriveFileManager.mySharedRootFile)
+    ]
 
-    private static var thirdSectionItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
-                                                                         image: KDriveResourcesAsset.favorite.image,
-                                                                         destinationFile: DriveFileManager.favoriteRootFile),
-                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
-                                                                         image: KDriveResourcesAsset.clock.image,
-                                                                         destinationFile: DriveFileManager
-                                                                             .lastModificationsRootFile),
-                                                            RootMenuItem(
-                                                                name: KDriveResourcesStrings.Localizable.offlineFileTitle,
-                                                                image: KDriveResourcesAsset.availableOffline.image,
-                                                                destinationFile: DriveFileManager.offlineRoot
-                                                            ),
-                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
+    private static var thirdSectionItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                          image: KDriveResourcesAsset.delete.image,
                                                                          destinationFile: DriveFileManager.trashRootFile)]
 
@@ -162,7 +170,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         configureDataSource()
 
-        let buttonAdd = UIButton(type: .system)
+        let buttonAdd = ImageButton()
         buttonAdd.setTitle(KDriveResourcesStrings.Localizable.buttonAdd, for: .normal)
         buttonAdd.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
         buttonAdd.setTitleColor(.white, for: .normal)
@@ -261,26 +269,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
         }
 
-//        dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
-//            let headerView = collectionView.dequeueReusableSupplementaryView(
-//                ofKind: UICollectionView.elementKindSectionHeader,
-//                withReuseIdentifier: "header",
-//                for: indexPath
-//            )
-//
-//            let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
-//
-//            switch section {
-//            case .one:
-//                headerView.largeContentTitle = "First Section"
-//            case .two:
-//                headerView.largeContentTitle = "Second Section"
-//            default:
-//                headerView.largeContentTitle = "Defaut"
-//            }
-//            return headerView
-//        }
-
         dataSource?.apply(itemsSnapshot, animatingDifferences: false)
     }
 
@@ -353,28 +341,32 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         }
 
-        let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
-        } ?? []
-        switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
-        case .main:
-            let menuItems = SidebarViewController.baseItems
-            let selectedItemName = menuItems[indexPath.row].name
-            delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-        case .one:
-            let length = (SidebarViewController.baseItems).count
-            let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                .secondSectionItems)
-            let selectedItemName = menuItems[indexPath.row + length].name
-            delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-        case .two:
-            let length = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                .secondSectionItems).count
-            let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                .secondSectionItems + SidebarViewController.thirdSectionItems)
-            let selectedItemName = menuItems[indexPath.row + length].name
-            delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
+        if indexPath != selectedIndexPath {
+            let userRootFolders = rootViewChildren?.compactMap {
+                RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
+            } ?? []
+            switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
+            case .main:
+                let menuItems = SidebarViewController.baseItems
+                let selectedItemName = menuItems[indexPath.row].name
+                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
+            case .one:
+                let length = (SidebarViewController.baseItems).count
+                let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
+                    .secondSectionItems)
+                let selectedItemName = menuItems[indexPath.row + length].name
+                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
+            case .two:
+                let length = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
+                    .secondSectionItems).count
+                let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
+                    .secondSectionItems + SidebarViewController.thirdSectionItems)
+                let selectedItemName = menuItems[indexPath.row + length].name
+                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
+            }
         }
+
+        selectedIndexPath = indexPath
     }
 
     @objc func buttonAddClicked() {
@@ -401,10 +393,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
-        delegate?.didSelectItem(
-            destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager),
-            name: KDriveResourcesStrings.Localizable.menuTitle
-        )
+        if selectedIndexPath != [-1, -1] {
+            selectedIndexPath = [-1, -1]
+            delegate?.didSelectItem(
+                destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager),
+                name: KDriveResourcesStrings.Localizable.menuTitle
+            )
+        }
     }
 }
 
