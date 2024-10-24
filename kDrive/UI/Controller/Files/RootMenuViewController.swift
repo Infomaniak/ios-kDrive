@@ -76,11 +76,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                  destinationFile: DriveFileManager.offlineRoot),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                  image: KDriveResourcesAsset.delete.image,
-                                                                 destinationFile: DriveFileManager.trashRootFile),
-                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.menuTitle,
-                                                                 image: generateProfileTabImages(image: KDriveResourcesAsset
-                                                                     .placeholderAvatar.image),
                                                                  destinationFile: DriveFileManager.trashRootFile)]
+//                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.menuTitle,
+//                                                                 image: generateProfileTabImages(image: KDriveResourcesAsset
+//                                                                     .placeholderAvatar.image),
+//                                                                 destinationFile: DriveFileManager.trashRootFile)]
 
     weak var delegate: SidebarViewControllerDelegate?
     @LazyInjectService private var accountManager: AccountManageable
@@ -138,7 +138,41 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         configureDataSource()
-        updateProfilePicture()
+//        updateProfilePicture()
+
+        let buttonAdd = UIButton(type: .system)
+        buttonAdd.setTitle("Ajouter", for: .normal)
+        buttonAdd.backgroundColor = .systemGreen
+        buttonAdd.setTitleColor(.white, for: .normal)
+        buttonAdd.layer.cornerRadius = 10
+        buttonAdd.translatesAutoresizingMaskIntoConstraints = false
+
+        let buttonMenu = UIButton(type: .custom)
+        accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+            buttonMenu
+                .setImage(SidebarViewController.generateProfileTabImages(image: image),
+                          for: .normal)
+            buttonMenu.translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        collectionView.addSubview(buttonAdd)
+        collectionView.addSubview(buttonMenu)
+        buttonAdd.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
+        buttonMenu.addTarget(self, action: #selector(buttonMenuClicked), for: .touchUpInside)
+
+        NSLayoutConstraint.activate([
+            buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 48),
+            buttonAdd.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+            buttonAdd.heightAnchor.constraint(equalToConstant: 50),
+            buttonAdd.widthAnchor.constraint(equalToConstant: 200)
+        ])
+
+        NSLayoutConstraint.activate([
+            buttonMenu.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -30),
+            buttonMenu.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            buttonMenu.widthAnchor.constraint(equalToConstant: 100),
+            buttonMenu.heightAnchor.constraint(equalToConstant: 100)
+        ])
 
         let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
@@ -179,6 +213,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             .withRenderingMode(.alwaysOriginal)
         return image
     }
+    
 
     func configureDataSource() {
         dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
@@ -303,6 +338,33 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let menuItems = (userRootFolders + SidebarViewController.baseItems).sorted { $0.priority > $1.priority }
         let selectedItemName = menuItems[indexPath.row].name
         delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
+    }
+
+    @objc func buttonAddClicked() {
+        let currentDriveFileManager = driveFileManager
+        let currentDirectory = (splitViewController?.viewController(for: .secondary) as? UINavigationController)?
+            .topViewController as? FileListViewController
+        let currentDirectoryOrRoot = currentDirectory?.viewModel.currentDirectory ?? driveFileManager.getCachedMyFilesRoot()
+        guard let currentDirectoryOrRoot else {
+            return
+        }
+        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+
+        let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
+            driveFileManager: currentDriveFileManager,
+            folder: currentDirectoryOrRoot
+        )
+
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = plusButtonFloatingPanel
+
+        floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
+        floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
+        present(floatingPanelViewController, animated: true)
+    }
+
+    @objc func buttonMenuClicked() {
+        delegate?.didSelectItem(destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager), name: KDriveResourcesStrings.Localizable.menuTitle)
     }
 }
 
