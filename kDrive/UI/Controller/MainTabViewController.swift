@@ -165,7 +165,7 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         if let detailNav = viewControllers.last as? UINavigationController {
             if name == KDriveResourcesStrings.Localizable.homeTitle {
                 detailNav.setViewControllers([homeViewController], animated: true)
-            } else if name == "Images" {
+            } else if name == KDriveResourcesStrings.Localizable.allPictures {
                 detailNav.setViewControllers([photoListViewController], animated: true)
             } else if name == KDriveResourcesStrings.Localizable.menuTitle {
                 detailNav.setViewControllers([menuViewController], animated: true)
