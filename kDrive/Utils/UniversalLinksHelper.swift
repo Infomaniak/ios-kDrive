@@ -117,15 +117,14 @@ enum UniversalLinksHelper {
     }
 
     private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation) async -> Bool {
+        @InjectService var appNavigable: AppNavigable
         switch limitation {
         case .passwordProtected:
             MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
-            @InjectService var appNavigable: AppNavigable
-            await appNavigable.presentPublicShareExpired()
+            await appNavigable.presentPublicShareLocked()
         case .expired:
             MatomoUtils.trackDeeplink(name: "publicShareExpired")
-            @InjectService var appNavigable: AppNavigable
-            await appNavigable.presentPublicShareLocked()
+            await appNavigable.presentPublicShareExpired()
         }
 
         return true

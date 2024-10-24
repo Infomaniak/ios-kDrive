@@ -16,11 +16,55 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
+import kDriveResources
 import UIKit
 
-class LockedFolderViewController: UIViewController {
+class LockedFolderViewController: BaseInfoViewController {
+    let openWebButton: IKLargeButton = {
+        let button = IKLargeButton(frame: .zero)
+        // TODO: i18n
+        button.setTitle("Open in Browser", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(openWebBrowser), for: .touchUpInside)
+        return button
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Locked Folder"
+
+        centerImageView.image = KDriveResourcesAsset.lockInfomaniak.image
+        titleLabel.text = "Protected content"
+        descriptionLabel.text = "Password-protected links are not yet available on the mobile app."
+
+        setupOpenWebButton()
+    }
+
+    private func setupOpenWebButton() {
+        view.addSubview(openWebButton)
+        view.bringSubviewToFront(openWebButton)
+
+        let leadingConstraint = openWebButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                                                       constant: 16)
+        leadingConstraint.priority = UILayoutPriority.defaultHigh
+        let trailingConstraint = openWebButton.trailingAnchor.constraint(
+            greaterThanOrEqualTo: view.trailingAnchor,
+            constant: -16
+        )
+        trailingConstraint.priority = UILayoutPriority.defaultHigh
+        let widthConstraint = openWebButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
+
+        NSLayoutConstraint.activate([
+            openWebButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            leadingConstraint,
+            trailingConstraint,
+            openWebButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            openWebButton.heightAnchor.constraint(equalToConstant: 60),
+            widthConstraint
+        ])
+    }
+    
+    @objc public func openWebBrowser() {
+        // dismiss(animated: true)
     }
 }

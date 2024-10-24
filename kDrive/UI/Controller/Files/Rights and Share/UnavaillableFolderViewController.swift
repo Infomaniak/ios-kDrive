@@ -16,11 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
-class UnavaillableFolderViewController: UIViewController {
+class UnavaillableFolderViewController: BaseInfoViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Content Unavailable"
+
+        centerImageView.image = KDriveResourcesAsset.ufo.image
+        titleLabel.text = "Content Unavailable"
+        descriptionLabel
+            .text =
+            "The link has been deactivated or has expired. To access the files, send a message to the user who shared the link with you to reactivate it."
     }
 }
