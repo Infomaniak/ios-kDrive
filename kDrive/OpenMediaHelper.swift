@@ -19,22 +19,34 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PhotosUI
 import Vision
 import VisionKit
 
-struct OpenMediaHelper {
-    var currentDirectory: File?
-    var driveFileManager: DriveFileManager
-    var photoPickerDelegate = PhotoPickerDelegate()
+class OpenMediaHelper: NSObject {
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var fileImportHelper: FileImportHelper
+
+    let currentDirectory: File?
+    let driveFileManager: DriveFileManager
+    let photoPickerDelegate = PhotoPickerDelegate()
 
     enum Media {
         case library, camera
     }
 
+    init(currentDirectory: File? = nil, driveFileManager: DriveFileManager) {
+        self.currentDirectory = currentDirectory
+        self.driveFileManager = driveFileManager
+        super.init()
+    }
+
     func openMedia(_ mainTabViewController: UIViewController, _ media: Media) {
+        photoPickerDelegate.viewController = mainTabViewController
         photoPickerDelegate.driveFileManager = driveFileManager
         photoPickerDelegate.currentDirectory = currentDirectory?.freezeIfNeeded()
 
@@ -47,7 +59,7 @@ struct OpenMediaHelper {
                         configuration.selectionLimit = 0
 
                         let picker = PHPickerViewController(configuration: configuration)
-                        picker.delegate = photoPickerDelegate
+                        picker.delegate = self.photoPickerDelegate
                         mainTabViewController.present(picker, animated: true)
                     }
                 } else {
@@ -108,5 +120,34 @@ struct OpenMediaHelper {
         }
         scanDoc.delegate = navigationViewController
         mainTabViewController.present(navigationViewController, animated: true)
+    }
+}
+
+extension OpenMediaHelper: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let documentPicker = controller as? DriveImportDocumentPickerViewController {
+            for url in urls {
+                let targetURL = fileImportHelper.generateImportURL(for: url.uti)
+
+                do {
+                    if FileManager.default.fileExists(atPath: targetURL.path) {
+                        try FileManager.default.removeItem(at: targetURL)
+                    }
+
+                    try FileManager.default.moveItem(at: url, to: targetURL)
+                    uploadQueue.saveToRealm(
+                        UploadFile(
+                            parentDirectoryId: documentPicker.importDriveDirectory.id,
+                            userId: accountManager.currentUserId,
+                            driveId: documentPicker.importDriveDirectory.driveId,
+                            url: targetURL,
+                            name: url.lastPathComponent
+                        )
+                    )
+                } catch {
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+                }
+            }
+        }
     }
 }
