@@ -205,7 +205,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         }
         dismiss(animated: true)
 
-        guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else {
+        guard let mainTabViewController = parent?.presentingViewController else {
             return
         }
 
@@ -244,15 +244,15 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
     // MARK: Actions
 
-    private func importAction(_ mainTabViewController: MainTabViewController) {
+    private func importAction(_ mainTabViewController: UIViewController) {
         let documentPicker = DriveImportDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
         documentPicker.importDrive = driveFileManager.drive
         documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
-        documentPicker.delegate = mainTabViewController
+//        documentPicker.delegate = mainTabViewController
         mainTabViewController.present(documentPicker, animated: true)
     }
 
-    private func folderAction(_ mainTabViewController: MainTabViewController) {
+    private func folderAction(_ mainTabViewController: UIViewController) {
         let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
             parentDirectory: currentDirectory,
             driveFileManager: driveFileManager
@@ -260,7 +260,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         mainTabViewController.present(newFolderViewController, animated: true)
     }
 
-    private func scanAction(_ mainTabViewController: MainTabViewController) {
+    private func scanAction(_ mainTabViewController: UIViewController) {
         guard VNDocumentCameraViewController.isSupported else {
             DDLogError("VNDocumentCameraViewController is not supported on this device")
             return
@@ -277,12 +277,12 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         mainTabViewController.present(navigationViewController, animated: true)
     }
 
-    private func mediaAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
+    private func mediaAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {
         let openMediaHelper = OpenMediaHelper(currentDirectory: currentDirectory, driveFileManager: driveFileManager)
         openMediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
     }
 
-    private func documentAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
+    private func documentAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {
         let alertViewController = AlertDocViewController(fileType: action.docType,
                                                          directory: currentDirectory.freezeIfNeeded(),
                                                          driveFileManager: driveFileManager)
