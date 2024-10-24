@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -103,26 +104,29 @@ enum UniversalLinksHelper {
                 apiFetcher: apiFetcher
             )
         } catch {
-            return await processPublicShareMetadataError(error)
+            guard let apiError = error as? ApiError else {
+                return false
+            }
+
+            guard let limitation = PublicShareLimitation(rawValue: apiError.code) else {
+                return false
+            }
+
+            return await processPublicShareMetadataLimitation(limitation)
         }
     }
 
-    private static func processPublicShareMetadataError(_ error: Error) async -> Bool {
-        @InjectService var accountManager: AccountManageable
-
-        print("•• woops \(error)")
-        // TODO: Switch on error
-//        if isPasswordNeeded {
-        MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
-        @InjectService var appNavigable: AppNavigable
-        await appNavigable.presentPublicShareExpired()
-//        }
-
-//        if .isExpired {
-//            MatomoUtils.trackDeeplink(name: "publicShareExpired")
-//            @InjectService var appNavigable: AppNavigable
-//            await appNavigable.presentPublicShareLocked()
-//        }
+    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation) async -> Bool {
+        switch limitation {
+        case .passwordProtected:
+            MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
+            @InjectService var appNavigable: AppNavigable
+            await appNavigable.presentPublicShareExpired()
+        case .expired:
+            MatomoUtils.trackDeeplink(name: "publicShareExpired")
+            @InjectService var appNavigable: AppNavigable
+            await appNavigable.presentPublicShareLocked()
+        }
 
         return true
     }
