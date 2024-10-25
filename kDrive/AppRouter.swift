@@ -184,57 +184,14 @@ public struct AppRouter: AppNavigable {
         }
 
         Task { @MainActor in
-            guard restoration, let tabBarViewController else {
+            guard restoration else {
                 return
             }
 
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
-                  let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
+                  SceneRestorationScreens(rawValue: lastViewControllerString) != nil else {
                 return
-            }
-
-            guard let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-                  previousDriveId == driveFileManager.drive.id else {
-                Log.sceneDelegate("driveId do not match for restore :\(sceneUserInfo)", level: .error)
-                return
-            }
-
-            let selectedIndex = tabBarViewController.selectedIndex
-            let viewControllers = tabBarViewController.viewControllers
-            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
-                Log.sceneDelegate("unable to access navigationController", level: .error)
-                return
-            }
-
-            switch lastViewController {
-            case .FileDetailViewController:
-                await restoreFileDetailViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .FileListViewController:
-                await restoreFileListViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .PreviewViewController:
-                await restorePreviewViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
-
-            case .StoreViewController:
-                await restoreStoreViewController(
-                    driveFileManager: driveFileManager,
-                    navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
-                )
             }
         }
     }
@@ -815,7 +772,7 @@ public struct AppRouter: AppNavigable {
                 navController.popToRootViewController(animated: false)
             }
 
-            guard let rootMenuViewController = navController.topViewController as? RootMenuViewController else {
+            guard let rootMenuViewController = navController.topViewController as? SidebarViewController else {
                 return
             }
 
