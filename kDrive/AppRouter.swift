@@ -585,7 +585,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
-    @MainActor public func presentPublicShareLocked() {
+    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
         guard let window,
               let rootViewController = window.rootViewController else {
             fatalError("TODO: lazy load a rootViewController")
@@ -598,6 +598,7 @@ public struct AppRouter: AppNavigable {
 
         rootViewController.dismiss(animated: false) {
             let viewController = LockedFolderViewController()
+            viewController.destinationURL = destinationURL
             let publicShareNavigationController = UINavigationController(rootViewController: viewController)
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical

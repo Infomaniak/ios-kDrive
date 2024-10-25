@@ -21,19 +21,14 @@ import kDriveResources
 import UIKit
 
 class LockedFolderViewController: BaseInfoViewController {
-    let openWebButton: IKLargeButton = {
-        let button = IKLargeButton(frame: .zero)
-        // TODO: i18n
-        button.setTitle("Open in Browser", for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(openWebBrowser), for: .touchUpInside)
-        return button
-    }()
+    var destinationURL: URL?
+
+    let openWebButton = IKLargeButton(frame: .zero)
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        centerImageView.image = KDriveResourcesAsset.lockInfomaniak.image
+        centerImageView.image = KDriveResourcesAsset.lockExternal.image
         titleLabel.text = "Protected content"
         descriptionLabel.text = "Password-protected links are not yet available on the mobile app."
 
@@ -41,6 +36,11 @@ class LockedFolderViewController: BaseInfoViewController {
     }
 
     private func setupOpenWebButton() {
+        // TODO: i18n
+        openWebButton.setTitle("Open in Browser", for: .normal)
+        openWebButton.translatesAutoresizingMaskIntoConstraints = false
+        openWebButton.addTarget(self, action: #selector(openWebBrowser), for: .touchUpInside)
+
         view.addSubview(openWebButton)
         view.bringSubviewToFront(openWebButton)
 
@@ -63,8 +63,12 @@ class LockedFolderViewController: BaseInfoViewController {
             widthConstraint
         ])
     }
-    
+
     @objc public func openWebBrowser() {
-        // dismiss(animated: true)
+        guard let destinationURL else {
+            return
+        }
+
+        UIApplication.shared.open(destinationURL)
     }
 }

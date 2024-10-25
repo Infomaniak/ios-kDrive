@@ -110,8 +110,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             // a public share password protected
             let somePublicShare = URL(string: "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
 
-            let components = URLComponents(url: somePublicShare!, resolvingAgainstBaseURL: true)
-            await UniversalLinksHelper.handlePath(components!.path)
+            await UniversalLinksHelper.handleURL(somePublicShare!)
         }
 
         return true

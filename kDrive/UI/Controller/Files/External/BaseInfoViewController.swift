@@ -45,13 +45,34 @@ class BaseInfoViewController: UIViewController {
         return imageView
     }()
 
+    let closeButton: IKButton = {
+        let button = IKButton()
+        button.setImage(UIImage(named: "close"), for: .normal)
+        return button
+    }()
+
     let containerView = UIView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        setupCloseButton()
+        setupBody()
+    }
 
+    private func setupCloseButton() {
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(closeButton)
+
+        closeButton.addTarget(self, action: #selector(closeButtonPressed), for: .touchUpInside)
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
+            closeButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 25)
+        ])
+    }
+
+    private func setupBody() {
         containerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(containerView)
         NSLayoutConstraint.activate([

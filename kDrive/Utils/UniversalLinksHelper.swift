@@ -63,13 +63,19 @@ enum UniversalLinksHelper {
     }
 
     @discardableResult
-    static func handlePath(_ path: String) async -> Bool {
+    static func handleURL(_ url: URL) async -> Bool {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            DDLogError("[UniversalLinksHelper] Failed to process url:\(url)")
+            return false
+        }
+
+        let path = components.path
         DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
         // Public share link regex
         let shareLink = Link.publicShareLink
         let matches = shareLink.regex.matches(in: path)
-        if await processPublicShareLink(matches: matches, displayMode: shareLink.displayMode) {
+        if await processPublicShareLink(matches: matches, displayMode: shareLink.displayMode, publicShareURL: url) {
             return true
         }
 
@@ -85,7 +91,7 @@ enum UniversalLinksHelper {
         return false
     }
 
-    private static func processPublicShareLink(matches: [[String]], displayMode: DisplayMode) async -> Bool {
+    private static func processPublicShareLink(matches: [[String]], displayMode: DisplayMode, publicShareURL: URL) async -> Bool {
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
@@ -112,16 +118,20 @@ enum UniversalLinksHelper {
                 return false
             }
 
-            return await processPublicShareMetadataLimitation(limitation)
+            return await processPublicShareMetadataLimitation(limitation, publicShareURL: publicShareURL)
         }
     }
 
-    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation) async -> Bool {
+    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
+                                                             publicShareURL: URL?) async -> Bool {
         @InjectService var appNavigable: AppNavigable
         switch limitation {
         case .passwordProtected:
+            guard let publicShareURL else {
+                return false
+            }
             MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
-            await appNavigable.presentPublicShareLocked()
+            await appNavigable.presentPublicShareLocked(publicShareURL)
         case .expired:
             MatomoUtils.trackDeeplink(name: "publicShareExpired")
             await appNavigable.presentPublicShareExpired()
