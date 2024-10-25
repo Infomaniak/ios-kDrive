@@ -30,9 +30,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private var selectedIndexPath: IndexPath?
 
     private enum RootMenuSection {
-        case main
-        case one
-        case two
+        case first
+        case second
+        case third
     }
 
     private struct RootMenuItem: Equatable, Hashable {
@@ -113,19 +113,23 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         } ?? []
 
-//        var menuItems = (userRootFolders + SidebarViewController.baseItems).sorted { $0.priority > $1.priority }
-//        if !menuItems.isEmpty {
-//            menuItems[0].isFirst = true
-//            menuItems[menuItems.count - 1].isLast = true
-//        }
-
         var snapshot = DataSourceSnapshot()
-        snapshot.appendSections([RootMenuSection.main])
-        snapshot.appendSections([RootMenuSection.one])
-        snapshot.appendSections([RootMenuSection.two])
-        snapshot.appendItems(SidebarViewController.baseItems, toSection: RootMenuSection.main)
-        snapshot.appendItems(userRootFolders + SidebarViewController.secondSectionItems, toSection: RootMenuSection.one)
-        snapshot.appendItems(SidebarViewController.thirdSectionItems, toSection: RootMenuSection.two)
+
+        let firstSectionItems = SidebarViewController.baseItems
+        let secondSectionItems = userRootFolders + SidebarViewController.secondSectionItems
+        let thirdSectionItems = SidebarViewController.thirdSectionItems
+        var sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
+        var sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
+
+        for i in 0 ... sectionsItems.count - 1 {
+            if !sections.isEmpty {
+                sectionsItems[i][0].isFirst = true
+                sectionsItems[i][sectionsItems[i].count - 1].isLast = true
+
+                snapshot.appendSections([sections[i]])
+                snapshot.appendItems(sectionsItems[i], toSection: sections[i])
+            }
+        }
 
         return snapshot
     }
@@ -351,17 +355,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
             } ?? []
             switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
-            case .main:
+            case .first:
                 let menuItems = SidebarViewController.baseItems
                 let selectedItemName = menuItems[indexPath.row].name
                 delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-            case .one:
+            case .second:
                 let length = (SidebarViewController.baseItems).count
                 let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
                     .secondSectionItems)
                 let selectedItemName = menuItems[indexPath.row + length].name
                 delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-            case .two:
+            case .third:
                 let length = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
                     .secondSectionItems).count
                 let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
