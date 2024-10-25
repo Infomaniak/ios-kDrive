@@ -164,13 +164,13 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         let menuViewController = MenuViewController(driveFileManager: driveFileManager)
         if let detailNav = viewControllers.last as? UINavigationController {
             if name == KDriveResourcesStrings.Localizable.homeTitle {
-                detailNav.setViewControllers([homeViewController], animated: true)
+                detailNav.setViewControllers([homeViewController], animated: false)
             } else if name == KDriveResourcesStrings.Localizable.allPictures {
-                detailNav.setViewControllers([photoListViewController], animated: true)
+                detailNav.setViewControllers([photoListViewController], animated: false)
             } else if name == KDriveResourcesStrings.Localizable.menuTitle {
-                detailNav.setViewControllers([menuViewController], animated: true)
+                detailNav.setViewControllers([menuViewController], animated: false)
             } else {
-                detailNav.setViewControllers([destinationViewController], animated: true)
+                detailNav.setViewControllers([destinationViewController], animated: false)
             }
         }
     }

@@ -171,6 +171,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         configureDataSource()
 
         let buttonAdd = ImageButton()
+        buttonAdd.setImage(KDriveResourcesAsset.plus.image, for: .normal)
+        buttonAdd.tintColor = .white
+        buttonAdd.imageWidth = 18
+        buttonAdd.imageHeight = 18
+        buttonAdd.imageSpacing = 20
         buttonAdd.setTitle(KDriveResourcesStrings.Localizable.buttonAdd, for: .normal)
         buttonAdd.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
         buttonAdd.setTitleColor(.white, for: .normal)
