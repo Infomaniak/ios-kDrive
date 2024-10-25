@@ -348,6 +348,12 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system.git",
       "state" : {
+      }
+    },
+    {
+      "identity" : "swiftbackports",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/shaps80/SwiftBackports",
         "revision" : "c8a44d836fe7913603e246acab7c528c2e780168",
         "version" : "1.4.0"
       }
@@ -356,6 +362,9 @@
       "identity" : "swiftbackports",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/shaps80/SwiftBackports",
+      "state" : {
+        "revision" : "ddca6a237c1ba2291d5a3cc47ec8480ce6e9f805",
+        "version" : "1.0.3"
       "state" : {
         "revision" : "ddca6a237c1ba2291d5a3cc47ec8480ce6e9f805",
         "version" : "1.0.3"
