@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fr, French
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Fri, 25 Oct 2024 11:47:50 +0200
+ * Exported by: Matthieu Déglon
+ * Exported at: Thu, 03 Oct 2024 08:22:20 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -376,9 +376,6 @@
 /* loco:6075c0bb65160c29997c5e32 */
 "buttonOpenDocument" = "Ouvrir le document";
 
-/* loco:66dfe78b7da115a16c0733e2 */
-"buttonOpenInBrowser" = "Ouvrir dans le navigateur";
-
 /* loco:607948379bda7f7df0121872 */
 "buttonOpenReadOnly" = "Ouvrir en lecture seule";
 
@@ -712,15 +709,6 @@
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Boîte de dépôt";
 
-/* loco:6708c590f8f4d36ec100ef42 */
-"dropboxPublicShareOutdatedDescription" = "Le lien a été désactivé ou a expiré.\nPour déposer vos fichiers, envoyez un message à l’utilisateur qui vous a partagé la boîte de dépôt pour qu’il la réactive";
-
-/* loco:6708c5155b4785a798019472 */
-"dropboxPublicShareOutdatedTitle" = "Cette boîte de dépôt n’est plus disponible";
-
-/* loco:6707c8d16e460cb6a304b692 */
-"dropboxPublicShareTitleUploadButton" = "%@ vous invite à importer vos fichiers sur son kDrive";
-
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "Vous ne pouvez pas créer un lien de partage sur une boite de dépôt.";
 
@@ -755,7 +743,7 @@
 "errorDelete" = "Erreur lors de la suppression";
 
 /* loco:60a693f631a0a90e163445f2 */
-"errorDeviceStorage" = "Stockage insuffisant";
+"errorDeviceStorage" = "Stockage insuffisant de l’appareil";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "Une erreur s’est produite. Veuillez vous reconnecter pour continuer.";
@@ -768,9 +756,6 @@
 
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Erreur lors de la duplication";
-
-/* loco:6708ec44807fa34749094072 */
-"errorExternalImportInProgress" = "Impossible d’effectuer l’action sur le dossier, une importation externe est en cours";
 
 /* loco:605cacde72147f269369e484 */
 "errorFileAlreadyExists" = "Le fichier ou le dossier existe déjà";
@@ -816,9 +801,6 @@
 
 /* loco:6049df4d5c2c3a04bc3979a1 */
 "errorPreviewTrash" = "L’aperçu d’un fichier dans la corbeille n’est pas disponible";
-
-/* loco:6708e538df700f157c09c833 */
-"errorQuotaExceeded" = "Espace insuffisant sur votre kDrive";
 
 /* loco:6049df4d5c2c3a04bc3979a2 */
 "errorRename" = "Erreur lors du renommage";
@@ -1493,7 +1475,7 @@
 "notificationFileUpload" = "Importation des fichiers";
 
 /* loco:604b9caa43ed563ca07293f2 */
-"notificationGeneralChannelName" = "Notifications générales";
+"notificationGeneralChannelName" = "Notification générales";
 
 /* loco:6049df4d5c2c3a04bc397a13 */
 "notificationReceiveNotifications" = "Recevoir des notifications";
@@ -1515,27 +1497,6 @@
 
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "Service d’importation de fichier";
-
-/* loco:66f658cbb0e522d4f50cc2f2 */
-"obtainkDriveAdAlreadyGotAccount" = "J’ai déjà un compte";
-
-/* loco:66f64e66297dda6eb402f022 */
-"obtainkDriveAdDescription" = "Stockez vos photos, documents et e-mails en Suisse auprès d’une entreprise indépendante qui respecte la vie privée.";
-
-/* loco:66f657511dc417a794017b92 */
-"obtainkDriveAdFreeTrialButton" = "Tester gratuitement";
-
-/* loco:66f64fa849bd6bdd0f0ae622 */
-"obtainkDriveAdListing1" = "15 Go gratuit, puis de 2 To jusqu’à 106 To";
-
-/* loco:66f65063f4b00a1c660ce462 */
-"obtainkDriveAdListing2" = "Création et collaboration en ligne de documents Word, Excel et PowerPoint";
-
-/* loco:66f651361a641d2f5f0207d2 */
-"obtainkDriveAdListing3" = "Import automatique de vos fichiers depuis Google Drive, Dropbox, One Drive, NextCloud, Hubic et WebDav";
-
-/* loco:66f64797fdc443552a0a5e92 */
-"obtainkDriveAdTitle" = "Obtenez kDrive gratuitement";
 
 /* loco:6049df4d5c2c3a04bc397a19 */
 "offlineFileNoFile" = "Aucun fichier hors ligne";
@@ -1602,30 +1563,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "Fichier vidéo non pris en charge par le lecteur vidéo";
-
-/* loco:6707af761017cac6e10d85b4 */
-"publicShareBadLinkError" = "Aucun partage associé à ce lien";
-
-/* loco:66ffbbcd294f6022e60948f3 */
-"publicShareImportationInProgress" = "Téléchargement en cours dans le dossier sélectionné";
-
-/* loco:6707ca3c9b41ff114e052962 */
-"publicShareLinkValidityDescription" = "Ce lien est valable jusqu’au %@";
-
-/* loco:66e0295f01da3c1ab90c2d72 */
-"publicShareOutdatedLinkDescription" = "Le lien a été désactivé ou a expiré.\nPour accéder aux fichiers, envoyez un message à l’utilisateur qui vous a partagé le lien pour qu’il le réactive.";
-
-/* loco:66e028cb3cd41df03c0a7003 */
-"publicShareOutdatedLinkTitle" = "Les fichiers ne sont plus disponibles";
-
-/* loco:66d05b05fe43da3cb8009652 */
-"publicSharePasswordNeededDescription" = "Veuillez saisir le mot de passe qui vous a été fourni pour accéder au contenu.";
-
-/* loco:66d05b5928ec407b32087892 */
-"publicSharePasswordNeededTitle" = "Contenu sécurisé";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Les liens protégés par mot de passe ne sont pas encore disponibles sur l’application mobile.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Lien de partage public";
@@ -2002,12 +1939,6 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Sauvegardez vos souvenirs en lieu sûr";
 
-/* loco:66f50ff53251a55b2f0f1532 */
-"syncOnlyWifiDescription" = "Les fichiers hors ligne ne seront synchronisés qu’avec le Wi-Fi";
-
-/* loco:66f50e357d4c318d780a5bd2 */
-"syncOnlyWifiTitle" = "Avec Wi-Fi uniquement";
-
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Activer la sauvegarde automatique";
 
@@ -2067,18 +1998,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Sauvegarde des photos";
-
-/* loco:66f51084cb6715272c0b5762 */
-"syncWifiAndMobileDataDescription" = "Des frais d’utilisation de données mobiles peuvent s’appliquer";
-
-/* loco:66f50ef81220705fc30d60a2 */
-"syncWifiAndMobileDataTitle" = "Avec Wi-Fi et données mobiles";
-
-/* loco:66f51f3fa1ad831cda076d52 */
-"syncWifiPicturesTitle" = "Synchroniser les photos et les vidéos";
-
-/* loco:66f5115224f82ae9020b3162 */
-"syncWifiSettingsTitle" = "Synchroniser des fichiers hors ligne";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Fichiers temporaires";
@@ -2217,9 +2136,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "En attente de réseau Wi-Fi";
-
-/* loco:66fbba74682fe9a0990df012 */
-"uploadOverDataRestrictedError" = "En attente de Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Des importations sont toujours en cours dans kDrive. Ouvrez l’app et gardez l’appareil branché pour accélérer l’upload.";
