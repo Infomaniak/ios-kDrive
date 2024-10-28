@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Fri, 25 Oct 2024 11:47:50 +0200
+ * Exported by: Matthieu Déglon
+ * Exported at: Thu, 03 Oct 2024 08:22:20 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -376,9 +376,6 @@
 /* loco:6075c0bb65160c29997c5e32 */
 "buttonOpenDocument" = "Abrir el documento";
 
-/* loco:66dfe78b7da115a16c0733e2 */
-"buttonOpenInBrowser" = "Abrir en el navegador";
-
 /* loco:607948379bda7f7df0121872 */
 "buttonOpenReadOnly" = "Abrir en modo de solo lectura";
 
@@ -712,15 +709,6 @@
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Buzón de depósito";
 
-/* loco:6708c590f8f4d36ec100ef42 */
-"dropboxPublicShareOutdatedDescription" = "El enlace se ha desactivado o ha caducado.\nPara subir tus archivos, envía un mensaje al usuario que compartió el dropbox contigo para que pueda reactivarlo.";
-
-/* loco:6708c5155b4785a798019472 */
-"dropboxPublicShareOutdatedTitle" = "Este dropbox ya no está disponible";
-
-/* loco:6707c8d16e460cb6a304b692 */
-"dropboxPublicShareTitleUploadButton" = "%@ te invita a importar tus archivos a su kDrive";
-
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "No puedes crear un enlace de uso compartido para un buzón de depósito.";
 
@@ -769,9 +757,6 @@
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Error al duplicar";
 
-/* loco:6708ec44807fa34749094072 */
-"errorExternalImportInProgress" = "No se puede realizar ninguna acción en la carpeta porque hay una importación externa en curso";
-
 /* loco:605cacde72147f269369e484 */
 "errorFileAlreadyExists" = "Archivo o carpeta ya existente";
 
@@ -816,9 +801,6 @@
 
 /* loco:6049df4d5c2c3a04bc3979a1 */
 "errorPreviewTrash" = "La vista previa de un archivo en la papelera no está disponible";
-
-/* loco:6708e538df700f157c09c833 */
-"errorQuotaExceeded" = "Espacio insuficiente en tu kDrive";
 
 /* loco:6049df4d5c2c3a04bc3979a2 */
 "errorRename" = "Error al cambiar el nombre";
@@ -1516,27 +1498,6 @@
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "Servicio de importación de archivos";
 
-/* loco:66f658cbb0e522d4f50cc2f2 */
-"obtainkDriveAdAlreadyGotAccount" = "Ya tengo una cuenta";
-
-/* loco:66f64e66297dda6eb402f022 */
-"obtainkDriveAdDescription" = "Almacene sus fotos, documentos y correos electrónicos en Suiza con una empresa independiente que respeta su privacidad.";
-
-/* loco:66f657511dc417a794017b92 */
-"obtainkDriveAdFreeTrialButton" = "Prueba gratuita";
-
-/* loco:66f64fa849bd6bdd0f0ae622 */
-"obtainkDriveAdListing1" = "15 GB gratuitos, luego 2 TB hasta 106 TB";
-
-/* loco:66f65063f4b00a1c660ce462 */
-"obtainkDriveAdListing2" = "Creación y colaboración en línea de documentos Word, Excel y PowerPoint";
-
-/* loco:66f651361a641d2f5f0207d2 */
-"obtainkDriveAdListing3" = "Importación automática de tus archivos desde Google Drive, Dropbox, One Drive, NextCloud, Hubic y WebDav";
-
-/* loco:66f64797fdc443552a0a5e92 */
-"obtainkDriveAdTitle" = "Consigue kDrive gratis";
-
 /* loco:6049df4d5c2c3a04bc397a19 */
 "offlineFileNoFile" = "No hay archivos sin conexión";
 
@@ -1602,30 +1563,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "El archivo de vídeo no es compatible con el lector de vídeo";
-
-/* loco:6707af761017cac6e10d85b4 */
-"publicShareBadLinkError" = "No hay compartir asociadas a este enlace";
-
-/* loco:66ffbbcd294f6022e60948f3 */
-"publicShareImportationInProgress" = "Descarga en curso en la carpeta seleccionada";
-
-/* loco:6707ca3c9b41ff114e052962 */
-"publicShareLinkValidityDescription" = "Este enlace es válido hasta el %@";
-
-/* loco:66e0295f01da3c1ab90c2d72 */
-"publicShareOutdatedLinkDescription" = "El enlace ha sido desactivado o ha caducado.\nPara acceder a los archivos, envía un mensaje al usuario que compartió el enlace contigo para que pueda reactivarlo.";
-
-/* loco:66e028cb3cd41df03c0a7003 */
-"publicShareOutdatedLinkTitle" = "Los archivos ya no están disponibles";
-
-/* loco:66d05b05fe43da3cb8009652 */
-"publicSharePasswordNeededDescription" = "Introduzca la contraseña que se le ha facilitado para acceder al contenido.";
-
-/* loco:66d05b5928ec407b32087892 */
-"publicSharePasswordNeededTitle" = "Contenido seguro";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Enlace de uso compartido público";
@@ -2002,12 +1939,6 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Haz copia de seguridad de tus recuerdos en un lugar seguro";
 
-/* loco:66f50ff53251a55b2f0f1532 */
-"syncOnlyWifiDescription" = "Los archivos sin conexión sólo se sincronizarán con Wi-Fi";
-
-/* loco:66f50e357d4c318d780a5bd2 */
-"syncOnlyWifiTitle" = "Sólo con Wi-Fi";
-
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Activar la copia de seguridad automática";
 
@@ -2067,18 +1998,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Copia de seguridad de las fotos";
-
-/* loco:66f51084cb6715272c0b5762 */
-"syncWifiAndMobileDataDescription" = "Pueden aplicarse tarifas por uso de datos móviles";
-
-/* loco:66f50ef81220705fc30d60a2 */
-"syncWifiAndMobileDataTitle" = "Con Wi-Fi y datos móviles";
-
-/* loco:66f51f3fa1ad831cda076d52 */
-"syncWifiPicturesTitle" = "Sincronizar fotos y vídeos";
-
-/* loco:66f5115224f82ae9020b3162 */
-"syncWifiSettingsTitle" = "Sincronizar archivos sin conexión";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Archivos temporales";
@@ -2217,9 +2136,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "A la espera de red WiFi";
-
-/* loco:66fbba74682fe9a0990df012 */
-"uploadOverDataRestrictedError" = "A la espera de Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Algunas subidas siguen en curso en kDrive. Abre la aplicación y mantén el dispositivo conectado para acelerar la carga.";
