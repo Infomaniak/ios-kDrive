@@ -26,7 +26,7 @@ import Kingfisher
 /// Server can notify us of publicShare limitations.
 public enum PublicShareLimitation: String {
     case passwordProtected = "password_not_valid"
-    case expired // TODO:
+    case expired = "link_is_not_valid"
 }
 
 public class PublicShareApiFetcher: ApiFetcher {
