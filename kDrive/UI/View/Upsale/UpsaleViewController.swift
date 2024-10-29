@@ -22,7 +22,6 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
-
     let titleImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -34,7 +33,7 @@ public class UpsaleViewController: UIViewController {
         let label = UILabel()
         // Some factorisation can be done in kDrive
         label.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
-        label.textColor = KDriveResourcesAsset.primaryTextColor.color
+        label.textColor = KDriveResourcesAsset.titleColor.color
         label.numberOfLines = 1
         label.textAlignment = .center
         label.text = KDriveStrings.Localizable.obtainkDriveAdTitle
@@ -44,7 +43,7 @@ public class UpsaleViewController: UIViewController {
     let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = KDriveResourcesAsset.secondaryTextColor.color
+        label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
         label.text = KDriveStrings.Localizable.obtainkDriveAdDescription
@@ -58,9 +57,13 @@ public class UpsaleViewController: UIViewController {
         return button
     }()
 
-    let loginButton: IKLargeButton = {
+    let dismissButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        button.setTitle(KDriveStrings.Localizable.buttonLogin, for: .normal)
+        // TODO: Check secondary is white not grey
+//        button.style = .secondaryButton
+        button.backgroundColor = .lightGray
+        // TODO: Dynamic switch to .buttonLogin
+        button.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
         button.addTarget(self, action: #selector(login), for: .touchUpInside)
         return button
     }()
@@ -94,27 +97,21 @@ public class UpsaleViewController: UIViewController {
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         bulletPointsView.translatesAutoresizingMaskIntoConstraints = false
         freeTrialButton.translatesAutoresizingMaskIntoConstraints = false
-        loginButton.translatesAutoresizingMaskIntoConstraints = false
-
-        // TODO: remove
-        containerView.backgroundColor = .purple
-        titleLabel.backgroundColor = .blue
-        descriptionLabel.backgroundColor = .green
-        bulletPointsView.backgroundColor = .yellow
+        dismissButton.translatesAutoresizingMaskIntoConstraints = false
 
         containerView.addSubview(titleLabel)
         containerView.addSubview(descriptionLabel)
         containerView.addSubview(bulletPointsView)
         containerView.addSubview(titleImageView)
         containerView.addSubview(freeTrialButton)
-        containerView.addSubview(loginButton)
+        containerView.addSubview(dismissButton)
 
         let views = ["titleLabel": titleLabel,
                      "descriptionLabel": descriptionLabel,
                      "titleImageView": titleImageView,
                      "bulletPointsView": bulletPointsView,
                      "freeTrialButton": freeTrialButton,
-                     "loginButton": loginButton]
+                     "loginButton": dismissButton]
 
         let verticalConstraints = NSLayoutConstraint
             .constraints(
@@ -133,9 +130,9 @@ public class UpsaleViewController: UIViewController {
             bulletPointsView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             bulletPointsView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -8),
             freeTrialButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            freeTrialButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -8),
-            loginButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            loginButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -8)
+            freeTrialButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -24),
+            dismissButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            dismissButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -24)
         ]
 
         NSLayoutConstraint.activate(verticalConstraints)
@@ -180,8 +177,6 @@ public class UpsaleViewController: UIViewController {
     }
 
     private func layoutBulletPointView(txt: String, container: UIView) {
-        container.backgroundColor = .orange
-
         let label = UILabel()
         let bullet = UIImageView()
 
@@ -198,9 +193,6 @@ public class UpsaleViewController: UIViewController {
         container.addSubview(label)
         container.addSubview(bullet)
 
-        // TODO: remove
-        label.backgroundColor = .purple
-
         let verticalConstraints = [
             label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             label.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 1),
@@ -212,7 +204,7 @@ public class UpsaleViewController: UIViewController {
         let views = ["label": label, "bullet": bullet]
 
         let horizontalConstraints = NSLayoutConstraint
-            .constraints(withVisualFormat: "H:|-[bullet]-[label]-8-|",
+            .constraints(withVisualFormat: "H:|-[bullet]-16-[label]-|",
                          metrics: nil,
                          views: views)
 
