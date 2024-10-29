@@ -344,7 +344,6 @@ class FileListViewModel: SelectDelegate {
 
     func didSelectFile(at indexPath: IndexPath) {
         guard let file: File = getFile(at: indexPath) else { return }
-
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             return
         }
