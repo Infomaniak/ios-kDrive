@@ -24,9 +24,7 @@ class UnavaillableFolderViewController: BaseInfoViewController {
         super.viewDidLoad()
 
         centerImageView.image = KDriveResourcesAsset.ufo.image
-        titleLabel.text = "Content Unavailable"
-        descriptionLabel
-            .text =
-            "The link has been deactivated or has expired. To access the files, send a message to the user who shared the link with you to reactivate it."
+        titleLabel.text = KDriveStrings.Localizable.dropboxPublicShareOutdatedTitle
+        descriptionLabel.text = KDriveStrings.Localizable.dropboxPublicShareOutdatedDescription
     }
 }

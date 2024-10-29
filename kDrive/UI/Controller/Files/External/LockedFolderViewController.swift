@@ -29,15 +29,14 @@ class LockedFolderViewController: BaseInfoViewController {
         super.viewDidLoad()
 
         centerImageView.image = KDriveResourcesAsset.lockExternal.image
-        titleLabel.text = "Protected content"
-        descriptionLabel.text = "Password-protected links are not yet available on the mobile app."
+        titleLabel.text = KDriveCoreStrings.Localizable.publicSharePasswordNeededTitle
+        descriptionLabel.text = KDriveCoreStrings.Localizable.publicSharePasswordNotSupportedDescription
 
         setupOpenWebButton()
     }
 
     private func setupOpenWebButton() {
-        // TODO: i18n
-        openWebButton.setTitle("Open in Browser", for: .normal)
+        openWebButton.setTitle(KDriveCoreStrings.Localizable.buttonOpenInBrowser, for: .normal)
         openWebButton.translatesAutoresizingMaskIntoConstraints = false
         openWebButton.addTarget(self, action: #selector(openWebBrowser), for: .touchUpInside)
 
