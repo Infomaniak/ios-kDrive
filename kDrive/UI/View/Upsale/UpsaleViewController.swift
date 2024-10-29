@@ -22,14 +22,6 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
-    // i18n keys
-    let gotAccount = "obtainkDriveAdAlreadyGotAccount"
-    let description_ = "obtainkDriveAdDescription"
-    let freeTrial_ = "obtainkDriveAdFreeTrialButton"
-    let adListing1 = "obtainkDriveAdListing1"
-    let adListing2 = "obtainkDriveAdListing2"
-    let adlisting3 = "obtainkDriveAdListing3"
-    let obtainDriveTitle = "obtainkDriveAdTitle"
 
     let titleImageView: UIImageView = {
         let imageView = UIImageView()
@@ -40,11 +32,12 @@ public class UpsaleViewController: UIViewController {
 
     let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .headline)
+        // Some factorisation can be done in kDrive
+        label.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
         label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 1
         label.textAlignment = .center
-        label.text = "Get kDrive" // TODO: i18n
+        label.text = KDriveStrings.Localizable.obtainkDriveAdTitle
         return label
     }()
 
@@ -54,20 +47,20 @@ public class UpsaleViewController: UIViewController {
         label.textColor = KDriveResourcesAsset.secondaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        label.text = KDriveStrings.Localizable.obtainkDriveAdDescription
         return label
     }()
 
     let freeTrialButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        button.setTitle("Free trial", for: .normal)
+        button.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
         button.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
         return button
     }()
 
     let loginButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        button.setTitle("Login", for: .normal)
+        button.setTitle(KDriveStrings.Localizable.buttonLogin, for: .normal)
         button.addTarget(self, action: #selector(login), for: .touchUpInside)
         return button
     }()
@@ -151,19 +144,22 @@ public class UpsaleViewController: UIViewController {
 
     /// Dynamically set auto-layout constraints for the bullet points
     private func setupBulletPoints() {
-        let bs = ["a", "b", "c"]
+        let adListings = [KDriveStrings.Localizable.obtainkDriveAdListing1,
+                          KDriveStrings.Localizable.obtainkDriveAdListing2,
+                          KDriveStrings.Localizable.obtainkDriveAdListing3]
         var verticalViews = [String: UIView]()
         var verticalContraintString = "V:|"
-        for s in bs {
+        for (index, ad) in adListings.enumerated() {
             let container = UIView()
+            let containerViewId = "view\(index)"
             container.translatesAutoresizingMaskIntoConstraints = false
             bulletPointsView.addSubview(container)
 
-            verticalViews["\(s)"] = container
-            verticalContraintString += "[\(s)]-12-"
+            verticalViews[containerViewId] = container
+            verticalContraintString += "[\(containerViewId)]-12-"
 
             layoutBulletPointView(
-                txt: "\(s) Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+                txt: ad,
                 container: container
             )
 
@@ -174,8 +170,6 @@ public class UpsaleViewController: UIViewController {
             NSLayoutConstraint.activate(horizontalConstraints)
         }
         verticalContraintString += "|"
-
-        print("•\(verticalContraintString)")
 
         let verticalConstraints = NSLayoutConstraint
             .constraints(withVisualFormat: verticalContraintString,
@@ -211,7 +205,7 @@ public class UpsaleViewController: UIViewController {
             label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             label.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 1),
             label.rightAnchor.constraint(equalTo: container.rightAnchor),
-            bullet.topAnchor.constraint(equalTo: container.topAnchor, constant: 10),
+            bullet.topAnchor.constraint(equalTo: container.topAnchor),
             bullet.heightAnchor.constraint(equalTo: bullet.widthAnchor)
         ]
 
