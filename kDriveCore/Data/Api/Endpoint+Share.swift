@@ -54,7 +54,6 @@ public extension Endpoint {
         shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }
 
-    /// Some legacy calls like thumbnails require a V2 call
     static func shareLinkFileV2(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         shareUrlV2.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }
