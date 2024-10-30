@@ -36,10 +36,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         observedFiles = AnyRealmCollection(currentDirectory.children)
     }
 
-    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        fatalError("unsupported initializer")
-    }
-
     convenience init(
         publicShareProxy: PublicShareProxy,
         sortType: SortType,
@@ -53,6 +49,10 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         self.publicShareProxy = publicShareProxy
         self.sortType = sortType
         publicShareApiFetcher = apiFetcher
+    }
+
+    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        fatalError("Use init(publicShareProxy:… ) instead")
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {

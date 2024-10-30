@@ -164,32 +164,26 @@ protocol FileCellDelegate: AnyObject {
                 requestFileId = file.id,
                 weak self
             ] image, _ in
-                guard let self,
-                      !self.file.isInvalidated,
-                      !self.isSelected else {
-                    return
-                }
-
-                if file.id == requestFileId {
-                    imageView.image = image
-                    imageView.backgroundColor = nil
-                }
+                self?.setImage(image, on: imageView, requestFileId: requestFileId)
             }
 
         } else {
             // Fetch thumbnail
             thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
-                guard let self,
-                      !self.file.isInvalidated,
-                      !self.isSelected else {
-                    return
-                }
-
-                if file.id == requestFileId {
-                    imageView.image = image
-                    imageView.backgroundColor = nil
-                }
+                self?.setImage(image, on: imageView, requestFileId: requestFileId)
             }
+        }
+    }
+
+    private func setImage(_ image: UIImage, on imageView: UIImageView, requestFileId: Int) {
+        guard !file.isInvalidated,
+              !isSelected else {
+            return
+        }
+
+        if file.id == requestFileId {
+            imageView.image = image
+            imageView.backgroundColor = nil
         }
     }
 

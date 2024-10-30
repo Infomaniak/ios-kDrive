@@ -1,10 +1,10 @@
 /*
- * Loco ios export: iOS Localizable.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: en, English
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Fri, 26 Jul 2024 13:09:12 +0200
+ * Exported by: Adrien Coye
+ * Exported at: Mon, 28 Oct 2024 09:46:15 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -376,6 +376,9 @@
 /* loco:6075c0bb65160c29997c5e32 */
 "buttonOpenDocument" = "Open document";
 
+/* loco:66dfe78b7da115a16c0733e2 */
+"buttonOpenInBrowser" = "Open in browser";
+
 /* loco:607948379bda7f7df0121872 */
 "buttonOpenReadOnly" = "Open in read-only mode";
 
@@ -708,6 +711,15 @@
 
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Drop box";
+
+/* loco:6708c590f8f4d36ec100ef42 */
+"dropboxPublicShareOutdatedDescription" = "The link has been deactivated or has expired.\nTo upload your files, send a message to the user who shared the Dropbox with you so that they can reactivate it.";
+
+/* loco:6708c5155b4785a798019472 */
+"dropboxPublicShareOutdatedTitle" = "This dropbox is no longer available";
+
+/* loco:6707c8d16e460cb6a304b692 */
+"dropboxPublicShareTitleUploadButton" = "%@ invites you to import your files onto their kDrive";
 
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "You cannot create a share link on a drop box.";
@@ -1498,6 +1510,27 @@
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "File upload services";
 
+/* loco:66f658cbb0e522d4f50cc2f2 */
+"obtainkDriveAdAlreadyGotAccount" = "I already have an account";
+
+/* loco:66f64e66297dda6eb402f022 */
+"obtainkDriveAdDescription" = "Store your photos, documents and emails in Switzerland with an independent company that respects your privacy.";
+
+/* loco:66f657511dc417a794017b92 */
+"obtainkDriveAdFreeTrialButton" = "Free trial";
+
+/* loco:66f64fa849bd6bdd0f0ae622 */
+"obtainkDriveAdListing1" = "15 GB free, then 2 TB up to 106 TB";
+
+/* loco:66f65063f4b00a1c660ce462 */
+"obtainkDriveAdListing2" = "Online creation and collaboration for Word, Excel and PowerPoint documents";
+
+/* loco:66f651361a641d2f5f0207d2 */
+"obtainkDriveAdListing3" = "Automatic file import from Google Drive, Dropbox, One Drive, NextCloud, Hubic and WebDav";
+
+/* loco:66f64797fdc443552a0a5e92 */
+"obtainkDriveAdTitle" = "Get kDrive for free";
+
 /* loco:6049df4d5c2c3a04bc397a19 */
 "offlineFileNoFile" = "No files offline";
 
@@ -1563,6 +1596,30 @@
 
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "Video file not supported by the video player";
+
+/* loco:6707af761017cac6e10d85b4 */
+"publicShareBadLinkError" = "No share associated with this link";
+
+/* loco:66ffbbcd294f6022e60948f3 */
+"publicShareImportationInProgress" = "Download in progress in selected folder";
+
+/* loco:6707ca3c9b41ff114e052962 */
+"publicShareLinkValidityDescription" = "This link is valid until %@";
+
+/* loco:66e0295f01da3c1ab90c2d72 */
+"publicShareOutdatedLinkDescription" = "The link has been deactivated or has expired.\nTo access its files, send a message to the user who shared the link with you so that they can reactivate it.";
+
+/* loco:66e028cb3cd41df03c0a7003 */
+"publicShareOutdatedLinkTitle" = "The files are no longer available";
+
+/* loco:66d05b05fe43da3cb8009652 */
+"publicSharePasswordNeededDescription" = "Please enter the password provided to access the content.";
+
+/* loco:66d05b5928ec407b32087892 */
+"publicSharePasswordNeededTitle" = "Protected content";
+
+/* loco:66dfe73543cef47d3e073e62 */
+"publicSharePasswordNotSupportedDescription" = "Password-protected links are not yet available on the mobile application.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Public sharing link";
