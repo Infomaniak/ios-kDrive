@@ -35,10 +35,7 @@ public class PublicShareApiFetcher: ApiFetcher {
     }
 
     /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
-    private static var handledHttpStatus: Set<Int> = {
-        var allStatus = Set(200 ... 500)
-        return allStatus
-    }()
+    private static var handledHttpStatus = Set(200 ... 500)
 
     override public func perform<T: Decodable>(request: DataRequest,
                                                decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {

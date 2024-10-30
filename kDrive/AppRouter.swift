@@ -587,12 +587,8 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
         guard let window,
-              let rootViewController = window.rootViewController else {
-            fatalError("TODO: lazy load a rootViewController")
-        }
-
-        guard let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("Root is not a MainTabViewController")
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareLocked")
             return
         }
 
@@ -615,12 +611,8 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func presentPublicShareExpired() {
         guard let window,
-              let rootViewController = window.rootViewController else {
-            fatalError("TODO: lazy load a rootViewController")
-        }
-
-        guard let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("Root is not a MainTabViewController")
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareExpired")
             return
         }
 
@@ -647,12 +639,8 @@ public struct AppRouter: AppNavigable {
         apiFetcher: PublicShareApiFetcher
     ) {
         guard let window,
-              let rootViewController = window.rootViewController else {
-            fatalError("TODO: lazy load a rootViewController")
-        }
-
-        guard let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("Root is not a MainTabViewController")
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShare")
             return
         }
 

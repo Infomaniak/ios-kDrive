@@ -75,7 +75,7 @@ enum UniversalLinksHelper {
         // Public share link regex
         let shareLink = Link.publicShareLink
         let matches = shareLink.regex.matches(in: path)
-        if await processPublicShareLink(matches: matches, displayMode: shareLink.displayMode, publicShareURL: url) {
+        if await processPublicShareLink(matches: matches, publicShareURL: url) {
             return true
         }
 
@@ -91,7 +91,7 @@ enum UniversalLinksHelper {
         return false
     }
 
-    private static func processPublicShareLink(matches: [[String]], displayMode: DisplayMode, publicShareURL: URL) async -> Bool {
+    private static func processPublicShareLink(matches: [[String]], publicShareURL: URL) async -> Bool {
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
