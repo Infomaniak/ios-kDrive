@@ -24,7 +24,7 @@ class UnavaillableFolderViewController: BaseInfoViewController {
         super.viewDidLoad()
 
         centerImageView.image = KDriveResourcesAsset.ufo.image
-        titleLabel.text = KDriveStrings.Localizable.dropboxPublicShareOutdatedTitle
-        descriptionLabel.text = KDriveStrings.Localizable.dropboxPublicShareOutdatedDescription
+        titleLabel.text = KDriveStrings.Localizable.publicShareOutdatedLinkTitle
+        descriptionLabel.text = KDriveStrings.Localizable.publicShareOutdatedLinkDescription
     }
 }
