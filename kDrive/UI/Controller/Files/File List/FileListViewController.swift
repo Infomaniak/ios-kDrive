@@ -441,7 +441,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
             (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
                 .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
-        case .multipleSelection:
+        case .multipleSelection(let downloadOnly):
             let allItemsSelected: Bool
             let exceptFileIds: [Int]?
             let selectedFiles: [File]
@@ -466,6 +466,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                 },
                 presentingParent: self
             )
+
+            if downloadOnly {
+                selectViewController.actions = [.download]
+            }
 
             floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             floatingPanelViewController.set(contentViewController: selectViewController)

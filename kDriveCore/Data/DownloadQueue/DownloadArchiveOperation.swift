@@ -31,6 +31,7 @@ public class DownloadArchiveOperation: Operation {
     private let archiveId: String
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
+    private let publicShareProxy: PublicShareProxy?
     private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
@@ -68,10 +69,14 @@ public class DownloadArchiveOperation: Operation {
         return true
     }
 
-    public init(archiveId: String, driveFileManager: DriveFileManager, urlSession: FileDownloadSession) {
+    public init(archiveId: String,
+                driveFileManager: DriveFileManager,
+                urlSession: FileDownloadSession,
+                publicShareProxy: PublicShareProxy? = nil) {
         self.archiveId = archiveId
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
+        self.publicShareProxy = publicShareProxy
     }
 
     // MARK: - Public methods
@@ -103,7 +108,17 @@ public class DownloadArchiveOperation: Operation {
     }
 
     override public func main() {
-        DDLogInfo("[DownloadOperation] Downloading Archive of files \(archiveId) with session \(urlSession.identifier)")
+        if publicShareProxy == nil {
+            authenticatedDownload()
+        } else {
+            publicShareDownload()
+        }
+    }
+
+    func publicShareDownload() {
+        DDLogInfo(
+            "[DownloadOperation] Downloading Archive of public share files \(archiveId) with session \(urlSession.identifier)"
+        )
 
         let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
 
@@ -129,6 +144,12 @@ public class DownloadArchiveOperation: Operation {
             error = .localError // Other error?
             end(sessionUrl: url)
         }
+    }
+
+    func authenticatedDownload() {
+        DDLogInfo("[DownloadOperation] Downloading Archive of files \(archiveId) with session \(urlSession.identifier)")
+
+        // TODO: missing imp
     }
 
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {

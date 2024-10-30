@@ -122,7 +122,14 @@ extension MultipleSelectionFloatingPanelViewController {
                             }
                             group.leave()
                         }
-                    DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+
+                    if let publicShareProxy = driveFileManager.publicShareProxy {
+                        DownloadQueue.instance.addPublicShareToQueue(file: file,
+                                                                     driveFileManager: driveFileManager,
+                                                                     publicShareProxy: publicShareProxy)
+                    } else {
+                        DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+                    }
                 }
             }
         } else {
@@ -147,16 +154,33 @@ extension MultipleSelectionFloatingPanelViewController {
                 downloadInProgress = true
                 collectionView.reloadItems(at: [indexPath])
                 group.enter()
-                downloadArchivedFiles(downloadCellPath: indexPath) { result in
-                    switch result {
-                    case .success(let archiveUrl):
-                        self.downloadedArchiveUrl = archiveUrl
-                        self.success = true
-                    case .failure(let error):
-                        self.downloadError = error
-                        self.success = false
+
+                if let publicShareProxy = driveFileManager.publicShareProxy {
+                    downloadPublicShareArchivedFiles(downloadCellPath: indexPath,
+                                                     driveFileManager: driveFileManager,
+                                                     publicShareProxy: publicShareProxy) { result in
+                        switch result {
+                        case .success(let archiveUrl):
+                            self.downloadedArchiveUrl = archiveUrl
+                            self.success = true
+                        case .failure(let error):
+                            self.downloadError = error
+                            self.success = false
+                        }
+                        group.leave()
                     }
-                    group.leave()
+                } else {
+                    downloadArchivedFiles(downloadCellPath: indexPath) { result in
+                        switch result {
+                        case .success(let archiveUrl):
+                            self.downloadedArchiveUrl = archiveUrl
+                            self.success = true
+                        case .failure(let error):
+                            self.downloadError = error
+                            self.success = false
+                        }
+                        group.leave()
+                    }
                 }
             }
         }

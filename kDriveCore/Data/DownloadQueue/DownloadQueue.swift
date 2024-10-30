@@ -188,6 +188,32 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         }
     }
 
+    public func addPublicShareArchiveToQueue(archiveId: String,
+                                             driveFileManager: DriveFileManager,
+                                             publicShareProxy: PublicShareProxy) {
+        Log.downloadQueue("addPublicShareArchiveToQueue archiveId:\(archiveId)")
+        dispatchQueue.async {
+            OperationQueueHelper.disableIdleTimer(true)
+
+            let operation = DownloadArchiveOperation(
+                archiveId: archiveId,
+                driveFileManager: driveFileManager,
+                urlSession: self.bestSession,
+                publicShareProxy: publicShareProxy
+            )
+
+            operation.completionBlock = {
+                self.dispatchQueue.async {
+                    self.archiveOperationsInQueue.removeValue(forKey: archiveId)
+                    self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                }
+            }
+            self.operationQueue.addOperation(operation)
+            self.archiveOperationsInQueue[archiveId] = operation
+        }
+    }
+
     public func addToQueue(archiveId: String, driveId: Int, userId: Int) {
         Log.downloadQueue("addToQueue archiveId:\(archiveId)")
         dispatchQueue.async {

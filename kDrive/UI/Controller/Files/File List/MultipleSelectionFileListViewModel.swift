@@ -23,34 +23,47 @@ import kDriveCore
 import kDriveResources
 
 struct MultipleSelectionAction: Equatable {
-    let id: Int
+    private let id: MultipleSelectionActionId
     let name: String
     let icon: KDriveResourcesImages
     var enabled = true
+
+    private enum MultipleSelectionActionId: Equatable {
+        case move
+        case delete
+        case more
+        case deletePermanently
+        case download
+    }
 
     static func == (lhs: MultipleSelectionAction, rhs: MultipleSelectionAction) -> Bool {
         return lhs.id == rhs.id
     }
 
     static let move = MultipleSelectionAction(
-        id: 0,
+        id: MultipleSelectionActionId.move,
         name: KDriveResourcesStrings.Localizable.buttonMove,
         icon: KDriveResourcesAsset.folderSelect
     )
     static let delete = MultipleSelectionAction(
-        id: 1,
+        id: MultipleSelectionActionId.delete,
         name: KDriveResourcesStrings.Localizable.buttonDelete,
         icon: KDriveResourcesAsset.delete
     )
     static let more = MultipleSelectionAction(
-        id: 2,
+        id: MultipleSelectionActionId.more,
         name: KDriveResourcesStrings.Localizable.buttonMenu,
         icon: KDriveResourcesAsset.menu
     )
     static let deletePermanently = MultipleSelectionAction(
-        id: 3,
+        id: MultipleSelectionActionId.deletePermanently,
         name: KDriveResourcesStrings.Localizable.buttonDelete,
         icon: KDriveResourcesAsset.delete
+    )
+    static let download = MultipleSelectionAction(
+        id: MultipleSelectionActionId.download,
+        name: KDriveResourcesStrings.Localizable.buttonDownload,
+        icon: KDriveResourcesAsset.menu
     )
 }
 
@@ -113,7 +126,7 @@ class MultipleSelectionFileListViewModel {
         self.driveFileManager = driveFileManager
 
         if driveFileManager.isPublicShare {
-            multipleSelectionActions = []
+            multipleSelectionActions = [.download]
         } else {
             multipleSelectionActions = [.move, .delete, .more]
         }
@@ -170,7 +183,9 @@ class MultipleSelectionFileListViewModel {
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
-            onPresentQuickActionPanel?(Array(selectedItems), .multipleSelection)
+            onPresentQuickActionPanel?(Array(selectedItems), .multipleSelection(onlyDownload: false))
+        case .download:
+            onPresentQuickActionPanel?(Array(selectedItems), .multipleSelection(onlyDownload: true))
         default:
             break
         }
