@@ -53,8 +53,8 @@ public struct DeeplinkParser: DeeplinkParsable {
             return true
 
         } else if components.host == DeeplinkPath.file.rawValue {
-            let files: [ImportedFile] = params.compactMap {
-                guard $0.name == "url", let filePath = $0.value else { return nil }
+            let files: [ImportedFile] = params.compactMap { param in
+                guard param.name == "url", let filePath = param.value else { return nil }
                 let fileUrl = URL(fileURLWithPath: filePath)
 
                 return ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
