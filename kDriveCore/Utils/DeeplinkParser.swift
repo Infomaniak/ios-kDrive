@@ -59,6 +59,10 @@ public struct DeeplinkParser: DeeplinkParsable {
 
                 return ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
             }
+            guard !files.isEmpty else {
+                Log.sceneDelegate("Failed to import files: No files found", level: .error)
+                return false
+            }
             await router.navigate(to: .saveFiles(files: files))
             return true
         }
