@@ -146,10 +146,13 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
         cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
-        cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: account.userId).isEmpty
+
         if account == accountManager.currentAccount {
             cell.accessoryImageView.image = KDriveResourcesAsset.check.image
             cell.isUserInteractionEnabled = false
+        } else {
+            cell.accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+            cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: account.userId).isEmpty
         }
 
         account.user.getAvatar { image in
