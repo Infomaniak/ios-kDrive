@@ -52,11 +52,18 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
             return true
 
-        } else if components.host == DeeplinkPath.file.rawValue,
-                  let filePath = params.first(where: { $0.name == "url" })?.value {
-            let fileUrl = URL(fileURLWithPath: filePath)
-            let file = ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
-            await router.navigate(to: .saveFile(file: file))
+        } else if components.host == DeeplinkPath.file.rawValue {
+            let files: [ImportedFile] = params.compactMap { param in
+                guard param.name == "url", let filePath = param.value else { return nil }
+                let fileUrl = URL(fileURLWithPath: filePath)
+
+                return ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
+            }
+            guard !files.isEmpty else {
+                Log.sceneDelegate("Failed to import files: No files found", level: .error)
+                return false
+            }
+            await router.navigate(to: .saveFiles(files: files))
             return true
         }
 

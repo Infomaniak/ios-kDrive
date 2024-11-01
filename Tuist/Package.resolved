@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Alamofire/Alamofire",
       "state" : {
-        "revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a",
-        "version" : "5.9.1"
+        "revision" : "ea6a94b7dddffd0ca4d0f29252d95310b84dec84",
+        "version" : "5.10.0"
       }
     },
     {
@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "3275b3dafa41d3bf8e618b715dfac17e236f86b0",
-        "version" : "12.2.0"
+        "revision" : "550e8fe4a4132570a63e144c88d095bfc7d5bac2",
+        "version" : "12.3.2"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "d83b9df4d8e7880fa8a55807549cac0fc4584ce6",
-        "version" : "13.1.0"
+        "revision" : "1aeba8dae671e8c2d7ea239a9669c0b9e085b2de",
+        "version" : "13.2.0"
       }
     },
     {
@@ -230,8 +230,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "5575af93efb776414f243e93d6af9f6258dc539a",
-        "version" : "8.36.0"
+        "revision" : "54cc2e3e4fcbf9d4c7708ce00d3b6eee29aecbb1",
+        "version" : "8.38.0"
       }
     },
     {
@@ -302,8 +302,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "665206000b8307cab5ac51203d29b0f232d7e31b",
-        "version" : "2.74.0"
+        "revision" : "f7dc3f527576c398709b017584392fb58592e7f5",
+        "version" : "2.75.0"
       }
     },
     {
@@ -311,8 +311,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-transport-services.git",
       "state" : {
-        "revision" : "38ac8221dd20674682148d6451367f89c2652980",
-        "version" : "1.21.0"
+        "revision" : "dbace16f126fdcd80d58dc54526c561ca17327d7",
+        "version" : "1.22.0"
       }
     },
     {
@@ -334,12 +334,39 @@
       }
     },
     {
+      "identity" : "swiftbackports",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/shaps80/SwiftBackports",
+      "state" : {
+        "revision" : "ddca6a237c1ba2291d5a3cc47ec8480ce6e9f805",
+        "version" : "1.0.3"
+      }
+    },
+    {
       "identity" : "swiftregex",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/flowbe/SwiftRegex",
       "state" : {
         "revision" : "d8c4846dfbbe04aa8196ae5a5a3cdc6cd7f9f6bc",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swiftui-introspect",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/siteline/SwiftUI-Introspect",
+      "state" : {
+        "revision" : "807f73ce09a9b9723f12385e592b4e0aaebd3336",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swiftuibackports",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/shaps80/SwiftUIBackports",
+      "state" : {
+        "revision" : "556d42f391b74059a354b81b8c8e19cc7cb576f4",
+        "version" : "1.15.1"
       }
     }
   ],
