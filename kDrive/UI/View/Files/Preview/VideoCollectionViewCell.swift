@@ -43,9 +43,10 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var floatingPanelController: FloatingPanelController?
 
     private var playableFileName: String?
-
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
+    private var timeObserverToken: Any?
+
     private var player: AVPlayer? {
         didSet {
             playButton.isEnabled = player != nil
@@ -55,12 +56,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(playerDidPlayToEnd),
-            name: .AVPlayerItemDidPlayToEndTime,
-            object: player?.currentItem
-        )
     }
 
     override func prepareForReuse() {
@@ -79,6 +74,9 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
+
+        setNowPlayingMetadata()
+
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -98,6 +96,13 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
             }
         } else {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
+        }
+
+        if let player = player {
+            let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
+                self?.updateNowPlayingInfo()
+            }
         }
     }
 
@@ -143,15 +148,25 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     private func setNowPlayingMetadata() {
         var nowPlayingInfo = [String: Any]()
 
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
+        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName
 
         if let player = player, let currentItem = player.currentItem {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.asset.duration)
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
         }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+
+    private func updateNowPlayingInfo() {
+        guard let player = player else { return }
+
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo
+
+        nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
+        nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }
