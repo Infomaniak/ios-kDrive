@@ -45,13 +45,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     private var playableFileName: String?
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
-    private var timeObserverToken: Any?
-
-    private var player: AVPlayer? {
-        didSet {
-            playButton.isEnabled = player != nil
-        }
-    }
+    private var videoPlayer: VideoPlayer?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -60,8 +54,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        player?.pause()
-        player = nil
+        videoPlayer?.stopPlayback()
         previewFrameImageView.image = nil
         previewDownloadTask?.cancel()
     }
@@ -75,47 +68,22 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
 
-        setNowPlayingMetadata()
+        videoPlayer = VideoPlayer(file: file, driveFileManager: driveFileManager)
+        videoPlayer?.setNowPlayingMetadata(playableFileName: playableFileName)
 
-        if !file.isLocalVersionOlderThanRemote {
-            player = AVPlayer(url: file.localUrl)
-        } else if let token = driveFileManager.apiFetcher.currentToken {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
-                    let url = Endpoint.download(file: file).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                    }
-                } else {
-                    Task {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
-                    }
-                }
-            }
-        } else {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
-        }
-
-        if let player = player {
-            let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
-                self?.updateNowPlayingInfo()
-            }
+        videoPlayer?.onPlaybackEnded = { [weak self] in
+            self?.videoPlayer?.setNowPlayingMetadata(playableFileName: self?.playableFileName)
         }
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
-    }
-
-    @objc private func playerDidPlayToEnd() {
-        setNowPlayingMetadata()
+        MatomoUtils.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
-        guard let player else { return }
+        guard let player = videoPlayer?.avPlayer else {
+            return
+        }
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
 
@@ -129,44 +97,28 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
-            self?.player?.pause()
-            if let floatingPanelController = self?.floatingPanelController {
-                self?.parentViewController?.present(floatingPanelController, animated: true)
-            }
+            self?.videoPlayer?.stopPlayback()
+            self?.presentFloatingPanel()
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController
-        floatingPanelController?.dismiss(animated: true)
+        presentFloatingPanel()
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }
     }
 
-    private func setNowPlayingMetadata() {
-        var nowPlayingInfo = [String: Any]()
-
-        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
-        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-
-        if let player = player, let currentItem = player.currentItem {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.asset.duration)
-            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
-            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+    private func presentFloatingPanel() {
+        if let floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController {
+            floatingPanelController.dismiss(animated: true)
         }
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
-    private func updateNowPlayingInfo() {
-        guard let player = player else { return }
-
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo
-
-        nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
-        nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    private func presentVideoPlayer(navController: VideoPlayerNavigationController, playerViewController: AVPlayerViewController) {
+        parentViewController?.present(navController, animated: true) {
+            playerViewController.player?.play()
+        }
     }
 }
