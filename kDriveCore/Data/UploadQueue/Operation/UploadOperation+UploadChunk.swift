@@ -87,18 +87,16 @@ extension UploadOperation {
                                     chunksToGenerateCount: chunksToGenerateCount)
     }
 
-    func storeChunk(_ buffer: Data, number: Int64, uploadFileId: String, sessionToken: String,
+    /// Store a chunk at the root of NSTemporaryDirectory with a stable name
+    func storeChunk(_ buffer: Data, number: Int64,
+                    uploadFileId: String,
+                    sessionToken: String,
                     hash: String) throws -> URL {
-        // Create subfolders if needed
-        let tempChunkFolder = buildFolderPath(fileId: uploadFileId, sessionToken: sessionToken)
-        Log.uploadOperation("using chunk folder:'\(tempChunkFolder)' ufid:\(uploadFileId)")
-        if !fileManager.fileExists(atPath: tempChunkFolder.path, isDirectory: nil) {
-            try fileManager.createDirectory(at: tempChunkFolder, withIntermediateDirectories: true, attributes: nil)
-        }
+        // Store chunks at the root of NSTemporaryDirectory
+        let tempRoot = URL(fileURLWithPath: NSTemporaryDirectory())
+        let chunkName = chunkName(number: number, fileId: uploadFileId, sessionToken: sessionToken, hash: hash)
+        let chunkPath = tempRoot.appendingPathComponent(chunkName)
 
-        // Write buffer
-        let chunkName = chunkName(number: number, fileId: uploadFileId, hash: hash)
-        let chunkPath = tempChunkFolder.appendingPathComponent(chunkName)
         try buffer.write(to: chunkPath, options: [.atomic])
         Log.uploadOperation("wrote chunk:\(chunkPath) ufid:\(uploadFileId)")
 
@@ -217,21 +215,10 @@ extension UploadOperation {
         }
     }
 
-    private func chunkName(number: Int64, fileId: String, hash: String) -> String {
+    private func chunkName(number: Int64, fileId: String, sessionToken: String, hash: String) -> String {
         // Hashing name as it can break path building. Also it keeps it short
-        let fileName = "upload_\(fileId)_\(hash)_\(number)".SHA256DigestString
+        let fileName = "upload_\(fileId)_\(hash)_\(number)_\(sessionToken)".SHA256DigestString
         return fileName + ".part"
-    }
-
-    private func buildFolderPath(fileId: String, sessionToken: String) -> URL {
-        // NSTemporaryDirectory is perfect for this use case.
-        // Cleaned after ≈ 3 days, our session is valid 12h.
-        // https://cocoawithlove.com/2009/07/temporary-files-and-folders-in-cocoa.html
-
-        // fileId and sessionToken can break the URL path, hashing makes sure it works
-        let folderUrlString = NSTemporaryDirectory() + "/\(fileId.SHA256DigestString)_\(sessionToken.SHA256DigestString)"
-        let folderPath = URL(fileURLWithPath: folderUrlString)
-        return folderPath.standardizedFileURL
     }
 
     /// Make sure all `uploadTasks` canceled or completed are up to date in database.
