@@ -98,7 +98,7 @@ extension UploadOperation {
 
         // Write buffer
         let chunkName = chunkName(number: number, fileId: uploadFileId, hash: hash)
-        let chunkPath = tempChunkFolder.appendingPathExtension(chunkName)
+        let chunkPath = tempChunkFolder.appendingPathComponent(chunkName)
         try buffer.write(to: chunkPath, options: [.atomic])
         Log.uploadOperation("wrote chunk:\(chunkPath) ufid:\(uploadFileId)")
 
