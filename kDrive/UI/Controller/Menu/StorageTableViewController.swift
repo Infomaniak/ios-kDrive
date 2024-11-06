@@ -24,6 +24,7 @@ import kDriveResources
 import Kingfisher
 import UIKit
 
+
 final class StorageTableViewController: UITableViewController {
     private enum Section: CaseIterable {
         case header, directories, files
@@ -111,13 +112,9 @@ final class StorageTableViewController: UITableViewController {
             self.tableView.reloadData()
         }
 
-        // Check old size calculation and new one, send a sentry.
         Task {
-            let legacySize = cacheDirectories.reduce(0) { $0 + $1.size }
-
             let metadata = [
                 "usedSize": usedSize,
-                "legacySize": legacySize,
                 "appSize": appSize,
                 "appGroupSize": appGroupSize
             ]
