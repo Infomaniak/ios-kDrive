@@ -185,7 +185,7 @@ public struct FreeSpaceService {
         }
 
         // Only clean if reaching the minimum space required for upload
-        guard freeSpaceInTemporaryDirectory < minimalSpaceRequiredForChunkUpload * 2 else {
+        guard freeSpaceInTemporaryDirectory < minimalSpaceRequiredForChunkUpload * 4 else {
             return
         }
 
