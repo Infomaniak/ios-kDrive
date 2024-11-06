@@ -175,7 +175,7 @@ public struct FreeSpaceService {
     }
 
     /// On devices with low free space, we clear the temporaryDirectory
-    /// 
+    ///
     /// Safe to call before rebuilding the upload queue
     public func cleanCacheIfAlmostFull() {
         let freeSpaceInTemporaryDirectory: Int64

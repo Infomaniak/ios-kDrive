@@ -24,7 +24,6 @@ import kDriveResources
 import Kingfisher
 import UIKit
 
-
 final class StorageTableViewController: UITableViewController {
     private enum Section: CaseIterable {
         case header, directories, files
