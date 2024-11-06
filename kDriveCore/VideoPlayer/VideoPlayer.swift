@@ -17,6 +17,7 @@
  */
 
 import AVKit
+import Combine
 import FloatingPanel
 import InfomaniakCore
 import kDriveCore
@@ -24,7 +25,6 @@ import kDriveResources
 import Kingfisher
 import MediaPlayer
 import UIKit
-import Combine
 
 class VideoPlayer {
     private var player: AVPlayer?
@@ -35,8 +35,8 @@ class VideoPlayer {
     }
 
     var progressPercentage: Double {
-        guard let player = player else { return 0 }
-        return player.currentTime().seconds / (player.currentItem?.duration.seconds ?? 1)
+        guard let player = player, let currentItem = player.currentItem else { return 0 }
+        return player.currentTime().seconds / currentItem.duration.seconds
     }
 
     init(file: File, driveFileManager: DriveFileManager) {
@@ -67,7 +67,6 @@ class VideoPlayer {
         player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
             self?.updateNowPlayingInfo()
         }
-        NotificationCenter.default.addObserver(self, selector: #selector(playerDidPlayToEnd), name: .AVPlayerItemDidPlayToEndTime, object: player.currentItem)
     }
 
     @objc private func playerDidPlayToEnd() {
@@ -76,24 +75,29 @@ class VideoPlayer {
 
     func setNowPlayingMetadata(playableFileName: String?) {
         var nowPlayingInfo = [String: Any]()
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
         nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
+        if let duration = player?.currentItem?.duration {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
+        }
 
-    func stopPlayback() {
-        player?.pause()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
     private func updateNowPlayingInfo() {
         guard let player = player else { return }
 
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
 
-        nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
-        nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
+
+        if let duration = player.currentItem?.duration, duration.isNumeric {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
+        }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }

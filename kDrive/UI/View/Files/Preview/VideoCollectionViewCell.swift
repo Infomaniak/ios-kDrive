@@ -54,7 +54,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        videoPlayer?.stopPlayback()
         previewFrameImageView.image = nil
         previewDownloadTask?.cancel()
     }
@@ -97,7 +96,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
-            self?.videoPlayer?.stopPlayback()
             self?.presentFloatingPanel()
         }
         navController.setNavigationBarHidden(true, animated: false)
@@ -116,7 +114,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    private func presentVideoPlayer(navController: VideoPlayerNavigationController, playerViewController: AVPlayerViewController) {
+    private func presentVideoPlayer(navController: VideoPlayerNavigationController,
+                                    playerViewController: AVPlayerViewController) {
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }
