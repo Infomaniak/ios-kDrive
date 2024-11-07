@@ -22,25 +22,25 @@ import FloatingPanel
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import Kingfisher
 import MediaPlayer
-import UIKit
 
-class VideoPlayer {
+public final class VideoPlayer {
     private var player: AVPlayer?
     var onPlaybackEnded: (() -> Void)?
 
-    var avPlayer: AVPlayer? {
-        return player
-    }
+    public lazy var playerViewController: AVPlayerViewController = {
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = self.player
+        return playerViewController
+    }()
 
     var progressPercentage: Double {
         guard let player = player, let currentItem = player.currentItem else { return 0 }
         return player.currentTime().seconds / currentItem.duration.seconds
     }
 
-    init(file: File, driveFileManager: DriveFileManager) {
-        setupPlayer(with: file, driveFileManager: driveFileManager)
+    init(frozenFile: File, driveFileManager: DriveFileManager) {
+        setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
@@ -73,7 +73,7 @@ class VideoPlayer {
         onPlaybackEnded?()
     }
 
-    func setNowPlayingMetadata(playableFileName: String?) {
+    public func setNowPlayingMetadata(playableFileName: String?) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false

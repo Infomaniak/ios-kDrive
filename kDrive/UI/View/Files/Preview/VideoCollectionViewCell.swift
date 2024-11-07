@@ -67,7 +67,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
 
-        videoPlayer = VideoPlayer(file: file, driveFileManager: driveFileManager)
+        videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
         videoPlayer?.setNowPlayingMetadata(playableFileName: playableFileName)
 
         videoPlayer?.onPlaybackEnded = { [weak self] in
@@ -80,14 +80,13 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
-        guard let player = videoPlayer?.avPlayer else {
-            return
-        }
+        guard let player = videoPlayer?.playerViewController.player else { return }
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
+        guard let playerViewController = videoPlayer?.playerViewController else { return }
 
         if #available(iOS 14.2, *) {
             playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
@@ -111,13 +110,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     private func presentFloatingPanel() {
         if let floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController {
             floatingPanelController.dismiss(animated: true)
-        }
-    }
-
-    private func presentVideoPlayer(navController: VideoPlayerNavigationController,
-                                    playerViewController: AVPlayerViewController) {
-        parentViewController?.present(navController, animated: true) {
-            playerViewController.player?.play()
         }
     }
 }
