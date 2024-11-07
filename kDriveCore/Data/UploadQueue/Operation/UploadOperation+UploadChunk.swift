@@ -93,7 +93,7 @@ extension UploadOperation {
                     sessionToken: String,
                     hash: String) throws -> URL {
         // Store chunks at the root of NSTemporaryDirectory
-        let tempRoot = URL(fileURLWithPath: NSTemporaryDirectory())
+        let tempRoot = FileManager.default.temporaryDirectory
         let chunkName = chunkName(number: number, fileId: uploadFileId, sessionToken: sessionToken, hash: hash)
         let chunkPath = tempRoot.appendingPathComponent(chunkName)
 
