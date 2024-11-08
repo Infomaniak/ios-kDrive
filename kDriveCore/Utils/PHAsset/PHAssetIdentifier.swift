@@ -174,6 +174,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
 
             // PHAssetResourceManager errors, possibly fetching an asset on iCloud failed
             if let resourceManagerError {
+                SentryDebug.capturePHAssetResourceManagerError(resourceManagerError)
                 throw resourceManagerError
             }
 
