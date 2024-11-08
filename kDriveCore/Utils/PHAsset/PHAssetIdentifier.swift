@@ -147,7 +147,6 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             let activity = ExpiringActivity(id: uid, delegate: activityDelegate)
             activity.start()
 
-            // TODO: Check iCloud behaviour
             let options = PHAssetResourceRequestOptions()
             options.isNetworkAccessAllowed = true
             options.progressHandler = { progress in
@@ -155,10 +154,17 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
             }
 
             group.enter()
+            var resourceManagerError: Error?
             PHAssetResourceManager.default().requestData(for: bestResource,
                                                          options: options) { data in
                 hasher.update(data)
-            } completionHandler: { _ in
+            } completionHandler: { error in
+                if let error {
+                    resourceManagerError = error
+                    Log.photoLibraryUploader("hashing resource failed with \(error)", level: .error)
+                } else {
+                    Log.photoLibraryUploader("hashing resource finished successfully")
+                }
                 hasher.finalize()
                 group.leave()
             }
@@ -166,13 +172,17 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
 
             activity.endAll()
 
-            guard let error = activityDelegate.error else {
-                // All good
-                return hasher.digestString
+            // PHAssetResourceManager errors, possibly fetching an asset on iCloud failed
+            if let resourceManagerError {
+                throw resourceManagerError
             }
 
             // The processing of the hash was interrupted by the system
-            throw error
+            if let activityError = activityDelegate.error {
+                throw activityError
+            }
+
+            return hasher.digestString
         }
     }
 }
