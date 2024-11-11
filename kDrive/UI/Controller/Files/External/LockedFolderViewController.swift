@@ -44,11 +44,11 @@ class LockedFolderViewController: BaseInfoViewController {
         view.bringSubviewToFront(openWebButton)
 
         let leadingConstraint = openWebButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
-                                                                       constant: 16)
+                                                                       constant: 25)
         leadingConstraint.priority = UILayoutPriority.defaultHigh
         let trailingConstraint = openWebButton.trailingAnchor.constraint(
             greaterThanOrEqualTo: view.trailingAnchor,
-            constant: -16
+            constant: -25
         )
         trailingConstraint.priority = UILayoutPriority.defaultHigh
         let widthConstraint = openWebButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
@@ -57,7 +57,7 @@ class LockedFolderViewController: BaseInfoViewController {
             openWebButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             leadingConstraint,
             trailingConstraint,
-            openWebButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            openWebButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
             openWebButton.heightAnchor.constraint(equalToConstant: 60),
             widthConstraint
         ])
