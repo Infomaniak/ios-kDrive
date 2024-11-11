@@ -22,4 +22,10 @@ public struct MediaMetadata {
     public let title: String
     public let artist: String
     public let artwork: UIImage?
+
+    public init(title: String, artist: String, artwork: UIImage?) {
+        self.title = title
+        self.artist = artist
+        self.artwork = artwork
+    }
 }

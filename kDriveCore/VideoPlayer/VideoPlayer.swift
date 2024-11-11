@@ -25,19 +25,22 @@ import kDriveResources
 import MediaPlayer
 
 public final class VideoPlayer {
-    private var player: AVPlayer?
     var onPlaybackEnded: (() -> Void)?
+
+    var progressPercentage: Double {
+        guard let player = player, let currentItem = player.currentItem else { return 0 }
+        return player.currentTime().seconds / currentItem.duration.seconds
+    }
+
+    private var player: AVPlayer?
+    private var playableFileName: String?
+    private var currentTrackMetadata: MediaMetadata?
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
         playerViewController.player = self.player
         return playerViewController
     }()
-
-    var progressPercentage: Double {
-        guard let player = player, let currentItem = player.currentItem else { return 0 }
-        return player.currentTime().seconds / currentItem.duration.seconds
-    }
 
     init(frozenFile: File, driveFileManager: DriveFileManager) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
@@ -46,6 +49,7 @@ public final class VideoPlayer {
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
+            let asset = AVAsset(url: file.localUrl)
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
@@ -73,11 +77,21 @@ public final class VideoPlayer {
         onPlaybackEnded?()
     }
 
-    public func setNowPlayingMetadata(playableFileName: String?) {
+    public func setNowPlayingMetadata(currentMetadata: MediaMetadata) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName
+
+        if let currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+            if let artwork = currentTrackMetadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        }
 
         if let duration = player?.currentItem?.duration {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
@@ -100,5 +114,33 @@ public final class VideoPlayer {
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+
+    public func extractTrackMetadata(from file: File) async -> MediaMetadata {
+        let asset = AVAsset(url: file.localUrl)
+
+        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
+        var artist = KDriveResourcesStrings.Localizable.unknownArtist
+        var artwork: UIImage?
+
+        let metadata = asset.commonMetadata
+
+        for item in metadata {
+            guard let commonKey = item.commonKey else { continue }
+
+            switch commonKey {
+            case .commonKeyTitle:
+                title = item.value as? String ?? title
+            case .commonKeyArtist:
+                artist = item.value as? String ?? artist
+            case .commonKeyArtwork:
+                if let data = item.value as? Data {
+                    artwork = UIImage(data: data)
+                }
+            default:
+                break
+            }
+        }
+        return MediaMetadata(title: title, artist: artist, artwork: artwork)
     }
 }

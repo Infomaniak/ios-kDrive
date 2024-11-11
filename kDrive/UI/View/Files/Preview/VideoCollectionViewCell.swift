@@ -66,13 +66,16 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-
-        videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
-        videoPlayer?.setNowPlayingMetadata(playableFileName: playableFileName)
-
-        videoPlayer?.onPlaybackEnded = { [weak self] in
-            self?.videoPlayer?.setNowPlayingMetadata(playableFileName: self?.playableFileName)
+        Task { @MainActor in
+            videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
+            guard let videoPlayer else { return }
+            let currentMetadata = await videoPlayer.extractTrackMetadata(from: file)
+            videoPlayer.setNowPlayingMetadata(currentMetadata: currentMetadata)
+            videoPlayer.onPlaybackEnded = { [weak self] in
+                self?.videoPlayer?.setNowPlayingMetadata(currentMetadata: currentMetadata)
+            }
         }
+
     }
 
     override func didEndDisplaying() {
