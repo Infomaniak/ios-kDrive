@@ -388,13 +388,15 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
             }
 
-            // Some cleanup if we have the chance
+            // Cleanup chunks in storage
             if let path = chunkTask.path {
                 let url = URL(fileURLWithPath: path, isDirectory: false)
                 let chunkNumber = chunkTask.chunkNumber
-                DispatchQueue.global(qos: .background).async {
-                    Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-                    try? self.fileManager.removeItem(at: url)
+                Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
+                do {
+                    try self.fileManager.removeItem(at: url)
+                } catch {
+                    Log.uploadOperation("failed to clean chunk \(error) ufid:\(self.uploadFileId)", level: .error)
                 }
             }
         } notFound: {

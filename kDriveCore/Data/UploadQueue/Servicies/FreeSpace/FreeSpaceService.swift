@@ -174,8 +174,10 @@ public struct FreeSpaceService {
         }
     }
 
-    /// On devices with low free space, we clear the temporaryDirectory on exit
-    private func cleanCacheIfAlmostFull() {
+    /// On devices with low free space, we clear the temporaryDirectory
+    ///
+    /// Safe to call before rebuilding the upload queue
+    public func cleanCacheIfAlmostFull() {
         let freeSpaceInTemporaryDirectory: Int64
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
@@ -185,7 +187,7 @@ public struct FreeSpaceService {
         }
 
         // Only clean if reaching the minimum space required for upload
-        guard freeSpaceInTemporaryDirectory < minimalSpaceRequiredForChunkUpload * 2 else {
+        guard freeSpaceInTemporaryDirectory < minimalSpaceRequiredForChunkUpload * 4 else {
             return
         }
 

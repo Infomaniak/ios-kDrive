@@ -81,13 +81,13 @@ public struct AppRouter: AppNavigable {
         }
 
         switch route {
-        case .saveFile(let file):
+        case .saveFiles(let files):
             guard let driveFileManager = accountManager.currentDriveFileManager else {
                 Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
                 return
             }
 
-            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
+            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, files: files)
 
         case .store(let driveId, let userId):
             guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
@@ -439,8 +439,8 @@ public struct AppRouter: AppNavigable {
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
-    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
-        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
+        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, files: files)
         viewController.present(vc, animated: true)
     }
 
