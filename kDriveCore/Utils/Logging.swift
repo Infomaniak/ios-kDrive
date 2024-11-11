@@ -81,7 +81,13 @@ public enum Logging {
     }
 
     private static func initNetworkLogging() {
-        Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+        #if DEBUG
+        @InjectService var appContextService: AppContextServiceable
+        if !appContextService.isExtension,
+           appContextService.context != .appTests {
+            Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+        }
+        #endif
     }
 
     private static func initSentry() {
