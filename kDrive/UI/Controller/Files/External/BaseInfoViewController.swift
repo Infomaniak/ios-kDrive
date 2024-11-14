@@ -77,14 +77,12 @@ class BaseInfoViewController: UIViewController {
         containerView.addSubview(titleLabel)
         containerView.addSubview(descriptionLabel)
 
-        let views = ["titleLabel": titleLabel,
-                     "descriptionLabel": descriptionLabel,
-                     "centerImageView": centerImageView]
-
-        let verticalConstraints = NSLayoutConstraint
-            .constraints(withVisualFormat: "V:|[centerImageView]-[titleLabel]-[descriptionLabel]|",
-                         metrics: nil,
-                         views: views)
+        let verticalConstraints = [
+            centerImageView.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor),
+            titleLabel.topAnchor.constraint(equalTo: centerImageView.bottomAnchor, constant: 8),
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            descriptionLabel.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor)
+        ]
 
         let horizontalConstraints = [
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
