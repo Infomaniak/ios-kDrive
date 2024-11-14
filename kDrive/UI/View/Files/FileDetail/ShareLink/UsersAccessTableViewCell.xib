@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -42,7 +42,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="b6c-UA-ZIN" userLabel="title Stack View">
                                                 <rect key="frame" x="57" y="4" width="313" height="22.5"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="249" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="pit-04-5d0" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="249" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="pit-04-5d0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="313" height="22.5"/>
                                                         <string key="text">Tous les utilisateurs du kDrive
 
@@ -60,7 +60,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="r9c-Fe-ia2" userLabel="details Stack View">
                                                 <rect key="frame" x="57" y="27" width="313" height="17"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="09p-zH-cVq" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="09p-zH-cVq" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="313" height="17"/>
                                                         <string key="text">2 utilisateurs
 
@@ -77,7 +77,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="jlU-IB-hep">
                                                 <rect key="frame" x="57" y="44" width="313" height="17"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Peut consulter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m83-Ub-BR0" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Peut consulter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m83-Ub-BR0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="313" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <nil key="textColor"/>
@@ -128,7 +128,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ye9-Db-pn5">
                                         <rect key="frame" x="0.0" y="65" width="410" height="31"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bgz-By-CxN" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bgz-By-CxN" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="12" y="0.0" width="398" height="31"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
@@ -151,7 +151,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xEX-gh-6jh">
                                         <rect key="frame" x="0.0" y="96" width="410" height="50"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rXs-cg-QBY" customClass="IKLabel" customModule="InfomaniakCoreUI">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rXs-cg-QBY" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="12" y="0.0" width="398" height="50"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
@@ -208,23 +208,6 @@
             <point key="canvasLocation" x="92.753623188405811" y="181.47321428571428"/>
         </tableViewCell>
     </objects>
-    <designables>
-        <designable name="09p-zH-cVq">
-            <size key="intrinsicContentSize" width="83" height="17"/>
-        </designable>
-        <designable name="bgz-By-CxN">
-            <size key="intrinsicContentSize" width="479.5" height="15.5"/>
-        </designable>
-        <designable name="m83-Ub-BR0">
-            <size key="intrinsicContentSize" width="96" height="17"/>
-        </designable>
-        <designable name="pit-04-5d0">
-            <size key="intrinsicContentSize" width="197.5" height="17"/>
-        </designable>
-        <designable name="rXs-cg-QBY">
-            <size key="intrinsicContentSize" width="479.5" height="15.5"/>
-        </designable>
-    </designables>
     <resources>
         <image name="chevron-right" width="24" height="24"/>
         <image name="test-image" width="2000" height="1333"/>
@@ -238,7 +221,7 @@
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

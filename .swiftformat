@@ -1,4 +1,3 @@
---strongOutlets
 --acronyms ID,URL,UUID
 --allman false
 --assetliterals visual-width
@@ -80,6 +79,7 @@
 --wraptypealiases preserve
 --xcodeindentation disabled
 --yodaswap always
---disable andOperator,opaqueGenericParameters,preferKeyPath,redundantReturn,strongOutlets,trailingCommas,unusedArguments,wrapMultilineStatementBraces
+--disable andOperator,opaqueGenericParameters,preferKeyPath,redundantReturn,strongOutlets,trailingCommas,unusedArguments,wrapMultilineStatementBraces,conditionalAssignment
 --enable blankLineAfterImports,blankLinesBetweenImports
 --exclude DerivedData,Derived,Tuist,Project.swift,Build,.build
+

@@ -259,7 +259,7 @@ extension FileProviderExtension {
         forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier,
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
-        Log.fileProvider("setTagData :\(tagData?.count) forItemIdentifier")
+        Log.fileProvider("setTagData :\(tagData?.count as Int?) forItemIdentifier")
         // kDrive doesn't support this
         completionHandler(nil, NSError.featureUnsupported)
     }
@@ -270,7 +270,7 @@ extension FileProviderExtension {
     ) {
         let fileId = itemIdentifier.toFileId()
         let uploadFileId = itemIdentifier.rawValue
-        Log.fileProvider("trashItem withIdentifier:\(fileId) uploadFileId:\(uploadFileId)")
+        Log.fileProvider("trashItem withIdentifier:\(fileId as Int?) uploadFileId:\(uploadFileId)")
         Task {
             // Cancel upload if any matching
             _ = self.uploadQueue.cancel(uploadFileId: uploadFileId)
@@ -307,7 +307,7 @@ extension FileProviderExtension {
         completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void
     ) {
         let fileId = itemIdentifier.toFileId()
-        Log.fileProvider("untrashItem withIdentifier:\(fileId)")
+        Log.fileProvider("untrashItem withIdentifier:\(fileId as Int?)")
         Task {
             guard let fileId else {
                 completionHandler(nil, NSFileProviderError(.noSuchItem))

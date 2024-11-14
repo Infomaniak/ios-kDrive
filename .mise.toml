@@ -1,5 +1,6 @@
 [tools]
-tuist = '4.12.0'
-periphery = '2.21.0'
-swiftformat = '0.54.0'
-swiftlint = '0.55.0'
+tuist = '4.12.1'
+periphery = '2.21.1'
+swiftformat = '0.54.5'
+swiftlint = '0.57.0'
+

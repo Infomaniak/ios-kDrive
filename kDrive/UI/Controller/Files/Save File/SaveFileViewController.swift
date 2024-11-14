@@ -18,7 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -178,7 +178,11 @@ class SaveFileViewController: UIViewController {
         guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
 
         let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
-            lazyFiles.filter("rawVisibility = %@ AND driveId == %d", FileVisibility.isInSharedSpace.rawValue, selectedDriveFileManager.drive.id)
+            lazyFiles.filter(
+                "rawVisibility = %@ AND driveId == %d",
+                FileVisibility.isInSharedSpace.rawValue,
+                selectedDriveFileManager.drive.id
+            )
         }.first
         return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
     }
@@ -308,10 +312,10 @@ class SaveFileViewController: UIViewController {
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
-                                                 file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
+                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
-        if let file {
-            saveViewController.items = [file]
+        if let files {
+            saveViewController.items = files
         }
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
         navigationController.navigationBar.prefersLargeTitles = true

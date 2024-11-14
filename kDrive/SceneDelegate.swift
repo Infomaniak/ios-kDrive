@@ -17,7 +17,7 @@
  */
 
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -218,7 +218,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         Task {
             let success = await DeeplinkParser().parse(url: url)
-            Log.sceneDelegate("scene open url\(url) success:\(success)")
+            Log.sceneDelegate("scene open url: \(url) success: \(success)")
         }
     }
 

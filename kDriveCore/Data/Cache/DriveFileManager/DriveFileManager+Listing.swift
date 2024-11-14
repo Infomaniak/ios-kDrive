@@ -94,7 +94,7 @@ public extension DriveFileManager {
             let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
 
             switch fileAction.action {
-            case .fileDelete, .fileTrash, .fileTrashInherited:
+            case .fileDelete, .fileTrash:
                 removeFileInDatabase(fileUid: fileUid, cascade: true, writableRealm: writableRealm)
 
             case .fileMoveOut:
@@ -103,7 +103,7 @@ public extension DriveFileManager {
 
                 oldParent.children.remove(movedOutFile)
 
-            case .fileMoveIn, .fileRestore, .fileCreate, .fileRestoreInherited:
+            case .fileMoveIn, .fileRestore, .fileCreate:
                 keepCacheAttributesForFile(
                     newFile: actionFile,
                     keepProperties: [.standard, .extras],

@@ -17,7 +17,7 @@
  */
 
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -41,7 +41,7 @@ public struct AppRouter: AppNavigable {
     @MainActor private var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
-                  delegate as? SceneDelegate != nil else {
+                  delegate is SceneDelegate else {
                 return false
             }
 
@@ -81,13 +81,13 @@ public struct AppRouter: AppNavigable {
         }
 
         switch route {
-        case .saveFile(let file):
+        case .saveFiles(let files):
             guard let driveFileManager = accountManager.currentDriveFileManager else {
                 Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
                 return
             }
 
-            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
+            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, files: files)
 
         case .store(let driveId, let userId):
             guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
@@ -280,11 +280,12 @@ public struct AppRouter: AppNavigable {
     private func restorePreviewViewController(driveFileManager: DriveFileManager,
                                               navigationController: UINavigationController,
                                               sceneUserInfo: [AnyHashable: Any]) async {
-        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int != nil,
+        guard sceneUserInfo[SceneRestorationValues.driveId.rawValue] is Int,
               let fileIds = sceneUserInfo[SceneRestorationValues.Carousel.filesIds.rawValue] as? [Int],
               let currentIndex = sceneUserInfo[SceneRestorationValues.Carousel.currentIndex.rawValue] as? Int,
               let normalFolderHierarchy = sceneUserInfo[SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue] as? Bool,
-              let presentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? PresentationOrigin else {
+              let rawPresentationOrigin = sceneUserInfo[SceneRestorationValues.Carousel.presentationOrigin.rawValue] as? String,
+              let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
             Log.sceneDelegate("metadata issue for PreviewController :\(sceneUserInfo)", level: .error)
             return
         }
@@ -438,8 +439,8 @@ public struct AppRouter: AppNavigable {
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
-    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
-        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
+        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, files: files)
         viewController.present(vc, animated: true)
     }
 
