@@ -22,13 +22,13 @@ import UIKit
 /// Abstract `Routes` that can be navigated to
 public enum NavigationRoutes: Equatable {
     case store(driveId: Int, userId: Int)
-    case saveFile(file: ImportedFile)
+    case saveFiles(files: [ImportedFile])
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
         case (.store(let lhdDriveId, let lhdUserId), .store(let rhdDriveId, let rhdUserId)):
             return lhdDriveId == rhdDriveId && lhdUserId == rhdUserId
-        case (.saveFile(let lhdFile), .saveFile(let rhdDile)):
+        case (.saveFiles(let lhdFile), .saveFiles(let rhdDile)):
             return lhdFile == rhdDile
         default:
             return false

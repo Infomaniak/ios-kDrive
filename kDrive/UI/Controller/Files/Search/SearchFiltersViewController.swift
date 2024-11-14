@@ -150,6 +150,7 @@ class SearchFiltersViewController: UITableViewController {
             cell.configure(with: filterType, filters: filters)
 
             return cell
+
         case .type:
             guard indexPath.row != 0,
                   filters.fileType == .searchExtension else {
@@ -229,6 +230,7 @@ class SearchFiltersViewController: UITableViewController {
             )
             present(floatingPanelController, animated: true)
             return nil
+
         case .type:
 
             if indexPath.row == 0 {

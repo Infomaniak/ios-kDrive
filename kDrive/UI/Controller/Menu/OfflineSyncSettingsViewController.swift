@@ -20,8 +20,8 @@ import kDriveCore
 import UIKit
 
 class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
-    private var tableContent: [SyncMod] = SyncMod.allCases
-    private var selectedOfflineMod: SyncMod!
+    private var tableContent: [SyncMode] = SyncMode.allCases
+    private var selectedOfflineMod: SyncMode!
 
     weak var delegate: SelectPhotoFormatDelegate?
 

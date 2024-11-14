@@ -2071,6 +2071,12 @@
 /* loco:62344c023cb45e6fcb219b43 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d éléments restaurés à leur emplacement d’origine";
 
+/* loco:66fe3560501931dbfb04f0c8 */
+"unknownArtist" = "Artiste inconnu";
+
+/* loco:66fe3634a0cfdc15cf0c1a94 */
+"unknownTitle" = "Titre inconnu";
+
 /* loco:6049df4d5c2c3a04bc397a7d */
 "updateAvailableDescription" = "Afin de profiter d’une expérience optimale de kDrive, nous vous conseillons de mettre à jour votre application.";
 

@@ -17,7 +17,7 @@
  */
 
 import FloatingPanel
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import UIKit

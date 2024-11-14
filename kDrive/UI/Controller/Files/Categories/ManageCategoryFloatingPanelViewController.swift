@@ -17,7 +17,7 @@
  */
 
 import FloatingPanel
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -105,7 +105,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     }
 
     private func setupContent() {
-        actions.forEach { action in
+        for action in actions {
             switch action {
             case .edit:
                 action.isEnabled = driveFileManager.drive.categoryRights.canEdit
