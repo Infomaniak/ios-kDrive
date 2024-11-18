@@ -20,14 +20,13 @@ import AVKit
 import Combine
 import FloatingPanel
 import InfomaniakCore
-import kDriveCore
 import kDriveResources
 import MediaPlayer
 
 public final class VideoPlayer {
-    var onPlaybackEnded: (() -> Void)?
+    public var onPlaybackEnded: (() -> Void)?
 
-    var progressPercentage: Double {
+    public var progressPercentage: Double {
         guard let player = player, let currentItem = player.currentItem else { return 0 }
         return player.currentTime().seconds / currentItem.duration.seconds
     }
@@ -35,6 +34,7 @@ public final class VideoPlayer {
     private var player: AVPlayer?
     private var playableFileName: String?
     private var currentTrackMetadata: MediaMetadata?
+    private var timeObserverToken: Any?
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
@@ -42,14 +42,18 @@ public final class VideoPlayer {
         return playerViewController
     }()
 
-    init(frozenFile: File, driveFileManager: DriveFileManager) {
+    public init(frozenFile: File, driveFileManager: DriveFileManager) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
+        playableFileName = file.name
+
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
-            let asset = AVAsset(url: file.localUrl)
+            Task { @MainActor in
+                currentTrackMetadata = await extractTrackMetadata(from: file)
+            }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
@@ -71,10 +75,6 @@ public final class VideoPlayer {
         player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
             self?.updateNowPlayingInfo()
         }
-    }
-
-    @objc private func playerDidPlayToEnd() {
-        onPlaybackEnded?()
     }
 
     public func setNowPlayingMetadata(currentMetadata: MediaMetadata) {

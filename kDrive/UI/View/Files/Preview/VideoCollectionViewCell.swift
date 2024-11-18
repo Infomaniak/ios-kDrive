@@ -75,7 +75,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
                 self?.videoPlayer?.setNowPlayingMetadata(currentMetadata: currentMetadata)
             }
         }
-
     }
 
     override func didEndDisplaying() {
