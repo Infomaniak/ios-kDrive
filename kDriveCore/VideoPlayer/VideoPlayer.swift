@@ -143,4 +143,8 @@ public final class VideoPlayer {
         }
         return MediaMetadata(title: title, artist: artist, artwork: artwork)
     }
+
+    public func stopPlayback() {
+        player?.pause()
+    }
 }
