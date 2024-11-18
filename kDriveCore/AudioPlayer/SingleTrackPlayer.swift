@@ -91,34 +91,6 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    public func extractTrackMetadata(from file: File) async -> MediaMetadata {
-        let asset = AVAsset(url: file.localUrl)
-
-        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
-        var artist = KDriveResourcesStrings.Localizable.unknownArtist
-        var artwork: UIImage?
-
-        let metadata = asset.commonMetadata
-
-        for item in metadata {
-            guard let commonKey = item.commonKey else { continue }
-
-            switch commonKey {
-            case .commonKeyTitle:
-                title = item.value as? String ?? title
-            case .commonKeyArtist:
-                artist = item.value as? String ?? artist
-            case .commonKeyArtwork:
-                if let data = item.value as? Data {
-                    artwork = UIImage(data: data)
-                }
-            default:
-                break
-            }
-        }
-        return MediaMetadata(title: title, artist: artist, artwork: artwork)
-    }
-
     // MARK: - Load
 
     /// Load internal structures to play a single track
@@ -130,7 +102,7 @@ public final class SingleTrackPlayer {
         if !playableFile.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: playableFile.localUrl)
             Task { @MainActor in
-                await onCurrentTrackMetadata.send(extractTrackMetadata(from: playableFile))
+                await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: playableFile, title: playableFileName))
             }
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -140,7 +112,10 @@ public final class SingleTrackPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
-                        await self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: playableFile))
+                        await self.onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(
+                            from: playableFile,
+                            title: self.playableFileName
+                        ))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }

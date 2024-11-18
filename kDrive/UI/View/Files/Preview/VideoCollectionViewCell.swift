@@ -70,7 +70,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         Task { @MainActor in
             videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
             guard let videoPlayer else { return }
-            let currentMetadata = await videoPlayer.extractTrackMetadata(from: file)
+            let currentMetadata = await MediaMetadata.extractTrackMetadata(from: file, title: playableFileName)
             videoPlayer.setNowPlayingMetadata(currentMetadata: currentMetadata)
             videoPlayer.onPlaybackEnded = { [weak self] in
                 self?.videoPlayer?.setNowPlayingMetadata(currentMetadata: currentMetadata)

@@ -46,13 +46,40 @@ public final class VideoPlayer {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
     }
 
+    public func setNowPlayingMetadata(currentMetadata: MediaMetadata) {
+        var nowPlayingInfo = [String: Any]()
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+
+        if let currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+            if let artwork = currentTrackMetadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        }
+
+        if let duration = player?.currentItem?.duration {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
+        }
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+
+    public func stopPlayback() {
+        player?.pause()
+    }
+
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
         playableFileName = file.name
 
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
             Task { @MainActor in
-                currentTrackMetadata = await extractTrackMetadata(from: file)
+                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file, title: playableFileName)
             }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -77,29 +104,6 @@ public final class VideoPlayer {
         }
     }
 
-    public func setNowPlayingMetadata(currentMetadata: MediaMetadata) {
-        var nowPlayingInfo = [String: Any]()
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
-        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-
-        if let currentTrackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
-            if let artwork = currentTrackMetadata.artwork {
-                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-            }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
-        }
-
-        if let duration = player?.currentItem?.duration {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
-        }
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
     private func updateNowPlayingInfo() {
         guard let player = player else { return }
 
@@ -114,37 +118,5 @@ public final class VideoPlayer {
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
-    public func extractTrackMetadata(from file: File) async -> MediaMetadata {
-        let asset = AVAsset(url: file.localUrl)
-
-        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
-        var artist = KDriveResourcesStrings.Localizable.unknownArtist
-        var artwork: UIImage?
-
-        let metadata = asset.commonMetadata
-
-        for item in metadata {
-            guard let commonKey = item.commonKey else { continue }
-
-            switch commonKey {
-            case .commonKeyTitle:
-                title = item.value as? String ?? title
-            case .commonKeyArtist:
-                artist = item.value as? String ?? artist
-            case .commonKeyArtwork:
-                if let data = item.value as? Data {
-                    artwork = UIImage(data: data)
-                }
-            default:
-                break
-            }
-        }
-        return MediaMetadata(title: title, artist: artist, artwork: artwork)
-    }
-
-    public func stopPlayback() {
-        player?.pause()
     }
 }
