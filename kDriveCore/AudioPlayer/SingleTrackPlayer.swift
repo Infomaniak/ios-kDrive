@@ -91,7 +91,9 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    private func extractTrackMetadata(from asset: AVAsset) async -> MediaMetadata {
+    public func extractTrackMetadata(from file: File) async -> MediaMetadata {
+        let asset = AVAsset(url: file.localUrl)
+
         var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage?
@@ -114,7 +116,6 @@ public final class SingleTrackPlayer {
                 break
             }
         }
-
         return MediaMetadata(title: title, artist: artist, artwork: artwork)
     }
 
@@ -127,10 +128,9 @@ public final class SingleTrackPlayer {
         playableFileName = playableFile.name
 
         if !playableFile.isLocalVersionOlderThanRemote {
-            let asset = AVAsset(url: playableFile.localUrl)
             player = AVPlayer(url: playableFile.localUrl)
             Task { @MainActor in
-                await onCurrentTrackMetadata.send(extractTrackMetadata(from: asset))
+                await onCurrentTrackMetadata.send(extractTrackMetadata(from: playableFile))
             }
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -140,7 +140,7 @@ public final class SingleTrackPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
-                        await self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: asset))
+                        await self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: playableFile))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
