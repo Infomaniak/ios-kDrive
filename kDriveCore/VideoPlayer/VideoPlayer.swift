@@ -46,7 +46,7 @@ public final class VideoPlayer {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
     }
 
-    public func setNowPlayingMetadata(currentMetadata: MediaMetadata) {
+    public func setNowPlayingMetadata() {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
