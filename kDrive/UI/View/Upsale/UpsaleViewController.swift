@@ -68,6 +68,8 @@ public class UpsaleViewController: UIViewController {
         return button
     }()
 
+    let scrollView = UIScrollView()
+
     let containerView = UIView()
 
     let bulletPointsView = UIView()
@@ -82,14 +84,25 @@ public class UpsaleViewController: UIViewController {
 
     /// Layout all the vertical elements of this view from code.
     private func setupBody() {
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(containerView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
 
         NSLayoutConstraint.activate([
-            containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            containerView.widthAnchor.constraint(equalTo: view.widthAnchor),
-            containerView.heightAnchor.constraint(equalTo: view.heightAnchor)
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
+        scrollView.addSubview(containerView)
+
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            containerView.widthAnchor.constraint(equalTo: view.widthAnchor)
         ])
 
         titleImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -111,13 +124,30 @@ public class UpsaleViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: titleImageView.bottomAnchor, constant: 24),
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             bulletPointsView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
-            bulletPointsView.heightAnchor.constraint(greaterThanOrEqualToConstant: 10),
-            freeTrialButton.topAnchor.constraint(greaterThanOrEqualTo: bulletPointsView.bottomAnchor, constant: 8),
+            freeTrialButton.topAnchor.constraint(equalTo: bulletPointsView.bottomAnchor, constant: 24),
             freeTrialButton.heightAnchor.constraint(equalToConstant: 45.0),
             dismissButton.topAnchor.constraint(equalTo: freeTrialButton.bottomAnchor, constant: 16),
             dismissButton.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             dismissButton.heightAnchor.constraint(equalToConstant: 45.0)
         ]
+
+        let dismissButtonConstraintHigh = dismissButton.widthAnchor.constraint(
+            equalTo: containerView.widthAnchor,
+            multiplier: 1,
+            constant: -24
+        )
+        dismissButtonConstraintHigh.priority = .defaultHigh
+
+        let dismissButtonConstraintRequired = dismissButton.widthAnchor.constraint(lessThanOrEqualToConstant: 370)
+
+        let freeTrialButtonConstraintHigh = freeTrialButton.widthAnchor.constraint(
+            equalTo: containerView.widthAnchor,
+            multiplier: 1,
+            constant: -24
+        )
+        freeTrialButtonConstraintHigh.priority = .defaultHigh
+
+        let freeTrialButtonConstraintRequired = freeTrialButton.widthAnchor.constraint(lessThanOrEqualToConstant: 370)
 
         let horizontalConstraints = [
             titleLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
@@ -129,9 +159,11 @@ public class UpsaleViewController: UIViewController {
             bulletPointsView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             bulletPointsView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1),
             freeTrialButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            freeTrialButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -24),
+            freeTrialButtonConstraintHigh,
+            freeTrialButtonConstraintRequired,
             dismissButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            dismissButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -24)
+            dismissButtonConstraintHigh,
+            dismissButtonConstraintRequired
         ]
 
         NSLayoutConstraint.activate(verticalConstraints)
@@ -158,11 +190,9 @@ public class UpsaleViewController: UIViewController {
         bulletPointsView.addSubview(mainStackView)
 
         NSLayoutConstraint.activate([
-            mainStackView.leadingAnchor.constraint(equalTo: bulletPointsView.leadingAnchor, constant: 16),
-            mainStackView.trailingAnchor.constraint(equalTo: bulletPointsView.trailingAnchor, constant: -16)
+            mainStackView.heightAnchor.constraint(equalTo: bulletPointsView.heightAnchor),
+            mainStackView.widthAnchor.constraint(equalTo: bulletPointsView.widthAnchor)
         ])
-
-        mainStackView.backgroundColor = .red
     }
 
     private func createRow(text: String) -> UIStackView {
@@ -176,7 +206,7 @@ public class UpsaleViewController: UIViewController {
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .left
 
-        let rowStackView = UIStackView(arrangedSubviews: [imageView, label])
+        let rowStackView = UIStackView(arrangedSubviews: [UIView(), imageView, label])
         rowStackView.axis = .horizontal
         rowStackView.spacing = 16
         rowStackView.alignment = .top
