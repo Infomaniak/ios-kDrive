@@ -132,7 +132,7 @@ public extension PHAsset {
             shouldTransformIntoJPEG = true
         }
 
-        // Asset are copied when we start the Upload, thus guarantees the stability of the file
+        // Asset is copied when we start the Upload, thus guarantees the stability of the file
         @InjectService var fileImportHelper: FileImportHelper
         let targetURL = fileImportHelper.generateImportURL(for: resourceUTI)
         do {
@@ -149,6 +149,7 @@ public extension PHAsset {
             return targetURL
         } catch {
             SentryDebug.addBreadcrumb(message: error.localizedDescription, category: SentryDebug.Category.PHAsset, level: .error)
+            SentryDebug.capturePHAssetResourceManagerError(error)
         }
         return nil
     }

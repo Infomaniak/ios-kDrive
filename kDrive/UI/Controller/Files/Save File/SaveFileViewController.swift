@@ -312,10 +312,10 @@ class SaveFileViewController: UIViewController {
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
-                                                 file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
+                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
-        if let file {
-            saveViewController.items = [file]
+        if let files {
+            saveViewController.items = files
         }
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
         navigationController.navigationBar.prefersLargeTitles = true

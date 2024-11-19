@@ -40,7 +40,11 @@ public protocol RouterAppNavigable {
 
     @MainActor func showPhotoSyncSettings()
 
-    @MainActor func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile)
+    @MainActor func showSaveFileVC(
+        from viewController: UIViewController,
+        driveFileManager: DriveFileManager,
+        files: [ImportedFile]
+    )
 }
 
 /// Routing methods available from both the AppExtension mode and App
@@ -63,6 +67,12 @@ public protocol RouterFileNavigable {
     ///   - driveFileManager: driveFileManager
     ///   - office: Open in only office
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
+
+    /// Present the public share locked screen
+    @MainActor func presentPublicShareLocked(_ destinationURL: URL)
+
+    /// Present the public share expired screen
+    @MainActor func presentPublicShareExpired()
 
     /// Present a file list for a public share, regardless of authenticated state
     @MainActor func presentPublicShare(

@@ -81,13 +81,13 @@ public struct AppRouter: AppNavigable {
         }
 
         switch route {
-        case .saveFile(let file):
+        case .saveFiles(let files):
             guard let driveFileManager = accountManager.currentDriveFileManager else {
                 Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
                 return
             }
 
-            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, file: file)
+            showSaveFileVC(from: viewController, driveFileManager: driveFileManager, files: files)
 
         case .store(let driveId, let userId):
             guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
@@ -439,8 +439,8 @@ public struct AppRouter: AppNavigable {
         navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
-    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, file: ImportedFile) {
-        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, file: file)
+    public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
+        let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, files: files)
         viewController.present(vc, animated: true)
     }
 
@@ -585,6 +585,53 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
+    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+        guard let window,
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareLocked")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = LockedFolderViewController()
+            viewController.destinationURL = destinationURL
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
+    @MainActor public func presentPublicShareExpired() {
+        guard let window,
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareExpired")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = UnavaillableFolderViewController()
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
     @MainActor public func presentPublicShare(
         frozenRootFolder: File,
         publicShareProxy: PublicShareProxy,
@@ -592,12 +639,8 @@ public struct AppRouter: AppNavigable {
         apiFetcher: PublicShareApiFetcher
     ) {
         guard let window,
-              let rootViewController = window.rootViewController else {
-            fatalError("TODO: lazy load a rootViewController")
-        }
-
-        guard let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("Root is not a MainTabViewController")
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShare")
             return
         }
 

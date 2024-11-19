@@ -218,7 +218,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         Task {
             let success = await DeeplinkParser().parse(url: url)
-            Log.sceneDelegate("scene open url\(url) success:\(success)")
+            Log.sceneDelegate("scene open url: \(url) success: \(success)")
         }
     }
 
@@ -232,13 +232,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         Log.sceneDelegate("scene continue userActivity")
         Task {
             guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-                  let incomingURL = userActivity.webpageURL,
-                  let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+                  let incomingURL = userActivity.webpageURL else {
                 Log.sceneDelegate("scene continue userActivity - invalid activity", level: .error)
                 return
             }
 
-            await UniversalLinksHelper.handlePath(components.path)
+            await UniversalLinksHelper.handleURL(incomingURL)
         }
     }
 
