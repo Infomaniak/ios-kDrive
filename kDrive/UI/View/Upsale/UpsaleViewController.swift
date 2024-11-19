@@ -77,7 +77,7 @@ public class UpsaleViewController: UIViewController {
 
         view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         setupBody()
-        setupBulletPoints()
+        layoutStackView()
     }
 
     /// Layout all the vertical elements of this view from code.
@@ -138,77 +138,50 @@ public class UpsaleViewController: UIViewController {
         NSLayoutConstraint.activate(horizontalConstraints)
     }
 
-    /// Dynamically set auto-layout constraints for the bullet points
-    private func setupBulletPoints() {
-        let adListings = [KDriveStrings.Localizable.obtainkDriveAdListing1,
-                          KDriveStrings.Localizable.obtainkDriveAdListing2,
-                          KDriveStrings.Localizable.obtainkDriveAdListing3]
-        var verticalViews = [String: UIView]()
-        var verticalContraintString = "V:|"
-        for (index, ad) in adListings.enumerated() {
-            let container = UIView()
-            let containerViewId = "view\(index)"
-            container.translatesAutoresizingMaskIntoConstraints = false
-            bulletPointsView.addSubview(container)
+    private func layoutStackView() {
+        let mainStackView = UIStackView()
+        mainStackView.axis = .vertical
+        mainStackView.spacing = 16
+        mainStackView.alignment = .leading
+        mainStackView.translatesAutoresizingMaskIntoConstraints = false
 
-            verticalViews[containerViewId] = container
-            verticalContraintString += "[\(containerViewId)]-12-"
+        mainStackView.addArrangedSubview(createRow(
+            text: KDriveStrings.Localizable.obtainkDriveAdListing1
+        ))
+        mainStackView.addArrangedSubview(createRow(
+            text: KDriveStrings.Localizable.obtainkDriveAdListing2
+        ))
+        mainStackView.addArrangedSubview(createRow(
+            text: KDriveStrings.Localizable.obtainkDriveAdListing3
+        ))
 
-            layoutBulletPointView(
-                txt: ad,
-                container: container
-            )
+        bulletPointsView.addSubview(mainStackView)
 
-            let horizontalConstraints = [
-                container.centerXAnchor.constraint(equalTo: bulletPointsView.centerXAnchor),
-                container.widthAnchor.constraint(equalTo: bulletPointsView.widthAnchor)
-            ]
-            NSLayoutConstraint.activate(horizontalConstraints)
-        }
-        verticalContraintString += "|"
+        NSLayoutConstraint.activate([
+            mainStackView.leadingAnchor.constraint(equalTo: bulletPointsView.leadingAnchor, constant: 16),
+            mainStackView.trailingAnchor.constraint(equalTo: bulletPointsView.trailingAnchor, constant: -16)
+        ])
 
-        let verticalConstraints = NSLayoutConstraint
-            .constraints(withVisualFormat: verticalContraintString,
-                         metrics: nil,
-                         views: verticalViews)
-
-        NSLayoutConstraint.activate(verticalConstraints)
+        mainStackView.backgroundColor = .red
     }
 
-    private func layoutBulletPointView(txt: String, container: UIView) {
+    private func createRow(text: String) -> UIStackView {
+        let imageView = UIImageView(image: KDriveResourcesAsset.select.image)
+        imageView.contentMode = .scaleAspectFit
+
         let label = UILabel()
-        let bullet = UIImageView()
-
-        label.textAlignment = .left
-        label.lineBreakMode = .byWordWrapping
+        label.text = text
+        label.font = UIFont.systemFont(ofSize: 16)
         label.numberOfLines = 0
-        label.text = txt
+        label.lineBreakMode = .byWordWrapping
+        label.textAlignment = .left
 
-        bullet.image = KDriveResourcesAsset.select.image
+        let rowStackView = UIStackView(arrangedSubviews: [imageView, label])
+        rowStackView.axis = .horizontal
+        rowStackView.spacing = 16
+        rowStackView.alignment = .top
 
-        label.translatesAutoresizingMaskIntoConstraints = false
-        bullet.translatesAutoresizingMaskIntoConstraints = false
-
-        container.addSubview(label)
-        container.addSubview(bullet)
-
-        let verticalConstraints = [
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            label.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 1),
-            label.rightAnchor.constraint(equalTo: container.rightAnchor),
-            bullet.topAnchor.constraint(equalTo: container.topAnchor),
-            bullet.heightAnchor.constraint(equalTo: bullet.widthAnchor)
-        ]
-
-        let views = ["label": label, "bullet": bullet]
-
-        let horizontalConstraints = NSLayoutConstraint
-            .constraints(withVisualFormat: "H:|-16-[bullet]-16-[label]-16-|",
-                         metrics: nil,
-                         views: views)
-
-        NSLayoutConstraint.activate(verticalConstraints)
-        NSLayoutConstraint.activate(horizontalConstraints)
+        return rowStackView
     }
 
     @objc public func freeTrial() {
