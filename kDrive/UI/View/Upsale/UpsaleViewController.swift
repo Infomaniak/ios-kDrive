@@ -106,19 +106,18 @@ public class UpsaleViewController: UIViewController {
         containerView.addSubview(freeTrialButton)
         containerView.addSubview(dismissButton)
 
-        let views = ["titleLabel": titleLabel,
-                     "descriptionLabel": descriptionLabel,
-                     "titleImageView": titleImageView,
-                     "bulletPointsView": bulletPointsView,
-                     "freeTrialButton": freeTrialButton,
-                     "loginButton": dismissButton]
-
-        let verticalConstraints = NSLayoutConstraint
-            .constraints(
-                withVisualFormat: "V:|-24-[titleImageView]-24-[titleLabel]-24-[descriptionLabel]-24-[bulletPointsView(>=10)]->=8-[freeTrialButton(45)]-16-[loginButton(45)]-|",
-                metrics: nil,
-                views: views
-            )
+        let verticalConstraints = [
+            titleImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 24),
+            titleLabel.topAnchor.constraint(equalTo: titleImageView.bottomAnchor, constant: 24),
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+            bulletPointsView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
+            bulletPointsView.heightAnchor.constraint(greaterThanOrEqualToConstant: 10),
+            freeTrialButton.topAnchor.constraint(greaterThanOrEqualTo: bulletPointsView.bottomAnchor, constant: 8),
+            freeTrialButton.heightAnchor.constraint(equalToConstant: 45.0),
+            dismissButton.topAnchor.constraint(equalTo: freeTrialButton.bottomAnchor, constant: 16),
+            dismissButton.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            dismissButton.heightAnchor.constraint(equalToConstant: 45.0)
+        ]
 
         let horizontalConstraints = [
             titleLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
@@ -128,7 +127,7 @@ public class UpsaleViewController: UIViewController {
             titleImageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             titleImageView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1),
             bulletPointsView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            bulletPointsView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -8),
+            bulletPointsView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1),
             freeTrialButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             freeTrialButton.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 1, constant: -24),
             dismissButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
@@ -204,7 +203,7 @@ public class UpsaleViewController: UIViewController {
         let views = ["label": label, "bullet": bullet]
 
         let horizontalConstraints = NSLayoutConstraint
-            .constraints(withVisualFormat: "H:|-[bullet]-16-[label]-|",
+            .constraints(withVisualFormat: "H:|-16-[bullet]-16-[label]-16-|",
                          metrics: nil,
                          views: views)
 
