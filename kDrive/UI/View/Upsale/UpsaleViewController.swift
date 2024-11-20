@@ -199,6 +199,11 @@ public class UpsaleViewController: UIViewController {
         let imageView = UIImageView(image: KDriveResourcesAsset.select.image)
         imageView.contentMode = .scaleAspectFit
 
+        NSLayoutConstraint.activate([
+            imageView.heightAnchor.constraint(equalToConstant: 20),
+            imageView.widthAnchor.constraint(equalToConstant: 20)
+        ])
+
         let label = UILabel()
         label.text = text
         label.font = UIFont.systemFont(ofSize: 16)
