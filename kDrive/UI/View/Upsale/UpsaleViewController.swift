@@ -50,19 +50,16 @@ public class UpsaleViewController: UIViewController {
         return label
     }()
 
-    let freeTrialButton: IKLargeButton = {
+    lazy var freeTrialButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
         button.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
         return button
     }()
 
-    let dismissButton: IKLargeButton = {
+    lazy var dismissButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        // TODO: Check secondary is white not grey
-//        button.style = .secondaryButton
-        button.backgroundColor = .lightGray
-        // TODO: Dynamic switch to .buttonLogin
+        button.style = .whiteButton
         button.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
         button.addTarget(self, action: #selector(login), for: .touchUpInside)
         return button
