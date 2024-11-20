@@ -22,12 +22,7 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
-    let titleImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = KDriveResourcesAsset.upsaleHeader.image
-        return imageView
-    }()
+    let titleImageView = UIImageView()
 
     let titleLabel: UILabel = {
         let label = UILabel()
@@ -50,20 +45,9 @@ public class UpsaleViewController: UIViewController {
         return label
     }()
 
-    lazy var freeTrialButton: IKLargeButton = {
-        let button = IKLargeButton(frame: .zero)
-        button.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
-        button.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
-        return button
-    }()
+    let freeTrialButton = IKLargeButton(frame: .zero)
 
-    lazy var dismissButton: IKLargeButton = {
-        let button = IKLargeButton(frame: .zero)
-        button.style = .whiteButton
-        button.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
-        button.addTarget(self, action: #selector(login), for: .touchUpInside)
-        return button
-    }()
+    let dismissButton = IKLargeButton(frame: .zero)
 
     let scrollView = UIScrollView()
 
@@ -75,8 +59,24 @@ public class UpsaleViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        configureButtons()
+        configureHeader()
         setupBody()
         layoutStackView()
+    }
+
+    func configureHeader() {
+        titleImageView.contentMode = .scaleAspectFit
+        titleImageView.image = KDriveResourcesAsset.upsaleHeader.image
+    }
+
+    func configureButtons() {
+        freeTrialButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
+        freeTrialButton.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
+
+        dismissButton.style = .whiteButton
+        dismissButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdAlreadyGotAccount, for: .normal)
+        dismissButton.addTarget(self, action: #selector(login), for: .touchUpInside)
     }
 
     /// Layout all the vertical elements of this view from code.
@@ -217,10 +217,12 @@ public class UpsaleViewController: UIViewController {
     }
 
     @objc public func freeTrial() {
+        // TODO: Hook free trial
         dismiss(animated: true, completion: nil)
     }
 
     @objc public func login() {
+        // TODO: Hook login
         dismiss(animated: true, completion: nil)
     }
 }
