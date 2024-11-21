@@ -33,10 +33,10 @@ public struct MediaMetadata {
 }
 
 public extension MediaMetadata {
-    static func extractTrackMetadata(from file: File, title: String?) async -> MediaMetadata {
-        let asset = AVAsset(url: file.localUrl)
+    static func extractTrackMetadata(from url: URL) async -> MediaMetadata {
+        let asset = AVAsset(url: url)
 
-        var title = title ?? KDriveResourcesStrings.Localizable.unknownTitle
+        var title = KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage?
 

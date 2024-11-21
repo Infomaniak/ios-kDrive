@@ -32,9 +32,7 @@ public final class VideoPlayer {
     }
 
     private var player: AVPlayer?
-    private var playableFileName: String?
     private var currentTrackMetadata: MediaMetadata?
-    private var timeObserverToken: Any?
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
@@ -58,8 +56,6 @@ public final class VideoPlayer {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
             }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
         }
 
         if let duration = player?.currentItem?.duration {
@@ -74,12 +70,10 @@ public final class VideoPlayer {
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
-        playableFileName = file.name
-
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
             Task { @MainActor in
-                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file, title: playableFileName)
+                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl)
             }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -88,35 +82,11 @@ public final class VideoPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
+                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: asset.url)
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                        self.addPeriodicTimeObserver()
                     }
                 }
             }
         }
-    }
-
-    private func addPeriodicTimeObserver() {
-        guard let player = player else { return }
-        let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
-            self?.updateNowPlayingInfo()
-        }
-    }
-
-    private func updateNowPlayingInfo() {
-        guard let player = player else { return }
-
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
-
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
-        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
-
-        if let duration = player.currentItem?.duration, duration.isNumeric {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
-        }
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }

@@ -37,9 +37,6 @@ public final class SingleTrackPlayer {
     ]
 
     private let driveFileManager: DriveFileManager
-
-    private var playableFileName: String?
-
     private var currentTrackMetadata: MediaMetadata?
 
     // MARK: Player Observation
@@ -97,12 +94,11 @@ public final class SingleTrackPlayer {
     ///
     /// Async as may take up some time
     public func setup(with playableFile: File) async { // TODO: use abstract type
-        playableFileName = playableFile.name
-
         if !playableFile.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: playableFile.localUrl)
             Task { @MainActor in
-                await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: playableFile, title: playableFileName))
+                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: playableFile.localUrl)
+                await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: playableFile.localUrl))
             }
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -112,9 +108,9 @@ public final class SingleTrackPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
+                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: asset.url)
                         await self.onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(
-                            from: playableFile,
-                            title: self.playableFileName
+                            from: asset.url
                         ))
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
@@ -149,8 +145,6 @@ public final class SingleTrackPlayer {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
             }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
