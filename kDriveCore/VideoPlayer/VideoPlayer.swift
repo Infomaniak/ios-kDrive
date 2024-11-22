@@ -44,18 +44,16 @@ public final class VideoPlayer {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
     }
 
-    public func setNowPlayingMetadata() {
+    public func setNowPlayingMetadata(metadata: MediaMetadata) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let currentTrackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
-            if let artwork = currentTrackMetadata.artwork {
-                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-            }
+        nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
+        if let artwork = metadata.artwork {
+            let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
         }
 
         if let duration = player?.currentItem?.duration {
@@ -73,7 +71,10 @@ public final class VideoPlayer {
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
             Task { @MainActor in
-                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl)
+                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl, playableFileName: file.name)
+                if let currentMetadata = self.currentTrackMetadata {
+                    setNowPlayingMetadata(metadata: currentMetadata)
+                }
             }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -82,7 +83,10 @@ public final class VideoPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
-                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: asset.url)
+                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
+                            from: asset.url,
+                            playableFileName: file.name
+                        )
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                     }
                 }

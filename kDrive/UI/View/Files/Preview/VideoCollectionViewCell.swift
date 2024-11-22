@@ -42,7 +42,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var parentViewController: UIViewController?
     weak var floatingPanelController: FloatingPanelController?
 
-    private var playableFileName: String?
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
     private var videoPlayer: VideoPlayer?
@@ -63,17 +62,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
 
         self.file = file
-        playableFileName = file.name
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
         Task { @MainActor in
             videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
-            guard let videoPlayer else { return }
-            videoPlayer.setNowPlayingMetadata()
-            videoPlayer.onPlaybackEnded = { [weak self] in
-                self?.videoPlayer?.setNowPlayingMetadata()
-            }
         }
     }
 

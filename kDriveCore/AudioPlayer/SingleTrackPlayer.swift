@@ -97,8 +97,7 @@ public final class SingleTrackPlayer {
         if !playableFile.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: playableFile.localUrl)
             Task { @MainActor in
-                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: playableFile.localUrl)
-                await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: playableFile.localUrl))
+                await setMetaData(url: playableFile.localUrl, playableFileName: playableFile.name)
             }
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
@@ -108,10 +107,7 @@ public final class SingleTrackPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
-                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: asset.url)
-                        await self.onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(
-                            from: asset.url
-                        ))
+                        await self.setMetaData(url: asset.url, playableFileName: playableFile.name)
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                         self.setUpObservers()
                     }
@@ -129,6 +125,11 @@ public final class SingleTrackPlayer {
         player?.pause()
         player = nil
         playerState = .stopped
+    }
+
+    private func setMetaData(url: URL, playableFileName: String?) async {
+        currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName)
+        await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName))
     }
 
     // MARK: - MediaPlayer

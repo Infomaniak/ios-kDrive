@@ -33,16 +33,14 @@ public struct MediaMetadata {
 }
 
 public extension MediaMetadata {
-    static func extractTrackMetadata(from url: URL) async -> MediaMetadata {
+    static func extractTrackMetadata(from url: URL, playableFileName: String?) async -> MediaMetadata {
         let asset = AVAsset(url: url)
 
-        var title = KDriveResourcesStrings.Localizable.unknownTitle
+        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist
         var artwork: UIImage?
 
-        let metadata = asset.commonMetadata
-
-        for item in metadata {
+        for item in asset.commonMetadata {
             guard let commonKey = item.commonKey else { continue }
 
             switch commonKey {
