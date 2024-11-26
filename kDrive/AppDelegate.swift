@@ -105,18 +105,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // swiftlint:disable force_try
         Task {
-            try! await Task.sleep(nanoseconds:5_000_000_000)
-            
+            try! await Task.sleep(nanoseconds: 5_000_000_000)
+
             @InjectService var router: AppNavigable
-            let sheet = UpsaleViewController()
-//            sheet.modalPresentationStyle = .fullScreen
-            router.topMostViewController?.present(sheet, animated: true, completion: nil)
+            let upsaleViewController = UpsaleViewController()
+            let noDriveViewController = NoDriveUpsaleViewController()
+            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+            router.topMostViewController?.present(floatingPanel, animated: true, completion: nil)
             return
 
             // a public share expired
-            let somePublicShare = URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
+            let somePublicShare =
+                URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
             // a public share password protected
-//            let somePublicShare = URL(string: "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
+//            let somePublicShare = URL(string:
+//            "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
 
             await UniversalLinksHelper.handleURL(somePublicShare!)
         }

@@ -21,6 +21,7 @@ import kDriveResources
 import Lottie
 import UIKit
 
+
 class FolderColorFloatingPanelViewController: InformationFloatingPanelViewController {
     override func viewDidLoad() {
         super.viewDidLoad()

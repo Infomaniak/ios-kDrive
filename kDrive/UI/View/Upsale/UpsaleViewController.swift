@@ -63,6 +63,7 @@ public class UpsaleViewController: UIViewController {
         configureHeader()
         setupBody()
         layoutStackView()
+        view.setNeedsLayout()
     }
 
     func configureHeader() {
