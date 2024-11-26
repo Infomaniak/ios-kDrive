@@ -73,7 +73,7 @@ extension FileActionsFloatingPanelViewController {
             case .manageDropbox:
                 return file.isDropbox
             case .folderColor:
-                return file.capabilities.canColor
+                return file.isDirectory // True for directory to display an upSaleView is necessary
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
