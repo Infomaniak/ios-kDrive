@@ -657,9 +657,8 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            // TODO: i18n
             let configuration = FileListViewModel.Configuration(selectAllSupported: true,
-                                                                rootTitle: "public share",
+                                                                rootTitle: nil,
                                                                 emptyViewType: .emptyFolder,
                                                                 supportsDrop: false,
                                                                 leftBarButtons: [.cancel],
