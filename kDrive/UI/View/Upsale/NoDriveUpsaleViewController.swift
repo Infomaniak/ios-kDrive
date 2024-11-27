@@ -23,10 +23,11 @@ import UIKit
 
 public class NoDriveUpsaleViewController: UpsaleViewController {
     override func configureButtons() {
+        dismissButton.style = .primaryButton
         freeTrialButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
         freeTrialButton.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
 
-        dismissButton.style = .whiteButton
+        dismissButton.style = .secondaryButton
         dismissButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
         dismissButton.addTarget(self, action: #selector(dismissViewController), for: .touchUpInside)
     }

@@ -34,7 +34,7 @@ class UpsaleFloatingPanelController: AdaptiveDriveFloatingPanelController {
         track(scrollView: upsaleViewController.scrollView)
 
         surfaceView.grabberHandle.isHidden = true
-        surfaceView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        surfaceView.backgroundColor = .white
     }
 
     override func viewDidLoad() {

@@ -25,10 +25,8 @@ public class UpsaleViewController: UIViewController {
     let titleImageView = UIImageView()
 
     let titleLabel: UILabel = {
-        let label = UILabel()
-        // Some factorisation can be done in kDrive
-        label.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
-        label.textColor = KDriveResourcesAsset.titleColor.color
+        let label = IKLabel()
+        label.style = .header2
         label.numberOfLines = 1
         label.textAlignment = .center
         label.text = KDriveStrings.Localizable.obtainkDriveAdTitle
@@ -36,8 +34,8 @@ public class UpsaleViewController: UIViewController {
     }()
 
     let descriptionLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .body)
+        let label = IKLabel()
+        label.style = .header3
         label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
@@ -58,12 +56,11 @@ public class UpsaleViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = .white
         configureButtons()
         configureHeader()
         setupBody()
         layoutStackView()
-        view.setNeedsLayout()
     }
 
     func configureHeader() {
@@ -72,10 +69,11 @@ public class UpsaleViewController: UIViewController {
     }
 
     func configureButtons() {
+        freeTrialButton.style = .primaryButton
         freeTrialButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
         freeTrialButton.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
 
-        dismissButton.style = .whiteButton
+        dismissButton.style = .secondaryButton
         dismissButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdAlreadyGotAccount, for: .normal)
         dismissButton.addTarget(self, action: #selector(login), for: .touchUpInside)
     }
@@ -202,9 +200,9 @@ public class UpsaleViewController: UIViewController {
             imageView.widthAnchor.constraint(equalToConstant: 20)
         ])
 
-        let label = UILabel()
+        let label = IKLabel()
+        label.style = .subtitle1
         label.text = text
-        label.font = UIFont.systemFont(ofSize: 16)
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .left
