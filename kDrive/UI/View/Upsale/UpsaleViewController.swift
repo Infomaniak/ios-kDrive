@@ -56,7 +56,7 @@ public class UpsaleViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .white
+        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         configureButtons()
         configureHeader()
         setupBody()
