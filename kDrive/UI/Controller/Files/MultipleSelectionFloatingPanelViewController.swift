@@ -141,6 +141,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
+    // TODO: make it work
     func downloadPublicShareArchivedFiles(downloadCellPath: IndexPath,
                                           driveFileManager: DriveFileManager,
                                           publicShareProxy: PublicShareProxy,

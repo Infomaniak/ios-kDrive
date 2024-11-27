@@ -105,13 +105,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // swiftlint:disable force_try
         Task {
-            try! await Task.sleep(nanoseconds:5_000_000_000)
+            try! await Task.sleep(nanoseconds: 5_000_000_000)
             print("coucou")
             // a public share expired
-            let somePublicShare = URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
+//            let somePublicShare = URL(string:"https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
             // a public share password protected
-//            let somePublicShare = URL(string: "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
-
+//            let somePublicShare = URL(string:"https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
+            // a valid public share
+            let somePublicShare =
+                URL(string: "https://kdrive.infomaniak.com/app/share/140946/01953831-16d3-4df6-8b48-33c8001c7981")
             await UniversalLinksHelper.handleURL(somePublicShare!)
         }
 
