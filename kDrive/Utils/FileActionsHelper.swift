@@ -105,6 +105,8 @@ public final class FileActionsHelper {
 
     #if !ISEXTENSION
     public static func save(file: File, from viewController: UIViewController? = nil, showSuccessSnackBar: Bool = true) {
+        guard !file.isInvalidated else { return }
+
         @InjectService var appNavigable: AppNavigable
         let presenterViewController = viewController != nil
             ? viewController
