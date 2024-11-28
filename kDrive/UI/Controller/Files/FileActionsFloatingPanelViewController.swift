@@ -158,6 +158,7 @@ public class FloatingPanelAction: Equatable {
         return [
             manageCategories,
             favorite,
+            upsaleColor,
             folderColor,
             convertToDropbox,
             manageDropbox,
@@ -197,6 +198,12 @@ public class FloatingPanelAction: Equatable {
                                                reverseName: KDriveResourcesStrings.Localizable.buttonSharePublicLink,
                                                image: KDriveResourcesAsset.link.image)
 
+    static let upsaleColor = FloatingPanelAction(
+        id: 21,
+        name: KDriveResourcesStrings.Localizable.buttonChangeFolderColor,
+        image: KDriveResourcesAsset.colorBucket.image
+    )
+
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
     }
@@ -218,7 +225,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActionsOnlyFolders: [FloatingPanelAction] {
-        return [manageCategories, favorite, folderColor, offline, download, move, duplicate].map { $0.reset() }
+        return [manageCategories, favorite, upsaleColor, folderColor, offline, download, move, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
