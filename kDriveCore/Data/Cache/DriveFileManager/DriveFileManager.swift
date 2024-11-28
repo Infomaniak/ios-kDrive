@@ -742,7 +742,6 @@ public final class DriveFileManager {
 
                 deleteOrphanFiles(
                     root: DriveFileManager.homeRootFile,
-                    DriveFileManager.lastPicturesRootFile,
                     DriveFileManager.lastModificationsRootFile,
                     DriveFileManager.searchFilesRootFile,
                     writableRealm: writableRealm

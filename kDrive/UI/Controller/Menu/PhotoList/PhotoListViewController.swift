@@ -101,6 +101,10 @@ final class PhotoListViewController: FileListViewController {
         bindPhotoListViewModel()
     }
 
+    override func getDisplayedFile(at indexPath: IndexPath) -> File? {
+        return displayedSections[safe: indexPath.section]?.elements[indexPath.item]
+    }
+
     private func bindPhotoListViewModel() {
         photoListViewModel.$sections.receiveOnMain(store: &bindStore) { [weak self] newContent in
             self?.reloadCollectionViewWith(sections: newContent)
@@ -291,7 +295,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
-        guard let file = displayedSections[safe: indexPath.section]?.elements[indexPath.row] else {
+        guard let file = getDisplayedFile(at: indexPath) else {
             return cell
         }
 
