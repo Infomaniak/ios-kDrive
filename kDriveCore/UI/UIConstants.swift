@@ -36,6 +36,28 @@ public enum UIConstants {
         public static let cornerRadius = 10.0
     }
 
+    public enum List {
+        public static let paddingBottom = 50.0
+        public static let floatingButtonPaddingBottom = 75.0
+    }
+
+    public enum FloatingPanel {
+        public static let cornerRadius = 20.0
+        public static let headerHeight = 70.0
+    }
+
+    public enum Image {
+        public static let cornerRadius = 3.0
+    }
+
+    public enum Alert {
+        public static let cornerRadius = 8.0
+    }
+
+    public enum FileList {
+        public static let cellHeight = 60.0
+    }
+
     private static let style: SnackBarStyle = {
         var style = SnackBarStyle.infomaniakStyle
         style.anchor = 20.0
@@ -43,19 +65,7 @@ public enum UIConstants {
         return style
     }()
 
-    public static let inputCornerRadius = 2.0
-    public static let imageCornerRadius = 3.0
-
-    public static let listPaddingBottom = 50.0
-    public static let listFloatingButtonPaddingBottom = 75.0
-
-    public static let floatingPanelCornerRadius = 20.0
-    public static let floatingPanelHeaderHeight = 70.0
-
     public static let cornerRadius = 6.0
-    public static let alertCornerRadius = 8.0
-    public static let homeListPaddingTop = 16.0
-    public static let fileListCellHeight = 60.0
     public static let largeTitleHeight = 96.0
     public static let insufficientStorageMinimumPercentage = 90.0
     public static let dropDelay = -1.0

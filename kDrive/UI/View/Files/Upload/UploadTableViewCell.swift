@@ -96,7 +96,7 @@ final class UploadTableViewCell: InsetTableViewCell {
 
     private func addThumbnail(image: UIImage) {
         Task { @MainActor in
-            self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
+            self.cardContentView.iconView.layer.cornerRadius = UIConstants.Image.cornerRadius
             self.cardContentView.iconView.contentMode = .scaleAspectFill
             self.cardContentView.iconView.layer.masksToBounds = true
             self.cardContentView.iconViewHeightConstraint.constant = 38

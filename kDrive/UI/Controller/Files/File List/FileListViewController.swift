@@ -130,7 +130,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: headerViewIdentifier
         )
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
@@ -810,7 +810,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         switch viewModel.listStyle {
         case .list:
             // Important: subtract safe area insets
-            return CGSize(width: effectiveContentWidth, height: UIConstants.fileListCellHeight)
+            return CGSize(width: effectiveContentWidth, height: UIConstants.FileList.cellHeight)
         case .grid:
             // Adjust cell size based on screen size
             let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))

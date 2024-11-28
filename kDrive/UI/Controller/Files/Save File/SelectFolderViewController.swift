@@ -73,7 +73,7 @@ class SelectFolderViewController: FileListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.floatingButtonPaddingBottom, right: 0)
 
         view.addSubview(selectFolderButton)
 
