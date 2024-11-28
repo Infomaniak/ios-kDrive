@@ -110,7 +110,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             @InjectService var router: AppNavigable
             let upsaleViewController = UpsaleViewController()
             let noDriveViewController = NoDriveUpsaleViewController()
-            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: noDriveViewController)
             router.topMostViewController?.present(floatingPanel, animated: true, completion: nil)
             return
 

@@ -27,7 +27,7 @@ public class UpsaleViewController: UIViewController {
     let titleLabel: UILabel = {
         let label = IKLabel()
         label.style = .header2
-        label.numberOfLines = 1
+        label.numberOfLines = 0
         label.textAlignment = .center
         label.text = KDriveStrings.Localizable.obtainkDriveAdTitle
         return label
@@ -95,11 +95,13 @@ public class UpsaleViewController: UIViewController {
         containerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: UIConstants.Padding.standard),
+            containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -UIConstants.Padding.standard),
             containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            containerView.widthAnchor.constraint(equalTo: view.widthAnchor)
+            containerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -(2 * UIConstants.Padding.standard))
         ])
+
+        containerView.backgroundColor = .red
 
         titleImageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -116,21 +118,23 @@ public class UpsaleViewController: UIViewController {
         containerView.addSubview(dismissButton)
 
         let verticalConstraints = [
-            titleImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 24),
-            titleLabel.topAnchor.constraint(equalTo: titleImageView.bottomAnchor, constant: 24),
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
-            bulletPointsView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
-            freeTrialButton.topAnchor.constraint(equalTo: bulletPointsView.bottomAnchor, constant: 24),
-            freeTrialButton.heightAnchor.constraint(equalToConstant: 45.0),
-            dismissButton.topAnchor.constraint(equalTo: freeTrialButton.bottomAnchor, constant: 16),
-            dismissButton.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            dismissButton.heightAnchor.constraint(equalToConstant: 45.0)
+            titleImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            titleLabel.topAnchor.constraint(equalTo: titleImageView.bottomAnchor, constant: UIConstants.Padding.standard),
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: UIConstants.Padding.standard),
+            bulletPointsView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: UIConstants.Padding.standard),
+            freeTrialButton.topAnchor.constraint(equalTo: bulletPointsView.bottomAnchor, constant: UIConstants.Padding.standard),
+            freeTrialButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
+            dismissButton.topAnchor.constraint(equalTo: freeTrialButton.bottomAnchor, constant: UIConstants.Padding.medium),
+            dismissButton.bottomAnchor.constraint(
+                equalTo: containerView.safeAreaLayoutGuide.bottomAnchor,
+                constant: -UIConstants.Padding.small
+            ),
+            dismissButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight)
         ]
 
         let dismissButtonConstraintHigh = dismissButton.widthAnchor.constraint(
             equalTo: containerView.widthAnchor,
-            multiplier: 1,
-            constant: -24
+            multiplier: 1
         )
         dismissButtonConstraintHigh.priority = .defaultHigh
 
@@ -138,8 +142,7 @@ public class UpsaleViewController: UIViewController {
 
         let freeTrialButtonConstraintHigh = freeTrialButton.widthAnchor.constraint(
             equalTo: containerView.widthAnchor,
-            multiplier: 1,
-            constant: -24
+            multiplier: 1
         )
         freeTrialButtonConstraintHigh.priority = .defaultHigh
 
@@ -169,7 +172,7 @@ public class UpsaleViewController: UIViewController {
     private func layoutStackView() {
         let mainStackView = UIStackView()
         mainStackView.axis = .vertical
-        mainStackView.spacing = 16
+        mainStackView.spacing = UIConstants.Padding.medium
         mainStackView.alignment = .leading
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -206,10 +209,11 @@ public class UpsaleViewController: UIViewController {
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .left
+        label.backgroundColor = .brown
 
-        let rowStackView = UIStackView(arrangedSubviews: [UIView(), imageView, label])
+        let rowStackView = UIStackView(arrangedSubviews: [imageView, label])
         rowStackView.axis = .horizontal
-        rowStackView.spacing = 16
+        rowStackView.spacing = UIConstants.Padding.medium
         rowStackView.alignment = .top
 
         return rowStackView
