@@ -72,6 +72,8 @@ extension FileActionsFloatingPanelViewController {
                 return file.capabilities.canBecomeDropbox
             case .manageDropbox:
                 return file.isDropbox
+            case .upsaleColor:
+                return file.isDirectory && driveFileManager.drive.isFreePack
             case .folderColor:
                 return file.capabilities.canColor
             case .seeFolder:
@@ -125,6 +127,8 @@ extension FileActionsFloatingPanelViewController {
             convertToDropboxAction()
         case .manageDropbox:
             manageDropboxAction()
+        case .upsaleColor:
+            upsaleColorAction()
         case .folderColor:
             folderColorAction()
         case .seeFolder:
@@ -287,6 +291,10 @@ extension FileActionsFloatingPanelViewController {
         let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
         presentingParent?.navigationController?.pushViewController(viewController, animated: true)
         dismiss(animated: true)
+    }
+
+    private func upsaleColorAction() {
+        FileActionsHelper.upsaleFolderColor(driveFileManager: driveFileManager, from: self)
     }
 
     private func folderColorAction() {
