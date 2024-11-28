@@ -141,9 +141,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    // TODO: make it work
+    // TODO:  make it work
     func downloadPublicShareArchivedFiles(downloadCellPath: IndexPath,
-                                          driveFileManager: DriveFileManager,
                                           publicShareProxy: PublicShareProxy,
                                           completion: @escaping (Result<URL, DriveError>) -> Void) {
         Task { [proxyFiles = files.map { $0.proxify() }, currentProxyDirectory = currentDirectory.proxify()] in
@@ -154,8 +153,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
-                let response = try await driveFileManager.apiFetcher.buildArchive(
-                    drive: driveFileManager.drive,
+
+                let response = try await PublicShareApiFetcher().buildPublicShareArchive(
+                    driveId: publicShareProxy.driveId,
+                    linkUuid: publicShareProxy.shareLinkUid,
                     body: archiveBody
                 )
                 currentArchiveId = response.uuid
@@ -168,9 +169,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                             completion(.failure(error ?? .unknownError))
                         }
                     }
-                DownloadQueue.instance.addToQueue(archiveId: response.uuid,
-                                                  driveId: self.driveFileManager.drive.id,
-                                                  userId: accountManager.currentUserId)
+                DownloadQueue.instance.addPublicShareArchiveToQueue(archiveId: response.uuid,
+                                                                    driveFileManager: driveFileManager,
+                                                                    publicShareProxy: publicShareProxy)
+
                 self.collectionView.reloadItems(at: [downloadCellPath])
             } catch {
                 completion(.failure(error as? DriveError ?? .unknownError))

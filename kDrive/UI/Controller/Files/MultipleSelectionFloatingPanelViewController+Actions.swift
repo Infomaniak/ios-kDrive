@@ -170,7 +170,6 @@ extension MultipleSelectionFloatingPanelViewController {
 
             if let publicShareProxy = driveFileManager.publicShareProxy {
                 downloadPublicShareArchivedFiles(downloadCellPath: indexPath,
-                                                 driveFileManager: driveFileManager,
                                                  publicShareProxy: publicShareProxy) { result in
                     switch result {
                     case .success(let archiveUrl):

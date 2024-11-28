@@ -84,6 +84,11 @@ public extension Endpoint {
         return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/download")
     }
 
+    /// Archive files from a share link
+    static func publicShareArchive(driveId: Int, linkUuid: String) -> Endpoint {
+        return shareUrlV2.appending(path: "/\(driveId)/share/\(linkUuid)/archive")
+    }
+
     func showOfficeShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return Self.shareUrlV1.appending(path: "/share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
     }
