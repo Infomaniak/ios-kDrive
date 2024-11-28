@@ -108,20 +108,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             try! await Task.sleep(nanoseconds: 5_000_000_000)
 
             @InjectService var router: AppNavigable
-            let upsaleViewController = UpsaleViewController()
+            //let upsaleViewController = UpsaleViewController()
             let noDriveViewController = NoDriveUpsaleViewController()
             let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: noDriveViewController)
             router.topMostViewController?.present(floatingPanel, animated: true, completion: nil)
-            return
 
-            // a public share expired
-            let somePublicShare =
-                URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
-            // a public share password protected
-//            let somePublicShare = URL(string:
-//            "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
+            /* Temp code to test out the feature. TODO: Remove later
+                         // a public share expired
+                         let somePublicShare =
+                             URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
+                         // a public share password protected
+             //            let somePublicShare = URL(string:
+             //            "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
 
-            await UniversalLinksHelper.handleURL(somePublicShare!)
+                         await UniversalLinksHelper.handleURL(somePublicShare!)
+              */
         }
 
         return true
