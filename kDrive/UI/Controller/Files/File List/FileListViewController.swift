@@ -305,6 +305,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
+    func getDisplayedFile(at indexPath: IndexPath) -> File? {
+        return displayedFiles[safe: indexPath.item]
+    }
+
     private func bindUploadCardViewModel() {
         viewModel.uploadViewModel?.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
             self?.updateUploadCard(uploadCount: uploadCount)
@@ -521,7 +525,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             // Necessary for events to trigger in the right order
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                if let file = displayedFiles[safe: indexPath.item] {
+                if let file = getDisplayedFile(at: indexPath) {
                     multipleSelectionViewModel.didSelectFile(file, at: indexPath)
                 }
             }
@@ -649,7 +653,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                  */
                 let scrollPosition: UICollectionView.ScrollPosition = viewIfLoaded?.window != nil ? .centeredVertically : []
                 for i in 0 ..< viewModel.files.count {
-                    guard let file = displayedFiles[safe: i],
+                    guard let file = getDisplayedFile(at: IndexPath(item: i, section: 0)),
                           multipleSelectionViewModel.selectedItems.contains(file) else {
                         continue
                     }
@@ -724,7 +728,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         forItemAt indexPath: IndexPath
     ) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
-           let file = displayedFiles[safe: indexPath.item],
+           let file = getDisplayedFile(at: indexPath),
            viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
@@ -736,7 +740,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            guard let file = displayedFiles[safe: indexPath.item] else { return }
+            guard let file = getDisplayedFile(at: indexPath) else { return }
             viewModel.multipleSelectionViewModel?.didSelectFile(file, at: indexPath)
         } else {
             viewModel.didSelectFile(at: indexPath)
@@ -745,7 +749,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     override func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true,
-              let file = displayedFiles[safe: indexPath.item] else {
+              let file = getDisplayedFile(at: indexPath) else {
             return
         }
         viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
@@ -912,7 +916,7 @@ extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
         if let draggableViewModel = viewModel.draggableFileListViewModel,
-           let draggedFile = displayedFiles[safe: indexPath.item] {
+           let draggedFile = getDisplayedFile(at: indexPath) {
             return draggableViewModel.dragItems(for: draggedFile, in: collectionView, at: indexPath, with: session)
         } else {
             return []
@@ -935,7 +939,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
     ) -> UICollectionViewDropProposal {
         if let droppableViewModel = viewModel.droppableFileListViewModel,
            let destinationIndexPath {
-            let file = displayedFiles[safe: destinationIndexPath.item]
+            let file = getDisplayedFile(at: destinationIndexPath)
             return droppableViewModel.updateDropSession(
                 session,
                 in: collectionView,
@@ -953,7 +957,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
             if let indexPath = coordinator.destinationIndexPath,
                indexPath.item < viewModel.files.count,
-               let file = displayedFiles[safe: indexPath.item],
+               let file = getDisplayedFile(at: indexPath),
                file.isDirectory && file.capabilities.canUpload {
                 destinationDirectory = file
             }
