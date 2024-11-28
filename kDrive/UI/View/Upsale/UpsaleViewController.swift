@@ -101,8 +101,6 @@ public class UpsaleViewController: UIViewController {
             containerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -(2 * UIConstants.Padding.standard))
         ])
 
-        containerView.backgroundColor = .red
-
         titleImageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -209,7 +207,6 @@ public class UpsaleViewController: UIViewController {
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .left
-        label.backgroundColor = .brown
 
         let rowStackView = UIStackView(arrangedSubviews: [imageView, label])
         rowStackView.axis = .horizontal
