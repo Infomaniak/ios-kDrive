@@ -152,7 +152,7 @@ protocol FileCellDelegate: AnyObject {
         // Configure placeholder
         imageView.image = nil
         imageView.contentMode = .scaleAspectFill
-        imageView.layer.cornerRadius = UIConstants.imageCornerRadius
+        imageView.layer.cornerRadius = UIConstants.Image.cornerRadius
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
 

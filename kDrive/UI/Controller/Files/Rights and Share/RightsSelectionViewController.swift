@@ -100,7 +100,7 @@ class RightsSelectionViewController: UIViewController {
         super.viewDidLoad()
 
         tableView.register(cellView: RightsSelectionTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
