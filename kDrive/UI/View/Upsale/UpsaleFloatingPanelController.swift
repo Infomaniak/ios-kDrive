@@ -31,20 +31,10 @@ class UpsaleFloatingPanelController: AdaptiveDriveFloatingPanelController {
         super.init()
 
         set(contentViewController: upsaleViewController)
-        track(scrollView: upsaleViewController.scrollView)
+        trackAndObserve(scrollView: upsaleViewController.scrollView)
 
         surfaceView.grabberHandle.isHidden = true
         surfaceView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        Task { @MainActor in
-            let height = max(upsaleViewController.scrollView.contentSize.height, 600.0)
-            layout = UpsaleFloatingPanelLayout(height: height)
-            invalidateLayout()
-        }
     }
 }
 

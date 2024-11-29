@@ -35,7 +35,7 @@ public class UpsaleViewController: UIViewController {
 
     let descriptionLabel: UILabel = {
         let label = IKLabel()
-        label.style = .header3
+        label.style = .subtitle1
         label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
