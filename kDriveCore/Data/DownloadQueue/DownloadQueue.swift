@@ -197,6 +197,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             let operation = DownloadArchiveOperation(
                 archiveId: archiveId,
+                shareDrive: publicShareProxy.proxyDrive,
                 driveFileManager: driveFileManager,
                 urlSession: self.bestSession,
                 publicShareProxy: publicShareProxy
@@ -209,6 +210,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                     OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
                 }
             }
+
             self.operationQueue.addOperation(operation)
             self.archiveOperationsInQueue[archiveId] = operation
         }
@@ -226,6 +228,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             let operation = DownloadArchiveOperation(
                 archiveId: archiveId,
+                shareDrive: drive,
                 driveFileManager: driveFileManager,
                 urlSession: self.bestSession
             )

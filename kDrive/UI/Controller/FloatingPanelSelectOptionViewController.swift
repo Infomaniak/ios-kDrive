@@ -37,7 +37,6 @@ protocol SelectDelegate: AnyObject {
     func didSelect(option: Selectable)
 }
 
-/// Something that can dismiss the current VC if presented
 @MainActor
 public protocol ViewControllerDismissable: AnyObject {
     func dismiss(animated flag: Bool, completion: (() -> Void)?)

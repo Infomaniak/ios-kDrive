@@ -141,7 +141,6 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    // TODO:  make it work
     func downloadPublicShareArchivedFiles(downloadCellPath: IndexPath,
                                           publicShareProxy: PublicShareProxy,
                                           completion: @escaping (Result<URL, DriveError>) -> Void) {
