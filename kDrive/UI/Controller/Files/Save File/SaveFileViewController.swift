@@ -139,7 +139,7 @@ class SaveFileViewController: UIViewController {
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.floatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
         hideKeyboardWhenTappedAround()

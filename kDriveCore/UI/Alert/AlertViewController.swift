@@ -74,7 +74,7 @@ open class AlertViewController: UIViewController {
 
         // Alert view
         alertView = UIView()
-        alertView.cornerRadius = UIConstants.alertCornerRadius
+        alertView.cornerRadius = UIConstants.Alert.cornerRadius
         alertView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         alertView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(alertView)

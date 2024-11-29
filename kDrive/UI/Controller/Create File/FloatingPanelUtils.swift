@@ -25,7 +25,7 @@ class DriveFloatingPanelController: FloatingPanelController {
     init() {
         super.init(delegate: nil)
         let appearance = SurfaceAppearance()
-        appearance.cornerRadius = UIConstants.floatingPanelCornerRadius
+        appearance.cornerRadius = UIConstants.FloatingPanel.cornerRadius
         appearance.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         surfaceView.appearance = appearance
         surfaceView.grabberHandlePadding = 16
