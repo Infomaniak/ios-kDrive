@@ -94,6 +94,11 @@ public extension Endpoint {
         return publicShareArchive(driveId: drive.id, linkUuid: linkUuid).appending(path: "/\(archiveUuid)/download")
     }
 
+    /// Count files of a public share folder
+    static func countPublicShare(drive: AbstractDrive, linkUuid: String) -> Endpoint {
+        return publicShareArchive(driveId: drive.id, linkUuid: linkUuid).appending(path: "/count")
+    }
+
     func showOfficeShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         return Self.shareUrlV1.appending(path: "/share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
     }

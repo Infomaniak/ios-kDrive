@@ -102,4 +102,11 @@ public extension PublicShareApiFetcher {
         let archiveResponse: ValidServerResponse<DownloadArchiveResponse> = try await perform(request: request)
         return archiveResponse.validApiResponse.data
     }
+
+    func countPublicShare(drive: AbstractDrive, linkUuid: String) async throws -> FileCount {
+        let countUrl = Endpoint.countPublicShare(drive: drive, linkUuid: linkUuid).url
+        let request = Session.default.request(countUrl)
+        let countResponse: ValidServerResponse<FileCount> = try await perform(request: request)
+        return countResponse.validApiResponse.data
+    }
 }

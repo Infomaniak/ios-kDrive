@@ -219,7 +219,15 @@ class MultipleSelectionFileListViewModel {
         onSelectAll?()
         Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
             do {
-                let directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
+                let directoryCount: FileCount
+                if let publicShareProxy = driveFileManager.publicShareProxy {
+                    directoryCount = try await PublicShareApiFetcher()
+                        .countPublicShare(drive: publicShareProxy.proxyDrive,
+                                          linkUuid: publicShareProxy.shareLinkUid)
+                } else {
+                    directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
+                }
+
                 selectedCount = directoryCount.count
                 rightBarButtons = [.deselectAll]
             } catch {
