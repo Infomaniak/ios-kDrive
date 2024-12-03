@@ -84,7 +84,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             // We try to close the "Public Share screen"
             if type == .cancel,
                !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true),
-               let viewControllerDismissable = viewControllerDismissable {
+               let viewControllerDismissable {
                 viewControllerDismissable.dismiss(animated: true, completion: nil)
                 return
             }
@@ -97,7 +97,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             return
         }
 
-        guard let publicShareProxy = publicShareProxy else {
+        guard let publicShareProxy else {
             return
         }
 
