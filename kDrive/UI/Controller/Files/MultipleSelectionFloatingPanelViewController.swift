@@ -48,7 +48,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         return currentDirectory.visibility == .isInSharedSpace || currentDirectory.visibility == .isSharedSpace
     }
 
-    var actions: [FloatingPanelAction] = []
+    var actions = FloatingPanelAction.listActions
 
     init(
         driveFileManager: DriveFileManager,
@@ -83,9 +83,9 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
-        guard actions.isEmpty else { return }
-
-        if sharedWithMe {
+        if driveFileManager.isPublicShare {
+            actions = FloatingPanelAction.multipleSelectionPublicShareActions
+        } else if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
             actions = FloatingPanelAction.selectAllActions

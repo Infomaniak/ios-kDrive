@@ -122,15 +122,9 @@ class MultipleSelectionFileListViewModel {
     init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
+        multipleSelectionActions = [.move, .delete, .more]
 
         self.driveFileManager = driveFileManager
-
-        if driveFileManager.isPublicShare {
-            multipleSelectionActions = [.download]
-        } else {
-            multipleSelectionActions = [.move, .delete, .more]
-        }
-
         self.currentDirectory = currentDirectory
         self.configuration = configuration
     }
