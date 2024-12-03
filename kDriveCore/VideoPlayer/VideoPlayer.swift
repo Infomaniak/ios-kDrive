@@ -93,42 +93,28 @@ public final class VideoPlayer: Pausable {
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
-        if !file.isLocalVersionOlderThanRemote {
-            player = AVPlayer(url: file.localUrl)
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(playerStateChanged),
-                name: .AVPlayerItemTimeJumped,
-                object: player?.currentItem
+        player = AVPlayer(url: file.localUrl)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerStateChanged),
+            name: .AVPlayerItemTimeJumped,
+            object: player?.currentItem
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerStateChanged),
+            name: .AVPlayerItemPlaybackStalled,
+            object: player?.currentItem
+        )
+
+        Task { @MainActor in
+            let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
+                from: file.localUrl,
+                playableFileName: file.name
             )
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(playerStateChanged),
-                name: .AVPlayerItemPlaybackStalled,
-                object: player?.currentItem
-            )
-            Task { @MainActor in
-                let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
-                    from: file.localUrl,
-                    playableFileName: file.name
-                )
-                setNowPlayingMetadata(metadata: currentTrackMetadata)
-            }
-        } else if let token = driveFileManager.apiFetcher.currentToken {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token = token {
-                    let url = Endpoint.download(file: file).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
-                            from: asset.url,
-                            playableFileName: file.name
-                        )
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                    }
-                }
-            }
+            setNowPlayingMetadata(metadata: currentTrackMetadata)
         }
     }
 }
