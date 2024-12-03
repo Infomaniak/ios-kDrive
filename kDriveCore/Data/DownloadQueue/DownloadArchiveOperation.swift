@@ -112,19 +112,24 @@ public class DownloadArchiveOperation: Operation {
     }
 
     override public func main() {
-        if publicShareProxy == nil {
+        guard let publicShareProxy else {
             authenticatedDownload()
-        } else {
-            publicShareDownload()
+            return
         }
+
+        publicShareDownload(proxy: publicShareProxy)
     }
 
-    func publicShareDownload() {
+    func publicShareDownload(proxy: PublicShareProxy) {
         DDLogInfo(
             "[DownloadOperation] Downloading Archive of public share files \(archiveId) with session \(urlSession.identifier)"
         )
 
-        let url = Endpoint.getArchive(drive: shareDrive, uuid: archiveId).url
+        let url = Endpoint.downloadPublicShareArchive(
+            drive: shareDrive,
+            linkUuid: proxy.shareLinkUid,
+            archiveUuid: archiveId
+        ).url
         let request = URLRequest(url: url)
 
         task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
