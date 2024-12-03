@@ -34,7 +34,13 @@ public struct MediaMetadata {
 
 public extension MediaMetadata {
     static func extractTrackMetadata(from url: URL, playableFileName: String?) async -> MediaMetadata {
-        let asset = AVAsset(url: url)
+        let asset: AVAsset
+
+        if url.isFileURL {
+            asset = AVAsset(url: url)
+        } else {
+            asset = AVURLAsset(url: url)
+        }
 
         var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         var artist = KDriveResourcesStrings.Localizable.unknownArtist

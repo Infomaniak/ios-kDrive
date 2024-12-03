@@ -43,7 +43,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var floatingPanelController: FloatingPanelController?
 
     private var previewDownloadTask: Kingfisher.DownloadTask?
-    private var file: File!
+    private var file: File?
     private var videoPlayer: VideoPlayer?
 
     override func awakeFromNib() {

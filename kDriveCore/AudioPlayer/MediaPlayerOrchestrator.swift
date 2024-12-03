@@ -18,23 +18,33 @@
 
 import Foundation
 
+public protocol Pausable {
+    func pause()
+}
+
 /// A simple service to orchestrate between all the possibly existing media player objects in the app
-public final class MediaPlayerOrchestrator {
+public final class MediaPlayerOrchestrator: Pausable {
     private weak var lastUsedPlayer: SingleTrackPlayer?
 
     public init() {}
 
-    public func newPlaybackStarted(playable: SingleTrackPlayer) {
+    public func newPlaybackStarted(playable: Pausable) {
         defer {
-            lastUsedPlayer = playable
+            if let playable = playable as? SingleTrackPlayer {
+                lastUsedPlayer = playable
+            }
         }
 
         guard let lastUsedPlayer,
-              !(lastUsedPlayer === playable),
+              !(lastUsedPlayer === playable as? SingleTrackPlayer),
               lastUsedPlayer.playerState == .playing else {
             return
         }
 
         lastUsedPlayer.pause()
+    }
+
+    public func pause() {
+        lastUsedPlayer?.pause()
     }
 }

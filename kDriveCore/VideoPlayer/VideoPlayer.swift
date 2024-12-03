@@ -20,10 +20,13 @@ import AVKit
 import Combine
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakDI
 import kDriveResources
 import MediaPlayer
 
-public final class VideoPlayer {
+public final class VideoPlayer: Pausable {
+    @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
+
     public var onPlaybackEnded: (() -> Void)?
 
     public var progressPercentage: Double {
@@ -32,7 +35,7 @@ public final class VideoPlayer {
     }
 
     private var player: AVPlayer?
-    private var currentTrackMetadata: MediaMetadata?
+    private var file: File?
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
@@ -42,6 +45,8 @@ public final class VideoPlayer {
 
     public init(frozenFile: File, driveFileManager: DriveFileManager) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
+        orchestrator.newPlaybackStarted(playable: self)
+        file = frozenFile
     }
 
     public func setNowPlayingMetadata(metadata: MediaMetadata) {
@@ -56,8 +61,10 @@ public final class VideoPlayer {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
         }
 
-        if let duration = player?.currentItem?.duration {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(duration)
+        if let player,
+           let currentItem = player.currentItem {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.duration)
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
@@ -67,14 +74,45 @@ public final class VideoPlayer {
         player?.pause()
     }
 
+    public func pause() {
+        player?.pause()
+        onPlaybackEnded?()
+    }
+
+    @objc func playerStateChanged(notification: Notification) {
+        guard let player = player else { return }
+        guard let file else { return }
+
+        if player.timeControlStatus == .playing {
+            Task {
+                let metadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl,
+                                                                        playableFileName: file.name)
+                setNowPlayingMetadata(metadata: metadata)
+            }
+        }
+    }
+
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
         if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(playerStateChanged),
+                name: .AVPlayerItemTimeJumped,
+                object: player?.currentItem
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(playerStateChanged),
+                name: .AVPlayerItemPlaybackStalled,
+                object: player?.currentItem
+            )
             Task { @MainActor in
-                currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl, playableFileName: file.name)
-                if let currentMetadata = self.currentTrackMetadata {
-                    setNowPlayingMetadata(metadata: currentMetadata)
-                }
+                let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
+                    from: file.localUrl,
+                    playableFileName: file.name
+                )
+                setNowPlayingMetadata(metadata: currentTrackMetadata)
             }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
@@ -83,7 +121,7 @@ public final class VideoPlayer {
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     Task { @MainActor in
-                        self.currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
+                        let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
                             from: asset.url,
                             playableFileName: file.name
                         )

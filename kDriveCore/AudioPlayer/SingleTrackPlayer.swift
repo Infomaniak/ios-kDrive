@@ -23,7 +23,7 @@ import kDriveResources
 import MediaPlayer
 
 /// Track one file been played
-public final class SingleTrackPlayer {
+public final class SingleTrackPlayer: Pausable {
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     let registeredCommands: [NowPlayableCommand] = [
@@ -102,17 +102,14 @@ public final class SingleTrackPlayer {
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
-                    let url = Endpoint.download(file: playableFile).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        await self.setMetaData(url: asset.url, playableFileName: playableFile.name)
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                        self.setUpObservers()
-                    }
-                } else {
-                    self.onPlaybackError.send(.previewLoadErrorNoToken)
+                guard let token else { return }
+                let url = Endpoint.download(file: playableFile).url
+                let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                Task { @MainActor in
+                    await self.setMetaData(url: asset.url, playableFileName: playableFile.name)
+                    self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+                    self.setUpObservers()
                 }
             }
         } else {
@@ -128,8 +125,9 @@ public final class SingleTrackPlayer {
     }
 
     private func setMetaData(url: URL, playableFileName: String?) async {
-        currentTrackMetadata = await MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName)
-        await onCurrentTrackMetadata.send(MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName))
+        let metadata = await MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName)
+        currentTrackMetadata = metadata
+        onCurrentTrackMetadata.send(metadata)
     }
 
     // MARK: - MediaPlayer
@@ -139,13 +137,13 @@ public final class SingleTrackPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let currentTrackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
-            if let artwork = currentTrackMetadata.artwork {
-                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-            }
+        guard let currentTrackMetadata else { return }
+        nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+
+        if let artwork = currentTrackMetadata.artwork {
+            let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
