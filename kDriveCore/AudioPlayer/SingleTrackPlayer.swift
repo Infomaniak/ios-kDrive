@@ -24,8 +24,6 @@ import MediaPlayer
 
 /// Track one file been played
 public final class SingleTrackPlayer: Pausable {
-    public var identifier: String = UUID().uuidString
-
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     let registeredCommands: [NowPlayableCommand] = [
@@ -66,6 +64,8 @@ public final class SingleTrackPlayer: Pausable {
             onPlayerStateChange.send(playerState)
         }
     }
+
+    public var identifier: String = UUID().uuidString
 
     public var progressPercentage: Double {
         player?.progressPercentage ?? 0.0

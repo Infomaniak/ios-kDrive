@@ -25,9 +25,12 @@ import kDriveResources
 import MediaPlayer
 
 public final class VideoPlayer: Pausable {
-    public var identifier: String = UUID().uuidString
 
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
+
+    private var player: AVPlayer?
+    private var asset: AVAsset?
+    private var file: File?
 
     public var onPlaybackEnded: (() -> Void)?
 
@@ -36,9 +39,7 @@ public final class VideoPlayer: Pausable {
         return player.currentTime().seconds / currentItem.duration.seconds
     }
 
-    private var player: AVPlayer?
-    private var asset: AVAsset?
-    private var file: File?
+    public var identifier: String = UUID().uuidString
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
