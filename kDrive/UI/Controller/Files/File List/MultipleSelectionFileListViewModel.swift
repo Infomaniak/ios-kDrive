@@ -122,7 +122,12 @@ class MultipleSelectionFileListViewModel {
     init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
-        multipleSelectionActions = [.move, .delete, .more]
+
+        if driveFileManager.isPublicShare {
+            multipleSelectionActions = [.more]
+        } else {
+            multipleSelectionActions = [.move, .delete, .more]
+        }
 
         self.driveFileManager = driveFileManager
         self.currentDirectory = currentDirectory
@@ -223,7 +228,8 @@ class MultipleSelectionFileListViewModel {
                 if let publicShareProxy = driveFileManager.publicShareProxy {
                     directoryCount = try await PublicShareApiFetcher()
                         .countPublicShare(drive: publicShareProxy.proxyDrive,
-                                          linkUuid: publicShareProxy.shareLinkUid)
+                                          linkUuid: publicShareProxy.shareLinkUid,
+                                          fileId: publicShareProxy.fileId)
                 } else {
                     directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
                 }
