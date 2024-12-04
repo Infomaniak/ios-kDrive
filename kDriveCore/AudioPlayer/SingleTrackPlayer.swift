@@ -24,6 +24,8 @@ import MediaPlayer
 
 /// Track one file been played
 public final class SingleTrackPlayer: Pausable {
+    public var identifier: String = UUID().uuidString
+
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     let registeredCommands: [NowPlayableCommand] = [
@@ -95,20 +97,21 @@ public final class SingleTrackPlayer: Pausable {
     /// Async as may take up some time
     public func setup(with playableFile: File) async { // TODO: use abstract type
         if !playableFile.isLocalVersionOlderThanRemote {
+            let asset = AVAsset(url: playableFile.localUrl)
             player = AVPlayer(url: playableFile.localUrl)
-            Task { @MainActor in
-                await setMetaData(url: playableFile.localUrl, playableFileName: playableFile.name)
-            }
             setUpObservers()
+            Task {
+                await setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
+            }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 guard let token else { return }
-                let url = Endpoint.download(file: playableFile).url
-                let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                 Task { @MainActor in
-                    await self.setMetaData(url: asset.url, playableFileName: playableFile.name)
+                    let url = Endpoint.download(file: playableFile).url
+                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+                    await self.setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
                     self.setUpObservers()
                 }
             }
@@ -124,10 +127,10 @@ public final class SingleTrackPlayer: Pausable {
         playerState = .stopped
     }
 
-    private func setMetaData(url: URL, playableFileName: String?) async {
-        let metadata = await MediaMetadata.extractTrackMetadata(from: url, playableFileName: playableFileName)
-        currentTrackMetadata = metadata
-        onCurrentTrackMetadata.send(metadata)
+    private func setMetaData(from metadata: [AVMetadataItem], playableFileName: String?) async {
+        let mediaMetadata = await MediaMetadata.extractTrackMetadata(from: metadata, playableFileName: playableFileName)
+        currentTrackMetadata = mediaMetadata
+        onCurrentTrackMetadata.send(mediaMetadata)
     }
 
     // MARK: - MediaPlayer

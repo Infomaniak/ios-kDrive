@@ -25,6 +25,8 @@ import kDriveResources
 import MediaPlayer
 
 public final class VideoPlayer: Pausable {
+    public var identifier: String = UUID().uuidString
+
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     public var onPlaybackEnded: (() -> Void)?
@@ -35,6 +37,7 @@ public final class VideoPlayer: Pausable {
     }
 
     private var player: AVPlayer?
+    private var asset: AVAsset?
     private var file: File?
 
     public lazy var playerViewController: AVPlayerViewController = {
@@ -45,7 +48,6 @@ public final class VideoPlayer: Pausable {
 
     public init(frozenFile: File, driveFileManager: DriveFileManager) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
-        orchestrator.newPlaybackStarted(playable: self)
         file = frozenFile
     }
 
@@ -80,41 +82,76 @@ public final class VideoPlayer: Pausable {
     }
 
     @objc func playerStateChanged(notification: Notification) {
-        guard let player = player else { return }
         guard let file else { return }
+        guard let player else { return }
+        updateMetadata(asset: asset, defaultName: file.name)
 
-        if player.timeControlStatus == .playing {
-            Task {
-                let metadata = await MediaMetadata.extractTrackMetadata(from: file.localUrl,
-                                                                        playableFileName: file.name)
-                setNowPlayingMetadata(metadata: metadata)
+        guard player.timeControlStatus == .playing else { return }
+        orchestrator.newPlaybackStarted(playable: self)
+    }
+
+    private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
+        if !file.isLocalVersionOlderThanRemote {
+            let localAsset = AVAsset(url: file.localUrl)
+            asset = localAsset
+            let playerItem = AVPlayerItem(asset: localAsset)
+            player = AVPlayer(playerItem: playerItem)
+            updateMetadata(asset: localAsset, defaultName: file.name)
+            observePlayer(currentItem: playerItem)
+        } else if let token = driveFileManager.apiFetcher.currentToken {
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
+                if let token = token {
+                    let url = Endpoint.download(file: file).url
+                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                    let URLAsset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                    self.asset = URLAsset
+                    Task { @MainActor in
+                        let playerItem = AVPlayerItem(asset: URLAsset)
+                        self.player = AVPlayer(playerItem: playerItem)
+                        self.updateMetadata(asset: URLAsset, defaultName: file.name)
+                        self.observePlayer(currentItem: playerItem)
+                    }
+                }
             }
         }
     }
 
-    private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
-        player = AVPlayer(url: file.localUrl)
-
+    private func observePlayer(currentItem: AVPlayerItem) {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerStateChanged),
             name: .AVPlayerItemTimeJumped,
-            object: player?.currentItem
+            object: currentItem
         )
 
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerStateChanged),
             name: .AVPlayerItemPlaybackStalled,
-            object: player?.currentItem
+            object: currentItem
         )
 
-        Task { @MainActor in
-            let currentTrackMetadata = await MediaMetadata.extractTrackMetadata(
-                from: file.localUrl,
-                playableFileName: file.name
-            )
-            setNowPlayingMetadata(metadata: currentTrackMetadata)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerStateChanged),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: currentItem
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerStateChanged),
+            name: .AVPlayerItemFailedToPlayToEndTime,
+            object: currentItem
+        )
+    }
+
+    private func updateMetadata(asset: AVAsset?, defaultName: String) {
+        guard let asset else { return }
+        Task {
+            let metadata = await MediaMetadata.extractTrackMetadata(from: asset.commonMetadata,
+                                                                    playableFileName: defaultName)
+            setNowPlayingMetadata(metadata: metadata)
         }
     }
 }
