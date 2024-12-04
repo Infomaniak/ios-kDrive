@@ -103,12 +103,12 @@ public final class VideoPlayer: Pausable {
                 if let token = token {
                     let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let URLAsset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    self.asset = URLAsset
+                    let urlAsset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                    self.asset = urlAsset
                     Task { @MainActor in
-                        let playerItem = AVPlayerItem(asset: URLAsset)
+                        let playerItem = AVPlayerItem(asset: urlAsset)
                         self.player = AVPlayer(playerItem: playerItem)
-                        self.updateMetadata(asset: URLAsset, defaultName: file.name)
+                        self.updateMetadata(asset: urlAsset, defaultName: file.name)
                         self.observePlayer(currentItem: playerItem)
                     }
                 }
