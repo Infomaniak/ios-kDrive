@@ -25,7 +25,6 @@ import kDriveResources
 import MediaPlayer
 
 public final class VideoPlayer: Pausable {
-
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     private var player: AVPlayer?
