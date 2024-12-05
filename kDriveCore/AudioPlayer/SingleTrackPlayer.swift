@@ -23,7 +23,7 @@ import kDriveResources
 import MediaPlayer
 
 /// Track one file been played
-public final class SingleTrackPlayer {
+public final class SingleTrackPlayer: Pausable {
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     let registeredCommands: [NowPlayableCommand] = [
@@ -37,10 +37,7 @@ public final class SingleTrackPlayer {
     ]
 
     private let driveFileManager: DriveFileManager
-
-    private var playableFileName: String?
-
-    private var currentTrackMetadata: TrackMetadata?
+    private var currentTrackMetadata: MediaMetadata?
 
     // MARK: Player Observation
 
@@ -58,7 +55,7 @@ public final class SingleTrackPlayer {
     public let onRemainingTimeChange = PassthroughSubject<String, Never>()
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
-    public let onCurrentTrackMetadata = PassthroughSubject<TrackMetadata, Never>()
+    public let onCurrentTrackMetadata = PassthroughSubject<MediaMetadata, Never>()
 
     var player: AVPlayer?
 
@@ -67,6 +64,8 @@ public final class SingleTrackPlayer {
             onPlayerStateChange.send(playerState)
         }
     }
+
+    public var identifier: String = UUID().uuidString
 
     public var progressPercentage: Double {
         player?.progressPercentage ?? 0.0
@@ -91,61 +90,29 @@ public final class SingleTrackPlayer {
         reset()
     }
 
-    private func extractTrackMetadata(from asset: AVAsset) async -> TrackMetadata {
-        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
-        var artist = KDriveResourcesStrings.Localizable.unknownArtist
-        var artwork: UIImage?
-
-        let metadata = asset.commonMetadata
-
-        for item in metadata {
-            guard let commonKey = item.commonKey else { continue }
-
-            switch commonKey {
-            case .commonKeyTitle:
-                title = item.value as? String ?? title
-            case .commonKeyArtist:
-                artist = item.value as? String ?? artist
-            case .commonKeyArtwork:
-                if let data = item.value as? Data {
-                    artwork = UIImage(data: data)
-                }
-            default:
-                break
-            }
-        }
-
-        return TrackMetadata(title: title, artist: artist, artwork: artwork)
-    }
-
     // MARK: - Load
 
     /// Load internal structures to play a single track
     ///
     /// Async as may take up some time
     public func setup(with playableFile: File) async { // TODO: use abstract type
-        playableFileName = playableFile.name
-
         if !playableFile.isLocalVersionOlderThanRemote {
             let asset = AVAsset(url: playableFile.localUrl)
             player = AVPlayer(url: playableFile.localUrl)
-            Task { @MainActor in
-                await onCurrentTrackMetadata.send(extractTrackMetadata(from: asset))
-            }
             setUpObservers()
+            Task {
+                await setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
+            }
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
+                guard let token else { return }
+                Task { @MainActor in
                     let url = Endpoint.download(file: playableFile).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        await self.onCurrentTrackMetadata.send(self.extractTrackMetadata(from: asset))
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                        self.setUpObservers()
-                    }
-                } else {
-                    self.onPlaybackError.send(.previewLoadErrorNoToken)
+                    self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+                    await self.setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
+                    self.setUpObservers()
                 }
             }
         } else {
@@ -160,6 +127,12 @@ public final class SingleTrackPlayer {
         playerState = .stopped
     }
 
+    private func setMetaData(from metadata: [AVMetadataItem], playableFileName: String?) async {
+        let mediaMetadata = await MediaMetadata.extractTrackMetadata(from: metadata, playableFileName: playableFileName)
+        currentTrackMetadata = mediaMetadata
+        onCurrentTrackMetadata.send(mediaMetadata)
+    }
+
     // MARK: - MediaPlayer
 
     private func setNowPlayingMetadata() {
@@ -167,15 +140,13 @@ public final class SingleTrackPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        if let currentTrackMetadata {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
-            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
-            if let artwork = currentTrackMetadata.artwork {
-                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-            }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = playableFileName ?? ""
+        guard let currentTrackMetadata else { return }
+        nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+
+        if let artwork = currentTrackMetadata.artwork {
+            let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
