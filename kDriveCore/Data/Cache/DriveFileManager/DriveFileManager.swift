@@ -447,7 +447,8 @@ public final class DriveFileManager {
                             let mySharedFiles = try await publicShareApiFetcher.shareLinkFileChildren(
                                 rootFolderId: rootProxy.id,
                                 publicShareProxy: publicShareProxy,
-                                sortType: sortType
+                                sortType: sortType,
+                                cursor: cursor
                             )
                             return mySharedFiles
                         },
