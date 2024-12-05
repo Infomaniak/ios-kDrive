@@ -22,6 +22,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Kingfisher
+import MediaPlayer
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell {
@@ -42,12 +43,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     weak var floatingPanelController: FloatingPanelController?
 
     private var previewDownloadTask: Kingfisher.DownloadTask?
-    private var file: File!
-    private var player: AVPlayer? {
-        didSet {
-            playButton.isEnabled = player != nil
-        }
-    }
+    private var file: File?
+    private var videoPlayer: VideoPlayer?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -56,8 +53,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        player?.pause()
-        player = nil
+        videoPlayer?.stopPlayback()
         previewFrameImageView.image = nil
         previewDownloadTask?.cancel()
     }
@@ -69,39 +65,23 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        if !file.isLocalVersionOlderThanRemote {
-            player = AVPlayer(url: file.localUrl)
-        } else if let token = driveFileManager.apiFetcher.currentToken {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
-                    let url = Endpoint.download(file: file).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    Task { @MainActor in
-                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                    }
-                } else {
-                    Task {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
-                    }
-                }
-            }
-        } else {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
+        Task { @MainActor in
+            videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
         }
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
+        MatomoUtils.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
-        guard let player else { return }
+        guard let player = videoPlayer?.playerViewController.player else { return }
 
         MatomoUtils.trackMediaPlayer(playMedia: .video)
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
+        guard let playerViewController = videoPlayer?.playerViewController else { return }
 
         if #available(iOS 14.2, *) {
             playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
@@ -110,19 +90,22 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
-            self?.player?.pause()
-            if let floatingPanelController = self?.floatingPanelController {
-                self?.parentViewController?.present(floatingPanelController, animated: true)
-            }
+            self?.videoPlayer?.stopPlayback()
+            self?.presentFloatingPanel()
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController
-        floatingPanelController?.dismiss(animated: true)
+        presentFloatingPanel()
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
+        }
+    }
+
+    private func presentFloatingPanel() {
+        if let floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController {
+            floatingPanelController.dismiss(animated: true)
         }
     }
 }
