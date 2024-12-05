@@ -449,33 +449,40 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         let file = previewFiles[index]
-        let previewError = OfficePreviewError(fileId: fileId)
         if file.convertedType == .spreadsheet || file.convertedType == .presentation || file.convertedType == .text {
-            previewError.pdfGenerationProgress = Progress(totalUnitCount: 10)
-            PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
-                previewError.addDownloadTask(downloadTask)
-                Task { @MainActor [weak self] in
-                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                }
-            } completion: { url, error in
-                previewError.removeDownloadTask()
-                if let url {
-                    previewError.pdfUrl = url
-                } else {
-                    previewError.downloadError = error
-                }
-                Task { @MainActor [weak self] in
-                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                }
-            }
+            handleOfficePreviewError(error, previewIndex: index)
         }
-        previewErrors[fileId] = previewError
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
         Task { @MainActor [weak self] in
             self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
+    }
+
+    func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
+        let file = previewFiles[previewIndex]
+
+        let previewError = OfficePreviewError(fileId: file.id, pdfGenerationProgress: Progress(totalUnitCount: 10))
+
+        PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
+            previewError.addDownloadTask(downloadTask)
+            Task { @MainActor [weak self] in
+                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
+            }
+        } completion: { url, error in
+            previewError.removeDownloadTask()
+            if let url {
+                previewError.pdfUrl = url
+            } else {
+                previewError.downloadError = error
+            }
+            Task { @MainActor [weak self] in
+                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
+            }
+        }
+
+        previewErrors[file.id] = previewError
     }
 
     func openWith(from: UIView) {
