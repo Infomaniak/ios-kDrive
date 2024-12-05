@@ -91,12 +91,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         Task { @MainActor in
             await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
-            setupObservation()
+            setupObservationFor(fileId: frozenFile.id)
         }
     }
 
     /// Setup data flow
-    @MainActor func setupObservation() {
+    @MainActor func setupObservationFor(fileId: Int) {
         cancellables.forEach { $0.cancel() }
         cancellables.removeAll()
 
@@ -156,6 +156,14 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
                 self.artworkImageView.image = metadata.artwork ?? KDriveResourcesAsset.music.image
                 self.artistNameLabel.text = metadata.artist
                 self.songTitleLabel.text = metadata.title
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onItemError
+            .receive(on: DispatchQueue.main)
+            .sink { error in
+                self.previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
             }
             .store(in: &cancellables)
     }
