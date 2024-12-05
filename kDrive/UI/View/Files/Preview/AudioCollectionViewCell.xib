@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_3" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -18,10 +19,10 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JwS-de-Pn7">
-                        <rect key="frame" x="24" y="185.33333333333334" width="458" height="456.66666666666663"/>
+                        <rect key="frame" x="24" y="190.33333333333334" width="458" height="446.66666666666663"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="36" translatesAutoresizingMaskIntoConstraints="NO" id="RQC-MS-Xpl">
-                                <rect key="frame" x="0.0" y="0.0" width="458" height="424.66666666666669"/>
+                                <rect key="frame" x="0.0" y="0.0" width="458" height="414.66666666666669"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="music" translatesAutoresizingMaskIntoConstraints="NO" id="W9a-yf-gb4">
                                         <rect key="frame" x="169" y="0.0" width="120" height="120"/>
@@ -30,20 +31,23 @@
                                             <constraint firstAttribute="height" constant="120" id="SGq-zm-Qis"/>
                                         </constraints>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l45-mr-rI7" customClass="IKLabel" customModule="kDrive" customModuleProvider="target">
-                                        <rect key="frame" x="182.33333333333334" y="155.99999999999997" width="93.666666666666657" height="27.666666666666657"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
-                                        <color key="textColor" name="backgroundCardView"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l45-mr-rI7" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                                        <rect key="frame" x="193" y="155.99999999999997" width="72.333333333333314" height="20.333333333333343"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header1Light"/>
+                                        </userDefinedRuntimeAttributes>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I2u-ME-J8U" customClass="IKLabel" customModule="kDrive" customModuleProvider="target">
-                                        <rect key="frame" x="206.33333333333334" y="219.66666666666666" width="45.666666666666657" height="23"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="19"/>
-                                        <color key="textColor" name="backgroundCardView"/>
-                                        <nil key="highlightedColor"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I2u-ME-J8U" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                                        <rect key="frame" x="208.66666666666666" y="212.33333333333334" width="41" height="20.333333333333343"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1Light"/>
+                                        </userDefinedRuntimeAttributes>
                                     </label>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Stm-WL-vWh">
-                                        <rect key="frame" x="5" y="278.66666666666663" width="448" height="40"/>
+                                        <rect key="frame" x="5" y="268.66666666666663" width="448" height="40"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q1t-cA-X5f">
                                                 <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
@@ -89,7 +93,7 @@
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nEX-wd-Ij8">
-                                        <rect key="frame" x="194" y="354.66666666666663" width="70" height="70"/>
+                                        <rect key="frame" x="194" y="344.66666666666663" width="70" height="70"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="70" id="PVE-gP-cBs"/>
                                             <constraint firstAttribute="width" constant="70" id="cfr-Lz-2Q8"/>
