@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AVFoundation
 import FloatingPanel
 import InfomaniakCore
 import InfomaniakDI
@@ -451,6 +452,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let file = previewFiles[index]
         if ConvertedType.documentTypes.contains(file.convertedType) {
             handleOfficePreviewError(error, previewIndex: index)
+        } else if file.convertedType == .audio {
+            handleAudioPreviewError(error, previewIndex: index)
         }
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
@@ -458,6 +461,19 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         Task { @MainActor [weak self] in
             self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
+    }
+
+    func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
+        let file = previewFiles[previewIndex]
+
+        guard let avError = error as? AVError,
+              avError.code == .fileFormatNotRecognized else {
+            return
+        }
+
+        previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
+        guard file.isLocalVersionOlderThanRemote else { return }
+        downloadFile(at: IndexPath(item: previewIndex, section: 0))
     }
 
     func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
@@ -526,6 +542,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
+        downloadFile(at: indexPath)
+    }
+
+    private func downloadFile(at indexPath: IndexPath) {
         DownloadQueue.instance.temporaryDownload(
             file: currentFile,
             userId: accountManager.currentUserId,
@@ -558,6 +578,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                     } else {
                         (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
                             .previewDownloadTask?.cancel()
+                        previewErrors[currentFile.id] = nil
                         collectionView.endEditing(true)
                         collectionView.reloadItems(at: [indexPath])
                         updateNavigationBar()
