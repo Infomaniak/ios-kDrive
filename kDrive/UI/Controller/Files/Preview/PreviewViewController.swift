@@ -449,7 +449,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         let file = previewFiles[index]
-        if file.convertedType == .spreadsheet || file.convertedType == .presentation || file.convertedType == .text {
+        if ConvertedType.documentTypes.contains(file.convertedType) {
             handleOfficePreviewError(error, previewIndex: index)
         }
 
