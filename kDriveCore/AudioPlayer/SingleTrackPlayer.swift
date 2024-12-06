@@ -45,6 +45,7 @@ public final class SingleTrackPlayer: Pausable {
     private var timeObserver: Any?
     private var rateObserver: NSKeyValueObservation?
     private var statusObserver: NSKeyValueObservation?
+    private var currentItemStatusObserver: NSKeyValueObservation?
     private var isInterrupted = false
 
     // MARK: Data flow
@@ -56,6 +57,7 @@ public final class SingleTrackPlayer: Pausable {
     public let onPositionChange = PassthroughSubject<Float, Never>()
     public let onPositionMaximumChange = PassthroughSubject<Float, Never>()
     public let onCurrentTrackMetadata = PassthroughSubject<MediaMetadata, Never>()
+    public let onItemError = PassthroughSubject<Error, Never>()
 
     var player: AVPlayer?
 
@@ -113,6 +115,10 @@ public final class SingleTrackPlayer: Pausable {
                     self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                     await self.setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
                     self.setUpObservers()
+
+                    self.currentItemStatusObserver = self.player?.observe(\.currentItem?.status) { _, _ in
+                        self.handleItemStatusChange()
+                    }
                 }
             }
         } else {
@@ -223,6 +229,12 @@ public final class SingleTrackPlayer: Pausable {
         }
     }
 
+    private func handleItemStatusChange() {
+        guard let error = player?.currentItem?.error else { return }
+
+        onItemError.send(error)
+    }
+
     // MARK: - Observation
 
     private func setUpObservers() {
@@ -270,6 +282,9 @@ public final class SingleTrackPlayer: Pausable {
 
         statusObserver?.invalidate()
         statusObserver = nil
+
+        currentItemStatusObserver?.invalidate()
+        currentItemStatusObserver = nil
 
         removeAllRemoteControlEvents()
     }
