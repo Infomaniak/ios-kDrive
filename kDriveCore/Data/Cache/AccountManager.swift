@@ -214,7 +214,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         // FileViewModel K.O. without a valid drive in Realm, therefore add one
         let publicShareDrive = Drive()
         publicShareDrive.objectId = publicShareId
-        @LazyInjectService var driveInfosManager: DriveInfosManager
         do {
             try driveInfosManager.storePublicShareDrive(drive: publicShareDrive)
         } catch {
