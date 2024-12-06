@@ -40,7 +40,7 @@ enum FileListBarButtonType {
 enum FileListQuickActionType {
     case file
     case trash
-    case multipleSelection
+    case multipleSelection(onlyDownload: Bool)
 }
 
 enum ControllerPresentationType {
@@ -92,6 +92,8 @@ class FileListViewModel: SelectDelegate {
         var sortingOptions: [SortType] = [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest]
         var matomoViewPath = ["FileList"]
     }
+
+    weak var viewControllerDismissable: ViewControllerDismissable?
 
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?

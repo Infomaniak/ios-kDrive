@@ -228,6 +228,10 @@ public class FloatingPanelAction: Equatable {
         return [manageCategories, favorite, upsaleColor, folderColor, offline, download, move, duplicate].map { $0.reset() }
     }
 
+    static var multipleSelectionPublicShareActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+    
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
         return [download].map { $0.reset() }
     }
