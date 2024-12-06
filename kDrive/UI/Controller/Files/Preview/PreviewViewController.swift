@@ -36,39 +36,6 @@ import UIKit
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
-    final class PreviewError {
-        let fileId: Int
-        var pdfGenerationProgress: Progress?
-        var downloadTask: URLSessionDownloadTask?
-        var pdfUrl: URL?
-        var error: Error?
-
-        init(
-            fileId: Int,
-            pdfGenerationProgress: Progress? = nil,
-            downloadTask: URLSessionDownloadTask? = nil,
-            pdfUrl: URL? = nil,
-            error: Error? = nil
-        ) {
-            self.fileId = fileId
-            self.pdfGenerationProgress = pdfGenerationProgress
-            self.downloadTask = downloadTask
-            self.pdfUrl = pdfUrl
-            self.error = error
-        }
-
-        func addDownloadTask(_ downloadTask: URLSessionDownloadTask) {
-            self.downloadTask = downloadTask
-            pdfGenerationProgress?.completedUnitCount += 1
-            pdfGenerationProgress?.addChild(downloadTask.progress, withPendingUnitCount: 9)
-        }
-
-        func removeDownloadTask() {
-            pdfGenerationProgress = nil
-            downloadTask = nil
-        }
-    }
-
     @IBOutlet var collectionView: UICollectionView!
     private var previewFiles = [File]()
     private var previewErrors = [Int: PreviewError]()
@@ -276,7 +243,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
-        previewErrors.values.forEach { $0.downloadTask?.cancel() }
+        previewErrors.values.compactMap { $0 as? OfficePreviewError }.forEach { $0.downloadTask?.cancel() }
         navigationController?.interactivePopGestureRecognizer?.delegate = nil
 
         UIApplication.shared.endReceivingRemoteControlEvents()
@@ -482,35 +449,40 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         let file = previewFiles[index]
-        let previewError = PreviewError(fileId: fileId)
-        if file.convertedType == .spreadsheet
-            || file.convertedType == .presentation
-            || file.convertedType == .text {
-            previewError.pdfGenerationProgress = Progress(totalUnitCount: 10)
-            PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
-                previewError.addDownloadTask(downloadTask)
-                Task { @MainActor [weak self] in
-                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                }
-            } completion: { url, error in
-                previewError.removeDownloadTask()
-                if let url {
-                    previewError.pdfUrl = url
-                } else {
-                    previewError.error = error
-                }
-                Task { @MainActor [weak self] in
-                    self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-                }
-            }
+        if ConvertedType.documentTypes.contains(file.convertedType) {
+            handleOfficePreviewError(error, previewIndex: index)
         }
-        previewErrors[fileId] = previewError
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
         Task { @MainActor [weak self] in
             self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
+    }
+
+    func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
+        let file = previewFiles[previewIndex]
+
+        let previewError = OfficePreviewError(fileId: file.id, pdfGenerationProgress: Progress(totalUnitCount: 10))
+
+        PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
+            previewError.addDownloadTask(downloadTask)
+            Task { @MainActor [weak self] in
+                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
+            }
+        } completion: { url, error in
+            previewError.removeDownloadTask()
+            if let url {
+                previewError.pdfUrl = url
+            } else {
+                previewError.downloadError = error
+            }
+            Task { @MainActor [weak self] in
+                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
+            }
+        }
+
+        previewErrors[file.id] = previewError
     }
 
     func openWith(from: UIView) {
@@ -546,7 +518,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
         let currentFile = previewFiles[indexPath.row]
-        previewErrors.values.forEach { $0.downloadTask?.cancel() }
+        previewErrors.values.compactMap { $0 as? OfficePreviewError }.forEach { $0.downloadTask?.cancel() }
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
         guard currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType)
@@ -559,37 +531,36 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             userId: accountManager.currentUserId,
             onOperationCreated: { operation in
                 Task { @MainActor [weak self] in
-                    guard let self = self else {
+                    guard let self else {
                         return
                     }
 
-                    self.currentDownloadOperation = operation
-                    if let progress = self.currentDownloadOperation?.task?.progress,
-                       let cell = self.collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+                    currentDownloadOperation = operation
+                    if let progress = currentDownloadOperation?.task?.progress,
+                       let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
                         cell.setDownloadProgress(progress)
                     }
                 }
             },
             completion: { error in
                 Task { @MainActor [weak self] in
-                    guard let self = self else {
-                        return
-                    }
+                    guard let self else { return }
 
-                    self.currentDownloadOperation = nil
-                    if self.view.window != nil {
-                        if let error {
-                            if error != .taskCancelled {
-                                self.previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, error: error)
-                                self.collectionView.reloadItems(at: [indexPath])
-                            }
-                        } else {
-                            (self.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
-                                .previewDownloadTask?.cancel()
-                            self.collectionView.endEditing(true)
-                            self.collectionView.reloadItems(at: [indexPath])
-                            self.updateNavigationBar()
+                    currentDownloadOperation = nil
+
+                    guard view.window != nil else { return }
+
+                    if let error {
+                        if error != .taskCancelled {
+                            previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
+                            collectionView.reloadItems(at: [indexPath])
                         }
+                    } else {
+                        (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
+                            .previewDownloadTask?.cancel()
+                        collectionView.endEditing(true)
+                        collectionView.reloadItems(at: [indexPath])
+                        updateNavigationBar()
                     }
                 }
             }
@@ -706,8 +677,8 @@ extension PreviewViewController: UICollectionViewDataSource {
     }
 
     private func getNoLocalPreviewCellFor(file: File, indexPath: IndexPath) -> UICollectionViewCell {
-        if let previewFallback = previewErrors[file.id] {
-            if let url = previewFallback.pdfUrl {
+        if let officePreviewError = previewErrors[file.id] as? OfficePreviewError {
+            if let url = officePreviewError.pdfUrl {
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(documentUrl: url)
@@ -715,9 +686,9 @@ extension PreviewViewController: UICollectionViewDataSource {
             } else {
                 let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
                 cell.configureWith(file: file)
-                if let progress = previewFallback.pdfGenerationProgress {
+                if let progress = officePreviewError.pdfGenerationProgress {
                     cell.setDownloadProgress(progress)
-                } else if previewFallback.error != nil {
+                } else if officePreviewError.downloadError != nil {
                     cell.errorDownloading()
                 }
                 cell.previewDelegate = self
