@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Matthieu Déglon
- * Exported at: Thu, 03 Oct 2024 08:22:20 +0200
+ * Exported by: Adrien Coye
+ * Exported at: Mon, 28 Oct 2024 09:46:15 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -375,6 +375,9 @@
 
 /* loco:6075c0bb65160c29997c5e32 */
 "buttonOpenDocument" = "Abrir el documento";
+
+/* loco:66dfe78b7da115a16c0733e2 */
+"buttonOpenInBrowser" = "Abrir en el navegador";
 
 /* loco:607948379bda7f7df0121872 */
 "buttonOpenReadOnly" = "Abrir en modo de solo lectura";
@@ -1498,6 +1501,27 @@
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "Servicio de importación de archivos";
 
+/* loco:66f658cbb0e522d4f50cc2f2 */
+"obtainkDriveAdAlreadyGotAccount" = "Ya tengo una cuenta";
+
+/* loco:66f64e66297dda6eb402f022 */
+"obtainkDriveAdDescription" = "Almacene sus fotos, documentos y correos electrónicos en Suiza con una empresa independiente que respeta su privacidad.";
+
+/* loco:66f657511dc417a794017b92 */
+"obtainkDriveAdFreeTrialButton" = "Prueba gratuita";
+
+/* loco:66f64fa849bd6bdd0f0ae622 */
+"obtainkDriveAdListing1" = "15 GB gratuitos, luego 2 TB hasta 106 TB";
+
+/* loco:66f65063f4b00a1c660ce462 */
+"obtainkDriveAdListing2" = "Creación y colaboración en línea de documentos Word, Excel y PowerPoint";
+
+/* loco:66f651361a641d2f5f0207d2 */
+"obtainkDriveAdListing3" = "Importación automática de tus archivos desde Google Drive, Dropbox, One Drive, NextCloud, Hubic y WebDav";
+
+/* loco:66f64797fdc443552a0a5e92 */
+"obtainkDriveAdTitle" = "Consigue kDrive gratis";
+
 /* loco:6049df4d5c2c3a04bc397a19 */
 "offlineFileNoFile" = "No hay archivos sin conexión";
 
@@ -1563,6 +1587,30 @@
 
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "El archivo de vídeo no es compatible con el lector de vídeo";
+
+/* loco:6707af761017cac6e10d85b4 */
+"publicShareBadLinkError" = "No hay compartir asociadas a este enlace";
+
+/* loco:66ffbbcd294f6022e60948f3 */
+"publicShareImportationInProgress" = "Descarga en curso en la carpeta seleccionada";
+
+/* loco:6707ca3c9b41ff114e052962 */
+"publicShareLinkValidityDescription" = "Este enlace es válido hasta el %@";
+
+/* loco:66e0295f01da3c1ab90c2d72 */
+"publicShareOutdatedLinkDescription" = "El enlace ha sido desactivado o ha caducado.\nPara acceder a los archivos, envía un mensaje al usuario que compartió el enlace contigo para que pueda reactivarlo.";
+
+/* loco:66e028cb3cd41df03c0a7003 */
+"publicShareOutdatedLinkTitle" = "Los archivos ya no están disponibles";
+
+/* loco:66d05b05fe43da3cb8009652 */
+"publicSharePasswordNeededDescription" = "Introduzca la contraseña que se le ha facilitado para acceder al contenido.";
+
+/* loco:66d05b5928ec407b32087892 */
+"publicSharePasswordNeededTitle" = "Contenido seguro";
+
+/* loco:66dfe73543cef47d3e073e62 */
+"publicSharePasswordNotSupportedDescription" = "Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Enlace de uso compartido público";

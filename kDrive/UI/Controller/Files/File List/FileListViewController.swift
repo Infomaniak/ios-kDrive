@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
+import FloatingPanel
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
@@ -91,6 +92,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewModel.driveFileManager
     }
 
+    lazy var addToKDriveButton: IKLargeButton = {
+        let button = IKLargeButton(frame: .zero)
+        button.setTitle(KDriveCoreStrings.Localizable.buttonAddToKDrive, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
+        return button
+    }()
+
     // MARK: - View controller lifecycle
 
     deinit {
@@ -121,7 +130,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: headerViewIdentifier
         )
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
@@ -141,6 +150,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         )
 
         setupViewModel()
+        setupFooterIfNeeded()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -250,6 +260,38 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
+    func setupFooterIfNeeded() {
+        guard driveFileManager.isPublicShare else {
+            return
+        }
+
+        view.addSubview(addToKDriveButton)
+        view.bringSubviewToFront(addToKDriveButton)
+
+        let leadingConstraint = addToKDriveButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                                                           constant: 16)
+        leadingConstraint.priority = .defaultHigh
+        let trailingConstraint = addToKDriveButton.trailingAnchor.constraint(
+            greaterThanOrEqualTo: view.trailingAnchor,
+            constant: -16
+        )
+        trailingConstraint.priority = .defaultHigh
+        let widthConstraint = addToKDriveButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
+
+        NSLayoutConstraint.activate([
+            addToKDriveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            leadingConstraint,
+            trailingConstraint,
+            addToKDriveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            addToKDriveButton.heightAnchor.constraint(equalToConstant: 60),
+            widthConstraint
+        ])
+    }
+
+    @objc func addToMyDriveButtonTapped(_ sender: UIView?) {
+        viewModel.barButtonPressed(sender: sender, type: .downloadAll)
+    }
+
     func reloadCollectionViewWith(files: [File]) {
         let changeSet = StagedChangeset(source: displayedFiles, target: files)
         collectionView.reload(using: changeSet,
@@ -352,6 +394,30 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
     }
 
+    private func fileFloatingPanelLayout(files: [File]) -> FloatingPanelLayout {
+        guard driveFileManager.isPublicShare else {
+            return FileFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        }
+
+        if files.first?.isDirectory == true {
+            return PublicShareFolderFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        } else {
+            return PublicShareFileFloatingPanelLayout(
+                initialState: .half,
+                hideTip: true,
+                backdropAlpha: 0.2
+            )
+        }
+    }
+
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
         var floatingPanelViewController: DriveFloatingPanelController
@@ -363,11 +429,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-            floatingPanelViewController.layout = FileFloatingPanelLayout(
-                initialState: .half,
-                hideTip: true,
-                backdropAlpha: 0.2
-            )
+            floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
 
             if let file = files.first {
                 fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
@@ -469,7 +531,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     @objc func barButtonPressed(_ sender: FileListBarButton) {
-        viewModel.barButtonPressed(type: sender.type)
+        viewModel.barButtonPressed(sender: sender, type: sender.type)
     }
 
     @objc func forceRefresh() {
@@ -752,7 +814,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         switch viewModel.listStyle {
         case .list:
             // Important: subtract safe area insets
-            return CGSize(width: effectiveContentWidth, height: UIConstants.fileListCellHeight)
+            return CGSize(width: effectiveContentWidth, height: UIConstants.FileList.cellHeight)
         case .grid:
             // Adjust cell size based on screen size
             let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))

@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -35,26 +36,50 @@ enum UniversalLinksHelper {
             regex: Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)!,
             displayMode: .file
         )
+
+        /// Matches a public share link
+        static let publicShareLink = Link(
+            regex: Regex(pattern: #"^/app/share/([0-9]+)/([a-z0-9-]+)$"#)!,
+            displayMode: .file
+        )
+
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
+
         /// Matches a file preview link
         static let filePreview = Link(
             regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!,
             displayMode: .file
         )
+
         /// Matches an office file link
         static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
 
-        static let all = [privateShareLink, directoryLink, filePreview, officeLink]
+        static let all = [privateShareLink, publicShareLink, directoryLink, filePreview, officeLink]
     }
 
     private enum DisplayMode {
         case office, file
     }
 
-    static func handlePath(_ path: String) -> Bool {
+    @discardableResult
+    static func handleURL(_ url: URL) async -> Bool {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            DDLogError("[UniversalLinksHelper] Failed to process url:\(url)")
+            return false
+        }
+
+        let path = components.path
         DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
+        // Public share link regex
+        let shareLink = Link.publicShareLink
+        let matches = shareLink.regex.matches(in: path)
+        if await processPublicShareLink(matches: matches, publicShareURL: url) {
+            return true
+        }
+
+        // Common regex
         for link in Link.all {
             let matches = link.regex.matches(in: path)
             if processRegex(matches: matches, displayMode: link.displayMode) {
@@ -64,6 +89,78 @@ enum UniversalLinksHelper {
 
         DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
         return false
+    }
+
+    private static func processPublicShareLink(matches: [[String]], publicShareURL: URL) async -> Bool {
+        guard let firstMatch = matches.first,
+              let driveId = firstMatch[safe: 1],
+              let driveIdInt = Int(driveId),
+              let shareLinkUid = firstMatch[safe: 2] else {
+            return false
+        }
+
+        // request metadata
+        let apiFetcher = PublicShareApiFetcher()
+        do {
+            let metadata = try await apiFetcher.getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
+            return await processPublicShareMetadata(
+                metadata,
+                driveId: driveIdInt,
+                shareLinkUid: shareLinkUid,
+                apiFetcher: apiFetcher
+            )
+        } catch {
+            guard let apiError = error as? ApiError else {
+                return false
+            }
+
+            guard let limitation = PublicShareLimitation(rawValue: apiError.code) else {
+                return false
+            }
+
+            return await processPublicShareMetadataLimitation(limitation, publicShareURL: publicShareURL)
+        }
+    }
+
+    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
+                                                             publicShareURL: URL?) async -> Bool {
+        @InjectService var appNavigable: AppNavigable
+        switch limitation {
+        case .passwordProtected:
+            guard let publicShareURL else {
+                return false
+            }
+            MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
+            await appNavigable.presentPublicShareLocked(publicShareURL)
+        case .expired:
+            MatomoUtils.trackDeeplink(name: "publicShareExpired")
+            await appNavigable.presentPublicShareExpired()
+        }
+
+        return true
+    }
+
+    private static func processPublicShareMetadata(_ metadata: PublicShareMetadata,
+                                                   driveId: Int,
+                                                   shareLinkUid: String,
+                                                   apiFetcher: PublicShareApiFetcher) async -> Bool {
+        @InjectService var accountManager: AccountManageable
+
+        MatomoUtils.trackDeeplink(name: "publicShare")
+
+        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
+            for: shareLinkUid,
+            driveId: driveId,
+            rootFileId: metadata.fileId
+        )
+
+        openPublicShare(driveId: driveId,
+                        linkUuid: shareLinkUid,
+                        fileId: metadata.fileId,
+                        driveFileManager: publicShareDriveFileManager,
+                        apiFetcher: apiFetcher)
+
+        return true
     }
 
     private static func processRegex(matches: [[String]], displayMode: DisplayMode) -> Bool {
@@ -81,6 +178,40 @@ enum UniversalLinksHelper {
         openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office)
 
         return true
+    }
+
+    private static func openPublicShare(driveId: Int,
+                                        linkUuid: String,
+                                        fileId: Int,
+                                        driveFileManager: DriveFileManager,
+                                        apiFetcher: PublicShareApiFetcher) {
+        Task {
+            do {
+                let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                                                                       linkUuid: linkUuid,
+                                                                       fileId: fileId)
+                // Root folder must be in database for the FileListViewModel to work
+                try driveFileManager.database.writeTransaction { writableRealm in
+                    writableRealm.add(rootFolder)
+                }
+
+                let frozenRootFolder = rootFolder.freeze()
+
+                @InjectService var appNavigable: AppNavigable
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+                await appNavigable.presentPublicShare(
+                    frozenRootFolder: frozenRootFolder,
+                    publicShareProxy: publicShareProxy,
+                    driveFileManager: driveFileManager,
+                    apiFetcher: apiFetcher
+                )
+            } catch {
+                DDLogError(
+                    "[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
+                )
+                await UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
     }
 
     private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
