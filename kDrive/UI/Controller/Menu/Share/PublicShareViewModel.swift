@@ -77,6 +77,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
 
         let (_, nextCursor) = try await driveFileManager.publicShareFiles(rootProxy: rootProxy,
                                                                           publicShareProxy: publicShareProxy,
+                                                                          cursor: cursor,
                                                                           publicShareApiFetcher: publicShareApiFetcher)
         endRefreshing()
         if let nextCursor {
