@@ -288,8 +288,20 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         ])
     }
 
-    @objc func addToMyDriveButtonTapped(_ sender: UIView?) {
-        viewModel.barButtonPressed(sender: sender, type: .downloadAll)
+    @objc func addToMyDriveButtonTapped(_ sender: UIButton?) {
+        defer {
+            sender?.isSelected = false
+            sender?.isEnabled = true
+            sender?.isHighlighted = false
+        }
+
+        guard accountManager.currentAccount != nil else {
+            // Let the user login with the onboarding
+            dismiss(animated: true)
+            return
+        }
+
+        viewModel.barButtonPressed(sender: sender, type: .addToMyDrive)
     }
 
     func reloadCollectionViewWith(files: [File]) {

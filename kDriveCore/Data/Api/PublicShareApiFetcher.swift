@@ -29,6 +29,13 @@ public enum PublicShareLimitation: String {
     case expired = "link_is_not_valid"
 }
 
+enum APIPublicShareParameter {
+    static let sourceDriveId = "source_drive_id"
+    static let fileIds = "file_ids"
+    static let exceptFileIds = "except_file_ids"
+    static let password = "password"
+}
+
 public class PublicShareApiFetcher: ApiFetcher {
     override public init() {
         super.init()
@@ -89,5 +96,30 @@ public extension PublicShareApiFetcher {
         let request = Session.default.request(shareLinkFileChildrenUrl)
         let shareLinkFiles: ValidServerResponse<[File]> = try await perform(request: request)
         return shareLinkFiles
+    }
+
+    func importShareLinkFiles(sourceDriveId: Int,
+                              destinationDriveId: Int,
+                              fileIds: [Int]?,
+                              exceptIds: [Int]?,
+                              password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
+        let importShareLinkFilesUrl = Endpoint.importShareLinkFiles(driveId: destinationDriveId).url
+        var requestParameters: [String: AnyHashable] = [
+            APIPublicShareParameter.sourceDriveId: sourceDriveId
+        ]
+
+        if let fileIds, !fileIds.isEmpty {
+            requestParameters[APIPublicShareParameter.fileIds] = fileIds
+        } else if let exceptIds, !exceptIds.isEmpty {
+            requestParameters[APIPublicShareParameter.exceptFileIds] = exceptIds
+        }
+
+        if let password {
+            requestParameters[APIPublicShareParameter.password] = password
+        }
+
+        let request = Session.default.request(importShareLinkFilesUrl)
+        let externalImport: ValidServerResponse<FileExternalImport> = try await perform(request: request)
+        return externalImport
     }
 }

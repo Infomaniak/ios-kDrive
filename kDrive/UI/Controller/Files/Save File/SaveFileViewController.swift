@@ -72,6 +72,13 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    var publicShareExceptIds = [Int]()
+    var publicShareFileIds = [Int]()
+    var publicShareProxy: PublicShareProxy?
+    var isPublicShareFiles: Bool {
+        publicShareProxy != nil
+    }
+
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
@@ -285,7 +292,22 @@ class SaveFileViewController: UIViewController {
     }
 
     func updateButton() {
-        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !items.isEmpty && !importInProgress
+        guard selectedDirectory != nil, !importInProgress else {
+            enableButton = false
+            return
+        }
+
+        guard !isPublicShareFiles else {
+            enableButton = true
+            return
+        }
+
+        guard !items.isEmpty,
+              items.allSatisfy({ !$0.name.isEmpty }) else {
+            enableButton = false
+            return
+        }
+        enableButton = true
     }
 
     func updateTableViewAfterImport() {

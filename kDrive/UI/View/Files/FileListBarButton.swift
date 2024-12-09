@@ -53,6 +53,10 @@ final class FileListBarButton: UIBarButtonItem {
             let image = KDriveResourcesAsset.download.image
             self.init(image: image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDownload
+        case .addToMyDrive:
+            let image = KDriveResourcesAsset.drive.image
+            self.init(image: image, style: .plain, target: target, action: action)
+            accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAddToKDrive
         }
         self.type = type
     }

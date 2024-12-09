@@ -35,6 +35,7 @@ enum FileListBarButtonType {
     case photoSort
     case addFolder
     case downloadAll
+    case addToMyDrive
 }
 
 enum FileListQuickActionType {

@@ -34,7 +34,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         guard let currentDirectory else {
             fatalError("PublicShareViewModel requires a currentDirectory to work")
         }
- 
+
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
                                           emptyViewType: .emptyFolder,
@@ -84,25 +84,25 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         }
     }
 
-    // TODO: Move away from view model
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         guard downloadObserver == nil else {
             return
         }
 
-        guard type == .downloadAll,
-              let publicShareProxy = publicShareProxy else {
+        guard let publicShareProxy = publicShareProxy else {
             return
         }
 
+        if type == .downloadAll {
+            downloadAll(sender: sender, publicShareProxy: publicShareProxy)
+        } else if type == .addToMyDrive {
+            addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
+        }
+    }
+
+    private func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
         let button = sender as? UIButton
         button?.isEnabled = false
-
-        // TODO: Abstract sheet presentation
-        @InjectService var appNavigable: AppNavigable
-        guard let topMostViewController = appNavigable.topMostViewController else {
-            return
-        }
 
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
@@ -139,12 +139,29 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                         fatalError("No sender button")
                     }
 
-                    topMostViewController.present(activityViewController, animated: true)
+                    self.onPresentViewController?(.modal, activityViewController, true)
                 }
             }
 
         DownloadQueue.instance.addPublicShareToQueue(file: currentDirectory,
                                                      driveFileManager: driveFileManager,
                                                      publicShareProxy: publicShareProxy)
+    }
+
+    private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
+        let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
+
+        let saveNavigationViewController = SaveFileViewController
+            .instantiateInNavigationController(driveFileManager: driveFileManager)
+
+        if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
+            saveViewController.publicShareFileIds = selectedItemsIds
+            saveViewController.publicShareExceptIds = exceptItemIds
+            saveViewController.publicShareProxy = publicShareProxy
+            saveViewController.selectedDirectory = currentDirectory
+        }
+
+        onPresentViewController?(.modal, saveNavigationViewController, true)
     }
 }
