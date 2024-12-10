@@ -148,11 +148,13 @@ enum UniversalLinksHelper {
 
         MatomoUtils.trackDeeplink(name: "publicShare")
 
-        let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
+        guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,
             driveId: driveId,
             rootFileId: metadata.fileId
-        )
+        ) else {
+            return false
+        }
 
         openPublicShare(driveId: driveId,
                         linkUuid: shareLinkUid,
