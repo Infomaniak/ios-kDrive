@@ -549,6 +549,42 @@ public class DriveApiFetcher: ApiFetcher {
     public func file(_ file: AbstractFile) async throws -> File {
         try await perform(request: authenticatedRequest(.file(file)))
     }
+
+    public func importShareLinkFiles(sourceDriveId: Int,
+                                     destinationDriveId: Int,
+                                     fileIds: [Int]?,
+                                     exceptIds: [Int]?,
+                                     password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
+        let destinationDrive = ProxyDrive(id: destinationDriveId)
+        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
+        var requestParameters: Parameters = [
+            APIPublicShareParameter.sourceDriveId: sourceDriveId
+        ]
+
+        if let fileIds, !fileIds.isEmpty {
+            requestParameters[APIPublicShareParameter.fileIds] = fileIds
+        } else if let exceptIds, !exceptIds.isEmpty {
+            requestParameters[APIPublicShareParameter.exceptFileIds] = exceptIds
+        }
+
+        if let password {
+            requestParameters[APIPublicShareParameter.password] = password
+        }
+
+        let result: ValidServerResponse<FileExternalImport> = try await perform(request: authenticatedRequest(
+            importShareLinkFiles,
+            method: .post,
+            parameters: requestParameters
+        ))
+        return result
+    }
+}
+
+enum APIPublicShareParameter {
+    static let sourceDriveId = "source_drive_id"
+    static let fileIds = "file_ids"
+    static let exceptFileIds = "except_file_ids"
+    static let password = "password"
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {

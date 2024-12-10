@@ -22,6 +22,8 @@ import kDriveResources
 import UIKit
 
 public class NoDriveUpsaleViewController: UpsaleViewController {
+    var dismissCallback: (() -> Void)?
+
     override func configureButtons() {
         dismissButton.style = .primaryButton
         freeTrialButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
@@ -39,5 +41,6 @@ public class NoDriveUpsaleViewController: UpsaleViewController {
 
     @objc public func dismissViewController() {
         dismiss(animated: true, completion: nil)
+        dismissCallback?()
     }
 }

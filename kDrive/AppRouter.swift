@@ -632,6 +632,9 @@ public struct AppRouter: AppNavigable {
         rootViewController.dismiss(animated: false) {
             guard !frozenRootFolder.isDisabled else {
                 let noDriveViewController = NoDriveUpsaleViewController()
+                noDriveViewController.dismissCallback = {
+                    rootViewController.dismiss(animated: false) {}
+                }
                 let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: noDriveViewController)
                 rootViewController.present(floatingPanel, animated: true, completion: nil)
                 return

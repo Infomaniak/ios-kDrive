@@ -296,8 +296,28 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         guard accountManager.currentAccount != nil else {
+            #if !ISEXTENSION
+            let upsaleViewController = UpsaleViewController()
+
+            // Create an account
+            upsaleViewController.freeTrialCallback = { [weak self] in
+                self?.dismiss(animated: true)
+                // TODO: Present login
+//                MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
+//                present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
+            }
+
             // Let the user login with the onboarding
+            upsaleViewController.loginCallback = { [weak self] in
+                self?.dismiss(animated: true)
+            }
+
+            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+            present(floatingPanel, animated: true, completion: nil)
+            #else
             dismiss(animated: true)
+            #endif
+
             return
         }
 

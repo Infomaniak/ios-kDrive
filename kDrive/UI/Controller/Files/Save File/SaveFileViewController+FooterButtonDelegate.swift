@@ -38,10 +38,10 @@ extension SaveFileViewController: FooterButtonDelegate {
 
         if let publicShareProxy {
             Task {
-                await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
-                                             destinationDriveId: drive.accountId,
-                                             fileIds: publicShareFileIds,
-                                             exceptIds: publicShareExceptIds)
+                try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
+                                                 destinationDriveId: drive.accountId,
+                                                 fileIds: publicShareFileIds,
+                                                 exceptIds: publicShareExceptIds)
             }
         } else {
             guard !items.isEmpty else {
@@ -63,11 +63,14 @@ extension SaveFileViewController: FooterButtonDelegate {
             dismiss(animated: true)
         }
 
-        try? await PublicShareApiFetcher().importShareLinkFiles(sourceDriveId: sourceDriveId,
-                                                                destinationDriveId: destinationDriveId,
-                                                                fileIds: fileIds,
-                                                                exceptIds: exceptIds)
-        print("savePublicShareToDrive")
+        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        try await currentDriveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
+                                                                          destinationDriveId: destinationDriveId,
+                                                                          fileIds: fileIds,
+                                                                          exceptIds: exceptIds)
     }
 
     private func saveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {
