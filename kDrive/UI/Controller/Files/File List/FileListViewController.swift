@@ -51,6 +51,7 @@ extension SortType: Selectable {
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
 
     // MARK: - Constants
 
@@ -301,15 +302,20 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
             // Create an account
             upsaleViewController.freeTrialCallback = { [weak self] in
-                self?.dismiss(animated: true)
-                // TODO: Present login
-//                MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
-//                present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
+                guard let self else { return }
+                self.dismiss(animated: true) {
+                    let loginDelegateHandler = LoginDelegateHandler()
+                    self.router.showRegister(delegate: loginDelegateHandler)
+                }
             }
 
             // Let the user login with the onboarding
             upsaleViewController.loginCallback = { [weak self] in
-                self?.dismiss(animated: true)
+                guard let self else { return }
+                self.dismiss(animated: true) {
+                    let loginDelegateHandler = LoginDelegateHandler()
+                    self.router.showLogin(delegate: loginDelegateHandler)
+                }
             }
 
             let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)

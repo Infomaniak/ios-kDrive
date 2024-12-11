@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import SafariServices
@@ -33,6 +34,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var reviewManager: ReviewManageable
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -442,6 +444,26 @@ public struct AppRouter: AppNavigable {
     public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
         let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, files: files)
         viewController.present(vc, animated: true)
+    }
+
+    @MainActor public func showRegister(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
+        let registerViewController = RegisterViewController.instantiateInNavigationController(delegate: delegate)
+        topMostViewController.present(registerViewController, animated: true)
+    }
+
+    @MainActor public func showLogin(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
+                                         hideCreateAccountButton: true,
+                                         delegate: delegate)
     }
 
     // MARK: AppExtensionRouter

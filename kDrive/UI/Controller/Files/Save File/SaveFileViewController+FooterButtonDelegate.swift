@@ -58,7 +58,7 @@ extension SaveFileViewController: FooterButtonDelegate {
     private func savePublicShareToDrive(sourceDriveId: Int,
                                         destinationDriveId: Int,
                                         fileIds: [Int],
-                                        exceptIds: [Int]) async {
+                                        exceptIds: [Int]) async throws {
         defer {
             dismiss(animated: true)
         }
