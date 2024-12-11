@@ -364,7 +364,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configureForSelection() {
         guard let viewModel,
-              viewModel.selectionMode == true else {
+              viewModel.selectionMode else {
             return
         }
 

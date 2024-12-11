@@ -22,6 +22,9 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
+    var loginCallback: (() -> Void)?
+    var freeTrialCallback: (() -> Void)?
+
     let titleImageView = UIImageView()
 
     let titleLabel: UILabel = {
@@ -217,12 +220,12 @@ public class UpsaleViewController: UIViewController {
     }
 
     @objc public func freeTrial() {
-        // TODO: Hook free trial
         dismiss(animated: true, completion: nil)
+        freeTrialCallback?()
     }
 
     @objc public func login() {
-        // TODO: Hook login
         dismiss(animated: true, completion: nil)
+        loginCallback?()
     }
 }

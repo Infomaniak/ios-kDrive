@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import SafariServices
@@ -33,6 +34,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var reviewManager: ReviewManageable
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -444,6 +446,26 @@ public struct AppRouter: AppNavigable {
         viewController.present(vc, animated: true)
     }
 
+    @MainActor public func showRegister(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
+        let registerViewController = RegisterViewController.instantiateInNavigationController(delegate: delegate)
+        topMostViewController.present(registerViewController, animated: true)
+    }
+
+    @MainActor public func showLogin(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
+                                         hideCreateAccountButton: true,
+                                         delegate: delegate)
+    }
+
     // MARK: AppExtensionRouter
 
     public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
@@ -587,8 +609,7 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
         guard let window,
-              let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("TODO: fix offline routing - presentPublicShareLocked")
+              let rootViewController = window.rootViewController else {
             return
         }
 
@@ -599,20 +620,13 @@ public struct AppRouter: AppNavigable {
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
-                return
-            }
-
-            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
         }
     }
 
     @MainActor public func presentPublicShareExpired() {
         guard let window,
-              let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("TODO: fix offline routing - presentPublicShareExpired")
+              let rootViewController = window.rootViewController else {
             return
         }
 
@@ -622,13 +636,7 @@ public struct AppRouter: AppNavigable {
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
-                return
-            }
-
-            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
         }
     }
 
@@ -639,21 +647,18 @@ public struct AppRouter: AppNavigable {
         apiFetcher: PublicShareApiFetcher
     ) {
         guard let window,
-              let rootViewController = window.rootViewController as? MainTabViewController else {
-            fatalError("TODO: fix offline routing - presentPublicShare")
-            return
-        }
-
-        // TODO: Fix access right
-        guard !frozenRootFolder.isDisabled else {
-            fatalError("isDisabled")
+              let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+            guard !frozenRootFolder.isDisabled else {
+                let noDriveViewController = NoDriveUpsaleViewController()
+                noDriveViewController.dismissCallback = {
+                    rootViewController.dismiss(animated: false) {}
+                }
+                let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: noDriveViewController)
+                rootViewController.present(floatingPanel, animated: true, completion: nil)
                 return
             }
 
@@ -667,7 +672,7 @@ public struct AppRouter: AppNavigable {
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
         }
     }
 
