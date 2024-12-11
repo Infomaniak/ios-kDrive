@@ -93,8 +93,7 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
-    weak var viewControllerDismissable: ViewControllerDismissable?
-
+    var dismissClosure: (() -> Void)?
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 

@@ -49,7 +49,7 @@ extension SortType: Selectable {
 }
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable, ViewControllerDismissable {
+    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
 
     // MARK: - Constants

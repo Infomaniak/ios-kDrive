@@ -37,11 +37,6 @@ protocol SelectDelegate: AnyObject {
     func didSelect(option: Selectable)
 }
 
-@MainActor
-public protocol ViewControllerDismissable: AnyObject {
-    func dismiss(animated flag: Bool, completion: (() -> Void)?)
-}
-
 class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITableViewController {
     var headerTitle = ""
     var selectedOption: T?

@@ -675,7 +675,9 @@ public struct AppRouter: AppNavigable {
                                                  apiFetcher: apiFetcher,
                                                  configuration: configuration)
             let viewController = FileListViewController(viewModel: viewModel)
-            viewModel.viewControllerDismissable = viewController
+            viewModel.dismissClosure = { [weak viewController] in
+                viewController?.dismiss(animated: true)
+            }
 
             let publicShareNavigationController = UINavigationController(rootViewController: viewController)
             publicShareNavigationController.modalPresentationStyle = .fullScreen
