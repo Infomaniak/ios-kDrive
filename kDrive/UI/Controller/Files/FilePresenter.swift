@@ -158,6 +158,10 @@ final class FilePresenter {
         }
 
         let nextVC = FileListViewController(viewModel: viewModel)
+        viewModel.onDismissViewController = { [weak nextVC] in
+            nextVC?.dismiss(animated: true)
+        }
+
         guard file.isDisabled else {
             navigationController?.pushViewController(nextVC, animated: animated)
             return

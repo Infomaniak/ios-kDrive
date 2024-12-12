@@ -658,6 +658,9 @@ public struct AppRouter: AppNavigable {
                                                  currentDirectory: frozenRootFolder,
                                                  apiFetcher: apiFetcher)
             let viewController = FileListViewController(viewModel: viewModel)
+            viewModel.onDismissViewController = { [weak viewController] in
+                viewController?.dismiss(animated: false)
+            }
             let publicShareNavigationController = UINavigationController(rootViewController: viewController)
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical

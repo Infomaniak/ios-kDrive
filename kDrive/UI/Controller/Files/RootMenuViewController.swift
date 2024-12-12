@@ -275,6 +275,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         }
 
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        destinationViewModel.onDismissViewController = { [weak destinationViewController] in
+            destinationViewController?.dismiss(animated: true)
+        }
+
         navigationController?.pushViewController(destinationViewController, animated: true)
     }
 

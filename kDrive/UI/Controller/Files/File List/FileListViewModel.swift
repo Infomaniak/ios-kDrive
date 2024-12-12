@@ -139,6 +139,8 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
+    var onDismissViewController: (() -> Void)?
+
     var sortTypeObservation: AnyCancellable?
     var listStyleObservation: AnyCancellable?
     var bindStore = Set<AnyCancellable>()

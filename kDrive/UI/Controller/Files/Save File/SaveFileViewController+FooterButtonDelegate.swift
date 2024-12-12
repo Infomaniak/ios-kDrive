@@ -27,10 +27,11 @@ import UIKit
 
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton(_ sender: AnyObject) {
-        guard let drive = selectedDriveFileManager?.drive,
+        guard let selectedDriveFileManager,
               let directory = selectedDirectory else {
             return
         }
+        let drive = selectedDriveFileManager.drive
 
         // Making sure the user cannot spam the button on tasks that may take a while
         let button = sender as? IKLargeButton
@@ -38,14 +39,18 @@ extension SaveFileViewController: FooterButtonDelegate {
 
         if let publicShareProxy {
             Task {
+                defer { dismiss() }
                 try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
-                                                 destinationDriveId: drive.accountId,
+                                                 destinationDriveId: drive.id,
+                                                 destinationFolderId: directory.id,
                                                  fileIds: publicShareFileIds,
-                                                 exceptIds: publicShareExceptIds)
+                                                 exceptIds: publicShareExceptIds,
+                                                 sharelinkUuid: publicShareProxy.shareLinkUid,
+                                                 driveFileManager: selectedDriveFileManager)
             }
         } else {
             guard !items.isEmpty else {
-                dismiss(animated: true)
+                dismiss()
                 return
             }
 
@@ -57,20 +62,22 @@ extension SaveFileViewController: FooterButtonDelegate {
 
     private func savePublicShareToDrive(sourceDriveId: Int,
                                         destinationDriveId: Int,
+                                        destinationFolderId: Int,
                                         fileIds: [Int],
-                                        exceptIds: [Int]) async throws {
-        defer {
-            dismiss(animated: true)
-        }
+                                        exceptIds: [Int],
+                                        sharelinkUuid: String,
+                                        driveFileManager: DriveFileManager) async throws {
+        try await _ = driveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
+                                                                       destinationDriveId: destinationDriveId,
+                                                                       destinationFolderId: destinationFolderId,
+                                                                       fileIds: fileIds,
+                                                                       exceptIds: exceptIds,
+                                                                       sharelinkUuid: sharelinkUuid)
+    }
 
-        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-            return
-        }
-
-        try await currentDriveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
-                                                                          destinationDriveId: destinationDriveId,
-                                                                          fileIds: fileIds,
-                                                                          exceptIds: exceptIds)
+    private func dismiss() {
+        completionClosure?()
+        dismiss(animated: true)
     }
 
     private func saveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {

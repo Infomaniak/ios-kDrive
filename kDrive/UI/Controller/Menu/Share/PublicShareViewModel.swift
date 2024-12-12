@@ -24,6 +24,8 @@ import UIKit
 
 /// Public share view model, loading content from memory realm
 final class PublicShareViewModel: InMemoryFileListViewModel {
+    @LazyInjectService private var accountManager: AccountManageable
+
     private var downloadObserver: ObservationToken?
 
     var publicShareProxy: PublicShareProxy?
@@ -150,11 +152,21 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
         let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
 
+        let saveViewController = SaveFileViewController.instantiate(driveFileManager: driveFileManager)
         let saveNavigationViewController = SaveFileViewController
-            .instantiateInNavigationController(driveFileManager: driveFileManager)
+            .setInNavigationController(saveViewController: saveViewController)
+
+        saveViewController.completionClosure = { [weak self] in
+            guard let self else { return }
+            self.onDismissViewController?()
+        }
 
         if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
             saveViewController.publicShareFileIds = selectedItemsIds

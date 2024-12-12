@@ -552,13 +552,17 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func importShareLinkFiles(sourceDriveId: Int,
                                      destinationDriveId: Int,
+                                     destinationFolderId: Int,
                                      fileIds: [Int]?,
                                      exceptIds: [Int]?,
+                                     sharelinkUuid: String,
                                      password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
         let destinationDrive = ProxyDrive(id: destinationDriveId)
         let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
         var requestParameters: Parameters = [
-            APIPublicShareParameter.sourceDriveId: sourceDriveId
+            APIPublicShareParameter.sourceDriveId: sourceDriveId,
+            APIPublicShareParameter.destinationFolderId: destinationFolderId,
+            APIPublicShareParameter.sharelinkUuid: sharelinkUuid
         ]
 
         if let fileIds, !fileIds.isEmpty {
@@ -585,6 +589,8 @@ enum APIPublicShareParameter {
     static let fileIds = "file_ids"
     static let exceptFileIds = "except_file_ids"
     static let password = "password"
+    static let destinationFolderId = "destination_folder_id"
+    static let sharelinkUuid = "sharelink_uuid"
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {

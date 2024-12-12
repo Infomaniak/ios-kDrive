@@ -118,6 +118,8 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    @MainActor var completionClosure: (() -> Void)?
+
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!
 
@@ -349,14 +351,20 @@ class SaveFileViewController: UIViewController {
         return viewController
     }
 
-    class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
-                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
-        let saveViewController = instantiate(driveFileManager: driveFileManager)
+    class func setInNavigationController(saveViewController: SaveFileViewController,
+                                         files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
         if let files {
             saveViewController.items = files
         }
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
+    }
+
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
+                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
+        let saveViewController = instantiate(driveFileManager: driveFileManager)
+        return setInNavigationController(saveViewController: saveViewController,
+                                         files: files)
     }
 }
