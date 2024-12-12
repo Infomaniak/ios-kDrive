@@ -20,6 +20,7 @@ import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import UIKit
+import InfomaniakDI
 
 public class UpsaleViewController: UIViewController {
     var loginCallback: (() -> Void)?
@@ -227,5 +228,31 @@ public class UpsaleViewController: UIViewController {
     @objc public func login() {
         dismiss(animated: true, completion: nil)
         loginCallback?()
+    }
+
+    public static func instantiateInFloatingPanel(rootViewController: UIViewController) -> UIViewController {
+        let upsaleViewController = UpsaleViewController()
+
+        // Create an account
+        upsaleViewController.freeTrialCallback = { [weak rootViewController] in
+            guard let rootViewController else { return }
+            rootViewController.dismiss(animated: true) {
+                let loginDelegateHandler = LoginDelegateHandler()
+                @InjectService var router: AppNavigable
+                router.showRegister(delegate: loginDelegateHandler)
+            }
+        }
+
+        // Let the user login with the onboarding
+        upsaleViewController.loginCallback = { [weak rootViewController] in
+            guard let rootViewController else { return }
+            rootViewController.dismiss(animated: true) {
+                let loginDelegateHandler = LoginDelegateHandler()
+                @InjectService var router: AppNavigable
+                router.showLogin(delegate: loginDelegateHandler)
+            }
+        }
+
+        return UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
     }
 }
