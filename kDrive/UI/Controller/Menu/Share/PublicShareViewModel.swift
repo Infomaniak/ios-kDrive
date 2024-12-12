@@ -152,10 +152,6 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
-        guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
-            return
-        }
-
         let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
 

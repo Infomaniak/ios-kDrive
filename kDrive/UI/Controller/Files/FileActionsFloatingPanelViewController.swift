@@ -204,6 +204,12 @@ public class FloatingPanelAction: Equatable {
         image: KDriveResourcesAsset.colorBucket.image
     )
 
+    static let addToMyDrive = FloatingPanelAction(
+        id: 22,
+        name: KDriveResourcesStrings.Localizable.buttonAddToKDrive,
+        image: KDriveResourcesAsset.drive.image
+    )
+
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
     }
@@ -213,7 +219,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var publicShareActions: [FloatingPanelAction] {
-        return [openWith, sendCopy, download].map { $0.reset() }
+        return [openWith, sendCopy, download, addToMyDrive].map { $0.reset() }
     }
 
     static var publicShareFolderActions: [FloatingPanelAction] {
