@@ -203,13 +203,16 @@ public extension PhotoLibraryUploader {
     }
 
     private func earlyStartUploadQueue() {
-        @InjectService var appContextService: AppContextServiceable
-        guard !appContextService.isExtension else {
-            return
-        }
+        Task {
+            // We do not start the upload in background mode or in extension
+            @InjectService var appContextService: AppContextServiceable
+            guard await appContextService.mainAppIsForeground else {
+                return
+            }
 
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+            @InjectService var uploadQueue: UploadQueue
+            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+        }
     }
 
     private func getPhotoLibraryName(
