@@ -48,13 +48,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
+    @LazyInjectService var appContextService: AppContextServiceable
 
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-        Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
+        Log.appDelegate("Application starting in foreground ? \(appContextService.mainAppIsForeground)")
 
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.ImageCache.memorySizeLimit
         // Must define a limit, unlimited otherwise

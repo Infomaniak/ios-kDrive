@@ -221,14 +221,12 @@ public struct NotificationsHelper: NotificationsHelpable {
                 return
             }
 
-            let isInBackground = appContextService.isExtension || UIApplication.shared.applicationState != .active
-
-            if isInBackground {
+            if appContextService.mainAppIsForeground {
+                UIConstants.showSnackBar(message: notification.body, duration: .lengthLong, action: action)
+            } else {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
                 try? await UNUserNotificationCenter.current().add(request)
-            } else {
-                UIConstants.showSnackBar(message: notification.body, duration: .lengthLong, action: action)
             }
         }
     }
