@@ -184,6 +184,12 @@ public extension PhotoLibraryUploader {
 
                     // Commit write every 100 assets if it's not the last
                     try? writableRealm.commitWrite()
+
+                    // Start the upload queue early once we have files to upload
+                    if idx < 100 {
+                        earlyStartUploadQueue()
+                    }
+
                     writableRealm.beginWrite()
                 }
             }
@@ -192,6 +198,16 @@ public extension PhotoLibraryUploader {
         guard !expiringActivity.shouldTerminate else {
             throw ErrorDomain.importCancelledBySystem
         }
+    }
+
+    private func earlyStartUploadQueue() {
+        @InjectService var appContextService: AppContextServiceable
+        guard !appContextService.isExtension else {
+            return
+        }
+
+        @InjectService var uploadQueue: UploadQueue
+        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
     }
 
     private func getPhotoLibraryName(
