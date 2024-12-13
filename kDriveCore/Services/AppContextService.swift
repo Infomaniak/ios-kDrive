@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
+import UIKit
 
 /// All the ways some code can be executed within the __kDrive__ project
 public enum DriveAppContext: String {
@@ -43,6 +43,9 @@ public protocol AppContextServiceable {
 
     /// Shorthand to check if we are within the main app or any extension
     var isExtension: Bool { get }
+
+    /// True if the main app is rendering in front of the user
+    @MainActor var mainAppIsForeground: Bool { get }
 }
 
 public struct AppContextService: AppContextServiceable {
@@ -54,6 +57,13 @@ public struct AppContextService: AppContextServiceable {
         }
 
         return false
+    }
+
+    @MainActor public var mainAppIsForeground: Bool {
+        guard !isExtension else {
+            return false
+        }
+        return UIApplication.shared.applicationState == .active
     }
 
     public init(context: DriveAppContext) {
