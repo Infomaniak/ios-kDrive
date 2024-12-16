@@ -64,18 +64,18 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let currentMod = tableContent[indexPath.row]
-        cell.syncTitleLabel.text = currentMod.title
-        cell.syncDetailLabel.text = currentMod.selectionTitle
-        if currentMod == selectedMode {
+        let currentMode = tableContent[indexPath.row]
+        cell.syncTitleLabel.text = currentMode.title
+        cell.syncDetailLabel.text = currentMode.selectionTitle
+        if currentMode == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let mod = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mod.rawValue.capitalized)")
+        let mode = tableContent[indexPath.row]
+        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
         delegate?.didSelectSyncMode(tableContent[indexPath.row])
         navigationController?.popViewController(animated: true)
     }

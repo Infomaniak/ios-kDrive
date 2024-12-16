@@ -21,14 +21,14 @@ import UIKit
 
 class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedOfflineMod: SyncMode!
+    private var selectedOfflineMode: SyncMode!
 
     weak var delegate: SelectPhotoFormatDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterSyncTableViewCell.self)
-        selectedOfflineMod = UserDefaults.shared.syncOfflineMod
+        selectedOfflineMode = UserDefaults.shared.syncOfflineMode
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -47,20 +47,20 @@ class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let currentMod = tableContent[indexPath.row]
-        cell.syncTitleLabel.text = currentMod.title
-        cell.syncDetailLabel.text = currentMod.selectionTitle
-        if currentMod == selectedOfflineMod {
+        let currentMode = tableContent[indexPath.row]
+        cell.syncTitleLabel.text = currentMode.title
+        cell.syncDetailLabel.text = currentMode.selectionTitle
+        if currentMode == selectedOfflineMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let mod = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mod.rawValue.capitalized)")
-        UserDefaults.shared.syncOfflineMod = mod
-        if mod == .onlyWifi {
+        let mode = tableContent[indexPath.row]
+        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
+        UserDefaults.shared.syncOfflineMode = mode
+        if mode == .onlyWifi {
             UserDefaults.shared.isWifiOnly = true
         } else {
             UserDefaults.shared.isWifiOnly = false

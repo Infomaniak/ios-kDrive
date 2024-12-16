@@ -141,7 +141,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
-            cell.detailLabel.text = UserDefaults.shared.syncOfflineMod.title
+            cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
             return cell
         }
     }
