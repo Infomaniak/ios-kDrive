@@ -16,21 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 protocol WifiSyncSettingsDelegate: AnyObject {
-    func didSelectSyncMod(_ mod: SyncMod)
+    func didSelectSyncMode(_ mode: SyncMode)
 }
 
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
-    private var tableContent: [SyncMod] = SyncMod.allCases
-    private var selectedMod: SyncMod!
+    private var tableContent: [SyncMode] = SyncMode.allCases
+    private var selectedMode: SyncMode!
     weak var delegate: WifiSyncSettingsDelegate?
 
     override func viewDidLoad() {
@@ -42,9 +42,9 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         tableView.allowsMultipleSelection = false
     }
 
-    static func instantiate(selectedMod: SyncMod) -> WifiSyncSettingsViewController {
+    static func instantiate(selectedMode: SyncMode) -> WifiSyncSettingsViewController {
         let viewController = WifiSyncSettingsViewController()
-        viewController.selectedMod = selectedMod
+        viewController.selectedMode = selectedMode
         return viewController
     }
 
@@ -67,7 +67,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         let currentMod = tableContent[indexPath.row]
         cell.syncTitleLabel.text = currentMod.title
         cell.syncDetailLabel.text = currentMod.selectionTitle
-        if currentMod == selectedMod {
+        if currentMod == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
@@ -76,7 +76,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mod = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mod.rawValue.capitalized)")
-        delegate?.didSelectSyncMod(tableContent[indexPath.row])
+        delegate?.didSelectSyncMode(tableContent[indexPath.row])
         navigationController?.popViewController(animated: true)
     }
 }

@@ -20,6 +20,7 @@ import Algorithms
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 import RealmSwift
 
 // MARK: - Publish
@@ -74,6 +75,10 @@ extension UploadQueue: UploadQueueable {
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
         concurrentQueue.sync {
+            // Clean cache if necessary before we try to restart the uploads.
+            @InjectService var freeSpaceService: FreeSpaceService
+            freeSpaceService.cleanCacheIfAlmostFull()
+
             guard let uploadFileQuery else {
                 Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
                 return

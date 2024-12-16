@@ -64,7 +64,12 @@ public enum MatomoUtils {
         shared.track(view: view)
     }
 
-    public static func track(eventWithCategory category: EventCategory, action: UserAction = .click, name: String, value: Float? = nil) {
+    public static func track(
+        eventWithCategory category: EventCategory,
+        action: UserAction = .click,
+        name: String,
+        value: Float? = nil
+    ) {
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
     }
 

@@ -18,7 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
-import InfomaniakCoreUI
+import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
 import Kingfisher

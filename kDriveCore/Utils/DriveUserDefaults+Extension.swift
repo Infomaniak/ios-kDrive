@@ -338,10 +338,10 @@ public extension UserDefaults {
         }
     }
 
-    var syncOfflineMod: SyncMod {
+    var syncOfflineMod: SyncMode {
         get {
             if let rawValue = object(forKey: key(.synOfflineMod)) as? String,
-               let mod = SyncMod(rawValue: rawValue) {
+               let mod = SyncMode(rawValue: rawValue) {
                 return mod
             }
             return .onlyWifi
