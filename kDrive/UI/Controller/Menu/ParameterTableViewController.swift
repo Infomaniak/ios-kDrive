@@ -252,7 +252,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
             )
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
-            cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.selectionTitle
+            cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
             return cell
         }
     }
