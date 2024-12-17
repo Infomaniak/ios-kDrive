@@ -23,8 +23,6 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-// MARK: - FooterButtonDelegate
-
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton(_ sender: AnyObject) {
         guard let drive = selectedDriveFileManager?.drive,

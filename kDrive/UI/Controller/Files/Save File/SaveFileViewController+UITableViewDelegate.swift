@@ -20,8 +20,6 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-// MARK: - UITableViewDelegate
-
 extension SaveFileViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)

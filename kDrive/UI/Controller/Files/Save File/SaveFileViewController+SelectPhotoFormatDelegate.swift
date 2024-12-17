@@ -19,8 +19,6 @@
 import Foundation
 import kDriveCore
 
-// MARK: - SelectPhotoFormatDelegate
-
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         if userPreferredPhotoFormat != format {

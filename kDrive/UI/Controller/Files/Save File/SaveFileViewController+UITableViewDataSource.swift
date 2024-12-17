@@ -19,8 +19,6 @@
 import kDriveResources
 import UIKit
 
-// MARK: - UITableViewDataSource
-
 extension SaveFileViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let section = sections[section]
