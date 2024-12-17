@@ -175,11 +175,12 @@ public enum ConvertedType: String, CaseIterable {
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
-    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .form, .pdf, .presentation, .spreadsheet, .text,
-                                                             .url)
-    public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
+    public static let downloadableTypes: Set<ConvertedType> = [.code, .form, .pdf, .presentation, .spreadsheet, .text, .url]
+    public static let remotePlayableTypes: Set<ConvertedType> = [.audio, .video]
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
+    /// Documents that can be previewed by the OS but not necessarily handled by OnlyOffice (eg. .pages)
+    public static let documentTypes: Set<ConvertedType> = [.presentation, .spreadsheet, .text]
 }
 
 /// Minimal data needed to query a PublicShare

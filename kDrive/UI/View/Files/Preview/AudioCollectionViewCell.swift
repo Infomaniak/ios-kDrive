@@ -20,6 +20,7 @@ import Combine
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import Kingfisher
 import MediaPlayer
 import UIKit
 
@@ -39,6 +40,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     public lazy var singleTrackPlayer = SingleTrackPlayer(driveFileManager: driveFileManager)
 
     private var cancellables = Set<AnyCancellable>()
+    private var thumbnailDownloadTask: Kingfisher.DownloadTask?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -77,6 +79,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        thumbnailDownloadTask?.cancel()
         setControls(enabled: false)
         singleTrackPlayer.reset()
         songTitleLabel.text = ""
@@ -91,12 +94,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         Task { @MainActor in
             await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
-            setupObservation()
+            setupObservationFor(frozenFile: frozenFile)
         }
     }
 
     /// Setup data flow
-    @MainActor func setupObservation() {
+    @MainActor func setupObservationFor(frozenFile: File) {
         cancellables.forEach { $0.cancel() }
         cancellables.removeAll()
 
@@ -153,9 +156,15 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onCurrentTrackMetadata
             .receive(on: DispatchQueue.main)
             .sink { metadata in
-                self.artworkImageView.image = metadata.artwork ?? KDriveResourcesAsset.music.image
-                self.artistNameLabel.text = metadata.artist
-                self.songTitleLabel.text = metadata.title
+                self.handleMetadata(metadata, file: frozenFile)
+            }
+            .store(in: &cancellables)
+
+        singleTrackPlayer
+            .onItemError
+            .receive(on: DispatchQueue.main)
+            .sink { error in
+                self.previewDelegate?.errorWhilePreviewing(fileId: frozenFile.id, error: error)
             }
             .store(in: &cancellables)
     }
@@ -165,6 +174,20 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         playButton.isHidden = !isPortrait
         landscapePlayButton.isHidden = isPortrait
         iconHeightConstraint.constant = isPortrait ? 254 : 120
+    }
+
+    func handleMetadata(_ metadata: MediaMetadata, file: File) {
+        if let artwork = metadata.artwork {
+            artworkImageView.image = artwork
+        } else {
+            artworkImageView.image = KDriveResourcesAsset.music.image
+            thumbnailDownloadTask = file.getThumbnail { thumbnail, isThumbnailAvailable in
+                guard isThumbnailAvailable else { return }
+                self.artworkImageView.image = thumbnail
+            }
+        }
+        artistNameLabel.text = metadata.artist
+        songTitleLabel.text = metadata.title
     }
 
     @objc func rotated() {

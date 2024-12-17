@@ -26,6 +26,27 @@ import Lottie
 import UIKit
 
 class OnboardingViewController: UIViewController {
+    private lazy var loginDelegateHandler: LoginDelegateHandler = {
+        let loginDelegateHandler = LoginDelegateHandler()
+        loginDelegateHandler.didStartLoginCallback = { [weak self] in
+            guard let self else { return }
+            signInButton.setLoading(true)
+            registerButton.isEnabled = false
+        }
+        loginDelegateHandler.didCompleteLoginCallback = { [weak self] in
+            guard let self else { return }
+            self.signInButton.setLoading(false)
+            self.registerButton.isEnabled = true
+            self.endBackgroundTask()
+        }
+        loginDelegateHandler.didFailLoginWithErrorCallback = { [weak self] _ in
+            guard let self else { return }
+            self.signInButton.setLoading(false)
+            self.registerButton.isEnabled = true
+        }
+        return loginDelegateHandler
+    }()
+
     @IBOutlet var navigationBar: UINavigationBar!
     @IBOutlet var collectionView: UICollectionView!
     @IBOutlet var pageControl: UIPageControl!
@@ -132,22 +153,16 @@ class OnboardingViewController: UIViewController {
         }
         infomaniakLogin.webviewLoginFrom(viewController: self,
                                          hideCreateAccountButton: true,
-                                         delegate: self)
+                                         delegate: loginDelegateHandler)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
         MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
-        present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
+        present(RegisterViewController.instantiateInNavigationController(delegate: loginDelegateHandler), animated: true)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
         dismiss(animated: true)
-    }
-
-    private func goToMainScreen(with driveFileManager: DriveFileManager) {
-        UserDefaults.shared.legacyIsFirstLaunch = false
-        UserDefaults.shared.numberOfConnections = 1
-        appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
     }
 
     private func updateButtonsState() {
@@ -258,71 +273,5 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
         let pageIndex = round(scrollView.contentOffset.x / view.frame.width)
         pageControl.currentPage = Int(pageIndex)
         updateButtonsState()
-    }
-}
-
-// MARK: - Infomaniak Login Delegate
-
-extension OnboardingViewController: InfomaniakLoginDelegate {
-    func didCompleteLoginWith(code: String, verifier: String) {
-        MatomoUtils.track(eventWithCategory: .account, name: "loggedIn")
-        let previousAccount = accountManager.currentAccount
-        signInButton.setLoading(true)
-        registerButton.isEnabled = false
-        Task {
-            do {
-                _ = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
-                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-                    throw DriveError.NoDriveError.noDriveFileManager
-                }
-                signInButton.setLoading(false)
-                registerButton.isEnabled = true
-                MatomoUtils.connectUser()
-                goToMainScreen(with: currentDriveFileManager)
-            } catch {
-                DDLogError("Error on didCompleteLoginWith \(error)")
-
-                if let previousAccount {
-                    accountManager.switchAccount(newAccount: previousAccount)
-                }
-                signInButton.setLoading(false)
-                registerButton.isEnabled = true
-                if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
-                    let driveErrorVC = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
-                    present(driveErrorVC, animated: true)
-                } else if let driveError = error as? DriveError,
-                          driveError == .noDrive
-                          || driveError == .productMaintenance
-                          || driveError == .driveMaintenance
-                          || driveError == .blocked {
-                    let errorViewType: DriveErrorViewController.DriveErrorViewType
-                    switch driveError {
-                    case .productMaintenance, .driveMaintenance:
-                        errorViewType = .maintenance
-                    case .blocked:
-                        errorViewType = .blocked
-                    default:
-                        errorViewType = .noDrive
-                    }
-                    let driveErrorVC = DriveErrorViewController.instantiate(errorType: errorViewType, drive: nil)
-                    present(driveErrorVC, animated: true)
-                } else {
-                    let metadata = [
-                        "Underlying Error": error.asAFError?.underlyingError.debugDescription ?? "Not an AFError"
-                    ]
-                    SentryDebug.capture(error: error, context: metadata, contextKey: "Error")
-                    okAlert(
-                        title: KDriveResourcesStrings.Localizable.errorTitle,
-                        message: KDriveResourcesStrings.Localizable.errorConnection
-                    )
-                }
-            }
-            endBackgroundTask()
-        }
-    }
-
-    func didFailLoginWith(error: Error) {
-        signInButton.setLoading(false)
-        registerButton.isEnabled = true
     }
 }
