@@ -165,12 +165,6 @@ class OnboardingViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    private func goToMainScreen(with driveFileManager: DriveFileManager) {
-        UserDefaults.shared.legacyIsFirstLaunch = false
-        UserDefaults.shared.numberOfConnections = 1
-        appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
-    }
-
     private func updateButtonsState() {
         if pageControl.currentPage == slides.count - 1 {
             if buttonContentView.isHidden {
