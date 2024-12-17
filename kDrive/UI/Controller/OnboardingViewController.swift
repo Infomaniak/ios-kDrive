@@ -26,28 +26,11 @@ import Lottie
 import UIKit
 
 class OnboardingViewController: UIViewController {
-    @LazyInjectService var router: AppNavigable
+    @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
 
-    @IBOutlet var navigationBar: UINavigationBar!
-    @IBOutlet var collectionView: UICollectionView!
-    @IBOutlet var pageControl: UIPageControl!
-    @IBOutlet var nextButton: UIButton!
-    @IBOutlet var signInButton: UIButton!
-    @IBOutlet var registerButton: UIButton!
-    @IBOutlet var buttonContentView: UIView!
-    @IBOutlet var closeBarButtonItem: UIBarButtonItem!
-
-    @IBOutlet var collectionViewTopConstraint: NSLayoutConstraint!
-    @IBOutlet var signInButtonHeight: NSLayoutConstraint!
-    @IBOutlet var nextButtonHeight: NSLayoutConstraint!
-    @IBOutlet var registerButtonHeight: NSLayoutConstraint!
-
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
-    @LazyInjectService var appNavigable: AppNavigable
-
-    var addUser = false
-    var slides: [Slide] = []
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     private lazy var loginDelegateHandler: LoginDelegateHandler = {
         let loginDelegateHandler = LoginDelegateHandler()
@@ -70,7 +53,22 @@ class OnboardingViewController: UIViewController {
         return loginDelegateHandler
     }()
 
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    @IBOutlet var navigationBar: UINavigationBar!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var pageControl: UIPageControl!
+    @IBOutlet var nextButton: UIButton!
+    @IBOutlet var signInButton: UIButton!
+    @IBOutlet var registerButton: UIButton!
+    @IBOutlet var buttonContentView: UIView!
+    @IBOutlet var closeBarButtonItem: UIBarButtonItem!
+
+    @IBOutlet var collectionViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet var signInButtonHeight: NSLayoutConstraint!
+    @IBOutlet var nextButtonHeight: NSLayoutConstraint!
+    @IBOutlet var registerButtonHeight: NSLayoutConstraint!
+
+    var addUser = false
+    var slides: [Slide] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -148,16 +146,15 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func signInButtonPressed(_ sender: Any) {
-        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Login WebView") { [weak self] in
             SentryDebug.capture(message: "Background task expired while logging in")
             self?.endBackgroundTask()
         }
-        router.showLogin(delegate: loginDelegateHandler)
+        appNavigable.showLogin(delegate: loginDelegateHandler)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
-        router.showRegister(delegate: loginDelegateHandler)
+        appNavigable.showRegister(delegate: loginDelegateHandler)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {

@@ -88,7 +88,7 @@ extension UploadQueue: UploadQueueable {
                 return lazyCollection.filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
             }
-            let uploadingFileIds = uploadingFiles.map(\.id)
+            let uploadingFileIds = Array(uploadingFiles.map(\.id))
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
 
             let batches = uploadingFileIds.chunks(ofCount: 100)

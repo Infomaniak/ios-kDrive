@@ -19,8 +19,6 @@
 import Foundation
 import kDriveCore
 
-// MARK: - SelectDriveDelegate
-
 extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         if let selectedDriveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId) {
