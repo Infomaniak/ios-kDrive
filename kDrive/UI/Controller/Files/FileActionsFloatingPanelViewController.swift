@@ -24,7 +24,7 @@ import kDriveResources
 import LinkPresentation
 import UIKit
 
-public enum FloatingPanelActionIdentifier: Int {
+public enum FloatingPanelActionIdentifier {
     case openWith
     case edit
     case manageCategories
@@ -50,7 +50,7 @@ public enum FloatingPanelActionIdentifier: Int {
 }
 
 public class FloatingPanelAction: Equatable {
-    let id: Int
+    let id: FloatingPanelActionIdentifier
     let name: String
     var reverseName: String?
     let image: UIImage
@@ -59,7 +59,7 @@ public class FloatingPanelAction: Equatable {
     var isEnabled = true
 
     init(
-        id: Int,
+        id: FloatingPanelActionIdentifier,
         name: String,
         reverseName: String? = nil,
         image: UIImage,
@@ -79,116 +79,116 @@ public class FloatingPanelAction: Equatable {
     }
 
     static let openWith = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.openWith.rawValue,
+        id: FloatingPanelActionIdentifier.openWith,
         name: KDriveResourcesStrings.Localizable.buttonOpenWith,
         image: KDriveResourcesAsset.openWith.image
     )
     static let edit = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.edit.rawValue,
+        id: FloatingPanelActionIdentifier.edit,
         name: KDriveResourcesStrings.Localizable.buttonEdit,
         image: KDriveResourcesAsset.editDocument.image
     )
     static let manageCategories = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.manageCategories.rawValue,
+        id: FloatingPanelActionIdentifier.manageCategories,
         name: KDriveResourcesStrings.Localizable.manageCategoriesTitle,
         image: KDriveResourcesAsset.categories.image
     )
     static let favorite = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.favorite.rawValue,
+        id: FloatingPanelActionIdentifier.favorite,
         name: KDriveResourcesStrings.Localizable.buttonAddFavorites,
         reverseName: KDriveResourcesStrings.Localizable.buttonRemoveFavorites,
         image: KDriveResourcesAsset.favorite.image
     )
     static let convertToDropbox = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.convertToDropbox.rawValue,
+        id: FloatingPanelActionIdentifier.convertToDropbox,
         name: KDriveResourcesStrings.Localizable.buttonConvertToDropBox,
         image: KDriveResourcesAsset.folderDropBox.image.withRenderingMode(.alwaysTemplate)
     )
     static let folderColor = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.folderColor.rawValue,
+        id: FloatingPanelActionIdentifier.folderColor,
         name: KDriveResourcesStrings.Localizable.buttonChangeFolderColor,
         image: KDriveResourcesAsset.colorBucket.image
     )
     static let manageDropbox = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.manageDropbox.rawValue,
+        id: FloatingPanelActionIdentifier.manageDropbox,
         name: KDriveResourcesStrings.Localizable.buttonManageDropBox,
         image: KDriveResourcesAsset.folderDropBox.image.withRenderingMode(.alwaysTemplate)
     )
     static let seeFolder = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.seeFolder.rawValue,
+        id: FloatingPanelActionIdentifier.seeFolder,
         name: KDriveResourcesStrings.Localizable.buttonSeeFolder,
         image: KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate)
     )
     static let offline = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.offline.rawValue,
+        id: FloatingPanelActionIdentifier.offline,
         name: KDriveResourcesStrings.Localizable.buttonAvailableOffline,
         image: KDriveResourcesAsset.availableOffline.image
     )
     static let download = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.download.rawValue,
+        id: FloatingPanelActionIdentifier.download,
         name: KDriveResourcesStrings.Localizable.buttonDownload,
         image: KDriveResourcesAsset.download.image
     )
     static let move = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.move.rawValue,
+        id: FloatingPanelActionIdentifier.move,
         name: KDriveResourcesStrings.Localizable.buttonMoveTo,
         image: KDriveResourcesAsset.folderSelect.image
     )
     static let duplicate = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.duplicate.rawValue,
+        id: FloatingPanelActionIdentifier.duplicate,
         name: KDriveResourcesStrings.Localizable.buttonDuplicate,
         image: KDriveResourcesAsset.duplicate.image
     )
     static let rename = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.rename.rawValue,
+        id: FloatingPanelActionIdentifier.rename,
         name: KDriveResourcesStrings.Localizable.buttonRename,
         image: KDriveResourcesAsset.edit.image
     )
     static let delete = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.delete.rawValue,
+        id: FloatingPanelActionIdentifier.delete,
         name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
         image: KDriveResourcesAsset.delete.image,
         tintColor: KDriveResourcesAsset.binColor.color
     )
     static let leaveShare = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.leaveShare.rawValue,
+        id: FloatingPanelActionIdentifier.leaveShare,
         name: KDriveResourcesStrings.Localizable.buttonLeaveShare,
         image: KDriveResourcesAsset.linkBroken.image
     )
     static let cancelImport = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.cancelImport.rawValue,
+        id: FloatingPanelActionIdentifier.cancelImport,
         name: KDriveResourcesStrings.Localizable.buttonCancelImport,
         image: KDriveResourcesAsset.remove.image,
         tintColor: KDriveCoreAsset.binColor.color
     )
     static let informations = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.informations.rawValue,
+        id: FloatingPanelActionIdentifier.informations,
         name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle,
         image: KDriveResourcesAsset.info.image
     )
     static let add = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.add.rawValue,
+        id: FloatingPanelActionIdentifier.add,
         name: KDriveResourcesStrings.Localizable.buttonAdd,
         image: KDriveResourcesAsset.add.image
     )
     static let sendCopy = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.sendCopy.rawValue,
+        id: FloatingPanelActionIdentifier.sendCopy,
         name: KDriveResourcesStrings.Localizable.buttonSendCopy,
         image: KDriveResourcesAsset.exportIos.image
     )
     static let shareAndRights = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.shareAndRights.rawValue,
+        id: FloatingPanelActionIdentifier.shareAndRights,
         name: KDriveResourcesStrings.Localizable.buttonFileRights,
         image: KDriveResourcesAsset.share.image
     )
     static let shareLink = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.shareLink.rawValue,
+        id: FloatingPanelActionIdentifier.shareLink,
         name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink,
         reverseName: KDriveResourcesStrings.Localizable.buttonSharePublicLink,
         image: KDriveResourcesAsset.link.image
     )
     static let upsaleColor = FloatingPanelAction(
-        id: FloatingPanelActionIdentifier.upsaleColor.rawValue,
+        id: FloatingPanelActionIdentifier.upsaleColor,
         name: KDriveResourcesStrings.Localizable.buttonChangeFolderColor,
         image: KDriveResourcesAsset.colorBucket.image
     )
