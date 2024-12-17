@@ -461,6 +461,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
+        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
                                          hideCreateAccountButton: true,
                                          delegate: delegate)

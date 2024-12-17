@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
@@ -29,6 +28,16 @@ class SaveFileViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var appContextService: AppContextServiceable
+
+    private var originalDriveId: Int = {
+        @InjectService var accountManager: AccountManageable
+        return accountManager.currentDriveId
+    }()
+
+    private var originalUserId: Int = {
+        @InjectService var accountManager: AccountManageable
+        return accountManager.currentUserId
+    }()
 
     enum SaveFileSection {
         case alert
@@ -46,16 +55,6 @@ class SaveFileViewController: UIViewController {
     }
 
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
-
-    private var originalDriveId: Int = {
-        @InjectService var accountManager: AccountManageable
-        return accountManager.currentDriveId
-    }()
-
-    private var originalUserId: Int = {
-        @InjectService var accountManager: AccountManageable
-        return accountManager.currentUserId
-    }()
 
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
@@ -312,7 +311,7 @@ class SaveFileViewController: UIViewController {
         enableButton = true
     }
 
-    func updateTableViewAfterImport() {
+    private func updateTableViewAfterImport() {
         guard !importInProgress else { return }
         // Update table view
         var newSections = [SaveFileSection]()

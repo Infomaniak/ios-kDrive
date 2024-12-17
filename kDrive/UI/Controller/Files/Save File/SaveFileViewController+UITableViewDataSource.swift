@@ -19,8 +19,6 @@
 import kDriveResources
 import UIKit
 
-// MARK: - UITableViewDataSource
-
 extension SaveFileViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let section = sections[section]
@@ -88,16 +86,6 @@ extension SaveFileViewController: UITableViewDataSource {
             fatalError("Not supported by this datasource")
         }
     }
-
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        if section == tableView.numberOfSections - 1 && !importInProgress {
-            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
-            view.delegate = self
-            view.footerButton.isEnabled = enableButton
-            return view
-        }
-        return nil
-    }
 }
 
 extension SaveFileViewController {
@@ -121,5 +109,15 @@ extension SaveFileViewController {
             return 124
         }
         return 32
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if section == tableView.numberOfSections - 1 && !importInProgress {
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
+            view.delegate = self
+            view.footerButton.isEnabled = enableButton
+            return view
+        }
+        return nil
     }
 }

@@ -22,11 +22,8 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
-import Lottie
-import UIKit
 
-/// Something to abstract away from the view the post login/register logic
-public class LoginDelegateHandler: InfomaniakLoginDelegate {
+public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
 

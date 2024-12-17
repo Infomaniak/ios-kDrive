@@ -19,8 +19,6 @@
 import Foundation
 import kDriveCore
 
-// MARK: - SelectFolderDelegate
-
 extension SaveFileViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
         if folder.id == DriveFileManager.constants.rootID {
