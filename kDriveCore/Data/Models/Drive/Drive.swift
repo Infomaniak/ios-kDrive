@@ -179,13 +179,16 @@ public final class Drive: Object, Codable {
     }
 
     public func categories(for file: File) -> [Category] {
-        guard !isInvalidated else {
+        guard !isInvalidated, !file.isInvalidated else {
             return []
         }
 
-        // If File is not managed by Realm: cannot use the `.sorted(by:)` method :(
-        // Also the Realm sort can crash if managed by realm
-        let fileCategoriesIds = file.categories.sorted { $0.addedAt.compare($1.addedAt) == .orderedAscending }.map(\.categoryId)
+        let fileCategoriesIds: [Int]
+        if file.isManagedByRealm {
+            fileCategoriesIds = Array(file.categories.sorted(by: \.addedAt, ascending: true)).map(\.categoryId)
+        } else {
+            fileCategoriesIds = file.categories.sorted { $0.addedAt.compare($1.addedAt) == .orderedAscending }.map(\.categoryId)
+        }
         let filteredCategories = categories.filter("id IN %@", fileCategoriesIds)
 
         // Sort the categories
