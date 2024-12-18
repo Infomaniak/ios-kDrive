@@ -51,6 +51,7 @@ extension SortType: Selectable {
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
 
     // MARK: - Constants
 
@@ -288,8 +289,45 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         ])
     }
 
-    @objc func addToMyDriveButtonTapped(_ sender: UIView?) {
-        viewModel.barButtonPressed(sender: sender, type: .downloadAll)
+    @objc func addToMyDriveButtonTapped(_ sender: UIButton?) {
+        defer {
+            sender?.isSelected = false
+            sender?.isEnabled = true
+            sender?.isHighlighted = false
+        }
+
+        guard accountManager.currentAccount != nil else {
+            #if !ISEXTENSION
+            let upsaleViewController = UpsaleViewController()
+
+            // Create an account
+            upsaleViewController.freeTrialCallback = { [weak self] in
+                guard let self else { return }
+                self.dismiss(animated: true) {
+                    let loginDelegateHandler = LoginDelegateHandler()
+                    self.router.showRegister(delegate: loginDelegateHandler)
+                }
+            }
+
+            // Let the user login with the onboarding
+            upsaleViewController.loginCallback = { [weak self] in
+                guard let self else { return }
+                self.dismiss(animated: true) {
+                    let loginDelegateHandler = LoginDelegateHandler()
+                    self.router.showLogin(delegate: loginDelegateHandler)
+                }
+            }
+
+            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+            present(floatingPanel, animated: true, completion: nil)
+            #else
+            dismiss(animated: true)
+            #endif
+
+            return
+        }
+
+        viewModel.barButtonPressed(sender: sender, type: .addToMyDrive)
     }
 
     func reloadCollectionViewWith(files: [File]) {
