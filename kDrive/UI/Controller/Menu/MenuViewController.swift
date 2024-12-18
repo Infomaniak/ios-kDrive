@@ -92,7 +92,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         updateTableContent()
 

@@ -67,7 +67,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         tableView.register(cellView: DropBoxDisableTableViewCell.self)
         tableView.register(cellView: DropBoxLinkTableViewCell.self)
         tableView.register(cellView: NewFolderSettingsTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         tableView.sectionHeaderHeight = 0
         tableView.sectionFooterHeight = 16
 

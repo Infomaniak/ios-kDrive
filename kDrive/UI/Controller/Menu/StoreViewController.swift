@@ -86,7 +86,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
         collectionView.register(supplementaryView: StoreHelpFooter.self, forSupplementaryViewOfKind: .footer)
         collectionView.collectionViewLayout = createLayout()
         collectionView.allowsSelection = false
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         // Set up delegates
         StoreManager.shared.delegate = self

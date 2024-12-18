@@ -585,6 +585,92 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
+    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+        guard let window,
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareLocked")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = LockedFolderViewController()
+            viewController.destinationURL = destinationURL
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
+    @MainActor public func presentPublicShareExpired() {
+        guard let window,
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShareExpired")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = UnavaillableFolderViewController()
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
+    @MainActor public func presentPublicShare(
+        frozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        guard let window,
+              let rootViewController = window.rootViewController as? MainTabViewController else {
+            fatalError("TODO: fix offline routing - presentPublicShare")
+            return
+        }
+
+        // TODO: Fix access right
+        guard !frozenRootFolder.isDisabled else {
+            fatalError("isDisabled")
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                                 sortType: .nameAZ,
+                                                 driveFileManager: driveFileManager,
+                                                 currentDirectory: frozenRootFolder,
+                                                 apiFetcher: apiFetcher)
+            let viewController = FileListViewController(viewModel: viewModel)
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            navigationController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
         present(file: file, driveFileManager: driveFileManager, office: false)
     }

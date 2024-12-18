@@ -145,6 +145,12 @@ final class FilePresenter {
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                             sortType: .nameAZ,
+                                             driveFileManager: driveFileManager,
+                                             currentDirectory: file,
+                                             apiFetcher: PublicShareApiFetcher())
         } else if file.isTrashed || file.deletedAt != nil {
             viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         } else {

@@ -59,13 +59,13 @@ class ConcreteFileListViewModel: FileListViewModel {
         try await loadFiles()
     }
 
-    override func barButtonPressed(type: FileListBarButtonType) {
+    override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         if type == .search {
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
             let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
             onPresentViewController?(.modal, searchViewController, true)
         } else {
-            super.barButtonPressed(type: type)
+            super.barButtonPressed(sender: sender, type: type)
         }
     }
 }

@@ -37,7 +37,7 @@ class SearchFilterCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        contentView.layer.cornerRadius = UIConstants.buttonCornerRadius
+        contentView.layer.cornerRadius = UIConstants.Button.cornerRadius
         contentView.clipsToBounds = true
         removeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
     }

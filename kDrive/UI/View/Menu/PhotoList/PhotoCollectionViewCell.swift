@@ -28,6 +28,6 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        image.layer.cornerRadius = UIConstants.imageCornerRadius
+        image.layer.cornerRadius = UIConstants.Image.cornerRadius
     }
 }
