@@ -152,6 +152,13 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard accountManager.currentAccount != nil else {
+            // TODO merge #1350 for API
+//            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+//            onPresentViewController?(.modal, upsaleFloatingPanelController, true)
+            return
+        }
+
         guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
             return
         }
@@ -159,7 +166,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
 
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: driveFileManager)
+        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
         let saveNavigationViewController = SaveFileViewController
             .setInNavigationController(saveViewController: saveViewController)
 
