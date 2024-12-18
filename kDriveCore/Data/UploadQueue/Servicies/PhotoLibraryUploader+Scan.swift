@@ -23,6 +23,8 @@ import Photos
 import RealmSwift
 
 public extension PhotoLibraryUploader {
+    private static let batchSize = 99
+
     @discardableResult
     func scheduleNewPicturesForUpload() -> Int {
         Log.photoLibraryUploader("scheduleNewPicturesForUpload")
@@ -176,7 +178,7 @@ public extension PhotoLibraryUploader {
                 writableRealm.add(uploadFile, update: .modified)
 
                 // Batching writes
-                if idx < assetsFetchResult.count - 1 && idx % 99 == 0 {
+                if idx < assetsFetchResult.count - 1 && idx % Self.batchSize == 0 {
                     Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, writableRealm: writableRealm)
@@ -184,6 +186,12 @@ public extension PhotoLibraryUploader {
 
                     // Commit write every 100 assets if it's not the last
                     try? writableRealm.commitWrite()
+
+                    // Start the upload queue early once we have files to upload
+                    if idx <= Self.batchSize {
+                        earlyStartUploadQueue()
+                    }
+
                     writableRealm.beginWrite()
                 }
             }
@@ -191,6 +199,19 @@ public extension PhotoLibraryUploader {
 
         guard !expiringActivity.shouldTerminate else {
             throw ErrorDomain.importCancelledBySystem
+        }
+    }
+
+    private func earlyStartUploadQueue() {
+        Task {
+            // We do not start the upload in background mode or in extension
+            @InjectService var appContextService: AppContextServiceable
+            guard await appContextService.mainAppIsForeground else {
+                return
+            }
+
+            @InjectService var uploadQueue: UploadQueue
+            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 
