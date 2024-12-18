@@ -179,7 +179,7 @@ public final class Drive: Object, Codable {
     }
 
     public func categories(for file: File) -> [Category] {
-        guard !isInvalidated else {
+        guard !isInvalidated, !file.isInvalidated else {
             return []
         }
 
