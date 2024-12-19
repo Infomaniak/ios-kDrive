@@ -93,7 +93,7 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
-    var dismissClosure: (() -> Void)?
+    var onDismiss: (() -> Void)?
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 

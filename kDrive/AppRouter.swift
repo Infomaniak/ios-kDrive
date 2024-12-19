@@ -675,7 +675,7 @@ public struct AppRouter: AppNavigable {
                                                  apiFetcher: apiFetcher,
                                                  configuration: configuration)
             let viewController = FileListViewController(viewModel: viewModel)
-            viewModel.dismissClosure = { [weak viewController] in
+            viewModel.onDismiss = { [weak viewController] in
                 viewController?.dismiss(animated: true)
             }
 

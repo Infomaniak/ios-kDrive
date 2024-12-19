@@ -41,27 +41,27 @@ struct MultipleSelectionAction: Equatable {
     }
 
     static let move = MultipleSelectionAction(
-        id: MultipleSelectionActionId.move,
+        id: .move,
         name: KDriveResourcesStrings.Localizable.buttonMove,
         icon: KDriveResourcesAsset.folderSelect
     )
     static let delete = MultipleSelectionAction(
-        id: MultipleSelectionActionId.delete,
+        id: .delete,
         name: KDriveResourcesStrings.Localizable.buttonDelete,
         icon: KDriveResourcesAsset.delete
     )
     static let more = MultipleSelectionAction(
-        id: MultipleSelectionActionId.more,
+        id: .more,
         name: KDriveResourcesStrings.Localizable.buttonMenu,
         icon: KDriveResourcesAsset.menu
     )
     static let deletePermanently = MultipleSelectionAction(
-        id: MultipleSelectionActionId.deletePermanently,
+        id: .deletePermanently,
         name: KDriveResourcesStrings.Localizable.buttonDelete,
         icon: KDriveResourcesAsset.delete
     )
     static let download = MultipleSelectionAction(
-        id: MultipleSelectionActionId.download,
+        id: .download,
         name: KDriveResourcesStrings.Localizable.buttonDownload,
         icon: KDriveResourcesAsset.menu
     )

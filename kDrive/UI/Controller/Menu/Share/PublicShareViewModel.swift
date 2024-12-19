@@ -85,7 +85,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             // We try to close the "Public Share screen"
             if type == .cancel,
                !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
-                dismissClosure?()
+                onDismiss?()
                 return
             }
 
