@@ -37,12 +37,6 @@ enum UniversalLinksHelper {
             displayMode: .file
         )
 
-        /// Matches a public share link
-        static let publicShareLink = Link(
-            regex: Regex(pattern: #"^/app/share/([0-9]+)/([a-z0-9-]+)$"#)!,
-            displayMode: .file
-        )
-
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
 
@@ -55,7 +49,7 @@ enum UniversalLinksHelper {
         /// Matches an office file link
         static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
 
-        static let all = [privateShareLink, publicShareLink, directoryLink, filePreview, officeLink]
+        static let all = [privateShareLink, directoryLink, filePreview, officeLink]
     }
 
     private enum DisplayMode {
@@ -72,10 +66,8 @@ enum UniversalLinksHelper {
         let path = components.path
         DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
-        // Public share link regex
-        let shareLink = Link.publicShareLink
-        let matches = shareLink.regex.matches(in: path)
-        if await processPublicShareLink(matches: matches, publicShareURL: url) {
+        if let publicShare = await PublicShareLink(publicShareURL: url),
+           await processPublicShareLink(publicShare) {
             return true
         }
 
@@ -91,22 +83,18 @@ enum UniversalLinksHelper {
         return false
     }
 
-    private static func processPublicShareLink(matches: [[String]], publicShareURL: URL) async -> Bool {
-        guard let firstMatch = matches.first,
-              let driveId = firstMatch[safe: 1],
-              let driveIdInt = Int(driveId),
-              let shareLinkUid = firstMatch[safe: 2] else {
-            return false
-        }
+    public static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
+        @InjectService var deeplinkService: DeeplinkServiceable
+        deeplinkService.setLastPublicShare(link)
 
-        // request metadata
         let apiFetcher = PublicShareApiFetcher()
         do {
-            let metadata = try await apiFetcher.getMetadata(driveId: driveIdInt, shareLinkUid: shareLinkUid)
+            let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
+
             return await processPublicShareMetadata(
                 metadata,
-                driveId: driveIdInt,
-                shareLinkUid: shareLinkUid,
+                driveId: link.driveId,
+                shareLinkUid: link.shareLinkUid,
                 apiFetcher: apiFetcher
             )
         } catch {
@@ -118,7 +106,7 @@ enum UniversalLinksHelper {
                 return false
             }
 
-            return await processPublicShareMetadataLimitation(limitation, publicShareURL: publicShareURL)
+            return await processPublicShareMetadataLimitation(limitation, publicShareURL: link.publicShareURL)
         }
     }
 
