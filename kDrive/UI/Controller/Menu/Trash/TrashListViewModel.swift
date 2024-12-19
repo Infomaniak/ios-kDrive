@@ -81,8 +81,9 @@ class TrashListViewModel: InMemoryFileListViewModel {
         endRefreshing()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
+            currentRightBarButtons = currentDirectory.children.isEmpty ? nil : [.emptyTrash]
         }
+
         if let nextCursor = fetchResponse.validApiResponse.cursor {
             try await loadFiles(cursor: nextCursor)
         }
