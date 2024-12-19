@@ -20,13 +20,11 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
-import kDriveCore
 import kDriveResources
 import SwiftRegex
 import UIKit
 
-#if !ISEXTENSION
-enum UniversalLinksHelper {
+public enum UniversalLinksHelper {
     private struct Link {
         let regex: Regex
         let displayMode: DisplayMode
@@ -57,7 +55,7 @@ enum UniversalLinksHelper {
     }
 
     @discardableResult
-    static func handleURL(_ url: URL) async -> Bool {
+    public static func handleURL(_ url: URL) async -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             DDLogError("[UniversalLinksHelper] Failed to process url:\(url)")
             return false
@@ -217,4 +215,3 @@ enum UniversalLinksHelper {
         }
     }
 }
-#endif
