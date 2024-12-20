@@ -22,13 +22,13 @@
                         <rect key="frame" x="24" y="16" width="272" height="75"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="cSl-Qq-OTk">
-                                <rect key="frame" x="20" y="16" width="216" height="43"/>
+                                <rect key="frame" x="0.0" y="16" width="236" height="43"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="left" semanticContentAttribute="forceLeftToRight" alignment="center" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="ztF-Xu-Gdi">
-                                        <rect key="frame" x="0.0" y="0.0" width="216" height="43"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="236" height="43"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Rx2-wp-Xd2" userLabel="Error Icon Image View">
-                                                <rect key="frame" x="-0.33333333333333393" y="10.33333333333333" width="24.666666666666664" height="22.666666666666671"/>
+                                                <rect key="frame" x="14.666666666666668" y="10.33333333333333" width="24.666666666666661" height="22.666666666666671"/>
                                                 <color key="tintColor" name="iconColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="24" id="DNg-nk-5hq"/>
@@ -36,7 +36,7 @@
                                                 </constraints>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="5fG-BH-ruV">
-                                                <rect key="frame" x="40" y="0.0" width="176" height="43"/>
+                                                <rect key="frame" x="60" y="0.0" width="176" height="43"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Importation suspendue" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AT0-QC-gNC" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="176" height="20.333333333333332"/>
@@ -45,7 +45,7 @@
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInterruptedErrorTitle"/>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadPausedTitle"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KPv-M6-kv9" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
@@ -61,14 +61,14 @@
                                             </stackView>
                                         </subviews>
                                         <constraints>
+                                            <constraint firstItem="Rx2-wp-Xd2" firstAttribute="leading" secondItem="ztF-Xu-Gdi" secondAttribute="leading" constant="15" id="DbR-NC-LTQ"/>
+                                            <constraint firstItem="5fG-BH-ruV" firstAttribute="leading" secondItem="Rx2-wp-Xd2" secondAttribute="trailing" constant="18" id="c7F-Sx-lMi"/>
                                             <constraint firstItem="Rx2-wp-Xd2" firstAttribute="centerY" secondItem="ztF-Xu-Gdi" secondAttribute="centerY" id="tqB-y7-zM3"/>
                                         </constraints>
                                     </stackView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="ztF-Xu-Gdi" firstAttribute="centerY" secondItem="cSl-Qq-OTk" secondAttribute="centerY" id="F5Z-fT-z2W"/>
-                                    <constraint firstItem="ztF-Xu-Gdi" firstAttribute="leading" secondItem="cSl-Qq-OTk" secondAttribute="leading" constant="16" id="J2R-Tt-XWk"/>
-                                    <constraint firstAttribute="trailing" secondItem="ztF-Xu-Gdi" secondAttribute="trailing" constant="16" id="KvY-Wj-0z0"/>
                                 </constraints>
                             </stackView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="G0J-Km-hBT">
@@ -87,6 +87,7 @@
                             <constraint firstAttribute="trailing" secondItem="G0J-Km-hBT" secondAttribute="trailing" constant="16" id="I0x-HS-FqI"/>
                             <constraint firstAttribute="bottom" secondItem="cSl-Qq-OTk" secondAttribute="bottom" constant="16" id="OBf-zc-JOM"/>
                             <constraint firstItem="cSl-Qq-OTk" firstAttribute="centerY" secondItem="o3H-RR-j9t" secondAttribute="centerY" id="Y1V-md-HRP"/>
+                            <constraint firstItem="ztF-Xu-Gdi" firstAttribute="leading" secondItem="o3H-RR-j9t" secondAttribute="leading" id="ZXa-bW-8Q5"/>
                             <constraint firstItem="cSl-Qq-OTk" firstAttribute="top" secondItem="o3H-RR-j9t" secondAttribute="top" constant="16" id="dnu-Lh-NJP"/>
                             <constraint firstItem="G0J-Km-hBT" firstAttribute="leading" secondItem="cSl-Qq-OTk" secondAttribute="trailing" constant="8" id="pIe-Lx-tVA"/>
                         </constraints>
