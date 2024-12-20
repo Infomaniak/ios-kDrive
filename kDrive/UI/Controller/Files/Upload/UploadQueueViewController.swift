@@ -62,7 +62,7 @@ final class UploadQueueViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Main"])
-        tableView.reloadData()
+        
     }
 
     deinit {
