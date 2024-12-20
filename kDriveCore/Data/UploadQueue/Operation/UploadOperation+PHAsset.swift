@@ -67,12 +67,14 @@ extension UploadOperation {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let canUpload = !(status == .cellular && photoLibraryUploader.frozenSettings?.wifiSync == .onlyWifi)
+        let canUpload = !(status == .cellular && UserDefaults.shared.isWifiOnly)
 
         guard !canUpload else {
             return
         }
 
+        uploadQueue.cancelRunningOperations()
+        uploadQueue.suspendAllOperations()
         throw ErrorDomain.uploadOverDataRestrictedError
     }
 }

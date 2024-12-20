@@ -60,11 +60,6 @@ class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
         let mode = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
         UserDefaults.shared.syncOfflineMode = mode
-        if mode == .onlyWifi {
-            UserDefaults.shared.isWifiOnly = true
-        } else {
-            UserDefaults.shared.isWifiOnly = false
-        }
         navigationController?.popViewController(animated: true)
     }
 }
