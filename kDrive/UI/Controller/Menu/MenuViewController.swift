@@ -83,7 +83,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -113,7 +113,8 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                self?.tableView.reloadData()
+                let indexPath = IndexPath(row: 0, section: 1)
+                self?.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
         }
     }
