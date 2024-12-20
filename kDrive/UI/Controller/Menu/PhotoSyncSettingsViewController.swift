@@ -584,6 +584,12 @@ extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegat
 extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
     func didSelectSyncMode(_ mode: SyncMode) {
         newSyncSettings.wifiSync = mode
+        if mode == .onlyWifi {
+            UserDefaults.shared.isWifiOnly = true
+        } else {
+            UserDefaults.shared.isWifiOnly = false
+        }
+        updateSaveButtonState()
         tableView.reloadRows(
             at: [IndexPath(row: PhotoSyncSettingsRows.wifiSync.rawValue, section: PhotoSyncSection.syncSettings.rawValue)],
             with: .fade

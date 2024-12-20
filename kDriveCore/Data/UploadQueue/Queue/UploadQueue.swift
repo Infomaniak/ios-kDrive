@@ -139,6 +139,10 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
+            if ReachabilityListener.instance.currentStatus == .wifi || !UserDefaults.shared.isWifiOnly {
+                self.cleanNetworkAndLocalErrorsForAllOperations()
+                self.resumeAllOperations()
+            }
         }
 
         observeMemoryWarnings()

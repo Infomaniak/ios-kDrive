@@ -92,12 +92,19 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
+        tableView.register(cellView: UploadsPausedTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
         navigationItem.hideBackButtonText()
+
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            Task { @MainActor in
+                self?.tableView.reloadData()
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -194,11 +201,18 @@ extension MenuViewController {
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
-            let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.progressView.enableIndeterminate()
-            cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
-            return cell
+            if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+                let cell = tableView.dequeueReusableCell(type: UploadsPausedTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.progressView.enableIndeterminate()
+                cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
+                return cell
+            }
         } else {
             let action = section.actions[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
