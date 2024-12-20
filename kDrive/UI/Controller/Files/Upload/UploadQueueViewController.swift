@@ -45,6 +45,7 @@ final class UploadQueueViewController: UIViewController {
         navigationItem.hideBackButtonText()
 
         tableView.register(cellView: UploadTableViewCell.self)
+        tableView.register(cellView: ErrorUploadTableViewCell.self)
 
         retryButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonRetry
         cancelButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCancel
@@ -61,6 +62,7 @@ final class UploadQueueViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Main"])
+        tableView.reloadData()
     }
 
     deinit {
@@ -147,19 +149,35 @@ extension UploadQueueViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-        let fileWrapper = frozenUploadingFiles[indexPath.row]
-        let frozenFile = fileWrapper.content
+        if indexPath.row == 0 && UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+            let cell = tableView.dequeueReusableCell(type: ErrorUploadTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true,
+                                           isLast: true)
+            cell.delegate = self
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
+                                           isLast: indexPath.row == self.tableView(
+                                               tableView,
+                                               numberOfRowsInSection: indexPath.section
+                                           ) - 1)
 
-        cell.initWithPositionAndShadow(isFirst: fileWrapper.isFirstInList,
-                                       isLast: fileWrapper.isLastInList)
+            /// Make sure the file is valid
+            let file = uploadingFiles[indexPath.row]
+            if !file.isInvalidated {
+                let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
+                cell.configureWith(uploadFile: file, progress: progress)
+            }
 
-        if !frozenFile.isInvalidated {
-            let progress: CGFloat? = (frozenFile.progress != nil) ? CGFloat(frozenFile.progress!) : nil
-            cell.configureWith(frozenUploadFile: frozenFile, progress: progress)
+            cell.selectionStyle = .none
+            return cell
         }
+    }
+}
 
-        cell.selectionStyle = .none
-        return cell
+extension UploadQueueViewController: AccessParametersDelegate {
+    func parameterButtonTapped() {
+        navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
     }
 }
