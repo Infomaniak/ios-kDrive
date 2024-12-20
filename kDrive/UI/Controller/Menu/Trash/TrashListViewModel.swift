@@ -151,6 +151,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
         sortingChanged()
     }
 
+    override func shouldShowEmptyView() -> Bool {
+        currentDirectory.children.isEmpty
+    }
+
     private func restoreTrashedFiles(
         _ restoredFiles: [ProxyFile],
         firstFilename: String,
