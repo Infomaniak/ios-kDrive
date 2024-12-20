@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "e0eca0781740231a95c0f32dc0ae5e2f92867a4e",
-        "version" : "12.8.0"
+        "branch" : "refactor-transitive-dependency",
+        "revision" : "c3fcb72b7af42e62acc5dc3666221584eec45311"
       }
     },
     {
