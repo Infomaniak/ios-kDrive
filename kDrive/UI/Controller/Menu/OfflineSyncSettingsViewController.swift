@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2024 Infomaniak Network SA
+ Copyright (C) 2021 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,41 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUIKit
-import InfomaniakDI
 import kDriveCore
-import kDriveResources
 import UIKit
 
-protocol WifiSyncSettingsDelegate: AnyObject {
-    func didSelectSyncMode(_ mode: SyncMode)
-}
-
-class WifiSyncSettingsViewController: BaseGroupedTableViewController {
-    @LazyInjectService private var appNavigable: AppNavigable
-
+class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedMode: SyncMode!
-    weak var delegate: WifiSyncSettingsDelegate?
+    private var selectedOfflineMode: SyncMode = UserDefaults.shared.syncOfflineMode
+
+    weak var delegate: SelectPhotoFormatDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
-
         tableView.register(cellView: ParameterSyncTableViewCell.self)
-        tableView.allowsMultipleSelection = false
-    }
-
-    static func instantiate(selectedMode: SyncMode) -> WifiSyncSettingsViewController {
-        let viewController = WifiSyncSettingsViewController()
-        viewController.selectedMode = selectedMode
-        return viewController
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "SelectSyncMode"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "selectOfflineMode"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -67,7 +49,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         let currentMode = tableContent[indexPath.row]
         cell.syncTitleLabel.text = currentMode.title
         cell.syncDetailLabel.text = currentMode.selectionTitle
-        if currentMode == selectedMode {
+        if currentMode == selectedOfflineMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
@@ -76,7 +58,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
-        delegate?.didSelectSyncMode(tableContent[indexPath.row])
+        UserDefaults.shared.syncOfflineMode = mode
         navigationController?.popViewController(animated: true)
     }
 }

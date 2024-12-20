@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Matthieu Déglon
- * Exported at: Thu, 03 Oct 2024 08:22:20 +0200
+ * Exported by: Baptiste Griva
+ * Exported at: Fri, 20 Dec 2024 14:32:53 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1540,6 +1540,12 @@
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Accesso limitato o negato";
 
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Collegarsi a una rete Wi-Fi o consentire l’utilizzo di dati mobili";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Backup delle foto sospeso";
+
 /* loco:627cf782146a6d748e5e7262 */
 "photosHeaderDateFormat" = "MMMM yyyy";
 
@@ -2154,6 +2160,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "In attesa di connessione alla rete Wi-Fi";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "In attesa del Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Alcuni caricamenti sono ancora in corso in kDrive. Aprite l’app e mantenete il dispositivo connesso per accelerare il caricamento.";
