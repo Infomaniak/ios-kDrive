@@ -21,19 +21,18 @@ import UIKit
 
 class OfflineSyncSettingsViewController: BaseGroupedTableViewController {
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedOfflineMode: SyncMode!
+    private var selectedOfflineMode: SyncMode = UserDefaults.shared.syncOfflineMode
 
     weak var delegate: SelectPhotoFormatDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterSyncTableViewCell.self)
-        selectedOfflineMode = UserDefaults.shared.syncOfflineMode
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "selectOfflineMod"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "selectOfflineMode"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

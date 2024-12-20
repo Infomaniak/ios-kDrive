@@ -46,6 +46,7 @@
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoSyncSuspendedTitle"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                 </subviews>
@@ -59,6 +60,7 @@
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoSyncSuspended"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uMn-mZ-woc">
@@ -68,6 +70,9 @@
                                         <buttonConfiguration key="configuration" style="plain" title="Ouvrir les paramètres">
                                             <fontDescription key="titleFontDescription" type="system" pointSize="12"/>
                                         </buttonConfiguration>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonGoToSettings"/>
+                                        </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="updateButtonPressed:" destination="zwq-dJ-i8f" eventType="touchUpInside" id="gc7-UP-SQA"/>
                                         </connections>
@@ -88,6 +93,7 @@
                                     <constraint firstAttribute="trailing" secondItem="sID-ck-uyq" secondAttribute="trailing" id="RH8-UU-Pcr"/>
                                     <constraint firstAttribute="bottom" secondItem="sID-ck-uyq" secondAttribute="bottom" id="cNa-vD-mU0"/>
                                     <constraint firstItem="sID-ck-uyq" firstAttribute="leading" secondItem="elD-7z-YF7" secondAttribute="leading" id="o73-fo-paB"/>
+                                    <constraint firstItem="uMn-mZ-woc" firstAttribute="leading" secondItem="6ze-tB-4A2" secondAttribute="leading" id="rrV-IZ-QWg"/>
                                 </constraints>
                             </stackView>
                         </subviews>

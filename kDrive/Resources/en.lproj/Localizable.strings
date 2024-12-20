@@ -4,7 +4,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Tue, 01 Oct 2024 12:54:40 +0200
+ * Exported at: Fri, 20 Dec 2024 14:32:53 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1539,6 +1539,12 @@
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Restricted or denied access";
+
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Connect to a Wi-Fi network or allow mobile data usage";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Photo backup suspended";
 
 /* loco:627cf782146a6d748e5e7262 */
 "photosHeaderDateFormat" = "MMMM yyyy";

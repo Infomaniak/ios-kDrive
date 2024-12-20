@@ -140,7 +140,6 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
             if ReachabilityListener.instance.currentStatus == .wifi || !UserDefaults.shared.isWifiOnly {
-                self.cleanNetworkAndLocalErrorsForAllOperations()
                 self.resumeAllOperations()
             }
         }
