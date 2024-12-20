@@ -554,5 +554,6 @@ extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
             at: [IndexPath(row: PhotoSyncSettingsRows.wifiSync.rawValue, section: PhotoSyncSection.syncSettings.rawValue)],
             with: .fade
         )
+        NotificationCenter.default.post(name: .reloadWifiView, object: nil)
     }
 }
