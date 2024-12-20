@@ -83,6 +83,10 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -99,6 +103,13 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
         navigationItem.hideBackButtonText()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadWifiView),
+            name: .reloadWifiView,
+            object: nil
+        )
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
@@ -169,6 +180,10 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         if let uploadCountManager, uploadCountManager.uploadCount > 0 {
             sections.insert(.uploads, at: 1)
         }
+    }
+
+    @objc func reloadWifiView(_ notification: Notification) {
+        reloadData()
     }
 }
 
