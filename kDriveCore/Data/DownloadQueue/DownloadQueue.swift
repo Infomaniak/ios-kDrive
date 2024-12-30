@@ -195,7 +195,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         dispatchQueue.async {
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadArchiveOperation(
+            let operation = DownloadPublicShareArchiveOperation(
                 archiveId: archiveId,
                 shareDrive: publicShareProxy.proxyDrive,
                 driveFileManager: driveFileManager,

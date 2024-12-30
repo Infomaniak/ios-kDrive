@@ -29,13 +29,13 @@ public class DownloadArchiveOperation: Operation {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    private let archiveId: String
-    private let shareDrive: AbstractDrive
     private let driveFileManager: DriveFileManager
-    private let urlSession: FileDownloadSession
-    private let publicShareProxy: PublicShareProxy?
-    private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+
+    let archiveId: String
+    let shareDrive: AbstractDrive
+    let urlSession: FileDownloadSession
+    var progressObservation: NSKeyValueObservation?
 
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
@@ -74,13 +74,11 @@ public class DownloadArchiveOperation: Operation {
     public init(archiveId: String,
                 shareDrive: AbstractDrive,
                 driveFileManager: DriveFileManager,
-                urlSession: FileDownloadSession,
-                publicShareProxy: PublicShareProxy? = nil) {
+                urlSession: FileDownloadSession) {
         self.archiveId = archiveId
         self.shareDrive = shareDrive
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
-        self.publicShareProxy = publicShareProxy
     }
 
     // MARK: - Public methods
@@ -112,34 +110,7 @@ public class DownloadArchiveOperation: Operation {
     }
 
     override public func main() {
-        guard let publicShareProxy else {
-            authenticatedDownload()
-            return
-        }
-
-        publicShareDownload(proxy: publicShareProxy)
-    }
-
-    func publicShareDownload(proxy: PublicShareProxy) {
-        DDLogInfo(
-            "[DownloadOperation] Downloading Archive of public share files \(archiveId) with session \(urlSession.identifier)"
-        )
-
-        let url = Endpoint.downloadPublicShareArchive(
-            drive: shareDrive,
-            linkUuid: proxy.shareLinkUid,
-            archiveUuid: archiveId
-        ).url
-        let request = URLRequest(url: url)
-
-        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
-            guard let newValue = value.newValue else {
-                return
-            }
-            DownloadQueue.instance.publishProgress(newValue, for: self.archiveId)
-        }
-        task?.resume()
+        authenticatedDownload()
     }
 
     func authenticatedDownload() {
