@@ -127,7 +127,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadOperation(
+            let operation = DownloadPublicShareOperation(
                 file: file,
                 driveFileManager: driveFileManager,
                 urlSession: self.bestSession,
