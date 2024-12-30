@@ -36,19 +36,18 @@ public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
-    private let driveFileManager: DriveFileManager
-    private let urlSession: FileDownloadSession
-    private let publicShareProxy: PublicShareProxy?
-    private let itemIdentifier: NSFileProviderItemIdentifier?
-    private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
-
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
     @LazyInjectService var appContextService: AppContextServiceable
+
+    let urlSession: FileDownloadSession
+    let driveFileManager: DriveFileManager
+    let itemIdentifier: NSFileProviderItemIdentifier?
+    var progressObservation: NSKeyValueObservation?
 
     public let file: File
     public var task: URLSessionDownloadTask?
@@ -94,13 +93,11 @@ public class DownloadOperation: Operation, DownloadOperationable {
         file: File,
         driveFileManager: DriveFileManager,
         urlSession: FileDownloadSession,
-        publicShareProxy: PublicShareProxy? = nil,
         itemIdentifier: NSFileProviderItemIdentifier? = nil
     ) {
         self.file = File(value: file)
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
-        self.publicShareProxy = publicShareProxy
         self.itemIdentifier = itemIdentifier
     }
 
@@ -112,7 +109,6 @@ public class DownloadOperation: Operation, DownloadOperationable {
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
         self.task = task
-        publicShareProxy = nil
         itemIdentifier = nil
     }
 
@@ -179,48 +175,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
     override public func main() {
         DDLogInfo("[DownloadOperation] Start for \(file.id) with session \(urlSession.identifier)")
 
-        if let publicShareProxy {
-            downloadPublicShareFile(publicShareProxy: publicShareProxy)
-        } else {
-            downloadFile()
-        }
-    }
-
-    private func downloadPublicShareFile(publicShareProxy: PublicShareProxy) {
-        DDLogInfo("[DownloadOperation] Downloading publicShare \(file.id) with session \(urlSession.identifier)")
-
-        let url = Endpoint.download(file: file, publicShareProxy: publicShareProxy).url
-
-        // Add download task to Realm
-        let downloadTask = DownloadTask(
-            fileId: file.id,
-            isDirectory: file.isDirectory,
-            driveId: file.driveId,
-            userId: driveFileManager.drive.userId,
-            sessionId: urlSession.identifier,
-            sessionUrl: url.absoluteString
-        )
-
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            writableRealm.add(downloadTask, update: .modified)
-        }
-
-        let request = URLRequest(url: url)
-        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
-            guard let newValue = value.newValue else {
-                return
-            }
-            DownloadQueue.instance.publishProgress(newValue, for: fileId)
-        }
-        if let itemIdentifier {
-            driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in
-                manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
-                    // META: keep SonarCloud happy
-                }
-            }
-        }
-        task?.resume()
+        downloadFile()
     }
 
     private func downloadFile() {
