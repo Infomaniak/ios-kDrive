@@ -36,6 +36,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
+    private let itemIdentifier: NSFileProviderItemIdentifier?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
@@ -46,7 +47,6 @@ public class DownloadOperation: Operation, DownloadOperationable {
 
     let urlSession: FileDownloadSession
     let driveFileManager: DriveFileManager
-    let itemIdentifier: NSFileProviderItemIdentifier?
     var progressObservation: NSKeyValueObservation?
 
     public let file: File
@@ -301,7 +301,10 @@ public class DownloadOperation: Operation, DownloadOperationable {
             return
         }
 
-        assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation error:\(error)")
+        assert(
+            file.isDownloaded,
+            "Expecting to be downloaded at the end of the downloadOperation error:\(String(describing: error))"
+        )
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)
