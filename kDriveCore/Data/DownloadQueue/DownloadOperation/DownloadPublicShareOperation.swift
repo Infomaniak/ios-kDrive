@@ -76,20 +76,6 @@ public final class DownloadPublicShareOperation: DownloadOperation {
         }
 
         let request = URLRequest(url: url)
-        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
-            guard let newValue = value.newValue else {
-                return
-            }
-            DownloadQueue.instance.publishProgress(newValue, for: fileId)
-        }
-        if let itemIdentifier {
-            driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in
-                manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
-                    // META: keep SonarCloud happy
-                }
-            }
-        }
-        task?.resume()
+        downloadRequest(request)
     }
 }
