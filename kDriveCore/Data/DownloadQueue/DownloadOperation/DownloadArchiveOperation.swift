@@ -31,11 +31,11 @@ public class DownloadArchiveOperation: Operation {
 
     private let driveFileManager: DriveFileManager
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    private var progressObservation: NSKeyValueObservation?
 
     let archiveId: String
     let shareDrive: AbstractDrive
     let urlSession: FileDownloadSession
-    var progressObservation: NSKeyValueObservation?
 
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
@@ -123,14 +123,7 @@ public class DownloadArchiveOperation: Operation {
                 if let token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                    task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
-                        guard let newValue = value.newValue else {
-                            return
-                        }
-                        DownloadQueue.instance.publishProgress(newValue, for: archiveId)
-                    }
-                    task?.resume()
+                    downloadRequest(request)
                 } else {
                     error = .localError // Other error?
                     end(sessionUrl: url)
@@ -140,6 +133,17 @@ public class DownloadArchiveOperation: Operation {
             error = .localError // Other error?
             end(sessionUrl: url)
         }
+    }
+
+    func downloadRequest(_ request: URLRequest) {
+        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
+        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
+            guard let newValue = value.newValue else {
+                return
+            }
+            DownloadQueue.instance.publishProgress(newValue, for: self.archiveId)
+        }
+        task?.resume()
     }
 
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {

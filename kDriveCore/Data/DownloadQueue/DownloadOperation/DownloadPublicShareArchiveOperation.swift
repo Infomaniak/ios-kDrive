@@ -55,15 +55,8 @@ public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation
             linkUuid: publicShareProxy.shareLinkUid,
             archiveUuid: archiveId
         ).url
-        let request = URLRequest(url: url)
 
-        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
-            guard let newValue = value.newValue else {
-                return
-            }
-            DownloadQueue.instance.publishProgress(newValue, for: self.archiveId)
-        }
-        task?.resume()
+        let request = URLRequest(url: url)
+        downloadRequest(request)
     }
 }
