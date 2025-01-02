@@ -25,6 +25,7 @@ public protocol DeeplinkServiceable: AnyObject {
 
 public class DeeplinkService: DeeplinkServiceable {
     var lastPublicShareLink: PublicShareLink?
+
     public func setLastPublicShare(_ link: PublicShareLink) {
         lastPublicShareLink = link
     }
