@@ -71,6 +71,13 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    var publicShareExceptIds = [Int]()
+    var publicShareFileIds = [Int]()
+    var publicShareProxy: PublicShareProxy?
+    var isPublicShareFiles: Bool {
+        publicShareProxy != nil
+    }
+
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
@@ -110,8 +117,12 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    @MainActor var completionClosure: (() -> Void)?
+
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!
+
+    // MARK: View lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -158,21 +169,23 @@ class SaveFileViewController: UIViewController {
         )
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SaveFile"])
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SaveFile"])
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
+
+    // MARK: Objc
 
     @objc func keyboardWillShow(_ notification: Notification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
@@ -199,46 +212,7 @@ class SaveFileViewController: UIViewController {
         }
     }
 
-    func setAssetIdentifiers() {
-        guard let assetIdentifiers else { return }
-        sections = [.importing]
-        importProgress = fileImportHelper.importAssets(
-            assetIdentifiers,
-            userPreferredPhotoFormat: userPreferredPhotoFormat
-        ) { [weak self] importedFiles, errorCount in
-            guard let self else {
-                return
-            }
-
-            items = importedFiles
-            self.errorCount = errorCount
-            Task { @MainActor in
-                self.updateTableViewAfterImport()
-            }
-        }
-    }
-
-    func setItemProviders() {
-        guard let itemProviders else { return }
-        sections = [.importing]
-        importProgress = fileImportHelper
-            .importItems(itemProviders,
-                         userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
-                guard let self else {
-                    return
-                }
-
-                items = importedFiles
-                self.errorCount = errorCount
-                Task { @MainActor in
-                    self.updateTableViewAfterImport()
-                }
-            }
-    }
-
-    func updateButton() {
-        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !items.isEmpty && !importInProgress
-    }
+    // MARK: Helpers
 
     func getBestDirectory() -> File? {
         if lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id {
@@ -281,6 +255,62 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    func setAssetIdentifiers() {
+        guard let assetIdentifiers else { return }
+        sections = [.importing]
+        importProgress = fileImportHelper.importAssets(
+            assetIdentifiers,
+            userPreferredPhotoFormat: userPreferredPhotoFormat
+        ) { [weak self] importedFiles, errorCount in
+            guard let self else {
+                return
+            }
+
+            items = importedFiles
+            self.errorCount = errorCount
+            Task { @MainActor in
+                self.updateTableViewAfterImport()
+            }
+        }
+    }
+
+    func setItemProviders() {
+        guard let itemProviders else { return }
+        sections = [.importing]
+        importProgress = fileImportHelper
+            .importItems(itemProviders,
+                         userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+                guard let self else {
+                    return
+                }
+
+                items = importedFiles
+                self.errorCount = errorCount
+                Task { @MainActor in
+                    self.updateTableViewAfterImport()
+                }
+            }
+    }
+
+    func updateButton() {
+        guard selectedDirectory != nil, !importInProgress else {
+            enableButton = false
+            return
+        }
+
+        guard !isPublicShareFiles else {
+            enableButton = true
+            return
+        }
+
+        guard !items.isEmpty,
+              items.allSatisfy({ !$0.name.isEmpty }) else {
+            enableButton = false
+            return
+        }
+        enableButton = true
+    }
+
     private func updateTableViewAfterImport() {
         guard !importInProgress else { return }
         // Update table view
@@ -311,6 +341,8 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    // MARK: Class methods
+
     class func instantiate(driveFileManager: DriveFileManager?) -> SaveFileViewController {
         let viewController = Storyboard.saveFile
             .instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
@@ -318,14 +350,20 @@ class SaveFileViewController: UIViewController {
         return viewController
     }
 
-    class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
-                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
-        let saveViewController = instantiate(driveFileManager: driveFileManager)
+    class func setInNavigationController(saveViewController: SaveFileViewController,
+                                         files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
         if let files {
             saveViewController.items = files
         }
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
+    }
+
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
+                                                 files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
+        let saveViewController = instantiate(driveFileManager: driveFileManager)
+        return setInNavigationController(saveViewController: saveViewController,
+                                         files: files)
     }
 }
