@@ -52,7 +52,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private var currentDownloadOperation: DownloadOperation?
+    private var currentDownloadOperation: DownloadAuthenticatedOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?

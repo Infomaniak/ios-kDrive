@@ -75,7 +75,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
-    public private(set) var operationsInQueue = SendableDictionary<Int, DownloadOperation>()
+    public private(set) var operationsInQueue = SendableDictionary<Int, DownloadAuthenticatedOperation>()
     public private(set) var archiveOperationsInQueue = SendableDictionary<String, DownloadArchiveOperation>()
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
@@ -170,7 +170,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadOperation(
+            let operation = DownloadAuthenticatedOperation(
                 file: file,
                 driveFileManager: driveFileManager,
                 urlSession: self.bestSession,
@@ -246,7 +246,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     public func temporaryDownload(file: File,
                                   userId: Int,
-                                  onOperationCreated: ((DownloadOperation?) -> Void)? = nil,
+                                  onOperationCreated: ((DownloadAuthenticatedOperation?) -> Void)? = nil,
                                   completion: @escaping (DriveError?) -> Void) {
         Log.downloadQueue("temporaryDownload file:\(file.id)")
         dispatchQueue.async(qos: .userInitiated) { [
@@ -263,7 +263,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
+            let operation = DownloadAuthenticatedOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
@@ -296,7 +296,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     ///
     /// Thread safe
     /// Lookup O(1) as Dictionary backed
-    public func operation(for fileId: Int) -> DownloadOperation? {
+    public func operation(for fileId: Int) -> DownloadAuthenticatedOperation? {
         return operationsInQueue[fileId]
     }
 
