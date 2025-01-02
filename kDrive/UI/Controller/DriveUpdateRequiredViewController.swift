@@ -35,8 +35,8 @@ class DriveUpdateRequiredViewController: UIViewController {
             buttonStyle: .init(
                 background: Color(largeButtonStyle.backgroundColor),
                 textStyle: .init(font: Font(largeButtonStyle.titleFont), color: Color(largeButtonStyle.titleColor)),
-                height: 60,
-                radius: UIConstants.buttonCornerRadius
+                height: UIConstants.Button.largeHeight,
+                radius: UIConstants.Button.cornerRadius
             )
         )
     }()

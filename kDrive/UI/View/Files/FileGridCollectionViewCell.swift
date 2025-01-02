@@ -110,7 +110,12 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
     }
 
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        configure(with: FileGridViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
+        let viewModel = FileGridViewModel(
+            driveFileManager: driveFileManager,
+            file: file,
+            selectionMode: selectionMode
+        )
+        configure(with: viewModel)
     }
 
     override func configureLoading() {

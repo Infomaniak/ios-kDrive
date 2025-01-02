@@ -68,6 +68,7 @@ public extension Target {
                            "kDrive/UI/Controller/DriveUpdateRequiredViewController.swift",
                            "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
                            "kDrive/UI/Controller/Create File/FloatingPanelUtils.swift",
+                           "kDrive/UI/Controller/Create File/FloatingPanelLayouts.swift",
                            "kDrive/UI/Controller/Files/Categories/**",
                            "kDrive/UI/Controller/Files/Rights and Share/**",
                            "kDrive/UI/Controller/Files/Save File/**",
