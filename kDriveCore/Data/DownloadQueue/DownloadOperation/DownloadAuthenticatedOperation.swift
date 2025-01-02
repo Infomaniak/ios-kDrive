@@ -31,59 +31,23 @@ public protocol DownloadFileOperationable: Operationable {
     var file: File { get }
 }
 
-public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationable, @unchecked Sendable {
+public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOperationable, @unchecked Sendable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
     private let itemIdentifier: NSFileProviderItemIdentifier?
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
-    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
-    @LazyInjectService var appContextService: AppContextServiceable
 
     let urlSession: FileDownloadSession
     let driveFileManager: DriveFileManager
-    var progressObservation: NSKeyValueObservation?
 
     public let file: File
-    public var task: URLSessionDownloadTask?
-    public var error: DriveError?
 
     public var fileId: Int {
         return file.id
-    }
-
-    private var _executing = false {
-        willSet {
-            willChangeValue(forKey: "isExecuting")
-        }
-        didSet {
-            didChangeValue(forKey: "isExecuting")
-        }
-    }
-
-    private var _finished = false {
-        willSet {
-            willChangeValue(forKey: "isFinished")
-        }
-        didSet {
-            didChangeValue(forKey: "isFinished")
-        }
-    }
-
-    override public var isExecuting: Bool {
-        return _executing
-    }
-
-    override public var isFinished: Bool {
-        return _finished
-    }
-
-    override public var isAsynchronous: Bool {
-        return true
     }
 
     // MARK: - Public methods
@@ -107,8 +71,8 @@ public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationabl
         self.file = file
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
-        self.task = task
         itemIdentifier = nil
+        super.init(task: task)
     }
 
     override public func start() {
@@ -224,12 +188,6 @@ public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationabl
         task?.resume()
     }
 
-    override public func cancel() {
-        DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
-        super.cancel()
-        task?.cancel()
-    }
-
     // MARK: - methods
 
     public func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
@@ -287,12 +245,7 @@ public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationabl
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
 
         defer {
-            progressObservation?.invalidate()
-            if backgroundTaskIdentifier != .invalid {
-                UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-            }
-            _executing = false
-            _finished = true
+            endBackgroundTaskObservation()
         }
 
         // Delete download task

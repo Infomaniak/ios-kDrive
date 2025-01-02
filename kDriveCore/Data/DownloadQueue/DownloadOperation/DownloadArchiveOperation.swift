@@ -23,53 +23,16 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 
-public class DownloadArchiveOperation: Operation, @unchecked Sendable {
+public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     // MARK: - Attributes
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var appContextService: AppContextServiceable
-
     private let driveFileManager: DriveFileManager
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
-    private var progressObservation: NSKeyValueObservation?
 
     let archiveId: String
     let shareDrive: AbstractDrive
     let urlSession: FileDownloadSession
 
-    public var task: URLSessionDownloadTask?
-    public var error: DriveError?
     public var archiveUrl: URL?
-
-    private var _executing = false {
-        willSet {
-            willChangeValue(forKey: "isExecuting")
-        }
-        didSet {
-            didChangeValue(forKey: "isExecuting")
-        }
-    }
-
-    private var _finished = false {
-        willSet {
-            willChangeValue(forKey: "isFinished")
-        }
-        didSet {
-            didChangeValue(forKey: "isFinished")
-        }
-    }
-
-    override public var isExecuting: Bool {
-        return _executing
-    }
-
-    override public var isFinished: Bool {
-        return _finished
-    }
-
-    override public var isAsynchronous: Bool {
-        return true
-    }
 
     public init(archiveId: String,
                 shareDrive: AbstractDrive,
@@ -189,20 +152,8 @@ public class DownloadArchiveOperation: Operation, @unchecked Sendable {
         end(sessionUrl: task?.originalRequest?.url)
     }
 
-    override public func cancel() {
-        super.cancel()
-        task?.cancel()
-    }
-
     private func end(sessionUrl: URL?) {
         DDLogInfo("[DownloadOperation] Download of archive \(archiveId) ended")
-
-        progressObservation?.invalidate()
-        if backgroundTaskIdentifier != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-        }
-
-        _executing = false
-        _finished = true
+        endBackgroundTaskObservation()
     }
 }
