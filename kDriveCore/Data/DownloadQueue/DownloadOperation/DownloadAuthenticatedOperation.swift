@@ -24,15 +24,14 @@ import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 
-/// Something that can download a file.
-public protocol DownloadOperationable: Operationable {
+public protocol DownloadFileOperationable: Operationable {
     /// Called upon request completion
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?)
 
     var file: File { get }
 }
 
-public class DownloadAuthenticatedOperation: Operation, DownloadOperationable {
+public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default

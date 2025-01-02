@@ -68,7 +68,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [DownloadOperationable]()
+    var operations = [DownloadFileOperationable]()
 
     override public init() {
         super.init()
