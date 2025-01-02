@@ -298,28 +298,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         guard accountManager.currentAccount != nil else {
             #if !ISEXTENSION
-            let upsaleViewController = UpsaleViewController()
-
-            // Create an account
-            upsaleViewController.freeTrialCallback = { [weak self] in
-                guard let self else { return }
-                self.dismiss(animated: true) {
-                    let loginDelegateHandler = LoginDelegateHandler()
-                    self.router.showRegister(delegate: loginDelegateHandler)
-                }
-            }
-
-            // Let the user login with the onboarding
-            upsaleViewController.loginCallback = { [weak self] in
-                guard let self else { return }
-                self.dismiss(animated: true) {
-                    let loginDelegateHandler = LoginDelegateHandler()
-                    self.router.showLogin(delegate: loginDelegateHandler)
-                }
-            }
-
-            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
-            present(floatingPanel, animated: true, completion: nil)
+            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+            present(upsaleFloatingPanelController, animated: true, completion: nil)
             #else
             dismiss(animated: true)
             #endif

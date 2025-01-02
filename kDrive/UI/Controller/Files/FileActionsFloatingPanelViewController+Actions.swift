@@ -165,6 +165,8 @@ extension FileActionsFloatingPanelViewController {
             leaveShareAction()
         case .cancelImport:
             cancelImportAction()
+        case .addToMyDrive:
+            addToMyKDrive()
         default:
             break
         }
@@ -519,5 +521,33 @@ extension FileActionsFloatingPanelViewController {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
+    }
+
+    private func addToMyKDrive() {
+        guard accountManager.currentAccount != nil else {
+            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+            present(upsaleFloatingPanelController, animated: true, completion: nil)
+            return
+        }
+
+        guard let currentUserDriveFileManager = accountManager.currentDriveFileManager,
+              let publicShareProxy = driveFileManager.publicShareProxy else {
+            return
+        }
+
+        let itemId = [file.id]
+        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
+        let saveNavigationViewController = SaveFileViewController
+            .setInNavigationController(saveViewController: saveViewController)
+
+        saveViewController.completionClosure = { [weak self] in
+            guard let self else { return }
+            self.dismiss(animated: true)
+        }
+
+        saveViewController.publicShareFileIds = itemId
+        saveViewController.publicShareProxy = publicShareProxy
+
+        present(saveNavigationViewController, animated: true, completion: nil)
     }
 }
