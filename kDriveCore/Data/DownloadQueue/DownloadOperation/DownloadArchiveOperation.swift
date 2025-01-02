@@ -68,7 +68,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
         }
 
         // If the operation is not canceled, begin executing the task
-        _executing = true
+        operationExecuting = true
         main()
     }
 

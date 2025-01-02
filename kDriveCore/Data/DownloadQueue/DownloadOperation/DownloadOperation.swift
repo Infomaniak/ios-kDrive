@@ -33,7 +33,7 @@ public class DownloadOperation: Operation, @unchecked Sendable {
         self.task = task
     }
 
-    var _executing = false {
+    var operationExecuting = false {
         willSet {
             willChangeValue(forKey: "isExecuting")
         }
@@ -42,7 +42,7 @@ public class DownloadOperation: Operation, @unchecked Sendable {
         }
     }
 
-    var _finished = false {
+    var operationFinished = false {
         willSet {
             willChangeValue(forKey: "isFinished")
         }
@@ -52,11 +52,11 @@ public class DownloadOperation: Operation, @unchecked Sendable {
     }
 
     override public var isExecuting: Bool {
-        return _executing
+        return operationExecuting
     }
 
     override public var isFinished: Bool {
-        return _finished
+        return operationFinished
     }
 
     override public var isAsynchronous: Bool {
@@ -74,7 +74,7 @@ public class DownloadOperation: Operation, @unchecked Sendable {
             UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
         }
 
-        _executing = false
-        _finished = true
+        operationExecuting = false
+        operationFinished = true
     }
 }
