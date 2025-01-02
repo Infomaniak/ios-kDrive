@@ -148,7 +148,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "CocoaLumberjackSwift"),
                                       .external(name: "MaterialOutlinedTextField"),
                                       .external(name: "SwiftRegex"),
-                                      .external(name: "Sentry"),
+                                      .external(name: "Sentry-Dynamic"),
                                       .external(name: "VersionChecker"),
                                       .external(name: "LocalizeKit")
                                   ]),

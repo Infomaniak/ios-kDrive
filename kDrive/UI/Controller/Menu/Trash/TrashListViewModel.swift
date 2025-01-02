@@ -81,8 +81,9 @@ class TrashListViewModel: InMemoryFileListViewModel {
         endRefreshing()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
+            currentRightBarButtons = currentDirectory.children.isEmpty ? nil : [.emptyTrash]
         }
+
         if let nextCursor = fetchResponse.validApiResponse.cursor {
             try await loadFiles(cursor: nextCursor)
         }
@@ -148,6 +149,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
         guard let type = option as? SortType else { return }
         sortType = type
         sortingChanged()
+    }
+
+    override func shouldShowEmptyView() -> Bool {
+        currentDirectory.children.isEmpty
     }
 
     private func restoreTrashedFiles(
