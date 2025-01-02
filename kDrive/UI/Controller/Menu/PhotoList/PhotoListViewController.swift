@@ -299,11 +299,23 @@ final class PhotoListViewController: FileListViewController {
             return cell
         }
 
+        let multipleSelectionEnabled: Bool
+        let isSelected: Bool
+        if let multipleSelectionViewModel = viewModel.multipleSelectionViewModel {
+            multipleSelectionEnabled = multipleSelectionViewModel.isMultipleSelectionEnabled
+            isSelected = multipleSelectionViewModel.selectedItems.contains { $0.uid == file.uid }
+        } else {
+            multipleSelectionEnabled = false
+            isSelected = false
+        }
+
         cell.configureWith(
             file: file,
             roundedCorners: false,
-            selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
+            selectionMode: multipleSelectionEnabled,
+            isSelected: isSelected
         )
+
         return cell
     }
 
