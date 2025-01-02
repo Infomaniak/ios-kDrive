@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
@@ -28,11 +29,13 @@ public class DownloadArchiveOperation: Operation {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    private let archiveId: String
     private let driveFileManager: DriveFileManager
-    private let urlSession: FileDownloadSession
-    private var progressObservation: NSKeyValueObservation?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    private var progressObservation: NSKeyValueObservation?
+
+    let archiveId: String
+    let shareDrive: AbstractDrive
+    let urlSession: FileDownloadSession
 
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
@@ -68,8 +71,12 @@ public class DownloadArchiveOperation: Operation {
         return true
     }
 
-    public init(archiveId: String, driveFileManager: DriveFileManager, urlSession: FileDownloadSession) {
+    public init(archiveId: String,
+                shareDrive: AbstractDrive,
+                driveFileManager: DriveFileManager,
+                urlSession: FileDownloadSession) {
         self.archiveId = archiveId
+        self.shareDrive = shareDrive
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
     }
@@ -103,6 +110,10 @@ public class DownloadArchiveOperation: Operation {
     }
 
     override public func main() {
+        authenticatedDownload()
+    }
+
+    func authenticatedDownload() {
         DDLogInfo("[DownloadOperation] Downloading Archive of files \(archiveId) with session \(urlSession.identifier)")
 
         let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
@@ -112,14 +123,7 @@ public class DownloadArchiveOperation: Operation {
                 if let token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                    task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
-                        guard let newValue = value.newValue else {
-                            return
-                        }
-                        DownloadQueue.instance.publishProgress(newValue, for: archiveId)
-                    }
-                    task?.resume()
+                    downloadRequest(request)
                 } else {
                     error = .localError // Other error?
                     end(sessionUrl: url)
@@ -129,6 +133,17 @@ public class DownloadArchiveOperation: Operation {
             error = .localError // Other error?
             end(sessionUrl: url)
         }
+    }
+
+    func downloadRequest(_ request: URLRequest) {
+        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
+        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { _, value in
+            guard let newValue = value.newValue else {
+                return
+            }
+            DownloadQueue.instance.publishProgress(newValue, for: self.archiveId)
+        }
+        task?.resume()
     }
 
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
