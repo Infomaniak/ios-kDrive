@@ -32,7 +32,7 @@ public protocol DownloadOperationable: Operationable {
     var file: File { get }
 }
 
-public class DownloadOperation: Operation, DownloadOperationable {
+public class DownloadAuthenticatedOperation: Operation, DownloadOperationable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
