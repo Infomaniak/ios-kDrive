@@ -22,7 +22,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 
-public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation {
+public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation, @unchecked Sendable {
     private let publicShareProxy: PublicShareProxy
 
     public init(archiveId: String,

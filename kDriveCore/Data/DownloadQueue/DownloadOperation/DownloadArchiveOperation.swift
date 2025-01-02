@@ -23,7 +23,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 
-public class DownloadArchiveOperation: Operation {
+public class DownloadArchiveOperation: Operation, @unchecked Sendable {
     // MARK: - Attributes
 
     @LazyInjectService var accountManager: AccountManageable

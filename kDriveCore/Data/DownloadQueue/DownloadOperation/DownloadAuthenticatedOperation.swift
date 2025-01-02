@@ -31,7 +31,7 @@ public protocol DownloadFileOperationable: Operationable {
     var file: File { get }
 }
 
-public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationable {
+public class DownloadAuthenticatedOperation: Operation, DownloadFileOperationable, @unchecked Sendable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
