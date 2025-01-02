@@ -99,6 +99,7 @@ public final class SingleTrackPlayer: Pausable {
     /// Async as may take up some time
     public func setup(with playableFile: File) async { // TODO: use abstract type
         if !playableFile.isLocalVersionOlderThanRemote {
+            removeAllObservers()
             let asset = AVAsset(url: playableFile.localUrl)
             player = AVPlayer(url: playableFile.localUrl)
             setUpObservers()
