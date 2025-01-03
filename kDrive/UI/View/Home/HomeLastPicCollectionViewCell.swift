@@ -31,6 +31,10 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     private var thumbnailDownloadTask: Kingfisher.DownloadTask?
 
     override var isSelected: Bool {
+        willSet {
+            // NOTE: DifferenceKit reset the selected flag mid air. Investigating
+            print("•• isSelected changed: \(newValue) fid:\(file?.id)")
+        }
         didSet {
             configureForSelection()
         }
@@ -77,9 +81,10 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         contentInsetView.cornerRadius = UIConstants.cornerRadius
     }
 
-    func configureWith(file: File, roundedCorners: Bool = true, selectionMode: Bool = false) {
+    func configureWith(file: File, roundedCorners: Bool = true, selectionMode: Bool = false, isSelected: Bool = false) {
         self.selectionMode = selectionMode
         self.file = file
+
         checkmarkImage.isHidden = !selectionMode
         darkLayer.isHidden = false
         thumbnailDownloadTask = file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
@@ -94,7 +99,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
         videoData.isHidden = !(file.uti.conforms(to: .video) || file.uti.conforms(to: .movie))
-        configureForSelection()
+
+        self.isSelected = isSelected
     }
 
     private func configureForSelection() {
