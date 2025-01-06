@@ -24,7 +24,7 @@ import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 
-public final class DownloadPublicShareOperation: DownloadOperation {
+public final class DownloadPublicShareOperation: DownloadAuthenticatedOperation, @unchecked Sendable {
     private let publicShareProxy: PublicShareProxy
 
     override public init(
