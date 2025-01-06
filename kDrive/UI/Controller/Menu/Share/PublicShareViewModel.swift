@@ -88,11 +88,8 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
-        guard downloadObserver == nil else {
-            return
-        }
-
-        guard let publicShareProxy = publicShareProxy else {
+        guard downloadObserver == nil,
+              let publicShareProxy else {
             return
         }
 

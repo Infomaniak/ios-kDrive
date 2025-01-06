@@ -301,7 +301,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             let upsaleViewController = UpsaleViewController()
 
             // Create an account
-            upsaleViewController.freeTrialCallback = { [weak self] in
+            upsaleViewController.onFreeTrialCompleted = { [weak self] in
                 guard let self else { return }
                 self.dismiss(animated: true) {
                     let loginDelegateHandler = LoginDelegateHandler()
@@ -310,7 +310,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             }
 
             // Let the user login with the onboarding
-            upsaleViewController.loginCallback = { [weak self] in
+            upsaleViewController.onLoginCompleted = { [weak self] in
                 guard let self else { return }
                 self.dismiss(animated: true) {
                     let loginDelegateHandler = LoginDelegateHandler()

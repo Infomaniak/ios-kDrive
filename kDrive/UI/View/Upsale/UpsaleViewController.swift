@@ -22,8 +22,8 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
-    var loginCallback: (() -> Void)?
-    var freeTrialCallback: (() -> Void)?
+    var onLoginCompleted: (() -> Void)?
+    var onFreeTrialCompleted: (() -> Void)?
 
     let titleImageView = UIImageView()
 
@@ -221,11 +221,11 @@ public class UpsaleViewController: UIViewController {
 
     @objc public func freeTrial() {
         dismiss(animated: true, completion: nil)
-        freeTrialCallback?()
+        onFreeTrialCompleted?()
     }
 
     @objc public func login() {
         dismiss(animated: true, completion: nil)
-        loginCallback?()
+        onLoginCompleted?()
     }
 }
