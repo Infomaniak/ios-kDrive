@@ -29,6 +29,10 @@ public class DownloadOperation: Operation, @unchecked Sendable {
 
     public var error: DriveError?
 
+    public var progress: Progress? {
+        task?.progress
+    }
+
     init(task: URLSessionDownloadTask? = nil) {
         self.task = task
     }

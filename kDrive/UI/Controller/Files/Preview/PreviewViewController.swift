@@ -556,7 +556,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                     }
 
                     currentDownloadOperation = operation
-                    if let progress = currentDownloadOperation?.task?.progress,
+                    if let progress = currentDownloadOperation?.progress,
                        let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
                         cell.setDownloadProgress(progress)
                     }
@@ -722,7 +722,7 @@ extension PreviewViewController: UICollectionViewDataSource {
         } else if file.supportedBy.contains(.thumbnail) && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
@@ -737,7 +737,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
