@@ -35,26 +35,27 @@ extension SaveFileViewController: FooterButtonDelegate {
         let button = sender as? IKLargeButton
         button?.setLoading(true)
 
-        if let publicShareProxy {
-            Task {
-                defer { dismiss() }
-                try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
-                                                 destinationDriveId: drive.id,
-                                                 destinationFolderId: directory.id,
-                                                 fileIds: publicShareFileIds,
-                                                 exceptIds: publicShareExceptIds,
-                                                 sharelinkUuid: publicShareProxy.shareLinkUid,
-                                                 driveFileManager: selectedDriveFileManager)
-            }
-        } else {
+        guard let publicShareProxy else {
             guard !items.isEmpty else {
-                dismiss()
+                dismissViewController()
                 return
             }
 
             Task {
                 await saveAndDismiss(files: items, directory: directory, drive: drive)
             }
+            return
+        }
+
+        Task {
+            defer { dismissViewController() }
+            try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
+                                             destinationDriveId: drive.id,
+                                             destinationFolderId: directory.id,
+                                             fileIds: publicShareFileIds,
+                                             exceptIds: publicShareExceptIds,
+                                             sharelinkUuid: publicShareProxy.shareLinkUid,
+                                             driveFileManager: selectedDriveFileManager)
         }
     }
 
@@ -73,8 +74,8 @@ extension SaveFileViewController: FooterButtonDelegate {
                                                                        sharelinkUuid: sharelinkUuid)
     }
 
-    private func dismiss() {
-        completionClosure?()
+    private func dismissViewController() {
+        onDismissViewController?()
         dismiss(animated: true)
     }
 

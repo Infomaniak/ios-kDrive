@@ -117,7 +117,7 @@ class SaveFileViewController: UIViewController {
         }
     }
 
-    @MainActor var completionClosure: (() -> Void)?
+    @MainActor var onDismissViewController: (() -> Void)?
 
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!

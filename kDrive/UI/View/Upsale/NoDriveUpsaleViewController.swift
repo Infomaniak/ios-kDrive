@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 public class NoDriveUpsaleViewController: UpsaleViewController {
-    var dismissCallback: (() -> Void)?
+    var onDismissViewController: (() -> Void)?
 
     override func configureButtons() {
         dismissButton.style = .primaryButton
@@ -41,6 +41,6 @@ public class NoDriveUpsaleViewController: UpsaleViewController {
 
     @objc public func dismissViewController() {
         dismiss(animated: true, completion: nil)
-        dismissCallback?()
+        onDismissViewController?()
     }
 }

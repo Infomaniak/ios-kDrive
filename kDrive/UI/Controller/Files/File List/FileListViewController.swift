@@ -298,7 +298,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             #if !ISEXTENSION
             let upsaleViewController = UpsaleViewController()
 
-            // Create an account
             upsaleViewController.onFreeTrialCompleted = { [weak self] in
                 guard let self else { return }
                 self.dismiss(animated: true) {
@@ -307,7 +306,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                 }
             }
 
-            // Let the user login with the onboarding
             upsaleViewController.onLoginCompleted = { [weak self] in
                 guard let self else { return }
                 self.dismiss(animated: true) {
