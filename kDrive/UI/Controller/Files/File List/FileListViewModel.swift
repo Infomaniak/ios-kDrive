@@ -41,7 +41,7 @@ enum FileListBarButtonType {
 enum FileListQuickActionType {
     case file
     case trash
-    case multipleSelection
+    case multipleSelection(onlyDownload: Bool)
 }
 
 enum ControllerPresentationType {

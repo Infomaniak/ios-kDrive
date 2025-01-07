@@ -653,11 +653,23 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: false) {
+            let configuration = FileListViewModel.Configuration(selectAllSupported: true,
+                                                                rootTitle: nil,
+                                                                emptyViewType: .emptyFolder,
+                                                                supportsDrop: false,
+                                                                leftBarButtons: [.cancel],
+                                                                rightBarButtons: [.downloadAll],
+                                                                matomoViewPath: [
+                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    "publicShare"
+                                                                ])
+
             let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
                                                  sortType: .nameAZ,
                                                  driveFileManager: driveFileManager,
                                                  currentDirectory: frozenRootFolder,
-                                                 apiFetcher: apiFetcher)
+                                                 apiFetcher: apiFetcher,
+                                                 configuration: configuration)
             let viewController = FileListViewController(viewModel: viewModel)
             viewModel.onDismissViewController = { [weak viewController] in
                 viewController?.dismiss(animated: false)

@@ -83,7 +83,9 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
-        if sharedWithMe {
+        if driveFileManager.isPublicShare {
+            actions = FloatingPanelAction.multipleSelectionPublicShareActions
+        } else if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
             actions = FloatingPanelAction.selectAllActions
@@ -139,7 +141,9 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
+    func downloadPublicShareArchivedFiles(downloadCellPath: IndexPath,
+                                          publicShareProxy: PublicShareProxy,
+                                          completion: @escaping (Result<URL, DriveError>) -> Void) {
         Task { [proxyFiles = files.map { $0.proxify() }, currentProxyDirectory = currentDirectory.proxify()] in
             do {
                 let archiveBody: ArchiveBody
@@ -148,7 +152,44 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
-                let response = try await driveFileManager.apiFetcher.buildArchive(
+
+                let response = try await PublicShareApiFetcher().buildPublicShareArchive(
+                    driveId: publicShareProxy.driveId,
+                    linkUuid: publicShareProxy.shareLinkUid,
+                    body: archiveBody
+                )
+                currentArchiveId = response.uuid
+                guard let rootViewController = view.window?.rootViewController else { return }
+                DownloadQueue.instance
+                    .observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
+                        if let archiveUrl {
+                            completion(.success(archiveUrl))
+                        } else {
+                            completion(.failure(error ?? .unknownError))
+                        }
+                    }
+                DownloadQueue.instance.addPublicShareArchiveToQueue(archiveId: response.uuid,
+                                                                    driveFileManager: driveFileManager,
+                                                                    publicShareProxy: publicShareProxy)
+
+                self.collectionView.reloadItems(at: [downloadCellPath])
+            } catch {
+                completion(.failure(error as? DriveError ?? .unknownError))
+            }
+        }
+    }
+
+    func downloadArchivedFiles(downloadCellPath: IndexPath,
+                               completion: @escaping (Result<URL, DriveError>) -> Void) {
+        Task { [proxyFiles = files.map { $0.proxify() }, currentProxyDirectory = currentDirectory.proxify()] in
+            do {
+                let archiveBody: ArchiveBody
+                if allItemsSelected {
+                    archiveBody = .init(parentId: currentProxyDirectory.id, exceptFileIds: exceptFileIds)
+                } else {
+                    archiveBody = .init(files: proxyFiles)
+                }
+                let response = try await self.driveFileManager.apiFetcher.buildArchive(
                     drive: driveFileManager.drive,
                     body: archiveBody
                 )
@@ -162,9 +203,17 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                             completion(.failure(error ?? .unknownError))
                         }
                     }
-                DownloadQueue.instance.addToQueue(archiveId: response.uuid,
-                                                  driveId: self.driveFileManager.drive.id,
-                                                  userId: accountManager.currentUserId)
+
+                if let publicShareProxy = self.driveFileManager.publicShareProxy {
+                    DownloadQueue.instance.addPublicShareArchiveToQueue(archiveId: response.uuid,
+                                                                        driveFileManager: driveFileManager,
+                                                                        publicShareProxy: publicShareProxy)
+                } else {
+                    DownloadQueue.instance.addToQueue(archiveId: response.uuid,
+                                                      driveId: self.driveFileManager.drive.id,
+                                                      userId: accountManager.currentUserId)
+                }
+
                 self.collectionView.reloadItems(at: [downloadCellPath])
             } catch {
                 completion(.failure(error as? DriveError ?? .unknownError))

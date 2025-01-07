@@ -233,6 +233,10 @@ public class FloatingPanelAction: Equatable {
         return [download].map { $0.reset() }
     }
 
+    static var multipleSelectionPublicShareActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
     }

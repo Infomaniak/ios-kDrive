@@ -32,18 +32,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     let rootProxy: ProxyFile
     var publicShareApiFetcher: PublicShareApiFetcher?
 
-    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        guard let currentDirectory else {
-            fatalError("PublicShareViewModel requires a currentDirectory to work")
-        }
-
-        let configuration = Configuration(selectAllSupported: false,
-                                          rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
-                                          emptyViewType: .emptyFolder,
-                                          supportsDrop: false,
-                                          rightBarButtons: [.downloadAll],
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "publicShare"])
-
+    override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         rootProxy = currentDirectory.proxify()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         observedFiles = AnyRealmCollection(currentDirectory.children)
@@ -54,12 +43,18 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         sortType: SortType,
         driveFileManager: DriveFileManager,
         currentDirectory: File,
-        apiFetcher: PublicShareApiFetcher
+        apiFetcher: PublicShareApiFetcher,
+        configuration: Configuration
     ) {
-        self.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        self.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+
         self.publicShareProxy = publicShareProxy
         self.sortType = sortType
         publicShareApiFetcher = apiFetcher
+    }
+
+    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        fatalError("Use init(publicShareProxy:… ) instead")
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
@@ -97,6 +92,8 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             downloadAll(sender: sender, publicShareProxy: publicShareProxy)
         } else if type == .addToMyDrive {
             addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
+        } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
+            onDismissViewController?()
         }
     }
 
