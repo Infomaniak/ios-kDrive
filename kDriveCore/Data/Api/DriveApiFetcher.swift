@@ -560,19 +560,19 @@ public class DriveApiFetcher: ApiFetcher {
         let destinationDrive = ProxyDrive(id: destinationDriveId)
         let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
         var requestParameters: Parameters = [
-            APIPublicShareParameter.sourceDriveId: sourceDriveId,
-            APIPublicShareParameter.destinationFolderId: destinationFolderId,
-            APIPublicShareParameter.sharelinkUuid: sharelinkUuid
+            PublicShareAPIParameters.sourceDriveId: sourceDriveId,
+            PublicShareAPIParameters.destinationFolderId: destinationFolderId,
+            PublicShareAPIParameters.sharelinkUuid: sharelinkUuid
         ]
 
         if let fileIds, !fileIds.isEmpty {
-            requestParameters[APIPublicShareParameter.fileIds] = fileIds
+            requestParameters[PublicShareAPIParameters.fileIds] = fileIds
         } else if let exceptIds, !exceptIds.isEmpty {
-            requestParameters[APIPublicShareParameter.exceptFileIds] = exceptIds
+            requestParameters[PublicShareAPIParameters.exceptFileIds] = exceptIds
         }
 
         if let password {
-            requestParameters[APIPublicShareParameter.password] = password
+            requestParameters[PublicShareAPIParameters.password] = password
         }
 
         let result: ValidServerResponse<FileExternalImport> = try await perform(request: authenticatedRequest(
@@ -584,7 +584,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 }
 
-enum APIPublicShareParameter {
+enum PublicShareAPIParameters {
     static let sourceDriveId = "source_drive_id"
     static let fileIds = "file_ids"
     static let exceptFileIds = "except_file_ids"

@@ -17,14 +17,14 @@
  */
 
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
-import InfomaniakDI
 
 public class UpsaleViewController: UIViewController {
-    var loginCallback: (() -> Void)?
-    var freeTrialCallback: (() -> Void)?
+    var onLoginCompleted: (() -> Void)?
+    var onFreeTrialCompleted: (() -> Void)?
 
     let titleImageView = UIImageView()
 
@@ -222,19 +222,19 @@ public class UpsaleViewController: UIViewController {
 
     @objc public func freeTrial() {
         dismiss(animated: true, completion: nil)
-        freeTrialCallback?()
+        onFreeTrialCompleted?()
     }
 
     @objc public func login() {
         dismiss(animated: true, completion: nil)
-        loginCallback?()
+        onLoginCompleted?()
     }
 
     public static func instantiateInFloatingPanel(rootViewController: UIViewController) -> UIViewController {
         let upsaleViewController = UpsaleViewController()
 
         // Create an account
-        upsaleViewController.freeTrialCallback = { [weak rootViewController] in
+        upsaleViewController.onFreeTrialCompleted = { [weak rootViewController] in
             guard let rootViewController else { return }
             rootViewController.dismiss(animated: true) {
                 let loginDelegateHandler = LoginDelegateHandler()
@@ -244,7 +244,7 @@ public class UpsaleViewController: UIViewController {
         }
 
         // Let the user login with the onboarding
-        upsaleViewController.loginCallback = { [weak rootViewController] in
+        upsaleViewController.onLoginCompleted = { [weak rootViewController] in
             guard let rootViewController else { return }
             rootViewController.dismiss(animated: true) {
                 let loginDelegateHandler = LoginDelegateHandler()
