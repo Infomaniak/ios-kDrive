@@ -75,7 +75,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
-    public private(set) var operationsInQueue = SendableDictionary<Int, DownloadAuthenticatedOperation>()
+    public private(set) var fileOperationsInQueue = SendableDictionary<Int, DownloadFileOperationable>()
     public private(set) var archiveOperationsInQueue = SendableDictionary<String, DownloadArchiveOperation>()
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
@@ -136,13 +136,13 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             )
             operation.completionBlock = {
                 self.dispatchQueue.async {
-                    self.operationsInQueue.removeValue(forKey: file.id)
+                    self.fileOperationsInQueue.removeValue(forKey: file.id)
                     self.publishFileDownloaded(fileId: file.id, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
-            self.operationsInQueue[file.id] = operation
+            self.fileOperationsInQueue[file.id] = operation
         }
     }
 
@@ -178,13 +178,13 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             )
             operation.completionBlock = {
                 self.dispatchQueue.async {
-                    self.operationsInQueue.removeValue(forKey: file.id)
+                    self.fileOperationsInQueue.removeValue(forKey: file.id)
                     self.publishFileDownloaded(fileId: file.id, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
-            self.operationsInQueue[file.id] = operation
+            self.fileOperationsInQueue[file.id] = operation
         }
     }
 
@@ -207,7 +207,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
                 }
             }
 
@@ -236,7 +236,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -266,13 +266,13 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
             let operation = DownloadAuthenticatedOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
-                    self.operationsInQueue.removeValue(forKey: fileId)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.operationsInQueue.isEmpty)
+                    self.fileOperationsInQueue.removeValue(forKey: fileId)
+                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
                     completion(operation.error)
                 }
             }
             operation.start()
-            self.operationsInQueue[file.id] = operation
+            self.fileOperationsInQueue[file.id] = operation
             onOperationCreated?(operation)
         }
     }
@@ -296,8 +296,8 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     ///
     /// Thread safe
     /// Lookup O(1) as Dictionary backed
-    public func operation(for fileId: Int) -> DownloadAuthenticatedOperation? {
-        return operationsInQueue[fileId]
+    public func operation(for fileId: Int) -> DownloadFileOperationable? {
+        return fileOperationsInQueue[fileId]
     }
 
     public func hasOperation(for fileId: Int) -> Bool {
