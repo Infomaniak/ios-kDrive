@@ -59,7 +59,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
 
     public typealias Task = URLSessionDownloadTask
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
-    public typealias Operation = DownloadOperation
+    public typealias Operation = DownloadAuthenticatedOperation
 
     public var backgroundCompletionHandler: (() -> Void)?
 
@@ -68,7 +68,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [String: CompletionHandler] = [:]
     var progressObservers: [String: NSKeyValueObservation] = [:]
-    var operations = [DownloadOperationable]()
+    var operations = [DownloadFileOperationable]()
 
     override public init() {
         super.init()
@@ -167,7 +167,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
                       userId: downloadTask.userId
                   ),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
-            let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
+            let operation = DownloadAuthenticatedOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
             operations.append(operation)
             return operation.downloadCompletion
