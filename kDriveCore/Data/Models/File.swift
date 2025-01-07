@@ -194,6 +194,10 @@ public struct PublicShareProxy {
         self.fileId = fileId
         self.shareLinkUid = shareLinkUid
     }
+
+    public var proxyDrive: ProxyDrive {
+        ProxyDrive(id: driveId)
+    }
 }
 
 public enum SortType: String {

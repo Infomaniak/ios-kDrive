@@ -262,9 +262,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func setupFooterIfNeeded() {
-        guard driveFileManager.isPublicShare else {
-            return
-        }
+        guard driveFileManager.isPublicShare else { return }
 
         view.addSubview(addToKDriveButton)
         view.bringSubviewToFront(addToKDriveButton)
@@ -465,7 +463,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
             (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
                 .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
-        case .multipleSelection:
+        case .multipleSelection(let downloadOnly):
             let allItemsSelected: Bool
             let exceptFileIds: [Int]?
             let selectedFiles: [File]
@@ -490,6 +488,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                 },
                 presentingParent: self
             )
+
+            if downloadOnly {
+                selectViewController.actions = [.download]
+            }
 
             floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             floatingPanelViewController.set(contentViewController: selectViewController)
@@ -636,6 +638,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
+            addToKDriveButton.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -645,6 +648,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
+            addToKDriveButton.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true

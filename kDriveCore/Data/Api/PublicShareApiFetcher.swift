@@ -90,4 +90,23 @@ public extension PublicShareApiFetcher {
         let shareLinkFiles: ValidServerResponse<[File]> = try await perform(request: request)
         return shareLinkFiles
     }
+
+    func buildPublicShareArchive(driveId: Int,
+                                 linkUuid: String,
+                                 body: ArchiveBody) async throws -> DownloadArchiveResponse {
+        let shareLinkArchiveUrl = Endpoint.publicShareArchive(driveId: driveId, linkUuid: linkUuid).url
+        let request = Session.default.request(shareLinkArchiveUrl,
+                                              method: .post,
+                                              parameters: body,
+                                              encoder: JSONParameterEncoder.convertToSnakeCase)
+        let archiveResponse: ValidServerResponse<DownloadArchiveResponse> = try await perform(request: request)
+        return archiveResponse.validApiResponse.data
+    }
+
+    func countPublicShare(drive: AbstractDrive, linkUuid: String, fileId: Int) async throws -> FileCount {
+        let countUrl = Endpoint.countPublicShare(driveId: drive.id, linkUuid: linkUuid, fileId: fileId).url
+        let request = Session.default.request(countUrl)
+        let countResponse: ValidServerResponse<FileCount> = try await perform(request: request)
+        return countResponse.validApiResponse.data
+    }
 }

@@ -540,7 +540,7 @@ extension FileActionsFloatingPanelViewController {
         let saveNavigationViewController = SaveFileViewController
             .setInNavigationController(saveViewController: saveViewController)
 
-        saveViewController.completionClosure = { [weak self] in
+        saveViewController.onDismissViewController = { [weak self] in
             guard let self else { return }
             self.dismiss(animated: true)
         }
