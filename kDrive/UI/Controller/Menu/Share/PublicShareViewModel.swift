@@ -94,6 +94,8 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
         } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
             onDismissViewController?()
+        } else {
+            super.barButtonPressed(sender: sender, type: type)
         }
     }
 
