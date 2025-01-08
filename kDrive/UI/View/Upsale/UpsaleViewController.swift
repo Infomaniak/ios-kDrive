@@ -233,7 +233,6 @@ public class UpsaleViewController: UIViewController {
     public static func instantiateInFloatingPanel(rootViewController: UIViewController) -> UIViewController {
         let upsaleViewController = UpsaleViewController()
 
-        // Create an account
         upsaleViewController.onFreeTrialCompleted = { [weak rootViewController] in
             guard let rootViewController else { return }
             rootViewController.dismiss(animated: true) {
@@ -243,7 +242,6 @@ public class UpsaleViewController: UIViewController {
             }
         }
 
-        // Let the user login with the onboarding
         upsaleViewController.onLoginCompleted = { [weak rootViewController] in
             guard let rootViewController else { return }
             rootViewController.dismiss(animated: true) {
