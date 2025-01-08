@@ -158,9 +158,12 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             return
         }
 
-        // TODO: Check logic
-        let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
+        var selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? []
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
+
+        if publicShareProxy.fileId != rootProxy.id, selectedItemsIds.isEmpty {
+            selectedItemsIds += [rootProxy.id]
+        }
 
         PublicShareAction().addToMyDrive(
             publicShareProxy: publicShareProxy,

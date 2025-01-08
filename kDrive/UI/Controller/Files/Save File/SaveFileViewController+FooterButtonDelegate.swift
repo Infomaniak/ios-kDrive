@@ -30,8 +30,6 @@ extension SaveFileViewController: FooterButtonDelegate {
             return
         }
         let drive = selectedDriveFileManager.drive
-
-        // Making sure the user cannot spam the button on tasks that may take a while
         let button = sender as? IKLargeButton
         button?.setLoading(true)
 
