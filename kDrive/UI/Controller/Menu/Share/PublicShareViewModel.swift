@@ -176,6 +176,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             onDismissViewController: { [weak self] in
                 guard let self else { return }
                 self.onDismissViewController?()
+                self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
             }
         )
     }
