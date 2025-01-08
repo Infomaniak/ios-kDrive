@@ -25,6 +25,7 @@ import UIKit
 /// Public share view model, loading content from memory realm
 final class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var router: AppNavigable
 
     private var downloadObserver: ObservationToken?
 
@@ -149,9 +150,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
         guard accountManager.currentAccount != nil else {
-            // TODO: Router
-//            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
-//            onPresentViewController?(.modal, upsaleFloatingPanelController, true)
+            router.showUpsaleFloatingPanel()
             return
         }
 
