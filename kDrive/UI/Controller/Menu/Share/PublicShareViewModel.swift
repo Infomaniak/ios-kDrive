@@ -148,29 +148,33 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard accountManager.currentAccount != nil else {
+            // TODO: Router
+//            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+//            onPresentViewController?(.modal, upsaleFloatingPanelController, true)
+            return
+        }
+
         guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
             return
         }
 
+        // TODO: Check logic
         let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
 
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
-        let saveNavigationViewController = SaveFileViewController
-            .setInNavigationController(saveViewController: saveViewController)
-
-        saveViewController.onDismissViewController = { [weak self] in
-            guard let self else { return }
-            self.onDismissViewController?()
-        }
-
-        if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
-            saveViewController.publicShareFileIds = selectedItemsIds
-            saveViewController.publicShareExceptIds = exceptItemIds
-            saveViewController.publicShareProxy = publicShareProxy
-            saveViewController.selectedDirectory = currentDirectory
-        }
-
-        onPresentViewController?(.modal, saveNavigationViewController, true)
+        PublicShareAction().addToMyDrive(
+            publicShareProxy: publicShareProxy,
+            currentUserDriveFileManager: currentUserDriveFileManager,
+            selectedItemsIds: selectedItemsIds,
+            exceptItemIds: exceptItemIds,
+            onPresentViewController: { saveNavigationViewController, animated in
+                onPresentViewController?(.modal, saveNavigationViewController, animated)
+            },
+            onDismissViewController: { [weak self] in
+                guard let self else { return }
+                self.onDismissViewController?()
+            }
+        )
     }
 }

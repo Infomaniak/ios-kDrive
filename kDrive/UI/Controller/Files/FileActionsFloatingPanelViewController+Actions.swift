@@ -166,7 +166,7 @@ extension FileActionsFloatingPanelViewController {
         case .cancelImport:
             cancelImportAction()
         case .addToMyDrive:
-            addToMyKDrive()
+            addToMyDrive()
         default:
             break
         }
@@ -523,8 +523,9 @@ extension FileActionsFloatingPanelViewController {
         }
     }
 
-    private func addToMyKDrive() {
+    private func addToMyDrive() {
         guard accountManager.currentAccount != nil else {
+            // TODO: Router
             let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
             present(upsaleFloatingPanelController, animated: true, completion: nil)
             return
@@ -535,19 +536,18 @@ extension FileActionsFloatingPanelViewController {
             return
         }
 
-        let itemId = [file.id]
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
-        let saveNavigationViewController = SaveFileViewController
-            .setInNavigationController(saveViewController: saveViewController)
-
-        saveViewController.onDismissViewController = { [weak self] in
-            guard let self else { return }
-            self.dismiss(animated: true)
-        }
-
-        saveViewController.publicShareFileIds = itemId
-        saveViewController.publicShareProxy = publicShareProxy
-
-        present(saveNavigationViewController, animated: true, completion: nil)
+        PublicShareAction().addToMyDrive(
+            publicShareProxy: publicShareProxy,
+            currentUserDriveFileManager: currentUserDriveFileManager,
+            selectedItemsIds: [file.id],
+            exceptItemIds: [],
+            onPresentViewController: { saveNavigationViewController, animated in
+                self.present(saveNavigationViewController, animated: animated, completion: nil)
+            },
+            onDismissViewController: { [weak self] in
+                guard let self else { return }
+                self.dismiss(animated: true)
+            }
+        )
     }
 }
