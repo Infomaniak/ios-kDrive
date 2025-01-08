@@ -26,6 +26,7 @@ import kDriveResources
 public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
 
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
@@ -57,6 +58,8 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
             }
 
             didCompleteLoginCallback?()
+
+            deeplinkService.processDeeplinksPostAuthentication()
         }
     }
 
