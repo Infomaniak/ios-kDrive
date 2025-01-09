@@ -26,6 +26,7 @@ struct PublicShareAction {
         selectedItemsIds: [Int],
         exceptItemIds: [Int],
         onPresentViewController: (UIViewController, Bool) -> Void,
+        onSave: (() -> Void)?,
         onDismissViewController: (() -> Void)?
     ) {
         let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(
@@ -33,6 +34,7 @@ struct PublicShareAction {
             publicShareProxy: publicShareProxy,
             publicShareFileIds: selectedItemsIds,
             publicShareExceptIds: exceptItemIds,
+            onSave: onSave,
             onDismissViewController: onDismissViewController
         )
 
