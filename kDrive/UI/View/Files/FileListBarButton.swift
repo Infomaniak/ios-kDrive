@@ -59,7 +59,7 @@ final class FileListBarButton: UIBarButtonItem {
             let activityView = UIActivityIndicatorView(style: .medium)
             activityView.startAnimating()
 
-            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGestureRecognizer))
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(cancelDownloadPressed))
             activityView.addGestureRecognizer(tapGestureRecognizer)
 
             customView = activityView
@@ -71,7 +71,7 @@ final class FileListBarButton: UIBarButtonItem {
         self.type = type
     }
 
-    @objc private func handleTapGestureRecognizer() {
+    @objc private func cancelDownloadPressed() {
         guard let targetObject = target as? NSObject, let action else { return }
         targetObject.perform(action, with: self)
     }
