@@ -735,7 +735,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func removeFilterButtonPressed(_ filter: Filterable) {
-        // Overriden in subclasses
+        // Overridden in subclasses
     }
 }
 
