@@ -147,4 +147,8 @@ public enum MatomoUtils {
     public static func trackPublicSharePasswordAction() {
         track(eventWithCategory: .publicSharePasswordAction, name: "openInBrowser")
     }
+
+    public static func trackUpsalePresented() {
+        track(eventWithCategory: .publicShareAction, name: "adBottomSheet")
+    }
 }

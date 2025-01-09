@@ -65,6 +65,8 @@ public class UpsaleViewController: UIViewController {
         configureHeader()
         setupBody()
         layoutStackView()
+
+        MatomoUtils.trackUpsalePresented()
     }
 
     func configureHeader() {
