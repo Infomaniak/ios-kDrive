@@ -23,6 +23,10 @@ import UIKit
 final class FileListBarButton: UIBarButtonItem {
     private(set) var type: FileListBarButtonType = .cancel
 
+    private var tapGestureRecognizer: UITapGestureRecognizer?
+    private var bridgeTarget: NSObject?
+    private var bridgeAction: Selector?
+
     convenience init(type: FileListBarButtonType, target: Any?, action: Selector?) {
         switch type {
         case .selectAll:
@@ -53,11 +57,28 @@ final class FileListBarButton: UIBarButtonItem {
             let image = KDriveResourcesAsset.download.image
             self.init(image: image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDownload
+        case .downloadingAll:
+            let activityView = UIActivityIndicatorView(style: .medium)
+            activityView.startAnimating()
+
+            self.init(customView: activityView)
+
+            bridgeTarget = target as? NSObject
+            bridgeAction = action
+
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGestureRecognizer))
+            activityView.addGestureRecognizer(tapGestureRecognizer)
+            self.tapGestureRecognizer = tapGestureRecognizer
         case .addToMyDrive:
             let image = KDriveResourcesAsset.drive.image
             self.init(image: image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAddToKDrive
         }
         self.type = type
+    }
+
+    @objc private func handleTapGestureRecognizer() {
+        guard let bridgeTarget, let bridgeAction else { return }
+        bridgeTarget.perform(bridgeAction, with: self)
     }
 }
