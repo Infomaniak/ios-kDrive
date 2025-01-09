@@ -25,6 +25,7 @@ import UIKit
 /// Public share view model, loading content from memory realm
 final class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var router: AppNavigable
 
     private var downloadObserver: ObservationToken?
 
@@ -148,29 +149,35 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard accountManager.currentAccount != nil else {
+            router.showUpsaleFloatingPanel()
+            return
+        }
+
         guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
             return
         }
 
-        let selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? [] + [rootProxy.id]
+        var selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? []
         let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
 
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
-        let saveNavigationViewController = SaveFileViewController
-            .setInNavigationController(saveViewController: saveViewController)
-
-        saveViewController.onDismissViewController = { [weak self] in
-            guard let self else { return }
-            self.onDismissViewController?()
+        if publicShareProxy.fileId != rootProxy.id, selectedItemsIds.isEmpty {
+            selectedItemsIds += [rootProxy.id]
         }
 
-        if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
-            saveViewController.publicShareFileIds = selectedItemsIds
-            saveViewController.publicShareExceptIds = exceptItemIds
-            saveViewController.publicShareProxy = publicShareProxy
-            saveViewController.selectedDirectory = currentDirectory
-        }
-
-        onPresentViewController?(.modal, saveNavigationViewController, true)
+        PublicShareAction().addToMyDrive(
+            publicShareProxy: publicShareProxy,
+            currentUserDriveFileManager: currentUserDriveFileManager,
+            selectedItemsIds: selectedItemsIds,
+            exceptItemIds: exceptItemIds,
+            onPresentViewController: { saveNavigationViewController, animated in
+                onPresentViewController?(.modal, saveNavigationViewController, animated)
+            },
+            onDismissViewController: { [weak self] in
+                guard let self else { return }
+                self.onDismissViewController?()
+                self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+            }
+        )
     }
 }

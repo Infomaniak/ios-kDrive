@@ -296,26 +296,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         guard accountManager.currentAccount != nil else {
             #if !ISEXTENSION
-            let upsaleViewController = UpsaleViewController()
-
-            upsaleViewController.onFreeTrialCompleted = { [weak self] in
-                guard let self else { return }
-                self.dismiss(animated: true) {
-                    let loginDelegateHandler = LoginDelegateHandler()
-                    self.router.showRegister(delegate: loginDelegateHandler)
-                }
-            }
-
-            upsaleViewController.onLoginCompleted = { [weak self] in
-                guard let self else { return }
-                self.dismiss(animated: true) {
-                    let loginDelegateHandler = LoginDelegateHandler()
-                    self.router.showLogin(delegate: loginDelegateHandler)
-                }
-            }
-
-            let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
-            present(floatingPanel, animated: true, completion: nil)
+            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+            present(upsaleFloatingPanelController, animated: true, completion: nil)
             #else
             dismiss(animated: true)
             #endif
@@ -656,7 +638,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
-            addToKDriveButton.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -666,7 +647,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
-            addToKDriveButton.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true

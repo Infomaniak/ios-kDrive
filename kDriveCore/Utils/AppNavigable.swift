@@ -37,6 +37,8 @@ public protocol RouterAppNavigable {
 
     @MainActor func showLaunchFloatingPanel()
 
+    @MainActor func showUpsaleFloatingPanel()
+
     @MainActor func showUpdateRequired()
 
     @MainActor func showPhotoSyncSettings()
