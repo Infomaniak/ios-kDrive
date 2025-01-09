@@ -350,20 +350,34 @@ class SaveFileViewController: UIViewController {
         return viewController
     }
 
-    class func setInNavigationController(saveViewController: SaveFileViewController,
-                                         files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
-        if let files {
-            saveViewController.items = files
-        }
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
-        navigationController.navigationBar.prefersLargeTitles = true
-        return navigationController
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager,
+                                                 publicShareProxy: PublicShareProxy,
+                                                 publicShareFileIds: [Int],
+                                                 publicShareExceptIds: [Int],
+                                                 onDismissViewController: (() -> Void)?)
+        -> TitleSizeAdjustingNavigationController {
+        let saveViewController = instantiate(driveFileManager: driveFileManager)
+
+        saveViewController.publicShareFileIds = publicShareFileIds
+        saveViewController.publicShareExceptIds = publicShareExceptIds
+        saveViewController.publicShareProxy = publicShareProxy
+
+        return wrapInNavigationController(saveViewController)
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
                                                  files: [ImportedFile]? = nil) -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
-        return setInNavigationController(saveViewController: saveViewController,
-                                         files: files)
+        if let files {
+            saveViewController.items = files
+        }
+
+        return wrapInNavigationController(saveViewController)
+    }
+
+    private class func wrapInNavigationController(_ viewController: UIViewController) -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
+        return navigationController
     }
 }

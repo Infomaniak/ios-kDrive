@@ -28,19 +28,13 @@ struct PublicShareAction {
         onPresentViewController: (UIViewController, Bool) -> Void,
         onDismissViewController: (() -> Void)?
     ) {
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentUserDriveFileManager)
-        let saveNavigationViewController = SaveFileViewController
-            .setInNavigationController(saveViewController: saveViewController)
-
-        saveViewController.onDismissViewController = {
-            onDismissViewController?()
-        }
-
-        if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
-            saveViewController.publicShareFileIds = selectedItemsIds
-            saveViewController.publicShareExceptIds = exceptItemIds
-            saveViewController.publicShareProxy = publicShareProxy
-        }
+        let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(
+            driveFileManager: currentUserDriveFileManager,
+            publicShareProxy: publicShareProxy,
+            publicShareFileIds: selectedItemsIds,
+            publicShareExceptIds: exceptItemIds,
+            onDismissViewController: onDismissViewController
+        )
 
         onPresentViewController(saveNavigationViewController, true)
     }
