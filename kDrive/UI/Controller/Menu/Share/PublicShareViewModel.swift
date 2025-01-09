@@ -103,12 +103,16 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     private func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
         let button = sender as? UIButton
         button?.isEnabled = false
+        configuration.rightBarButtons = [.loading]
+        loadButtonsConfiguration()
 
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
                 Task { @MainActor in
                     defer {
                         button?.isEnabled = true
+                        self?.configuration.rightBarButtons = [.downloadAll]
+                        self?.loadButtonsConfiguration()
                     }
 
                     guard let self = self else {
@@ -165,12 +169,14 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             selectedItemsIds += [rootProxy.id]
         }
 
+        configuration.rightBarButtons = [.loading]
         PublicShareAction().addToMyDrive(
             publicShareProxy: publicShareProxy,
             currentUserDriveFileManager: currentUserDriveFileManager,
             selectedItemsIds: selectedItemsIds,
             exceptItemIds: exceptItemIds,
             onPresentViewController: { saveNavigationViewController, animated in
+                self.configuration.rightBarButtons = [.downloadAll]
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
             onDismissViewController: { [weak self] in

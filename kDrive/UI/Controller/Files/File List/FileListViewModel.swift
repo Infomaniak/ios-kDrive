@@ -164,8 +164,6 @@ class FileListViewModel: SelectDelegate {
         listStyle = FileListOptions.instance.currentStyle
         isRefreshing = false
         isLoading = false
-        currentLeftBarButtons = configuration.leftBarButtons
-        currentRightBarButtons = configuration.rightBarButtons
 
         if self.currentDirectory.isRoot {
             if let rootTitle = configuration.rootTitle {
@@ -199,6 +197,13 @@ class FileListViewModel: SelectDelegate {
                 currentDirectory: self.currentDirectory
             )
         }
+
+        loadButtonsConfiguration()
+    }
+
+    func loadButtonsConfiguration() {
+        currentLeftBarButtons = configuration.leftBarButtons
+        currentRightBarButtons = configuration.rightBarButtons
     }
 
     func updateRealmObservation() {
