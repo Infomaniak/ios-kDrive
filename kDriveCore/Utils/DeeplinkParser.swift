@@ -17,6 +17,7 @@
  */
 
 import InfomaniakDI
+import MatomoTracker
 import SwiftUI
 
 /// Deeplink entrypoint
@@ -50,6 +51,7 @@ public struct DeeplinkParser: DeeplinkParsable {
            let driveId = params.first(where: { $0.name == "driveId" })?.value,
            let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
             await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
+            MatomoUtils.trackDeeplink(name: DeeplinkPath.store.rawValue)
             return true
 
         } else if components.host == DeeplinkPath.file.rawValue {
@@ -64,6 +66,7 @@ public struct DeeplinkParser: DeeplinkParsable {
                 return false
             }
             await router.navigate(to: .saveFiles(files: files))
+            MatomoUtils.trackDeeplink(name: DeeplinkPath.file.rawValue)
             return true
         }
 

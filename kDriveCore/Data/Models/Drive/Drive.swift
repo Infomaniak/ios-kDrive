@@ -190,8 +190,6 @@ public final class Drive: Object, Codable {
             fileCategoriesIds = file.categories.sorted { $0.addedAt.compare($1.addedAt) == .orderedAscending }.map(\.categoryId)
         }
         let filteredCategories = categories.filter("id IN %@", fileCategoriesIds)
-
-        // Sort the categories
         return fileCategoriesIds.compactMap { id in filteredCategories.first { $0.id == id } }
     }
 

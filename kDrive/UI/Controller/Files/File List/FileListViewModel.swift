@@ -34,12 +34,13 @@ enum FileListBarButtonType {
     case searchFilters
     case photoSort
     case addFolder
+    case downloadAll
 }
 
 enum FileListQuickActionType {
     case file
     case trash
-    case multipleSelection
+    case multipleSelection(onlyDownload: Bool)
 }
 
 enum ControllerPresentationType {
@@ -92,6 +93,7 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
+    var onDismiss: (() -> Void)?
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 
@@ -279,7 +281,7 @@ class FileListViewModel: SelectDelegate {
         }.store(in: &bindStore)
     }
 
-    func barButtonPressed(type: FileListBarButtonType) {
+    func barButtonPressed(sender: Any? = nil, type: FileListBarButtonType) {
         if multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             multipleSelectionViewModel?.barButtonPressed(type: type)
         }

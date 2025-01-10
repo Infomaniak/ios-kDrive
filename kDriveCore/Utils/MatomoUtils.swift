@@ -44,7 +44,7 @@ public enum MatomoUtils {
     public enum EventCategory: String {
         case newElement, fileListFileAction, picturesFileAction, fileInfo, shareAndRights, colorFolder, categories, search,
              fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash,
-             dropbox, preview, mediaPlayer, shortcuts, appReview
+             dropbox, preview, mediaPlayer, shortcuts, appReview, deeplink, publicShareAction, publicSharePasswordAction
     }
 
     public enum UserAction: String {
@@ -126,5 +126,25 @@ public enum MatomoUtils {
 
     public static func trackMediaPlayer(leaveAt percentage: Double?) {
         track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
+    }
+
+    // MARK: - Deeplink
+
+    public static func trackDeeplink(name: String) {
+        track(eventWithCategory: .deeplink, name: name)
+    }
+
+    // MARK: - Public Share
+
+    public static func trackAddToMykDrive() {
+        track(eventWithCategory: .publicShareAction, name: "saveToKDrive")
+    }
+
+    public static func trackAddBulkToMykDrive() {
+        track(eventWithCategory: .publicShareAction, name: "bulkSaveToKDrive")
+    }
+
+    public static func trackPublicSharePasswordAction() {
+        track(eventWithCategory: .publicSharePasswordAction, name: "openInBrowser")
     }
 }

@@ -45,8 +45,7 @@ extension MatomoUtils {
 
     #if !ISEXTENSION
 
-    static func trackFileAction(action: FloatingPanelAction, file: File, fromPhotoList: Bool) {
-        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
+    static func trackFileAction(action: FloatingPanelAction, file: File, category: EventCategory) {
         switch action {
         // Quick Actions
         case .sendCopy:
@@ -77,9 +76,8 @@ extension MatomoUtils {
         }
     }
 
-    static func trackBuklAction(action: FloatingPanelAction, files: [File], fromPhotoList: Bool) {
+    static func trackBuklAction(action: FloatingPanelAction, files: [File], category: EventCategory) {
         let numberOfFiles = files.count
-        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
         switch action {
         // Quick Actions
         case .duplicate:

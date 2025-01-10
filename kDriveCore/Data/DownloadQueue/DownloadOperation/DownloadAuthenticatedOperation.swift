@@ -24,67 +24,30 @@ import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
 
-/// Something that can download a file.
-public protocol DownloadOperationable: Operationable {
+public protocol DownloadFileOperationable: Operationable {
     /// Called upon request completion
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?)
 
     var file: File { get }
 }
 
-public class DownloadOperation: Operation, DownloadOperationable {
+public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOperationable, @unchecked Sendable {
     // MARK: - Attributes
 
     private let fileManager = FileManager.default
-    private let driveFileManager: DriveFileManager
-    private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
-    private var progressObservation: NSKeyValueObservation?
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
-
-    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
-    @LazyInjectService var appContextService: AppContextServiceable
+
+    let urlSession: FileDownloadSession
+    let driveFileManager: DriveFileManager
 
     public let file: File
-    public var task: URLSessionDownloadTask?
-    public var error: DriveError?
 
     public var fileId: Int {
         return file.id
-    }
-
-    private var _executing = false {
-        willSet {
-            willChangeValue(forKey: "isExecuting")
-        }
-        didSet {
-            didChangeValue(forKey: "isExecuting")
-        }
-    }
-
-    private var _finished = false {
-        willSet {
-            willChangeValue(forKey: "isFinished")
-        }
-        didSet {
-            didChangeValue(forKey: "isFinished")
-        }
-    }
-
-    override public var isExecuting: Bool {
-        return _executing
-    }
-
-    override public var isFinished: Bool {
-        return _finished
-    }
-
-    override public var isAsynchronous: Bool {
-        return true
     }
 
     // MARK: - Public methods
@@ -101,12 +64,15 @@ public class DownloadOperation: Operation, DownloadOperationable {
         self.itemIdentifier = itemIdentifier
     }
 
-    public init(file: File, driveFileManager: DriveFileManager, task: URLSessionDownloadTask, urlSession: FileDownloadSession) {
+    public init(file: File,
+                driveFileManager: DriveFileManager,
+                task: URLSessionDownloadTask,
+                urlSession: FileDownloadSession) {
         self.file = file
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
-        self.task = task
         itemIdentifier = nil
+        super.init(task: task)
     }
 
     override public func start() {
@@ -150,7 +116,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
         }
 
         // If the operation is not canceled, begin executing the task
-        _executing = true
+        operationExecuting = true
         main()
     }
 
@@ -170,6 +136,12 @@ public class DownloadOperation: Operation, DownloadOperationable {
     }
 
     override public func main() {
+        DDLogInfo("[DownloadOperation] Start for \(file.id) with session \(urlSession.identifier)")
+
+        downloadFile()
+    }
+
+    private func downloadFile() {
         DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
         let url = Endpoint.download(file: file).url
@@ -191,31 +163,29 @@ public class DownloadOperation: Operation, DownloadOperationable {
         if let token = getToken() {
             var request = URLRequest(url: url)
             request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-            task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
-                guard let newValue = value.newValue else {
-                    return
-                }
-                DownloadQueue.instance.publishProgress(newValue, for: fileId)
-            }
-            if let itemIdentifier {
-                driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in
-                    manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
-                        // META: keep SonarCloud happy
-                    }
-                }
-            }
-            task?.resume()
+            downloadRequest(request)
         } else {
-            error = .localError // Other error?
+            error = .unknownToken // Other error?
             end(sessionUrl: url)
         }
     }
 
-    override public func cancel() {
-        DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
-        super.cancel()
-        task?.cancel()
+    func downloadRequest(_ request: URLRequest) {
+        task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
+        progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+            guard let newValue = value.newValue else {
+                return
+            }
+            DownloadQueue.instance.publishProgress(newValue, for: fileId)
+        }
+        if let itemIdentifier {
+            driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in
+                manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in
+                    // META: keep SonarCloud happy
+                }
+            }
+        }
+        task?.resume()
     }
 
     // MARK: - methods
@@ -275,12 +245,7 @@ public class DownloadOperation: Operation, DownloadOperationable {
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
 
         defer {
-            progressObservation?.invalidate()
-            if backgroundTaskIdentifier != .invalid {
-                UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-            }
-            _executing = false
-            _finished = true
+            endBackgroundTaskObservation()
         }
 
         // Delete download task
@@ -288,7 +253,10 @@ public class DownloadOperation: Operation, DownloadOperationable {
             return
         }
 
-        assert(file.isDownloaded, "Expecting to be downloaded at the end of the downloadOperation")
+        assert(
+            file.isDownloaded,
+            "Expecting to be downloaded at the end of the downloadOperation error:\(String(describing: error))"
+        )
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)

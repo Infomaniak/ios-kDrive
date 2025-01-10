@@ -144,7 +144,7 @@ class PhotoListViewModel: FileListViewModel {
         self.nextCursor = nextCursor
     }
 
-    override func barButtonPressed(type: FileListBarButtonType) {
+    override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         if type == .search {
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager, filters: Filters(fileType: .image))
             let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
@@ -156,7 +156,7 @@ class PhotoListViewModel: FileListViewModel {
                                   delegate: self)
             onPresentViewController?(.modal, floatingPanelViewController, true)
         } else {
-            super.barButtonPressed(type: type)
+            super.barButtonPressed(sender: sender, type: type)
         }
     }
 

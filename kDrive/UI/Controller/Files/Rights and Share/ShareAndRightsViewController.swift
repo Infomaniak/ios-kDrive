@@ -60,7 +60,7 @@ class ShareAndRightsViewController: UIViewController {
         tableView.register(cellView: InviteUserTableViewCell.self)
         tableView.register(cellView: UsersAccessTableViewCell.self)
         tableView.register(cellView: ShareLinkTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         updateShareList()
         hideKeyboardWhenTappedAround()

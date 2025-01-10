@@ -145,6 +145,23 @@ final class FilePresenter {
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            let configuration = FileListViewModel.Configuration(selectAllSupported: true,
+                                                                rootTitle: nil,
+                                                                emptyViewType: .emptyFolder,
+                                                                supportsDrop: false,
+                                                                rightBarButtons: [.downloadAll],
+                                                                matomoViewPath: [
+                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    "publicShare"
+                                                                ])
+
+            viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                             sortType: .nameAZ,
+                                             driveFileManager: driveFileManager,
+                                             currentDirectory: file,
+                                             apiFetcher: PublicShareApiFetcher(),
+                                             configuration: configuration)
         } else if file.isTrashed || file.deletedAt != nil {
             viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         } else {

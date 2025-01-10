@@ -52,7 +52,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private var currentDownloadOperation: DownloadOperation?
+    private var currentDownloadOperation: DownloadAuthenticatedOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
@@ -556,7 +556,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                     }
 
                     currentDownloadOperation = operation
-                    if let progress = currentDownloadOperation?.task?.progress,
+                    if let progress = currentDownloadOperation?.progress,
                        let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
                         cell.setDownloadProgress(progress)
                     }
@@ -601,8 +601,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previewPageViewController.driveFileManager = driveFileManager
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.presentationOrigin = presentationOrigin
-        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the
-        // function returns
+        // currentIndex should be set at the end of the function as the it takes time
+        // and the viewDidLoad() is called before the function returns
         // this should be fixed in the future with the refactor of the init
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         return previewPageViewController
@@ -642,7 +642,11 @@ extension PreviewViewController: UICollectionViewDataSource {
     ) {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
-            cell.progressiveLoadingForFile(file)
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                cell.progressiveLoadingForPublicShareFile(file, publicShareProxy: publicShareProxy)
+            } else {
+                cell.progressiveLoadingForFile(file)
+            }
         }
     }
 
@@ -718,7 +722,7 @@ extension PreviewViewController: UICollectionViewDataSource {
         } else if file.supportedBy.contains(.thumbnail) && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
@@ -733,7 +737,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }

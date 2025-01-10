@@ -153,7 +153,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         navigationItem.hideBackButtonText()
