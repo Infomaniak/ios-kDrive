@@ -35,6 +35,7 @@ enum FileListBarButtonType {
     case photoSort
     case addFolder
     case downloadAll
+    case addToMyDrive
 }
 
 enum FileListQuickActionType {
@@ -93,7 +94,6 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
-    var onDismiss: (() -> Void)?
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 
@@ -138,6 +138,8 @@ class FileListViewModel: SelectDelegate {
             multipleSelectionViewModel?.onPresentViewController = onPresentViewController
         }
     }
+
+    var onDismissViewController: (() -> Void)?
 
     var sortTypeObservation: AnyCancellable?
     var listStyleObservation: AnyCancellable?

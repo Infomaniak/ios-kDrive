@@ -91,6 +91,10 @@ public final class VideoPlayer: Pausable {
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
+        guard !driveFileManager.isPublicShare else {
+            return
+        }
+
         if !file.isLocalVersionOlderThanRemote {
             let localAsset = AVAsset(url: file.localUrl)
             asset = localAsset

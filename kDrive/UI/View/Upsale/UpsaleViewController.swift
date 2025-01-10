@@ -17,11 +17,15 @@
  */
 
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
+    var onLoginCompleted: (() -> Void)?
+    var onFreeTrialCompleted: (() -> Void)?
+
     let titleImageView = UIImageView()
 
     let titleLabel: UILabel = {
@@ -217,12 +221,36 @@ public class UpsaleViewController: UIViewController {
     }
 
     @objc public func freeTrial() {
-        // TODO: Hook free trial
         dismiss(animated: true, completion: nil)
+        onFreeTrialCompleted?()
     }
 
     @objc public func login() {
-        // TODO: Hook login
         dismiss(animated: true, completion: nil)
+        onLoginCompleted?()
+    }
+
+    public static func instantiateInFloatingPanel(rootViewController: UIViewController) -> UIViewController {
+        let upsaleViewController = UpsaleViewController()
+
+        upsaleViewController.onFreeTrialCompleted = { [weak rootViewController] in
+            guard let rootViewController else { return }
+            rootViewController.dismiss(animated: true) {
+                let loginDelegateHandler = LoginDelegateHandler()
+                @InjectService var router: AppNavigable
+                router.showRegister(delegate: loginDelegateHandler)
+            }
+        }
+
+        upsaleViewController.onLoginCompleted = { [weak rootViewController] in
+            guard let rootViewController else { return }
+            rootViewController.dismiss(animated: true) {
+                let loginDelegateHandler = LoginDelegateHandler()
+                @InjectService var router: AppNavigable
+                router.showLogin(delegate: loginDelegateHandler)
+            }
+        }
+
+        return UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
     }
 }

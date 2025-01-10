@@ -51,6 +51,7 @@ extension SortType: Selectable {
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
 
     // MARK: - Constants
 
@@ -286,8 +287,25 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         ])
     }
 
-    @objc func addToMyDriveButtonTapped(_ sender: UIView?) {
-        viewModel.barButtonPressed(sender: sender, type: .downloadAll)
+    @objc func addToMyDriveButtonTapped(_ sender: UIButton?) {
+        defer {
+            sender?.isSelected = false
+            sender?.isEnabled = true
+            sender?.isHighlighted = false
+        }
+
+        guard accountManager.currentAccount != nil else {
+            #if !ISEXTENSION
+            let upsaleFloatingPanelController = UpsaleViewController.instantiateInFloatingPanel(rootViewController: self)
+            present(upsaleFloatingPanelController, animated: true, completion: nil)
+            #else
+            dismiss(animated: true)
+            #endif
+
+            return
+        }
+
+        viewModel.barButtonPressed(sender: sender, type: .addToMyDrive)
     }
 
     func reloadCollectionViewWith(files: [File]) {
@@ -620,7 +638,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func toggleMultipleSelection(_ on: Bool) {
         if on {
-            addToKDriveButton.isHidden = true
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             headerView?.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
@@ -630,7 +647,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             generator.prepare()
             generator.impactOccurred()
         } else {
-            addToKDriveButton.isHidden = false
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true

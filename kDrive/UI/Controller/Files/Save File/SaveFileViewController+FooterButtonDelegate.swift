@@ -25,27 +25,59 @@ import UIKit
 
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton(_ sender: AnyObject) {
-        guard let drive = selectedDriveFileManager?.drive,
+        guard let selectedDriveFileManager,
               let directory = selectedDirectory else {
             return
         }
-
-        // Making sure the user cannot spam the button on tasks that may take a while
+        let drive = selectedDriveFileManager.drive
         let button = sender as? IKLargeButton
         button?.setLoading(true)
 
-        let items = items
-        guard !items.isEmpty else {
-            dismiss(animated: true)
+        guard let publicShareProxy else {
+            guard !items.isEmpty else {
+                dismissViewController()
+                return
+            }
+
+            Task {
+                await saveAndDismiss(files: items, directory: directory, drive: drive)
+            }
             return
         }
 
         Task {
-            await presentSnackBarSaveAndDismiss(files: items, directory: directory, drive: drive)
+            defer { dismissViewController() }
+            try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
+                                             destinationDriveId: drive.id,
+                                             destinationFolderId: directory.id,
+                                             fileIds: publicShareFileIds,
+                                             exceptIds: publicShareExceptIds,
+                                             sharelinkUuid: publicShareProxy.shareLinkUid,
+                                             driveFileManager: selectedDriveFileManager)
         }
     }
 
-    private func presentSnackBarSaveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {
+    private func savePublicShareToDrive(sourceDriveId: Int,
+                                        destinationDriveId: Int,
+                                        destinationFolderId: Int,
+                                        fileIds: [Int],
+                                        exceptIds: [Int],
+                                        sharelinkUuid: String,
+                                        driveFileManager: DriveFileManager) async throws {
+        try await _ = driveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
+                                                                       destinationDriveId: destinationDriveId,
+                                                                       destinationFolderId: destinationFolderId,
+                                                                       fileIds: fileIds,
+                                                                       exceptIds: exceptIds,
+                                                                       sharelinkUuid: sharelinkUuid)
+    }
+
+    private func dismissViewController() {
+        onDismissViewController?()
+        dismiss(animated: true)
+    }
+
+    private func saveAndDismiss(files: [ImportedFile], directory: File, drive: Drive) async {
         let message: String
         do {
             try await processForUpload(files: files, directory: directory, drive: drive)
@@ -57,6 +89,10 @@ extension SaveFileViewController: FooterButtonDelegate {
             message = error.localizedDescription
         }
 
+        presentSnackBar(message)
+    }
+
+    private func presentSnackBar(_ message: String) {
         Task { @MainActor in
             self.dismiss(animated: true, clean: false) {
                 UIConstants.showSnackBar(message: message)
