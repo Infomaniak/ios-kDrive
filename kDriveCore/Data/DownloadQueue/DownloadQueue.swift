@@ -263,7 +263,11 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
             OperationQueueHelper.disableIdleTimer(true)
 
-            let operation = DownloadAuthenticatedOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
+            let operation = DownloadAuthenticatedOperation(
+                file: file,
+                driveFileManager: driveFileManager,
+                urlSession: self.foregroundSession
+            )
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.fileOperationsInQueue.removeValue(forKey: fileId)
@@ -292,12 +296,28 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         operationQueue.cancelAllOperations()
     }
 
-    /// Check if a file is been uploaded
-    ///
-    /// Thread safe
-    /// Lookup O(1) as Dictionary backed
+    public func cancelArchiveOperation(for archiveId: String) {
+        guard let operation = archiveOperation(for: archiveId) else {
+            return
+        }
+        operation.cancel()
+        archiveOperationsInQueue.removeValue(forKey: archiveId)
+    }
+
+    public func cancelFileOperation(for fileId: Int) {
+        guard let operation = operation(for: fileId) else {
+            return
+        }
+        operation.cancel()
+        fileOperationsInQueue.removeValue(forKey: fileId)
+    }
+
     public func operation(for fileId: Int) -> DownloadFileOperationable? {
         return fileOperationsInQueue[fileId]
+    }
+
+    public func archiveOperation(for archiveId: String) -> DownloadArchiveOperation? {
+        return archiveOperationsInQueue[archiveId]
     }
 
     public func hasOperation(for fileId: Int) -> Bool {
