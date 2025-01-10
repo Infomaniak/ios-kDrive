@@ -103,33 +103,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         application.registerForRemoteNotifications()
 
-        // swiftlint:disable force_try
-        Task {
-            try! await Task.sleep(nanoseconds: 5_000_000_000)
-
-            /* TODO: Remove later
-             @InjectService var router: AppNavigable
-             let upsaleViewController = UpsaleViewController()
-             let noDriveViewController = NoDriveUpsaleViewController()
-             let floatingPanel = UpsaleFloatingPanelController(upsaleViewController: noDriveViewController)
-             router.topMostViewController?.present(floatingPanel, animated: true, completion: nil)
-              */
-
-            /* TODO: Remove later
-             // a public share expired
-             let somePublicShareExpired =
-                 URL(string: "https://kdrive.infomaniak.com/app/share/140946/81de098a-3156-4ae6-93df-be7f9ae78ddd")
-             // a public share password protected
-             let somePublicShareProtected =
-                 URL(string: "https://kdrive.infomaniak.com/app/share/140946/34844cea-db8d-4d87-b66f-e944e9759a2e")
-              */
-
-            // a valid public share
-            let somePublicShare =
-                URL(string: "https://kdrive.infomaniak.com/app/share/140946/01953831-16d3-4df6-8b48-33c8001c7981")
-            await UniversalLinksHelper.handleURL(somePublicShare!)
-        }
-
         return true
     }
 
