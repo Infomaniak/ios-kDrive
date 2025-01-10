@@ -26,6 +26,7 @@ import UIKit
 final class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var deeplinkService: DeeplinkServiceable
 
     private var downloadObserver: ObservationToken?
 
@@ -94,6 +95,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         } else if type == .addToMyDrive {
             addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
         } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
+            deeplinkService.clearLastPublicShare()
             onDismissViewController?()
         } else {
             super.barButtonPressed(sender: sender, type: type)

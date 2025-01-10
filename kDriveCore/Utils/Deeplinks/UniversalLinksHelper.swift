@@ -81,6 +81,7 @@ public enum UniversalLinksHelper {
         return false
     }
 
+    @discardableResult
     public static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
         @InjectService var deeplinkService: DeeplinkServiceable
         deeplinkService.setLastPublicShare(link)
