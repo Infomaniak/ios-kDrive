@@ -35,6 +35,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService private var deeplinkService: DeeplinkServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -146,6 +147,7 @@ public struct AppRouter: AppNavigable {
             Task {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
+                deeplinkService.processDeeplinksPostAuthentication()
             }
         case .onboarding:
             showOnboarding()
@@ -664,6 +666,10 @@ public struct AppRouter: AppNavigable {
     ) {
         guard let window,
               let rootViewController = window.rootViewController else {
+            return
+        }
+
+        if let topMostViewController, (topMostViewController as? LockedAppViewController) != nil {
             return
         }
 
