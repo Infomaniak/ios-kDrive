@@ -30,23 +30,23 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
-    private enum PhotoSyncSection {
+    private enum PhotoSyncSection: Int {
         case syncSwitch
         case syncLocation
         case syncSettings
         case syncDenied
     }
 
-    private enum PhotoSyncSwitchRows: CaseIterable {
+    private enum PhotoSyncSwitchRows: Int, CaseIterable {
         case syncSwitch
     }
 
-    private enum PhotoSyncLocationRows: CaseIterable {
+    private enum PhotoSyncLocationRows: Int, CaseIterable {
         case driveSelection
         case folderSelection
     }
 
-    private enum PhotoSyncSettingsRows: CaseIterable {
+    private enum PhotoSyncSettingsRows: Int, CaseIterable {
         case syncMode
         case importPicturesSwitch
         case importVideosSwitch
@@ -54,6 +54,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         case createDatedSubFolders
         case deleteAssetsAfterImport
         case photoFormat
+        case wifiSync
     }
 
     private enum PhotoSyncDeniedRows: CaseIterable {
@@ -109,6 +110,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
         tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
+        tableView.register(cellView: AboutDetailTableViewCell.self)
 
         let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.delegate = self
@@ -428,6 +430,12 @@ extension PhotoSyncSettingsViewController {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.configure(with: newSyncSettings.photoFormat)
                 return cell
+            case .wifiSync:
+                let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
+                cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
+                cell.detailLabel.text = UserDefaults.shared.syncMode.title
+                return cell
             }
         case .syncDenied:
             switch deniedRows[indexPath.row] {
@@ -485,6 +493,11 @@ extension PhotoSyncSettingsViewController {
                     .instantiate(selectedFormat: newSyncSettings.photoFormat)
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
+            case .wifiSync:
+                let wifiSyncSettingsViewController = WifiSyncSettingsViewController
+                    .instantiate(selectedMode: newSyncSettings.wifiSync)
+                wifiSyncSettingsViewController.delegate = self
+                navigationController?.pushViewController(wifiSyncSettingsViewController, animated: true)
             default:
                 break
             }
@@ -499,7 +512,14 @@ extension PhotoSyncSettingsViewController: SelectDriveDelegate {
         driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
-        tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)
+        tableView.reloadRows(
+            at: [IndexPath(row: PhotoSyncSettingsRows.syncMode.rawValue, section: PhotoSyncSection.syncLocation.rawValue),
+                 IndexPath(
+                     row: PhotoSyncSettingsRows.importPicturesSwitch.rawValue,
+                     section: PhotoSyncSection.syncLocation.rawValue
+                 )],
+            with: .fade
+        )
     }
 }
 
@@ -509,7 +529,13 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
         selectedDirectory = folder
         updateSaveButtonState()
-        tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .fade)
+        tableView.reloadRows(
+            at: [IndexPath(
+                row: PhotoSyncSettingsRows.importPicturesSwitch.rawValue,
+                section: PhotoSyncSection.syncLocation.rawValue
+            )],
+            with: .fade
+        )
     }
 }
 
@@ -519,7 +545,10 @@ extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         newSyncSettings.photoFormat = format
         updateSaveButtonState()
-        tableView.reloadData()
+        tableView.reloadRows(
+            at: [IndexPath(row: PhotoSyncSettingsRows.photoFormat.rawValue, section: PhotoSyncSection.syncSettings.rawValue)],
+            with: .fade
+        )
     }
 }
 
@@ -549,5 +578,15 @@ extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegat
     func didSelectDate(date: Date) {
         newSyncSettings.fromDate = date
         updateSaveButtonState()
+    }
+}
+
+extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
+    func didSelectSyncMode(_ mode: SyncMode) {
+        newSyncSettings.wifiSync = mode
+        tableView.reloadRows(
+            at: [IndexPath(row: PhotoSyncSettingsRows.wifiSync.rawValue, section: PhotoSyncSection.syncSettings.rawValue)],
+            with: .fade
+        )
     }
 }
