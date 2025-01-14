@@ -85,13 +85,14 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
-        guard downloadObserver == nil,
-              let publicShareProxy else {
+        guard let publicShareProxy else {
             return
         }
 
         if type == .downloadAll {
             downloadAll(sender: sender, publicShareProxy: publicShareProxy)
+        } else if type == .downloadingAll {
+            cancelDownloadAll()
         } else if type == .addToMyDrive {
             addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
         } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
@@ -102,15 +103,26 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         }
     }
 
+    private func cancelDownloadAll() {
+        DownloadQueue.instance.cancelFileOperation(for: currentDirectory.id)
+        clearDownloadObserver()
+        configuration.rightBarButtons = [.downloadAll]
+        loadButtonsConfiguration()
+    }
+
     private func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
         let button = sender as? UIButton
         button?.isEnabled = false
+        configuration.rightBarButtons = [.downloadingAll]
+        loadButtonsConfiguration()
 
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
                 Task { @MainActor in
                     defer {
                         button?.isEnabled = true
+                        self?.configuration.rightBarButtons = [.downloadAll]
+                        self?.loadButtonsConfiguration()
                     }
 
                     guard let self = self else {
@@ -118,8 +130,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                     }
 
                     defer {
-                        self.downloadObserver?.cancel()
-                        self.downloadObserver = nil
+                        self.clearDownloadObserver()
                     }
 
                     guard error == nil else {
@@ -148,6 +159,11 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         DownloadQueue.instance.addPublicShareToQueue(file: currentDirectory,
                                                      driveFileManager: driveFileManager,
                                                      publicShareProxy: publicShareProxy)
+    }
+
+    private func clearDownloadObserver() {
+        downloadObserver?.cancel()
+        downloadObserver = nil
     }
 
     private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
