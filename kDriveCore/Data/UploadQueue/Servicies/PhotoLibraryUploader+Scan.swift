@@ -137,6 +137,7 @@ public extension PhotoLibraryUploader {
                 } catch {
                     // Error thrown while hashing a resource, we stop ASAP.
                     Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
+                    writableRealm.cancelWrite()
                     stop.pointee = true
                     return
                 }
