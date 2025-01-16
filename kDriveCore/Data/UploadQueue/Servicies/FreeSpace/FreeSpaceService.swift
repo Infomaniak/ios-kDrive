@@ -55,17 +55,23 @@ public struct FreeSpaceService {
         return requiredSpace
     }
 
-    public func checkEnoughAvailableSpaceForChunkUpload() throws {
+    public var isEnoughAvailableSpaceForChunkUpload: Bool {
         let freeSpaceInTemporaryDirectory: Int64
         do {
             freeSpaceInTemporaryDirectory = try freeSpace(url: Self.temporaryDirectoryURL)
         } catch {
             Log.uploadOperation("unable to read available space \(error)", level: .error)
-            return
+            return true
         }
 
-        // Throw if not enough space
         guard freeSpaceInTemporaryDirectory > minimalSpaceRequiredForChunkUpload else {
+            return false
+        }
+        return true
+    }
+
+    public func checkEnoughAvailableSpaceForChunkUpload() throws {
+        guard isEnoughAvailableSpaceForChunkUpload else {
             throw StorageIssues.notEnoughSpace
         }
     }
