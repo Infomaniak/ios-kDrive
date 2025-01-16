@@ -79,6 +79,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         setupContent()
     }
 
