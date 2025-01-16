@@ -111,13 +111,14 @@ extension SentryDebug {
         requestId: Int32 = Int32(NSNotFound),
         function: StaticString = #function
     ) {
-        let context: [String: AnyHashable] = [
+        let extra: [String: AnyHashable] = [
+            "group": ErrorNames.assetResourceManagerError,
             "requestId": requestId,
             "func": "\(function)",
-            "error": "\(error)",
             "localizedError": error.localizedDescription
         ]
-        SentryDebug.capture(message: ErrorNames.assetResourceManagerError, context: context, level: .error)
+
+        SentryDebug.capture(error: error, extras: extra)
     }
 
     // MARK: - Upload notifications
