@@ -155,8 +155,8 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
 
             group.enter()
             var resourceManagerError: Error?
-            PHAssetResourceManager.default().requestData(for: bestResource,
-                                                         options: options) { data in
+            let requestId = PHAssetResourceManager.default().requestData(for: bestResource,
+                                                                         options: options) { data in
                 hasher.update(data)
             } completionHandler: { error in
                 if let error {
@@ -174,7 +174,7 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
 
             // PHAssetResourceManager errors, possibly fetching an asset on iCloud failed
             if let resourceManagerError {
-                SentryDebug.capturePHAssetResourceManagerError(resourceManagerError)
+                SentryDebug.capturePHAssetResourceManagerError(resourceManagerError, requestId: requestId)
                 throw resourceManagerError
             }
 
