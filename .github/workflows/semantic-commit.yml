@@ -15,8 +15,8 @@ jobs:
       - name: Check Commit Message
         uses: gsactions/commit-message-checker@v2
         with:
-          pattern: '^Merge .+|(^(feat|fix|chore|docs|style|refactor|perf|ci|test)(\(.+\))?: [A-Z0-9].+)'
-          error: 'Commit messages and PR title should match conventional commit convention and start with a majuscule.'
+          pattern: '^(Merge .+|((feat|fix|chore|docs|style|refactor|perf|ci|test)(\(.+\))?: [A-Z0-9].+[^.\s])$)'
+          error: 'Commit messages and PR title should match conventional commit convention and start with an uppercase.'
           excludeDescription: 'true'
           excludeTitle: 'false'
           checkAllCommitMessages: 'true'
