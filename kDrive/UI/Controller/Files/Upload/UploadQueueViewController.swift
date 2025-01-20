@@ -35,7 +35,6 @@ final class UploadQueueViewController: UIViewController {
 
     var currentDirectory: File!
     private var liveUploadingFiles = [UploadFile]()
-    private var observedFiles: AnyRealmCollection<UploadFile> = AnyRealmCollection(List<UploadFile>())
     private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -73,9 +72,9 @@ final class UploadQueueViewController: UIViewController {
 
         notificationToken?.invalidate()
 
-        observedFiles = AnyRealmCollection(uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
-                                                                         userId: accountManager.currentUserId,
-                                                                         driveId: currentDirectory.driveId))
+        let observedFiles = AnyRealmCollection(uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
+                                                                             userId: accountManager.currentUserId,
+                                                                             driveId: currentDirectory.driveId))
         notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
             guard let self else {
                 return
