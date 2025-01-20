@@ -417,18 +417,13 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showUpsaleFloatingPanel() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        guard let rootViewController = window.rootViewController else {
+        guard let topMostViewController else {
             return
         }
 
         let upsaleFloatingPanelController = UpsaleViewController
-            .instantiateInFloatingPanel(rootViewController: rootViewController)
-        rootViewController.present(upsaleFloatingPanelController, animated: true)
+            .instantiateInFloatingPanel(rootViewController: topMostViewController)
+        topMostViewController.present(upsaleFloatingPanelController, animated: true)
     }
 
     @MainActor public func showUpdateRequired() {

@@ -106,13 +106,19 @@ extension SentryDebug {
         SentryDebug.capture(message: EventNames.uploadCompletedSuccess, extras: metadata)
     }
 
-    static func capturePHAssetResourceManagerError(_ error: Error, function: StaticString = #function) {
-        let metadata: [String: Any] = [
-            "func": function,
-            "error": error,
+    static func capturePHAssetResourceManagerError(
+        _ error: Error,
+        requestId: Int32 = Int32(NSNotFound),
+        function: StaticString = #function
+    ) {
+        let extra: [String: AnyHashable] = [
+            "group": ErrorNames.assetResourceManagerError,
+            "requestId": requestId,
+            "func": "\(function)",
             "localizedError": error.localizedDescription
         ]
-        SentryDebug.capture(message: ErrorNames.assetResourceManagerError, context: metadata, level: .error)
+
+        SentryDebug.capture(error: error, extras: extra)
     }
 
     // MARK: - Upload notifications

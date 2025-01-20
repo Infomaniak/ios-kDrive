@@ -81,6 +81,7 @@ public enum UniversalLinksHelper {
         return false
     }
 
+    @discardableResult
     public static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
         @InjectService var deeplinkService: DeeplinkServiceable
         deeplinkService.setLastPublicShare(link)
@@ -180,7 +181,7 @@ public enum UniversalLinksHelper {
                                                                        fileId: fileId)
                 // Root folder must be in database for the FileListViewModel to work
                 try driveFileManager.database.writeTransaction { writableRealm in
-                    writableRealm.add(rootFolder)
+                    writableRealm.add(rootFolder, update: .modified)
                 }
 
                 let frozenRootFolder = rootFolder.freeze()
