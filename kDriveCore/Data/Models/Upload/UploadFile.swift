@@ -389,3 +389,24 @@ public extension [UploadFile] {
         return file
     }
 }
+
+extension UploadFile: Differentiable {
+    public var differenceIdentifier: Int {
+        return id.hashValue
+    }
+
+    public func isContentEqual(to source: UploadFile) -> Bool {
+        autoreleasepool {
+            name == source.name
+                && parentDirectoryId == source.parentDirectoryId
+                && name == source.name
+                && userId == source.userId
+                && driveId == source.driveId
+                && uploadDate == source.uploadDate
+                && creationDate == source.creationDate
+                && modificationDate == source.modificationDate
+                && taskCreationDate == source.taskCreationDate
+                && maxRetryCount == source.maxRetryCount
+        }
+    }
+}

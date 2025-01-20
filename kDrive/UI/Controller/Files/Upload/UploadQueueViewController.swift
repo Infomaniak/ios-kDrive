@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import DifferenceKit
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
@@ -33,7 +34,8 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var uploadQueue: UploadQueue
 
     var currentDirectory: File!
-    private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
+    private var liveUploadingFiles = [UploadFile]()
+    private var observedFiles: AnyRealmCollection<UploadFile> = AnyRealmCollection(List<UploadFile>())
     private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -70,42 +72,45 @@ final class UploadQueueViewController: UIViewController {
         }
 
         notificationToken?.invalidate()
-        notificationToken = uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
-                                                          userId: accountManager.currentUserId,
-                                                          driveId: currentDirectory.driveId)
-            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
-                guard let self else {
-                    return
-                }
 
-                switch change {
-                case .initial(let results):
-                    uploadingFiles = AnyRealmCollection(results)
-                    tableView.reloadData()
-                    if results.isEmpty {
-                        navigationController?.popViewController(animated: true)
-                    }
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    uploadingFiles = AnyRealmCollection(results)
-
-                    guard !results.isEmpty else {
-                        navigationController?.popViewController(animated: true)
-                        return
-                    }
-
-                    tableView.performBatchUpdates {
-                        // Always apply updates in the following order: deletions, insertions, then modifications.
-                        // Handling insertions before deletions may result in unexpected behavior.
-                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                    }
-                    // Update cell corners
-                    tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
-                case .error(let error):
-                    DDLogError("Realm observer error: \(error)")
-                }
+        observedFiles = AnyRealmCollection(uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
+                                                                         userId: accountManager.currentUserId,
+                                                                         driveId: currentDirectory.driveId))
+        notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+            guard let self else {
+                return
             }
+
+            let newResults: AnyRealmCollection<UploadFile>?
+            switch change {
+            case .initial(let results):
+                newResults = results
+            case .update(let results, _, _, _):
+                newResults = results
+            case .error(let error):
+                newResults = nil
+                DDLogError("Realm observer error: \(error)")
+            }
+
+            guard let newResults else {
+                reloadCollectionViewWith(files: [])
+                return
+            }
+
+            reloadCollectionViewWith(files: Array(newResults))
+        }
+    }
+
+    func reloadCollectionViewWith(files: [UploadFile]) {
+        let changeSet = StagedChangeset(source: liveUploadingFiles, target: files)
+        tableView.reload(using: changeSet,
+                         with: UITableView.RowAnimation.automatic,
+                         interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                         setData: { self.liveUploadingFiles = $0 })
+
+        if files.isEmpty {
+            navigationController?.popViewController(animated: true)
+        }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -130,7 +135,7 @@ final class UploadQueueViewController: UIViewController {
 
 extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return uploadingFiles.count
+        return liveUploadingFiles.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -142,7 +147,7 @@ extension UploadQueueViewController: UITableViewDataSource {
                                        ) - 1)
 
         /// Make sure the file is valid
-        let file = uploadingFiles[indexPath.row]
+        let file = liveUploadingFiles[indexPath.row]
         if !file.isInvalidated {
             let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
             cell.configureWith(uploadFile: file, progress: progress)
