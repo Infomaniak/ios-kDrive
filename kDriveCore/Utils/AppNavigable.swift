@@ -49,10 +49,8 @@ public protocol RouterAppNavigable {
         files: [ImportedFile]
     )
 
-    /// Present login webView on top of the topMostViewController
     @MainActor func showLogin(delegate: InfomaniakLoginDelegate)
 
-    /// Present register webView on top of the topMostViewController
     @MainActor func showRegister(delegate: InfomaniakLoginDelegate)
 }
 

@@ -229,7 +229,6 @@ class SaveFileViewController: UIViewController {
             return myFilesDirectory.freezeIfNeeded()
         }
 
-        // If we are in a shared with me, we only have access to some folders that are shared with the user
         guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
 
         let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
