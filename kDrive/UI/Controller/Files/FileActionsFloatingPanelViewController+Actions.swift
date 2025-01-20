@@ -525,7 +525,9 @@ extension FileActionsFloatingPanelViewController {
 
     private func addToMyDrive() {
         guard accountManager.currentAccount != nil else {
-            router.showUpsaleFloatingPanel()
+            dismiss(animated: true) {
+                self.router.showUpsaleFloatingPanel()
+            }
             return
         }
 

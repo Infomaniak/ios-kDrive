@@ -20,14 +20,19 @@ import Foundation
 
 public protocol DeeplinkServiceable: AnyObject {
     func setLastPublicShare(_ link: PublicShareLink)
+    func clearLastPublicShare()
     func processDeeplinksPostAuthentication()
 }
 
 public class DeeplinkService: DeeplinkServiceable {
-    var lastPublicShareLink: PublicShareLink?
+    private var lastPublicShareLink: PublicShareLink?
 
     public func setLastPublicShare(_ link: PublicShareLink) {
         lastPublicShareLink = link
+    }
+
+    public func clearLastPublicShare() {
+        lastPublicShareLink = nil
     }
 
     public func processDeeplinksPostAuthentication() {
@@ -37,7 +42,7 @@ public class DeeplinkService: DeeplinkServiceable {
 
         Task {
             await UniversalLinksHelper.processPublicShareLink(lastPublicShareLink)
-            self.lastPublicShareLink = nil
+            clearLastPublicShare()
         }
     }
 }

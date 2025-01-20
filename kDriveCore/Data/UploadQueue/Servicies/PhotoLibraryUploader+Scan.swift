@@ -135,9 +135,8 @@ public extension PhotoLibraryUploader {
                 do {
                     bestResourceSHA256 = try asset.bestResourceSHA256
                 } catch {
-                    // Error thrown while hashing a resource, we stop ASAP.
+                    // Error thrown while hashing a resource, we skip the asset.
                     Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
-                    stop.pointee = true
                     return
                 }
 
