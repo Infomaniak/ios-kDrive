@@ -29,6 +29,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var freeSpaceService: FreeSpaceService
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -527,6 +528,11 @@ extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
 
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton(_ sender: AnyObject) {
+        guard freeSpaceService.hasEnoughAvailableSpaceForChunkUpload else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            return
+        }
+
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
         DispatchQueue.global(qos: .userInitiated).async {
