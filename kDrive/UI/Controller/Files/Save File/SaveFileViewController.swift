@@ -118,6 +118,7 @@ class SaveFileViewController: UIViewController {
     }
 
     @MainActor var onDismissViewController: (() -> Void)?
+    @MainActor var onSave: (() -> Void)?
 
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!
@@ -353,6 +354,7 @@ class SaveFileViewController: UIViewController {
                                                  publicShareProxy: PublicShareProxy,
                                                  publicShareFileIds: [Int],
                                                  publicShareExceptIds: [Int],
+                                                 onSave: (() -> Void)?,
                                                  onDismissViewController: (() -> Void)?)
         -> TitleSizeAdjustingNavigationController {
         let saveViewController = instantiate(driveFileManager: driveFileManager)
@@ -360,6 +362,8 @@ class SaveFileViewController: UIViewController {
         saveViewController.publicShareFileIds = publicShareFileIds
         saveViewController.publicShareExceptIds = publicShareExceptIds
         saveViewController.publicShareProxy = publicShareProxy
+        saveViewController.onSave = onSave
+        saveViewController.onDismissViewController = onDismissViewController
 
         return wrapInNavigationController(saveViewController)
     }

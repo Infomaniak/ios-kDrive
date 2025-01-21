@@ -544,6 +544,9 @@ extension FileActionsFloatingPanelViewController {
             onPresentViewController: { saveNavigationViewController, animated in
                 self.present(saveNavigationViewController, animated: animated, completion: nil)
             },
+            onSave: {
+                MatomoUtils.trackAddToMyDrive()
+            },
             onDismissViewController: { [weak self] in
                 guard let self else { return }
                 self.dismiss(animated: true)

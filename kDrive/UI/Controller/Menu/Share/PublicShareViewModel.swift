@@ -191,6 +191,9 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             onPresentViewController: { saveNavigationViewController, animated in
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
+            onSave: {
+                MatomoUtils.trackAddBulkToMykDrive()
+            },
             onDismissViewController: { [weak self] in
                 guard let self else { return }
                 self.onDismissViewController?()
