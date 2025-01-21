@@ -104,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-dependency-injection",
       "state" : {
-        "revision" : "7d127ead20bbb4a6a39ca60e6dc32e580197b59e",
-        "version" : "2.0.2"
+        "revision" : "f7724f3237f6e2b36fbfabacb88f2658e1e7281e",
+        "version" : "2.0.3"
       }
     },
     {
