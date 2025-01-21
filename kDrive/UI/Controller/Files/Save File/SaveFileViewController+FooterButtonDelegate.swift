@@ -46,7 +46,11 @@ extension SaveFileViewController: FooterButtonDelegate {
         }
 
         Task {
-            defer { dismissViewController() }
+            defer {
+                onSave?()
+                dismissViewController()
+            }
+
             try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
                                              destinationDriveId: drive.id,
                                              destinationFolderId: directory.id,
