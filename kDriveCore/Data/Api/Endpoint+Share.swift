@@ -103,7 +103,7 @@ public extension Endpoint {
         return Self.shareUrlV1.appending(path: "/share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
     }
 
-    func importShareLinkFiles(driveId: Int) -> Endpoint {
-        return Self.shareUrlV2.appending(path: "/\(driveId)/imports/sharelink")
+    static func importShareLinkFiles(destinationDrive: AbstractDrive) -> Endpoint {
+        return Endpoint.driveInfoV2(drive: destinationDrive).appending(path: "/imports/sharelink")
     }
 }

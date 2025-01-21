@@ -53,7 +53,26 @@ final class FileListBarButton: UIBarButtonItem {
             let image = KDriveResourcesAsset.download.image
             self.init(image: image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDownload
+        case .downloadingAll:
+            self.init(title: nil, style: .plain, target: target, action: action)
+
+            let activityView = UIActivityIndicatorView(style: .medium)
+            activityView.startAnimating()
+
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(cancelDownloadPressed))
+            activityView.addGestureRecognizer(tapGestureRecognizer)
+
+            customView = activityView
+        case .addToMyDrive:
+            let image = KDriveResourcesAsset.drive.image
+            self.init(image: image, style: .plain, target: target, action: action)
+            accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAddToKDrive
         }
         self.type = type
+    }
+
+    @objc private func cancelDownloadPressed() {
+        guard let targetObject = target as? NSObject, let action else { return }
+        targetObject.perform(action, with: self)
     }
 }

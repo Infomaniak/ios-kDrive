@@ -168,9 +168,13 @@ final class FilePresenter {
             viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         }
 
-        let nextVC = FileListViewController(viewModel: viewModel)
+        let destinationViewController = FileListViewController(viewModel: viewModel)
+        viewModel.onDismissViewController = { [weak destinationViewController] in
+            destinationViewController?.dismiss(animated: true)
+        }
+
         guard file.isDisabled else {
-            navigationController?.pushViewController(nextVC, animated: animated)
+            navigationController?.pushViewController(destinationViewController, animated: animated)
             return
         }
 
@@ -190,7 +194,7 @@ final class FilePresenter {
                     let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
                     if response {
                         accessFileDriveFloatingPanelController.dismiss(animated: true)
-                        self.navigationController?.pushViewController(nextVC, animated: true)
+                        self.navigationController?.pushViewController(destinationViewController, animated: true)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
                     }

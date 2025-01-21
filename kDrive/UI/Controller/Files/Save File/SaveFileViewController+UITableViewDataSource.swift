@@ -86,7 +86,9 @@ extension SaveFileViewController: UITableViewDataSource {
             fatalError("Not supported by this datasource")
         }
     }
+}
 
+extension SaveFileViewController {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .fileName:

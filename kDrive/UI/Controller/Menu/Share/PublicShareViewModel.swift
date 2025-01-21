@@ -24,6 +24,10 @@ import UIKit
 
 /// Public share view model, loading content from memory realm
 final class PublicShareViewModel: InMemoryFileListViewModel {
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var deeplinkService: DeeplinkServiceable
+
     private var downloadObserver: ObservationToken?
 
     var publicShareProxy: PublicShareProxy?
@@ -81,40 +85,44 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
-        guard type == .downloadAll else {
-            // We try to close the "Public Share screen"
-            if type == .cancel,
-               !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
-                onDismiss?()
-                return
-            }
-
-            super.barButtonPressed(sender: sender, type: type)
-            return
-        }
-
-        guard downloadObserver == nil else {
-            return
-        }
-
         guard let publicShareProxy else {
             return
         }
 
+        if type == .downloadAll {
+            downloadAll(sender: sender, publicShareProxy: publicShareProxy)
+        } else if type == .downloadingAll {
+            cancelDownloadAll()
+        } else if type == .addToMyDrive {
+            addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
+        } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
+            deeplinkService.clearLastPublicShare()
+            onDismissViewController?()
+        } else {
+            super.barButtonPressed(sender: sender, type: type)
+        }
+    }
+
+    private func cancelDownloadAll() {
+        DownloadQueue.instance.cancelFileOperation(for: currentDirectory.id)
+        clearDownloadObserver()
+        configuration.rightBarButtons = [.downloadAll]
+        loadButtonsConfiguration()
+    }
+
+    private func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
         let button = sender as? UIButton
         button?.isEnabled = false
-
-        // TODO: Abstract sheet presentation
-        @InjectService var appNavigable: AppNavigable
-        guard let topMostViewController = appNavigable.topMostViewController else {
-            return
-        }
+        configuration.rightBarButtons = [.downloadingAll]
+        loadButtonsConfiguration()
 
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
                 Task { @MainActor in
                     defer {
                         button?.isEnabled = true
+                        self?.configuration.rightBarButtons = [.downloadAll]
+                        self?.loadButtonsConfiguration()
                     }
 
                     guard let self = self else {
@@ -122,8 +130,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                     }
 
                     defer {
-                        self.downloadObserver?.cancel()
-                        self.downloadObserver = nil
+                        self.clearDownloadObserver()
                     }
 
                     guard error == nil else {
@@ -145,12 +152,50 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                         fatalError("No sender button")
                     }
 
-                    topMostViewController.present(activityViewController, animated: true)
+                    self.onPresentViewController?(.modal, activityViewController, true)
                 }
             }
 
         DownloadQueue.instance.addPublicShareToQueue(file: currentDirectory,
                                                      driveFileManager: driveFileManager,
                                                      publicShareProxy: publicShareProxy)
+    }
+
+    private func clearDownloadObserver() {
+        downloadObserver?.cancel()
+        downloadObserver = nil
+    }
+
+    private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard accountManager.currentAccount != nil else {
+            router.showUpsaleFloatingPanel()
+            return
+        }
+
+        guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        var selectedItemsIds = multipleSelectionViewModel?.selectedItems.map(\.id) ?? []
+        let exceptItemIds = multipleSelectionViewModel?.exceptItemIds.map { $0 } ?? []
+
+        if publicShareProxy.fileId != rootProxy.id, selectedItemsIds.isEmpty {
+            selectedItemsIds += [rootProxy.id]
+        }
+
+        PublicShareAction().addToMyDrive(
+            publicShareProxy: publicShareProxy,
+            currentUserDriveFileManager: currentUserDriveFileManager,
+            selectedItemsIds: selectedItemsIds,
+            exceptItemIds: exceptItemIds,
+            onPresentViewController: { saveNavigationViewController, animated in
+                onPresentViewController?(.modal, saveNavigationViewController, animated)
+            },
+            onDismissViewController: { [weak self] in
+                guard let self else { return }
+                self.onDismissViewController?()
+                self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+            }
+        )
     }
 }

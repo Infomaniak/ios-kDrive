@@ -70,7 +70,7 @@ public protocol AccountManageable: AnyObject {
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
 
     /// Create on the fly an "in memory" DriveFileManager for a specific share
-    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager?
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
@@ -201,31 +201,27 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager {
+    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager? {
         if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
             return inMemoryDriveFileManager
-        }
-
-        // TODO: Big hack, refactor to allow for non authenticated requests
-        guard let someToken = apiFetchers.values.first?.currentToken else {
-            fatalError("probably no account available")
         }
 
         // FileViewModel K.O. without a valid drive in Realm, therefore add one
         let publicShareDrive = Drive()
         publicShareDrive.objectId = publicShareId
+
         do {
             try driveInfosManager.storePublicShareDrive(drive: publicShareDrive)
         } catch {
-            fatalError("unable to update public share drive in base, \(error)")
+            DDLogError("Failed to store public share drive in base, \(error)")
+            return nil
         }
-        let frozenPublicShareDrive = publicShareDrive.freeze()
 
-        let apiFetcher = DriveApiFetcher(token: someToken, delegate: SomeRefreshTokenDelegate())
+        let frozenPublicShareDrive = publicShareDrive.freeze()
         let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: rootFileId, shareLinkUid: publicShareId)
         let context = DriveFileManagerContext.publicShare(shareProxy: publicShareProxy)
 
-        return DriveFileManager(drive: frozenPublicShareDrive, apiFetcher: apiFetcher, context: context)
+        return DriveFileManager(drive: frozenPublicShareDrive, apiFetcher: DriveApiFetcher(), context: context)
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {

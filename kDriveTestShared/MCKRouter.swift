@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import kDrive
 import kDriveCore
 import UIKit
@@ -74,11 +75,23 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func showUpsaleFloatingPanel() {
+        logNoop()
+    }
+
     public func showUpdateRequired() {
         logNoop()
     }
 
     public func showPhotoSyncSettings() {
+        logNoop()
+    }
+
+    public func showLogin(delegate: InfomaniakLoginDelegate) {
+        logNoop()
+    }
+
+    public func showRegister(delegate: InfomaniakLoginDelegate) {
         logNoop()
     }
 

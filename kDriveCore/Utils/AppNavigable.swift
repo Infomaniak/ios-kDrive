@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import UIKit
 
 /// Something that can navigate to specific places of the kDrive app
@@ -36,6 +37,8 @@ public protocol RouterAppNavigable {
 
     @MainActor func showLaunchFloatingPanel()
 
+    @MainActor func showUpsaleFloatingPanel()
+
     @MainActor func showUpdateRequired()
 
     @MainActor func showPhotoSyncSettings()
@@ -45,6 +48,10 @@ public protocol RouterAppNavigable {
         driveFileManager: DriveFileManager,
         files: [ImportedFile]
     )
+
+    @MainActor func showLogin(delegate: InfomaniakLoginDelegate)
+
+    @MainActor func showRegister(delegate: InfomaniakLoginDelegate)
 }
 
 /// Routing methods available from both the AppExtension mode and App

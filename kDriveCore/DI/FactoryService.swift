@@ -73,6 +73,9 @@ public enum FactoryService {
             },
             Factory(type: FileProviderServiceable.self) { _, _ in
                 FileProviderService()
+            },
+            Factory(type: DeeplinkServiceable.self) { _, _ in
+                DeeplinkService()
             }
         ]
         return services

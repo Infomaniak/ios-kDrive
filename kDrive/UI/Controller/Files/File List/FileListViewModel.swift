@@ -35,6 +35,8 @@ enum FileListBarButtonType {
     case photoSort
     case addFolder
     case downloadAll
+    case downloadingAll
+    case addToMyDrive
 }
 
 enum FileListQuickActionType {
@@ -93,7 +95,6 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
-    var onDismiss: (() -> Void)?
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
 
@@ -139,6 +140,8 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
+    var onDismissViewController: (() -> Void)?
+
     var sortTypeObservation: AnyCancellable?
     var listStyleObservation: AnyCancellable?
     var bindStore = Set<AnyCancellable>()
@@ -162,8 +165,6 @@ class FileListViewModel: SelectDelegate {
         listStyle = FileListOptions.instance.currentStyle
         isRefreshing = false
         isLoading = false
-        currentLeftBarButtons = configuration.leftBarButtons
-        currentRightBarButtons = configuration.rightBarButtons
 
         if self.currentDirectory.isRoot {
             if let rootTitle = configuration.rootTitle {
@@ -197,6 +198,13 @@ class FileListViewModel: SelectDelegate {
                 currentDirectory: self.currentDirectory
             )
         }
+
+        loadButtonsConfiguration()
+    }
+
+    func loadButtonsConfiguration() {
+        currentLeftBarButtons = configuration.leftBarButtons
+        currentRightBarButtons = configuration.rightBarButtons
     }
 
     func updateRealmObservation() {
