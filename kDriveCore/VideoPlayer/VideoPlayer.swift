@@ -91,10 +91,6 @@ public final class VideoPlayer: Pausable {
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
-        guard !driveFileManager.isPublicShare else {
-            return
-        }
-
         if !file.isLocalVersionOlderThanRemote {
             let localAsset = AVAsset(url: file.localUrl)
             asset = localAsset
@@ -102,21 +98,34 @@ public final class VideoPlayer: Pausable {
             player = AVPlayer(playerItem: playerItem)
             updateMetadata(asset: localAsset, defaultName: file.name)
             observePlayer(currentItem: playerItem)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            let url = Endpoint.downloadShareLinkFile(
+                driveId: publicShareProxy.driveId,
+                linkUuid: publicShareProxy.shareLinkUid,
+                fileId: file.id
+            ).url
+
+            let asset = AVURLAsset(url: url, options: nil)
+            setupStreamingAsset(asset, fileName: file.name)
+
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token = token {
-                    let url = Endpoint.download(file: file).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let urlAsset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    self.asset = urlAsset
-                    Task { @MainActor in
-                        let playerItem = AVPlayerItem(asset: urlAsset)
-                        self.player = AVPlayer(playerItem: playerItem)
-                        self.updateMetadata(asset: urlAsset, defaultName: file.name)
-                        self.observePlayer(currentItem: playerItem)
-                    }
-                }
+                guard let token else { return }
+                let url = Endpoint.download(file: file).url
+                let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                self.setupStreamingAsset(asset, fileName: file.name)
             }
+        }
+    }
+
+    private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) {
+        asset = urlAsset
+        Task { @MainActor in
+            let playerItem = AVPlayerItem(asset: urlAsset)
+            self.player = AVPlayer(playerItem: playerItem)
+            self.updateMetadata(asset: urlAsset, defaultName: fileName)
+            self.observePlayer(currentItem: playerItem)
         }
     }
 
