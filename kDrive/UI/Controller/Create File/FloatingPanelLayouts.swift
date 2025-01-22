@@ -48,7 +48,6 @@ class PublicShareFolderFloatingPanelLayout: FloatingPanelLayout {
     }
 }
 
-/// Layout used for a file within a public share
 class PublicShareFileFloatingPanelLayout: FloatingPanelLayout {
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
@@ -59,7 +58,7 @@ class PublicShareFileFloatingPanelLayout: FloatingPanelLayout {
         self.initialState = initialState
         self.backdropAlpha = backdropAlpha
         let extendedAnchor = FloatingPanelLayoutAnchor(
-            absoluteInset: 248.0 + safeAreaInset,
+            absoluteInset: 320.0 + safeAreaInset,
             edge: .bottom,
             referenceGuide: .superview
         )
