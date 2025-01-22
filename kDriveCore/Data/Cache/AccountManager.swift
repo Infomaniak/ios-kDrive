@@ -98,6 +98,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -546,6 +547,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
+            deeplinkService.clearLastPublicShare()
+
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)
             }
