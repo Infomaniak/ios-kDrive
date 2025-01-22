@@ -31,10 +31,23 @@ final class FileGridViewModel: FileViewModel {
         imageView.image = nil
         imageView.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         thumbnailDownloadTask?.cancel()
-        thumbnailDownloadTask = file.getThumbnail { image, _ in
-            imageView.image = image
-            imageView.backgroundColor = nil
+
+        if let publicShareProxy {
+            thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
+                                                                 publicDriveId: publicShareProxy.driveId,
+                                                                 publicFileId: file.id) { thumbnail, _ in
+                self.setThumbnail(thumbnail, on: imageView)
+            }
+        } else {
+            thumbnailDownloadTask = file.getThumbnail { thumbnail, _ in
+                self.setThumbnail(thumbnail, on: imageView)
+            }
         }
+    }
+
+    private func setThumbnail(_ thumbnail: UIImage, on imageView: UIImageView) {
+        imageView.image = thumbnail
+        imageView.backgroundColor = nil
     }
 }
 
