@@ -23,9 +23,9 @@ import RealmSwift
 // MARK: - Trash
 
 public extension Endpoint {
-    private static let trashPath: String = "/trash"
+    private static let trashPath = "/trash"
 
-    private static let countPath: String = "/count"
+    private static let countPath = "/count"
 
     static func trash(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: trashPath, queryItems: [FileWith.fileMinimal.toQueryItem()])

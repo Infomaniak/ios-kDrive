@@ -167,7 +167,10 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
                       userId: downloadTask.userId
                   ),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
-            let operation = DownloadAuthenticatedOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
+            let operation = DownloadAuthenticatedOperation(file: file,
+                                                           driveFileManager: driveFileManager,
+                                                           task: task,
+                                                           urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
             operations.append(operation)
             return operation.downloadCompletion
