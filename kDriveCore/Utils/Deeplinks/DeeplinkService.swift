@@ -40,7 +40,7 @@ public class DeeplinkService: DeeplinkServiceable {
             return
         }
 
-        Task {
+        Task { @MainActor in
             await UniversalLinksHelper.processPublicShareLink(lastPublicShareLink)
             clearLastPublicShare()
         }
