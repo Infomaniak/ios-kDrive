@@ -542,7 +542,24 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        downloadFile(at: indexPath)
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            downloadPublicShareFile(at: indexPath, publicShareProxy: publicShareProxy)
+        } else {
+            downloadFile(at: indexPath)
+        }
+    }
+
+    private func downloadPublicShareFile(at indexPath: IndexPath, publicShareProxy: PublicShareProxy) {
+        DownloadQueue.instance.addPublicShareToQueue(
+            file: currentFile,
+            driveFileManager: driveFileManager,
+            publicShareProxy: publicShareProxy,
+            onOperationCreated: { operation in
+                self.trackOperationCreated(at: indexPath, downloadOperation: operation)
+            }, completion: { error in
+                self.downloadCompletion(at: indexPath, error: error)
+            }
+        )
     }
 
     private func downloadFile(at indexPath: IndexPath) {
@@ -550,42 +567,50 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             file: currentFile,
             userId: accountManager.currentUserId,
             onOperationCreated: { operation in
-                Task { @MainActor [weak self] in
-                    guard let self else {
-                        return
-                    }
-
-                    currentDownloadOperation = operation
-                    if let progress = currentDownloadOperation?.progress,
-                       let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
-                        cell.setDownloadProgress(progress)
-                    }
-                }
+                self.trackOperationCreated(at: indexPath, downloadOperation: operation)
             },
             completion: { error in
-                Task { @MainActor [weak self] in
-                    guard let self else { return }
-
-                    currentDownloadOperation = nil
-
-                    guard view.window != nil else { return }
-
-                    if let error {
-                        if error != .taskCancelled {
-                            previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
-                            collectionView.reloadItems(at: [indexPath])
-                        }
-                    } else {
-                        (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
-                            .previewDownloadTask?.cancel()
-                        previewErrors[currentFile.id] = nil
-                        collectionView.endEditing(true)
-                        collectionView.reloadItems(at: [indexPath])
-                        updateNavigationBar()
-                    }
-                }
+                self.downloadCompletion(at: indexPath, error: error)
             }
         )
+    }
+
+    private func trackOperationCreated(at indexPath: IndexPath, downloadOperation: DownloadAuthenticatedOperation?) {
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            currentDownloadOperation = downloadOperation
+            if let progress = currentDownloadOperation?.progress,
+               let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+                cell.setDownloadProgress(progress)
+            }
+        }
+    }
+
+    private func downloadCompletion(at indexPath: IndexPath, error: DriveError?) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            currentDownloadOperation = nil
+
+            guard view.window != nil else { return }
+
+            if let error {
+                if error != .taskCancelled {
+                    previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
+                    collectionView.reloadItems(at: [indexPath])
+                }
+            } else {
+                (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
+                    .previewDownloadTask?.cancel()
+                previewErrors[currentFile.id] = nil
+                collectionView.endEditing(true)
+                collectionView.reloadItems(at: [indexPath])
+                updateNavigationBar()
+            }
+        }
     }
 
     static func instantiate(
