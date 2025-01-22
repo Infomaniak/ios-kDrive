@@ -24,6 +24,7 @@ import kDriveCore
 import kDriveResources
 
 public final class LoginDelegateHandler: InfomaniakLoginDelegate {
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
 
@@ -64,6 +65,10 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
         _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+
+        Task {
+            deeplinkService.processDeeplinksPostAuthentication()
+        }
     }
 
     private func didCompleteLoginWithError(_ error: Error,
