@@ -25,6 +25,8 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
+typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
+
 final class UploadQueueViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var retryButton: UIBarButtonItem!
@@ -34,7 +36,7 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var uploadQueue: UploadQueue
 
     var currentDirectory: File!
-    private var liveUploadingFiles = [UploadFile]()
+    private var liveUploadingFiles = [UploadFileDisplayed]()
     private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -92,15 +94,21 @@ final class UploadQueueViewController: UIViewController {
             }
 
             guard let newResults else {
-                reloadCollectionViewWith(files: [])
+                reloadCollectionViewWith([])
                 return
             }
 
-            reloadCollectionViewWith(files: Array(newResults))
+            let wrappedFiles = newResults.enumerated().map { index, item in
+                UploadFileDisplayed(isFirstInList: index == 0,
+                                    isLastInList: index == newResults.count - 1,
+                                    content: item)
+            }
+
+            reloadCollectionViewWith(wrappedFiles)
         }
     }
 
-    func reloadCollectionViewWith(files: [UploadFile]) {
+    func reloadCollectionViewWith(_ files: [UploadFileDisplayed]) {
         let changeSet = StagedChangeset(source: liveUploadingFiles, target: files)
         tableView.reload(using: changeSet,
                          with: UITableView.RowAnimation.automatic,
@@ -139,14 +147,12 @@ extension UploadQueueViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
-                                       isLast: indexPath.row == self.tableView(
-                                           tableView,
-                                           numberOfRowsInSection: indexPath.section
-                                       ) - 1)
+        let fileWrapper = liveUploadingFiles[indexPath.row]
+        let file = fileWrapper.content
 
-        /// Make sure the file is valid
-        let file = liveUploadingFiles[indexPath.row]
+        cell.initWithPositionAndShadow(isFirst: fileWrapper.isFirstInList,
+                                       isLast: fileWrapper.isLastInList)
+
         if !file.isInvalidated {
             let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
             cell.configureWith(uploadFile: file, progress: progress)
