@@ -65,10 +65,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
         _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
-
-        Task {
-            deeplinkService.processDeeplinksPostAuthentication()
-        }
+        deeplinkService.processDeeplinksPostAuthentication()
     }
 
     private func didCompleteLoginWithError(_ error: Error,
