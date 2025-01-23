@@ -24,12 +24,14 @@ import kDriveCore
 import RealmSwift
 import UIKit
 
+typealias FileDisplayed = CornerCellContainer<File>
+
 final class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var uploadQueue: UploadQueue
 
-    private var frozenUploadingFolders = [File]()
+    private var frozenUploadingFolders = [FileDisplayed]()
     private var notificationToken: NotificationToken?
     private var driveFileManager: DriveFileManager!
 
@@ -81,7 +83,8 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        let folders: [File] = files.compactMap { tuple in
+        let filesCount = files.count
+        let folders: [FileDisplayed] = files.enumerated().compactMap { index, tuple in
             let parentId = tuple.parentId
             let driveId = tuple.driveId
 
@@ -98,7 +101,9 @@ final class UploadQueueFoldersViewController: UITableViewController {
                 return nil
             }
 
-            return folder
+            return FileDisplayed(isFirstInList: index == 0,
+                                 isLastInList: index == filesCount - 1,
+                                 content: folder)
         }
 
         let changeSet = StagedChangeset(source: frozenUploadingFolders, target: folders)
@@ -128,9 +133,10 @@ final class UploadQueueFoldersViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadFolderTableViewCell.self, for: indexPath)
 
-        let folder = frozenUploadingFolders[indexPath.row]
-        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == frozenUploadingFolders.count - 1)
-        cell.configure(with: folder, drive: driveFileManager.drive)
+        let folderDisplayed = frozenUploadingFolders[indexPath.row]
+        cell.initWithPositionAndShadow(isFirst: folderDisplayed.isFirstInList,
+                                       isLast: folderDisplayed.isLastInList)
+        cell.configure(with: folderDisplayed.content, drive: driveFileManager.drive)
 
         return cell
     }
@@ -139,7 +145,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let uploadViewController = UploadQueueViewController.instantiate()
-        uploadViewController.currentDirectory = frozenUploadingFolders[indexPath.row]
+        uploadViewController.currentDirectory = frozenUploadingFolders[indexPath.row].content
         navigationController?.pushViewController(uploadViewController, animated: true)
     }
 }
