@@ -115,7 +115,9 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
     public func addPublicShareToQueue(file: File,
                                       driveFileManager: DriveFileManager,
                                       publicShareProxy: PublicShareProxy,
-                                      itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+                                      itemIdentifier: NSFileProviderItemIdentifier? = nil,
+                                      onOperationCreated: ((DownloadPublicShareOperation?) -> Void)? = nil,
+                                      completion: ((DriveError?) -> Void)? = nil) {
         Log.downloadQueue("addPublicShareToQueue file:\(file.id)")
         let file = file.freezeIfNeeded()
 
@@ -139,10 +141,12 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
                     self.fileOperationsInQueue.removeValue(forKey: file.id)
                     self.publishFileDownloaded(fileId: file.id, error: operation.error)
                     OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    completion?(operation.error)
                 }
             }
             self.operationQueue.addOperation(operation)
             self.fileOperationsInQueue[file.id] = operation
+            onOperationCreated?(operation)
         }
     }
 
