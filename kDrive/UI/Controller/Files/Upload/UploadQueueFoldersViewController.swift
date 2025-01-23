@@ -17,24 +17,27 @@
  */
 
 import CocoaLumberjackSwift
+import DifferenceKit
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import RealmSwift
 import UIKit
 
-final class UploadQueueFoldersViewController: UITableViewController {
-    var driveFileManager: DriveFileManager!
+typealias FileDisplayed = CornerCellContainer<File>
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var uploadQueue: UploadQueue
+final class UploadQueueFoldersViewController: UITableViewController {
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var driveInfosManager: DriveInfosManager
+    @LazyInjectService private var uploadQueue: UploadQueue
+
+    private var frozenUploadingFolders = [FileDisplayed]()
+    private var notificationToken: NotificationToken?
+    private var driveFileManager: DriveFileManager!
 
     private var userId: Int {
         return driveFileManager.drive.userId
     }
-
-    private var folders: [File] = []
-    private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,53 +60,31 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     private func setUpObserver() {
         guard driveFileManager != nil else { return }
-        // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
-
-        // Observe uploading files
-        notificationToken = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds)
+        let uploadingFiles = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds)
             .distinct(by: [\.parentDirectoryId])
-            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
-                guard let self else {
-                    return
-                }
 
-                switch change {
-                case .initial(let results):
-                    updateFolders(from: results)
-                    tableView.reloadData()
-                    if results.isEmpty {
-                        navigationController?.popViewController(animated: true)
-                    }
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    guard !results.isEmpty else {
-                        navigationController?.popViewController(animated: true)
-                        return
-                    }
-
-                    // No animation on updating the same lines without changes
-                    if deletions == insertions, modifications.isEmpty {
-                        return
-                    }
-
-                    tableView.performBatchUpdates {
-                        self.updateFolders(from: results)
-                        // Always apply updates in the following order: deletions, insertions, then modifications.
-                        // Handling insertions before deletions may result in unexpected behavior.
-                        self.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        self.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                    }
-                case .error(let error):
-                    DDLogError("Realm observer error: \(error)")
-                }
+        notificationToken = uploadingFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+            guard let self else {
+                return
             }
+
+            switch change {
+            case .initial(let results):
+                updateFolders(from: results)
+            case .update(let results, _, _, _):
+                updateFolders(from: results)
+            case .error(let error):
+                DDLogError("Realm observer error: \(error)")
+            }
+        }
     }
 
     private func updateFolders(from results: Results<UploadFile>) {
         let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        folders = files.compactMap { tuple in
+        let filesCount = files.count
+        let folders: [FileDisplayed] = files.enumerated().compactMap { index, tuple in
             let parentId = tuple.parentId
             let driveId = tuple.driveId
 
@@ -120,14 +101,19 @@ final class UploadQueueFoldersViewController: UITableViewController {
                 return nil
             }
 
-            return folder
+            return FileDisplayed(isFirstInList: index == 0,
+                                 isLastInList: index == filesCount - 1,
+                                 content: folder)
         }
 
-        // (Pop view controller if nothing to show)
+        let changeSet = StagedChangeset(source: frozenUploadingFolders, target: folders)
+        tableView.reload(using: changeSet,
+                         with: UITableView.RowAnimation.automatic,
+                         interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                         setData: { self.frozenUploadingFolders = $0 })
+
         if folders.isEmpty {
-            Task { @MainActor in
-                self.navigationController?.popViewController(animated: true)
-            }
+            navigationController?.popViewController(animated: true)
         }
     }
 
@@ -141,15 +127,16 @@ final class UploadQueueFoldersViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return folders.count
+        return frozenUploadingFolders.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadFolderTableViewCell.self, for: indexPath)
 
-        let folder = folders[indexPath.row]
-        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == folders.count - 1)
-        cell.configure(with: folder, drive: driveFileManager.drive)
+        let folderDisplayed = frozenUploadingFolders[indexPath.row]
+        cell.initWithPositionAndShadow(isFirst: folderDisplayed.isFirstInList,
+                                       isLast: folderDisplayed.isLastInList)
+        cell.configure(with: folderDisplayed.content, drive: driveFileManager.drive)
 
         return cell
     }
@@ -158,7 +145,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let uploadViewController = UploadQueueViewController.instantiate()
-        uploadViewController.currentDirectory = folders[indexPath.row]
+        uploadViewController.currentDirectory = frozenUploadingFolders[indexPath.row].content
         navigationController?.pushViewController(uploadViewController, animated: true)
     }
 }
