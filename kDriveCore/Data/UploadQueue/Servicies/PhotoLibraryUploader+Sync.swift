@@ -20,12 +20,43 @@ import Foundation
 import RealmSwift
 
 public extension PhotoLibraryUploader {
-    func enableSync(with newSettings: PhotoSyncSettings, writableRealm: Realm) {
-        writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
-        writableRealm.add(newSettings)
+    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
+        let currentSyncSettings = frozenSettings
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            guard liveNewSyncSettings.userId != -1,
+                  liveNewSyncSettings.driveId != -1,
+                  liveNewSyncSettings.parentDirectoryId != -1 else {
+                return
+            }
+
+            switch liveNewSyncSettings.syncMode {
+            case .new:
+                liveNewSyncSettings.lastSync = Date()
+            case .all:
+                if let currentSyncSettings,
+                   currentSyncSettings.syncMode == .all {
+                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                }
+            case .fromDate:
+                if let currentSyncSettings = currentSyncSettings,
+                   currentSyncSettings
+                   .syncMode == .all ||
+                   (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
+                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending) {
+                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    liveNewSyncSettings.lastSync = liveNewSyncSettings.fromDate
+                }
+            }
+
+            writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
+            writableRealm.add(liveNewSyncSettings)
+        }
     }
 
-    func disableSync() {
+    @MainActor func disableSync() {
         try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
