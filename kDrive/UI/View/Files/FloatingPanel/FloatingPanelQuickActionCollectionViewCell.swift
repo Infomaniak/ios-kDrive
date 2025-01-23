@@ -58,6 +58,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     #if !ISEXTENSION
     func configure(with action: FloatingPanelAction, file: File) {
+        guard !file.isInvalidated else { return }
         configure(
             name: action.name,
             icon: action.image,
