@@ -389,3 +389,16 @@ public extension [UploadFile] {
         return file
     }
 }
+
+extension UploadFile: Differentiable {
+    public var differenceIdentifier: Int {
+        return id.hashValue
+    }
+
+    public func isContentEqual(to source: UploadFile) -> Bool {
+        autoreleasepool {
+            id == source.id
+                && error == source.error
+        }
+    }
+}
