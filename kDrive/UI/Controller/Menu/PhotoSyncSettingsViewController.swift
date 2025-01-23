@@ -225,7 +225,8 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             return
         }
 
-        photoLibraryUploader.enableSync(liveNewSyncSettings)
+        let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
+        photoLibraryUploader.enableSync(newSettings)
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
