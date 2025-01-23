@@ -225,37 +225,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             return
         }
 
-        let currentSyncSettings = photoLibraryUploader.frozenSettings
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            guard liveNewSyncSettings.userId != -1,
-                  liveNewSyncSettings.driveId != -1,
-                  liveNewSyncSettings.parentDirectoryId != -1 else {
-                return
-            }
-
-            switch liveNewSyncSettings.syncMode {
-            case .new:
-                liveNewSyncSettings.lastSync = Date()
-            case .all:
-                if let currentSyncSettings,
-                   currentSyncSettings.syncMode == .all {
-                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
-                }
-            case .fromDate:
-                if let currentSyncSettings = photoLibraryUploader.frozenSettings,
-                   currentSyncSettings
-                   .syncMode == .all ||
-                   (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending) {
-                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
-                } else {
-                    liveNewSyncSettings.lastSync = liveNewSyncSettings.fromDate
-                }
-            }
-            photoLibraryUploader.enableSync(with: liveNewSyncSettings, writableRealm: writableRealm)
-        }
+        photoLibraryUploader.enableSync(liveNewSyncSettings)
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
