@@ -67,7 +67,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
     private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
-    private var newSyncSettings: PhotoSyncSettings = {
+    private var liveNewSyncSettings: PhotoSyncSettings = {
         @InjectService var photoUploader: PhotoLibraryUploader
 
         if let settings = photoUploader.frozenSettings {
@@ -80,7 +80,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
-            newSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
+            liveNewSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
             if oldValue == nil || selectedDirectory == nil {
                 Task { @MainActor in
                     self.updateSections()
@@ -91,8 +91,8 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
     private var driveFileManager: DriveFileManager? {
         didSet {
-            newSyncSettings.userId = driveFileManager?.drive.userId ?? -1
-            newSyncSettings.driveId = driveFileManager?.drive.id ?? -1
+            liveNewSyncSettings.userId = driveFileManager?.drive.userId ?? -1
+            liveNewSyncSettings.driveId = driveFileManager?.drive.id ?? -1
         }
     }
 
@@ -115,21 +115,21 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         view.delegate = self
         tableView.tableFooterView = view
 
-        let savedCurrentUserId = newSyncSettings.userId
-        let savedCurrentDriveId = newSyncSettings.driveId
+        let savedCurrentUserId = liveNewSyncSettings.userId
+        let savedCurrentDriveId = liveNewSyncSettings.driveId
         if savedCurrentUserId != -1 && savedCurrentDriveId != -1 {
             driveFileManager = accountManager.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
         }
         updateSaveButtonState()
 
-        if newSyncSettings.parentDirectoryId != -1 {
+        if liveNewSyncSettings.parentDirectoryId != -1 {
             // We should always have the folder in cache but just in case we don't...
-            if let photoSyncDirectory = driveFileManager?.getCachedFile(id: newSyncSettings.parentDirectoryId) {
+            if let photoSyncDirectory = driveFileManager?.getCachedFile(id: liveNewSyncSettings.parentDirectoryId) {
                 selectedDirectory = photoSyncDirectory
                 updateSaveButtonState()
             } else {
                 Task {
-                    let file = try await driveFileManager?.file(id: newSyncSettings.parentDirectoryId)
+                    let file = try await driveFileManager?.file(id: liveNewSyncSettings.parentDirectoryId)
                     self.selectedDirectory = file?.freeze()
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .none)
                 }
@@ -209,7 +209,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
     func updateSaveButtonState() {
         let isEdited = photoLibraryUploader.isSyncEnabled != photoSyncEnabled || photoLibraryUploader.frozenSettings?
-            .isContentEqual(to: newSyncSettings) == false
+            .isContentEqual(to: liveNewSyncSettings) == false
 
         let footer = tableView.tableFooterView as? FooterButtonView
         if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
@@ -227,34 +227,34 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
         let currentSyncSettings = photoLibraryUploader.frozenSettings
         try? uploadsDatabase.writeTransaction { writableRealm in
-            guard newSyncSettings.userId != -1,
-                  newSyncSettings.driveId != -1,
-                  newSyncSettings.parentDirectoryId != -1 else {
+            guard liveNewSyncSettings.userId != -1,
+                  liveNewSyncSettings.driveId != -1,
+                  liveNewSyncSettings.parentDirectoryId != -1 else {
                 return
             }
 
-            switch newSyncSettings.syncMode {
+            switch liveNewSyncSettings.syncMode {
             case .new:
-                newSyncSettings.lastSync = Date()
+                liveNewSyncSettings.lastSync = Date()
             case .all:
                 if let currentSyncSettings,
                    currentSyncSettings.syncMode == .all {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
-                    newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                    liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
                 }
             case .fromDate:
                 if let currentSyncSettings = photoLibraryUploader.frozenSettings,
                    currentSyncSettings
                    .syncMode == .all ||
                    (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                       .compare(newSyncSettings.fromDate) == .orderedAscending) {
-                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending) {
+                    liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
-                    newSyncSettings.lastSync = newSyncSettings.fromDate
+                    liveNewSyncSettings.lastSync = liveNewSyncSettings.fromDate
                 }
             }
-            photoLibraryUploader.enableSync(with: newSyncSettings, writableRealm: writableRealm)
+            photoLibraryUploader.enableSync(with: liveNewSyncSettings, writableRealm: writableRealm)
         }
     }
 
@@ -363,9 +363,9 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncPicture
-                cell.valueSwitch.setOn(newSyncSettings.syncPicturesEnabled, animated: true)
+                cell.valueSwitch.setOn(liveNewSyncSettings.syncPicturesEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncPicturesEnabled = sender.isOn
+                    self?.liveNewSyncSettings.syncPicturesEnabled = sender.isOn
                     self?.updateSaveButtonState()
                 }
                 return cell
@@ -373,9 +373,9 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncVideo
-                cell.valueSwitch.setOn(newSyncSettings.syncVideosEnabled, animated: true)
+                cell.valueSwitch.setOn(liveNewSyncSettings.syncVideosEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncVideosEnabled = sender.isOn
+                    self?.liveNewSyncSettings.syncVideosEnabled = sender.isOn
                     self?.updateSaveButtonState()
                 }
                 return cell
@@ -383,9 +383,9 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncScreenshot
-                cell.valueSwitch.setOn(newSyncSettings.syncScreenshotsEnabled, animated: true)
+                cell.valueSwitch.setOn(liveNewSyncSettings.syncScreenshotsEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.syncScreenshotsEnabled = sender.isOn
+                    self?.liveNewSyncSettings.syncScreenshotsEnabled = sender.isOn
                     self?.updateSaveButtonState()
                 }
                 return cell
@@ -394,9 +394,9 @@ extension PhotoSyncSettingsViewController {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle
                 cell.detailsLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription
-                cell.valueSwitch.setOn(newSyncSettings.createDatedSubFolders, animated: true)
+                cell.valueSwitch.setOn(liveNewSyncSettings.createDatedSubFolders, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.createDatedSubFolders = sender.isOn
+                    self?.liveNewSyncSettings.createDatedSubFolders = sender.isOn
                     self?.updateSaveButtonState()
                 }
                 return cell
@@ -405,9 +405,9 @@ extension PhotoSyncSettingsViewController {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.deletePicturesTitle
                 cell.detailsLabel.text = KDriveResourcesStrings.Localizable.deletePicturesDescription
-                cell.valueSwitch.setOn(newSyncSettings.deleteAssetsAfterImport, animated: true)
+                cell.valueSwitch.setOn(liveNewSyncSettings.deleteAssetsAfterImport, animated: true)
                 cell.switchHandler = { [weak self] sender in
-                    self?.newSyncSettings.deleteAssetsAfterImport = sender.isOn
+                    self?.liveNewSyncSettings.deleteAssetsAfterImport = sender.isOn
                     self?.updateSaveButtonState()
                 }
                 return cell
@@ -415,11 +415,11 @@ extension PhotoSyncSettingsViewController {
                 let cell = tableView.dequeueReusableCell(type: PhotoSyncSettingsTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
-                cell.valueLabel.text = newSyncSettings.syncMode.title.lowercased()
+                cell.valueLabel.text = liveNewSyncSettings.syncMode.title.lowercased()
                 cell.delegate = self
-                if newSyncSettings.syncMode == .fromDate {
+                if liveNewSyncSettings.syncMode == .fromDate {
                     cell.datePicker.isHidden = false
-                    cell.datePicker.date = newSyncSettings.fromDate
+                    cell.datePicker.date = liveNewSyncSettings.fromDate
                 } else {
                     cell.datePicker.isHidden = true
                 }
@@ -427,7 +427,7 @@ extension PhotoSyncSettingsViewController {
             case .photoFormat:
                 let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.configure(with: newSyncSettings.photoFormat)
+                cell.configure(with: liveNewSyncSettings.photoFormat)
                 return cell
             }
         case .syncDenied:
@@ -473,17 +473,17 @@ extension PhotoSyncSettingsViewController {
                     choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2,
                               KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue,
                               KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2],
-                    selected: newSyncSettings.syncMode.rawValue,
+                    selected: liveNewSyncSettings.syncMode.rawValue,
                     action: KDriveResourcesStrings.Localizable.buttonValid
                 ) { selectedIndex in
-                    self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
+                    self.liveNewSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                 }
                 present(alert, animated: true)
             case .photoFormat:
                 let selectPhotoFormatViewController = SelectPhotoFormatViewController
-                    .instantiate(selectedFormat: newSyncSettings.photoFormat)
+                    .instantiate(selectedFormat: liveNewSyncSettings.photoFormat)
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
             default:
@@ -518,7 +518,7 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
 
 extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
-        newSyncSettings.photoFormat = format
+        liveNewSyncSettings.photoFormat = format
         updateSaveButtonState()
         tableView.reloadData()
     }
@@ -533,7 +533,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             return
         }
 
-        MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
+        MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
 
         saveSettings()
         Task { @MainActor in
@@ -553,7 +553,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
 
 extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegate {
     func didSelectDate(date: Date) {
-        newSyncSettings.fromDate = date
+        liveNewSyncSettings.fromDate = date
         updateSaveButtonState()
     }
 }
