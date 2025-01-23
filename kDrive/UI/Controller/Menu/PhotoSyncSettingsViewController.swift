@@ -535,12 +535,12 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
 
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.saveSettings()
-            Task { @MainActor in
-                self.navigationController?.popViewController(animated: true)
-            }
+        saveSettings()
+        Task { @MainActor in
+            self.navigationController?.popViewController(animated: true)
+        }
 
+        DispatchQueue.global(qos: .userInitiated).async {
             // Add new pictures to be uploaded and reload upload queue
             self.photoLibraryUploader.scheduleNewPicturesForUpload()
             @InjectService var uploadQueue: UploadQueue
