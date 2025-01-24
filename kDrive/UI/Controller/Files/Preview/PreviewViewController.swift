@@ -52,6 +52,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var editButtonHidden: Bool {
+        driveFileManager.isPublicShare
+    }
+
     private var currentDownloadOperation: DownloadAuthenticatedOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
@@ -344,7 +348,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func setNavbarForEditing() {
         backButton.isHidden = false
         pdfPageLabel.isHidden = true
-        editButton.isHidden = false
+        editButton.isHidden = editButtonHidden
         openButton.isHidden = true
     }
 
@@ -372,6 +376,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     @objc private func editFile() {
+        guard !driveFileManager.isPublicShare else { return }
         MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
