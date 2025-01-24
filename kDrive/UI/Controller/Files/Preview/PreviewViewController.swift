@@ -52,7 +52,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private var currentDownloadOperation: DownloadOperation?
+    private var editButtonHidden: Bool {
+        driveFileManager.isPublicShare
+    }
+
+    private var currentDownloadOperation: DownloadAuthenticatedOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
@@ -344,7 +348,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func setNavbarForEditing() {
         backButton.isHidden = false
         pdfPageLabel.isHidden = true
-        editButton.isHidden = false
+        editButton.isHidden = editButtonHidden
         openButton.isHidden = true
     }
 
@@ -372,6 +376,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     @objc private func editFile() {
+        guard !driveFileManager.isPublicShare else { return }
         MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
@@ -542,7 +547,24 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        downloadFile(at: indexPath)
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            downloadPublicShareFile(at: indexPath, publicShareProxy: publicShareProxy)
+        } else {
+            downloadFile(at: indexPath)
+        }
+    }
+
+    private func downloadPublicShareFile(at indexPath: IndexPath, publicShareProxy: PublicShareProxy) {
+        DownloadQueue.instance.addPublicShareToQueue(
+            file: currentFile,
+            driveFileManager: driveFileManager,
+            publicShareProxy: publicShareProxy,
+            onOperationCreated: { operation in
+                self.trackOperationCreated(at: indexPath, downloadOperation: operation)
+            }, completion: { error in
+                self.downloadCompletion(at: indexPath, error: error)
+            }
+        )
     }
 
     private func downloadFile(at indexPath: IndexPath) {
@@ -550,42 +572,50 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             file: currentFile,
             userId: accountManager.currentUserId,
             onOperationCreated: { operation in
-                Task { @MainActor [weak self] in
-                    guard let self else {
-                        return
-                    }
-
-                    currentDownloadOperation = operation
-                    if let progress = currentDownloadOperation?.task?.progress,
-                       let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
-                        cell.setDownloadProgress(progress)
-                    }
-                }
+                self.trackOperationCreated(at: indexPath, downloadOperation: operation)
             },
             completion: { error in
-                Task { @MainActor [weak self] in
-                    guard let self else { return }
-
-                    currentDownloadOperation = nil
-
-                    guard view.window != nil else { return }
-
-                    if let error {
-                        if error != .taskCancelled {
-                            previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
-                            collectionView.reloadItems(at: [indexPath])
-                        }
-                    } else {
-                        (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
-                            .previewDownloadTask?.cancel()
-                        previewErrors[currentFile.id] = nil
-                        collectionView.endEditing(true)
-                        collectionView.reloadItems(at: [indexPath])
-                        updateNavigationBar()
-                    }
-                }
+                self.downloadCompletion(at: indexPath, error: error)
             }
         )
+    }
+
+    private func trackOperationCreated(at indexPath: IndexPath, downloadOperation: DownloadAuthenticatedOperation?) {
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            currentDownloadOperation = downloadOperation
+            if let progress = currentDownloadOperation?.progress,
+               let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+                cell.setDownloadProgress(progress)
+            }
+        }
+    }
+
+    private func downloadCompletion(at indexPath: IndexPath, error: DriveError?) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            currentDownloadOperation = nil
+
+            guard view.window != nil else { return }
+
+            if let error {
+                if error != .taskCancelled {
+                    previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
+                    collectionView.reloadItems(at: [indexPath])
+                }
+            } else {
+                (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
+                    .previewDownloadTask?.cancel()
+                previewErrors[currentFile.id] = nil
+                collectionView.endEditing(true)
+                collectionView.reloadItems(at: [indexPath])
+                updateNavigationBar()
+            }
+        }
     }
 
     static func instantiate(
@@ -601,8 +631,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previewPageViewController.driveFileManager = driveFileManager
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.presentationOrigin = presentationOrigin
-        // currentIndex should be set at the end of the function as the it takes time and the viewDidLoad() is called before the
-        // function returns
+        // currentIndex should be set at the end of the function as the it takes time
+        // and the viewDidLoad() is called before the function returns
         // this should be fixed in the future with the refactor of the init
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)
         return previewPageViewController
@@ -642,7 +672,11 @@ extension PreviewViewController: UICollectionViewDataSource {
     ) {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
-            cell.progressiveLoadingForFile(file)
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                cell.progressiveLoadingForPublicShareFile(file, publicShareProxy: publicShareProxy)
+            } else {
+                cell.progressiveLoadingForFile(file)
+            }
         }
     }
 
@@ -718,7 +752,7 @@ extension PreviewViewController: UICollectionViewDataSource {
         } else if file.supportedBy.contains(.thumbnail) && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
@@ -733,7 +767,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file)
             if let downloadOperation = currentDownloadOperation,
-               let progress = downloadOperation.task?.progress,
+               let progress = downloadOperation.progress,
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }

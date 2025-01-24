@@ -26,6 +26,21 @@ import InfomaniakLogin
 import RealmSwift
 import SwiftRegex
 
+// TODO: Move to core
+extension TransactionExecutor: CustomStringConvertible {
+    public var description: String {
+        var render = "TransactionExecutor: realm access issue"
+        try? writeTransaction { realm in
+            render = """
+            TransactionExecutor:
+            realmURL:\(realm.configuration.fileURL)
+            inMemory:\(realm.configuration.inMemoryIdentifier)
+            """
+        }
+        return render
+    }
+}
+
 // MARK: - Transactionable
 
 public final class DriveFileManager {
@@ -85,11 +100,23 @@ public final class DriveFileManager {
     /// Fetch and write into DB with this object
     public let database: Transactionable
 
+    /// Context this object was initialized with
+    public let context: DriveFileManagerContext
+
     /// Build a realm configuration for a specific Drive
     public static func configuration(context: DriveFileManagerContext, driveId: Int, driveUserId: Int) -> Realm.Configuration {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
+
+        let inMemoryIdentifier: String?
+        if case .publicShare(let identifier) = context {
+            inMemoryIdentifier = "inMemory:\(identifier)"
+        } else {
+            inMemoryIdentifier = nil
+        }
+
         return Realm.Configuration(
             fileURL: realmURL,
+            inMemoryIdentifier: inMemoryIdentifier,
             schemaVersion: RealmSchemaVersion.drive,
             migrationBlock: { migration, oldSchemaVersion in
                 let currentDriveSchemeVersion = RealmSchemaVersion.drive
@@ -197,9 +224,28 @@ public final class DriveFileManager {
         )
     }
 
+    public var isPublicShare: Bool {
+        switch context {
+        case .publicShare:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var publicShareProxy: PublicShareProxy? {
+        switch context {
+        case .publicShare(let shareProxy):
+            return shareProxy
+        default:
+            return nil
+        }
+    }
+
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         self.drive = drive
         self.apiFetcher = apiFetcher
+        self.context = context
         realmConfiguration = Self.configuration(context: context, driveId: drive.id, driveUserId: drive.userId)
 
         let realmURL = context.realmURL(driveId: drive.id, driveUserId: drive.userId)
@@ -380,6 +426,29 @@ public final class DriveFileManager {
                                 drive: drive,
                                 cursor: cursor,
                                 sortType: sortType
+                            )
+                            return mySharedFiles
+                        },
+                        cursor: cursor,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
+    }
+
+    public func publicShareFiles(rootProxy: ProxyFile,
+                                 publicShareProxy: PublicShareProxy,
+                                 cursor: String? = nil,
+                                 sortType: SortType = .nameAZ,
+                                 forceRefresh: Bool = false,
+                                 publicShareApiFetcher: PublicShareApiFetcher) async throws
+        -> (files: [File], nextCursor: String?) {
+        try await files(in: rootProxy,
+                        fetchFiles: {
+                            let mySharedFiles = try await publicShareApiFetcher.shareLinkFileChildren(
+                                rootFolderId: rootProxy.id,
+                                publicShareProxy: publicShareProxy,
+                                sortType: sortType,
+                                cursor: cursor
                             )
                             return mySharedFiles
                         },

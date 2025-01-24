@@ -34,12 +34,15 @@ enum FileListBarButtonType {
     case searchFilters
     case photoSort
     case addFolder
+    case downloadAll
+    case downloadingAll
+    case addToMyDrive
 }
 
 enum FileListQuickActionType {
     case file
     case trash
-    case multipleSelection
+    case multipleSelection(onlyDownload: Bool)
 }
 
 enum ControllerPresentationType {
@@ -137,6 +140,8 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
+    var onDismissViewController: (() -> Void)?
+
     var sortTypeObservation: AnyCancellable?
     var listStyleObservation: AnyCancellable?
     var bindStore = Set<AnyCancellable>()
@@ -160,8 +165,6 @@ class FileListViewModel: SelectDelegate {
         listStyle = FileListOptions.instance.currentStyle
         isRefreshing = false
         isLoading = false
-        currentLeftBarButtons = configuration.leftBarButtons
-        currentRightBarButtons = configuration.rightBarButtons
 
         if self.currentDirectory.isRoot {
             if let rootTitle = configuration.rootTitle {
@@ -195,6 +198,13 @@ class FileListViewModel: SelectDelegate {
                 currentDirectory: self.currentDirectory
             )
         }
+
+        loadButtonsConfiguration()
+    }
+
+    func loadButtonsConfiguration() {
+        currentLeftBarButtons = configuration.leftBarButtons
+        currentRightBarButtons = configuration.rightBarButtons
     }
 
     func updateRealmObservation() {
@@ -279,7 +289,7 @@ class FileListViewModel: SelectDelegate {
         }.store(in: &bindStore)
     }
 
-    func barButtonPressed(type: FileListBarButtonType) {
+    func barButtonPressed(sender: Any? = nil, type: FileListBarButtonType) {
         if multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             multipleSelectionViewModel?.barButtonPressed(type: type)
         }

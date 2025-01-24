@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import kDriveCore
-import UIKit
 
 extension SaveFileViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {

@@ -71,6 +71,13 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    var publicShareExceptIds = [Int]()
+    var publicShareFileIds = [Int]()
+    var publicShareProxy: PublicShareProxy?
+    var isPublicShareFiles: Bool {
+        publicShareProxy != nil
+    }
+
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
@@ -110,8 +117,13 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    @MainActor var onDismissViewController: (() -> Void)?
+    @MainActor var onSave: (() -> Void)?
+
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!
+
+    // MARK: View lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -138,7 +150,7 @@ class SaveFileViewController: UIViewController {
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: PhotoFormatTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.floatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
         hideKeyboardWhenTappedAround()
@@ -158,21 +170,23 @@ class SaveFileViewController: UIViewController {
         )
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SaveFile"])
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SaveFile"])
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
+
+    // MARK: Objc
 
     @objc func keyboardWillShow(_ notification: Notification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
@@ -196,6 +210,48 @@ class SaveFileViewController: UIViewController {
         dismiss(animated: true)
         if let extensionContext {
             extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
+        }
+    }
+
+    // MARK: Helpers
+
+    func getBestDirectory() -> File? {
+        if lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id {
+            return lastSelectedDirectory
+        }
+
+        guard let selectedDriveFileManager else { return nil }
+
+        let myFilesDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter("rawVisibility = %@", FileVisibility.isPrivateSpace.rawValue)
+        }.first
+
+        if let myFilesDirectory {
+            return myFilesDirectory.freezeIfNeeded()
+        }
+
+        guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
+
+        let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
+            lazyFiles.filter(
+                "rawVisibility = %@ AND driveId == %d",
+                FileVisibility.isInSharedSpace.rawValue,
+                selectedDriveFileManager.drive.id
+            )
+        }.first
+        return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
+    }
+
+    func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
+        Task {
+            // Cleanup file that were duplicated to appGroup on extension mode
+            if appContextService.isExtension && clean {
+                await items.concurrentForEach { item in
+                    try? FileManager.default.removeItem(at: item.path)
+                }
+            }
+
+            navigationController?.dismiss(animated: animated, completion: completion)
         }
     }
 
@@ -237,48 +293,22 @@ class SaveFileViewController: UIViewController {
     }
 
     func updateButton() {
-        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !items.isEmpty && !importInProgress
-    }
-
-    func getBestDirectory() -> File? {
-        if lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id {
-            return lastSelectedDirectory
+        guard selectedDirectory != nil, !importInProgress else {
+            enableButton = false
+            return
         }
 
-        guard let selectedDriveFileManager else { return nil }
-
-        let myFilesDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
-            lazyFiles.filter("rawVisibility = %@", FileVisibility.isPrivateSpace.rawValue)
-        }.first
-
-        if let myFilesDirectory {
-            return myFilesDirectory.freezeIfNeeded()
+        guard !isPublicShareFiles else {
+            enableButton = true
+            return
         }
 
-        // If we are in a shared with me, we only have access to some folders that are shared with the user
-        guard selectedDriveFileManager.drive.sharedWithMe else { return nil }
-
-        let firstAvailableSharedDriveDirectory = selectedDriveFileManager.database.fetchResults(ofType: File.self) { lazyFiles in
-            lazyFiles.filter(
-                "rawVisibility = %@ AND driveId == %d",
-                FileVisibility.isInSharedSpace.rawValue,
-                selectedDriveFileManager.drive.id
-            )
-        }.first
-        return firstAvailableSharedDriveDirectory?.freezeIfNeeded()
-    }
-
-    func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
-        Task {
-            // Cleanup file that were duplicated to appGroup on extension mode
-            if appContextService.isExtension && clean {
-                await items.concurrentForEach { item in
-                    try? FileManager.default.removeItem(at: item.path)
-                }
-            }
-
-            navigationController?.dismiss(animated: animated, completion: completion)
+        guard !items.isEmpty,
+              items.allSatisfy({ !$0.name.isEmpty }) else {
+            enableButton = false
+            return
         }
+        enableButton = true
     }
 
     private func updateTableViewAfterImport() {
@@ -311,11 +341,31 @@ class SaveFileViewController: UIViewController {
         }
     }
 
+    // MARK: Class methods
+
     class func instantiate(driveFileManager: DriveFileManager?) -> SaveFileViewController {
         let viewController = Storyboard.saveFile
             .instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
+    }
+
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager,
+                                                 publicShareProxy: PublicShareProxy,
+                                                 publicShareFileIds: [Int],
+                                                 publicShareExceptIds: [Int],
+                                                 onSave: (() -> Void)?,
+                                                 onDismissViewController: (() -> Void)?)
+        -> TitleSizeAdjustingNavigationController {
+        let saveViewController = instantiate(driveFileManager: driveFileManager)
+
+        saveViewController.publicShareFileIds = publicShareFileIds
+        saveViewController.publicShareExceptIds = publicShareExceptIds
+        saveViewController.publicShareProxy = publicShareProxy
+        saveViewController.onSave = onSave
+        saveViewController.onDismissViewController = onDismissViewController
+
+        return wrapInNavigationController(saveViewController)
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager?,
@@ -324,7 +374,12 @@ class SaveFileViewController: UIViewController {
         if let files {
             saveViewController.items = files
         }
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: saveViewController)
+
+        return wrapInNavigationController(saveViewController)
+    }
+
+    private class func wrapInNavigationController(_ viewController: UIViewController) -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: viewController)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }

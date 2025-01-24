@@ -25,6 +25,40 @@ import SnackBar
 import UIKit
 
 public enum UIConstants {
+    public enum Padding {
+        public static let small: CGFloat = 8.0
+        public static let medium: CGFloat = 16.0
+        public static let standard: CGFloat = 24.0
+    }
+
+    public enum Button {
+        public static let largeHeight: CGFloat = 60.0
+        public static let cornerRadius = 10.0
+    }
+
+    public enum List {
+        public static let paddingBottom = 50.0
+        public static let publicSharePaddingBottom = 90.0
+        public static let floatingButtonPaddingBottom = 75.0
+    }
+
+    public enum FloatingPanel {
+        public static let cornerRadius = 20.0
+        public static let headerHeight = 70.0
+    }
+
+    public enum Image {
+        public static let cornerRadius = 3.0
+    }
+
+    public enum Alert {
+        public static let cornerRadius = 8.0
+    }
+
+    public enum FileList {
+        public static let cellHeight = 60.0
+    }
+
     private static let style: SnackBarStyle = {
         var style = SnackBarStyle.infomaniakStyle
         style.anchor = 20.0
@@ -32,26 +66,18 @@ public enum UIConstants {
         return style
     }()
 
-    public static let inputCornerRadius = 2.0
-    public static let imageCornerRadius = 3.0
     public static let cornerRadius = 6.0
-    public static let alertCornerRadius = 8.0
-    public static let buttonCornerRadius = 10.0
-    public static let floatingPanelCornerRadius = 20.0
-    public static let listPaddingBottom = 50.0
-    public static let listFloatingButtonPaddingBottom = 75.0
-    public static let homeListPaddingTop = 16.0
-    public static let floatingPanelHeaderHeight = 70.0
-    public static let fileListCellHeight = 60.0
     public static let largeTitleHeight = 96.0
     public static let insufficientStorageMinimumPercentage = 90.0
     public static let dropDelay = -1.0
+}
 
+public extension UIConstants {
     @discardableResult
     @MainActor
-    public static func showSnackBar(message: String,
-                                    duration: SnackBar.Duration = .lengthLong,
-                                    action: IKSnackBar.Action? = nil) -> IKSnackBar? {
+    static func showSnackBar(message: String,
+                             duration: SnackBar.Duration = .lengthLong,
+                             action: IKSnackBar.Action? = nil) -> IKSnackBar? {
         let snackbar = IKSnackBar.make(message: message,
                                        duration: duration,
                                        style: style)
@@ -65,7 +91,7 @@ public enum UIConstants {
 
     @discardableResult
     @MainActor
-    public static func showCancelableSnackBar(
+    static func showCancelableSnackBar(
         message: String,
         cancelSuccessMessage: String,
         duration: SnackBar.Duration = .lengthLong,
@@ -94,7 +120,7 @@ public enum UIConstants {
     }
 
     @MainActor
-    public static func showSnackBarIfNeeded(error: Error) {
+    static func showSnackBarIfNeeded(error: Error) {
         if (ReachabilityListener.instance.currentStatus == .offline || ReachabilityListener.instance.currentStatus == .undefined)
             && (error.asAFError?.isRequestAdaptationError == true || error.asAFError?.isSessionTaskError == true) {
             // No network and refresh token failed
@@ -107,13 +133,13 @@ public enum UIConstants {
         }
     }
 
-    public static func openUrl(_ string: String, from viewController: UIViewController) {
+    static func openUrl(_ string: String, from viewController: UIViewController) {
         if let url = URL(string: string) {
             openUrl(url, from: viewController)
         }
     }
 
-    public static func openUrl(_ url: URL, from viewController: UIViewController) {
+    static func openUrl(_ url: URL, from viewController: UIViewController) {
         #if ISEXTENSION
         viewController.extensionContext?.open(url)
         #else
@@ -121,7 +147,7 @@ public enum UIConstants {
         #endif
     }
 
-    public static func presentLinkPreviewForFile(
+    static func presentLinkPreviewForFile(
         _ file: File,
         link: String,
         from viewController: UIViewController,

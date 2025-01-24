@@ -383,9 +383,9 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toShareLinkSettingsSegue" {
-            let nextVC = segue.destination as! ShareLinkSettingsViewController
-            nextVC.driveFileManager = driveFileManager
-            nextVC.file = file
+            let destinationViewController = segue.destination as! ShareLinkSettingsViewController
+            destinationViewController.driveFileManager = driveFileManager
+            destinationViewController.file = file
         }
     }
 

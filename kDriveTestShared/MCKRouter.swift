@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import kDrive
 import kDriveCore
 import UIKit
@@ -74,11 +75,23 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func showUpsaleFloatingPanel() {
+        logNoop()
+    }
+
     public func showUpdateRequired() {
         logNoop()
     }
 
     public func showPhotoSyncSettings() {
+        logNoop()
+    }
+
+    public func showLogin(delegate: InfomaniakLoginDelegate) {
+        logNoop()
+    }
+
+    public func showRegister(delegate: InfomaniakLoginDelegate) {
         logNoop()
     }
 
@@ -146,6 +159,23 @@ public final class MCKRouter: AppNavigable {
     }
 
     public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
+        logNoop()
+    }
+
+    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+        logNoop()
+    }
+
+    @MainActor public func presentPublicShareExpired() {
+        logNoop()
+    }
+
+    @MainActor public func presentPublicShare(
+        frozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
         logNoop()
     }
 }

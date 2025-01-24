@@ -73,7 +73,12 @@ class SelectFolderViewController: FileListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: UIConstants.List.floatingButtonPaddingBottom,
+            right: 0
+        )
 
         view.addSubview(selectFolderButton)
 
@@ -201,7 +206,7 @@ class SelectFolderViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = viewModel.getFile(at: indexPath)!
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController(
+            let destinationViewController = SelectFolderViewController(
                 viewModel: SelectFolderViewModel(
                     driveFileManager: viewModel.driveFileManager,
                     currentDirectory: selectedFile
@@ -211,7 +216,7 @@ class SelectFolderViewController: FileListViewController {
                 delegate: delegate,
                 selectHandler: selectHandler
             )
-            navigationController?.pushViewController(nextVC, animated: true)
+            navigationController?.pushViewController(destinationViewController, animated: true)
         }
     }
 }

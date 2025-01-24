@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import SafariServices
@@ -33,6 +34,8 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var reviewManager: ReviewManageable
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService private var deeplinkService: DeeplinkServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -144,6 +147,7 @@ public struct AppRouter: AppNavigable {
             Task {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
+                deeplinkService.processDeeplinksPostAuthentication()
             }
         case .onboarding:
             showOnboarding()
@@ -412,6 +416,16 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    @MainActor public func showUpsaleFloatingPanel() {
+        guard let topMostViewController else {
+            return
+        }
+
+        let upsaleFloatingPanelController = UpsaleViewController
+            .instantiateInFloatingPanel(rootViewController: topMostViewController)
+        topMostViewController.present(upsaleFloatingPanelController, animated: true)
+    }
+
     @MainActor public func showUpdateRequired() {
         guard let window else {
             SentryDebug.captureNoWindow()
@@ -442,6 +456,27 @@ public struct AppRouter: AppNavigable {
     public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
         let vc = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, files: files)
         viewController.present(vc, animated: true)
+    }
+
+    @MainActor public func showRegister(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
+        let registerViewController = RegisterViewController.instantiateInNavigationController(delegate: delegate)
+        topMostViewController.present(registerViewController, animated: true)
+    }
+
+    @MainActor public func showLogin(delegate: InfomaniakLoginDelegate) {
+        guard let topMostViewController else {
+            return
+        }
+
+        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
+        infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
+                                         hideCreateAccountButton: true,
+                                         delegate: delegate)
     }
 
     // MARK: AppExtensionRouter
@@ -584,6 +619,84 @@ public struct AppRouter: AppNavigable {
     }
 
     // MARK: RouterFileNavigable
+
+    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = LockedFolderViewController()
+            viewController.destinationURL = destinationURL
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
+    @MainActor public func presentPublicShareExpired() {
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let viewController = UnavaillableFolderViewController()
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
+
+    @MainActor public func presentPublicShare(
+        frozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            return
+        }
+
+        if let topMostViewController, (topMostViewController as? LockedAppViewController) != nil {
+            return
+        }
+
+        rootViewController.dismiss(animated: false) {
+            let configuration = FileListViewModel.Configuration(selectAllSupported: true,
+                                                                rootTitle: nil,
+                                                                emptyViewType: .emptyFolder,
+                                                                supportsDrop: false,
+                                                                leftBarButtons: [.cancel],
+                                                                rightBarButtons: [.downloadAll],
+                                                                matomoViewPath: [
+                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    "publicShare"
+                                                                ])
+
+            let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                                 sortType: .nameAZ,
+                                                 driveFileManager: driveFileManager,
+                                                 currentDirectory: frozenRootFolder,
+                                                 apiFetcher: apiFetcher,
+                                                 configuration: configuration)
+            let viewController = FileListViewController(viewModel: viewModel)
+            viewModel.onDismissViewController = { [weak viewController] in
+                viewController?.dismiss(animated: false)
+            }
+            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
+            publicShareNavigationController.modalPresentationStyle = .fullScreen
+            publicShareNavigationController.modalTransitionStyle = .coverVertical
+
+            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+        }
+    }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
         present(file: file, driveFileManager: driveFileManager, office: false)

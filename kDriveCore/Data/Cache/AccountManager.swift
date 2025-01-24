@@ -24,6 +24,19 @@ import InfomaniakLogin
 import RealmSwift
 import Sentry
 
+// TODO: Delete
+public class SomeRefreshTokenDelegate: RefreshTokenDelegate {
+    public init() {}
+
+    public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+        print("noop")
+    }
+
+    public func didFailRefreshToken(_ token: ApiToken) {
+        print("noop")
+    }
+}
+
 public protocol UpdateAccountDelegate: AnyObject {
     @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account)
 }
@@ -55,6 +68,9 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
+
+    /// Create on the fly an "in memory" DriveFileManager for a specific share
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager?
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher
     func getTokenForUserId(_ id: Int) -> ApiToken?
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken)
@@ -82,6 +98,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -183,6 +200,29 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager? {
+        if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
+            return inMemoryDriveFileManager
+        }
+
+        // FileViewModel K.O. without a valid drive in Realm, therefore add one
+        let publicShareDrive = Drive()
+        publicShareDrive.objectId = publicShareId
+
+        do {
+            try driveInfosManager.storePublicShareDrive(drive: publicShareDrive)
+        } catch {
+            DDLogError("Failed to store public share drive in base, \(error)")
+            return nil
+        }
+
+        let frozenPublicShareDrive = publicShareDrive.freeze()
+        let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: rootFileId, shareLinkUid: publicShareId)
+        let context = DriveFileManagerContext.publicShare(shareProxy: publicShareProxy)
+
+        return DriveFileManager(drive: frozenPublicShareDrive, apiFetcher: DriveApiFetcher(), context: context)
     }
 
     public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
@@ -507,6 +547,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
+            deeplinkService.clearLastPublicShare()
+
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)
             }

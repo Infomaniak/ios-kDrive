@@ -153,7 +153,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         navigationItem.hideBackButtonText()
@@ -475,8 +475,11 @@ extension HomeViewController: RecentActivityDelegate {
         }
 
         if activities.count > 3 && index > 1 {
-            let nextVC = RecentActivityFilesViewController(activities: activities, driveFileManager: driveFileManager)
-            filePresenter.navigationController?.pushViewController(nextVC, animated: true)
+            let destinationViewController = RecentActivityFilesViewController(
+                activities: activities,
+                driveFileManager: driveFileManager
+            )
+            filePresenter.navigationController?.pushViewController(destinationViewController, animated: true)
         } else {
             filePresenter.present(
                 for: driveFileManager.getManagedFile(from: file),

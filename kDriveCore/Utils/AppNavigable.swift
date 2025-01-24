@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import UIKit
 
 /// Something that can navigate to specific places of the kDrive app
@@ -36,6 +37,8 @@ public protocol RouterAppNavigable {
 
     @MainActor func showLaunchFloatingPanel()
 
+    @MainActor func showUpsaleFloatingPanel()
+
     @MainActor func showUpdateRequired()
 
     @MainActor func showPhotoSyncSettings()
@@ -45,6 +48,10 @@ public protocol RouterAppNavigable {
         driveFileManager: DriveFileManager,
         files: [ImportedFile]
     )
+
+    @MainActor func showLogin(delegate: InfomaniakLoginDelegate)
+
+    @MainActor func showRegister(delegate: InfomaniakLoginDelegate)
 }
 
 /// Routing methods available from both the AppExtension mode and App
@@ -67,6 +74,20 @@ public protocol RouterFileNavigable {
     ///   - driveFileManager: driveFileManager
     ///   - office: Open in only office
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
+
+    /// Present the public share locked screen
+    @MainActor func presentPublicShareLocked(_ destinationURL: URL)
+
+    /// Present the public share expired screen
+    @MainActor func presentPublicShareExpired()
+
+    /// Present a file list for a public share, regardless of authenticated state
+    @MainActor func presentPublicShare(
+        frozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    )
 
     /// Present a list of files from a folder
     /// - Parameters:

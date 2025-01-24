@@ -52,6 +52,7 @@ public class FloatingPanelAction: Equatable {
         case shareAndRights
         case shareLink
         case upsaleColor
+        case addToMyDrive
     }
 
     init(
@@ -188,6 +189,11 @@ public class FloatingPanelAction: Equatable {
         name: KDriveResourcesStrings.Localizable.buttonChangeFolderColor,
         image: KDriveResourcesAsset.colorBucket.image
     )
+    static let addToMyDrive = FloatingPanelAction(
+        id: .addToMyDrive,
+        name: KDriveResourcesStrings.Localizable.buttonAddToKDrive,
+        image: KDriveResourcesAsset.drive.image
+    )
 
     static var listActions: [FloatingPanelAction] {
         return [
@@ -223,6 +229,18 @@ public class FloatingPanelAction: Equatable {
             delete,
             cancelImport
         ].map { $0.reset() }
+    }
+
+    static var publicShareActions: [FloatingPanelAction] {
+        return [openWith, sendCopy, download, addToMyDrive].map { $0.reset() }
+    }
+
+    static var publicShareFolderActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+
+    static var multipleSelectionPublicShareActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
     }
 
     static var quickActions: [FloatingPanelAction] {

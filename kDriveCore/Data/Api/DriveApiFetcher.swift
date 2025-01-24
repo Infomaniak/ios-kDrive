@@ -52,6 +52,54 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
     }
 }
 
+public struct PublicShareMetadata: Decodable {
+    public let url: URL
+    public let fileId: Int
+    public let right: String
+
+    public let validUntil: TimeInterval?
+    public let capabilities: Rights
+
+    public let createdBy: TimeInterval
+    public let createdAt: TimeInterval
+    public let updatedAt: TimeInterval
+    public let accessBlocked: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case url
+        case fileId
+        case right
+        case validUntil
+        case capabilities
+        case createdBy
+        case createdAt
+        case updatedAt
+        case accessBlocked
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        do {
+            url = try container.decode(URL.self, forKey: .url)
+            fileId = try container.decode(Int.self, forKey: .fileId)
+            right = try container.decode(String.self, forKey: .right)
+
+            validUntil = try container.decodeIfPresent(TimeInterval.self, forKey: .validUntil)
+            capabilities = try container.decode(Rights.self, forKey: .capabilities)
+
+            createdBy = try container.decode(TimeInterval.self, forKey: .createdBy)
+            createdAt = try container.decode(TimeInterval.self, forKey: .createdAt)
+            updatedAt = try container.decode(TimeInterval.self, forKey: .updatedAt)
+
+            accessBlocked = try container.decode(Bool.self, forKey: .accessBlocked)
+        } catch {
+            // TODO: remove
+            fatalError("error:\(error)")
+        }
+    }
+}
+
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakNetworkLoginable
@@ -501,6 +549,48 @@ public class DriveApiFetcher: ApiFetcher {
     public func file(_ file: AbstractFile) async throws -> File {
         try await perform(request: authenticatedRequest(.file(file)))
     }
+
+    public func importShareLinkFiles(sourceDriveId: Int,
+                                     destinationDriveId: Int,
+                                     destinationFolderId: Int,
+                                     fileIds: [Int]?,
+                                     exceptIds: [Int]?,
+                                     sharelinkUuid: String,
+                                     password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
+        let destinationDrive = ProxyDrive(id: destinationDriveId)
+        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
+        var requestParameters: Parameters = [
+            PublicShareAPIParameters.sourceDriveId: sourceDriveId,
+            PublicShareAPIParameters.destinationFolderId: destinationFolderId,
+            PublicShareAPIParameters.sharelinkUuid: sharelinkUuid
+        ]
+
+        if let fileIds, !fileIds.isEmpty {
+            requestParameters[PublicShareAPIParameters.fileIds] = fileIds
+        } else if let exceptIds, !exceptIds.isEmpty {
+            requestParameters[PublicShareAPIParameters.exceptFileIds] = exceptIds
+        }
+
+        if let password {
+            requestParameters[PublicShareAPIParameters.password] = password
+        }
+
+        let result: ValidServerResponse<FileExternalImport> = try await perform(request: authenticatedRequest(
+            importShareLinkFiles,
+            method: .post,
+            parameters: requestParameters
+        ))
+        return result
+    }
+}
+
+enum PublicShareAPIParameters {
+    static let sourceDriveId = "source_drive_id"
+    static let fileIds = "file_ids"
+    static let exceptFileIds = "except_file_ids"
+    static let password = "password"
+    static let destinationFolderId = "destination_folder_id"
+    static let sharelinkUuid = "sharelink_uuid"
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {

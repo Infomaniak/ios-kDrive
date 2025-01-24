@@ -110,7 +110,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
@@ -275,6 +275,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         }
 
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        destinationViewModel.onDismissViewController = { [weak destinationViewController] in
+            destinationViewController?.dismiss(animated: true)
+        }
+
         navigationController?.pushViewController(destinationViewController, animated: true)
     }
 

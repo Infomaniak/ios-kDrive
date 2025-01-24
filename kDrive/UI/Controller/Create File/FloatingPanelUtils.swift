@@ -25,7 +25,7 @@ class DriveFloatingPanelController: FloatingPanelController {
     init() {
         super.init(delegate: nil)
         let appearance = SurfaceAppearance()
-        appearance.cornerRadius = UIConstants.floatingPanelCornerRadius
+        appearance.cornerRadius = UIConstants.FloatingPanel.cornerRadius
         appearance.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         surfaceView.appearance = appearance
         surfaceView.grabberHandlePadding = 16
@@ -71,70 +71,5 @@ class AdaptiveDriveFloatingPanelController: DriveFloatingPanelController {
             self?.updateLayout(size: window.bounds.size)
         }
         track(scrollView: scrollView)
-    }
-}
-
-class FileFloatingPanelLayout: FloatingPanelLayout {
-    var position: FloatingPanelPosition = .bottom
-    var initialState: FloatingPanelState = .tip
-    var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring]
-    private var backdropAlpha: CGFloat
-
-    init(initialState: FloatingPanelState = .tip, hideTip: Bool = false, safeAreaInset: CGFloat = 0, backdropAlpha: CGFloat = 0) {
-        self.initialState = initialState
-        self.backdropAlpha = backdropAlpha
-        if hideTip {
-            anchors = [
-                .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
-                .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea)
-            ]
-        } else {
-            anchors = [
-                .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
-                .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea),
-                .tip: FloatingPanelLayoutAnchor(absoluteInset: 86.0 + safeAreaInset, edge: .bottom, referenceGuide: .superview)
-            ]
-        }
-    }
-
-    func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
-        return backdropAlpha
-    }
-}
-
-class PlusButtonFloatingPanelLayout: FloatingPanelLayout {
-    var position: FloatingPanelPosition = .bottom
-    var height: CGFloat = 16
-
-    init(height: CGFloat) {
-        self.height = height
-    }
-
-    var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring] {
-        return [
-            .full: FloatingPanelLayoutAnchor(absoluteInset: height, edge: .bottom, referenceGuide: .safeArea)
-        ]
-    }
-
-    var initialState: FloatingPanelState = .full
-
-    func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
-        return 0.2
-    }
-}
-
-class InformationViewFloatingPanelLayout: FloatingPanelLayout {
-    var position: FloatingPanelPosition = .bottom
-
-    var initialState: FloatingPanelState = .full
-
-    var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring] {
-        return [
-            .full: FloatingPanelIntrinsicLayoutAnchor(absoluteOffset: 0, referenceGuide: .safeArea)
-        ]
-    }
-
-    func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
-        return 0.3
     }
 }

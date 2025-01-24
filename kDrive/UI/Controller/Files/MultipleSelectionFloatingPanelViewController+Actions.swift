@@ -100,53 +100,88 @@ extension MultipleSelectionFloatingPanelViewController {
     }
 
     private func downloadAction(group: DispatchGroup, at indexPath: IndexPath) {
-        if !allItemsSelected &&
-            (files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1) {
-            for file in files {
-                if file.isDownloaded {
-                    FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
-                } else {
-                    guard let observerViewController = view.window?.rootViewController else { return }
-                    downloadInProgress = true
-                    collectionView.reloadItems(at: [indexPath])
-                    group.enter()
-                    DownloadQueue.instance
-                        .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
-                            guard let self else { return }
-                            if error == nil {
-                                Task { @MainActor in
-                                    FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
-                                }
-                            } else {
-                                success = false
-                            }
-                            group.leave()
-                        }
-                    DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
-                }
-            }
+        if !allItemsSelected,
+           files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1 {
+            downloadActionMediaOrSingleFile(group: group, at: indexPath)
         } else {
-            if downloadInProgress,
-               let currentArchiveId,
-               let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
-                group.enter()
-                let alert = AlertTextViewController(
-                    title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
-                    message: KDriveResourcesStrings.Localizable.cancelDownloadDescription,
-                    action: KDriveResourcesStrings.Localizable.buttonYes,
-                    destructive: true
-                ) {
-                    operation.cancel()
-                    self.downloadError = .taskCancelled
-                    self.success = false
+            downloadActionArchive(group: group, at: indexPath)
+        }
+    }
+
+    private func downloadActionMediaOrSingleFile(group: DispatchGroup, at indexPath: IndexPath) {
+        for file in files {
+            guard !file.isDownloaded else {
+                FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                return
+            }
+
+            guard let observerViewController = view.window?.rootViewController else {
+                return
+            }
+
+            downloadInProgress = true
+            collectionView.reloadItems(at: [indexPath])
+            group.enter()
+            DownloadQueue.instance
+                .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
+                    guard let self else { return }
+                    if error == nil {
+                        Task { @MainActor in
+                            FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                        }
+                    } else {
+                        success = false
+                    }
                     group.leave()
                 }
-                present(alert, animated: true)
+
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                DownloadQueue.instance.addPublicShareToQueue(file: file,
+                                                             driveFileManager: driveFileManager,
+                                                             publicShareProxy: publicShareProxy)
             } else {
-                downloadedArchiveUrl = nil
-                downloadInProgress = true
-                collectionView.reloadItems(at: [indexPath])
-                group.enter()
+                DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+            }
+        }
+    }
+
+    private func downloadActionArchive(group: DispatchGroup, at indexPath: IndexPath) {
+        if downloadInProgress,
+           let currentArchiveId,
+           let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+            group.enter()
+            let alert = AlertTextViewController(
+                title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
+                message: KDriveResourcesStrings.Localizable.cancelDownloadDescription,
+                action: KDriveResourcesStrings.Localizable.buttonYes,
+                destructive: true
+            ) {
+                operation.cancel()
+                self.downloadError = .taskCancelled
+                self.success = false
+                group.leave()
+            }
+            present(alert, animated: true)
+        } else {
+            downloadedArchiveUrl = nil
+            downloadInProgress = true
+            collectionView.reloadItems(at: [indexPath])
+            group.enter()
+
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                downloadPublicShareArchivedFiles(downloadCellPath: indexPath,
+                                                 publicShareProxy: publicShareProxy) { result in
+                    switch result {
+                    case .success(let archiveUrl):
+                        self.downloadedArchiveUrl = archiveUrl
+                        self.success = true
+                    case .failure(let error):
+                        self.downloadError = error
+                        self.success = false
+                    }
+                    group.leave()
+                }
+            } else {
                 downloadArchivedFiles(downloadCellPath: indexPath) { result in
                     switch result {
                     case .success(let archiveUrl):

@@ -93,7 +93,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
         forceRefresh()
     }
 
-    override func barButtonPressed(type: FileListBarButtonType) {
+    override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         if type == .emptyTrash {
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalEmptyTrashTitle,
                                                 message: KDriveResourcesStrings.Localizable.modalEmptyTrashDescription,
@@ -104,7 +104,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
             }
             onPresentViewController?(.modal, alert, true)
         } else {
-            super.barButtonPressed(type: type)
+            super.barButtonPressed(sender: sender, type: type)
         }
     }
 

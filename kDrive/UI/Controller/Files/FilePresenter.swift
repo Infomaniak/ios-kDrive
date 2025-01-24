@@ -145,15 +145,36 @@ final class FilePresenter {
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            let configuration = FileListViewModel.Configuration(selectAllSupported: true,
+                                                                rootTitle: nil,
+                                                                emptyViewType: .emptyFolder,
+                                                                supportsDrop: false,
+                                                                rightBarButtons: [.downloadAll],
+                                                                matomoViewPath: [
+                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    "publicShare"
+                                                                ])
+
+            viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                             sortType: .nameAZ,
+                                             driveFileManager: driveFileManager,
+                                             currentDirectory: file,
+                                             apiFetcher: PublicShareApiFetcher(),
+                                             configuration: configuration)
         } else if file.isTrashed || file.deletedAt != nil {
             viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         } else {
             viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         }
 
-        let nextVC = FileListViewController(viewModel: viewModel)
+        let destinationViewController = FileListViewController(viewModel: viewModel)
+        viewModel.onDismissViewController = { [weak destinationViewController] in
+            destinationViewController?.dismiss(animated: true)
+        }
+
         guard file.isDisabled else {
-            navigationController?.pushViewController(nextVC, animated: animated)
+            navigationController?.pushViewController(destinationViewController, animated: animated)
             return
         }
 
@@ -173,7 +194,7 @@ final class FilePresenter {
                     let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
                     if response {
                         accessFileDriveFloatingPanelController.dismiss(animated: true)
-                        self.navigationController?.pushViewController(nextVC, animated: true)
+                        self.navigationController?.pushViewController(destinationViewController, animated: true)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
                     }

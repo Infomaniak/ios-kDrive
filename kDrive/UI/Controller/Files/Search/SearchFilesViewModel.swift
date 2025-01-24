@@ -155,7 +155,7 @@ class SearchFilesViewModel: FileListViewModel {
         startObservation()
     }
 
-    override func barButtonPressed(type: FileListBarButtonType) {
+    override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         if type == .searchFilters {
             let navigationController = SearchFiltersViewController
                 .instantiateInNavigationController(driveFileManager: driveFileManager)
@@ -164,7 +164,7 @@ class SearchFilesViewModel: FileListViewModel {
             searchFiltersViewController?.delegate = self
             onPresentViewController?(.modal, navigationController, true)
         } else {
-            super.barButtonPressed(type: type)
+            super.barButtonPressed(sender: sender, type: type)
         }
     }
 

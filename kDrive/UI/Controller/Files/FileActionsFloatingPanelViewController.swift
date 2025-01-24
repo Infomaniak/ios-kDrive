@@ -130,7 +130,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .header:
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1),
-                    heightDimension: .absolute(UIConstants.fileListCellHeight)
+                    heightDimension: .absolute(UIConstants.FileList.cellHeight)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
@@ -178,7 +178,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         present(activityViewController, animated: true)
     }
 
-    func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
+    func downloadFile(action: FloatingPanelAction,
+                      indexPath: IndexPath,
+                      completion: @escaping () -> Void) {
         guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
@@ -195,7 +197,15 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                 }
             }
-        DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            DownloadQueue.instance.addPublicShareToQueue(file: file,
+                                                         driveFileManager: driveFileManager,
+                                                         publicShareProxy: publicShareProxy)
+        } else {
+            DownloadQueue.instance.addToQueue(file: file,
+                                              userId: accountManager.currentUserId)
+        }
     }
 
     func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
@@ -267,7 +277,17 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
-        MatomoUtils.trackFileAction(action: action, file: file, fromPhotoList: presentingParent is PhotoListViewController)
+
+        let eventCategory: MatomoUtils.EventCategory
+        if presentingParent is PhotoListViewController {
+            eventCategory = .picturesFileAction
+        } else if driveFileManager.isPublicShare {
+            eventCategory = .publicShareAction
+        } else {
+            eventCategory = .fileListFileAction
+        }
+
+        MatomoUtils.trackFileAction(action: action, file: file, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }

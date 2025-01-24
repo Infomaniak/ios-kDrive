@@ -26,6 +26,12 @@ import Lottie
 import UIKit
 
 class OnboardingViewController: UIViewController {
+    @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
+
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+
     private lazy var loginDelegateHandler: LoginDelegateHandler = {
         let loginDelegateHandler = LoginDelegateHandler()
         loginDelegateHandler.didStartLoginCallback = { [weak self] in
@@ -61,14 +67,8 @@ class OnboardingViewController: UIViewController {
     @IBOutlet var nextButtonHeight: NSLayoutConstraint!
     @IBOutlet var registerButtonHeight: NSLayoutConstraint!
 
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
-    @LazyInjectService var appNavigable: AppNavigable
-
     var addUser = false
     var slides: [Slide] = []
-
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -146,19 +146,15 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func signInButtonPressed(_ sender: Any) {
-        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Login WebView") { [weak self] in
             SentryDebug.capture(message: "Background task expired while logging in")
             self?.endBackgroundTask()
         }
-        infomaniakLogin.webviewLoginFrom(viewController: self,
-                                         hideCreateAccountButton: true,
-                                         delegate: loginDelegateHandler)
+        appNavigable.showLogin(delegate: loginDelegateHandler)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
-        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
-        present(RegisterViewController.instantiateInNavigationController(delegate: loginDelegateHandler), animated: true)
+        appNavigable.showRegister(delegate: loginDelegateHandler)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
