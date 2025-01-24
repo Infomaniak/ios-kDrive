@@ -64,6 +64,13 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     // MARK: - Properties
 
+    private var paddingBottom: CGFloat {
+        guard !driveFileManager.isPublicShare else {
+            return UIConstants.List.publicSharePaddingBottom
+        }
+        return UIConstants.List.paddingBottom
+    }
+
     var collectionViewFlowLayout: UICollectionViewFlowLayout? {
         collectionViewLayout as? UICollectionViewFlowLayout
     }
@@ -131,7 +138,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: headerViewIdentifier
         )
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self

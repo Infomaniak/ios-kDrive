@@ -38,6 +38,7 @@ public enum UIConstants {
 
     public enum List {
         public static let paddingBottom = 50.0
+        public static let publicSharePaddingBottom = 90.0
         public static let floatingButtonPaddingBottom = 75.0
     }
 
