@@ -130,6 +130,7 @@ protocol FileCellDelegate: AnyObject {
             .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
                 Task { @MainActor [weak self] in
                     guard let self else { return }
+                    guard !file.isInvalidated else { return }
                     handler(!file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
                 }
             }
