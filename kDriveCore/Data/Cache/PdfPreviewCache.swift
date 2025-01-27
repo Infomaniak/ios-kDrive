@@ -54,44 +54,65 @@ public class PdfPreviewCache {
     public func retrievePdf(for file: File, driveFileManager: DriveFileManager,
                             downloadTaskCreated: @escaping (URLSessionDownloadTask) -> Void,
                             completion: @escaping (URL?, Error?) -> Void) {
-        let pdfUrl = pdfPreviewUrl(for: file)
         if isLocalVersionOlderThanRemote(for: file) {
-            guard let token = driveFileManager.apiFetcher.currentToken else {
-                completion(nil, DriveError.unknownToken)
-                return
-            }
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                if let token {
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                let urlRequest = URLRequest(url: Endpoint.download(file: file, publicShareProxy: publicShareProxy, as: "pdf").url)
+                retrievePdf(for: file, urlRequest: urlRequest, downloadTaskCreated: downloadTaskCreated, completion: completion)
+            } else {
+                guard let token = driveFileManager.apiFetcher.currentToken else {
+                    completion(nil, DriveError.unknownToken)
+                    return
+                }
+
+                driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
+                    guard let token else { return }
                     var urlRequest = URLRequest(url: Endpoint.download(file: file, as: "pdf").url)
                     urlRequest.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                    let task = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
-                        if let url {
-                            do {
-                                let driveCacheDirectory = self.pdfCacheDirectory.appendingPathComponent(
-                                    "\(file.driveId)",
-                                    isDirectory: true
-                                )
-                                if !FileManager.default.fileExists(atPath: driveCacheDirectory.path) {
-                                    try FileManager.default.createDirectory(
-                                        at: driveCacheDirectory,
-                                        withIntermediateDirectories: true
-                                    )
-                                }
-                                try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: pdfUrl)
-                                completion(pdfUrl, nil)
-                            } catch {
-                                completion(nil, error)
-                            }
-                        } else {
-                            completion(nil, error ?? DriveError.unknownError)
-                        }
-                    }
-                    downloadTaskCreated(task)
-                    task.resume()
+                    self.retrievePdf(
+                        for: file,
+                        urlRequest: urlRequest,
+                        downloadTaskCreated: downloadTaskCreated,
+                        completion: completion
+                    )
                 }
             }
         } else {
+            let pdfUrl = pdfPreviewUrl(for: file)
             completion(pdfUrl, nil)
         }
+    }
+
+    private func retrievePdf(
+        for file: File,
+        urlRequest: URLRequest,
+        downloadTaskCreated: @escaping (URLSessionDownloadTask) -> Void,
+        completion: @escaping (URL?, Error?) -> Void
+    ) {
+        let pdfUrl = pdfPreviewUrl(for: file)
+        let task = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
+            guard let url else {
+                completion(nil, error ?? DriveError.unknownError)
+                return
+            }
+
+            do {
+                let driveCacheDirectory = self.pdfCacheDirectory.appendingPathComponent(
+                    "\(file.driveId)",
+                    isDirectory: true
+                )
+                if !FileManager.default.fileExists(atPath: driveCacheDirectory.path) {
+                    try FileManager.default.createDirectory(
+                        at: driveCacheDirectory,
+                        withIntermediateDirectories: true
+                    )
+                }
+                try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: pdfUrl)
+                completion(pdfUrl, nil)
+            } catch {
+                completion(nil, error)
+            }
+        }
+        downloadTaskCreated(task)
+        task.resume()
     }
 }
