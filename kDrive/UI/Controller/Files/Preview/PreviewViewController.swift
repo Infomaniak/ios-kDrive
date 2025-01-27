@@ -548,10 +548,23 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
+        downloadFile(at: indexPath)
+    }
+
+    private func downloadFile(at indexPath: IndexPath) {
         if let publicShareProxy = driveFileManager.publicShareProxy {
             downloadPublicShareFile(at: indexPath, publicShareProxy: publicShareProxy)
         } else {
-            downloadFile(at: indexPath)
+            DownloadQueue.instance.temporaryDownload(
+                file: currentFile,
+                userId: accountManager.currentUserId,
+                onOperationCreated: { operation in
+                    self.trackOperationCreated(at: indexPath, downloadOperation: operation)
+                },
+                completion: { error in
+                    self.downloadCompletion(at: indexPath, error: error)
+                }
+            )
         }
     }
 
@@ -563,19 +576,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             onOperationCreated: { operation in
                 self.trackOperationCreated(at: indexPath, downloadOperation: operation)
             }, completion: { error in
-                self.downloadCompletion(at: indexPath, error: error)
-            }
-        )
-    }
-
-    private func downloadFile(at indexPath: IndexPath) {
-        DownloadQueue.instance.temporaryDownload(
-            file: currentFile,
-            userId: accountManager.currentUserId,
-            onOperationCreated: { operation in
-                self.trackOperationCreated(at: indexPath, downloadOperation: operation)
-            },
-            completion: { error in
                 self.downloadCompletion(at: indexPath, error: error)
             }
         )
