@@ -147,6 +147,9 @@ public struct AppRouter: AppNavigable {
             Task {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
+                if #available(iOS 15, *) {
+                    await upSaleIfQuotaReached()
+                }
                 deeplinkService.processDeeplinksPostAuthentication()
             }
         case .onboarding:
@@ -508,6 +511,21 @@ public struct AppRouter: AppNavigable {
 
             window?.rootViewController?.present(alert, animated: true)
         }
+    }
+
+    @available(iOS 15, *) @MainActor
+    public func upSaleIfQuotaReached() {
+        guard let presentingViewController = window?.rootViewController,
+              !Bundle.main.isRunningInTestFlight else {
+            return
+        }
+
+        let floatingPanelViewController = FloatingPanelBridgeController()
+        let wrapperViewController = BridgeViewController()
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.set(contentViewController: wrapperViewController)
+
+        presentingViewController.present(floatingPanelViewController, animated: true)
     }
 
     public func askForReview() async {
