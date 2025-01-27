@@ -141,7 +141,7 @@ final class OnlyOfficeViewController: UIViewController {
         progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
 
         // Load request
-        if driveFileManager.isPublicShare{
+        if driveFileManager.isPublicShare {
             showErrorMessage()
         } else if let officeUrl = file.officeUrl, let url = ApiRoutes.mobileLogin(url: officeUrl.absoluteString) {
             if let token = driveFileManager.apiFetcher.currentToken {
