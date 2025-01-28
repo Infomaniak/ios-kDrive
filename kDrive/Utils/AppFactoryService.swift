@@ -35,7 +35,13 @@ public struct EarlyDIHook {
             }
         ]
 
-        #if !ISEXTENSION
+        #if ISEXTENSION
+        extraDependencies += [
+            Factory(type: AppNavigable.self) { _, _ in
+                InExtensionRouter()
+            }
+        ]
+        #else
         extraDependencies += [
             Factory(type: AppRestorationServiceable.self) { _, _ in
                 AppRestorationService()
