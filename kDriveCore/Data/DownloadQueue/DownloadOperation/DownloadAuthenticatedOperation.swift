@@ -253,11 +253,6 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
             return
         }
 
-        assert(
-            file.isDownloaded,
-            "Expecting to be downloaded at the end of the downloadOperation error:\(String(describing: error))"
-        )
-
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard let task = writableRealm.objects(DownloadTask.self)
                 .filter("sessionUrl = %@", sessionUrl.absoluteString)
