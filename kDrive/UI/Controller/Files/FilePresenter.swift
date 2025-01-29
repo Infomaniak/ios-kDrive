@@ -92,7 +92,7 @@ final class FilePresenter {
         if file.isDirectory {
             presentDirectory(for: file, driveFileManager: driveFileManager, animated: animated, completion: completion)
         } else if file.isBookmark {
-            downloadAndPresentBookmark(for: file, completion: completion)
+            downloadAndPresentBookmark(for: file, driveFileManager: driveFileManager, completion: completion)
         } else {
             presentFile(
                 for: file,
@@ -207,21 +207,30 @@ final class FilePresenter {
         viewController?.present(accessFileDriveFloatingPanelController, animated: true)
     }
 
-    private func downloadAndPresentBookmark(for file: File, completion: ((Bool) -> Void)?) {
-        // Open bookmark URL
+    private func downloadAndPresentBookmark(for file: File, driveFileManager: DriveFileManager, completion: ((Bool) -> Void)?) {
         if file.isMostRecentDownloaded {
             presentBookmark(for: file, completion: completion)
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            DownloadQueue.instance.addPublicShareToQueue(file: file,
+                                                         driveFileManager: driveFileManager,
+                                                         publicShareProxy: publicShareProxy,
+                                                         onOperationCreated: nil) { error in
+                self.onBookmarkDownloaded(for: file, error: error, completion: completion)
+            }
         } else {
-            // Download file
             DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
-                Task {
-                    if let error {
-                        UIConstants.showSnackBarIfNeeded(error: error)
-                        completion?(false)
-                    } else {
-                        self.presentBookmark(for: file, completion: completion)
-                    }
-                }
+                self.onBookmarkDownloaded(for: file, error: error, completion: completion)
+            }
+        }
+    }
+
+    private func onBookmarkDownloaded(for file: File, error: DriveError?, completion: ((Bool) -> Void)?) {
+        Task {
+            if let error {
+                UIConstants.showSnackBarIfNeeded(error: error)
+                completion?(false)
+            } else {
+                self.presentBookmark(for: file, completion: completion)
             }
         }
     }

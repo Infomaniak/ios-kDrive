@@ -206,6 +206,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         }
 
                         deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
+                        updatedItems.removeAll { $0.id == existingDeletedFile.id }
                         writableRealm.delete(existingDeletedFile)
                     }
 

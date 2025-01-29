@@ -106,24 +106,36 @@ public final class SingleTrackPlayer: Pausable {
             Task {
                 await setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
             }
+        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+            let url = Endpoint.downloadShareLinkFile(
+                driveId: publicShareProxy.driveId,
+                linkUuid: publicShareProxy.shareLinkUid,
+                fileId: playableFile.id
+            ).url
+            let asset = AVURLAsset(url: url)
+            setupStreamingAsset(asset, fileName: playableFile.name)
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 guard let token else { return }
-                Task { @MainActor in
-                    let url = Endpoint.download(file: playableFile).url
-                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                    self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-                    await self.setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
-                    self.setUpObservers()
-
-                    self.currentItemStatusObserver = self.player?.observe(\.currentItem?.status) { _, _ in
-                        self.handleItemStatusChange()
-                    }
-                }
+                let url = Endpoint.download(file: playableFile).url
+                let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                self.setupStreamingAsset(asset, fileName: playableFile.name)
             }
         } else {
             onPlaybackError.send(.previewLoadErrorNoToken)
+        }
+    }
+
+    private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) {
+        Task { @MainActor in
+            player = AVPlayer(playerItem: AVPlayerItem(asset: urlAsset))
+            await setMetaData(from: urlAsset.commonMetadata, playableFileName: fileName)
+            setUpObservers()
+
+            currentItemStatusObserver = player?.observe(\.currentItem?.status) { _, _ in
+                self.handleItemStatusChange()
+            }
         }
     }
 
