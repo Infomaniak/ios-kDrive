@@ -40,6 +40,7 @@ enum DriveInitWith: String, CaseIterable {
     case drivesTeams = "drives.teams"
     case drivesRewind = "drives.rewind"
     case drivesAccount = "drives.account"
+    case quota // TODO: This should no longer be useful once the backend PR is in prod
 }
 
 extension [DriveInitWith] {
