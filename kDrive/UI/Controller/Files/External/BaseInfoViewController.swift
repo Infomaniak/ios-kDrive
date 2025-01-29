@@ -18,11 +18,14 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class BaseInfoViewController: UIViewController {
+    @LazyInjectService private var deeplinkService: DeeplinkServiceable
+
     let titleLabel: IKLabel = {
         let label = IKLabel()
         label.style = .header1
@@ -98,6 +101,7 @@ class BaseInfoViewController: UIViewController {
     }
 
     @objc open func closeButtonPressed() {
+        deeplinkService.clearLastPublicShare()
         dismiss(animated: true)
     }
 }
