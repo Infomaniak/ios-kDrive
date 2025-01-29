@@ -150,7 +150,8 @@ let project = Project(name: "kDrive",
                                       .external(name: "SwiftRegex"),
                                       .external(name: "Sentry-Dynamic"),
                                       .external(name: "VersionChecker"),
-                                      .external(name: "LocalizeKit")
+                                      .external(name: "LocalizeKit"),
+                                      .external(name: "MyKSuite")
                                   ]),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,
