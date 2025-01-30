@@ -171,7 +171,7 @@ public final class Drive: Object, Codable {
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
         isInAppSubscription = try values.decode(Bool.self, forKey: .isInAppSubscription)
-        quota = try? values.decodeIfPresent(DriveQuota.self, forKey: .isInAppSubscription)
+        quota = try values.decode(DriveQuota.self, forKey: .isInAppSubscription)
     }
 
     override public init() {
