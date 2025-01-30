@@ -83,10 +83,10 @@ class MyKSuiteBridgeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let driveLabel1 = MyKSuiteLabel(icon: Image("drive"), text: "Drive mesage")
-        let driveLabel2 = MyKSuiteLabel(icon: Image("drive"), text: "Another drive message")
-
-        let swiftUIView = MyKSuiteView(configuration: [driveLabel1, driveLabel2])
+        let swiftUIView = MyKSuiteView(configuration: [
+            MyKSuiteLabel(icon: Image("drive.cloud"), text: "1Tb for your storage"),
+            MyKSuiteLabel(icon: Image("folder.arrow.up"), text: "Dropbox, PDF edit …")
+        ])
         let hostingController = UIHostingController(rootView: swiftUIView)
 
         addChild(hostingController)
