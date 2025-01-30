@@ -122,10 +122,10 @@ public final class FileActionsHelper {
                 successMessage: showSuccessSnackBar ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation : nil
             )
         case .folder:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.temporaryUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         default:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
+            let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.localUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         }
     }
