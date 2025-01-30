@@ -87,7 +87,7 @@ public final class Drive: Object, Codable {
     @Persisted public var maintenanceReason: MaintenanceReason?
     @Persisted public var updatedAt: Date
     @Persisted public var _account: DriveAccount?
-    @Persisted public var quota: DriveQuota?
+    @Persisted public var quota: DriveQuota
     /// Is manager admin.
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
