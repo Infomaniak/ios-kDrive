@@ -46,22 +46,17 @@ public struct PublicShareMetadata: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        do {
-            url = try container.decode(URL.self, forKey: .url)
-            fileId = try container.decode(Int.self, forKey: .fileId)
-            right = try container.decode(String.self, forKey: .right)
+        url = try container.decode(URL.self, forKey: .url)
+        fileId = try container.decode(Int.self, forKey: .fileId)
+        right = try container.decode(String.self, forKey: .right)
 
-            validUntil = try container.decodeIfPresent(TimeInterval.self, forKey: .validUntil)
-            capabilities = try container.decode(Rights.self, forKey: .capabilities)
+        validUntil = try container.decodeIfPresent(TimeInterval.self, forKey: .validUntil)
+        capabilities = try container.decode(Rights.self, forKey: .capabilities)
 
-            createdBy = try container.decode(TimeInterval.self, forKey: .createdBy)
-            createdAt = try container.decode(TimeInterval.self, forKey: .createdAt)
-            updatedAt = try container.decode(TimeInterval.self, forKey: .updatedAt)
+        createdBy = try container.decode(TimeInterval.self, forKey: .createdBy)
+        createdAt = try container.decode(TimeInterval.self, forKey: .createdAt)
+        updatedAt = try container.decode(TimeInterval.self, forKey: .updatedAt)
 
-            accessBlocked = try container.decode(Bool.self, forKey: .accessBlocked)
-        } catch {
-            // TODO: remove
-            fatalError("error:\(error)")
-        }
+        accessBlocked = try container.decode(Bool.self, forKey: .accessBlocked)
     }
 }
