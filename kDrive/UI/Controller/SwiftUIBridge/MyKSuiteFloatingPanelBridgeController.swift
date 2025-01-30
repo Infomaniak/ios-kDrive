@@ -20,11 +20,12 @@
 import FloatingPanel
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import SwiftUI
 import UIKit
 
 @available(iOS 15, *)
-class FloatingPanelBridgeController: FloatingPanelController {
+class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
     init() {
         super.init(delegate: nil)
         let appearance = SurfaceAppearance()
@@ -36,7 +37,7 @@ class FloatingPanelBridgeController: FloatingPanelController {
         surfaceView.grabberHandle.barColor = KDriveResourcesAsset.iconColor.color.withAlphaComponent(0.4)
         surfaceView.contentPadding = UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
         backdropView.dismissalTapGestureRecognizer.isEnabled = true
-        layout = FloatingPanelBridgeLayout()
+        layout = MyKSuiteFloatingPanelBridgeLayout()
     }
 
     @available(*, unavailable)
@@ -46,7 +47,7 @@ class FloatingPanelBridgeController: FloatingPanelController {
 }
 
 @available(iOS 15, *)
-class FloatingPanelBridgeLayout: FloatingPanelLayout {
+class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
     var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring]
@@ -61,7 +62,7 @@ class FloatingPanelBridgeLayout: FloatingPanelLayout {
         self.initialState = initialState
         self.backdropAlpha = backdropAlpha
         let extendedAnchor = FloatingPanelLayoutAnchor(
-            absoluteInset: 320.0 + safeAreaInset,
+            absoluteInset: 580.0 + safeAreaInset,
             edge: .bottom,
             referenceGuide: .superview
         )
@@ -78,36 +79,26 @@ class FloatingPanelBridgeLayout: FloatingPanelLayout {
 }
 
 @available(iOS 15, *)
-class BridgeViewController: UIViewController {
+class MyKSuiteBridgeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let helloWorldSwiftUIView = HelloWorldView()
-        let hostingController = UIHostingController(rootView: helloWorldSwiftUIView)
+        let driveLabel1 = MyKSuiteLabel(icon: Image("drive"), text: "Drive mesage")
+        let driveLabel2 = MyKSuiteLabel(icon: Image("drive"), text: "Another drive message")
+
+        let swiftUIView = MyKSuiteView(configuration: [driveLabel1, driveLabel2])
+        let hostingController = UIHostingController(rootView: swiftUIView)
 
         addChild(hostingController)
-        hostingController.view.frame = view.bounds
+        let sourceBounds = view.bounds
+        let adjustedFrame = CGRect(x: 0,
+                                   y: -60,
+                                   width: sourceBounds.width,
+                                   height: sourceBounds.height - 200)
+        hostingController.view.frame = adjustedFrame
         view.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
+
+        // hostingController.view.backgroundColor = .yellow
     }
 }
-
-@available(iOS 15, *)
-struct HelloWorldView: View {
-    var body: some View {
-        ZStack {
-            Color.yellow
-                .ignoresSafeArea()
-            Text("Hello, World!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-        }
-    }
-}
-
-// struct HelloWorldView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        HelloWorldView()
-//    }
-// }

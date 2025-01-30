@@ -144,12 +144,13 @@ public struct AppRouter: AppNavigable {
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()
+            if #available(iOS 15, *) {
+                self.askToUpSaleIfQuotaReached()
+            }
+
             Task {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
-                if #available(iOS 15, *) {
-                    await upSaleIfQuotaReached()
-                }
                 deeplinkService.processDeeplinksPostAuthentication()
             }
         case .onboarding:
@@ -513,19 +514,24 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @available(iOS 15, *) @MainActor
-    public func upSaleIfQuotaReached() {
-        guard let presentingViewController = window?.rootViewController,
-              !Bundle.main.isRunningInTestFlight else {
+    @MainActor public func askToUpSaleIfQuotaReached() {
+        guard let window,
+              let rootViewController = window.rootViewController else {
             return
         }
 
-        let floatingPanelViewController = FloatingPanelBridgeController()
-        let wrapperViewController = BridgeViewController()
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.set(contentViewController: wrapperViewController)
+        // TODO: Check quota
 
-        presentingViewController.present(floatingPanelViewController, animated: true)
+        if #available(iOS 15, *) {
+            let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
+            let myKSuiteViewController = MyKSuiteBridgeViewController()
+            floatingPanelViewController.isRemovalInteractionEnabled = true
+            floatingPanelViewController.set(contentViewController: myKSuiteViewController)
+
+            rootViewController.present(floatingPanelViewController, animated: false)
+        } else {
+            fatalError("kaput")
+        }
     }
 
     public func askForReview() async {
