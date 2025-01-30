@@ -163,7 +163,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         _ = notification.request.content.userInfo
 
-        completionHandler([.alert, .sound])
+        completionHandler([.list, .banner, .sound])
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter,
