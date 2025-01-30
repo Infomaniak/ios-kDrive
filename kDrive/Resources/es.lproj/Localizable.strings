@@ -4,7 +4,7 @@
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Mon, 28 Oct 2024 09:46:15 +0100
+ * Exported at: Thu, 30 Jan 2025 18:00:26 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -712,6 +712,15 @@
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Buzón de depósito";
 
+/* loco:6708c590f8f4d36ec100ef42 */
+"dropboxPublicShareOutdatedDescription" = "El enlace se ha desactivado o ha caducado.\nPara subir tus archivos, envía un mensaje al usuario que compartió el dropbox contigo para que pueda reactivarlo.";
+
+/* loco:6708c5155b4785a798019472 */
+"dropboxPublicShareOutdatedTitle" = "Este dropbox ya no está disponible";
+
+/* loco:6707c8d16e460cb6a304b692 */
+"dropboxPublicShareTitleUploadButton" = "%@ te invita a importar tus archivos a su kDrive";
+
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "No puedes crear un enlace de uso compartido para un buzón de depósito.";
 
@@ -760,6 +769,9 @@
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Error al duplicar";
 
+/* loco:6708ec44807fa34749094072 */
+"errorExternalImportInProgress" = "No se puede realizar ninguna acción en la carpeta porque hay una importación externa en curso";
+
 /* loco:605cacde72147f269369e484 */
 "errorFileAlreadyExists" = "Archivo o carpeta ya existente";
 
@@ -804,6 +816,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a1 */
 "errorPreviewTrash" = "La vista previa de un archivo en la papelera no está disponible";
+
+/* loco:6708e538df700f157c09c833 */
+"errorQuotaExceeded" = "Espacio insuficiente en tu kDrive";
 
 /* loco:6049df4d5c2c3a04bc3979a2 */
 "errorRename" = "Error al cambiar el nombre";
@@ -1417,6 +1432,15 @@
 /* loco:61696058c328022b120007c6 */
 "modificationDateFilterTitle" = "Fecha de modificación";
 
+/* loco:67925285a5fc81e9d105fde2 */
+"myKSuiteLabel1" = "1 TB para tus fotos, documentos y archivos";
+
+/* loco:6792529ee464f5250c0317d2 */
+"myKSuiteLabel2" = "Edición en PDF";
+
+/* loco:679252b09ef067c9260dbb94 */
+"myKSuiteLabel3" = "Y aún más.";
+
 /* loco:6049df4d5c2c3a04bc397a06 */
 "mySharesNoFile" = "No hay archivos compartidos";
 
@@ -1563,6 +1587,12 @@
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Acceso restringido o denegado";
+
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Conectarse a una red Wi-Fi o permitir el uso de datos móviles";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Suspendida la copia de seguridad de fotos";
 
 /* loco:627cf782146a6d748e5e7262 */
 "photosHeaderDateFormat" = "MMMM yyyy";
@@ -1987,6 +2017,12 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Haz copia de seguridad de tus recuerdos en un lugar seguro";
 
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Los archivos sin conexión sólo se sincronizarán con Wi-Fi";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "Sólo con Wi-Fi";
+
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Activar la copia de seguridad automática";
 
@@ -2046,6 +2082,18 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Copia de seguridad de las fotos";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Pueden aplicarse tarifas por uso de datos móviles";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "Con Wi-Fi y datos móviles";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Sincronizar fotos y vídeos";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Sincronizar archivos sin conexión";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Archivos temporales";
@@ -2184,6 +2232,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "A la espera de red WiFi";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "A la espera de Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Algunas subidas siguen en curso en kDrive. Abre la aplicación y mantén el dispositivo conectado para acelerar la carga.";
