@@ -296,8 +296,8 @@ extension MultipleSelectionFloatingPanelViewController {
                         : self.appNavigable.topMostViewController
                     guard viewController as? UIDocumentPickerViewController == nil else { return }
                     let documentExportViewController = UIDocumentPickerViewController(
-                        url: downloadedArchiveUrl,
-                        in: .exportToService
+                        forExporting: [downloadedArchiveUrl],
+                        asCopy: true
                     )
                     viewController?.present(documentExportViewController, animated: true)
                 }
