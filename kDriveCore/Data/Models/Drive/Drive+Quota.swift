@@ -21,8 +21,8 @@ import InfomaniakCore
 import RealmSwift
 
 public final class DriveQuota: EmbeddedObject, Codable {
-    @Persisted public var dropbox: Int?
-    @Persisted public var sharedLink: Int?
+    @Persisted public var dropbox: Int
+    @Persisted public var sharedLink: Int
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -32,20 +32,6 @@ public final class DriveQuota: EmbeddedObject, Codable {
     override public init() {
         // Required by Realm
         super.init()
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        let dropboxString = try container.decode(String.self, forKey: .dropbox)
-        if let dropbox = Int(dropboxString) {
-            self.dropbox = dropbox
-        }
-
-        let sharedLinkString = try container.decode(String.self, forKey: .sharedLink)
-        if let sharedLink = Int(sharedLinkString) {
-            self.sharedLink = sharedLink
-        }
     }
 }
 
