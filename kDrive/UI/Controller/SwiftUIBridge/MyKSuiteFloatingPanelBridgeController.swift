@@ -62,7 +62,7 @@ class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
         self.initialState = initialState
         self.backdropAlpha = backdropAlpha
         let extendedAnchor = FloatingPanelLayoutAnchor(
-            absoluteInset: 580.0 + safeAreaInset,
+            absoluteInset: 620.0 + safeAreaInset,
             edge: .bottom,
             referenceGuide: .superview
         )
@@ -92,9 +92,9 @@ class MyKSuiteBridgeViewController: UIViewController {
         addChild(hostingController)
         let sourceBounds = view.bounds
         let adjustedFrame = CGRect(x: 0,
-                                   y: -60,
+                                   y: -140,
                                    width: sourceBounds.width,
-                                   height: sourceBounds.height - 200)
+                                   height: sourceBounds.height)
         hostingController.view.frame = adjustedFrame
         view.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
