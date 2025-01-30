@@ -20,9 +20,19 @@ import Foundation
 import InfomaniakCore
 import RealmSwift
 
+public final class Quota: EmbeddedObject, Codable {
+    @Persisted public var current: Int?
+    @Persisted public var max: Int
+
+    override public init() {
+        // Required by Realm
+        super.init()
+    }
+}
+
 public final class DriveQuota: EmbeddedObject, Codable {
-    @Persisted public var dropbox: Int
-    @Persisted public var sharedLink: Int
+    @Persisted public var dropbox: Quota?
+    @Persisted public var sharedLink: Quota?
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -37,12 +47,12 @@ public final class DriveQuota: EmbeddedObject, Codable {
 
 extension Drive {
     var dropboxQuotaExceeded: Bool {
-        // TODO: Use real quota data
-        true
+        guard let quota, let dropbox = quota.dropbox else { return true }
+        return dropbox.current ?? 0 >= dropbox.max
     }
 
     var sharedLinkQuotaExceeded: Bool {
-        // TODO: Use real quota data
-        true
+        guard let quota, let sharedLink = quota.sharedLink else { return true }
+        return sharedLink.current ?? 0 >= sharedLink.max
     }
 }

@@ -108,6 +108,7 @@ public final class DriveInfosManager: DriveInfosManagerQueryable {
             DriveRights.self,
             DriveAccount.self,
             DriveQuota.self,
+            Quota.self,
             Team.self,
             Category.self,
             CategoryRights.self
