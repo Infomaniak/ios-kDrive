@@ -30,10 +30,6 @@ public enum PublicShareLimitation: String {
 }
 
 public class PublicShareApiFetcher: ApiFetcher {
-    public init() {
-        super.init()
-    }
-
     /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
     private static var handledHttpStatus = Set(200 ... 500)
 
