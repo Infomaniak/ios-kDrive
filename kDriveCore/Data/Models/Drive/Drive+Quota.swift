@@ -31,8 +31,8 @@ public final class Quota: EmbeddedObject, Codable {
 }
 
 public final class DriveQuota: EmbeddedObject, Codable {
-    @Persisted public var dropbox: Quota
-    @Persisted public var sharedLink: Quota
+    @Persisted public var dropbox: Quota?
+    @Persisted public var sharedLink: Quota?
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -47,10 +47,12 @@ public final class DriveQuota: EmbeddedObject, Codable {
 
 extension Drive {
     var dropboxQuotaExceeded: Bool {
-        return quota.dropbox.current ?? 0 >= quota.dropbox.max
+        guard let quota, let dropbox = quota.dropbox else { return true }
+        return dropbox.current ?? 0 >= dropbox.max
     }
 
     var sharedLinkQuotaExceeded: Bool {
-        return quota.sharedLink.current ?? 0 >= quota.sharedLink.max
+        guard let quota, let sharedLink = quota.sharedLink else { return true }
+        return sharedLink.current ?? 0 >= sharedLink.max
     }
 }

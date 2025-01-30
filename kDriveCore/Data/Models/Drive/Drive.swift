@@ -87,7 +87,7 @@ public final class Drive: Object, Codable {
     @Persisted public var maintenanceReason: MaintenanceReason?
     @Persisted public var updatedAt: Date
     @Persisted public var _account: DriveAccount?
-    @Persisted public var quota: DriveQuota
+    @Persisted public var quota: DriveQuota?
     /// Is manager admin.
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
@@ -171,7 +171,7 @@ public final class Drive: Object, Codable {
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
         isInAppSubscription = try values.decode(Bool.self, forKey: .isInAppSubscription)
-        quota = try values.decode(DriveQuota.self, forKey: .quota)
+        quota = try values.decodeIfPresent(DriveQuota.self, forKey: .quota)
     }
 
     override public init() {
