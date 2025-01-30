@@ -30,7 +30,7 @@ public enum PublicShareLimitation: String {
 }
 
 public class PublicShareApiFetcher: ApiFetcher {
-    override public init() {
+    public init() {
         super.init()
     }
 
@@ -38,7 +38,8 @@ public class PublicShareApiFetcher: ApiFetcher {
     private static var handledHttpStatus = Set(200 ... 500)
 
     override public func perform<T: Decodable>(request: DataRequest,
-                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {
+                                               overrideDecoder: JSONDecoder? = nil) async throws -> ValidServerResponse<T> {
+        let decoder = overrideDecoder ?? self.decoder
         let validatedRequest = request.validate(statusCode: PublicShareApiFetcher.handledHttpStatus)
         let dataResponse = await validatedRequest.serializingDecodable(ApiResponse<T>.self,
                                                                        automaticallyCancelling: true,
