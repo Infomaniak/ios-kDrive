@@ -67,20 +67,12 @@ final class AssetExpiringActivityDelegate: ExpiringActivityDelegate {
 struct PHAssetIdentifier: PHAssetIdentifiable {
     let asset: PHAsset
 
-    init?(_ asset: PHAsset) {
-        guard #available(iOS 15, *) else {
-            return nil
-        }
-
+    init(_ asset: PHAsset) {
         self.asset = asset
     }
 
     var baseImageSHA256: String? {
         get throws {
-            guard #available(iOS 15, *) else {
-                return nil
-            }
-
             // We build an ExpiringActivity to track system termination
             let uid = "\(#function)-\(asset.localIdentifier)-\(UUID().uuidString)"
             let group = TolerantDispatchGroup()
@@ -129,10 +121,6 @@ struct PHAssetIdentifier: PHAssetIdentifiable {
 
     var bestResourceSHA256: String? {
         get throws {
-            guard #available(iOS 15, *) else {
-                return nil
-            }
-
             guard let bestResource = asset.bestResource else {
                 let hashFallback = try baseImageSHA256
                 return hashFallback
