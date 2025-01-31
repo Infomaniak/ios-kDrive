@@ -20,6 +20,6 @@ import UIKit
 
 extension UINavigationItem {
     func hideBackButtonText() {
-        self.backButtonDisplayMode = .minimal
+        backButtonDisplayMode = .minimal
     }
 }
