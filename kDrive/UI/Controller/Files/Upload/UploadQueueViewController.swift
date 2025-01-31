@@ -36,7 +36,7 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var uploadQueue: UploadQueue
 
     var currentDirectory: File!
-    private var liveUploadingFiles = [UploadFileDisplayed]()
+    private var frozenUploadingFiles = [UploadFileDisplayed]()
     private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -98,24 +98,25 @@ final class UploadQueueViewController: UIViewController {
                 return
             }
 
-            let wrappedFiles = newResults.enumerated().map { index, item in
-                UploadFileDisplayed(isFirstInList: index == 0,
-                                    isLastInList: index == newResults.count - 1,
-                                    content: item)
+            let wrappedFrozenFiles = newResults.enumerated().map { index, file in
+                let frozenFile = file.freeze()
+                return UploadFileDisplayed(isFirstInList: index == 0,
+                                           isLastInList: index == newResults.count - 1,
+                                           content: frozenFile)
             }
 
-            reloadCollectionViewWith(wrappedFiles)
+            reloadCollectionViewWith(wrappedFrozenFiles)
         }
     }
 
-    func reloadCollectionViewWith(_ files: [UploadFileDisplayed]) {
-        let changeSet = StagedChangeset(source: liveUploadingFiles, target: files)
+    func reloadCollectionViewWith(_ frozenFiles: [UploadFileDisplayed]) {
+        let changeSet = StagedChangeset(source: frozenUploadingFiles, target: frozenFiles)
         tableView.reload(using: changeSet,
                          with: UITableView.RowAnimation.automatic,
                          interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                         setData: { self.liveUploadingFiles = $0 })
+                         setData: { self.frozenUploadingFiles = $0 })
 
-        if files.isEmpty {
+        if frozenFiles.isEmpty {
             navigationController?.popViewController(animated: true)
         }
     }
@@ -142,20 +143,20 @@ final class UploadQueueViewController: UIViewController {
 
 extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return liveUploadingFiles.count
+        return frozenUploadingFiles.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-        let fileWrapper = liveUploadingFiles[indexPath.row]
-        let file = fileWrapper.content
+        let fileWrapper = frozenUploadingFiles[indexPath.row]
+        let frozenFile = fileWrapper.content
 
         cell.initWithPositionAndShadow(isFirst: fileWrapper.isFirstInList,
                                        isLast: fileWrapper.isLastInList)
 
-        if !file.isInvalidated {
-            let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-            cell.configureWith(uploadFile: file, progress: progress)
+        if !frozenFile.isInvalidated {
+            let progress: CGFloat? = (frozenFile.progress != nil) ? CGFloat(frozenFile.progress!) : nil
+            cell.configureWith(frozenUploadFile: frozenFile, progress: progress)
         }
 
         cell.selectionStyle = .none
