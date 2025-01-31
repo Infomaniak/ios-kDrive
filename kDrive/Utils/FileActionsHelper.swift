@@ -150,8 +150,7 @@ public final class FileActionsHelper {
                                       }
                                   })
             } catch {
-                if #available(iOS 15, *),
-                   (error as? PHPhotosError)?.code == PHPhotosError.notEnoughSpace {
+                if (error as? PHPhotosError)?.code == PHPhotosError.notEnoughSpace {
                     await UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
                 } else {
                     DDLogError("Cannot save media: \(error)")
