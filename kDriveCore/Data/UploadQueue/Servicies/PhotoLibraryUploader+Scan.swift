@@ -282,10 +282,6 @@ public extension PhotoLibraryUploader {
 
     /// Get the current diff algorithm version
     private var currentDiffAlgorithmVersion: Int {
-        if #available(iOS 15, *) {
-            PhotoLibraryImport.hashBestResource.rawValue
-        } else {
-            PhotoLibraryImport.legacyName.rawValue
-        }
+        PhotoLibraryImport.hashBestResource.rawValue
     }
 }
