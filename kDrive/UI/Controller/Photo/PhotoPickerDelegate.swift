@@ -98,7 +98,6 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 
 // MARK: - Picker view controller delegate
 
-@available(iOS 14, *)
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
