@@ -104,8 +104,9 @@ final class UploadTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
-        guard !uploadFile.isInvalidated else {
+    func configureWith(frozenUploadFile: UploadFile, progress: CGFloat?) {
+        assert(frozenUploadFile.isFrozen, "Expected a frozen upload file")
+        guard let uploadFile = frozenUploadFile.thaw() else {
             return
         }
 
