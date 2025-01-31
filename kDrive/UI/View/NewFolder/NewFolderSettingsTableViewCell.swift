@@ -200,13 +200,8 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
         titleLabel.text = KDriveResourcesStrings.Localizable.allAddExpirationDateTitle
         detailLabel.text = KDriveResourcesStrings.Localizable.createFolderValidUntilDescription
 
-        if #available(iOS 13.4, *) {
-            datePicker.isHidden = !switchValue
-            datePicker.date = setting as? Date ?? Date()
-        } else {
-            dateTextField.isHidden = !switchValue
-            dateTextField.text = Constants.formatDate(setting as? Date ?? Date(), style: .date)
-        }
+        datePicker.isHidden = !switchValue
+        datePicker.date = setting as? Date ?? Date()
 
         if switchValue {
             datePickerUpdated(datePicker)
