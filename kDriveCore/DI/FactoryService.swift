@@ -182,7 +182,8 @@ public enum FactoryService {
             (loggerFactory, "DriveInfosManager"),
             (loggerFactory, "SceneDelegate"),
             (loggerFactory, "SyncedAuthenticator"),
-            (loggerFactory, "FileList")
+            (loggerFactory, "FileList"),
+            (loggerFactory, "Default")
         ]
         return services
     }
