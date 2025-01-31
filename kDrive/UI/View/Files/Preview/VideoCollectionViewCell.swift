@@ -82,10 +82,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         guard let playerViewController = videoPlayer?.playerViewController else { return }
-
-        if #available(iOS 14.2, *) {
-            playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
-        }
+        playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
 
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
