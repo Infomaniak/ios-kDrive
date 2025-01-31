@@ -29,10 +29,7 @@ public extension PHAsset {
     /// Will return `nil` for any other resource type (like video)
     var baseImageSHA256: String? {
         get throws {
-            guard let identifier = PHAssetIdentifier(self) else {
-                return nil
-            }
-
+            let identifier = PHAssetIdentifier(self)
             let hash = try identifier.baseImageSHA256
             return hash
         }
@@ -41,10 +38,7 @@ public extension PHAsset {
     /// Hash of the best resource available. Editing a video or a picture will change this hash
     var bestResourceSHA256: String? {
         get throws {
-            guard let identifier = PHAssetIdentifier(self) else {
-                return nil
-            }
-
+            let identifier = PHAssetIdentifier(self)
             let hash = try identifier.bestResourceSHA256
             return hash
         }
