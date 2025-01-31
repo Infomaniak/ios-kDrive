@@ -100,14 +100,12 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
             navigationItem.leftBarButtonItem = closeButton
         }
 
-        if #available(iOS 14.0, *) {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                title: KDriveResourcesStrings.Localizable.buttonRedeemPromoCode,
-                style: .plain,
-                target: self,
-                action: #selector(redeemButtonPressed)
-            )
-        }
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: KDriveResourcesStrings.Localizable.buttonRedeemPromoCode,
+            style: .plain,
+            target: self,
+            action: #selector(redeemButtonPressed)
+        )
 
         checkDriveFileManager()
 
