@@ -84,7 +84,7 @@ private let categoryKey = "category"
 ///   - tag: any extra info
 ///   - async: Should this be async?
 public func ABLog(_ message: @autoclosure () -> Any,
-                  category: String = "",
+                  category: String = "Default",
                   level: AbstractLogLevel = .info,
                   context: Int = 0,
                   file: StaticString = #file,
@@ -95,28 +95,24 @@ public func ABLog(_ message: @autoclosure () -> Any,
     let messageString = message() as! String
 
     #if DEBUG
-    if #available(iOS 14.0, *), !category.isEmpty {
-        let factoryParameters = [categoryKey: category]
-        @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
+    let factoryParameters = [categoryKey: category]
+    @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
 
-        switch level {
-        case .warning, .alert:
-            logger.warning("\(messageString, privacy: .public)")
-        case .emergency, .critical:
-            logger.critical("\(messageString, privacy: .public)")
-        case .error:
-            logger.error("\(messageString, privacy: .public)")
-        case .notice:
-            logger.notice("\(messageString, privacy: .public)")
-        case .info:
-            logger.info("\(messageString, privacy: .public)")
-        case .debug:
-            logger.debug("\(messageString, privacy: .public)")
-        case .fault:
-            logger.fault("\(messageString, privacy: .public)")
-        }
-    } else {
-        os_log("[%@] %@", log: .default, type: level.logType, category, messageString)
+    switch level {
+    case .warning, .alert:
+        logger.warning("\(messageString, privacy: .public)")
+    case .emergency, .critical:
+        logger.critical("\(messageString, privacy: .public)")
+    case .error:
+        logger.error("\(messageString, privacy: .public)")
+    case .notice:
+        logger.notice("\(messageString, privacy: .public)")
+    case .info:
+        logger.info("\(messageString, privacy: .public)")
+    case .debug:
+        logger.debug("\(messageString, privacy: .public)")
+    case .fault:
+        logger.fault("\(messageString, privacy: .public)")
     }
 
     #else
