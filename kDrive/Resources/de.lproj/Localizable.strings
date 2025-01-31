@@ -4,7 +4,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Mon, 28 Oct 2024 09:46:15 +0100
+ * Exported at: Thu, 30 Jan 2025 18:00:26 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -769,6 +769,9 @@
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Fehler beim Duplizieren";
 
+/* loco:6708ec44807fa34749094072 */
+"errorExternalImportInProgress" = "Der Ordner kann nicht bearbeitet werden, da ein externer Import im Gange ist";
+
 /* loco:605cacde72147f269369e484 */
 "errorFileAlreadyExists" = "Datei oder Ordner existiert bereits";
 
@@ -813,6 +816,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a1 */
 "errorPreviewTrash" = "Die Vorschau auf eine Datei im Papierkorb ist nicht verfügbar";
+
+/* loco:6708e538df700f157c09c833 */
+"errorQuotaExceeded" = "Unzureichender Platz auf Ihrem kDrive";
 
 /* loco:6049df4d5c2c3a04bc3979a2 */
 "errorRename" = "Fehler beim Umbenennen";
@@ -1426,6 +1432,15 @@
 /* loco:61696058c328022b120007c6 */
 "modificationDateFilterTitle" = "Zuletzt geändert am";
 
+/* loco:67925285a5fc81e9d105fde2 */
+"myKSuiteLabel1" = "1 TB für Ihre Fotos, Dokumente und Dateien";
+
+/* loco:6792529ee464f5250c0317d2 */
+"myKSuiteLabel2" = "PDF-Ausgabe";
+
+/* loco:679252b09ef067c9260dbb94 */
+"myKSuiteLabel3" = "Und noch mehr!";
+
 /* loco:6049df4d5c2c3a04bc397a06 */
 "mySharesNoFile" = "Keine Datei freigegeben";
 
@@ -1572,6 +1587,12 @@
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Eingeschränkter oder verweigerter Zugang";
+
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Verbinden Sie sich mit einem Wi-Fi-Netzwerk oder erlauben Sie die mobile Datennutzung";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Fotosicherung ausgesetzt";
 
 /* loco:627cf782146a6d748e5e7262 */
 "photosHeaderDateFormat" = "MMMM yyyy";
@@ -1996,6 +2017,12 @@
 /* loco:6049df4d5c2c3a04bc397a65 */
 "syncConfigureTitle" = "Speichern Sie Ihre Erinnerungen an einem sicheren Ort";
 
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Offline-Dateien werden nur mit Wi-Fi synchronisiert";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "Nur mit Wi-Fi";
+
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Automatische Sicherung aktivieren";
 
@@ -2055,6 +2082,18 @@
 
 /* loco:6049df4d5c2c3a04bc397a75 */
 "syncSettingsTitle" = "Sicherung der Fotos";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Für die mobile Datennutzung können Gebühren anfallen";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "Mit Wi-Fi und mobilen Daten";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Fotos und Videos synchronisieren";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Offline-Dateien synchronisieren";
 
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporäre Dateien";
@@ -2193,6 +2232,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a8c */
 "uploadNetworkErrorWifiRequired" = "Warten auf WLAN";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "Warten auf Wi-Fi";
 
 /* loco:60928fcf72952001716b86d2 */
 "uploadPausedDescription" = "Einige Uploads sind in kDrive noch im Gange. Öffnen Sie die App und lassen Sie das Gerät verbunden, um den Upload zu beschleunigen.";
