@@ -55,20 +55,19 @@ class AppLockSettingsViewController: UIViewController {
         let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
         var error: NSError?
         MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
-        if #available(iOS 8.0, *) {
-            if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                    Task { @MainActor in
-                        if success {
-                            UserDefaults.shared.isAppLockEnabled = sender.isOn
-                        } else {
-                            sender.setOn(!sender.isOn, animated: true)
-                        }
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
+                Task { @MainActor in
+                    if success {
+                        UserDefaults.shared.isAppLockEnabled = sender.isOn
+                    } else {
+                        sender.setOn(!sender.isOn, animated: true)
                     }
                 }
-            } else {
-                sender.setOn(!sender.isOn, animated: true)
             }
+        } else {
+            sender.setOn(!sender.isOn, animated: true)
         }
     }
 
