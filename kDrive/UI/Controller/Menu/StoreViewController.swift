@@ -130,7 +130,6 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
         dismiss(animated: true)
     }
 
-    @available(iOS 14.0, *)
     @objc func redeemButtonPressed() {
         SKPaymentQueue.default().presentCodeRedemptionSheet()
     }
