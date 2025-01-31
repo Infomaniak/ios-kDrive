@@ -52,54 +52,6 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
     }
 }
 
-public struct PublicShareMetadata: Decodable {
-    public let url: URL
-    public let fileId: Int
-    public let right: String
-
-    public let validUntil: TimeInterval?
-    public let capabilities: Rights
-
-    public let createdBy: TimeInterval
-    public let createdAt: TimeInterval
-    public let updatedAt: TimeInterval
-    public let accessBlocked: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case url
-        case fileId
-        case right
-        case validUntil
-        case capabilities
-        case createdBy
-        case createdAt
-        case updatedAt
-        case accessBlocked
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        do {
-            url = try container.decode(URL.self, forKey: .url)
-            fileId = try container.decode(Int.self, forKey: .fileId)
-            right = try container.decode(String.self, forKey: .right)
-
-            validUntil = try container.decodeIfPresent(TimeInterval.self, forKey: .validUntil)
-            capabilities = try container.decode(Rights.self, forKey: .capabilities)
-
-            createdBy = try container.decode(TimeInterval.self, forKey: .createdBy)
-            createdAt = try container.decode(TimeInterval.self, forKey: .createdAt)
-            updatedAt = try container.decode(TimeInterval.self, forKey: .updatedAt)
-
-            accessBlocked = try container.decode(Bool.self, forKey: .accessBlocked)
-        } catch {
-            // TODO: remove
-            fatalError("error:\(error)")
-        }
-    }
-}
-
 public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakNetworkLoginable
