@@ -19,14 +19,16 @@
 import Foundation
 import RealmSwift
 
-public enum DrivePackId: Int {
-    case solo = 1
-    case team = 2
-    case pro = 3
-    case free = 6
-    case kSuiteStandard = 8
-    case kSuitePro = 11
-    case kSuiteEntreprise = 14
+public enum DrivePackId: String {
+    case solo
+    case team
+    case pro
+    case free
+    case kSuiteStandard = "ksuite_standard"
+    case kSuitePro = "ksuite_pro"
+    case kSuiteEntreprise = "ksuite_entreprise"
+    case myKSuite = "my_ksuite"
+    case myKSuitePlus = "my_ksuite_plus"
 }
 
 public class DrivePack: EmbeddedObject, Codable {
@@ -40,7 +42,7 @@ public class DrivePack: EmbeddedObject, Codable {
 
     /// Convenience enum bridge
     public var drivePackId: DrivePackId? {
-        DrivePackId(rawValue: id)
+        DrivePackId(rawValue: name)
     }
 
     enum CodingKeys: String, CodingKey {
