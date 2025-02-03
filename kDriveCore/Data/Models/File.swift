@@ -383,6 +383,15 @@ public enum FileSupportedBy: String, PersistableEnum, Codable {
     case thumbnail
     /// This file can be read by OnlyOffice
     case onlyOffice = "onlyoffice"
+
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = FileSupportedBy(rawValue: value) ?? .unknown
+    }
 }
 
 public typealias FileCursor = String
@@ -853,9 +862,9 @@ public final class File: Object, Codable {
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         externalImport = try container.decodeIfPresent(FileExternalImport.self, forKey: .externalImport)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
-        let rawSupportedBy = try container.decodeIfPresent([String].self, forKey: .supportedBy) ?? []
+        let rawSupportedBy = try container.decodeIfPresent([FileSupportedBy].self, forKey: .supportedBy) ?? []
         supportedBy = MutableSet()
-        supportedBy.insert(objectsIn: rawSupportedBy.compactMap { FileSupportedBy(rawValue: $0) })
+        supportedBy.insert(objectsIn: rawSupportedBy.filter { $0 != .unknown })
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
         version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
