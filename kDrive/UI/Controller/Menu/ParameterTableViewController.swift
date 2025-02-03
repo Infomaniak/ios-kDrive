@@ -38,6 +38,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case wifi
         case storage
         case about
+        case account
         case deleteAccount
 
         var title: String {
@@ -56,6 +57,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveResourcesStrings.Localizable.aboutTitle
+            case .account:
+                return "My subscription_"
             case .deleteAccount:
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
@@ -138,7 +141,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        case .security, .storage, .about, .deleteAccount:
+        case .security, .storage, .about, .account, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
@@ -165,6 +168,14 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             break
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
+        case .account:
+            if #available(iOS 15, *) {
+                //let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
+                let dashboardViewController = MyKSuiteDashboardViewBridge.hostingViewController(apiFetcher: driveFileManager.apiFetcher)
+                navigationController?.pushViewController(dashboardViewController, animated: true)
+            } else {
+                assert(false, "TODO remove if #available(iOS 15, *)")
+            }
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
