@@ -29,6 +29,7 @@ public enum DrivePackId: String {
     case kSuiteEntreprise = "ksuite_entreprise"
     case myKSuite = "my_ksuite"
     case myKSuitePlus = "my_ksuite_plus"
+    case unknown
 }
 
 public class DrivePack: EmbeddedObject, Codable {
