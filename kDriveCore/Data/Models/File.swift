@@ -321,7 +321,20 @@ public enum FileStatus: String {
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
     // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
-    case waiting, inProgress = "in_progress", done, failed, canceling, canceled
+    case waiting
+    case inProgress = "in_progress"
+    case done
+    case failed
+    case canceling
+    case canceled
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = FileImportStatus(rawValue: value) ?? .unknown
+    }
 }
 
 public final class FileExternalImport: EmbeddedObject, Codable {
