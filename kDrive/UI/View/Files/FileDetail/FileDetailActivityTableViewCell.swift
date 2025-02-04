@@ -133,7 +133,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileDetailsActivityFileColorUpdate"
         case .fileColorDelete:
             localizedKey = "fileDetailsActivityFileColorDelete"
-        case .none:
+        case .unknown:
             localizedKey = "fileActivityUnknown"
         }
         detailLabel.text = localizedKey.localized
