@@ -30,6 +30,10 @@ public enum DrivePackId: String {
     case myKSuite = "my_ksuite"
     case myKSuitePlus = "my_ksuite_plus"
     case unknown
+
+    public init(apiRawValue: String) {
+        self = .init(rawValue: apiRawValue) ?? .unknown
+    }
 }
 
 public class DrivePack: EmbeddedObject, Codable {
@@ -42,8 +46,8 @@ public class DrivePack: EmbeddedObject, Codable {
     }
 
     /// Convenience enum bridge
-    public var drivePackId: DrivePackId? {
-        DrivePackId(rawValue: name)
+    public var drivePackId: DrivePackId {
+        DrivePackId(apiRawValue: name)
     }
 
     enum CodingKeys: String, CodingKey {

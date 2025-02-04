@@ -181,6 +181,10 @@ public enum ConvertedType: String, CaseIterable {
     public static let ignoreThumbnailTypes = downloadableTypes
     /// Documents that can be previewed by the OS but not necessarily handled by OnlyOffice (eg. .pages)
     public static let documentTypes: Set<ConvertedType> = [.presentation, .spreadsheet, .text]
+
+    public init(apiRawValue: String) {
+        self = .init(rawValue: apiRawValue) ?? .unknown
+    }
 }
 
 /// Minimal data needed to query a PublicShare
@@ -688,7 +692,7 @@ public final class File: Object, Codable {
         } else if isBookmark {
             return .url
         } else {
-            return ConvertedType(rawValue: extensionType ?? "") ?? .unknown
+            return ConvertedType(apiRawValue: extensionType ?? "")
         }
     }
 

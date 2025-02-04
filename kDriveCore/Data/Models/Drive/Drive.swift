@@ -142,11 +142,7 @@ public final class Drive: Object, Codable {
     }
 
     public var isFreePack: Bool {
-        guard let packId = pack.drivePackId else {
-            return false
-        }
-
-        return packId == .free
+        return pack.drivePackId == .free
     }
 
     public var isInTechnicalMaintenance: Bool {
