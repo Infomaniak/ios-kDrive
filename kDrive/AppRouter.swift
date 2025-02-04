@@ -515,22 +515,27 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func askToUpSaleIfQuotaReached() {
+        // TODO: Check quota
+        presentUpSaleSheet()
+    }
+
+    @MainActor public func presentUpSaleSheet() {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
-        // TODO: Check quota
+        rootViewController.dismiss(animated: false) {
+            if #available(iOS 15, *) {
+                let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
+                let myKSuiteViewController = MyKSuiteBridgeViewController()
+                floatingPanelViewController.isRemovalInteractionEnabled = true
+                floatingPanelViewController.set(contentViewController: myKSuiteViewController)
 
-        if #available(iOS 15, *) {
-            let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
-            let myKSuiteViewController = MyKSuiteBridgeViewController()
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.set(contentViewController: myKSuiteViewController)
-
-            rootViewController.present(floatingPanelViewController, animated: false)
-        } else {
-            fatalError("kaput")
+                rootViewController.present(floatingPanelViewController, animated: false)
+            } else {
+                fatalError("kaput")
+            }
         }
     }
 
