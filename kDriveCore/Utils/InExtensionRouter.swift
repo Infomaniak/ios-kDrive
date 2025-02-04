@@ -31,6 +31,10 @@ public struct InExtensionRouter: AppNavigable {
 
     public func askUserToRemovePicturesIfNecessary() async {}
 
+    public func askToUpSaleIfQuotaReached() {}
+
+    public func presentUpSaleSheet() {}
+
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {}
 
     public func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UITabBarController? {
