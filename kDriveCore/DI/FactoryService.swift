@@ -23,6 +23,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import MyKSuite
 import os.log
 
 /// Something that can associate a custom identifier with a `Factory`
@@ -83,7 +84,7 @@ public enum FactoryService {
 
     /// Misc services
     private static var miscServices: [Factory] {
-        let services = [
+        var services = [
             Factory(type: KeychainHelper.self) { _, _ in
                 KeychainHelper(accessGroup: AccountManager.accessGroup)
             },
@@ -157,6 +158,13 @@ public enum FactoryService {
                 MediaPlayerOrchestrator()
             }
         ]
+
+        if #available(iOS 15, *) {
+            services += [Factory(type: MyKSuiteStore.self) { _, _ in
+                MyKSuiteStore()
+            }]
+        }
+
         return services
     }
 
