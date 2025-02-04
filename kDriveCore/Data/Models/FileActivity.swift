@@ -58,6 +58,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
     case collaborativeUserDelete = "collaborative_user_delete"
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
+    case unknown
 
     public static let displayedFileActivities: [FileActivityType] = [
         .fileCreate,
@@ -85,6 +86,10 @@ public enum FileActivityType: String, Codable, CaseIterable {
         .fileColorUpdate,
         .fileColorDelete
     ]
+
+    public init(apiRawValue: String) {
+        self = .init(rawValue: apiRawValue) ?? .unknown
+    }
 }
 
 public class FileActivity: Object, Decodable {
@@ -109,8 +114,8 @@ public class FileActivity: Object, Decodable {
     public var mergedFileActivities: [FileActivity] = []
 
     /// Activity type
-    public var action: FileActivityType? {
-        return FileActivityType(rawValue: rawAction)
+    public var action: FileActivityType {
+        return FileActivityType(apiRawValue: rawAction)
     }
 
     public var user: DriveUser? {
