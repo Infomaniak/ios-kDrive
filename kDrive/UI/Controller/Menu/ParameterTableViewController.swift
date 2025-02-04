@@ -170,9 +170,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .account:
             if #available(iOS 15, *) {
-                //let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
-                let dashboardViewController = MyKSuiteDashboardViewBridge.hostingViewController(apiFetcher: driveFileManager.apiFetcher)
-                navigationController?.pushViewController(dashboardViewController, animated: true)
+                let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
+                navigationController?.present(dashboardViewController, animated: true)
             } else {
                 assert(false, "TODO remove if #available(iOS 15, *)")
             }

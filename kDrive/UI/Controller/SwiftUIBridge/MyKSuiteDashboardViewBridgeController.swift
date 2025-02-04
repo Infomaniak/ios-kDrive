@@ -25,11 +25,13 @@ import UIKit
 
 @available(iOS 15, *)
 class MyKSuiteDashboardViewBridgeController: UIViewController {
-    let apiFetcher: DriveApiFetcher
+    private let hostingController: UIViewController
 
     init(apiFetcher: DriveApiFetcher) {
-        self.apiFetcher = apiFetcher
-        super.init()
+        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher)
+        hostingController = UIHostingController(rootView: swiftUIView)
+
+        super.init(nibName: nil, bundle: nil)
     }
 
     @available(*, unavailable)
@@ -40,23 +42,22 @@ class MyKSuiteDashboardViewBridgeController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher)
-        let hostingController = UIHostingController(rootView: swiftUIView)
-
         addChild(hostingController)
         view.addSubview(hostingController.view)
+
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
         hostingController.didMove(toParent: self)
-        hostingController.view.backgroundColor = .yellow
-    }
-}
-
-@available(iOS 15, *)
-class MyKSuiteDashboardViewBridge {
-    static func hostingViewController(apiFetcher: DriveApiFetcher) -> UIViewController {
-        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher)
-        let hostingController = UIHostingController(rootView: swiftUIView)
-        hostingController.view.backgroundColor = .yellow
-
-        return hostingController
+        
+        // TODO: Remove
+        view.backgroundColor = .yellow
+        print("hostingController.view frame \(hostingController.view.frame) bounds \(hostingController.view.bounds)")
     }
 }
