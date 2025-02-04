@@ -187,6 +187,8 @@ public protocol RouterActionable {
 
     @MainActor func askToUpSaleIfQuotaReached()
 
+    @MainActor func presentUpSaleSheet()
+
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
 }
 
