@@ -37,7 +37,6 @@ class FolderTypeTableViewCell: InsetTableViewCell {
         chipImageView.translatesAutoresizingMaskIntoConstraints = false
         chip.addSubview(chipImageView)
 
-        // Set constraints to match the superview
         NSLayoutConstraint.activate([
             chipImageView.leadingAnchor.constraint(equalTo: chip.leadingAnchor),
             chipImageView.trailingAnchor.constraint(equalTo: chip.trailingAnchor),
