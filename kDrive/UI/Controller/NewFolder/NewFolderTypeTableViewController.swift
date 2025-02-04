@@ -116,7 +116,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox {
             if selectedPackId == .myKSuite || true { // TODO: Remove force true
-                router.askToUpSaleIfQuotaReached()
+                router.presentUpSaleSheet()
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController
