@@ -27,6 +27,13 @@ import UIKit
 import Vision
 import VisionKit
 
+// TODO: Move to core
+extension UTI {
+    var asUTType: UTType? {
+        UTType(identifier)
+    }
+}
+
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
     let currentDirectory: File
     let driveFileManager: DriveFileManager
@@ -241,7 +248,9 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     // MARK: Actions
 
     private func importAction(_ mainTabViewController: MainTabViewController) {
-        let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
+        guard let utType = UTI.data.asUTType else { return }
+        let documentPicker = DriveImportDocumentPickerViewController(forOpeningContentTypes: [utType])
+
         documentPicker.importDrive = driveFileManager.drive
         documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
         documentPicker.delegate = mainTabViewController

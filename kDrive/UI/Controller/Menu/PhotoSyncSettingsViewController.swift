@@ -177,10 +177,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
                 sections.append(.syncSettings)
             }
         } else {
-            var limited = false
-            if #available(iOS 14, *) {
-                limited = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
-            }
+            let limited = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
             if limited || PHPhotoLibrary.authorizationStatus() == .denied {
                 sections.append(.syncDenied)
             }
@@ -230,15 +227,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
-        if #available(iOS 14, *) {
-            return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        } else {
-            return await withCheckedContinuation { continuation in
-                PHPhotoLibrary.requestAuthorization { status in
-                    continuation.resume(returning: status)
-                }
-            }
-        }
+        return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
     }
 }
 

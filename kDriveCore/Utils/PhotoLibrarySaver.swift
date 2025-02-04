@@ -36,25 +36,12 @@ public final class PhotoLibrarySaver: PhotoLibrarySavable {
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
-        if #available(iOS 14, *) {
-            return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        } else {
-            return await withCheckedContinuation { continuation in
-                PHPhotoLibrary.requestAuthorization { status in
-                    continuation.resume(returning: status)
-                }
-            }
-        }
+        return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
     }
 
     private func requestAuthorizationAndCreateAlbum() async throws {
         let status = await requestAuthorization()
-        let authorized: Bool
-        if #available(iOS 14, *) {
-            authorized = status == .authorized || status == .limited
-        } else {
-            authorized = status == .authorized
-        }
+        let authorized = status == .authorized || status == .limited
         if authorized {
             try await createAlbumIfNeeded()
         } else {

@@ -224,10 +224,7 @@ public extension PhotoLibraryUploader {
         burstIdentifier = asset.burstIdentifier
 
         // Only generate a different file name if has adjustments
-        var modificationDate: Date?
-        if #available(iOS 15, *), asset.hasAdjustments {
-            modificationDate = asset.modificationDate
-        }
+        let modificationDate = asset.modificationDate
 
         // Build the same name as importing manually a file
         correctName = asset.getFilename(fileExtension: fileExtension,
@@ -258,13 +255,11 @@ public extension PhotoLibraryUploader {
         /// Identify a PHAsset with a specific `localIdentifier` _and_ a hash, `bestResourceSHA256`, if any.
         ///
         /// Only used on iOS15 and up.
-        if #available(iOS 15, *),
-           uploadedPictures.filter(NSPredicate(
-               format: "assetLocalIdentifier = %@ AND bestResourceSHA256 = %@",
-               localIdentifier,
-               bestResourceSHA256 ?? "NULL"
-           ))
-           .first != nil {
+        if uploadedPictures
+            .filter("assetLocalIdentifier = %@ AND bestResourceSHA256 = %@",
+                    localIdentifier,
+                    bestResourceSHA256 ?? "NULL")
+            .first != nil {
             Log
                 .photoLibraryUploader(
                     "AlreadyUploaded match with identifier:\(localIdentifier) hash:\(String(describing: bestResourceSHA256)) "
@@ -287,10 +282,6 @@ public extension PhotoLibraryUploader {
 
     /// Get the current diff algorithm version
     private var currentDiffAlgorithmVersion: Int {
-        if #available(iOS 15, *) {
-            PhotoLibraryImport.hashBestResource.rawValue
-        } else {
-            PhotoLibraryImport.legacyName.rawValue
-        }
+        PhotoLibraryImport.hashBestResource.rawValue
     }
 }
