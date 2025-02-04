@@ -181,6 +181,10 @@ public enum ConvertedType: String, CaseIterable {
     public static let ignoreThumbnailTypes = downloadableTypes
     /// Documents that can be previewed by the OS but not necessarily handled by OnlyOffice (eg. .pages)
     public static let documentTypes: Set<ConvertedType> = [.presentation, .spreadsheet, .text]
+
+    public init(apiRawValue: String) {
+        self = .init(rawValue: apiRawValue) ?? .unknown
+    }
 }
 
 /// Minimal data needed to query a PublicShare
@@ -321,7 +325,20 @@ public enum FileStatus: String {
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
     // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
-    case waiting, inProgress = "in_progress", done, failed, canceling, canceled
+    case waiting
+    case inProgress = "in_progress"
+    case done
+    case failed
+    case canceling
+    case canceled
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = FileImportStatus(rawValue: value) ?? .unknown
+    }
 }
 
 public final class FileExternalImport: EmbeddedObject, Codable {
@@ -370,6 +387,15 @@ public enum FileSupportedBy: String, PersistableEnum, Codable {
     case thumbnail
     /// This file can be read by OnlyOffice
     case onlyOffice = "onlyoffice"
+
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = FileSupportedBy(rawValue: value) ?? .unknown
+    }
 }
 
 public typealias FileCursor = String
@@ -666,7 +692,7 @@ public final class File: Object, Codable {
         } else if isBookmark {
             return .url
         } else {
-            return ConvertedType(rawValue: extensionType ?? "") ?? .unknown
+            return ConvertedType(apiRawValue: extensionType ?? "")
         }
     }
 
@@ -840,9 +866,9 @@ public final class File: Object, Codable {
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         externalImport = try container.decodeIfPresent(FileExternalImport.self, forKey: .externalImport)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
-        let rawSupportedBy = try container.decodeIfPresent([String].self, forKey: .supportedBy) ?? []
+        let rawSupportedBy = try container.decodeIfPresent([FileSupportedBy].self, forKey: .supportedBy) ?? []
         supportedBy = MutableSet()
-        supportedBy.insert(objectsIn: rawSupportedBy.compactMap { FileSupportedBy(rawValue: $0) })
+        supportedBy.insert(objectsIn: rawSupportedBy.filter { $0 != .unknown })
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
         version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)

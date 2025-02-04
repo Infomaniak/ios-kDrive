@@ -65,7 +65,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
 
     private var purchaseEnabled = true
     private var items = Item.allItems
-    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.id)
+    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
     private var selectedStorage = 1
     private var selectedPeriod = PeriodTab.yearly {
         didSet { updateOffers() }
