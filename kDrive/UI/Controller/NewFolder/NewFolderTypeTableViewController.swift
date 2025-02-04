@@ -23,6 +23,8 @@ import kDriveResources
 import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
+    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     @LazyInjectService private var router: AppNavigable
 
     var driveFileManager: DriveFileManager!
@@ -103,6 +105,10 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
+            // TODO: enable pack check
+//            if selectedPackId == .myKSuite {
+                cell.setMykSuiteChip()
+//            }
         }
         return cell
     }
