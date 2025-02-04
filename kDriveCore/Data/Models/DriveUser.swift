@@ -26,6 +26,14 @@ public enum DriveUserRole: String, Codable {
     case admin
     case user
     case external
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = DriveUserRole(rawValue: value) ?? .unknown
+    }
 }
 
 public enum UserPermission: String, Codable, CaseIterable {

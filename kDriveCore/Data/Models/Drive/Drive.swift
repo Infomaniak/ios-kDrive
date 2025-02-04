@@ -52,6 +52,14 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     case demoEnd = "demo_end"
     case invoiceOverdue = "invoice_overdue"
     case technical
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = MaintenanceReason(rawValue: value) ?? .unknown
+    }
 }
 
 public final class DrivePreferences: EmbeddedObject, Codable {
@@ -135,11 +143,7 @@ public final class Drive: Object, Codable {
     }
 
     public var isFreePack: Bool {
-        guard let packId = pack.drivePackId else {
-            return false
-        }
-
-        return packId == .free
+        return pack.drivePackId == .free
     }
 
     public var isInTechnicalMaintenance: Bool {
