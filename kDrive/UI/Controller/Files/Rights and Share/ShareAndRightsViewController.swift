@@ -27,6 +27,7 @@ import UIKit
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService var router: AppNavigable
     @LazyInjectService var accountManager: AccountManageable
 
     private enum ShareAndRightsSections: CaseIterable {
@@ -47,6 +48,8 @@ class ShareAndRightsViewController: UIViewController {
 
     var driveFileManager: DriveFileManager!
     var file: File!
+
+    lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -209,6 +212,12 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
+            // TODO: Remove force display
+//            guard selectedPackId != .myKSuite else {
+                router.presentUpSaleSheet()
+                return
+//            }
+
             let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink
             if file.isDropbox || !canBecomeLink {
                 return
