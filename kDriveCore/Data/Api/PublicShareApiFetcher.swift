@@ -30,15 +30,12 @@ public enum PublicShareLimitation: String {
 }
 
 public class PublicShareApiFetcher: ApiFetcher {
-    override public init() {
-        super.init()
-    }
-
     /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
     private static var handledHttpStatus = Set(200 ... 500)
 
     override public func perform<T: Decodable>(request: DataRequest,
-                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {
+                                               overrideDecoder: JSONDecoder? = nil) async throws -> ValidServerResponse<T> {
+        let decoder = overrideDecoder ?? self.decoder
         let validatedRequest = request.validate(statusCode: PublicShareApiFetcher.handledHttpStatus)
         let dataResponse = await validatedRequest.serializingDecodable(ApiResponse<T>.self,
                                                                        automaticallyCancelling: true,

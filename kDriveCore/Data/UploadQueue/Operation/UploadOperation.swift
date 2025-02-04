@@ -362,7 +362,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     private func uploadCompletionSuccess(data: Data, response: URLResponse?, error: Error?) async throws {
         Log.uploadOperation("completion successful \(uploadFileId)")
-        guard let uploadedChunk = try? ApiFetcher.decoder.decode(ApiResponse<UploadedChunk>.self, from: data).data else {
+
+        guard let uploadedChunk = try? DriveApiFetcher.decoder.decode(ApiResponse<UploadedChunk>.self, from: data).data else {
             Log.uploadOperation("parsing error:\(String(describing: error)) ufid:\(uploadFileId)", level: .error)
             throw ErrorDomain.parseError
         }
@@ -460,7 +461,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         var driveError = DriveError.serverError
         if let data,
-           let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
+           let apiError = try? DriveApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
             driveError = DriveError(apiError: apiError)
         }
 

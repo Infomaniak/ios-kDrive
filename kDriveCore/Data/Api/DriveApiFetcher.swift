@@ -25,15 +25,6 @@ import Kingfisher
 import Sentry
 import UIKit
 
-public extension ApiFetcher {
-    convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
-        self.init()
-        createAuthenticatedSession(token,
-                                   authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate),
-                                   additionalAdapters: [RequestContextIdAdaptor(), UserAgentAdapter()])
-    }
-}
-
 public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
     weak var apiFetcher: ApiFetcher?
 
@@ -53,18 +44,33 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 }
 
 public class DriveApiFetcher: ApiFetcher {
+    public static var decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
+
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakNetworkLoginable
 
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
-    override public init() {
-        super.init()
+    public init() {
+        super.init(decoder: Self.decoder)
+        authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
+    }
+
+    public convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
+        self.init()
+        createAuthenticatedSession(token,
+                                   authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate),
+                                   additionalAdapters: [RequestContextIdAdaptor(), UserAgentAdapter()])
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
     override public func perform<T: Decodable>(request: DataRequest,
-                                               decoder: JSONDecoder = ApiFetcher.decoder) async throws -> ValidServerResponse<T> {
+                                               overrideDecoder: JSONDecoder? = nil) async throws -> ValidServerResponse<T> {
         do {
             return try await super.perform(request: request)
         } catch InfomaniakError.apiError(let apiError) {
@@ -395,7 +401,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func restore(file: ProxyFile, in directory: ProxyFile? = nil) async throws -> CancelableResponse {
-        let parameters: Parameters?
+        let parameters: EncodableParameters?
         if let directory {
             parameters = ["destination_directory_id": directory.id]
         } else {
@@ -433,7 +439,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func add(drive: AbstractDrive, category: Category, to files: [ProxyFile]) async throws -> [CategoryResponse] {
-        let parameters: Parameters = ["file_ids": files.map(\.id)]
+        let parameters: EncodableParameters = ["file_ids": files.map(\.id)]
         return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .post,
                                                                parameters: parameters))
     }
@@ -443,7 +449,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func remove(drive: AbstractDrive, category: Category, from files: [ProxyFile]) async throws -> [CategoryResponse] {
-        let parameters: Parameters = ["file_ids": files.map(\.id)]
+        let parameters: EncodableParameters = ["file_ids": files.map(\.id)]
         return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .delete,
                                                                parameters: parameters))
     }
@@ -511,7 +517,7 @@ public class DriveApiFetcher: ApiFetcher {
                                      password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
         let destinationDrive = ProxyDrive(id: destinationDriveId)
         let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
-        var requestParameters: Parameters = [
+        var requestParameters: EncodableParameters = [
             PublicShareAPIParameters.sourceDriveId: sourceDriveId,
             PublicShareAPIParameters.destinationFolderId: destinationFolderId,
             PublicShareAPIParameters.sharelinkUuid: sharelinkUuid
