@@ -107,25 +107,29 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
             // TODO: enable pack check
 //            if selectedPackId == .myKSuite {
-                cell.setMykSuiteChip()
+            cell.setMykSuiteChip()
 //            }
         }
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if content[indexPath.row] == .dropbox && !driveFileManager.drive.pack.capabilities.useDropbox {
-            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController
-                .contentViewController as? DropBoxFloatingPanelViewController
-            floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-            floatingPanelViewController?.actionHandler = { _ in
-                driveFloatingPanelController.dismiss(animated: true) { [weak self] in
-                    guard let self else { return }
-                    router.showStore(from: self, driveFileManager: driveFileManager)
+        if content[indexPath.row] == .dropbox {
+            if selectedPackId == .myKSuite || true { // TODO: Remove force true
+                router.askToUpSaleIfQuotaReached()
+            } else if !driveFileManager.drive.pack.capabilities.useDropbox {
+                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? DropBoxFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) { [weak self] in
+                        guard let self else { return }
+                        router.showStore(from: self, driveFileManager: driveFileManager)
+                    }
                 }
+                present(driveFloatingPanelController, animated: true)
             }
-            present(driveFloatingPanelController, animated: true)
             return
         } else {
             performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
