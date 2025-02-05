@@ -45,6 +45,10 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet var activityListView: UIView!
     @IBOutlet var activityAvatar: UIImageView!
     @IBOutlet var activityLabel: UILabel!
+    @IBOutlet var trashInformationView: UIView!
+    @IBOutlet var trashInformationTitle: UILabel!
+    @IBOutlet var trashInformationSubtitle: UILabel!
+    @IBOutlet var trashInformationChip: UIView!
     var selectView: SelectView!
 
     weak var delegate: FilesHeaderViewDelegate? {
@@ -75,9 +79,37 @@ class FilesHeaderView: UICollectionReusableView {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
 
+        setupTrashView()
+
         selectView = SelectView.instantiate()
         selectView.isHidden = true
         containerStackView.addArrangedSubview(selectView)
+    }
+
+    private func setupTrashView() {
+        trashInformationTitle.font = .systemFont(ofSize: 14)
+        trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color // "#556772"
+        trashInformationSubtitle.font = .systemFont(ofSize: 14)
+        trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color // "#0098FF"
+
+        // TODO: remove hardcoded text
+        trashInformationTitle
+            .text = "Trash is cleaned automatically every 30 days, Trash is cleaned automatically every 30 days !"
+        trashInformationSubtitle.text = "Upgrade"
+
+        // TODO: Use SwiftUI chip component
+        let image = UIImage(named: "myKSuitePlus.logo")
+        let chipImageView = UIImageView(image: image)
+
+        chipImageView.translatesAutoresizingMaskIntoConstraints = false
+        trashInformationChip.addSubview(chipImageView)
+
+        NSLayoutConstraint.activate([
+            chipImageView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
+            chipImageView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
+            chipImageView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
+            chipImageView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
+        ])
     }
 
     @objc private func didTapOnCard() {
