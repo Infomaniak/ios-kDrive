@@ -87,6 +87,8 @@ class FilesHeaderView: UICollectionReusableView {
     }
 
     private func setupTrashView() {
+        trashInformationView.isHidden = true
+
         trashInformationTitle.font = .systemFont(ofSize: 14)
         trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color // "#556772"
         trashInformationSubtitle.font = .systemFont(ofSize: 14)
