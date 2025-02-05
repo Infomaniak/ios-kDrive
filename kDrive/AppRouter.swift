@@ -532,7 +532,7 @@ public struct AppRouter: AppNavigable {
                 floatingPanelViewController.isRemovalInteractionEnabled = true
                 floatingPanelViewController.set(contentViewController: myKSuiteViewController)
 
-                rootViewController.present(floatingPanelViewController, animated: false)
+                rootViewController.present(floatingPanelViewController, animated: true)
             } else {
                 fatalError("kaput")
             }
