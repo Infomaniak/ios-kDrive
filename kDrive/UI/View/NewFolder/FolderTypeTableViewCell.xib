@@ -103,7 +103,7 @@
             <connections>
                 <outlet property="accessoryImageView" destination="kZU-CD-ye1" id="V4o-qX-R0L"/>
                 <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
-                <outlet property="chip" destination="1Hm-LS-nCV" id="X60-ba-pVL"/>
+                <outlet property="chipContainerView" destination="1Hm-LS-nCV" id="GFJ-AP-QL4"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
                 <outlet property="descriptionLabel" destination="EHm-bK-k4d" id="Ta8-Xv-Zah"/>
                 <outlet property="separator" destination="BSA-Kc-s9g" id="Aqp-OR-DH2"/>
@@ -119,13 +119,13 @@
             <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="separatorColor">
             <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
