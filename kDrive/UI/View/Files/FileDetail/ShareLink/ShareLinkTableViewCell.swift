@@ -39,6 +39,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet var leadingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var trailingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var separatorView: UIView!
+    @IBOutlet var chipContainerView: UIView!
     @IBOutlet var fileShareLinkSettingTitle: IKButton!
 
     weak var delegate: ShareLinkTableViewCellDelegate?
@@ -86,7 +87,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(file: File, insets: Bool = true) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    func configureWith(file: File, displayChip: Bool = false, insets: Bool = true) {
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -139,6 +145,22 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             fileShareLinkSettingTitle.alpha = 0
             fileShareLinkSettingTitle.isUserInteractionEnabled = false
             shareIconImageView.image = KDriveResourcesAsset.lock.image
+        }
+
+        if displayChip {
+            // TODO: Use SwiftUI chip component
+            let image = UIImage(named: "myKSuitePlus.logo")
+            let chipImageView = UIImageView(image: image)
+
+            chipImageView.translatesAutoresizingMaskIntoConstraints = false
+            chipContainerView.addSubview(chipImageView)
+
+            NSLayoutConstraint.activate([
+                chipImageView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+                chipImageView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+                chipImageView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+                chipImageView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+            ])
         }
 
         layoutIfNeeded()

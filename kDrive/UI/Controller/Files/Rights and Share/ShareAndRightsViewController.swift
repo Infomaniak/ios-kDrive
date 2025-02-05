@@ -192,7 +192,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(file: file)
+            cell.configureWith(file: file, displayChip: true) // TODO: selectedPackId == .myKSuite
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
