@@ -21,12 +21,12 @@ import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
     @IBOutlet var descriptionLabel: UILabel!
-    @IBOutlet var chip: UIView!
+    @IBOutlet var chipContainerView: UIView!
 
     override func prepareForReuse() {
         super.prepareForReuse()
         descriptionLabel.text = nil
-        chip.subviews.forEach { $0.removeFromSuperview() }
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
 
     public func setMykSuiteChip() {
@@ -35,13 +35,13 @@ class FolderTypeTableViewCell: InsetTableViewCell {
         let chipImageView = UIImageView(image: image)
 
         chipImageView.translatesAutoresizingMaskIntoConstraints = false
-        chip.addSubview(chipImageView)
+        chipContainerView.addSubview(chipImageView)
 
         NSLayoutConstraint.activate([
-            chipImageView.leadingAnchor.constraint(equalTo: chip.leadingAnchor),
-            chipImageView.trailingAnchor.constraint(equalTo: chip.trailingAnchor),
-            chipImageView.topAnchor.constraint(equalTo: chip.topAnchor),
-            chipImageView.bottomAnchor.constraint(equalTo: chip.bottomAnchor)
+            chipImageView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipImageView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipImageView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipImageView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
     }
 }
