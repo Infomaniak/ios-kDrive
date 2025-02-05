@@ -99,18 +99,15 @@ class FilesHeaderView: UICollectionReusableView {
             .text = "Trash is cleaned automatically every 30 days, Trash is cleaned automatically every 30 days !"
         trashInformationSubtitle.text = "Upgrade"
 
-        // TODO: Use SwiftUI chip component
-        let image = UIImage(named: "myKSuitePlus.logo")
-        let chipImageView = UIImageView(image: image)
-
-        chipImageView.translatesAutoresizingMaskIntoConstraints = false
-        trashInformationChip.addSubview(chipImageView)
+        let chipView = MyKSuiteChip.instantiateWhiteChip()
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        trashInformationChip.addSubview(chipView)
 
         NSLayoutConstraint.activate([
-            chipImageView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
-            chipImageView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
-            chipImageView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
-            chipImageView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
         ])
     }
 

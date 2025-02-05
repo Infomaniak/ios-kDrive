@@ -148,18 +148,16 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
 
         if displayChip {
-            // TODO: Use SwiftUI chip component
-            let image = UIImage(named: "myKSuitePlus.logo")
-            let chipImageView = UIImageView(image: image)
+            let chipView = MyKSuiteChip.instantiateGreyChip()
 
-            chipImageView.translatesAutoresizingMaskIntoConstraints = false
-            chipContainerView.addSubview(chipImageView)
+            chipView.translatesAutoresizingMaskIntoConstraints = false
+            chipContainerView.addSubview(chipView)
 
             NSLayoutConstraint.activate([
-                chipImageView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
-                chipImageView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
-                chipImageView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
-                chipImageView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+                chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+                chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+                chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+                chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
             ])
         }
 

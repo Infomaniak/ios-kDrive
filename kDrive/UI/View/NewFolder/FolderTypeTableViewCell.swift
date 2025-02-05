@@ -30,18 +30,15 @@ class FolderTypeTableViewCell: InsetTableViewCell {
     }
 
     public func setMykSuiteChip() {
-        // TODO: Use SwiftUI chip component
-        let image = UIImage(named: "myKSuitePlus.logo")
-        let chipImageView = UIImageView(image: image)
-
-        chipImageView.translatesAutoresizingMaskIntoConstraints = false
-        chipContainerView.addSubview(chipImageView)
+        let chipView = MyKSuiteChip.instantiateGreyChip()
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
 
         NSLayoutConstraint.activate([
-            chipImageView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
-            chipImageView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
-            chipImageView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
-            chipImageView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
     }
 }
