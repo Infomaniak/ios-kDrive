@@ -525,7 +525,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        rootViewController.dismiss(animated: false) {
+        rootViewController.dismiss(animated: true) {
             if #available(iOS 15, *) {
                 let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
                 let myKSuiteViewController = MyKSuiteBridgeViewController()
