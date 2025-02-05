@@ -21,4 +21,27 @@ import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
     @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var chipContainerView: UIView!
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        descriptionLabel.text = nil
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    public func setMykSuiteChip() {
+        // TODO: Use SwiftUI chip component
+        let image = UIImage(named: "myKSuitePlus.logo")
+        let chipImageView = UIImageView(image: image)
+
+        chipImageView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipImageView)
+
+        NSLayoutConstraint.activate([
+            chipImageView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipImageView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipImageView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipImageView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
+    }
 }
