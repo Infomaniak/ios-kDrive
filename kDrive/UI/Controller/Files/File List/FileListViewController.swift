@@ -594,7 +594,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         let isTrash = viewModel.configuration.emptyViewType == .noTrash
         let isMykSuite = selectedPackId == .myKSuite
-        headerView.trashInformationView.isHidden = !(isTrash && isMykSuite)
+        headerView.trashInformationView.isHidden = false // !(isTrash && isMykSuite) TODO: Use actual logic
 
         headerView.sortView.isHidden = !isEmptyViewHidden
 
