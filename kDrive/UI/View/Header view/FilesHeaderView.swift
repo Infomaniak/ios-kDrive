@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -34,6 +35,8 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
+    @LazyInjectService private var router: AppNavigable
+
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -90,9 +93,9 @@ class FilesHeaderView: UICollectionReusableView {
         trashInformationView.isHidden = true
 
         trashInformationTitle.font = .systemFont(ofSize: 14)
-        trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color // "#556772"
+        trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color
         trashInformationSubtitle.font = .systemFont(ofSize: 14)
-        trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color // "#0098FF"
+        trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color
 
         // TODO: remove hardcoded text
         trashInformationTitle
@@ -109,6 +112,13 @@ class FilesHeaderView: UICollectionReusableView {
             chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
             chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
         ])
+
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnTrashHeaderView))
+        trashInformationView.addGestureRecognizer(tapRecognizer)
+    }
+
+    @objc func didTapOnTrashHeaderView() {
+        router.presentUpSaleSheet()
     }
 
     @objc private func didTapOnCard() {
