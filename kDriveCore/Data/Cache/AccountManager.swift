@@ -93,7 +93,6 @@ public protocol AccountManageable: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
-    @LazyInjectService var myKSuiteStore: MyKSuiteStore
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var tokenStore: TokenStore
@@ -317,7 +316,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.noDrive
         }
 
-        try await myKSuiteStore.updateMyKSuite(with: apiFetcher)
+        if #available(iOS 14.0, *) {
+            @InjectService var myKSuiteStore: MyKSuiteStore
+            try await myKSuiteStore.updateMyKSuite(with: apiFetcher)
+        }
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user

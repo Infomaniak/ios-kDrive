@@ -30,7 +30,37 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     let driveFileManager: DriveFileManager
 
-    private enum ParameterRow: CaseIterable {
+    private enum ParameterSection: Int, CaseIterable {
+        case mykSuite
+        case general
+
+        // TODO: i18n
+        var title: String {
+            switch self {
+            case .mykSuite:
+                return "mykSuite _"
+            case .general:
+                return "General _"
+            }
+        }
+    }
+
+    private enum MykSuiteParameterRow: CaseIterable {
+        case email
+        case mySubscription
+
+        // TODO: i18n
+        var title: String {
+            switch self {
+            case .email:
+                return "Email _"
+            case .mySubscription:
+                return "My subscription_"
+            }
+        }
+    }
+
+    private enum GeneralParameterRow: CaseIterable {
         case photos
         case theme
         case notifications
@@ -38,7 +68,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case wifi
         case storage
         case about
-        case account
         case deleteAccount
 
         var title: String {
@@ -57,16 +86,10 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveResourcesStrings.Localizable.aboutTitle
-            case .account:
-                return "My subscription_"
             case .deleteAccount:
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
-    }
-
-    private var tableContent: [ParameterRow] {
-        return ParameterRow.allCases
     }
 
     init(driveFileManager: DriveFileManager) {
@@ -108,81 +131,127 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard let currentSection = ParameterSection(rawValue: section) else {
+            return nil
+        }
+        return currentSection.title
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return ParameterSection.allCases.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableContent.count
+        switch section {
+        case ParameterSection.mykSuite.rawValue:
+            return 2
+        case ParameterSection.general.rawValue:
+            return GeneralParameterRow.allCases.count
+        default:
+            return 0
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = tableContent[indexPath.row]
-        switch row {
-        case .photos, .theme, .notifications:
+        switch indexPath.section {
+        case ParameterSection.mykSuite.rawValue:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
-            cell.titleLabel.text = row.title
-            if row == .photos {
-                cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
-                    .allActivated : KDriveResourcesStrings.Localizable.allDisabled
-            } else if row == .theme {
-                cell.valueLabel.text = UserDefaults.shared.theme.title
-            } else if row == .notifications {
-                cell.valueLabel.text = getNotificationText()
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            )
+
+            let row = MykSuiteParameterRow.allCases[indexPath.row]
+            switch row {
+            case .email:
+                cell.titleLabel.text = row.title
+            case .mySubscription:
+                cell.titleLabel.text = row.title
             }
             return cell
-        case .wifi:
-            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
-            cell.switchHandler = { sender in
-                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
-                UserDefaults.shared.isWifiOnly = sender.isOn
+        case ParameterSection.general.rawValue:
+            let row = GeneralParameterRow.allCases[indexPath.row]
+            switch row {
+            case .photos, .theme, .notifications:
+                let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(
+                    isFirst: indexPath.row == 0,
+                    isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+                )
+                cell.titleLabel.text = row.title
+                if row == .photos {
+                    cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
+                        .allActivated : KDriveResourcesStrings.Localizable.allDisabled
+                } else if row == .theme {
+                    cell.valueLabel.text = UserDefaults.shared.theme.title
+                } else if row == .notifications {
+                    cell.valueLabel.text = getNotificationText()
+                }
+                return cell
+            case .wifi:
+                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow()
+                cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
+                cell.switchHandler = { sender in
+                    MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
+                    UserDefaults.shared.isWifiOnly = sender.isOn
+                }
+                return cell
+            case .security, .storage, .about, .deleteAccount:
+                let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(
+                    isFirst: indexPath.row == 0,
+                    isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+                )
+                cell.titleLabel.text = row.title
+                return cell
             }
-            return cell
-        case .security, .storage, .about, .account, .deleteAccount:
-            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
-            cell.titleLabel.text = row.title
-            return cell
+        default:
+            fatalError("invalid indexPath: \(indexPath)")
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let row = tableContent[indexPath.row]
         tableView.deselectRow(at: indexPath, animated: true)
 
-        switch row {
-        case .storage:
-            navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
-        case .photos:
-            navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
-        case .theme:
-            navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
-        case .notifications:
-            navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
-        case .security:
-            navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-        case .wifi:
-            break
-        case .about:
-            navigationController?.pushViewController(AboutTableViewController(), animated: true)
-        case .account:
+        switch indexPath.section {
+        case ParameterSection.mykSuite.rawValue:
+            let row = MykSuiteParameterRow.allCases[indexPath.row]
             if #available(iOS 15, *) {
                 let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
                 navigationController?.present(dashboardViewController, animated: true)
             } else {
-                assert(false, "TODO remove if #available(iOS 15, *)")
+                assertionFailure("TODO remove if #available(iOS 15, *)")
             }
-        case .deleteAccount:
-            let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
-                delegate: self,
-                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
-                navBarColor: KDriveResourcesAsset.backgroundColor.color,
-                navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
-            )
-            navigationController?.present(deleteAccountViewController, animated: true)
+        case ParameterSection.general.rawValue:
+            let row = GeneralParameterRow.allCases[indexPath.row]
+            switch row {
+            case .storage:
+                navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+            case .photos:
+                navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
+            case .theme:
+                navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
+            case .notifications:
+                navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
+            case .security:
+                navigationController?.pushViewController(SecurityTableViewController(), animated: true)
+            case .wifi:
+                break
+            case .about:
+                navigationController?.pushViewController(AboutTableViewController(), animated: true)
+            case .deleteAccount:
+                let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
+                    delegate: self,
+                    accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
+                    navBarColor: KDriveResourcesAsset.backgroundColor.color,
+                    navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
+                )
+                navigationController?.present(deleteAccountViewController, animated: true)
+            }
+        default:
+            return
         }
     }
 }
