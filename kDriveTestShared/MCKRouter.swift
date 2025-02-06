@@ -49,6 +49,14 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func askToUpSaleIfQuotaReached() {
+        logNoop()
+    }
+
+    public func presentUpSaleSheet() {
+        logNoop()
+    }
+
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
         logNoop()
     }
