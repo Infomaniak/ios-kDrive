@@ -23,7 +23,6 @@ import MyKSuite
 import SwiftUI
 import UIKit
 
-@available(iOS 15, *)
 class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
     init() {
         super.init(delegate: nil)
@@ -45,7 +44,6 @@ class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
     }
 }
 
-@available(iOS 15, *)
 class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
@@ -77,7 +75,6 @@ class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
     }
 }
 
-@available(iOS 15, *)
 class MyKSuiteBridgeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
