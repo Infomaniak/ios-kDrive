@@ -37,7 +37,7 @@ struct OpenMediaHelper {
         mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
         mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory?.freezeIfNeeded()
 
-        if #available(iOS 14, *), media == .library {
+        if media == .library {
             // Check permission
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
                 if authorizationStatus == .authorized {
