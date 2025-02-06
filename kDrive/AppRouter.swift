@@ -144,9 +144,7 @@ public struct AppRouter: AppNavigable {
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()
-            if #available(iOS 15, *) {
-                self.askToUpSaleIfQuotaReached()
-            }
+            askToUpSaleIfQuotaReached()
 
             Task {
                 await askForReview()
@@ -526,16 +524,12 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: true) {
-            if #available(iOS 15, *) {
-                let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
-                let myKSuiteViewController = MyKSuiteBridgeViewController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.set(contentViewController: myKSuiteViewController)
+            let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
+            let myKSuiteViewController = MyKSuiteBridgeViewController()
+            floatingPanelViewController.isRemovalInteractionEnabled = true
+            floatingPanelViewController.set(contentViewController: myKSuiteViewController)
 
-                rootViewController.present(floatingPanelViewController, animated: true)
-            } else {
-                fatalError("kaput")
-            }
+            rootViewController.present(floatingPanelViewController, animated: true)
         }
     }
 
