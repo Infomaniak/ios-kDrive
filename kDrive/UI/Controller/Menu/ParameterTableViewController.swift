@@ -218,12 +218,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         switch indexPath.section {
         case ParameterSection.mykSuite.rawValue:
             let row = MykSuiteParameterRow.allCases[indexPath.row]
-            if #available(iOS 15, *) {
-                let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
-                navigationController?.present(dashboardViewController, animated: true)
-            } else {
-                assertionFailure("TODO remove if #available(iOS 15, *)")
-            }
+            let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
+            navigationController?.present(dashboardViewController, animated: true)
         case ParameterSection.general.rawValue:
             let row = GeneralParameterRow.allCases[indexPath.row]
             switch row {

@@ -156,14 +156,11 @@ public enum FactoryService {
             },
             Factory(type: MediaPlayerOrchestrator.self) { _, _ in
                 MediaPlayerOrchestrator()
+            },
+            Factory(type: MyKSuiteStore.self) { _, _ in
+                MyKSuiteStore()
             }
         ]
-
-        if #available(iOS 15, *) {
-            services += [Factory(type: MyKSuiteStore.self) { _, _ in
-                MyKSuiteStore()
-            }]
-        }
 
         return services
     }

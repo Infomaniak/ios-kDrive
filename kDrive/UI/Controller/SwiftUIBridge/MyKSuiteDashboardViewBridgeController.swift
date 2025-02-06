@@ -23,7 +23,6 @@ import MyKSuite
 import SwiftUI
 import UIKit
 
-@available(iOS 15, *)
 class MyKSuiteDashboardViewBridgeController: UIViewController {
     private let hostingController: UIViewController
 
