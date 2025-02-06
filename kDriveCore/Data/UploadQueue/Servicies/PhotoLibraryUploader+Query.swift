@@ -26,22 +26,16 @@ extension PhotoLibraryUploader {
         let syncFromDate = settings.fromDate as NSDate
         let datePredicate: NSPredicate
 
-        // iOS15 and up, we fetch resources with changes
-        if #available(iOS 15, *) {
-            // Look also for `modificationDate` when we can query the system for more specific
-            // details about the nature of the change later
-            //
-            // Tracking changes of files with a creation date beyond syncFromDate
-            datePredicate = NSPredicate(
-                format: "creationDate > %@ OR (modificationDate > %@ AND creationDate > %@)",
-                lastSyncDate,
-                lastSyncDate,
-                syncFromDate
-            )
-        } else {
-            // Legacy query based on name only
-            datePredicate = NSPredicate(format: "creationDate > %@", lastSyncDate)
-        }
+        // Look also for `modificationDate` when we can query the system for more specific
+        // details about the nature of the change later
+        //
+        // Tracking changes of files with a creation date beyond syncFromDate
+        datePredicate = NSPredicate(
+            format: "creationDate > %@ OR (modificationDate > %@ AND creationDate > %@)",
+            lastSyncDate,
+            lastSyncDate,
+            syncFromDate
+        )
 
         return datePredicate
     }
