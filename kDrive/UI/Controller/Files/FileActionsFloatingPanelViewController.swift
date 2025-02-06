@@ -181,7 +181,12 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     func downloadFile(action: FloatingPanelAction,
                       indexPath: IndexPath,
                       completion: @escaping () -> Void) {
-        guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
+        guard let activeScene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+            let observerViewController = activeScene.windows.first?.rootViewController else {
+            return
+        }
+
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
