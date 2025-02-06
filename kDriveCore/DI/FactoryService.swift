@@ -170,33 +170,30 @@ public enum FactoryService {
 
     /// Debug services
     static var debugServices: [FactoryWithIdentifier] {
-        if #available(iOS 14.0, *) {
-            let loggerFactory = Factory(type: Logger.self) { parameters, _ in
-                guard let category = parameters?["category"] as? String else {
-                    fatalError("Please pass a category")
-                }
-                let subsystem = Bundle.main.bundleIdentifier!
-                return Logger(subsystem: subsystem, category: category)
+        let loggerFactory = Factory(type: Logger.self) { parameters, _ in
+            guard let category = parameters?["category"] as? String else {
+                fatalError("Please pass a category")
             }
-
-            let services = [
-                (loggerFactory, "UploadOperation"),
-                (loggerFactory, "BackgroundSessionManager"),
-                (loggerFactory, "UploadQueue"),
-                (loggerFactory, "DownloadQueue"),
-                (loggerFactory, "BGTaskScheduling"),
-                (loggerFactory, "PhotoLibraryUploader"),
-                (loggerFactory, "AppDelegate"),
-                (loggerFactory, "FileProvider"),
-                (loggerFactory, "DriveInfosManager"),
-                (loggerFactory, "SceneDelegate"),
-                (loggerFactory, "SyncedAuthenticator"),
-                (loggerFactory, "FileList")
-            ]
-            return services
-        } else {
-            return []
+            let subsystem = Bundle.main.bundleIdentifier!
+            return Logger(subsystem: subsystem, category: category)
         }
+
+        let services = [
+            (loggerFactory, "UploadOperation"),
+            (loggerFactory, "BackgroundSessionManager"),
+            (loggerFactory, "UploadQueue"),
+            (loggerFactory, "DownloadQueue"),
+            (loggerFactory, "BGTaskScheduling"),
+            (loggerFactory, "PhotoLibraryUploader"),
+            (loggerFactory, "AppDelegate"),
+            (loggerFactory, "FileProvider"),
+            (loggerFactory, "DriveInfosManager"),
+            (loggerFactory, "SceneDelegate"),
+            (loggerFactory, "SyncedAuthenticator"),
+            (loggerFactory, "FileList"),
+            (loggerFactory, "Default")
+        ]
+        return services
     }
 
     /// DB Transactions
