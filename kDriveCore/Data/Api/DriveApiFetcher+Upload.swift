@@ -40,7 +40,7 @@ enum APIUploadParameter: String {
 }
 
 public extension DriveApiFetcher {
-    internal typealias APIParameters = [APIUploadParameter: Any?]
+    internal typealias APIParameters = [APIUploadParameter: Encodable?]
     /// Starts a session to upload a file in multiple parts
     ///
     /// https://developer.infomaniak.com/docs/api/post/2/drive/%7Bdrive_id%7D/upload/session/start
@@ -242,9 +242,9 @@ public extension DriveApiFetcher {
     }
 }
 
-extension [APIUploadParameter: Any?] {
-    func toParameters() -> Parameters {
-        var parameters = Parameters()
+extension [APIUploadParameter: Encodable?] {
+    func toParameters() -> EncodableParameters {
+        var parameters = EncodableParameters()
         for rawParameter in self {
             if let nonNilValue = rawParameter.value {
                 parameters[rawParameter.key.rawValue] = nonNilValue
