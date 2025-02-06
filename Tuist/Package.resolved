@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "9fdaf17dea8d950a520d240f21391be6195239fd",
-        "version" : "13.1.0"
+        "revision" : "c3a442b5bd2fb67680aa252638773c4d7d1551ad",
+        "version" : "14.0.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "824ac002c136fc706321e8f12f8c7736bebd8680",
-        "version" : "16.4.0"
+        "revision" : "fc37b5e6e96e38f232f62bd03d322ea6951c1c0f",
+        "version" : "17.0.0"
       }
     },
     {
@@ -104,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-dependency-injection",
       "state" : {
-        "revision" : "7d127ead20bbb4a6a39ca60e6dc32e580197b59e",
-        "version" : "2.0.2"
+        "revision" : "f7724f3237f6e2b36fbfabacb88f2658e1e7281e",
+        "version" : "2.0.3"
       }
     },
     {
@@ -122,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "7027616a4fc3d5b1464f55c934111724356ebac3",
-        "version" : "8.0.0"
+        "revision" : "4f7303c66e8bfd6a0ca7fb21fd35838b58c72219",
+        "version" : "9.0.0"
       }
     },
     {
@@ -302,8 +302,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "ba72f31e11275fc5bf060c966cf6c1f36842a291",
-        "version" : "2.79.0"
+        "revision" : "dff45738d84a53dbc8ee899c306b3a7227f54f89",
+        "version" : "2.80.0"
       }
     },
     {
