@@ -23,75 +23,24 @@ import MyKSuite
 import SwiftUI
 import UIKit
 
-class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
-    init() {
-        super.init(delegate: nil)
-        let appearance = SurfaceAppearance()
-        appearance.cornerRadius = UIConstants.FloatingPanel.cornerRadius
-        appearance.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        surfaceView.appearance = appearance
-        surfaceView.grabberHandlePadding = 16
-        surfaceView.grabberHandleSize = CGSize(width: 45, height: 5)
-        surfaceView.grabberHandle.barColor = KDriveResourcesAsset.iconColor.color.withAlphaComponent(0.4)
-        surfaceView.contentPadding = UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
-        backdropView.dismissalTapGestureRecognizer.isEnabled = true
-        layout = MyKSuiteFloatingPanelBridgeLayout()
-    }
+final class MyKSuiteBridgeViewController: UIViewController {
+    let swiftUIView = MyKSuiteView(configuration: .kDrive)
+    lazy var hostingController = UIHostingController(rootView: ScrollView { swiftUIView })
 
-    @available(*, unavailable)
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
-    var position: FloatingPanelPosition = .bottom
-    var initialState: FloatingPanelState = .tip
-    var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring]
-    private var backdropAlpha: CGFloat
-
-    init(
-        initialState: FloatingPanelState = .full,
-        hideTip: Bool = false,
-        safeAreaInset: CGFloat = 0,
-        backdropAlpha: CGFloat = 0
-    ) {
-        self.initialState = initialState
-        self.backdropAlpha = backdropAlpha
-        let extendedAnchor = FloatingPanelLayoutAnchor(
-            absoluteInset: 620.0 + safeAreaInset,
-            edge: .bottom,
-            referenceGuide: .superview
-        )
-        anchors = [
-            .full: extendedAnchor,
-            .half: extendedAnchor,
-            .tip: FloatingPanelLayoutAnchor(absoluteInset: 86.0 + safeAreaInset, edge: .bottom, referenceGuide: .superview)
-        ]
-    }
-
-    func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
-        return backdropAlpha
-    }
-}
-
-class MyKSuiteBridgeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let swiftUIView = MyKSuiteView(configuration: .kDrive)
-        let hostingController = UIHostingController(rootView: swiftUIView)
-
         addChild(hostingController)
-        let sourceBounds = view.bounds
-        let adjustedFrame = CGRect(x: 0,
-                                   y: -140,
-                                   width: sourceBounds.width,
-                                   height: sourceBounds.height)
-        hostingController.view.frame = adjustedFrame
         view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
 
-        // hostingController.view.backgroundColor = .yellow
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
+        hostingController.didMove(toParent: self)
     }
 }

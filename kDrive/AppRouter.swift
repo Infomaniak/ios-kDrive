@@ -22,7 +22,9 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import SafariServices
+import SwiftUI
 import UIKit
 import VersionChecker
 
@@ -523,14 +525,25 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        rootViewController.dismiss(animated: true) {
-            let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
-            let myKSuiteViewController = MyKSuiteBridgeViewController()
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.set(contentViewController: myKSuiteViewController)
+        let viewControllerToPresent = MyKSuiteBridgeViewController()
+        if let sheet = viewControllerToPresent.sheetPresentationController {
+            if #available(iOS 16.0, *) {
+                sheet.detents = [
+                    .custom { _ in
+                        return 560
+                    }
+                ]
+            } else {
+                sheet.detents = [.large()]
+                sheet.largestUndimmedDetentIdentifier = .large
+            }
 
-            rootViewController.present(floatingPanelViewController, animated: true)
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
         }
+        rootViewController.present(viewControllerToPresent, animated: true)
     }
 
     public func askForReview() async {
