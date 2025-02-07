@@ -18,6 +18,7 @@ let packageSettings = PackageSettings(
         "InfomaniakCoreCommonUI": .framework,
         "InfomaniakCoreUIKit": .framework,
         "Kingfisher": .framework,
+        "Lottie": .framework,
         "RealmSwift": .framework,
         "Realm": .framework
     ]
