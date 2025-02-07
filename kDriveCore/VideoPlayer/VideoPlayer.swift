@@ -18,7 +18,6 @@
 
 import AVKit
 import Combine
-import FloatingPanel
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
