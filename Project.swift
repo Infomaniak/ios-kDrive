@@ -21,7 +21,11 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(name: "kDrive",
-                      packages: [],
+                      options: .options(
+                          automaticSchemesOptions: .enabled(
+                              targetSchemesGrouping: .notGrouped
+                          )
+                      ),
                       targets: [
                           .target(name: "kDrive",
                                   destinations: Constants.destinations,
