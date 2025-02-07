@@ -40,6 +40,7 @@ final class ITDrive: XCTestCase {
         }
 
         let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         // WHEN
         do {
@@ -62,6 +63,7 @@ final class ITDrive: XCTestCase {
         }
 
         let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         // WHEN
         do {
