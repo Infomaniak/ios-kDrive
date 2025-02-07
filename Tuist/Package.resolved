@@ -1,4 +1,5 @@
 {
+  "originHash" : "2e661e8c8c3a4c4af33d3e5a69c81ce37669665e4b98e10943641241208799be",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -114,7 +115,7 @@
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
         "branch" : "myksuite",
-        "revision" : "c678214ed6331594df744ebb191b0789ddff694a"
+        "revision" : "51815cc2838ded5e797b6593153afb6d43a0ab11"
       }
     },
     {
@@ -239,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "f45e9c62d7a4d9258ac3cf35a3acf9dbab4481d1",
-        "version" : "8.43.0"
+        "revision" : "0c34e4da899a1dd9183db04082d1ceb6e9c2b301",
+        "version" : "8.44.0"
       }
     },
     {
@@ -320,8 +321,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-transport-services.git",
       "state" : {
-        "revision" : "bbd5e63cf949b7db0c9edaf7a21e141c52afe214",
-        "version" : "1.23.0"
+        "revision" : "3c394067c08d1225ba8442e9cffb520ded417b64",
+        "version" : "1.23.1"
       }
     },
     {
@@ -379,5 +380,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
