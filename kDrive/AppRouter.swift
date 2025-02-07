@@ -22,7 +22,9 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import SafariServices
+import SwiftUI
 import UIKit
 import VersionChecker
 
@@ -524,11 +526,8 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: true) {
-            let floatingPanelViewController = MyKSuiteFloatingPanelBridgeController()
-            let myKSuiteViewController = MyKSuiteBridgeViewController()
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.set(contentViewController: myKSuiteViewController)
-
+            let floatingPanelViewController = MyKSuiteBridgeViewController
+                .instantiateInFloatingPanel(rootViewController: rootViewController)
             rootViewController.present(floatingPanelViewController, animated: true)
         }
     }

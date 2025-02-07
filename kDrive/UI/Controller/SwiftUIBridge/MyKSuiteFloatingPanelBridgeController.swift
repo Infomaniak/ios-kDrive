@@ -23,7 +23,7 @@ import MyKSuite
 import SwiftUI
 import UIKit
 
-class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
+final class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
     init() {
         super.init(delegate: nil)
         let appearance = SurfaceAppearance()
@@ -44,7 +44,7 @@ class MyKSuiteFloatingPanelBridgeController: FloatingPanelController {
     }
 }
 
-class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
+final class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
     var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring]
@@ -75,23 +75,99 @@ class MyKSuiteFloatingPanelBridgeLayout: FloatingPanelLayout {
     }
 }
 
-class MyKSuiteBridgeViewController: UIViewController {
+struct RedView: View {
+    var body: some View {
+        Color.red
+            .edgesIgnoringSafeArea(.all)
+    }
+}
+
+final class MyKSuiteBridgeViewController: UIViewController {
+    let scrollView = UIScrollView()
+    let swiftUIView =  MyKSuiteView(configuration: .kDrive) // RedView()
+    lazy var hostingController = UIHostingController(rootView: ScrollView(){ swiftUIView })
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let swiftUIView = MyKSuiteView(configuration: .kDrive)
-        let hostingController = UIHostingController(rootView: swiftUIView)
+        view.addSubview(scrollView)
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
 
         addChild(hostingController)
-        let sourceBounds = view.bounds
-        let adjustedFrame = CGRect(x: 0,
-                                   y: -140,
-                                   width: sourceBounds.width,
-                                   height: sourceBounds.height)
-        hostingController.view.frame = adjustedFrame
-        view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
+        scrollView.addSubview(hostingController.view)
+        hostingController.view.backgroundColor = .green
 
-        // hostingController.view.backgroundColor = .yellow
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+//            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+//        ])
+
+        NSLayoutConstraint.activate([
+            hostingController.view.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            hostingController.view.leadingAnchor.constraint(
+                equalTo: scrollView.leadingAnchor,
+                constant: UIConstants.Padding.standard
+            ),
+            hostingController.view.trailingAnchor.constraint(
+                equalTo: scrollView.trailingAnchor,
+                constant: -UIConstants.Padding.standard
+            ),
+            hostingController.view.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            hostingController.view.widthAnchor.constraint(
+                equalTo: view.widthAnchor,
+                constant: -(2 * UIConstants.Padding.standard)
+            )
+        ])
+
+//        scrollView.contentSize = CGSize(width: scrollView.bounds.width, height: 600)
+//        view.frame = CGRect(x: 0, y: 0, width: 800, height: 600)
+
+        hostingController.didMove(toParent: self)
+    }
+
+    public static func instantiateInFloatingPanel(rootViewController: UIViewController) -> UIViewController {
+        let upsaleViewController = MyKSuiteBridgeViewController()
+        upsaleViewController.view.backgroundColor = .red
+        return MyKSuiteUpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+    }
+}
+
+// ___
+
+final class MyKSuiteUpsaleFloatingPanelController: AdaptiveDriveFloatingPanelController {
+    private let upsaleViewController: MyKSuiteBridgeViewController
+
+    init(upsaleViewController: MyKSuiteBridgeViewController) {
+        self.upsaleViewController = upsaleViewController
+
+        super.init()
+
+        set(contentViewController: upsaleViewController)
+        trackAndObserve(scrollView: upsaleViewController.scrollView)
+
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return
+        }
+        guard let window = windowScene.windows.first(where: { $0.isKeyWindow }) else {
+            return
+        }
+        updateLayout(size: window.bounds.size)
+
+        print("• SIZE\(window.bounds.size)")
+
+        upsaleViewController.view.setNeedsLayout()
+        upsaleViewController.scrollView.setNeedsLayout()
+
+//        surfaceView.grabberHandle.isHidden = true
+//        surfaceView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 }
