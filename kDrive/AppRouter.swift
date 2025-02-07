@@ -525,11 +525,25 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        rootViewController.dismiss(animated: true) {
-            let floatingPanelViewController = MyKSuiteBridgeViewController
-                .instantiateInFloatingPanel(rootViewController: rootViewController)
-            rootViewController.present(floatingPanelViewController, animated: true)
+        let viewControllerToPresent = MyKSuiteBridgeViewController()
+        if let sheet = viewControllerToPresent.sheetPresentationController {
+            if #available(iOS 16.0, *) {
+                sheet.detents = [
+                    .custom { _ in
+                        return 560
+                    }
+                ]
+            } else {
+                sheet.detents = [.large()]
+                sheet.largestUndimmedDetentIdentifier = .large
+            }
+
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
         }
+        rootViewController.present(viewControllerToPresent, animated: true)
     }
 
     public func askForReview() async {
