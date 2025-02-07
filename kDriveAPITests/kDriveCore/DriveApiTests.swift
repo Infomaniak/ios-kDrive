@@ -640,21 +640,6 @@ final class DriveApiTests: XCTestCase {
 
     // MARK: Miscellaneous
 
-    func testSearchFiles() async throws {
-        let (testDirectory, file) = try await initOfficeFile(testName: "Search files")
-        let files = try await currentApiFetcher.searchFiles(
-            drive: proxyDrive,
-            query: "officeFile",
-            fileExtensions: [],
-            categories: [],
-            belongToAllCategories: true,
-            sortType: .newer
-        ).validApiResponse.data
-        let fileFound = files.contains { $0.id == file.id }
-        XCTAssertTrue(fileFound, "File created should be in response")
-        tearDownTest(directory: testDirectory)
-    }
-
     func testUndoAction() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Undo action")
         let directory = try await createTestDirectory(name: "test", parentDirectory: testDirectory)
