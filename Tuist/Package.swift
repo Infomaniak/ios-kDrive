@@ -22,7 +22,10 @@ let packageSettings = PackageSettings(
         "InfomaniakCoreSwiftUI": .framework,
         "DesignSystem": .framework,
         "RealmSwift": .framework,
-        "Realm": .framework
+        "Realm": .framework,
+        "MyKSuite": .framework,
+        "InfomaniakCoreSwiftUI": .framework,
+        "DesignSystem": .framework
     ]
 )
 
