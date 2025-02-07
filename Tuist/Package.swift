@@ -20,7 +20,9 @@ let packageSettings = PackageSettings(
         "Lottie": .framework,
         "RealmSwift": .framework,
         "Realm": .framework,
-        "MyKSuite": .framework
+        "MyKSuite": .framework,
+        "InfomaniakCoreSwiftUI": .framework,
+        "DesignSystem": .framework
     ]
 )
 
