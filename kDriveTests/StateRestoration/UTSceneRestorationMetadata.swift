@@ -90,7 +90,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
         XCTAssertEqual(metadata["filesIds"] as? [Int], [1337])
         XCTAssertEqual(metadata["currentIndex"] as? Int, Int(0))
         XCTAssertEqual(metadata["normalFolderHierarchy"] as? Bool, true)
-        XCTAssertEqual(metadata["presentationOrigin"] as? PresentationOrigin, .activities)
+        XCTAssertEqual(metadata["presentationOrigin"] as? String, PresentationOrigin.activities.rawValue)
     }
 
     @MainActor func testFileDetailViewController() {
