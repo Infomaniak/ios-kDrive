@@ -109,7 +109,11 @@ public extension Target {
                            .external(name: "FloatingPanel"),
                            .external(name: "Lottie"),
                            .external(name: "DropDown"),
-                           .external(name: "HorizonCalendar")
+                           .external(name: "HorizonCalendar"),
+                           .external(name: "Realm"),
+                           .external(name: "RealmSwift"),
+                           .external(name: "CocoaLumberjack"),
+                           .external(name: "CocoaLumberjackSwift")
                        ],
                        settings: settings)
     }
