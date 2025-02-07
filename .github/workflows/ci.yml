@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Create test env
         env:
-          ENV_PATH: "kDriveTests/Env.swift"
+          ENV_PATH: "kDriveTestShared/Env.swift"
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           USER_ID: ${{ secrets.USER_ID }}
           INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
