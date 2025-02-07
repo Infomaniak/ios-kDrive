@@ -11,7 +11,6 @@ let packageSettings = PackageSettings(
         "Atlantis": .staticFramework,
         "CocoaLumberjackSwift": .framework,
         "CocoaLumberjack": .framework,
-        "MyKSuite": .framework,
         "InfomaniakDI": .framework,
         "InfomaniakLogin": .framework,
         "InfomaniakCore": .framework,
@@ -19,11 +18,11 @@ let packageSettings = PackageSettings(
         "InfomaniakCoreUIKit": .framework,
         "Kingfisher": .framework,
         "Lottie": .framework,
-        "RealmSwift": .framework,
-        "Realm": .framework,
         "MyKSuite": .framework,
         "InfomaniakCoreSwiftUI": .framework,
-        "DesignSystem": .framework
+        "DesignSystem": .framework,
+        "RealmSwift": .framework,
+        "Realm": .framework
     ]
 )
 
@@ -34,14 +33,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
         .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
-<<<<<<< HEAD
-        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "14.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "17.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-features", branch: "myksuite"),
-=======
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "18.0.0")),
->>>>>>> 0c501c62 (chore: Bump core)
+        .package(url: "https://github.com/Infomaniak/ios-features", branch: "myksuite"),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.3")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),
