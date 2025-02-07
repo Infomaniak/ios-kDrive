@@ -21,7 +21,11 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(name: "kDrive",
-                      packages: [],
+                      options: .options(
+                          automaticSchemesOptions: .enabled(
+                              targetSchemesGrouping: .notGrouped
+                          )
+                      ),
                       targets: [
                           .target(name: "kDrive",
                                   destinations: Constants.destinations,
@@ -48,13 +52,17 @@ let project = Project(name: "kDrive",
                                       .target(name: "kDriveCore"),
                                       .target(name: "kDriveShareExtension"),
                                       .target(name: "kDriveActionExtension"),
-                                      .external(name: "FloatingPanel"),
-                                      .external(name: "Lottie"),
+                                      .external(name: "CocoaLumberjackSwift"),
+                                      .external(name: "CocoaLumberjack"),
                                       .external(name: "DropDown"),
+                                      .external(name: "FloatingPanel"),
+                                      .external(name: "Highlightr"),
                                       .external(name: "HorizonCalendar"),
                                       .external(name: "Kvitto"),
-                                      .external(name: "Highlightr"),
+                                      .external(name: "Lottie"),
                                       .external(name: "MarkdownKit"),
+                                      .external(name: "RealmSwift"),
+                                      .external(name: "Realm"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
                                   settings: .settings(base: Constants.baseSettings),
@@ -76,7 +84,16 @@ let project = Project(name: "kDrive",
                                       "kDriveTests/**/*.json"
                                   ],
                                   dependencies: [
-                                      .target(name: "kDrive")
+                                      .target(name: "kDrive"),
+                                      .target(name: "kDriveCore"),
+                                      .external(name: "Alamofire"),
+                                      .external(name: "InfomaniakCoreCommonUI"),
+                                      .external(name: "InfomaniakCoreUIKit"),
+                                      .external(name: "InfomaniakCore"),
+                                      .external(name: "InfomaniakDI"),
+                                      .external(name: "InfomaniakLogin"),
+                                      .external(name: "RealmSwift"),
+                                      .external(name: "Realm")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveAPITests",
@@ -90,7 +107,13 @@ let project = Project(name: "kDrive",
                                       "kDriveTestShared/**"
                                   ],
                                   dependencies: [
-                                      .target(name: "kDrive")
+                                      .target(name: "kDrive"),
+                                      .target(name: "kDriveCore"),
+                                      .external(name: "InfomaniakCore"),
+                                      .external(name: "InfomaniakDI"),
+                                      .external(name: "InfomaniakLogin"),
+                                      .external(name: "RealmSwift"),
+                                      .external(name: "Realm")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveUITests",
@@ -133,24 +156,25 @@ let project = Project(name: "kDrive",
                                       .external(name: "Alamofire"),
                                       .external(name: "Algorithms"),
                                       .external(name: "Atlantis"),
-                                      .external(name: "MQTTNIO"),
-                                      .external(name: "InfomaniakCore"),
-                                      .external(name: "InfomaniakCoreDB"),
+                                      .external(name: "CocoaLumberjackSwift"),
+                                      .external(name: "CocoaLumberjack"),
+                                      .external(name: "DifferenceKit"),
+                                      .external(name: "InfomaniakConcurrency"),
                                       .external(name: "InfomaniakCoreCommonUI"),
+                                      .external(name: "InfomaniakCoreDB"),
                                       .external(name: "InfomaniakCoreSwiftUI"),
                                       .external(name: "InfomaniakCoreUIKit"),
-                                      .external(name: "InfomaniakLogin"),
+                                      .external(name: "InfomaniakCore"),
                                       .external(name: "InfomaniakDI"),
-                                      .external(name: "InfomaniakConcurrency"),
-                                      .external(name: "RealmSwift"),
+                                      .external(name: "InfomaniakLogin"),
                                       .external(name: "Kingfisher"),
-                                      .external(name: "DifferenceKit"),
-                                      .external(name: "CocoaLumberjackSwift"),
+                                      .external(name: "LocalizeKit"),
                                       .external(name: "MaterialOutlinedTextField"),
-                                      .external(name: "SwiftRegex"),
+                                      .external(name: "MQTTNIO"),
+                                      .external(name: "RealmSwift"),
                                       .external(name: "Sentry-Dynamic"),
-                                      .external(name: "VersionChecker"),
-                                      .external(name: "LocalizeKit")
+                                      .external(name: "SwiftRegex"),
+                                      .external(name: "VersionChecker")
                                   ]),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,
@@ -170,7 +194,13 @@ let project = Project(name: "kDrive",
                                   headers: .headers(project: "kDriveFileProvider/**"),
                                   entitlements: "kDriveFileProvider/FileProvider.entitlements",
                                   dependencies: [
-                                      .target(name: "kDriveCore")
+                                      .target(name: "kDriveCore"),
+                                      .external(name: "CocoaLumberjackSwift"),
+                                      .external(name: "CocoaLumberjack"),
+                                      .external(name: "InfomaniakCore"),
+                                      .external(name: "InfomaniakDI"),
+                                      .external(name: "InfomaniakLogin"),
+                                      .external(name: "RealmSwift")
                                   ],
                                   settings: .settings(
                                       base: Constants.fileProviderSettings,

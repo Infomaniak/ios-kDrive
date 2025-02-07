@@ -1,5 +1,5 @@
-// swift-tools-version: 5.9
-import PackageDescription
+// swift-tools-version: 5.10
+@preconcurrency import PackageDescription
 
 #if TUIST
 import ProjectDescription
@@ -7,8 +7,19 @@ import ProjectDescriptionHelpers
 
 let packageSettings = PackageSettings(
     productTypes: [
-        "RealmSwift": .staticLibrary,
-        "Realm": .staticLibrary
+        "Alamofire": .framework,
+        "Atlantis": .staticFramework,
+        "CocoaLumberjackSwift": .framework,
+        "CocoaLumberjack": .framework,
+        "InfomaniakDI": .framework,
+        "InfomaniakLogin": .framework,
+        "InfomaniakCore": .framework,
+        "InfomaniakCoreCommonUI": .framework,
+        "InfomaniakCoreUIKit": .framework,
+        "Kingfisher": .framework,
+        "Lottie": .framework,
+        "RealmSwift": .framework,
+        "Realm": .framework
     ]
 )
 

@@ -71,3 +71,4 @@ release/
 kDriveTests/Env.swift
 kDriveAPITests/Env.swift
 kDriveUITests/Env.swift
+kDriveTestShared/Env.swift
