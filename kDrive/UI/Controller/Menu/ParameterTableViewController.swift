@@ -20,9 +20,9 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import Sentry
 import UIKit
-import MyKSuite
 
 class ParameterTableViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
@@ -31,17 +31,32 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     let driveFileManager: DriveFileManager
 
+    lazy var packId = DrivePackId.myKSuite // TODO: Remove hardcode for -> DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
+    lazy var isMykSuiteEnabled: Bool = {
+        if packId == .myKSuite || packId == .myKSuitePlus {
+            return true
+        } else {
+            return false
+        }
+    }()
+
     private enum ParameterSection: Int, CaseIterable {
         case mykSuite
         case general
 
-        // TODO: i18n
-        var title: String {
+        func title(packId: DrivePackId?) -> String {
             switch self {
             case .mykSuite:
-                return "my kSuite _"
+                if packId == .myKSuite {
+                    return "my kSuite"
+                } else if packId == .myKSuitePlus {
+                    return "my kSuite plus"
+                } else {
+                    return ""
+                }
             case .general:
-                return "General _"
+                return "General _" // TODO: use settingsSectionGeneral
             }
         }
     }
@@ -136,17 +151,25 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         guard let currentSection = ParameterSection(rawValue: section) else {
             return nil
         }
-        return currentSection.title
+        return currentSection.title(packId: packId)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
+        guard isMykSuiteEnabled else {
+            return 1
+        }
+
         return ParameterSection.allCases.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        guard isMykSuiteEnabled else {
+            return GeneralParameterRow.allCases.count
+        }
+
         switch section {
         case ParameterSection.mykSuite.rawValue:
-            return 2
+            return MykSuiteParameterRow.allCases.count
         case ParameterSection.general.rawValue:
             return GeneralParameterRow.allCases.count
         default:
@@ -155,62 +178,74 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard isMykSuiteEnabled else {
+            return generalCell(tableView, forRowAt: indexPath)
+        }
+
         switch indexPath.section {
         case ParameterSection.mykSuite.rawValue:
+            return mykSuiteCell(tableView, forRowAt: indexPath)
+        case ParameterSection.general.rawValue:
+            return generalCell(tableView, forRowAt: indexPath)
+        default:
+            fatalError("invalid indexPath: \(indexPath)")
+        }
+    }
+
+    private func generalCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
+        let row = GeneralParameterRow.allCases[indexPath.row]
+        switch row {
+        case .photos, .theme, .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
                 isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
             )
-
-            let row = MykSuiteParameterRow.allCases[indexPath.row]
-            switch row {
-            case .email:
-                cell.titleLabel.text = row.title
-            case .mySubscription:
-                cell.titleLabel.text = row.title
+            cell.titleLabel.text = row.title
+            if row == .photos {
+                cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
+                    .allActivated : KDriveResourcesStrings.Localizable.allDisabled
+            } else if row == .theme {
+                cell.valueLabel.text = UserDefaults.shared.theme.title
+            } else if row == .notifications {
+                cell.valueLabel.text = getNotificationText()
             }
             return cell
-        case ParameterSection.general.rawValue:
-            let row = GeneralParameterRow.allCases[indexPath.row]
-            switch row {
-            case .photos, .theme, .notifications:
-                let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(
-                    isFirst: indexPath.row == 0,
-                    isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
-                )
-                cell.titleLabel.text = row.title
-                if row == .photos {
-                    cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
-                        .allActivated : KDriveResourcesStrings.Localizable.allDisabled
-                } else if row == .theme {
-                    cell.valueLabel.text = UserDefaults.shared.theme.title
-                } else if row == .notifications {
-                    cell.valueLabel.text = getNotificationText()
-                }
-                return cell
-            case .wifi:
-                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow()
-                cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
-                cell.switchHandler = { sender in
-                    MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
-                    UserDefaults.shared.isWifiOnly = sender.isOn
-                }
-                return cell
-            case .security, .storage, .about, .deleteAccount:
-                let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(
-                    isFirst: indexPath.row == 0,
-                    isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
-                )
-                cell.titleLabel.text = row.title
-                return cell
+        case .wifi:
+            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
+            cell.switchHandler = { sender in
+                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
+                UserDefaults.shared.isWifiOnly = sender.isOn
             }
-        default:
-            fatalError("invalid indexPath: \(indexPath)")
+            return cell
+        case .security, .storage, .about, .deleteAccount:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            )
+            cell.titleLabel.text = row.title
+            return cell
         }
+    }
+
+    private func mykSuiteCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+        cell.initWithPositionAndShadow(
+            isFirst: indexPath.row == 0,
+            isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+        )
+
+        let row = MykSuiteParameterRow.allCases[indexPath.row]
+        switch row {
+        case .email:
+            cell.titleLabel.text = row.title
+        case .mySubscription:
+            cell.titleLabel.text = row.title
+        }
+        return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
