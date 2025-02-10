@@ -318,7 +318,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if #available(iOS 14.0, *) {
             @InjectService var myKSuiteStore: MyKSuiteStore
-            try await myKSuiteStore.updateMyKSuite(with: apiFetcher)
+            @InjectService var accountManager: AccountManageable
+            try await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
         }
 
         let newAccount = Account(apiToken: token)

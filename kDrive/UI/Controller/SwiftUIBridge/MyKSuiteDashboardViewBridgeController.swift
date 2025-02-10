@@ -17,6 +17,7 @@
  */
 
 import FloatingPanel
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import MyKSuite
@@ -27,7 +28,8 @@ class MyKSuiteDashboardViewBridgeController: UIViewController {
     private let hostingController: UIViewController
 
     init(apiFetcher: DriveApiFetcher) {
-        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher)
+        @InjectService var accountManager: AccountManageable
+        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher, userId: accountManager.currentUserId, userAvatar: nil)
         hostingController = UIHostingController(rootView: swiftUIView)
 
         super.init(nibName: nil, bundle: nil)
@@ -54,7 +56,7 @@ class MyKSuiteDashboardViewBridgeController: UIViewController {
         ])
 
         hostingController.didMove(toParent: self)
-        
+
         // TODO: Remove
         view.backgroundColor = .yellow
         print("hostingController.view frame \(hostingController.view.frame) bounds \(hostingController.view.bounds)")
