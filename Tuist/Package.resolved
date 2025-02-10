@@ -1,4 +1,5 @@
 {
+  "originHash" : "978577225a5036d45e6d0b6efa3114b62d416e56115615c78b83bb375e8534df",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -86,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "c3a442b5bd2fb67680aa252638773c4d7d1551ad",
-        "version" : "14.0.0"
+        "revision" : "f9664e0b91a79d86373cafa87f89e0a45deb3128",
+        "version" : "15.0.0"
       }
     },
     {
@@ -95,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "fc37b5e6e96e38f232f62bd03d322ea6951c1c0f",
-        "version" : "17.0.0"
+        "revision" : "3c36b8c376dd8779b47a5b03acfbe71ed270282a",
+        "version" : "18.0.0"
       }
     },
     {
@@ -122,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "4f7303c66e8bfd6a0ca7fb21fd35838b58c72219",
-        "version" : "9.0.0"
+        "revision" : "050e58bf34ad61db90c2426f8d8fd6a4b49fabf0",
+        "version" : "10.0.0"
       }
     },
     {
@@ -370,5 +371,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
