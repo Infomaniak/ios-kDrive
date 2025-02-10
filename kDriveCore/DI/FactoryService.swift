@@ -84,7 +84,7 @@ public enum FactoryService {
 
     /// Misc services
     private static var miscServices: [Factory] {
-        var services = [
+        let services = [
             Factory(type: KeychainHelper.self) { _, _ in
                 KeychainHelper(accessGroup: AccountManager.accessGroup)
             },
