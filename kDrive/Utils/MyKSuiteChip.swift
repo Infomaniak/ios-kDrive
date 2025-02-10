@@ -22,11 +22,11 @@ import UIKit
 
 public enum MyKSuiteChip {
     public static func instantiateWhiteChip() -> UIView {
-        instantiate(backgroundColor: .white)
+        instantiate(backgroundColor: KDriveResourcesAsset.whiteBackgroundChipColor.color)
     }
 
     public static func instantiateGreyChip() -> UIView {
-        instantiate(backgroundColor: KDriveResourcesAsset.chipBackgroundColor.color)
+        instantiate(backgroundColor: KDriveResourcesAsset.greyBackgroundChipColor.color)
     }
 
     private static func instantiate(backgroundColor: UIColor) -> UIView {
