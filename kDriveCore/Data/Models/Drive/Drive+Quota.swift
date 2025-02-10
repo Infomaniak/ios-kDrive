@@ -47,12 +47,12 @@ public final class DriveQuota: EmbeddedObject, Codable {
 
 extension Drive {
     var dropboxQuotaExceeded: Bool {
-        guard let quota, let dropbox = quota.dropbox else { return true }
+        guard let quota, let dropbox = quota.dropbox else { return false }
         return dropbox.current ?? 0 >= dropbox.max
     }
 
     var sharedLinkQuotaExceeded: Bool {
-        guard let quota, let sharedLink = quota.sharedLink else { return true }
+        guard let quota, let sharedLink = quota.sharedLink else { return false }
         return sharedLink.current ?? 0 >= sharedLink.max
     }
 }
