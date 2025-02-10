@@ -22,6 +22,7 @@ import kDriveCore
 import kDriveResources
 import Sentry
 import UIKit
+import MyKSuite
 
 class ParameterTableViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
@@ -38,7 +39,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         var title: String {
             switch self {
             case .mykSuite:
-                return "mykSuite _"
+                return "my kSuite _"
             case .general:
                 return "General _"
             }
@@ -49,13 +50,13 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case email
         case mySubscription
 
-        // TODO: i18n
         var title: String {
             switch self {
             case .email:
-                return "Email _"
+                @LazyInjectService var accountManager: AccountManageable
+                return accountManager.currentAccount?.user.email ?? ""
             case .mySubscription:
-                return "My subscription_"
+                return MyKSuiteLocalizable.iosMyKSuiteDashboardSubscriptionButton
             }
         }
     }
