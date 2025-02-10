@@ -45,13 +45,13 @@
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Lop-v5-aTk">
-                                    <rect key="frame" x="32" y="24.5" width="41.5" height="73.5"/>
+                                    <rect key="frame" x="32" y="28.5" width="41.5" height="69.5"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8t5-AV-Kjf">
-                                    <rect key="frame" x="83.5" y="49" width="25" height="25"/>
+                                    <rect key="frame" x="83.5" y="51" width="25" height="25"/>
                                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     <constraints>
                                         <constraint firstAttribute="width" constant="25" placeholder="YES" id="c7k-Vn-fDv"/>
@@ -70,7 +70,7 @@
                                 <constraint firstItem="Y85-uP-1W2" firstAttribute="leading" secondItem="yuD-RJ-QYe" secondAttribute="leading" id="adb-NS-S8c"/>
                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="8t5-AV-Kjf" secondAttribute="trailing" id="eMy-7m-YOP"/>
                                 <constraint firstAttribute="trailing" secondItem="QgE-e7-AZW" secondAttribute="trailing" id="iIf-Be-thP"/>
-                                <constraint firstItem="Lop-v5-aTk" firstAttribute="top" secondItem="QgE-e7-AZW" secondAttribute="bottom" constant="4" id="mFm-C3-Lrv"/>
+                                <constraint firstItem="Lop-v5-aTk" firstAttribute="top" secondItem="QgE-e7-AZW" secondAttribute="bottom" constant="8" id="mFm-C3-Lrv"/>
                                 <constraint firstItem="Y85-uP-1W2" firstAttribute="top" secondItem="yuD-RJ-QYe" secondAttribute="top" id="vkW-bu-sK8"/>
                                 <constraint firstItem="Lop-v5-aTk" firstAttribute="leading" secondItem="QgE-e7-AZW" secondAttribute="leading" id="wer-zw-hSr"/>
                             </constraints>
@@ -344,13 +344,13 @@
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
