@@ -316,11 +316,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.noDrive
         }
 
-        if #available(iOS 14.0, *) {
-            @InjectService var myKSuiteStore: MyKSuiteStore
-            @InjectService var accountManager: AccountManageable
-            try await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
-        }
+        @InjectService var myKSuiteStore: MyKSuiteStore
+        @InjectService var accountManager: AccountManageable
+        try await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
