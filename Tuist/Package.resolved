@@ -1,5 +1,5 @@
 {
-  "originHash" : "978577225a5036d45e6d0b6efa3114b62d416e56115615c78b83bb375e8534df",
+  "originHash" : "35fb6043ee8b281dc1633d5d9ceddcb14555d433a9ee84c0a4e2de98bc9e4303",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -115,7 +115,7 @@
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
         "branch" : "myksuite",
-        "revision" : "51815cc2838ded5e797b6593153afb6d43a0ab11"
+        "revision" : "a9f91c552190320155b07e4ff6f33a45e61102b4"
       }
     },
     {
