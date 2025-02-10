@@ -26,4 +26,10 @@ class ParameterTableViewCell: InsetTableViewCell {
         super.awakeFromNib()
         valueLabel.text = ""
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        valueLabel.text = ""
+        titleLabel.text = ""
+    }
 }
