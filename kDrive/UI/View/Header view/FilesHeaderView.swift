@@ -97,10 +97,8 @@ class FilesHeaderView: UICollectionReusableView {
         trashInformationSubtitle.font = .systemFont(ofSize: 14)
         trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color
 
-        // TODO: remove hardcoded text
-        trashInformationTitle
-            .text = "Trash is cleaned automatically every 30 days, Trash is cleaned automatically every 30 days !"
-        trashInformationSubtitle.text = "Upgrade"
+        trashInformationTitle.text = KDriveResourcesStrings.Localizable.trashAutoClearDescription
+        trashInformationSubtitle.text = KDriveResourcesStrings.Localizable.buttonUpgrade
 
         let chipView = MyKSuiteChip.instantiateWhiteChip()
         chipView.translatesAutoresizingMaskIntoConstraints = false
