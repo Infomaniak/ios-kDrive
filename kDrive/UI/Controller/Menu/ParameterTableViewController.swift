@@ -56,7 +56,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                     return ""
                 }
             case .general:
-                return "General _" // TODO: use settingsSectionGeneral
+                return KDriveResourcesStrings.Localizable.settingsSectionGeneral
             }
         }
     }
