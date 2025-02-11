@@ -185,13 +185,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     }
 
     private func getTopRows() -> [HomeTopRow] {
-        var topRows: [HomeTopRow] = []
-
-        guard driveFileManager.drive.size > 0 else {
-            return topRows
-        }
-
-        return topRows
+        return []
     }
 
     func reloadTopRows() {
