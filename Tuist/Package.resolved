@@ -1,5 +1,5 @@
 {
-  "originHash" : "35fb6043ee8b281dc1633d5d9ceddcb14555d433a9ee84c0a4e2de98bc9e4303",
+  "originHash" : "88f7f532a7e7657a65b78bfcaf4a729503a5cbc882035f94e3ccc805e73a8845",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "3c36b8c376dd8779b47a5b03acfbe71ed270282a",
-        "version" : "18.0.0"
+        "revision" : "89873aff2c300f9f2966340b7b3e8832e88a95a6",
+        "version" : "18.0.1"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "branch" : "myksuite",
-        "revision" : "a9f91c552190320155b07e4ff6f33a45e61102b4"
+        "revision" : "cf6608e2d84d8f921fd00806689a13ad4a7d96ff",
+        "version" : "1.0.1"
       }
     },
     {
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms",
       "state" : {
-        "revision" : "f6919dfc309e7f1b56224378b11e28bab5bccc42",
-        "version" : "1.2.0"
+        "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
+        "version" : "1.2.1"
       }
     },
     {
@@ -312,8 +312,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "dff45738d84a53dbc8ee899c306b3a7227f54f89",
-        "version" : "2.80.0"
+        "revision" : "c51907a839e63ebf0ba2076bba73dd96436bd1b9",
+        "version" : "2.81.0"
       }
     },
     {
