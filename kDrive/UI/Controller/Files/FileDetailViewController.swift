@@ -40,8 +40,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
 
-    lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
-    
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     private struct ActivitySection {
         let referenceDate: Date
         var elements: [FileActivity]
@@ -552,7 +552,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(file: file, selectedPackId: selectedPackId, insets: false)
+                    cell.configureWith(file: file, currentPackId: packId, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)

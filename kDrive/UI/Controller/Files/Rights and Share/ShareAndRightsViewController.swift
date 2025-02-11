@@ -49,7 +49,7 @@ class ShareAndRightsViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
 
-    lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -192,7 +192,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(file: file, displayChip: true, selectedPackId: selectedPackId) // TODO: selectedPackId == .myKSuite
+            cell.configureWith(file: file, displayChip: true, currentPackId: packId) // TODO: selectedPackId == .myKSuite
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -214,8 +214,8 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .link:
             // TODO: Remove force display
 //            guard selectedPackId != .myKSuite else {
-                router.presentUpSaleSheet()
-                return
+            router.presentUpSaleSheet()
+            return
 //            }
 
             let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink

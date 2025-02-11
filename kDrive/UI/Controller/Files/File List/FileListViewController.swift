@@ -108,7 +108,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         return button
     }()
 
-    lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     // MARK: - View controller lifecycle
 
@@ -593,7 +593,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
-        let isMykSuite = selectedPackId == .myKSuite
+        let isMykSuite = packId == .myKSuite
         headerView.trashInformationView.isHidden = !isTrash // !(isTrash && isMykSuite) TODO: Use actual logic
 
         headerView.sortView.isHidden = !isEmptyViewHidden

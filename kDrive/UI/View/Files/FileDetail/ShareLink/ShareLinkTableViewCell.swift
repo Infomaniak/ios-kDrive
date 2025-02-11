@@ -47,7 +47,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
-    var selectedPackId: DrivePackId?
+    var packId: DrivePackId?
 
     private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
@@ -96,8 +96,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
 
-    func configureWith(file: File, displayChip: Bool = false, selectedPackId: DrivePackId?, insets: Bool = true) {
-        self.selectedPackId = selectedPackId
+    func configureWith(file: File, displayChip: Bool = false, currentPackId: DrivePackId?, insets: Bool = true) {
+        packId = currentPackId
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -182,8 +182,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         // TODO: Remove force display
 //        if let selectedPackId, selectedPackId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
+        router.presentUpSaleSheet()
+        return
 //        }
 //        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
 //        delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
@@ -192,8 +192,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {
         // TODO: Remove force display
 //        if let selectedPackId, selectedPackId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
+        router.presentUpSaleSheet()
+        return
 //        }
 //        delegate?.shareLinkSettingsButtonPressed()
     }
