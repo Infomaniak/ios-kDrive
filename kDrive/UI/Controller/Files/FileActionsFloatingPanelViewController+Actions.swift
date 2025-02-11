@@ -89,7 +89,7 @@ extension FileActionsFloatingPanelViewController {
             case .manageDropbox:
                 return file.isDropbox
             case .upsaleColor:
-                return file.isDirectory && driveFileManager.drive.isFreePack
+                return false
             case .folderColor:
                 return file.capabilities.canColor
             case .seeFolder:
