@@ -21,8 +21,9 @@ import kDriveResources
 
 public extension File {
     func formattedLocalizedName(drive: Drive? = nil) -> String {
+        let isFreePack = drive?.isFreePack ?? false
         let packId = drive?.pack.drivePackId
-        let isIndividualDrive = packId == .solo || packId == .free
+        let isIndividualDrive = packId == .solo || isFreePack
         return Self.LocalizedFilenameFormatter(isIndividualDrive: isIndividualDrive).format(self)
     }
 
