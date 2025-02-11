@@ -152,12 +152,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     }
 
     private func updateTableContent() {
-        // Show upgrade section if free drive
-        if driveFileManager.drive.isFreePack {
-            sections = [.header, .upgrade, .options]
-        } else {
-            sections = [.header, .options]
-        }
+        sections = [.header, .options]
 
         if let uploadCountManager, uploadCountManager.uploadCount > 0 {
             sections.insert(.uploads, at: 1)
