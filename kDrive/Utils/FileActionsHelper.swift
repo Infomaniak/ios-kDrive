@@ -477,7 +477,6 @@ public final class FileActionsHelper {
                                    completion: @escaping (Bool) -> Void) {
         group?.enter()
         guard !driveFileManager.drive.isFreePack else {
-            upsaleFolderColor(driveFileManager: driveFileManager, from: viewController)
             return
         }
 
@@ -499,7 +498,7 @@ public final class FileActionsHelper {
         }
     }
 
-    public static func upsaleFolderColor(driveFileManager: DriveFileManager, from viewController: UIViewController) {
+    static func upsaleFolderColor(driveFileManager: DriveFileManager, from viewController: UIViewController) {
         let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
         let floatingPanelViewController = driveFloatingPanelController
             .contentViewController as? FolderColorFloatingPanelViewController
