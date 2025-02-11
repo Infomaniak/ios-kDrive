@@ -212,11 +212,10 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            // TODO: Remove force display
-//            guard selectedPackId != .myKSuite else {
-            router.presentUpSaleSheet()
-            return
-//            }
+            guard selectedPackId != .myKSuite else {
+                router.presentUpSaleSheet()
+                return
+            }
 
             let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink
             if file.isDropbox || !canBecomeLink {
