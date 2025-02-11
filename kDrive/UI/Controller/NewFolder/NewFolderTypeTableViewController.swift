@@ -105,10 +105,9 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-            // TODO: enable pack check
-//            if selectedPackId == .myKSuite {
-            cell.setMykSuiteChip()
-//            }
+            if selectedPackId == .myKSuite {
+                cell.setMykSuiteChip()
+            }
         }
         return cell
     }
