@@ -25,8 +25,8 @@ public enum MyKSuiteChip {
         instantiate(backgroundColor: KDriveResourcesAsset.whiteBackgroundChipColor.color)
     }
 
-    public static func instantiateGreyChip() -> UIView {
-        instantiate(backgroundColor: KDriveResourcesAsset.greyBackgroundChipColor.color)
+    public static func instantiateGrayChip() -> UIView {
+        instantiate(backgroundColor: KDriveResourcesAsset.grayBackgroundChipColor.color)
     }
 
     private static func instantiate(backgroundColor: UIColor) -> UIView {

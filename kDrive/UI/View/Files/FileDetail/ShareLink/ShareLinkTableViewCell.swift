@@ -153,7 +153,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
 
         if displayChip {
-            let chipView = MyKSuiteChip.instantiateGreyChip()
+            let chipView = MyKSuiteChip.instantiateGrayChip()
 
             chipView.translatesAutoresizingMaskIntoConstraints = false
             chipContainerView.addSubview(chipView)
