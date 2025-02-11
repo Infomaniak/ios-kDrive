@@ -35,4 +35,3 @@ jobs:
         run: tuist generate && tuist test kDriveTests
       - name: Test API
         run: tuist generate && tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests
-
