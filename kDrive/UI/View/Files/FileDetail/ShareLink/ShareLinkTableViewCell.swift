@@ -96,7 +96,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
 
-    func configureWith(file: File, displayChip: Bool = false, currentPackId: DrivePackId?, insets: Bool = true) {
+    func configureWith(file: File, currentPackId: DrivePackId?, insets: Bool = true) {
         packId = currentPackId
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
@@ -152,7 +152,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
 
-        if displayChip {
+        if currentPackId == .myKSuite {
             let chipView = MyKSuiteChip.instantiateGrayChip()
 
             chipView.translatesAutoresizingMaskIntoConstraints = false
