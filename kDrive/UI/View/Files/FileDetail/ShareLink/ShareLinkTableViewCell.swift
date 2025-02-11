@@ -180,7 +180,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        if let selectedPackId, selectedPackId == .myKSuite {
+        if let packId, packId == .myKSuite {
             router.presentUpSaleSheet()
             return
         }
@@ -189,7 +189,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {
-        if let selectedPackId, selectedPackId == .myKSuite {
+        if let packId, packId == .myKSuite {
             router.presentUpSaleSheet()
             return
         }

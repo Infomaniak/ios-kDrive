@@ -23,7 +23,7 @@ import kDriveResources
 import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
-    private lazy var selectedPackId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+    private lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     @LazyInjectService private var router: AppNavigable
 
@@ -105,7 +105,7 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-            if selectedPackId == .myKSuite {
+            if packId == .myKSuite {
                 cell.setMykSuiteChip()
             }
         }
@@ -114,7 +114,7 @@ class NewFolderTypeTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox {
-            if selectedPackId == .myKSuite || true { // TODO: Remove force true
+            if packId == .myKSuite {
                 router.presentUpSaleSheet()
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()

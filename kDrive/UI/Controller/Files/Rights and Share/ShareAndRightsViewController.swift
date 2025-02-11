@@ -212,7 +212,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            guard selectedPackId != .myKSuite else {
+            guard packId != .myKSuite else {
                 router.presentUpSaleSheet()
                 return
             }
