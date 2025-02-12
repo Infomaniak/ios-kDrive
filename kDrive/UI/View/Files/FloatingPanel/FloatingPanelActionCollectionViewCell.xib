@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -35,7 +35,7 @@
                         </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0FA-dt-y7y" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                        <rect key="frame" x="52" y="19" width="241" height="15"/>
+                        <rect key="frame" x="52" y="19" width="41.5" height="15"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -46,6 +46,19 @@
                     <switch opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nG8-v1-MKX">
                         <rect key="frame" x="301" y="11" width="51" height="31"/>
                     </switch>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PH0-vR-Rh8">
+                        <rect key="frame" x="330" y="16.5" width="20" height="20"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="20" placeholder="YES" id="Tii-0i-b35"/>
+                            <constraint firstAttribute="height" constant="20" placeholder="YES" id="XOO-nQ-Ml6"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                <color key="value" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
                     <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SnW-jI-CaQ" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                         <rect key="frame" x="20" y="14.5" width="24" height="24"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -59,8 +72,11 @@
                     <constraint firstAttribute="bottom" secondItem="bMd-r9-rAt" secondAttribute="bottom" id="4po-k6-UJP"/>
                     <constraint firstAttribute="trailing" secondItem="Y3Q-nc-2FL" secondAttribute="trailing" id="AIZ-vp-h5V"/>
                     <constraint firstAttribute="trailing" secondItem="nG8-v1-MKX" secondAttribute="trailing" constant="20" id="BFa-AM-x9S"/>
+                    <constraint firstItem="PH0-vR-Rh8" firstAttribute="centerY" secondItem="0FA-dt-y7y" secondAttribute="centerY" id="Mdp-wA-O8s"/>
                     <constraint firstAttribute="bottom" secondItem="0FA-dt-y7y" secondAttribute="bottom" constant="19" id="PtP-Qp-euN"/>
                     <constraint firstItem="qXV-7J-B71" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" constant="20" id="T9J-lz-Lta"/>
+                    <constraint firstItem="nG8-v1-MKX" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="0FA-dt-y7y" secondAttribute="trailing" constant="8" id="Thz-cf-hYe"/>
+                    <constraint firstAttribute="trailing" secondItem="PH0-vR-Rh8" secondAttribute="trailing" constant="20" id="UIC-eh-zg7"/>
                     <constraint firstAttribute="bottom" secondItem="Y3Q-nc-2FL" secondAttribute="bottom" id="VDw-Yv-hzH"/>
                     <constraint firstItem="nG8-v1-MKX" firstAttribute="centerY" secondItem="u4L-yp-I0Z" secondAttribute="centerY" id="aci-cf-Ovd"/>
                     <constraint firstItem="0FA-dt-y7y" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" constant="19" id="bBS-jY-bRl"/>
@@ -68,16 +84,17 @@
                     <constraint firstItem="bMd-r9-rAt" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" id="exm-Vu-h57"/>
                     <constraint firstItem="Y3Q-nc-2FL" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" id="iEJ-xy-PIq"/>
                     <constraint firstItem="Y3Q-nc-2FL" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" id="j1q-Xm-5GJ"/>
+                    <constraint firstItem="PH0-vR-Rh8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="0FA-dt-y7y" secondAttribute="trailing" constant="8" id="m6B-lk-vW9"/>
                     <constraint firstItem="qXV-7J-B71" firstAttribute="centerY" secondItem="u4L-yp-I0Z" secondAttribute="centerY" id="oHS-QB-Dfe"/>
                     <constraint firstItem="0FA-dt-y7y" firstAttribute="leading" secondItem="qXV-7J-B71" secondAttribute="trailing" constant="8" symbolic="YES" id="pN0-1u-Tgk"/>
                     <constraint firstAttribute="trailing" secondItem="bMd-r9-rAt" secondAttribute="trailing" id="v88-Mh-fN9"/>
-                    <constraint firstItem="nG8-v1-MKX" firstAttribute="leading" secondItem="0FA-dt-y7y" secondAttribute="trailing" constant="8" id="wYU-OO-UMq"/>
                     <constraint firstItem="bMd-r9-rAt" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" id="xcg-PE-hNL"/>
                     <constraint firstItem="SnW-jI-CaQ" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" constant="20" id="zmG-Ev-6ox"/>
                 </constraints>
             </collectionViewCellContentView>
             <size key="customSize" width="50" height="57"/>
             <connections>
+                <outlet property="chipContainerView" destination="PH0-vR-Rh8" id="2mT-DU-vcl"/>
                 <outlet property="disabledView" destination="bMd-r9-rAt" id="kTs-of-LbH"/>
                 <outlet property="highlightedView" destination="Y3Q-nc-2FL" id="GTw-q2-zX8"/>
                 <outlet property="iconImageView" destination="qXV-7J-B71" id="0Pp-uD-tDM"/>
