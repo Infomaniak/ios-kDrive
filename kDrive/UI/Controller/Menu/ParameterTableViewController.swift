@@ -53,7 +53,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 if packId == .myKSuite {
                     return "my kSuite"
                 } else if packId == .myKSuitePlus {
-                    return "my kSuite plus"
+                    return "my kSuite+"
                 } else {
                     return ""
                 }
