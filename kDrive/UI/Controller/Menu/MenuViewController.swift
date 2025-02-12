@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import Sentry
 import UIKit
 
@@ -237,8 +238,23 @@ extension MenuViewController {
             let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
             navigationController?.pushViewController(storeViewController, animated: true)
         case .parameters:
-            let parametersViewController = ParameterTableViewController(driveFileManager: driveFileManager)
-            navigationController?.pushViewController(parametersViewController, animated: true)
+            Task { @MainActor in
+                @InjectService var mykSuiteStore: MyKSuiteStore
+                let mykSuiteEnabled: Bool
+                let packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+                if await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId) != nil,
+                   packId == .myKSuite || packId == .myKSuitePlus {
+                    mykSuiteEnabled = true
+                } else {
+                    mykSuiteEnabled = false
+                }
+
+                let parametersViewController = ParameterTableViewController(
+                    driveFileManager: driveFileManager,
+                    mykSuiteEnabled: mykSuiteEnabled
+                )
+                navigationController?.pushViewController(parametersViewController, animated: true)
+            }
         case .switchUser:
             let switchUserViewController = SwitchUserViewController.instantiate()
             navigationController?.pushViewController(switchUserViewController, animated: true)

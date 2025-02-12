@@ -35,13 +35,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
-    lazy var isMykSuiteEnabled: Bool = {
-        if packId == .myKSuite || packId == .myKSuitePlus {
-            return true
-        } else {
-            return false
-        }
-    }()
+    let mykSuiteEnabled: Bool
 
     private enum ParameterSection: Int, CaseIterable {
         case mykSuite
@@ -110,8 +104,9 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, mykSuiteEnabled: Bool) {
         self.driveFileManager = driveFileManager
+        self.mykSuiteEnabled = mykSuiteEnabled
         super.init()
     }
 
@@ -177,7 +172,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        guard isMykSuiteEnabled else {
+        guard mykSuiteEnabled else {
             return 1
         }
 
@@ -185,7 +180,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard isMykSuiteEnabled else {
+        guard mykSuiteEnabled else {
             return GeneralParameterRow.allCases.count
         }
 
@@ -200,7 +195,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard isMykSuiteEnabled else {
+        guard mykSuiteEnabled else {
             return generalCell(tableView, forRowAt: indexPath)
         }
 
@@ -275,7 +270,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        guard isMykSuiteEnabled else {
+        guard mykSuiteEnabled else {
             didSelectGeneralRowAt(indexPath: indexPath)
             return
         }
