@@ -54,6 +54,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     var quickActions = FloatingPanelAction.quickActions
     var actions = FloatingPanelAction.listActions
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     private var downloadAction: FloatingPanelAction?
     private var fileObserver: ObservationToken?
@@ -254,7 +255,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
-            cell.configure(with: action, file: file, showProgress: downloadAction == action)
+            cell.configure(with: action, file: file, showProgress: downloadAction == action, currentPackId: packId)
             return cell
         }
     }
