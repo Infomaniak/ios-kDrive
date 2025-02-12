@@ -17,6 +17,8 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -49,8 +51,8 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet var activityAvatar: UIImageView!
     @IBOutlet var activityLabel: UILabel!
     @IBOutlet var trashInformationView: UIView!
-    @IBOutlet var trashInformationTitle: UILabel!
-    @IBOutlet var trashInformationSubtitle: UILabel!
+    @IBOutlet var trashInformationTitle: IKLabel!
+    @IBOutlet var trashInformationSubtitle: IKLabel!
     @IBOutlet var trashInformationChip: UIView!
     var selectView: SelectView!
 
@@ -92,9 +94,9 @@ class FilesHeaderView: UICollectionReusableView {
     private func setupTrashView() {
         trashInformationView.isHidden = true
 
-        trashInformationTitle.font = .systemFont(ofSize: 14)
+        trashInformationTitle.font = TextStyle.body1.font
         trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color
-        trashInformationSubtitle.font = .systemFont(ofSize: 14)
+        trashInformationSubtitle.font = TextStyle.body1.font
         trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color
 
         trashInformationTitle.text = KDriveResourcesStrings.Localizable.trashAutoClearDescription
