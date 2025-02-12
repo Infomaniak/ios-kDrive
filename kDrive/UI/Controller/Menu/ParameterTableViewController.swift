@@ -150,10 +150,30 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        guard let currentSection = ParameterSection(rawValue: section) else {
-            return nil
-        }
-        return currentSection.title(packId: packId)
+        return nil
+    }
+
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard let currentSection = ParameterSection(rawValue: section) else { return nil }
+
+        let headerView = UIView()
+        headerView.backgroundColor = .clear
+
+        let label = IKLabel()
+        label.text = currentSection.title(packId: packId)
+        label.font = TextStyle.body1.font
+        label.textColor = KDriveResourcesAsset.titleColor.color
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 24),
+            label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -24),
+            label.centerYAnchor.constraint(equalTo: headerView.centerYAnchor)
+        ])
+
+        return headerView
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
