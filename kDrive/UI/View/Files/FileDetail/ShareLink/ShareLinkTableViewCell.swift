@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -28,6 +29,8 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
+    @LazyInjectService private var router: AppNavigable
+
     @IBOutlet var shareLinkTitleLabel: IKLabel!
     @IBOutlet var shareIconImageView: UIImageView!
     @IBOutlet var rightArrow: UIImageView!
@@ -39,10 +42,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet var leadingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var trailingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var separatorView: UIView!
+    @IBOutlet var chipContainerView: UIView!
     @IBOutlet var fileShareLinkSettingTitle: IKButton!
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
+    var packId: DrivePackId?
 
     private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
@@ -86,7 +91,13 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(file: File, insets: Bool = true) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    func configureWith(file: File, currentPackId: DrivePackId?, insets: Bool = true) {
+        packId = currentPackId
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -141,6 +152,20 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
 
+        if currentPackId == .myKSuite {
+            let chipView = MyKSuiteChip.instantiateGrayChip()
+
+            chipView.translatesAutoresizingMaskIntoConstraints = false
+            chipContainerView.addSubview(chipView)
+
+            NSLayoutConstraint.activate([
+                chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+                chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+                chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+                chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+            ])
+        }
+
         layoutIfNeeded()
     }
 
@@ -155,11 +180,19 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
+        if let packId, packId == .myKSuite {
+            router.presentUpSaleSheet()
+            return
+        }
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {
+        if let packId, packId == .myKSuite {
+            router.presentUpSaleSheet()
+            return
+        }
         delegate?.shareLinkSettingsButtonPressed()
     }
 }

@@ -363,7 +363,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    router.showStore(from: self, driveFileManager: driveFileManager)
+                    router.presentUpSaleSheet()
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }

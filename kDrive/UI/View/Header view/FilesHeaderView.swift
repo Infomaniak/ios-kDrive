@@ -17,6 +17,9 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -34,6 +37,8 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
+    @LazyInjectService private var router: AppNavigable
+
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -45,6 +50,10 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet var activityListView: UIView!
     @IBOutlet var activityAvatar: UIImageView!
     @IBOutlet var activityLabel: UILabel!
+    @IBOutlet var trashInformationView: UIView!
+    @IBOutlet var trashInformationTitle: IKLabel!
+    @IBOutlet var trashInformationSubtitle: IKLabel!
+    @IBOutlet var trashInformationChip: UIView!
     var selectView: SelectView!
 
     weak var delegate: FilesHeaderViewDelegate? {
@@ -75,9 +84,41 @@ class FilesHeaderView: UICollectionReusableView {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
 
+        setupTrashView()
+
         selectView = SelectView.instantiate()
         selectView.isHidden = true
         containerStackView.addArrangedSubview(selectView)
+    }
+
+    private func setupTrashView() {
+        trashInformationView.isHidden = true
+
+        trashInformationTitle.font = TextStyle.body1.font
+        trashInformationTitle.textColor = KDriveResourcesAsset.headerTitleColor.color
+        trashInformationSubtitle.font = TextStyle.body1.font
+        trashInformationSubtitle.textColor = KDriveResourcesAsset.infomaniakColor.color
+
+        trashInformationTitle.text = KDriveResourcesStrings.Localizable.trashAutoClearDescription
+        trashInformationSubtitle.text = KDriveResourcesStrings.Localizable.buttonUpgrade
+
+        let chipView = MyKSuiteChip.instantiateWhiteChip()
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        trashInformationChip.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
+        ])
+
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnTrashHeaderView))
+        trashInformationView.addGestureRecognizer(tapRecognizer)
+    }
+
+    @objc func didTapOnTrashHeaderView() {
+        router.presentUpSaleSheet()
     }
 
     @objc private func didTapOnCard() {

@@ -108,6 +108,8 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         return button
     }()
 
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     // MARK: - View controller lifecycle
 
     deinit {
@@ -589,6 +591,10 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         } else {
             headerView.commonDocumentsDescriptionLabel.isHidden = true
         }
+
+        let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
+        let isMykSuite = packId == .myKSuite
+        headerView.trashInformationView.isHidden = !(isTrash && isMykSuite)
 
         headerView.sortView.isHidden = !isEmptyViewHidden
 

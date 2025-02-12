@@ -259,7 +259,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
                 floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) {
-                        self.router.showStore(from: self, driveFileManager: self.driveFileManager)
+                        self.router.presentUpSaleSheet()
                     }
                 }
                 present(driveFloatingPanelController, animated: true)

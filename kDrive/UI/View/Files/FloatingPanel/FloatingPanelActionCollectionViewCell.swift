@@ -29,6 +29,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var titleLabel: IKLabel!
     @IBOutlet var switchView: UISwitch!
+    @IBOutlet var chipContainerView: UIView!
 
     private var observationToken: ObservationToken?
 
@@ -51,10 +52,13 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         switchView.isHidden = true
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
         observationToken?.cancel()
     }
 
-    func configure(with action: FloatingPanelAction, file: File?, showProgress: Bool) {
+    func configure(with action: FloatingPanelAction,
+                   file: File?, showProgress: Bool,
+                   currentPackId: DrivePackId? = nil) {
         titleLabel.text = action.name
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
@@ -69,6 +73,14 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             } else {
                 observeProgress(showProgress, file: file)
             }
+        }
+
+        switch action {
+        case .upsaleColor, .convertToDropbox:
+            guard currentPackId == .myKSuite else { return }
+            configureChip()
+        default:
+            break
         }
     }
 
@@ -104,6 +116,20 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         default:
             break
         }
+    }
+
+    func configureChip() {
+        let chipView = MyKSuiteChip.instantiateGrayChip()
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
     }
 
     func configureAvailableOffline(with file: File) {
