@@ -32,9 +32,9 @@ struct AsyncImageView: View {
                     .scaledToFit()
                     .frame(width: 40, height: 40)
             } else {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(2)
+                Circle()
+                    .fill(KDriveAsset.loaderDefaultColor.swiftUIColor)
+                    .frame(width: 40, height: 40)
             }
         }
         .task {
