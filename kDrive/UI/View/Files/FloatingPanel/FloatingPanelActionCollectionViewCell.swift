@@ -76,8 +76,8 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
 
         switch action {
-        case .upsaleColor:
-            guard currentPack == .myKSuite else { return }
+        case .upsaleColor, .convertToDropbox:
+            guard currentPackId == .myKSuite else { return }
             configureChip()
         default:
             break
