@@ -29,7 +29,9 @@ class MyKSuiteDashboardViewBridgeController: UIViewController {
 
     init(apiFetcher: DriveApiFetcher) {
         @InjectService var accountManager: AccountManageable
-        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher, userId: accountManager.currentUserId, userAvatar: nil)
+        let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher, userId: 123) {
+            EmptyView()
+        }
         hostingController = UIHostingController(rootView: swiftUIView)
 
         super.init(nibName: nil, bundle: nil)
