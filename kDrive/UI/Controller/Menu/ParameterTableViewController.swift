@@ -33,7 +33,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     let driveFileManager: DriveFileManager
 
-    lazy var packId = DrivePackId.myKSuite // TODO: Remove hardcode for -> DrivePackId(rawValue: driveFileManager.drive.pack.name)
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     lazy var isMykSuiteEnabled: Bool = {
         if packId == .myKSuite || packId == .myKSuitePlus {
