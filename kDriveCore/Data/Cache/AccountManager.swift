@@ -318,7 +318,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         @InjectService var myKSuiteStore: MyKSuiteStore
         @InjectService var accountManager: AccountManageable
-        try await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
+        _ = try? await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
