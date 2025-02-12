@@ -235,7 +235,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(
             isFirst: indexPath.row == 0,
-            isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            isLast: indexPath.row == MykSuiteParameterRow.allCases.count - 1
         )
 
         let row = MykSuiteParameterRow.allCases[indexPath.row]
