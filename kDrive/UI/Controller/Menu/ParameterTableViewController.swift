@@ -254,7 +254,12 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         switch indexPath.section {
         case ParameterSection.mykSuite.rawValue:
             let row = MykSuiteParameterRow.allCases[indexPath.row]
-            let dashboardViewController = MyKSuiteDashboardViewBridgeController(apiFetcher: driveFileManager.apiFetcher)
+            guard row == MykSuiteParameterRow.mySubscription else { return }
+            guard let currentAccount = accountManager.currentAccount else { return }
+            let dashboardViewController = MyKSuiteDashboardViewBridgeController(
+                apiFetcher: driveFileManager.apiFetcher,
+                currentAccount: currentAccount
+            )
             navigationController?.present(dashboardViewController, animated: true)
         case ParameterSection.general.rawValue:
             let row = GeneralParameterRow.allCases[indexPath.row]
