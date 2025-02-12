@@ -124,7 +124,7 @@ class NewFolderTypeTableViewController: UITableViewController {
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) { [weak self] in
                         guard let self else { return }
-                        router.showStore(from: self, driveFileManager: driveFileManager)
+                        router.presentUpSaleSheet()
                     }
                 }
                 present(driveFloatingPanelController, animated: true)
