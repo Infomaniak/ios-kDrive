@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import UIKit
 
@@ -24,12 +25,18 @@ class ParameterTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        valueLabel.text = ""
+        setupDefault()
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        valueLabel.text = ""
+        setupDefault()
+    }
+
+    private func setupDefault() {
         titleLabel.text = ""
+        valueLabel.text = ""
+        selectionStyle = .default
+        titleLabel.font = TextStyle.subtitle2.font
     }
 }

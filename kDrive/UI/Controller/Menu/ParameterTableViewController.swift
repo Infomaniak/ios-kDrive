@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -242,6 +244,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         switch row {
         case .email:
             cell.titleLabel.text = row.title
+            cell.titleLabel.font = TextStyle.body1.font
+            cell.selectionStyle = .none
         case .mySubscription:
             cell.titleLabel.text = row.title
         }
@@ -251,44 +255,57 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
+        guard isMykSuiteEnabled else {
+            didSelectGeneralRowAt(indexPath: indexPath)
+            return
+        }
+
         switch indexPath.section {
         case ParameterSection.mykSuite.rawValue:
-            let row = MykSuiteParameterRow.allCases[indexPath.row]
-            guard row == MykSuiteParameterRow.mySubscription else { return }
-            guard let currentAccount = accountManager.currentAccount else { return }
-            let dashboardViewController = MyKSuiteDashboardViewBridgeController(
-                apiFetcher: driveFileManager.apiFetcher,
-                currentAccount: currentAccount
-            )
-            navigationController?.present(dashboardViewController, animated: true)
+            didSelectMykSuiteRowAt(indexPath: indexPath)
         case ParameterSection.general.rawValue:
-            let row = GeneralParameterRow.allCases[indexPath.row]
-            switch row {
-            case .storage:
-                navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
-            case .photos:
-                navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
-            case .theme:
-                navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
-            case .notifications:
-                navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
-            case .security:
-                navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-            case .wifi:
-                break
-            case .about:
-                navigationController?.pushViewController(AboutTableViewController(), animated: true)
-            case .deleteAccount:
-                let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
-                    delegate: self,
-                    accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
-                    navBarColor: KDriveResourcesAsset.backgroundColor.color,
-                    navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
-                )
-                navigationController?.present(deleteAccountViewController, animated: true)
-            }
+            didSelectGeneralRowAt(indexPath: indexPath)
         default:
             return
+        }
+    }
+
+    private func didSelectMykSuiteRowAt(indexPath: IndexPath) {
+        let row = MykSuiteParameterRow.allCases[indexPath.row]
+        guard row == MykSuiteParameterRow.mySubscription else { return }
+        guard let currentAccount = accountManager.currentAccount else { return }
+        let dashboardViewController = MyKSuiteDashboardViewBridgeController(
+            apiFetcher: driveFileManager.apiFetcher,
+            currentAccount: currentAccount
+        )
+        navigationController?.present(dashboardViewController, animated: true)
+    }
+
+    private func didSelectGeneralRowAt(indexPath: IndexPath) {
+        let row = GeneralParameterRow.allCases[indexPath.row]
+        switch row {
+        case .storage:
+            navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+        case .photos:
+            navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
+        case .theme:
+            navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
+        case .notifications:
+            navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
+        case .security:
+            navigationController?.pushViewController(SecurityTableViewController(), animated: true)
+        case .wifi:
+            break
+        case .about:
+            navigationController?.pushViewController(AboutTableViewController(), animated: true)
+        case .deleteAccount:
+            let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
+                delegate: self,
+                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
+                navBarColor: KDriveResourcesAsset.backgroundColor.color,
+                navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
+            )
+            navigationController?.present(deleteAccountViewController, animated: true)
         }
     }
 }
