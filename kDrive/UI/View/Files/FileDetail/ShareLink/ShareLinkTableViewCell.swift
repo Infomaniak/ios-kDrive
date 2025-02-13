@@ -175,13 +175,9 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     private var showMykSuiteRestriction: Bool {
-        guard let driveFileManager, let packId, let fileHasShareLink else {
-            return false
-        }
-
-        return packId == .myKSuite
-            && driveFileManager.drive.sharedLinkQuotaExceeded
-            && !fileHasShareLink
+        MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
+                                                  driveFileManager: driveFileManager,
+                                                  fileHasShareLink: fileHasShareLink)
     }
 
     func initWithoutInsets() {

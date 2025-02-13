@@ -244,9 +244,9 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     private func showMykSuiteRestriction(fileHasShareLink: Bool) -> Bool {
-        return packId == .myKSuite
-            && driveFileManager.drive.sharedLinkQuotaExceeded
-            && !fileHasShareLink
+        return MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
+                                                         driveFileManager: driveFileManager,
+                                                         fileHasShareLink: fileHasShareLink)
     }
 }
 
