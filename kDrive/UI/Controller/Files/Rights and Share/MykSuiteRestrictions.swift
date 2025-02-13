@@ -21,12 +21,9 @@ import kDriveCore
 
 public enum MykSuiteRestrictions {
     public static func sharedLinkRestricted(packId: DrivePackId?,
-                                            driveFileManager: DriveFileManager?,
-                                            fileHasShareLink: Bool?) -> Bool {
-        guard let packId, let driveFileManager, let fileHasShareLink else {
-            return false
-        }
-
+                                            driveFileManager: DriveFileManager,
+                                            fileHasShareLink: Bool) -> Bool {
+        guard let packId else { return false }
         return packId == .myKSuite
             && driveFileManager.drive.sharedLinkQuotaExceeded
             && !fileHasShareLink

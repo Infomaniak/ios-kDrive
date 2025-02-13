@@ -47,9 +47,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
-    var fileHasShareLink: Bool?
-    var packId: DrivePackId?
-    var driveFileManager: DriveFileManager?
 
     private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
@@ -102,7 +99,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                        currentPackId: DrivePackId?,
                        driveFileManager: DriveFileManager,
                        insets: Bool = true) {
-        packId = currentPackId
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -157,6 +153,9 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
 
+        let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: currentPackId,
+                                                                                driveFileManager: driveFileManager,
+                                                                                fileHasShareLink: file.hasSharelink)
         if showMykSuiteRestriction {
             let chipView = MyKSuiteChip.instantiateGrayChip()
 
@@ -172,12 +171,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
 
         layoutIfNeeded()
-    }
-
-    private var showMykSuiteRestriction: Bool {
-        MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
-                                                  driveFileManager: driveFileManager,
-                                                  fileHasShareLink: fileHasShareLink)
     }
 
     func initWithoutInsets() {
