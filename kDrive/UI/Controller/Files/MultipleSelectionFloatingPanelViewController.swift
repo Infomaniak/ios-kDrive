@@ -252,7 +252,13 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
         let action = actions[indexPath.item]
-        cell.configure(with: action, files: files, showProgress: downloadInProgress, archiveId: currentArchiveId)
+        cell.configure(
+            with: action,
+            files: files,
+            driveFileManager: driveFileManager,
+            showProgress: downloadInProgress,
+            archiveId: currentArchiveId
+        )
         return cell
     }
 

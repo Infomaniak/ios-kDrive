@@ -255,7 +255,13 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
-            cell.configure(with: action, file: file, showProgress: downloadAction == action, currentPackId: packId)
+            cell.configure(
+                with: action,
+                file: file,
+                showProgress: downloadAction == action,
+                driveFileManager: driveFileManager,
+                currentPackId: packId
+            )
             return cell
         }
     }
