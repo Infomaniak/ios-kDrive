@@ -35,7 +35,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
-    let mykSuiteEnabled: Bool
+    var mykSuiteEnabled: Bool = false
 
     private enum ParameterSection: Int, CaseIterable {
         case mykSuite
@@ -104,9 +104,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
-    init(driveFileManager: DriveFileManager, mykSuiteEnabled: Bool) {
+    init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
-        self.mykSuiteEnabled = mykSuiteEnabled
         super.init()
     }
 
@@ -119,6 +118,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterWifiTableViewCell.self)
 
         navigationItem.hideBackButtonText()
+        checkMykSuiteEnabledAndRefresh()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -321,6 +321,23 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
             )
             navigationController?.present(deleteAccountViewController, animated: true)
+        }
+    }
+
+    private func checkMykSuiteEnabledAndRefresh() {
+        Task { @MainActor in
+            @InjectService var mykSuiteStore: MyKSuiteStore
+            let mykSuiteEnabled: Bool
+            let packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+            if await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId) != nil,
+               packId == .myKSuite || packId == .myKSuitePlus {
+                mykSuiteEnabled = true
+            } else {
+                mykSuiteEnabled = false
+            }
+
+            self.mykSuiteEnabled = mykSuiteEnabled
+            self.tableView.reloadData()
         }
     }
 }
