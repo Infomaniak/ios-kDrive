@@ -36,7 +36,7 @@ public final class DriveQuota: EmbeddedObject, Codable {
 
     enum CodingKeys: String, CodingKey {
         case dropbox
-        case sharedLink = "shared_link"
+        case sharedLink
     }
 
     override public init() {
