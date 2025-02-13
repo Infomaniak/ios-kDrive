@@ -334,16 +334,15 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     private func checkMykSuiteEnabledAndRefresh() {
         Task { @MainActor in
             @InjectService var mykSuiteStore: MyKSuiteStore
-            let mykSuiteEnabled: Bool
-            let packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+            let packIsMykSuite: Bool
             if await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId) != nil,
                packId == .myKSuite || packId == .myKSuitePlus {
-                mykSuiteEnabled = true
+                packIsMykSuite = true
             } else {
-                mykSuiteEnabled = false
+                packIsMykSuite = false
             }
 
-            self.mykSuiteEnabled = mykSuiteEnabled
+            self.mykSuiteEnabled = packIsMykSuite
             self.tableView.reloadData()
         }
     }
