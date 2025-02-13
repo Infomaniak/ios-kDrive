@@ -146,7 +146,6 @@ public struct AppRouter: AppNavigable {
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()
-            askToUpSaleIfQuotaReached()
 
             Task {
                 await askForReview()
@@ -512,11 +511,6 @@ public struct AppRouter: AppNavigable {
 
             window?.rootViewController?.present(alert, animated: true)
         }
-    }
-
-    @MainActor public func askToUpSaleIfQuotaReached() {
-        // TODO: Check quota
-        presentUpSaleSheet()
     }
 
     @MainActor public func presentUpSaleSheet() {
