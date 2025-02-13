@@ -283,7 +283,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func convertToDropboxAction() {
-        if !file.capabilities.canBecomeDropbox {
+        guard file.capabilities.canBecomeDropbox else {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController
                 .contentViewController as? DropBoxFloatingPanelViewController
@@ -295,15 +295,22 @@ extension FileActionsFloatingPanelViewController {
                 }
             }
             present(driveFloatingPanelController, animated: true)
-        } else {
-            let viewController = ManageDropBoxViewController.instantiate(
-                driveFileManager: driveFileManager,
-                convertingFolder: true,
-                folder: file
-            )
-            presentingParent?.navigationController?.pushViewController(viewController, animated: true)
-            dismiss(animated: true)
+            return
         }
+
+        if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
+        let viewController = ManageDropBoxViewController.instantiate(
+            driveFileManager: driveFileManager,
+            convertingFolder: true,
+            folder: file
+        )
+
+        presentingParent?.navigationController?.pushViewController(viewController, animated: true)
+        dismiss(animated: true)
     }
 
     private func manageDropboxAction() {

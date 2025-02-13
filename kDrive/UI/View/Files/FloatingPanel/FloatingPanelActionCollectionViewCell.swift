@@ -58,6 +58,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     func configure(with action: FloatingPanelAction,
                    file: File?, showProgress: Bool,
+                   driveFileManager: DriveFileManager,
                    currentPackId: DrivePackId? = nil) {
         titleLabel.text = action.name
         iconImageView.image = action.image
@@ -76,16 +77,23 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
 
         switch action {
-        case .upsaleColor, .convertToDropbox:
+        case .upsaleColor:
             guard currentPackId == .myKSuite else { return }
+            configureChip()
+        case .convertToDropbox:
+            guard currentPackId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded else { return }
             configureChip()
         default:
             break
         }
     }
 
-    func configure(with action: FloatingPanelAction, files: [File], showProgress: Bool, archiveId: String?) {
-        configure(with: action, file: nil, showProgress: false)
+    func configure(with action: FloatingPanelAction,
+                   files: [File],
+                   driveFileManager: DriveFileManager,
+                   showProgress: Bool,
+                   archiveId: String?) {
+        configure(with: action, file: nil, showProgress: false, driveFileManager: driveFileManager)
 
         switch action {
         case .favorite:
