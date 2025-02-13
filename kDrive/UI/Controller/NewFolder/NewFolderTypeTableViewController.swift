@@ -128,8 +128,9 @@ class NewFolderTypeTableViewController: UITableViewController {
                     }
                 }
                 present(driveFloatingPanelController, animated: true)
+            } else {
+                performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
             }
-            return
         } else {
             performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
         }
