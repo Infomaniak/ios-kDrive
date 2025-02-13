@@ -149,7 +149,14 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard let currentSection = ParameterSection(rawValue: section) else { return nil }
+        let currentSection: ParameterSection?
+        if mykSuiteEnabled {
+            currentSection = ParameterSection(rawValue: section)
+        } else {
+            currentSection = ParameterSection.general
+        }
+
+        guard let currentSection else { return nil }
 
         let headerView = UIView()
         headerView.backgroundColor = .clear
