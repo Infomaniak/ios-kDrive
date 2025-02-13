@@ -212,7 +212,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            if showMykSuiteRestriction(fileHasShareLink: file.hasSharelink) {
+            guard !showMykSuiteRestriction(fileHasShareLink: file.hasSharelink) else {
                 router.presentUpSaleSheet()
                 return
             }
