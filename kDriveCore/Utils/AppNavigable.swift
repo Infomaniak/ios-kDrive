@@ -185,8 +185,6 @@ public protocol RouterActionable {
     /// Ask the user to remove pictures if configured
     func askUserToRemovePicturesIfNecessary() async
 
-    @MainActor func askToUpSaleIfQuotaReached()
-
     @MainActor func presentUpSaleSheet()
 
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
