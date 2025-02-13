@@ -4,7 +4,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Adrien Coye
- * Exported at: Mon, 10 Feb 2025 13:54:47 +0100
+ * Exported at: Thu, 13 Feb 2025 09:38:13 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -2123,7 +2123,7 @@
 "trashActionRestoreFileOriginalPlace" = "Recover to the original location";
 
 /* loco:67a9ef7e628ce12f3209f422 */
-"trashAutoClearDescription" = "Trash is cleaned automatically every 30 days.";
+"trashAutoClearDescription" = "Trash is cleaned automatically every 30 days.\nWould you like to increase this period?";
 
 /* loco:6049df4d5c2c3a04bc397a7b */
 "trashNoFile" = "No deleted files";
