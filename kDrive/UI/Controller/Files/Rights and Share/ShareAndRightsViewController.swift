@@ -192,7 +192,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(file: file, currentPackId: packId)
+            cell.configureWith(file: file, currentPackId: packId, driveFileManager: driveFileManager)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -212,7 +212,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
+            if showMykSuiteRestriction(fileHasShareLink: file.hasSharelink) {
                 router.presentUpSaleSheet()
                 return
             }
@@ -241,6 +241,12 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             return NewFolderSectionHeaderView
                 .instantiate(title: KDriveResourcesStrings.Localizable.fileShareDetailsUsersAccesTitle)
         }
+    }
+
+    private func showMykSuiteRestriction(fileHasShareLink: Bool) -> Bool {
+        return packId == .myKSuite
+            && driveFileManager.drive.sharedLinkQuotaExceeded
+            && !fileHasShareLink
     }
 }
 
