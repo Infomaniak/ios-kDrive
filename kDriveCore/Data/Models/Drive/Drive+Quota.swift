@@ -45,7 +45,7 @@ public final class DriveQuota: EmbeddedObject, Codable {
     }
 }
 
-extension Drive {
+public extension Drive {
     var dropboxQuotaExceeded: Bool {
         guard let quota, let dropbox = quota.dropbox else { return false }
         return dropbox.current ?? 0 >= dropbox.max
