@@ -319,6 +319,11 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     }
 
     func shareLinkSettingsButtonPressed() {
+        if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file

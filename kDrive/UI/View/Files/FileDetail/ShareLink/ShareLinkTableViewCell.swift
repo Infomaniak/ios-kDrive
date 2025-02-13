@@ -180,19 +180,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        if let packId, packId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
-        }
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {
-        if let packId, packId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
-        }
         delegate?.shareLinkSettingsButtonPressed()
     }
 }
