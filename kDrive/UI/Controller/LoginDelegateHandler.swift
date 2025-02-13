@@ -66,7 +66,6 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         UserDefaults.shared.numberOfConnections = 1
         _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         deeplinkService.processDeeplinksPostAuthentication()
-        router.askToUpSaleIfQuotaReached()
     }
 
     private func didCompleteLoginWithError(_ error: Error,

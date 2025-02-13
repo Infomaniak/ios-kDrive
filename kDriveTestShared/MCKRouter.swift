@@ -49,10 +49,6 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func askToUpSaleIfQuotaReached() {
-        logNoop()
-    }
-
     public func presentUpSaleSheet() {
         logNoop()
     }

@@ -105,7 +105,7 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-            if packId == .myKSuite {
+            if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
                 cell.setMykSuiteChip()
             }
         }
@@ -114,7 +114,7 @@ class NewFolderTypeTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox {
-            if packId == .myKSuite {
+            if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
                 router.presentUpSaleSheet()
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
@@ -128,8 +128,9 @@ class NewFolderTypeTableViewController: UITableViewController {
                     }
                 }
                 present(driveFloatingPanelController, animated: true)
+            } else {
+                performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
             }
-            return
         } else {
             performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
         }
