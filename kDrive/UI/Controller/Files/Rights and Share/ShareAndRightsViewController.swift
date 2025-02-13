@@ -212,7 +212,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            guard packId != .myKSuite else {
+            if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
                 router.presentUpSaleSheet()
                 return
             }
