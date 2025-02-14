@@ -163,8 +163,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
         let label = IKLabel()
         label.text = currentSection.title(packId: packId)
-        label.font = TextStyle.body1.font
-        label.textColor = KDriveResourcesAsset.titleColor.color
+        label.font = TextStyle.header3.font
 
         label.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(label)
