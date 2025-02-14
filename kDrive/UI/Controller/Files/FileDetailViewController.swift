@@ -29,6 +29,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet var commentButton: UIButton!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
 
     var file: File!
     var driveFileManager: DriveFileManager!
@@ -39,6 +40,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var activitiesInfo: ActivitiesInfo = (cursor: nil, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
+
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     private struct ActivitySection {
         let referenceDate: Date
@@ -550,7 +553,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(file: file, insets: false)
+                    cell.configureWith(file: file, currentPackId: packId, driveFileManager: driveFileManager, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -919,6 +922,11 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     }
 
     func shareLinkSettingsButtonPressed() {
+        if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
         performSegue(withIdentifier: "toShareLinkSettingsSegue", sender: nil)
     }
 }

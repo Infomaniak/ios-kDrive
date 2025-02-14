@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -28,6 +29,8 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
+    @LazyInjectService private var router: AppNavigable
+
     @IBOutlet var shareLinkTitleLabel: IKLabel!
     @IBOutlet var shareIconImageView: UIImageView!
     @IBOutlet var rightArrow: UIImageView!
@@ -39,6 +42,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet var leadingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var trailingInnerConstraint: NSLayoutConstraint!
     @IBOutlet var separatorView: UIView!
+    @IBOutlet var chipContainerView: UIView!
     @IBOutlet var fileShareLinkSettingTitle: IKButton!
 
     weak var delegate: ShareLinkTableViewCellDelegate?
@@ -86,7 +90,15 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(file: File, insets: Bool = true) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    func configureWith(file: File,
+                       currentPackId: DrivePackId?,
+                       driveFileManager: DriveFileManager,
+                       insets: Bool = true) {
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -139,6 +151,23 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             fileShareLinkSettingTitle.alpha = 0
             fileShareLinkSettingTitle.isUserInteractionEnabled = false
             shareIconImageView.image = KDriveResourcesAsset.lock.image
+        }
+
+        let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: currentPackId,
+                                                                                driveFileManager: driveFileManager,
+                                                                                fileHasShareLink: file.hasSharelink)
+        if showMykSuiteRestriction {
+            let chipView = MyKSuiteChip.instantiateGrayChip()
+
+            chipView.translatesAutoresizingMaskIntoConstraints = false
+            chipContainerView.addSubview(chipView)
+
+            NSLayoutConstraint.activate([
+                chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+                chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+                chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+                chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+            ])
         }
 
         layoutIfNeeded()

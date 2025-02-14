@@ -283,7 +283,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func convertToDropboxAction() {
-        if !file.capabilities.canBecomeDropbox {
+        guard file.capabilities.canBecomeDropbox else {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController
                 .contentViewController as? DropBoxFloatingPanelViewController
@@ -291,19 +291,26 @@ extension FileActionsFloatingPanelViewController {
             floatingPanelViewController?.actionHandler = { [weak self] _ in
                 driveFloatingPanelController.dismiss(animated: true) {
                     guard let self else { return }
-                    self.router.showStore(from: self, driveFileManager: self.driveFileManager)
+                    self.router.presentUpSaleSheet()
                 }
             }
             present(driveFloatingPanelController, animated: true)
-        } else {
-            let viewController = ManageDropBoxViewController.instantiate(
-                driveFileManager: driveFileManager,
-                convertingFolder: true,
-                folder: file
-            )
-            presentingParent?.navigationController?.pushViewController(viewController, animated: true)
-            dismiss(animated: true)
+            return
         }
+
+        if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
+        let viewController = ManageDropBoxViewController.instantiate(
+            driveFileManager: driveFileManager,
+            convertingFolder: true,
+            folder: file
+        )
+
+        presentingParent?.navigationController?.pushViewController(viewController, animated: true)
+        dismiss(animated: true)
     }
 
     private func manageDropboxAction() {
@@ -313,7 +320,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func upsaleColorAction() {
-        FileActionsHelper.upsaleFolderColor(driveFileManager: driveFileManager, from: self)
+        FileActionsHelper.upsaleFolderColor()
     }
 
     private func folderColorAction() {

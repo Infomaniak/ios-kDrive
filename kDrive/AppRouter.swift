@@ -22,7 +22,9 @@ import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import SafariServices
+import SwiftUI
 import UIKit
 import VersionChecker
 
@@ -144,6 +146,7 @@ public struct AppRouter: AppNavigable {
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()
+
             Task {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
@@ -507,6 +510,35 @@ public struct AppRouter: AppNavigable {
             }
 
             window?.rootViewController?.present(alert, animated: true)
+        }
+    }
+
+    @MainActor public func presentUpSaleSheet() {
+        guard let window,
+              let rootViewController = window.rootViewController else {
+            return
+        }
+
+        rootViewController.dismiss(animated: true) {
+            let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
+            if let sheet = viewControllerToPresent.sheetPresentationController {
+                if #available(iOS 16.0, *) {
+                    sheet.detents = [
+                        .custom { _ in
+                            return 560
+                        }
+                    ]
+                } else {
+                    sheet.detents = [.large()]
+                    sheet.largestUndimmedDetentIdentifier = .large
+                }
+
+                sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                sheet.prefersGrabberVisible = true
+            }
+            rootViewController.present(viewControllerToPresent, animated: true)
         }
     }
 

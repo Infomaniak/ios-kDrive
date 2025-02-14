@@ -63,6 +63,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "MarkdownKit"),
                                       .external(name: "RealmSwift"),
                                       .external(name: "Realm"),
+                                      .external(name: "MyKSuite"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
                                   settings: .settings(base: Constants.baseSettings),

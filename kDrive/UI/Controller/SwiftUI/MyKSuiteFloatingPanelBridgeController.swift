@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,27 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreCommonUI
-import InfomaniakCoreUIKit
+import FloatingPanel
+import kDriveCore
+import kDriveResources
+import MyKSuite
+import SwiftUI
 import UIKit
 
-class ParameterTableViewCell: InsetTableViewCell {
-    @IBOutlet var valueLabel: UILabel!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        setupDefault()
-    }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        setupDefault()
-    }
-
-    private func setupDefault() {
-        titleLabel.text = ""
-        valueLabel.text = ""
-        selectionStyle = .default
-        titleLabel.font = TextStyle.subtitle2.font
+enum MyKSuiteBridgeViewController {
+    public static func instantiate() -> UIViewController {
+        let swiftUIView = MyKSuiteView(configuration: .kDrive)
+        return UIHostingController(rootView: ScrollView { swiftUIView })
     }
 }

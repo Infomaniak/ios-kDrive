@@ -29,6 +29,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var titleLabel: IKLabel!
     @IBOutlet var switchView: UISwitch!
+    @IBOutlet var chipContainerView: UIView!
 
     private var observationToken: ObservationToken?
 
@@ -51,10 +52,14 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         switchView.isHidden = true
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
         observationToken?.cancel()
     }
 
-    func configure(with action: FloatingPanelAction, file: File?, showProgress: Bool) {
+    func configure(with action: FloatingPanelAction,
+                   file: File?, showProgress: Bool,
+                   driveFileManager: DriveFileManager,
+                   currentPackId: DrivePackId? = nil) {
         titleLabel.text = action.name
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
@@ -70,10 +75,25 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
                 observeProgress(showProgress, file: file)
             }
         }
+
+        switch action {
+        case .upsaleColor:
+            guard currentPackId == .myKSuite else { return }
+            configureChip()
+        case .convertToDropbox:
+            guard currentPackId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded else { return }
+            configureChip()
+        default:
+            break
+        }
     }
 
-    func configure(with action: FloatingPanelAction, files: [File], showProgress: Bool, archiveId: String?) {
-        configure(with: action, file: nil, showProgress: false)
+    func configure(with action: FloatingPanelAction,
+                   files: [File],
+                   driveFileManager: DriveFileManager,
+                   showProgress: Bool,
+                   archiveId: String?) {
+        configure(with: action, file: nil, showProgress: false, driveFileManager: driveFileManager)
 
         switch action {
         case .favorite:
@@ -104,6 +124,20 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         default:
             break
         }
+    }
+
+    func configureChip() {
+        let chipView = MyKSuiteChip.instantiateGrayChip()
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
     }
 
     func configureAvailableOffline(with file: File) {

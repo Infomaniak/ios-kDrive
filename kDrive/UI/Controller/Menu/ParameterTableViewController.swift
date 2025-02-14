@@ -16,10 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MyKSuite
 import Sentry
 import UIKit
 
@@ -30,7 +33,46 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     let driveFileManager: DriveFileManager
 
-    private enum ParameterRow: CaseIterable {
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
+    var mykSuiteEnabled = false
+
+    private enum ParameterSection: Int, CaseIterable {
+        case mykSuite
+        case general
+
+        func title(packId: DrivePackId?) -> String {
+            switch self {
+            case .mykSuite:
+                if packId == .myKSuite {
+                    return "my kSuite"
+                } else if packId == .myKSuitePlus {
+                    return "my kSuite+"
+                } else {
+                    return ""
+                }
+            case .general:
+                return KDriveResourcesStrings.Localizable.settingsSectionGeneral
+            }
+        }
+    }
+
+    private enum MykSuiteParameterRow: CaseIterable {
+        case email
+        case mySubscription
+
+        var title: String {
+            switch self {
+            case .email:
+                @InjectService var accountManager: AccountManageable
+                return accountManager.currentAccount?.user.email ?? ""
+            case .mySubscription:
+                return MyKSuiteLocalizable.iosMyKSuiteDashboardSubscriptionButton
+            }
+        }
+    }
+
+    private enum GeneralParameterRow: CaseIterable {
         case photos
         case theme
         case notifications
@@ -62,10 +104,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
-    private var tableContent: [ParameterRow] {
-        return ParameterRow.allCases
-    }
-
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
         super.init()
@@ -80,6 +118,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterWifiTableViewCell.self)
 
         navigationItem.hideBackButtonText()
+        checkMykSuiteEnabledAndRefresh()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -105,20 +144,86 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return nil
+    }
+
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let currentSection: ParameterSection?
+        if mykSuiteEnabled {
+            currentSection = ParameterSection(rawValue: section)
+        } else {
+            currentSection = ParameterSection.general
+        }
+
+        guard let currentSection else { return nil }
+
+        let headerView = UIView()
+        headerView.backgroundColor = .clear
+
+        let label = IKLabel()
+        label.text = currentSection.title(packId: packId)
+        label.font = TextStyle.header3.font
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 24),
+            label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -24),
+            label.centerYAnchor.constraint(equalTo: headerView.centerYAnchor)
+        ])
+
+        return headerView
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        guard mykSuiteEnabled else {
+            return 1
+        }
+
+        return ParameterSection.allCases.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableContent.count
+        guard mykSuiteEnabled else {
+            return GeneralParameterRow.allCases.count
+        }
+
+        switch section {
+        case ParameterSection.mykSuite.rawValue:
+            return MykSuiteParameterRow.allCases.count
+        case ParameterSection.general.rawValue:
+            return GeneralParameterRow.allCases.count
+        default:
+            return 0
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = tableContent[indexPath.row]
+        guard mykSuiteEnabled else {
+            return generalCell(tableView, forRowAt: indexPath)
+        }
+
+        switch indexPath.section {
+        case ParameterSection.mykSuite.rawValue:
+            return mykSuiteCell(tableView, forRowAt: indexPath)
+        case ParameterSection.general.rawValue:
+            return generalCell(tableView, forRowAt: indexPath)
+        default:
+            fatalError("invalid indexPath: \(indexPath)")
+        }
+    }
+
+    private func generalCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
+        let row = GeneralParameterRow.allCases[indexPath.row]
         switch row {
         case .photos, .theme, .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            )
             cell.titleLabel.text = row.title
             if row == .photos {
                 cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
@@ -140,16 +245,65 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             return cell
         case .security, .storage, .about, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            )
             cell.titleLabel.text = row.title
             return cell
         }
     }
 
+    private func mykSuiteCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+        cell.initWithPositionAndShadow(
+            isFirst: indexPath.row == 0,
+            isLast: indexPath.row == MykSuiteParameterRow.allCases.count - 1
+        )
+
+        let row = MykSuiteParameterRow.allCases[indexPath.row]
+        switch row {
+        case .email:
+            cell.titleLabel.text = row.title
+            cell.titleLabel.font = TextStyle.body1.font
+            cell.selectionStyle = .none
+        case .mySubscription:
+            cell.titleLabel.text = row.title
+        }
+        return cell
+    }
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let row = tableContent[indexPath.row]
         tableView.deselectRow(at: indexPath, animated: true)
 
+        guard mykSuiteEnabled else {
+            didSelectGeneralRowAt(indexPath: indexPath)
+            return
+        }
+
+        switch indexPath.section {
+        case ParameterSection.mykSuite.rawValue:
+            didSelectMykSuiteRowAt(indexPath: indexPath)
+        case ParameterSection.general.rawValue:
+            didSelectGeneralRowAt(indexPath: indexPath)
+        default:
+            return
+        }
+    }
+
+    private func didSelectMykSuiteRowAt(indexPath: IndexPath) {
+        let row = MykSuiteParameterRow.allCases[indexPath.row]
+        guard row == MykSuiteParameterRow.mySubscription else { return }
+        guard let currentAccount = accountManager.currentAccount else { return }
+        let dashboardViewController = MyKSuiteDashboardViewBridgeController.instantiate(
+            apiFetcher: driveFileManager.apiFetcher,
+            currentAccount: currentAccount
+        )
+        navigationController?.present(dashboardViewController, animated: true)
+    }
+
+    private func didSelectGeneralRowAt(indexPath: IndexPath) {
+        let row = GeneralParameterRow.allCases[indexPath.row]
         switch row {
         case .storage:
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
@@ -173,6 +327,22 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
             )
             navigationController?.present(deleteAccountViewController, animated: true)
+        }
+    }
+
+    private func checkMykSuiteEnabledAndRefresh() {
+        Task { @MainActor in
+            @InjectService var mykSuiteStore: MyKSuiteStore
+            let packIsMykSuite: Bool
+            if await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId) != nil,
+               packId == .myKSuite || packId == .myKSuitePlus {
+                packIsMykSuite = true
+            } else {
+                packIsMykSuite = false
+            }
+
+            self.mykSuiteEnabled = packIsMykSuite
+            self.tableView.reloadData()
         }
     }
 }

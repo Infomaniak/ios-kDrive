@@ -21,4 +21,24 @@ import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
     @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var chipContainerView: UIView!
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        descriptionLabel.text = nil
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    public func setMykSuiteChip() {
+        let chipView = MyKSuiteChip.instantiateGrayChip()
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
+    }
 }
