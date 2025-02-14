@@ -188,6 +188,10 @@ public protocol RouterActionable {
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
 }
 
+public protocol SceneRoutable {
+    @MainActor var sceneUserInfo: [AnyHashable: Any]? { get }
+}
+
 /// Something that can navigate within the kDrive app
 public typealias AppNavigable = AppExtensionRoutable
     & Routable
@@ -195,4 +199,5 @@ public typealias AppNavigable = AppExtensionRoutable
     & RouterAppNavigable
     & RouterFileNavigable
     & RouterRootNavigable
+    & SceneRoutable
     & TopmostViewControllerFetchable

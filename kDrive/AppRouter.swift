@@ -59,7 +59,7 @@ public struct AppRouter: AppNavigable {
         return window
     }
 
-    @MainActor var sceneUserInfo: [AnyHashable: Any]? {
+    @MainActor public var sceneUserInfo: [AnyHashable: Any]? {
         guard let scene = window?.windowScene,
               let userInfo = scene.userActivity?.userInfo else {
             return nil

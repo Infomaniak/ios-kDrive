@@ -111,4 +111,6 @@ public struct InExtensionRouter: AppNavigable {
     public func updateTheme() {}
 
     public var topMostViewController: UIViewController?
+
+    @MainActor public var sceneUserInfo: [AnyHashable: Any]? { return nil }
 }
