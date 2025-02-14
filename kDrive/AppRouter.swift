@@ -187,6 +187,12 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
+            guard let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
+                  previousDriveId == driveFileManager.drive.id else {
+                Log.sceneDelegate("driveId do not match for restore :\(sceneUserInfo)", level: .error)
+                return
+            }
+
             let selectedIndex = tabBarViewController.selectedIndex
             let viewControllers = tabBarViewController.viewControllers
             guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
