@@ -100,6 +100,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var myKSuiteStore: MyKSuiteStore
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -316,9 +317,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.noDrive
         }
 
-        @InjectService var myKSuiteStore: MyKSuiteStore
-        @InjectService var accountManager: AccountManageable
-        _ = try? await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: accountManager.currentUserId)
+        await updateMykSuite(apiFetcher: apiFetcher)
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
@@ -352,6 +351,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
+        await updateMykSuite(apiFetcher: apiFetcher)
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
@@ -383,6 +384,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return account
+    }
+
+    private func updateMykSuite(apiFetcher: DriveApiFetcher) async {
+        _ = try? await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: currentUserId)
     }
 
     public func loadAccounts() -> [Account] {
