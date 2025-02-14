@@ -20,7 +20,6 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import MyKSuite
 import Sentry
 import UIKit
 
