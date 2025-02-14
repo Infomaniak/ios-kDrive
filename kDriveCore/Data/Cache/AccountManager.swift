@@ -99,6 +99,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var appRestorationService: AppRestorationServiceable
+    @LazyInjectService var router: AppNavigable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -320,11 +322,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         addAccount(account: newAccount, token: token)
         setCurrentAccount(account: newAccount)
 
-        guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
-            removeAccount(toDeleteAccount: newAccount)
-            throw driveResponse.drives.first?.isInTechnicalMaintenance == true ?
-                DriveError.productMaintenance : DriveError.blocked
-        }
+        let mainDrive = try await bestAvailableDrive(from: driveResponse.drives, account: newAccount)
+
         driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
 
         let frozenDrive = mainDrive.freeze()
@@ -336,6 +335,16 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         mqService.registerForNotifications(with: driveResponse.ips)
 
         return newAccount
+    }
+
+    private func bestAvailableDrive(from drives: [Drive], account: Account) async throws -> Drive {
+        guard let mainDrive = drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
+            removeAccount(toDeleteAccount: account)
+            throw drives.first?.isInTechnicalMaintenance == true ?
+                DriveError.productMaintenance : DriveError.blocked
+        }
+
+        return mainDrive
     }
 
     public func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
