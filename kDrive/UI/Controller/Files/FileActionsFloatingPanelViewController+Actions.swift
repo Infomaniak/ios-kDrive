@@ -320,7 +320,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func upsaleColorAction() {
-        FileActionsHelper.upsaleFolderColor(driveFileManager: driveFileManager, from: self)
+        FileActionsHelper.upsaleFolderColor()
     }
 
     private func folderColorAction() {

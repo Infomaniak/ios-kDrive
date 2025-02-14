@@ -477,7 +477,7 @@ public final class FileActionsHelper {
                                    completion: @escaping (Bool) -> Void) {
         group?.enter()
         guard !driveFileManager.drive.isFreePack else {
-            upsaleFolderColor(driveFileManager: driveFileManager, from: viewController)
+            upsaleFolderColor()
             return
         }
 
@@ -499,7 +499,7 @@ public final class FileActionsHelper {
         }
     }
 
-    public static func upsaleFolderColor(driveFileManager: DriveFileManager, from viewController: UIViewController) {
+    public static func upsaleFolderColor() {
         @InjectService var router: AppNavigable
         router.presentUpSaleSheet()
     }
