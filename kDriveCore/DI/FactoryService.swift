@@ -23,6 +23,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import MyKSuite
 import os.log
 
 /// Something that can associate a custom identifier with a `Factory`
@@ -155,8 +156,12 @@ public enum FactoryService {
             },
             Factory(type: MediaPlayerOrchestrator.self) { _, _ in
                 MediaPlayerOrchestrator()
+            },
+            Factory(type: MyKSuiteStore.self) { _, _ in
+                MyKSuiteStore()
             }
         ]
+
         return services
     }
 

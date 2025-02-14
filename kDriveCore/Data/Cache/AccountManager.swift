@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+import MyKSuite
 import RealmSwift
 import Sentry
 
@@ -99,6 +100,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var myKSuiteStore: MyKSuiteStore
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -315,6 +317,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.noDrive
         }
 
+        await updateMykSuite(apiFetcher: apiFetcher)
+
         let newAccount = Account(apiToken: token)
         newAccount.user = user
         addAccount(account: newAccount, token: token)
@@ -347,6 +351,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
+        await updateMykSuite(apiFetcher: apiFetcher)
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
@@ -378,6 +384,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return account
+    }
+
+    private func updateMykSuite(apiFetcher: DriveApiFetcher) async {
+        _ = try? await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: currentUserId)
     }
 
     public func loadAccounts() -> [Account] {
