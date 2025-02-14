@@ -64,7 +64,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         var title: String {
             switch self {
             case .email:
-                @LazyInjectService var accountManager: AccountManageable
+                @InjectService var accountManager: AccountManageable
                 return accountManager.currentAccount?.user.email ?? ""
             case .mySubscription:
                 return MyKSuiteLocalizable.iosMyKSuiteDashboardSubscriptionButton
