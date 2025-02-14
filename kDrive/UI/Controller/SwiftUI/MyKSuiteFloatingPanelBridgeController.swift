@@ -23,24 +23,9 @@ import MyKSuite
 import SwiftUI
 import UIKit
 
-final class MyKSuiteBridgeViewController: UIViewController {
-    let swiftUIView = MyKSuiteView(configuration: .kDrive)
-    lazy var hostingController = UIHostingController(rootView: ScrollView { swiftUIView })
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        hostingController.didMove(toParent: self)
+enum MyKSuiteBridgeViewController {
+    public static func instantiate() -> UIViewController {
+        let swiftUIView = MyKSuiteView(configuration: .kDrive)
+        return UIHostingController(rootView: ScrollView { swiftUIView })
     }
 }

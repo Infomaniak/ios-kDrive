@@ -520,7 +520,7 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: true) {
-            let viewControllerToPresent = MyKSuiteBridgeViewController()
+            let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
             if let sheet = viewControllerToPresent.sheetPresentationController {
                 if #available(iOS 16.0, *) {
                     sheet.detents = [
