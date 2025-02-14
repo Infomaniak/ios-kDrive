@@ -23,6 +23,8 @@ import kDriveResources
 import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
+    private lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     @LazyInjectService private var router: AppNavigable
 
     var driveFileManager: DriveFileManager!
@@ -103,24 +105,32 @@ class NewFolderTypeTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
+            if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+                cell.setMykSuiteChip()
+            }
         }
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if content[indexPath.row] == .dropbox && !driveFileManager.drive.pack.capabilities.useDropbox {
-            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController
-                .contentViewController as? DropBoxFloatingPanelViewController
-            floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-            floatingPanelViewController?.actionHandler = { _ in
-                driveFloatingPanelController.dismiss(animated: true) { [weak self] in
-                    guard let self else { return }
-                    router.showStore(from: self, driveFileManager: driveFileManager)
+        if content[indexPath.row] == .dropbox {
+            if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+                router.presentUpSaleSheet()
+            } else if !driveFileManager.drive.pack.capabilities.useDropbox {
+                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController
+                    .contentViewController as? DropBoxFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) { [weak self] in
+                        guard let self else { return }
+                        router.presentUpSaleSheet()
+                    }
                 }
+                present(driveFloatingPanelController, animated: true)
+            } else {
+                performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
             }
-            present(driveFloatingPanelController, animated: true)
-            return
         } else {
             performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
         }

@@ -27,6 +27,7 @@ import UIKit
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService var router: AppNavigable
     @LazyInjectService var accountManager: AccountManageable
 
     private enum ShareAndRightsSections: CaseIterable {
@@ -47,6 +48,8 @@ class ShareAndRightsViewController: UIViewController {
 
     var driveFileManager: DriveFileManager!
     var file: File!
+
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -189,7 +192,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(file: file)
+            cell.configureWith(file: file, currentPackId: packId, driveFileManager: driveFileManager)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -209,6 +212,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
+            guard !showMykSuiteRestriction(fileHasShareLink: file.hasSharelink) else {
+                router.presentUpSaleSheet()
+                return
+            }
+
             let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink
             if file.isDropbox || !canBecomeLink {
                 return
@@ -233,6 +241,12 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             return NewFolderSectionHeaderView
                 .instantiate(title: KDriveResourcesStrings.Localizable.fileShareDetailsUsersAccesTitle)
         }
+    }
+
+    private func showMykSuiteRestriction(fileHasShareLink: Bool) -> Bool {
+        return MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
+                                                         driveFileManager: driveFileManager,
+                                                         fileHasShareLink: fileHasShareLink)
     }
 }
 
@@ -311,6 +325,11 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     }
 
     func shareLinkSettingsButtonPressed() {
+        if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file
