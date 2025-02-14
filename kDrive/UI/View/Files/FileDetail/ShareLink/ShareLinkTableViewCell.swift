@@ -47,7 +47,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
-    var packId: DrivePackId?
 
     private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
@@ -96,8 +95,10 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
 
-    func configureWith(file: File, currentPackId: DrivePackId?, insets: Bool = true) {
-        packId = currentPackId
+    func configureWith(file: File,
+                       currentPackId: DrivePackId?,
+                       driveFileManager: DriveFileManager,
+                       insets: Bool = true) {
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -152,7 +153,10 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
 
-        if currentPackId == .myKSuite {
+        let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: currentPackId,
+                                                                                driveFileManager: driveFileManager,
+                                                                                fileHasShareLink: file.hasSharelink)
+        if showMykSuiteRestriction {
             let chipView = MyKSuiteChip.instantiateGrayChip()
 
             chipView.translatesAutoresizingMaskIntoConstraints = false
@@ -180,19 +184,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        if let packId, packId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
-        }
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {
-        if let packId, packId == .myKSuite {
-            router.presentUpSaleSheet()
-            return
-        }
         delegate?.shareLinkSettingsButtonPressed()
     }
 }

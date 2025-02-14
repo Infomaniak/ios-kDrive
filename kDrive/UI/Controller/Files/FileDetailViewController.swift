@@ -29,6 +29,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet var commentButton: UIButton!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
 
     var file: File!
     var driveFileManager: DriveFileManager!
@@ -552,7 +553,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(file: file, currentPackId: packId, insets: false)
+                    cell.configureWith(file: file, currentPackId: packId, driveFileManager: driveFileManager, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -921,6 +922,11 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     }
 
     func shareLinkSettingsButtonPressed() {
+        if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
+            router.presentUpSaleSheet()
+            return
+        }
+
         performSegue(withIdentifier: "toShareLinkSettingsSegue", sender: nil)
     }
 }

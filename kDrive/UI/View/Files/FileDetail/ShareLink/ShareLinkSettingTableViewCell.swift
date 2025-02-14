@@ -34,7 +34,9 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet var passwordTextField: MaterialOutlinedTextField!
     @IBOutlet var newPasswordButton: IKButton!
     @IBOutlet var compactDatePicker: UIDatePicker!
+    @IBOutlet var updateView: UIView!
     @IBOutlet var updateButton: UIButton!
+    @IBOutlet var chipContainerView: UIView!
 
     var option: ShareLinkSettingsViewController.OptionsRow?
     weak var delegate: ShareLinkSettingsDelegate?
@@ -48,7 +50,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         super.awakeFromNib()
         passwordTextField.isHidden = true
         compactDatePicker.isHidden = true
-        updateButton.isHidden = true
+        updateView.isHidden = true
         newPasswordButton.isHidden = true
 
         compactDatePicker.minimumDate = Date()
@@ -79,6 +81,22 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         rightView.addSubview(overlayButton)
         passwordTextField.rightView = rightView
         passwordTextField.rightViewMode = .always
+
+        prepareChip()
+    }
+
+    private func prepareChip() {
+        let chipView = MyKSuiteChip.instantiateGrayChip()
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -109,7 +127,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         settingDetail.text = isFolder ? option.folderDescription : option.fileDescription
         settingSwitch.isOn = switchValue
         settingSwitch.isEnabled = option.isEnabled(drive: drive)
-        updateButton.isHidden = option.isEnabled(drive: drive)
+        updateView.isHidden = option.isEnabled(drive: drive)
         passwordTextField.isHidden = true
         newPasswordButton.isHidden = true
         compactDatePicker.isHidden = true
