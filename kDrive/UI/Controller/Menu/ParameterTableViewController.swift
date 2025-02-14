@@ -295,7 +295,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         let row = MykSuiteParameterRow.allCases[indexPath.row]
         guard row == MykSuiteParameterRow.mySubscription else { return }
         guard let currentAccount = accountManager.currentAccount else { return }
-        let dashboardViewController = MyKSuiteDashboardViewBridgeController(
+        let dashboardViewController = MyKSuiteDashboardViewBridgeController.instantiate(
             apiFetcher: driveFileManager.apiFetcher,
             currentAccount: currentAccount
         )
