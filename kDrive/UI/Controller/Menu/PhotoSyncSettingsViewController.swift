@@ -456,7 +456,7 @@ extension PhotoSyncSettingsViewController {
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
             case .wifiSync:
                 let wifiSyncSettingsViewController = WifiSyncSettingsViewController
-                    .instantiate(selectedMode: newSyncSettings.wifiSync)
+                    .instantiate(selectedMode: liveNewSyncSettings.wifiSync)
                 wifiSyncSettingsViewController.delegate = self
                 navigationController?.pushViewController(wifiSyncSettingsViewController, animated: true)
             default:
@@ -549,7 +549,7 @@ extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegat
 
 extension PhotoSyncSettingsViewController: WifiSyncSettingsDelegate {
     func didSelectSyncMode(_ mode: SyncMode) {
-        newSyncSettings.wifiSync = mode
+        liveNewSyncSettings.wifiSync = mode
         tableView.reloadRows(
             at: [IndexPath(row: PhotoSyncSettingsRows.wifiSync.rawValue, section: PhotoSyncSection.syncSettings.rawValue)],
             with: .fade
