@@ -1,5 +1,5 @@
 {
-  "originHash" : "5a7622e6f22f2c0d8ab585cfe7e68ac4429f608132773fc8375408e608ddb814",
+  "originHash" : "68ed75fdcce0038d075c6f626ce5daf49e91de45e65e94844eea781997c8027f",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -202,10 +202,10 @@
     {
       "identity" : "mqtt-nio",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/mqtt-nio",
+      "location" : "https://github.com/swift-server-community/mqtt-nio",
       "state" : {
-        "revision" : "96ece4989a8c1c4e0d0924073862916d29fd9bf0",
-        "version" : "2.4.1"
+        "revision" : "aa23a1a17344bea48d7585afc817e7dd75ce2a52",
+        "version" : "2.12.0"
       }
     },
     {
@@ -314,6 +314,15 @@
       "state" : {
         "revision" : "c51907a839e63ebf0ba2076bba73dd96436bd1b9",
         "version" : "2.81.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-ssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-ssl.git",
+      "state" : {
+        "revision" : "0cc3528ff48129d64ab9cab0b1cd621634edfc6b",
+        "version" : "2.29.3"
       }
     },
     {

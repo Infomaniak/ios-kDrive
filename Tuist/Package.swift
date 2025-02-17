@@ -9,23 +9,34 @@ let packageSettings = PackageSettings(
     productTypes: [
         "Alamofire": .framework,
         "Atlantis": .staticFramework,
+        "Atomics": .framework,
+        "CNIODarwin": .framework,
+        "CNIOLinux": .framework,
+        "CNIOWindows": .framework,
         "CocoaLumberjackSwift": .framework,
         "CocoaLumberjack": .framework,
+        "DequeModule": .framework,
+        "DesignSystem": .framework,
+        "InfomaniakCoreCommonUI": .framework,
+        "InfomaniakCoreSwiftUI": .framework,
+        "InfomaniakCoreUIKit": .framework,
+        "InfomaniakCore": .framework,
         "InfomaniakDI": .framework,
         "InfomaniakLogin": .framework,
-        "InfomaniakCore": .framework,
-        "InfomaniakCoreCommonUI": .framework,
-        "InfomaniakCoreUIKit": .framework,
+        "InternalCollectionsUtilities": .framework,
         "Kingfisher": .framework,
         "Lottie": .framework,
+        "MyKSuite": .framework,
+        "NIOConcurrencyHelpers": .framework,
+        "NIOCore": .framework,
+        "NIOTransportServices": .framework,
+        "NIO": .framework,
         "RealmSwift": .framework,
         "Realm": .framework,
-        "MyKSuite": .framework,
-        "InfomaniakCoreSwiftUI": .framework,
-        "DesignSystem": .framework
+        "_NIOBase64": .framework,
+        "_NIODataStructures": .framework
     ]
 )
-
 #endif
 
 let package = Package(
@@ -52,7 +63,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/DropDown", branch: "master"),
         .package(url: "https://github.com/flowbe/SwiftRegex", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "8.0.0")),
-        .package(url: "https://github.com/Infomaniak/mqtt-nio", .upToNextMajor(from: "2.4.1")),
+        .package(url: "https://github.com/swift-server-community/mqtt-nio", .upToNextMajor(from: "2.12.0")),
         .package(url: "https://github.com/airbnb/HorizonCalendar", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
