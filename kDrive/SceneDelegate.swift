@@ -222,6 +222,18 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
     }
 
+    @discardableResult
+    private func continueToWebActivityIfPossible(_ scene: UIScene, userActivity: NSUserActivity) async -> Bool {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL else {
+            Log.sceneDelegate("the scene continue userActivity - is not NSUserActivityTypeBrowsingWeb", level: .error)
+            return false
+        }
+
+        await UniversalLinksHelper.handleURL(incomingURL)
+        return true
+    }
+
     // MARK: - Handoff support
 
     func scene(_ scene: UIScene, willContinueUserActivityWithType userActivityType: String) {
@@ -231,13 +243,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         Log.sceneDelegate("scene continue userActivity")
         Task {
-            guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-                  let incomingURL = userActivity.webpageURL else {
-                Log.sceneDelegate("scene continue userActivity - invalid activity", level: .error)
-                return
-            }
-
-            await UniversalLinksHelper.handleURL(incomingURL)
+            await continueToWebActivityIfPossible(scene, userActivity: userActivity)
         }
     }
 
