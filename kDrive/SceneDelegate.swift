@@ -32,7 +32,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
-
+    @LazyInjectService var deeplinkParser: DeeplinkParsable
+    
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
