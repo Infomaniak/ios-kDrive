@@ -68,20 +68,26 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard userActivity.activityType == SceneActivityIdentifier.mainSceneActivityType else {
-            Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
-            return
+        Task {
+            guard await !continueToWebActivityIfPossible(scene, userActivity: userActivity) else {
+                return
+            }
+
+            guard userActivity.activityType == SceneActivityIdentifier.mainSceneActivityType else {
+                Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
+                return
+            }
+
+            scene.userActivity = userActivity
+
+            guard let userInfo = userActivity.userInfo else {
+                Log.sceneDelegate("activity has no metadata to process")
+                return
+            }
+
+            Log.sceneDelegate("restore from \(userActivity.activityType)")
+            Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
         }
-
-        scene.userActivity = userActivity
-
-        guard let userInfo = userActivity.userInfo else {
-            Log.sceneDelegate("activity has no metadata to process")
-            return
-        }
-
-        Log.sceneDelegate("restore from \(userActivity.activityType)")
-        Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
@@ -230,8 +236,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return false
         }
 
-        await UniversalLinksHelper.handleURL(incomingURL)
-        return true
+        return await DeeplinkParser().parse(url: incomingURL)
     }
 
     // MARK: - Handoff support
