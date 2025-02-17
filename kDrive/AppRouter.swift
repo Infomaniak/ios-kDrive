@@ -606,7 +606,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+        let driveFileManager = try await accountManager.getBestAvailableDriveFileManager(for: account)
         let drive = driveFileManager.drive
         accountManager.setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)

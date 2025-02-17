@@ -94,7 +94,7 @@ class PreloadingViewController: UIViewController {
         Task {
             do {
                 _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
+                _ = try await accountManager.getBestAvailableDriveFileManager(for: currentAccount)
 
                 if let currentDriveFileManager = self.accountManager.currentDriveFileManager {
                     let state = RootViewControllerState.mainViewController(driveFileManager: currentDriveFileManager)

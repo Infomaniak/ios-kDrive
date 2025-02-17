@@ -86,12 +86,14 @@ class SwitchUserViewController: UIViewController {
 
     private func switchToConnectedAccount(_ account: Account) {
         do {
-            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
-            MatomoUtils.track(eventWithCategory: .account, name: "switch")
-            MatomoUtils.connectUser()
+            Task { @MainActor in
+                let driveFileManager = try await accountManager.getBestAvailableDriveFileManager(for: account)
+                MatomoUtils.track(eventWithCategory: .account, name: "switch")
+                MatomoUtils.connectUser()
 
-            accountManager.switchAccount(newAccount: account)
-            appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+                accountManager.switchAccount(newAccount: account)
+                appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+            }
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                 errorType: .noDrive,

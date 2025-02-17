@@ -67,7 +67,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
+    func getBestAvailableDriveFileManager(for account: Account) async throws -> DriveFileManager
 
     /// Create on the fly an "in memory" DriveFileManager for a specific share
     func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager?
@@ -227,14 +227,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return DriveFileManager(drive: frozenPublicShareDrive, apiFetcher: DriveApiFetcher(), context: context)
     }
 
-    public func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
-        let userDrives = driveInfosManager.getDrives(for: userId)
+    public func getBestAvailableDriveFileManager(for account: Account) async throws -> DriveFileManager {
+        let userDrives = Array(driveInfosManager.getDrives(for: account.userId))
 
         guard !userDrives.isEmpty else {
             throw DriveError.NoDriveError.noDrive
         }
 
-        guard let firstAvailableDrive = userDrives.first(where: { !$0.inMaintenance }) else {
+        guard let mainDrive = try? await bestAvailableDrive(from: userDrives, account: account) else {
             if userDrives[0].isInTechnicalMaintenance {
                 throw DriveError.NoDriveError.maintenance(drive: userDrives[0])
             } else {
@@ -242,7 +242,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        guard let driveFileManager = getDriveFileManager(for: firstAvailableDrive.id, userId: firstAvailableDrive.userId) else {
+        guard let driveFileManager = getDriveFileManager(for: mainDrive.id, userId: mainDrive.userId) else {
             // We should always have a driveFileManager here
             throw DriveError.NoDriveError.noDriveFileManager
         }

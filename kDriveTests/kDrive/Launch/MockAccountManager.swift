@@ -49,7 +49,7 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? { currentDriveFileManager }
 
-    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager { fatalError("Not implemented") }
+    func getBestAvailableDriveFileManager(for account: Account) async throws -> DriveFileManager { fatalError("Not implemented") }
 
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
 
