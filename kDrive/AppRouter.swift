@@ -260,7 +260,7 @@ public struct AppRouter: AppNavigable {
                                                navigationController: UINavigationController,
                                                sceneUserInfo: [AnyHashable: Any]) async {
         guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-              driveFileManager.drive.id == driveId,
+              driveFileManager.driveId == driveId,
               let fileId = sceneUserInfo[SceneRestorationValues.fileId.rawValue] else {
             Log.sceneDelegate("metadata issue for FileList :\(sceneUserInfo)", level: .error)
             return
@@ -321,7 +321,7 @@ public struct AppRouter: AppNavigable {
                                             navigationController: UINavigationController,
                                             sceneUserInfo: [AnyHashable: Any]) async {
         guard let driveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-              driveFileManager.drive.id == driveId else {
+              driveFileManager.driveId == driveId else {
             Log.sceneDelegate("unable to load drive id", level: .error)
             return
         }

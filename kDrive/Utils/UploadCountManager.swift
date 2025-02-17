@@ -37,7 +37,7 @@ final class UploadCountManager {
                                              qos: .utility, autoreleaseFrequency: .workItem)
 
     private lazy var userId = driveFileManager.drive.userId
-    private lazy var driveIds = [driveFileManager.drive.id] + driveInfosManager
+    private lazy var driveIds = [driveFileManager.driveId] + driveInfosManager
         .getDrives(for: userId, sharedWithMe: true).map(\.id)
 
     public var uploadCount = 0

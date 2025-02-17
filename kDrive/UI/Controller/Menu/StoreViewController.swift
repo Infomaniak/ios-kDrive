@@ -346,7 +346,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
     var currentSceneMetadata: [AnyHashable: Any] {
         [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.StoreViewController.rawValue,
-            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id
+            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId
         ]
     }
 }
@@ -373,7 +373,7 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
             // Attempt to purchase the tapped product
             StoreObserver.shared.buy(product,
                                      userId: accountManager.currentUserId,
-                                     driveId: driveFileManager.drive.id)
+                                     driveId: driveFileManager.driveId)
             button.setLoading(true)
         }
     }
@@ -416,7 +416,7 @@ extension StoreViewController: StoreObserverDelegate {
         // Send receipt to the server
         let body = ReceiptInfo(latestReceipt: receiptString,
                                userId: accountManager.currentUserId,
-                               itemId: driveFileManager.drive.id,
+                               itemId: driveFileManager.driveId,
                                productId: transaction.payment.productIdentifier,
                                transactionId: transaction.transactionIdentifier ?? "",
                                bundleId: Bundle.main.bundleIdentifier ?? "")

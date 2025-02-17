@@ -45,7 +45,7 @@ class UploadCardViewModel {
     }
 
     private func initObservation() {
-        let driveId = driveFileManager.drive.id
+        let driveId = driveFileManager.driveId
         uploadCount = uploadQueue.getUploadingFiles(withParent: uploadDirectory.id,
                                                     userId: accountManager.currentUserId,
                                                     driveId: driveId).count

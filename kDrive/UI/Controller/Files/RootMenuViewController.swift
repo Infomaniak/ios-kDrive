@@ -121,7 +121,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         configureDataSource()
 
-        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+        let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
             return
         }

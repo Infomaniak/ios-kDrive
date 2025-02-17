@@ -60,7 +60,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             if page.isInitialPage {
                 let uploadingFiles = uploadQueue.getUploadingFiles(withParent: parentDirectory.id,
                                                                    userId: driveFileManager.drive.userId,
-                                                                   driveId: driveFileManager.drive.id)
+                                                                   driveId: driveFileManager.driveId)
                 for uploadFile in uploadingFiles {
                     let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
                     uploadFilesItems.append(uploadFileItem)
@@ -170,7 +170,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             }
 
             do {
-                let proxyFile = ProxyFile(driveId: driveFileManager.drive.id, id: fileId)
+                let proxyFile = ProxyFile(driveId: driveFileManager.driveId, id: fileId)
                 let response = try await driveFileManager.apiFetcher.files(
                     in: proxyFile,
                     advancedListingCursor: cursor,

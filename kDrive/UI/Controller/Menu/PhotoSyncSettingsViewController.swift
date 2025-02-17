@@ -92,7 +92,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     private var driveFileManager: DriveFileManager? {
         didSet {
             liveNewSyncSettings.userId = driveFileManager?.drive.userId ?? -1
-            liveNewSyncSettings.driveId = driveFileManager?.drive.id ?? -1
+            liveNewSyncSettings.driveId = driveFileManager?.driveId ?? -1
         }
     }
 

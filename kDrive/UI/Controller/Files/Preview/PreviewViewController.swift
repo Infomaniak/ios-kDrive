@@ -650,7 +650,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         return [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.PreviewViewController.rawValue,
-            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId,
             SceneRestorationValues.Carousel.filesIds.rawValue: allFilesIds,
             SceneRestorationValues.Carousel.currentIndex.rawValue: currentIndexRow,
             SceneRestorationValues.Carousel.normalFolderHierarchy.rawValue: normalFolderHierarchy,
