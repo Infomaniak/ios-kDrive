@@ -93,12 +93,8 @@ public final class DriveFileManager {
 
     private var _drive: Drive
     public var drive: Drive {
-        guard let freshFrozenDrive = driveInfoDatabase.fetchObject(ofType: Drive.self, filtering: { lazyCollection in
-            return lazyCollection
-                .filter("id = %lld", driveId)
-                .first?
-                .freeze()
-        }) else {
+        guard let freshFrozenDrive = driveInfoDatabase.fetchObject(ofType: Drive.self, forPrimaryKey: _drive.objectId)?.freeze()
+        else {
             return _drive
         }
         _drive = freshFrozenDrive
