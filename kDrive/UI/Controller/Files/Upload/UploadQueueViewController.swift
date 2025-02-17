@@ -62,7 +62,6 @@ final class UploadQueueViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Main"])
-        
     }
 
     deinit {
@@ -164,10 +163,10 @@ extension UploadQueueViewController: UITableViewDataSource {
                                            ) - 1)
 
             /// Make sure the file is valid
-            let file = uploadingFiles[indexPath.row]
+            let file = frozenUploadingFiles[indexPath.row].content
             if !file.isInvalidated {
                 let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-                cell.configureWith(uploadFile: file, progress: progress)
+                cell.configureWith(frozenUploadFile: file, progress: progress)
             }
 
             cell.selectionStyle = .none
