@@ -338,6 +338,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     private func bestAvailableDrive(from drives: [Drive], account: Account) async throws -> Drive {
+        if appRestorationService.shouldRestoreApplicationState,
+           let sceneUserInfo = await router.sceneUserInfo,
+           let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
+           let restoredDrive = drives.first(where: { $0.id == previousDriveId && $0.isDriveUser && !$0.inMaintenance }) {
+            return restoredDrive
+        }
+
         guard let mainDrive = drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
             removeAccount(toDeleteAccount: account)
             throw drives.first?.isInTechnicalMaintenance == true ?
