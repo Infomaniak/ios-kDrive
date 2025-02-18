@@ -230,7 +230,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 uploadFileUUID: UUID().uuidString,
                 parentDirectoryId: parentDirectoryId,
                 userId: driveFileManager.drive.userId,
-                driveId: driveFileManager.drive.id,
+                driveId: driveFileManager.driveId,
                 sourceUrl: url,
                 conflictOption: .version,
                 driveError: nil

@@ -210,7 +210,7 @@ public enum UniversalLinksHelper {
                 @InjectService var appNavigable: AppNavigable
                 await appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
+                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
                 await UIConstants.showSnackBarIfNeeded(error: error)
             }
         }

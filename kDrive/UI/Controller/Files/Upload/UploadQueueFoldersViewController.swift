@@ -60,7 +60,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     private func setUpObserver() {
         guard driveFileManager != nil else { return }
-        let driveIds = [driveFileManager.drive.id] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
+        let driveIds = [driveFileManager.driveId] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
         let uploadingFiles = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds)
             .distinct(by: [\.parentDirectoryId])

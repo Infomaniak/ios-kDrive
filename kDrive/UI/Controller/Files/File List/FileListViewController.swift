@@ -802,7 +802,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     var currentSceneMetadata: [AnyHashable: Any] {
         [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
-            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId,
             SceneRestorationValues.fileId.rawValue: viewModel.currentDirectory.id
         ]
     }

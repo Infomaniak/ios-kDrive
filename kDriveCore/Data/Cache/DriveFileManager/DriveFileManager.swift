@@ -44,6 +44,7 @@ extension TransactionExecutor: CustomStringConvertible {
 // MARK: - Transactionable
 
 public final class DriveFileManager {
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) private var driveInfoDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
     public static let constants = DriveFileManagerConstants()
@@ -90,8 +91,19 @@ public final class DriveFileManager {
 
     public let realmConfiguration: Realm.Configuration
 
-    // TODO: Fetch a drive with a computed property instead of tracking a Realm object
-    public private(set) var drive: Drive
+    private var _drive: Drive
+    public var drive: Drive {
+        guard let freshFrozenDrive = driveInfoDatabase.fetchObject(ofType: Drive.self, forPrimaryKey: _drive.objectId)?.freeze()
+        else {
+            return _drive
+        }
+        _drive = freshFrozenDrive
+        return freshFrozenDrive
+    }
+
+    public var driveId: Int {
+        _drive.id
+    }
 
     public let apiFetcher: DriveApiFetcher
 
@@ -243,7 +255,7 @@ public final class DriveFileManager {
     }
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
-        self.drive = drive
+        _drive = drive
         self.apiFetcher = apiFetcher
         self.context = context
         realmConfiguration = Self.configuration(context: context, driveId: drive.id, driveUserId: drive.userId)
@@ -285,7 +297,7 @@ public final class DriveFileManager {
     }
 
     public func initRoot() async throws {
-        let root = ProxyFile(driveId: drive.id, id: DriveFileManager.constants.rootID)
+        let root = ProxyFile(driveId: driveId, id: DriveFileManager.constants.rootID)
         _ = try await files(in: root, forceRefresh: true)
     }
 
@@ -663,7 +675,7 @@ public final class DriveFileManager {
             SentryDebug.capture(message: message)
         }
         // Silently handle error
-        DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
+        DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(driveId) - \(drive.name)]: \(message)")
     }
 
     public func add(category: Category, to file: ProxyFile) async throws {
@@ -704,7 +716,7 @@ public final class DriveFileManager {
         let categoryId = category.id
         let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
         for fileResponse in response where fileResponse.result {
-            updateFileProperty(fileUid: File.uid(driveId: drive.id, fileId: fileResponse.id)) { file in
+            updateFileProperty(fileUid: File.uid(driveId: driveId, fileId: fileResponse.id)) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -723,7 +735,6 @@ public final class DriveFileManager {
             }
 
             drive.categories.append(category)
-            self.drive = drive.freeze()
         }
 
         return category.freeze()
@@ -743,8 +754,6 @@ public final class DriveFileManager {
             if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
                 drive.categories[index] = category
             }
-
-            self.drive = drive.freeze()
         }
 
         return category
@@ -768,8 +777,6 @@ public final class DriveFileManager {
             if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
                 drive.categories.remove(at: index)
             }
-
-            self.drive = drive.freeze()
         }
 
         // Delete category from files

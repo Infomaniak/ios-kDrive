@@ -101,7 +101,7 @@ final class DroppableFileListViewModel {
                 .loadObject(ofClass: DragAndDropFile.self) { [destinationDriveFileManager = driveFileManager] itemProvider, _ in
                     if let itemProvider = itemProvider as? DragAndDropFile,
                        let file = itemProvider.file {
-                        if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider
+                        if itemProvider.driveId == destinationDriveFileManager.driveId && itemProvider
                             .userId == destinationDriveFileManager.drive.userId {
                             FileActionsHelper.instance.move(
                                 file: file,

@@ -490,7 +490,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     var currentSceneMetadata: [AnyHashable: Any] {
         [
             SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileDetailViewController.rawValue,
-            SceneRestorationValues.driveId.rawValue: driveFileManager.drive.id,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId,
             SceneRestorationValues.fileId.rawValue: file.id
         ]
     }

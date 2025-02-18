@@ -211,7 +211,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                                                                         publicShareProxy: publicShareProxy)
                 } else {
                     DownloadQueue.instance.addToQueue(archiveId: response.uuid,
-                                                      driveId: self.driveFileManager.drive.id,
+                                                      driveId: self.driveFileManager.driveId,
                                                       userId: accountManager.currentUserId)
                 }
 

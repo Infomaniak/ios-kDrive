@@ -370,7 +370,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                frozenSettings?.driveId == driveRemoved.id {
                 photoLibraryUploader.disableSync()
             }
-            if currentDriveFileManager?.drive.id == driveRemoved.id {
+            if currentDriveFileManager?.driveId == driveRemoved.id {
                 setCurrentDriveForCurrentAccount(for: firstDrive.id, userId: firstDrive.userId)
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)

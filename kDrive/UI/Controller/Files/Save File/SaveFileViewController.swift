@@ -50,7 +50,7 @@ class SaveFileViewController: UIViewController {
     }
 
     var lastSelectedDirectory: File? {
-        guard UserDefaults.shared.lastSelectedDrive == selectedDriveFileManager?.drive.id else { return nil }
+        guard UserDefaults.shared.lastSelectedDrive == selectedDriveFileManager?.driveId else { return nil }
         return selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
     }
 
@@ -216,7 +216,7 @@ class SaveFileViewController: UIViewController {
     // MARK: Helpers
 
     func getBestDirectory() -> File? {
-        if lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id {
+        if lastSelectedDirectory?.driveId == selectedDriveFileManager?.driveId {
             return lastSelectedDirectory
         }
 
@@ -236,7 +236,7 @@ class SaveFileViewController: UIViewController {
             lazyFiles.filter(
                 "rawVisibility = %@ AND driveId == %d",
                 FileVisibility.isInSharedSpace.rawValue,
-                selectedDriveFileManager.drive.id
+                selectedDriveFileManager.driveId
             )
         }.first
         return firstAvailableSharedDriveDirectory?.freezeIfNeeded()

@@ -25,7 +25,7 @@ public struct AppExtensionRouter: AppExtensionRoutable {
     public func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
         #if ISEXTENSION
         UIConstants.openUrl(
-            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)",
+            "kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.driveId)",
             from: viewController
         )
         #else

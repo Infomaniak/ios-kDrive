@@ -70,7 +70,7 @@ extension FileProviderExtension {
 
             do {
                 let response = try await self.driveFileManager.apiFetcher
-                    .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                    .deleteDefinitely(file: ProxyFile(driveId: self.driveFileManager.driveId, id: fileId))
                 if response {
                     try await self.manager.signalEnumerator(for: .workingSet)
                     try await self.manager.signalEnumerator(for: itemIdentifier)
@@ -139,7 +139,7 @@ extension FileProviderExtension {
         let importItem = UploadFileProviderItem(uploadFileUUID: importedFileUUID,
                                                 parentDirectoryId: parentDirectoryId,
                                                 userId: driveFileManager.drive.userId,
-                                                driveId: driveFileManager.drive.id,
+                                                driveId: driveFileManager.driveId,
                                                 sourceUrl: storageUrl,
                                                 conflictOption: .version,
                                                 driveError: nil)
@@ -317,10 +317,10 @@ extension FileProviderExtension {
             // Trashed items are not cached so we call the API
             do {
                 let file = try await self.driveFileManager.apiFetcher
-                    .trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                    .trashedFile(ProxyFile(driveId: self.driveFileManager.driveId, id: fileId))
                 let parent: ProxyFile?
                 if let id = parentItemIdentifier?.toFileId() {
-                    parent = ProxyFile(driveId: self.driveFileManager.drive.id, id: id)
+                    parent = ProxyFile(driveId: self.driveFileManager.driveId, id: id)
                 } else {
                     parent = nil
                 }
