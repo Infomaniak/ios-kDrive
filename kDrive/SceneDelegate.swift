@@ -224,7 +224,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
 
         Task {
-            let success = await DeeplinkParser().parse(url: url)
+            let success = await deeplinkParser.parse(url: url)
             Log.sceneDelegate("scene open url: \(url) success: \(success)")
         }
     }
@@ -237,7 +237,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return false
         }
 
-        return await DeeplinkParser().parse(url: incomingURL)
+        return await deeplinkParser.parse(url: incomingURL)
     }
 
     // MARK: - Handoff support
