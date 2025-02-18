@@ -163,7 +163,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 //        navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
