@@ -32,6 +32,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
+    @LazyInjectService var deeplinkParser: DeeplinkParsable
 
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
@@ -68,20 +69,26 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard userActivity.activityType == SceneActivityIdentifier.mainSceneActivityType else {
-            Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
-            return
+        Task {
+            guard await !continueWebActivityIfPossible(scene, userActivity: userActivity) else {
+                return
+            }
+
+            guard userActivity.activityType == SceneActivityIdentifier.mainSceneActivityType else {
+                Log.sceneDelegate("unsupported user activity type:\(userActivity.activityType)")
+                return
+            }
+
+            scene.userActivity = userActivity
+
+            guard let userInfo = userActivity.userInfo else {
+                Log.sceneDelegate("activity has no metadata to process")
+                return
+            }
+
+            Log.sceneDelegate("restore from \(userActivity.activityType)")
+            Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
         }
-
-        scene.userActivity = userActivity
-
-        guard let userInfo = userActivity.userInfo else {
-            Log.sceneDelegate("activity has no metadata to process")
-            return
-        }
-
-        Log.sceneDelegate("restore from \(userActivity.activityType)")
-        Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
     }
 
     private func prepareWindowScene(_ windowScene: UIWindowScene) {
@@ -217,9 +224,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
 
         Task {
-            let success = await DeeplinkParser().parse(url: url)
+            let success = await deeplinkParser.parse(url: url)
             Log.sceneDelegate("scene open url: \(url) success: \(success)")
         }
+    }
+
+    @discardableResult
+    private func continueWebActivityIfPossible(_ scene: UIScene, userActivity: NSUserActivity) async -> Bool {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL else {
+            Log.sceneDelegate("the scene continue userActivity - is not NSUserActivityTypeBrowsingWeb", level: .error)
+            return false
+        }
+
+        return await deeplinkParser.parse(url: incomingURL)
     }
 
     // MARK: - Handoff support
@@ -231,13 +249,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         Log.sceneDelegate("scene continue userActivity")
         Task {
-            guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-                  let incomingURL = userActivity.webpageURL else {
-                Log.sceneDelegate("scene continue userActivity - invalid activity", level: .error)
-                return
-            }
-
-            await UniversalLinksHelper.handleURL(incomingURL)
+            await continueWebActivityIfPossible(scene, userActivity: userActivity)
         }
     }
 
