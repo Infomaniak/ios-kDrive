@@ -33,7 +33,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var deeplinkParser: DeeplinkParsable
-    
+
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
@@ -70,7 +70,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
 
         Task {
-            guard await !continueToWebActivityIfPossible(scene, userActivity: userActivity) else {
+            guard await !continueWebActivityIfPossible(scene, userActivity: userActivity) else {
                 return
             }
 
@@ -230,7 +230,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     @discardableResult
-    private func continueToWebActivityIfPossible(_ scene: UIScene, userActivity: NSUserActivity) async -> Bool {
+    private func continueWebActivityIfPossible(_ scene: UIScene, userActivity: NSUserActivity) async -> Bool {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL else {
             Log.sceneDelegate("the scene continue userActivity - is not NSUserActivityTypeBrowsingWeb", level: .error)
@@ -249,7 +249,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         Log.sceneDelegate("scene continue userActivity")
         Task {
-            await continueToWebActivityIfPossible(scene, userActivity: userActivity)
+            await continueWebActivityIfPossible(scene, userActivity: userActivity)
         }
     }
 
