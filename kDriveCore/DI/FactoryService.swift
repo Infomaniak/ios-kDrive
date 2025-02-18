@@ -76,6 +76,9 @@ public enum FactoryService {
             },
             Factory(type: DeeplinkServiceable.self) { _, _ in
                 DeeplinkService()
+            },
+            Factory(type: DeeplinkParsable.self) { _, _ in
+                DeeplinkParser()
             }
         ]
         return services
