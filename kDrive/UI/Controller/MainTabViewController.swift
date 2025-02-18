@@ -34,6 +34,98 @@ public enum MainTabBarIndex: Int {
     case profile = 4
 }
 
+// class RootViewController: UISplitViewController {
+//    @LazyInjectService var router: AppNavigable
+//    let driveFileManager: DriveFileManager
+//
+//    init(driveFileManager: DriveFileManager) {
+//        self.driveFileManager = driveFileManager
+//        var rootViewControllers = [UIViewController]()
+//        rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
+////        rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
+////        rootViewControllers.append(Self.initFakeViewController())
+////        rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager:
+/// driveFileManager)))
+////        rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
+//        super.init(style: .doubleColumn)
+//        preferredDisplayMode = .oneBesideSecondary
+//        viewControllers = rootViewControllers
+//    }
+//
+//    @available(*, unavailable)
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//
+//    private static func generateProfileTabImages(image: UIImage) -> (UIImage, UIImage) {
+//        let iconSize = 28.0
+//
+//        let selectedImage = image
+//            .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
+//            .maskImageWithRoundedRect(
+//                cornerRadius: CGFloat((iconSize + 2) / 2),
+//                borderWidth: 2,
+//                borderColor: KDriveResourcesAsset.infomaniakColor.color
+//            )
+//            .withRenderingMode(.alwaysOriginal)
+//
+//        let image = image
+//            .resize(size: CGSize(width: iconSize, height: iconSize))
+//            .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
+//            .withRenderingMode(.alwaysOriginal)
+//        return (image, selectedImage)
+//    }
+//
+//    private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.restorationIdentifier = String(describing: HomeViewController.self)
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.house.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.houseFill.image
+//        return navigationViewController
+//    }
+//
+//    private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let homeViewController = SidebarViewController()
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.folder.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.folderFilledTab.image
+//        return navigationViewController
+//    }
+//
+//    private static func initMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
+//        let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: menuViewController)
+//        let (placeholder, placeholderSelected) = generateProfileTabImages(image: KDriveResourcesAsset.placeholderAvatar.image)
+//        navigationViewController.restorationIdentifier = String(describing: MenuViewController.self)
+//        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
+//        navigationViewController.tabBarItem.image = placeholder
+//        navigationViewController.tabBarItem.selectedImage = placeholderSelected
+//        return navigationViewController
+//    }
+//
+//    private static func initFakeViewController() -> UIViewController {
+//        let fakeViewController = UIViewController()
+//        fakeViewController.tabBarItem.isEnabled = false
+//        return fakeViewController
+//    }
+//
+//    private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
+//        let photoListViewController = PhotoListViewController(viewModel: viewModel)
+//        let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
+//        navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
+//        navigationViewController.navigationBar.prefersLargeTitles = true
+//        navigationViewController.tabBarItem.accessibilityLabel = viewModel.title
+//        navigationViewController.tabBarItem.image = KDriveResourcesAsset.mediaInline.image
+//        navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.mediaBold.image
+//        return navigationViewController
+//    }
+// }
+
 class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
     let driveFileManager: DriveFileManager
 
@@ -213,7 +305,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
-        let homeViewController = SidebarViewController(driveFileManager: driveFileManager)
+        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
