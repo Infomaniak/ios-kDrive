@@ -73,8 +73,8 @@ extension UploadOperation {
             return
         }
 
-        uploadQueue.cancelRunningOperations()
         uploadQueue.suspendAllOperations()
+        uploadQueue.cancelRunningOperations()
         throw ErrorDomain.uploadOverDataRestrictedError
     }
 }

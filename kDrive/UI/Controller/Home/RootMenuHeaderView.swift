@@ -92,7 +92,6 @@ class RootMenuHeaderView: UICollectionReusableView {
     }
 
     @objc func reloadWifiView(_ notification: Notification) {
-        print("Call observeNetworkChange")
         updateWifiView()
     }
 
