@@ -30,7 +30,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedMode: SyncMode!
+    private var selectedMode: SyncMode = .onlyWifi
     weak var delegate: WifiSyncSettingsDelegate?
 
     override func viewDidLoad() {
