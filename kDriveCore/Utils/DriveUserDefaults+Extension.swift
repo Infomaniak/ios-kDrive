@@ -49,7 +49,7 @@ extension UserDefaults.Keys {
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
     static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
     static let importPhotoFormat = UserDefaults.Keys(rawValue: "importPhotoFormat")
-    static let syncOfflineMode = UserDefaults.Keys(rawValue: "syncOfflineMod")
+    static let syncOfflineMode = UserDefaults.Keys(rawValue: "syncOfflineMode")
 }
 
 public extension UserDefaults {
