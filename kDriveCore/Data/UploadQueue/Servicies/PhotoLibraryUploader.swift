@@ -29,6 +29,16 @@ public final class PhotoLibraryUploader {
     @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
+    let serialQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.photo-library",
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
+
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 

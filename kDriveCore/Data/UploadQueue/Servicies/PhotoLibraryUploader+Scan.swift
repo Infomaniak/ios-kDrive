@@ -34,36 +34,41 @@ public extension PhotoLibraryUploader {
 
         var newAssetsCount = 0
 
-        let options = PHFetchOptions()
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        serialQueue.sync {
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-        let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
-        let datePredicate = getDatePredicate(with: frozenSettings)
-        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+            let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
+            let datePredicate = getDatePredicate(with: frozenSettings)
+            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
-        Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-        let assetsFetchResult = PHAsset.fetchAssets(with: options)
-        let syncDate = Date()
+            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+            let assetsFetchResult = PHAsset.fetchAssets(with: options)
+            let syncDate = Date()
 
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            do {
-                try addImageAssetsToUploadQueue(
-                    assetsFetchResult: assetsFetchResult,
-                    initial: frozenSettings.lastSync.timeIntervalSince1970 == 0,
-                    writableRealm: writableRealm
-                )
+            try? uploadsDatabase.writeTransaction { writableRealm in
+                do {
+                    try addImageAssetsToUploadQueue(
+                        assetsFetchResult: assetsFetchResult,
+                        initial: frozenSettings.lastSync.timeIntervalSince1970 == 0,
+                        writableRealm: writableRealm
+                    )
 
-                updateLastSyncDate(syncDate, writableRealm: writableRealm)
+                    updateLastSyncDate(syncDate, writableRealm: writableRealm)
 
-                newAssetsCount = assetsFetchResult.count
-                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
-            } catch ErrorDomain.importCancelledBySystem {
-                Log.photoLibraryUploader("System is requesting to stop", level: .error)
-            } catch {
-                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+                    newAssetsCount = assetsFetchResult.count
+                    Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+                } catch ErrorDomain.importCancelledBySystem {
+                    Log.photoLibraryUploader("System is requesting to stop", level: .error)
+                } catch {
+                    Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+                }
             }
+
+            Log.photoLibraryUploader("scheduleNewPicturesForUpload FINISHED")
         }
+
         return newAssetsCount
     }
 
@@ -73,6 +78,7 @@ public extension PhotoLibraryUploader {
         if let settings = writableRealm.objects(PhotoSyncSettings.self).first,
            !settings.isInvalidated {
             settings.lastSync = date
+            Log.photoLibraryUploader("updateLastSyncDate: \(date)")
         }
     }
 
@@ -151,6 +157,12 @@ public extension PhotoLibraryUploader {
                     return
                 }
 
+                guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
+                                                 writableRealm: writableRealm) else {
+                    Log.photoLibraryUploader("Asset already in pending upload")
+                    return
+                }
+
                 let algorithmImportVersion = currentDiffAlgorithmVersion
 
                 // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
@@ -191,6 +203,17 @@ public extension PhotoLibraryUploader {
         guard !expiringActivity.shouldTerminate else {
             throw ErrorDomain.importCancelledBySystem
         }
+    }
+
+    private func assetAlreadyPendingUpload(bestResourceSHA256: String?,
+                                           writableRealm: Realm) -> Bool {
+        guard let bestResourceSHA256 else {
+            return false
+        }
+        guard !writableRealm.objects(UploadFile.self).filter("bestResourceSHA256 == %@", bestResourceSHA256).isEmpty else {
+            return false
+        }
+        return true
     }
 
     private func getPhotoLibraryName(
