@@ -65,8 +65,6 @@ public extension PhotoLibraryUploader {
                     Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
                 }
             }
-
-            Log.photoLibraryUploader("scheduleNewPicturesForUpload FINISHED")
         }
 
         return newAssetsCount
@@ -78,7 +76,6 @@ public extension PhotoLibraryUploader {
         if let settings = writableRealm.objects(PhotoSyncSettings.self).first,
            !settings.isInvalidated {
             settings.lastSync = date
-            Log.photoLibraryUploader("updateLastSyncDate: \(date)")
         }
     }
 
