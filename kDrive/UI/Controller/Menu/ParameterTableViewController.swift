@@ -318,9 +318,9 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-        case .wifi:
+        case .offlineSync:
             navigationController?.pushViewController(
-                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncMode),
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode),
                 animated: true
             )
         case .about:
