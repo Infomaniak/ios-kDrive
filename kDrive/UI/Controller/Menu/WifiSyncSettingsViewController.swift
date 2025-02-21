@@ -30,8 +30,13 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
     private var tableContent: [SyncMode] = SyncMode.allCases
-    private var selectedMode: SyncMode = .onlyWifi
+    private var selectedMode: SyncMode
     weak var delegate: WifiSyncSettingsDelegate?
+
+    init(selectedMode: SyncMode) {
+        self.selectedMode = selectedMode
+        super.init()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,13 +45,10 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
-
-        selectedMode = UserDefaults.shared.syncMode
     }
 
     static func instantiate(selectedMode: SyncMode) -> WifiSyncSettingsViewController {
-        let viewController = WifiSyncSettingsViewController()
-        viewController.selectedMode = selectedMode
+        let viewController = WifiSyncSettingsViewController(selectedMode: selectedMode)
         return viewController
     }
 
