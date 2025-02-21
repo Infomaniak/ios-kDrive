@@ -17,22 +17,24 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveCore
 import kDriveResources
 import UIKit
 
-class ParameterSyncTableViewCell: InsetTableViewCell {
-    @IBOutlet var syncTitleLabel: UILabel!
-    @IBOutlet var syncDetailLabel: UILabel!
+protocol AccessParametersDelegate: AnyObject {
+    func parameterButtonTapped()
+}
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
+class ErrorUploadTableViewCell: InsetTableViewCell {
+    @IBOutlet var bannerView: UIView!
+    @IBOutlet var errorIconImageView: UIImageView!
+    @IBOutlet var errorTitleLabel: UILabel!
+    @IBOutlet var errorDetailLabel: UILabel!
+    @IBOutlet var settingButton: UIButton!
 
-        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        if selected {
-            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-            contentInsetView.borderWidth = 2
-        } else {
-            contentInsetView.borderWidth = 0
-        }
+    weak var delegate: AccessParametersDelegate?
+
+    @IBAction func updateButtonPressed(_ sender: UIButton) {
+        delegate?.parameterButtonTapped()
     }
 }

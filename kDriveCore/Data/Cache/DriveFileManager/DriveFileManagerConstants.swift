@@ -207,7 +207,7 @@ public class DriveFileManagerConstants {
 
         // Migration to add syncWifi
         if oldSchemaVersion < 22 {
-            migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
+            migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
                 guard let newObject else {
                     return
                 }

@@ -84,6 +84,10 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -92,12 +96,27 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
+        tableView.register(cellView: UploadsPausedTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         updateTableContent()
 
         navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
         navigationItem.hideBackButtonText()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadWifiView),
+            name: .reloadWifiView,
+            object: nil
+        )
+
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            Task { @MainActor in
+                let indexPath = IndexPath(row: 0, section: 1)
+                self?.tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -158,6 +177,10 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
             sections.insert(.uploads, at: 1)
         }
     }
+
+    @objc func reloadWifiView(_ notification: Notification) {
+        reloadData()
+    }
 }
 
 // MARK: - Table view delegate
@@ -189,11 +212,18 @@ extension MenuViewController {
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
-            let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.progressView.enableIndeterminate()
-            cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
-            return cell
+            if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+                let cell = tableView.dequeueReusableCell(type: UploadsPausedTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.progressView.enableIndeterminate()
+                cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
+                return cell
+            }
         } else {
             let action = section.actions[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
