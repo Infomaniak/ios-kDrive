@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2024 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,10 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
+import InfomaniakCoreUIKit
+import kDriveCore
+import kDriveResources
+import UIKit
 
-public extension Notification.Name {
-    static let locateUploadActionTapped = Notification.Name(rawValue: "kDriveLocateUploadActionTapped")
-    static let reloadDrive = Notification.Name(rawValue: "kDriveReloadDrive")
-    static let reloadWifiView = Notification.Name(rawValue: "kDriveReloadWifiView")
+class UploadsPausedTableViewCell: InsetTableViewCell {
+    @IBOutlet var subtitleLabel: IKLabel!
+
+    func setUploadCount(_ count: Int) {
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(count)
+    }
 }
