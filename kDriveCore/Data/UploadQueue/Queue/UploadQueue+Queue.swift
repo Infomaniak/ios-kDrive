@@ -74,7 +74,7 @@ extension UploadQueue: UploadQueueable {
 
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
-        concurrentQueue.sync {
+        serialQueue.sync {
             // Clean cache if necessary before we try to restart the uploads.
             @InjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.cleanCacheIfAlmostFull()
