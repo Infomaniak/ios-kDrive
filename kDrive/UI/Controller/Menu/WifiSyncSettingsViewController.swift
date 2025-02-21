@@ -82,7 +82,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
-        if offlineSync == false {
+        if !offlineSync {
             delegate?.didSelectSyncMode(mode)
         } else {
             UserDefaults.shared.syncOfflineMode = mode
