@@ -17,22 +17,14 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveCore
 import kDriveResources
 import UIKit
 
-class ParameterSyncTableViewCell: InsetTableViewCell {
-    @IBOutlet var syncTitleLabel: UILabel!
-    @IBOutlet var syncDetailLabel: UILabel!
+class UploadsPausedTableViewCell: InsetTableViewCell {
+    @IBOutlet var subtitleLabel: IKLabel!
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        if selected {
-            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-            contentInsetView.borderWidth = 2
-        } else {
-            contentInsetView.borderWidth = 0
-        }
+    func setUploadCount(_ count: Int) {
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(count)
     }
 }
