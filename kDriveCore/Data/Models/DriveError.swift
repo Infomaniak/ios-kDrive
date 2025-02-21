@@ -143,7 +143,8 @@ public struct DriveError: Error, Equatable {
 
     public static let uploadOverDataRestrictedError = DriveError(type: .localError,
                                                                  code: "uploadOverDataRestrictedError",
-                                                                 localizedString: KDriveResourcesStrings.Localizable.uploadOverDataRestrictedError)
+                                                                 localizedString: KDriveResourcesStrings.Localizable
+                                                                     .uploadOverDataRestrictedError)
 
     // MARK: - Server
 
