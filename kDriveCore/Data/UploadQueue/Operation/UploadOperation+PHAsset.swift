@@ -72,9 +72,6 @@ extension UploadOperation {
         guard !canUpload else {
             return
         }
-
-        uploadQueue.suspendAllOperations()
-        uploadQueue.cancelRunningOperations()
         throw ErrorDomain.uploadOverDataRestrictedError
     }
 }
