@@ -31,10 +31,12 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     private var tableContent: [SyncMode] = SyncMode.allCases
     private var selectedMode: SyncMode
+    private var offlineSync: Bool
     weak var delegate: WifiSyncSettingsDelegate?
 
-    init(selectedMode: SyncMode) {
+    init(selectedMode: SyncMode, offlineSync: Bool = false) {
         self.selectedMode = selectedMode
+        self.offlineSync = offlineSync
         super.init()
     }
 
@@ -80,7 +82,12 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
         MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
-        delegate?.didSelectSyncMode(tableContent[indexPath.row])
+        if offlineSync == false {
+            delegate?.didSelectSyncMode(mode)
+        } else {
+            UserDefaults.shared.syncOfflineMode = mode
+        }
+
         navigationController?.popViewController(animated: true)
     }
 }

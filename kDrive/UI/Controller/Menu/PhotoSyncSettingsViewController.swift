@@ -455,8 +455,7 @@ extension PhotoSyncSettingsViewController {
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
             case .wifiSync:
-                let wifiSyncSettingsViewController = WifiSyncSettingsViewController
-                    .instantiate(selectedMode: liveNewSyncSettings.wifiSync)
+                let wifiSyncSettingsViewController = WifiSyncSettingsViewController(selectedMode: liveNewSyncSettings.wifiSync)
                 wifiSyncSettingsViewController.delegate = self
                 navigationController?.pushViewController(wifiSyncSettingsViewController, animated: true)
             default:
