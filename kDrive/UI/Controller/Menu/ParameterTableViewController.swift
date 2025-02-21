@@ -319,7 +319,10 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
         case .wifi:
-            navigationController?.pushViewController(WifiSyncSettingsViewController(), animated: true)
+            navigationController?.pushViewController(
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncMode),
+                animated: true
+            )
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .deleteAccount:
