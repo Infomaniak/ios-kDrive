@@ -320,7 +320,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
         case .offlineSync:
             navigationController?.pushViewController(
-                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode),
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
                 animated: true
             )
         case .about:
