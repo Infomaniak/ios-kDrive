@@ -49,7 +49,7 @@ extension UserDefaults.Keys {
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
     static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
     static let importPhotoFormat = UserDefaults.Keys(rawValue: "importPhotoFormat")
-    static let syncMode = UserDefaults.Keys(rawValue: "syncMode")
+    static let syncOfflineMode = UserDefaults.Keys(rawValue: "syncOfflineMode")
 }
 
 public extension UserDefaults {
@@ -338,16 +338,16 @@ public extension UserDefaults {
         }
     }
 
-    var syncMode: SyncMode {
+    var syncOfflineMode: SyncMode {
         get {
-            if let rawValue = object(forKey: key(.syncMode)) as? String,
+            if let rawValue = object(forKey: key(.syncOfflineMode)) as? String,
                let mode = SyncMode(rawValue: rawValue) {
                 return mode
             }
             return .onlyWifi
         }
         set {
-            set(newValue.rawValue, forKey: key(.syncMode))
+            set(newValue.rawValue, forKey: key(.syncOfflineMode))
         }
     }
 }

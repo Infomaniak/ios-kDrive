@@ -74,8 +74,13 @@ final class UploadTableViewCell: InsetTableViewCell {
 
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
-            cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
-                .errorUpload + " (\(error.localizedDescription))"
+            if error.localizedDescription == KDriveResourcesStrings.Localizable.uploadOverDataRestrictedError {
+                cardContentView.detailsLabel.text = error.localizedDescription
+            } else {
+                cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
+                    .errorUpload + " (\(error.localizedDescription))"
+            }
+
         } else {
             cardContentView.retryButton?
                 .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit

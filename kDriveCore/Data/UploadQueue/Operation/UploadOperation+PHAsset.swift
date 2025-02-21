@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 extension UploadOperation {
     func getPhAssetIfNeeded() async throws {
@@ -55,5 +56,22 @@ extension UploadOperation {
         try transactionWithFile { file in
             file.pathURL = url
         }
+    }
+
+    func checkForRestrictedUploadOverDataMode() throws {
+        let file = try readOnlyFile()
+
+        guard file.type == .phAsset else {
+            // This UploadFile is not a PHAsset, return silently
+            return
+        }
+
+        let status = ReachabilityListener.instance.currentStatus
+        let canUpload = !(status == .cellular && UserDefaults.shared.isWifiOnly)
+
+        guard !canUpload else {
+            return
+        }
+        throw ErrorDomain.uploadOverDataRestrictedError
     }
 }

@@ -141,6 +141,10 @@ public struct DriveError: Error, Equatable {
                                                  localizedString: KDriveResourcesStrings.Localizable.errorCache)
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
+    public static let uploadOverDataRestrictedError = DriveError(type: .localError,
+                                                                 code: "uploadOverDataRestrictedError",
+                                                                 localizedString: KDriveResourcesStrings.Localizable.uploadOverDataRestrictedError)
+
     // MARK: - Server
 
     public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
@@ -261,7 +265,8 @@ public struct DriveError: Error, Equatable {
                                                   uploadTokenIsNotValid,
                                                   fileAlreadyExistsError,
                                                   errorDeviceStorage,
-                                                  limitExceededError]
+                                                  limitExceededError,
+                                                  uploadOverDataRestrictedError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()

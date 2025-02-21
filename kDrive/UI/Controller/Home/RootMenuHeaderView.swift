@@ -35,6 +35,10 @@ class RootMenuHeaderView: UICollectionReusableView {
 
     var onUploadCardViewTapped: (() -> Void)?
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
 
@@ -45,9 +49,7 @@ class RootMenuHeaderView: UICollectionReusableView {
             radius: 10
         )
 
-        uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressTitle
-        uploadCardView.progressView.setInfomaniakStyle()
-        uploadCardView.progressView.enableIndeterminate()
+        updateWifiView()
 
         uploadCardView.isHidden = true
         offlineView.isHidden = true
@@ -55,6 +57,13 @@ class RootMenuHeaderView: UICollectionReusableView {
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnUploadCardView))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadWifiView),
+            name: .reloadWifiView,
+            object: nil
+        )
     }
 
     func configureInCollectionView(
@@ -80,6 +89,10 @@ class RootMenuHeaderView: UICollectionReusableView {
             topConstraint.constant = 16
             bottomConstraint.constant = 16
         }
+    }
+
+    @objc func reloadWifiView(_ notification: Notification) {
+        updateWifiView()
     }
 
     @objc func didTapOnUploadCardView() {
@@ -113,9 +126,32 @@ class RootMenuHeaderView: UICollectionReusableView {
                 guard let self else { return }
 
                 offlineView.isHidden = status != .offline
-                reloadHeader()
+
+                updateWifiView()
             }
         }
+    }
+
+    private func updateWifiView() {
+        if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+            uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadPausedTitle
+            uploadCardView.progressView.isHidden = true
+            uploadCardView.iconView.image = UIImage(systemName: "exclamationmark.arrow.triangle.2.circlepath")
+            uploadCardView.iconView.isHidden = false
+            uploadCardView.iconView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                uploadCardView.iconView.widthAnchor.constraint(equalToConstant: 24),
+                uploadCardView.iconView.heightAnchor.constraint(equalToConstant: 24)
+            ])
+            uploadCardView.iconView.tintColor = .gray
+        } else {
+            uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressTitle
+            uploadCardView.progressView.isHidden = false
+            uploadCardView.iconView.isHidden = true
+            uploadCardView.progressView.setInfomaniakStyle()
+            uploadCardView.progressView.enableIndeterminate()
+        }
+        reloadHeader()
     }
 
     private func reloadHeader() {
