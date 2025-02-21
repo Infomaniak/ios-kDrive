@@ -108,7 +108,7 @@ extension SentryDebug {
 
     static func capturePHAssetResourceManagerError(
         _ error: Error,
-        requestId: Int32 = Int32(NSNotFound),
+        requestId: Int32 = INT32_MAX,
         function: StaticString = #function
     ) {
         let extra: [String: AnyHashable] = [
