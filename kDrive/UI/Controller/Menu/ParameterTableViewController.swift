@@ -80,7 +80,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case theme
         case notifications
         case security
-        case wifi
+        case offlineSync
         case storage
         case about
         case joinBeta
@@ -96,7 +96,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.notificationTitle
             case .security:
                 return KDriveResourcesStrings.Localizable.securityTitle
-            case .wifi:
+            case .offlineSync:
                 return KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
             case .storage:
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
@@ -254,14 +254,14 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             cell.titleLabel.text = row.title
             return cell
 
-        case .wifi:
+        case .offlineSync:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
                 isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
             )
-            cell.titleLabel.text = UserDefaults.shared.syncMode.title
-            cell.detailLabel.text = UserDefaults.shared.syncMode.selectionTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+            cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
             return cell
         }
     }
@@ -328,9 +328,9 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-        case .wifi:
+        case .offlineSync:
             navigationController?.pushViewController(
-                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncMode),
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
                 animated: true
             )
         case .about:
