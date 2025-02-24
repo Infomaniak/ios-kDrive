@@ -104,10 +104,14 @@ public enum Logging {
                     "Wifi only enabled": UserDefaults.shared.isWifiOnly
                 ]
 
-                #if DEBUG
+                #if DEBUG || TEST
                 return nil
                 #else
-                return event
+                if UserDefaults.shared.isSentryAuthorized {
+                    return event
+                } else {
+                    return nil
+                }
                 #endif
             }
         }
