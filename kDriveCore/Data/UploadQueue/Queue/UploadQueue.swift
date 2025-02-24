@@ -102,7 +102,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline || !(status == .wifi && UserDefaults.shared.isWifiOnly)
+        let shouldBeSuspended = status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
         return shouldBeSuspended
     }
 
