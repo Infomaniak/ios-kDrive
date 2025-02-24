@@ -51,7 +51,7 @@ public extension Results where Element: KeypathSortable {
 public final class DriveInfosManager: DriveInfosManagerQueryable {
     private static let dbName = "DrivesInfos.realm"
 
-    private static let currentDbVersion: UInt64 = 12
+    private static let currentDbVersion: UInt64 = 13
 
     let currentFpStorageVersion = 1
 
