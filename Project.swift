@@ -65,6 +65,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "Realm"),
                                       .external(name: "MyKSuite"),
                                       .external(name: "InfomaniakPrivacyManagement"),
+                                      .external(name: "InfomaniakCoreCommonUI"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
                                   settings: .settings(base: Constants.baseSettings),

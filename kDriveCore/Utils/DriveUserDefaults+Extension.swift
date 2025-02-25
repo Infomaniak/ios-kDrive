@@ -343,7 +343,7 @@ public extension UserDefaults {
         get {
             bool(forKey: key(.matomoAuthorized))
             if object(forKey: key(.matomoAuthorized)) == nil {
-                set(true, forKey: key(.matomoAuthorized))
+                set(DefaultPreferences.matomoAuthorized, forKey: key(.matomoAuthorized))
             }
             return bool(forKey: key(.matomoAuthorized))
         }
@@ -356,7 +356,7 @@ public extension UserDefaults {
         get {
             bool(forKey: key(.sentryAuthorized))
             if object(forKey: key(.sentryAuthorized)) == nil {
-                set(true, forKey: key(.sentryAuthorized))
+                set(DefaultPreferences.sentryAuthorized, forKey: key(.sentryAuthorized))
             }
             return bool(forKey: key(.sentryAuthorized))
         }
@@ -364,4 +364,9 @@ public extension UserDefaults {
             set(newValue, forKey: key(.sentryAuthorized))
         }
     }
+}
+
+public enum DefaultPreferences {
+    public static let matomoAuthorized = true
+    public static let sentryAuthorized = true
 }

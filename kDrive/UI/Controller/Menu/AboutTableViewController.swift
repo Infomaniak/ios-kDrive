@@ -24,7 +24,7 @@ import UIKit
 
 class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
-        case privacy, sourceCode, license, version, dataPrivacy
+        case privacy, dataPrivacy, sourceCode, license, version
 
         var url: URL? {
             switch self {
