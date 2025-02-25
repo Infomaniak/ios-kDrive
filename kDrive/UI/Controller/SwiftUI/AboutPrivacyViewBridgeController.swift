@@ -16,15 +16,24 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import InfomaniakPrivacyManagement
 import kDriveCore
-import UIKit
 import SwiftUI
 
 enum AboutPrivacyViewBridgeController {
     static func instantiate() -> UIViewController {
-        let swiftUIView = PrivacyManagementView(
+        let swiftUIView = AboutPrivacyView()
+        return UIHostingController(rootView: swiftUIView)
+    }
+}
+
+struct AboutPrivacyView: View {
+    @AppStorage(UserDefaults.shared.key(.matomoAuthorized)) private var matomoAuthorized = DefaultPreferences.matomoAuthorized
+
+    var body: some View {
+        PrivacyManagementView(
             urlRepository: URLConstants.sourceCode.url,
             backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
             illustration: KDriveAsset.documentSignaturePencilBulb.swiftUIImage,
@@ -32,6 +41,17 @@ enum AboutPrivacyViewBridgeController {
             userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
             userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized)
         )
-        return UIHostingController(rootView: swiftUIView)
+        .onChange(of: matomoAuthorized) { newValue in
+            @InjectService var matomo: InfomaniakCoreCommonUI.MatomoUtils
+            #if DEBUG && !TEST
+            matomo.optOut(true)
+            #else
+            matomo.optOut(!newValue)
+            #endif
+        }
     }
+}
+
+#Preview {
+    AboutPrivacyView()
 }
