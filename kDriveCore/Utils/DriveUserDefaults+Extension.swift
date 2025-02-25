@@ -18,7 +18,7 @@
 
 import Foundation
 
-extension UserDefaults.Keys {
+public extension UserDefaults.Keys {
     static let currentDriveId = UserDefaults.Keys(rawValue: "currentDriveId")
     static let fileSortMode = UserDefaults.Keys(rawValue: "fileSortMode")
     static let filesListStyle = UserDefaults.Keys(rawValue: "filesListStyle")
@@ -49,6 +49,8 @@ extension UserDefaults.Keys {
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
     static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
     static let importPhotoFormat = UserDefaults.Keys(rawValue: "importPhotoFormat")
+    static let matomoAuthorized = UserDefaults.Keys(rawValue: "matomoAuthorized")
+    static let sentryAuthorized = UserDefaults.Keys(rawValue: "sentryAuthorized")
 }
 
 public extension UserDefaults {
@@ -336,4 +338,33 @@ public extension UserDefaults {
             set(newValue.rawValue, forKey: key(.importPhotoFormat))
         }
     }
+
+    var isMatomoAuthorized: Bool {
+        get {
+            if object(forKey: key(.matomoAuthorized)) == nil {
+                set(DefaultPreferences.matomoAuthorized, forKey: key(.matomoAuthorized))
+            }
+            return bool(forKey: key(.matomoAuthorized))
+        }
+        set {
+            set(newValue, forKey: key(.matomoAuthorized))
+        }
+    }
+
+    var isSentryAuthorized: Bool {
+        get {
+            if object(forKey: key(.sentryAuthorized)) == nil {
+                set(DefaultPreferences.sentryAuthorized, forKey: key(.sentryAuthorized))
+            }
+            return bool(forKey: key(.sentryAuthorized))
+        }
+        set {
+            set(newValue, forKey: key(.sentryAuthorized))
+        }
+    }
+}
+
+public enum DefaultPreferences {
+    public static let matomoAuthorized = true
+    public static let sentryAuthorized = true
 }

@@ -16,13 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakPrivacyManagement
 import kDriveCore
 import kDriveResources
+import SwiftUI
 import UIKit
 
 class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
-        case privacy, sourceCode, license, version
+        case privacy, dataPrivacy, sourceCode, license, version
 
         var url: URL? {
             switch self {
@@ -76,6 +78,11 @@ class AboutTableViewController: BaseGroupedTableViewController {
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutPrivacyTitle
             return cell
+        case .dataPrivacy:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.settingsOptionDataManagement
+            return cell
         case .sourceCode:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
@@ -105,6 +112,9 @@ class AboutTableViewController: BaseGroupedTableViewController {
             if let url = row.url {
                 UIApplication.shared.open(url)
             }
+        case .dataPrivacy:
+            let privacyVC = AboutPrivacyViewBridgeController.instantiate()
+            navigationController?.pushViewController(privacyVC, animated: true)
         case .version: break
         }
     }
