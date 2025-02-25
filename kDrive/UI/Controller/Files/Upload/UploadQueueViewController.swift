@@ -28,6 +28,12 @@ import UIKit
 typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
 
 final class UploadQueueViewController: UIViewController {
+    private let errorFile = UploadFileDisplayed(isFirstInList: true, isLastInList: true, content: UploadFile())
+
+    enum SectionModel: Differentiable {
+        case error, files
+    }
+
     @IBOutlet var tableView: UITableView!
     @IBOutlet var retryButton: UIBarButtonItem!
     @IBOutlet var cancelButton: UIBarButtonItem!
@@ -37,6 +43,7 @@ final class UploadQueueViewController: UIViewController {
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
+    private lazy var sections = buildSections(files: [UploadFileDisplayed]())
     private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -54,7 +61,7 @@ final class UploadQueueViewController: UIViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                self?.tableView.reloadData()
+                self?.reloadCollectionView()
             }
         }
     }
@@ -95,7 +102,7 @@ final class UploadQueueViewController: UIViewController {
             }
 
             guard let newResults else {
-                reloadCollectionViewWith([])
+                reloadCollectionView(with: [])
                 return
             }
 
@@ -106,20 +113,50 @@ final class UploadQueueViewController: UIViewController {
                                            content: frozenFile)
             }
 
-            reloadCollectionViewWith(wrappedFrozenFiles)
+            reloadCollectionView(with: wrappedFrozenFiles)
         }
     }
 
-    func reloadCollectionViewWith(_ frozenFiles: [UploadFileDisplayed]) {
-        let changeSet = StagedChangeset(source: frozenUploadingFiles, target: frozenFiles)
+    @MainActor func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]? = nil) {
+        let newSections: [ArraySection<SectionModel, UploadFileDisplayed>]
+        if let frozenFiles {
+            newSections = buildSections(files: frozenFiles)
+        } else {
+            newSections = buildSections(files: frozenUploadingFiles)
+        }
+
+        let changeSet = StagedChangeset(source: sections, target: newSections)
+
         tableView.reload(using: changeSet,
                          with: UITableView.RowAnimation.automatic,
                          interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                         setData: { self.frozenUploadingFiles = $0 })
+                         setData: { newValues in
+                             if let frozenFiles {
+                                 frozenUploadingFiles = frozenFiles
+                             }
+                             sections = newValues
+                         })
 
-        if frozenFiles.isEmpty {
+        if let frozenFiles, frozenFiles.isEmpty {
             navigationController?.popViewController(animated: true)
         }
+    }
+
+    private func buildSections(files: [UploadFileDisplayed]) -> [ArraySection<SectionModel, UploadFileDisplayed>] {
+        guard !isUploadLimited else {
+            return [
+                ArraySection(model: SectionModel.error, elements: [errorFile]),
+                ArraySection(model: SectionModel.files, elements: files)
+            ]
+        }
+
+        return [
+            ArraySection(model: SectionModel.files, elements: files)
+        ]
+    }
+
+    private var isUploadLimited: Bool {
+        UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -144,11 +181,18 @@ final class UploadQueueViewController: UIViewController {
 
 extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return frozenUploadingFiles.count
+        guard let rows = sections[safe: section] else {
+            return 0
+        }
+        return rows.elements.count
+    }
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 && UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+        if indexPath.section == 0 && isUploadLimited {
             let cell = tableView.dequeueReusableCell(type: ErrorUploadTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true,
                                            isLast: true)
@@ -162,13 +206,13 @@ extension UploadQueueViewController: UITableViewDataSource {
                                                numberOfRowsInSection: indexPath.section
                                            ) - 1)
 
-            /// Make sure the file is valid
-            let file = frozenUploadingFiles[indexPath.row].content
-            if !file.isInvalidated {
-                let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-                cell.configureWith(frozenUploadFile: file, progress: progress)
+            guard let frozenUploadingFiles = sections[safe: indexPath.section]?.elements,
+                  let file = frozenUploadingFiles[safe: indexPath.row]?.content, !file.isInvalidated else {
+                return cell
             }
 
+            let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
+            cell.configureWith(frozenUploadFile: file, progress: progress)
             cell.selectionStyle = .none
             return cell
         }
