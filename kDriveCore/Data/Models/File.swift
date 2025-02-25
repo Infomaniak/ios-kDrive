@@ -35,6 +35,7 @@ public enum ConvertedType: String, CaseIterable {
     case font
     case form
     case image
+    case mail
     case pdf
     case presentation
     case spreadsheet
@@ -55,11 +56,13 @@ public enum ConvertedType: String, CaseIterable {
         case .folder:
             return KDriveResourcesAsset.folderFilled.image
         case .font:
-            return KDriveResourcesAsset.fileDefault.image
+            return KDriveResourcesAsset.fileFont.image
         case .form:
             return KDriveResourcesAsset.fileForm.image
         case .image:
             return KDriveResourcesAsset.fileImage.image
+        case .mail:
+            return KDriveResourcesAsset.fileMail.image
         case .pdf:
             return KDriveResourcesAsset.filePdf.image
         case .presentation:
@@ -110,7 +113,7 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesStrings.Localizable.allOfficeGrids
         case .text:
             return KDriveResourcesStrings.Localizable.allOfficeDocs
-        case .unknown, .url, .font:
+        case .unknown, .url, .font, .mail:
             return ""
         case .video:
             return KDriveResourcesStrings.Localizable.allVideo
@@ -135,6 +138,8 @@ public enum ConvertedType: String, CaseIterable {
             return .data
         case .image:
             return .image
+        case .mail:
+            return .message
         case .pdf:
             return .pdf
         case .presentation:
