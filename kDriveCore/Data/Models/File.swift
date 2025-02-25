@@ -31,11 +31,12 @@ public enum ConvertedType: String, CaseIterable {
     case archive
     case audio
     case code
+    case email
     case folder = "dir"
     case font
     case form
     case image
-    case mail
+    case model
     case pdf
     case presentation
     case spreadsheet
@@ -53,6 +54,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesAsset.fileAudio.image
         case .code:
             return KDriveResourcesAsset.fileCode.image
+        case .email:
+            return KDriveResourcesAsset.file3dmodel.image
         case .folder:
             return KDriveResourcesAsset.folderFilled.image
         case .font:
@@ -61,8 +64,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesAsset.fileForm.image
         case .image:
             return KDriveResourcesAsset.fileImage.image
-        case .mail:
-            return KDriveResourcesAsset.fileMail.image
+        case .model:
+            return KDriveResourcesAsset.file3dmodel.image
         case .pdf:
             return KDriveResourcesAsset.filePdf.image
         case .presentation:
@@ -113,7 +116,7 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesStrings.Localizable.allOfficeGrids
         case .text:
             return KDriveResourcesStrings.Localizable.allOfficeDocs
-        case .unknown, .url, .font, .mail:
+        case .unknown, .url, .font, .email, .model:
             return ""
         case .video:
             return KDriveResourcesStrings.Localizable.allVideo
@@ -130,6 +133,8 @@ public enum ConvertedType: String, CaseIterable {
             return .audio
         case .code:
             return .sourceCode
+        case .email:
+            return .emailMessage
         case .folder:
             return .folder
         case .font:
@@ -138,8 +143,8 @@ public enum ConvertedType: String, CaseIterable {
             return .data
         case .image:
             return .image
-        case .mail:
-            return .emailMessage
+        case .model:
+            return .threeDContent
         case .pdf:
             return .pdf
         case .presentation:
