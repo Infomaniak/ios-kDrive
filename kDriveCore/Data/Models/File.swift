@@ -139,7 +139,7 @@ public enum ConvertedType: String, CaseIterable {
         case .image:
             return .image
         case .mail:
-            return .message
+            return .emailMessage
         case .pdf:
             return .pdf
         case .presentation:
