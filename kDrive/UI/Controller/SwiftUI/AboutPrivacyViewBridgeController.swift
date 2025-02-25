@@ -43,7 +43,7 @@ struct AboutPrivacyView: View {
         )
         .onChange(of: matomoAuthorized) { newValue in
             @InjectService var matomo: InfomaniakCoreCommonUI.MatomoUtils
-            #if DEBUG && !TEST
+            #if DEBUG || TEST
             matomo.optOut(true)
             #else
             matomo.optOut(!newValue)
