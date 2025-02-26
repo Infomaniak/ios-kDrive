@@ -119,6 +119,7 @@ class FilesHeaderView: UICollectionReusableView {
 
     @objc func didTapOnTrashHeaderView() {
         router.presentUpSaleSheet()
+        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
     }
 
     @objc private func didTapOnCard() {

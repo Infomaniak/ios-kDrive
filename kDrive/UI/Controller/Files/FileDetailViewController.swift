@@ -924,6 +924,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSettingsButtonPressed() {
         if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
             router.presentUpSaleSheet()
+            MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
             return
         }
 
