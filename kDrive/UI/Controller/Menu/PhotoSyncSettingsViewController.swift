@@ -30,6 +30,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var freeSpaceService: FreeSpaceService
+    @LazyInjectService var uploadQueue: UploadQueue
 
     private enum PhotoSyncSection: Int {
         case syncSwitch
@@ -226,6 +227,12 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
         photoLibraryUploader.enableSync(newSettings)
+        uploadQueue.retryAllOperations(
+            withParent: newSettings.parentDirectoryId,
+            userId: newSettings.userId,
+            driveId: newSettings.driveId
+        )
+        uploadQueue.updateQueueSuspension()
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
