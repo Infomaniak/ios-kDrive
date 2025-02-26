@@ -84,4 +84,7 @@ public protocol UploadQueueable {
     ///
     /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
     func cleanNetworkAndLocalErrorsForAllOperations()
+
+    /// Update queue suspension state
+    func updateQueueSuspension()
 }
