@@ -55,7 +55,7 @@ public enum ConvertedType: String, CaseIterable {
         case .code:
             return KDriveResourcesAsset.fileCode.image
         case .email:
-            return KDriveResourcesAsset.file3dmodel.image
+            return KDriveResourcesAsset.fileEmail.image
         case .folder:
             return KDriveResourcesAsset.folderFilled.image
         case .font:
