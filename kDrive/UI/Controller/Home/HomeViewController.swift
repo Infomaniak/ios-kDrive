@@ -364,6 +364,7 @@ extension HomeViewController {
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
                     router.presentUpSaleSheet()
+                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }

@@ -299,6 +299,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             apiFetcher: driveFileManager.apiFetcher,
             currentAccount: currentAccount
         )
+        MatomoUtils.track(eventWithCategory: .myKSuite, name: "openDashboard")
         navigationController?.present(dashboardViewController, animated: true)
     }
 

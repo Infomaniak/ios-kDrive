@@ -253,6 +253,11 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
                 self?.router.presentUpSaleSheet()
+                if option == .optionPassword {
+                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
+                } else if option == .optionDate {
+                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
+                }
             }
         }
 

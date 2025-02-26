@@ -502,6 +502,7 @@ public final class FileActionsHelper {
     public static func upsaleFolderColor() {
         @InjectService var router: AppNavigable
         router.presentUpSaleSheet()
+        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "colorFolder")
     }
     #endif
 }

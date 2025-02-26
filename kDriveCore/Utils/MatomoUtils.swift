@@ -44,7 +44,8 @@ public enum MatomoUtils {
     public enum EventCategory: String {
         case newElement, fileListFileAction, picturesFileAction, fileInfo, shareAndRights, colorFolder, categories, search,
              fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash,
-             dropbox, preview, mediaPlayer, shortcuts, appReview, deeplink, publicShareAction, publicSharePasswordAction
+             dropbox, preview, mediaPlayer, shortcuts, appReview, deeplink, publicShareAction, publicSharePasswordAction,
+             myKSuite, myKSuiteUpgradeBottomSheet
     }
 
     public enum UserAction: String {
