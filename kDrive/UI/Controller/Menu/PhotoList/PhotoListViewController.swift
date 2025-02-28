@@ -102,7 +102,7 @@ final class PhotoListViewController: FileListViewController {
     }
 
     override func getDisplayedFile(at indexPath: IndexPath) -> File? {
-        return displayedSections[safe: indexPath.section]?.elements[indexPath.item]
+        return displayedSections[safe: indexPath.section]?.elements[safe: indexPath.item]
     }
 
     private func bindPhotoListViewModel() {
