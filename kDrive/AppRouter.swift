@@ -304,10 +304,12 @@ public struct AppRouter: AppNavigable {
                 .freezeIfNeeded()
         }
 
-        let frozenFilesToRestore = Array(frozenFetchedFiles)
+        let frozenOrderedFilesToRestore = fileIds.compactMap { id in
+            frozenFetchedFiles.first { $0.id == id }
+        }
 
         await presentPreviewViewController(
-            frozenFiles: frozenFilesToRestore,
+            frozenFiles: frozenOrderedFilesToRestore,
             index: currentIndex,
             driveFileManager: driveFileManager,
             normalFolderHierarchy: normalFolderHierarchy,
