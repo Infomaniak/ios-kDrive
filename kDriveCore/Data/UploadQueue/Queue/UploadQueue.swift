@@ -129,11 +129,13 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
             // Initialize operation queue with files from Realm, and make sure it restarts
             self.rebuildUploadQueueFromObjectsInRealm()
             self.resumeAllOperations()
+            DownloadQueue.instance.resumeAllOperations()
         }
 
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             self?.updateQueueSuspension()
+            DownloadQueue.instance.updateQueueSuspension()
         }
 
         observeMemoryWarnings()
