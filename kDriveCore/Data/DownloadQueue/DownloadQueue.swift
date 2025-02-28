@@ -285,14 +285,30 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
         }
     }
 
+    var shouldSuspendQueue: Bool {
+        // Explicitly disable the upload queue from the share extension
+        guard appContextService.context != .shareExtension else {
+            return true
+        }
+
+        let status = ReachabilityListener.instance.currentStatus
+        let shouldBeSuspended = status == .offline || (status != .wifi && UserDefaults.shared.syncOfflineMode == .onlyWifi)
+        return shouldBeSuspended
+    }
+
+    var forceSuspendQueue = false
+
     public func suspendAllOperations() {
         Log.downloadQueue("suspendAllOperations")
+        forceSuspendQueue = true
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
         Log.downloadQueue("resumeAllOperations")
+        forceSuspendQueue = false
         operationQueue.isSuspended = false
+        operationQueue.isSuspended = shouldSuspendQueue
     }
 
     public func cancelAllOperations() {
@@ -332,6 +348,11 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
 
     public init() {
         parallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
+
+        // Observe network state change
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            self?.updateQueueSuspension()
+        }
     }
 
     private func publishFileDownloaded(fileId: Int, error: DriveError?) {
@@ -464,5 +485,11 @@ public extension DownloadQueue {
 
     func parallelismShouldChange(value: Int) {
         operationQueue.maxConcurrentOperationCount = value
+    }
+
+    func updateQueueSuspension() {
+        let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
+        operationQueue.isSuspended = isSuspended
+        Log.uploadQueue("update isSuspended to :\(isSuspended)")
     }
 }
