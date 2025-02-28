@@ -102,12 +102,18 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesStrings.Localizable.allAudio
         case .code:
             return KDriveResourcesStrings.Localizable.allCode
+        case .email:
+            return KDriveResourcesStrings.Localizable.allEmail
         case .folder:
             return KDriveResourcesStrings.Localizable.allFolder
+        case .font:
+            return KDriveResourcesStrings.Localizable.allFont
         case .form:
             return KDriveResourcesStrings.Localizable.allOfficeForm
         case .image:
             return KDriveResourcesStrings.Localizable.allPictures
+        case .model:
+            return KDriveResourcesStrings.Localizable.all3DModel
         case .pdf:
             return KDriveResourcesStrings.Localizable.allPdf
         case .presentation:
@@ -116,7 +122,7 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesStrings.Localizable.allOfficeGrids
         case .text:
             return KDriveResourcesStrings.Localizable.allOfficeDocs
-        case .unknown, .url, .font, .email, .model:
+        case .unknown, .url:
             return ""
         case .video:
             return KDriveResourcesStrings.Localizable.allVideo
