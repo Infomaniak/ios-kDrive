@@ -304,10 +304,17 @@ public struct AppRouter: AppNavigable {
                 .freezeIfNeeded()
         }
 
-        let frozenFilesToRestore = Array(frozenFetchedFiles)
+        let frozenOrderedFilesToRestore = fileIds.compactMap { id in
+            frozenFetchedFiles.first { $0.id == id }
+        }
+
+        guard frozenOrderedFilesToRestore.count == fileIds.count else {
+            Log.sceneDelegate("restored file count does not match the provided fileIds", level: .error)
+            return
+        }
 
         await presentPreviewViewController(
-            frozenFiles: frozenFilesToRestore,
+            frozenFiles: frozenOrderedFilesToRestore,
             index: currentIndex,
             driveFileManager: driveFileManager,
             normalFolderHierarchy: normalFolderHierarchy,
