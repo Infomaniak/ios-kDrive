@@ -49,6 +49,9 @@
 /* loco:6049df4d5c2c3a04bc39790c */
 "alertRemoveUserTitle" = "Rimuovi utente";
 
+/* loco:67c18ad0a89ca83d24067454 */
+"all3DModel" = "Modello 3D";
+
 /* loco:6049df4d5c2c3a04bc39790d */
 "allActivated" = "Attivato";
 
@@ -84,6 +87,9 @@
 
 /* loco:6049df4d5c2c3a04bc397914 */
 "allDisabled" = "Disattivato";
+
+/* loco:67c18a029e7cc069de0144a2 */
+"allEmail" = "E-mail";
 
 /* loco:6049df4d5c2c3a04bc397916 */
 "allEmptyInputError" = "Il campo deve essere compilato";
