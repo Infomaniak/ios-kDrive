@@ -55,7 +55,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var typeIdentifier: String
     public var capabilities: NSFileProviderItemCapabilities
     public var parentItemIdentifier: NSFileProviderItemIdentifier
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     // MARK: Optional properties
 
@@ -125,7 +125,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     init(file: File, parent: NSFileProviderItemIdentifier? = nil, drive: Drive?, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
         @InjectService var fileProviderService: FileProviderServiceable
-        @LazyInjectService var downloadQueue: DownloadQueue
+        @LazyInjectService var downloadQueue: DownloadQueueable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)

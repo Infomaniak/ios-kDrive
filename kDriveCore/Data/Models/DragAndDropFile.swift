@@ -22,7 +22,7 @@ import InfomaniakDI
 
 public class DragAndDropFile: NSObject, Codable {
     static let localDragIdentifier = "private.kdrive.file"
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     public let fileId: Int
     public let driveId: Int

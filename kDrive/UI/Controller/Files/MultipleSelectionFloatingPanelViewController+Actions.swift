@@ -137,15 +137,18 @@ extension MultipleSelectionFloatingPanelViewController {
 
             if let publicShareProxy = driveFileManager.publicShareProxy {
                 downloadQueue.addPublicShareToQueue(file: file,
-                                                             driveFileManager: driveFileManager,
-                                                             publicShareProxy: publicShareProxy)
+                                                    driveFileManager: driveFileManager,
+                                                    publicShareProxy: publicShareProxy,
+                                                    itemIdentifier: nil,
+                                                    onOperationCreated: nil, completion: nil)
             } else {
-                downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId)
+                downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId, itemIdentifier: nil)
             }
         }
     }
 
     private func downloadActionArchive(group: DispatchGroup, at indexPath: IndexPath) {
+        @InjectService var downloadQueue: DownloadQueue
         if downloadInProgress,
            let currentArchiveId,
            let operation = downloadQueue.archiveOperationsInQueue[currentArchiveId] {

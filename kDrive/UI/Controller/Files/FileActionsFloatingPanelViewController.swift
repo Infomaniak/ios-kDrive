@@ -27,7 +27,7 @@ import UIKit
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -207,11 +207,13 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         if let publicShareProxy = driveFileManager.publicShareProxy {
             downloadQueue.addPublicShareToQueue(file: file,
-                                                         driveFileManager: driveFileManager,
-                                                         publicShareProxy: publicShareProxy)
+                                                driveFileManager: driveFileManager,
+                                                publicShareProxy: publicShareProxy,
+                                                itemIdentifier: nil,
+                                                onOperationCreated: nil, completion: nil)
         } else {
             downloadQueue.addToQueue(file: file,
-                                              userId: accountManager.currentUserId)
+                                     userId: accountManager.currentUserId, itemIdentifier: nil)
         }
     }
 

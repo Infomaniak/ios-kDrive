@@ -66,7 +66,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderService: FileProviderServiceable
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()

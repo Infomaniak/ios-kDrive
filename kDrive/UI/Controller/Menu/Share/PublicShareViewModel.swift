@@ -27,7 +27,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var router: AppNavigable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     private var downloadObserver: ObservationToken?
 
@@ -158,8 +158,11 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
             }
 
         downloadQueue.addPublicShareToQueue(file: currentDirectory,
-                                                     driveFileManager: driveFileManager,
-                                                     publicShareProxy: publicShareProxy)
+                                            driveFileManager: driveFileManager,
+                                            publicShareProxy: publicShareProxy,
+                                            itemIdentifier: nil,
+                                            onOperationCreated: nil,
+                                            completion: nil)
     }
 
     private func clearDownloadObserver() {

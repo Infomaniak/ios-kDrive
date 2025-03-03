@@ -27,7 +27,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     // MARK: - Attributes
 
     private let driveFileManager: DriveFileManager
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     let archiveId: String
     let shareDrive: AbstractDrive

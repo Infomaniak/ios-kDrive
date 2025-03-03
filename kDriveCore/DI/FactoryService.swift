@@ -118,6 +118,12 @@ public enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
+            Factory(type: DownloadQueueable.self) { _, resolver in
+                try resolver.resolve(type: DownloadQueue.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: BGTaskScheduler.self) { _, _ in
                 BGTaskScheduler.shared
             },

@@ -33,7 +33,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     weak var previewDelegate: PreviewContentCellDelegate?
 
     private var observationToken: ObservationToken?
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     override func awakeFromNib() {
         super.awakeFromNib()

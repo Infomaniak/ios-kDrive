@@ -56,7 +56,7 @@ protocol FileCellDelegate: AnyObject {
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     var title: String {
         guard !file.isInvalidated else { return "" }

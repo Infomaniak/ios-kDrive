@@ -46,7 +46,7 @@ extension TransactionExecutor: CustomStringConvertible {
 public final class DriveFileManager {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) private var driveInfoDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     public static let constants = DriveFileManagerConstants()
 
@@ -1340,7 +1340,7 @@ public final class DriveFileManager {
                         completion(error)
                     }
                 }
-                downloadQueue.addToQueue(file: safeFile, userId: drive.userId)
+                downloadQueue.addToQueue(file: safeFile, userId: drive.userId, itemIdentifier: nil)
             }
         } else {
             updateFileProperty(fileUid: liveFile.uid) { writableFile in

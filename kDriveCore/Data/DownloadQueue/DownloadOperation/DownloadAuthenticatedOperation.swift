@@ -40,7 +40,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     let urlSession: FileDownloadSession
     let driveFileManager: DriveFileManager

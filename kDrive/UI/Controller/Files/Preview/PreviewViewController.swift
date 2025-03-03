@@ -36,7 +36,7 @@ import UIKit
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     @IBOutlet var collectionView: UICollectionView!
     private var previewFiles = [File]()
@@ -535,7 +535,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 }
             }
         }
-        downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId)
+        downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
         currentCell.observeProgress(true, file: currentFile)
     }
 
@@ -573,7 +573,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         downloadQueue.addPublicShareToQueue(
             file: currentFile,
             driveFileManager: driveFileManager,
-            publicShareProxy: publicShareProxy,
+            publicShareProxy: publicShareProxy, itemIdentifier: nil,
             onOperationCreated: { operation in
                 self.trackOperationCreated(at: indexPath, downloadOperation: operation)
             }, completion: { error in

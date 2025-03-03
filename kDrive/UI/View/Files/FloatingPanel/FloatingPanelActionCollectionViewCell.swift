@@ -33,7 +33,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet var chipContainerView: UIView!
 
     private var observationToken: ObservationToken?
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     override var isHighlighted: Bool {
         didSet {

@@ -48,7 +48,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
-    @LazyInjectService var downloadQueue: DownloadQueue
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     // MARK: - UIApplicationDelegate
 
