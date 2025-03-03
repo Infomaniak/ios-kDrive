@@ -126,7 +126,7 @@ class NewFolderTypeTableViewController: UITableViewController {
                     driveFloatingPanelController.dismiss(animated: true) { [weak self] in
                         guard let self else { return }
                         router.presentUpSaleSheet()
-                        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "manageDropbox")
+                        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "convertToDropbox")
                     }
                 }
                 present(driveFloatingPanelController, animated: true)
