@@ -66,6 +66,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     @LazyInjectService var uploadQueueObservable: UploadQueueObservable
     @LazyInjectService var fileProviderService: FileProviderServiceable
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
@@ -326,14 +327,14 @@ final class FileProviderExtension: NSFileProviderExtension {
     ) {
         Log.fileProvider("downloadFreshRemoteFile file:\(file.id)")
         // Prevent observing file multiple times
-        guard !DownloadQueue.instance.hasOperation(for: file.id) else {
+        guard !downloadQueue.hasOperation(for: file.id) else {
             Log.fileProvider("downloadFreshRemoteFile in queue, skip", level: .error)
             completion(nil)
             return
         }
 
         var observationToken: ObservationToken?
-        observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+        observationToken = downloadQueue.observeFileDownloaded(self, fileId: file.id) { _, error in
             observationToken?.cancel()
             observationToken = nil
 
@@ -357,7 +358,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
         }
 
-        DownloadQueue.instance.addToQueue(
+        downloadQueue.addToQueue(
             file: file,
             userId: driveFileManager.drive.userId,
             itemIdentifier: item.itemIdentifier

@@ -122,7 +122,7 @@ extension MultipleSelectionFloatingPanelViewController {
             downloadInProgress = true
             collectionView.reloadItems(at: [indexPath])
             group.enter()
-            DownloadQueue.instance
+            downloadQueue
                 .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
                     guard let self else { return }
                     if error == nil {
@@ -136,11 +136,11 @@ extension MultipleSelectionFloatingPanelViewController {
                 }
 
             if let publicShareProxy = driveFileManager.publicShareProxy {
-                DownloadQueue.instance.addPublicShareToQueue(file: file,
+                downloadQueue.addPublicShareToQueue(file: file,
                                                              driveFileManager: driveFileManager,
                                                              publicShareProxy: publicShareProxy)
             } else {
-                DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+                downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId)
             }
         }
     }
@@ -148,7 +148,7 @@ extension MultipleSelectionFloatingPanelViewController {
     private func downloadActionArchive(group: DispatchGroup, at indexPath: IndexPath) {
         if downloadInProgress,
            let currentArchiveId,
-           let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+           let operation = downloadQueue.archiveOperationsInQueue[currentArchiveId] {
             group.enter()
             let alert = AlertTextViewController(
                 title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,

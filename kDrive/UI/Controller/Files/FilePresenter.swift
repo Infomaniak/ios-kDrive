@@ -25,6 +25,7 @@ import UIKit
 @MainActor
 final class FilePresenter {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     weak var viewController: UIViewController?
 
@@ -211,14 +212,14 @@ final class FilePresenter {
         if file.isMostRecentDownloaded {
             presentBookmark(for: file, completion: completion)
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
-            DownloadQueue.instance.addPublicShareToQueue(file: file,
+            downloadQueue.addPublicShareToQueue(file: file,
                                                          driveFileManager: driveFileManager,
                                                          publicShareProxy: publicShareProxy,
                                                          onOperationCreated: nil) { error in
                 self.onBookmarkDownloaded(for: file, error: error, completion: completion)
             }
         } else {
-            DownloadQueue.instance.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
+            downloadQueue.temporaryDownload(file: file, userId: accountManager.currentUserId) { error in
                 self.onBookmarkDownloaded(for: file, error: error, completion: completion)
             }
         }

@@ -357,7 +357,7 @@ extension FileActionsFloatingPanelViewController {
     private func downloadAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         if file.isMostRecentDownloaded {
             FileActionsHelper.save(file: file, from: self)
-        } else if let operation = DownloadQueue.instance.operation(for: file.id) {
+        } else if let operation = downloadQueue.operation(for: file.id) {
             // Download is already scheduled, ask to cancel
             let alert = AlertTextViewController(
                 title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,

@@ -26,6 +26,7 @@ import UIKit
 final class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     let driveFileManager: DriveFileManager
     var files: [File]
@@ -161,7 +162,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 )
                 currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }
-                DownloadQueue.instance
+                downloadQueue
                     .observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
                         if let archiveUrl {
                             completion(.success(archiveUrl))
@@ -169,7 +170,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                             completion(.failure(error ?? .unknownError))
                         }
                     }
-                DownloadQueue.instance.addPublicShareArchiveToQueue(archiveId: response.uuid,
+                downloadQueue.addPublicShareArchiveToQueue(archiveId: response.uuid,
                                                                     driveFileManager: driveFileManager,
                                                                     publicShareProxy: publicShareProxy)
 
@@ -196,7 +197,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 )
                 currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }
-                DownloadQueue.instance
+                downloadQueue
                     .observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
                         if let archiveUrl {
                             completion(.success(archiveUrl))
@@ -206,11 +207,11 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                     }
 
                 if let publicShareProxy = self.driveFileManager.publicShareProxy {
-                    DownloadQueue.instance.addPublicShareArchiveToQueue(archiveId: response.uuid,
+                    downloadQueue.addPublicShareArchiveToQueue(archiveId: response.uuid,
                                                                         driveFileManager: driveFileManager,
                                                                         publicShareProxy: publicShareProxy)
                 } else {
-                    DownloadQueue.instance.addToQueue(archiveId: response.uuid,
+                    downloadQueue.addToQueue(archiveId: response.uuid,
                                                       driveId: self.driveFileManager.driveId,
                                                       userId: accountManager.currentUserId)
                 }

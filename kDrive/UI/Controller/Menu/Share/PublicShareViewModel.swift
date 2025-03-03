@@ -27,6 +27,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var router: AppNavigable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     private var downloadObserver: ObservationToken?
 
@@ -104,7 +105,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
     }
 
     private func cancelDownloadAll() {
-        DownloadQueue.instance.cancelFileOperation(for: currentDirectory.id)
+        downloadQueue.cancelFileOperation(for: currentDirectory.id)
         clearDownloadObserver()
         configuration.rightBarButtons = [.downloadAll]
         loadButtonsConfiguration()
@@ -116,7 +117,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
         configuration.rightBarButtons = [.downloadingAll]
         loadButtonsConfiguration()
 
-        downloadObserver = DownloadQueue.instance
+        downloadObserver = downloadQueue
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
                 Task { @MainActor in
                     defer {
@@ -156,7 +157,7 @@ final class PublicShareViewModel: InMemoryFileListViewModel {
                 }
             }
 
-        DownloadQueue.instance.addPublicShareToQueue(file: currentDirectory,
+        downloadQueue.addPublicShareToQueue(file: currentDirectory,
                                                      driveFileManager: driveFileManager,
                                                      publicShareProxy: publicShareProxy)
     }

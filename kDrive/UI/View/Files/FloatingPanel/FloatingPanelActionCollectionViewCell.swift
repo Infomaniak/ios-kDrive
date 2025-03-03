@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -32,6 +33,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet var chipContainerView: UIView!
 
     private var observationToken: ObservationToken?
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     override var isHighlighted: Bool {
         didSet {
@@ -162,7 +164,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         observationToken?.cancel()
         setProgress(showProgress ? -1 : nil)
         if showProgress {
-            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+            observationToken = downloadQueue.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 Task { @MainActor [weak self] in
                     self?.setProgress(progress)
                 }
@@ -174,7 +176,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         observationToken?.cancel()
         setProgress(showProgress ? -1 : nil)
         if showProgress {
-            observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
+            observationToken = downloadQueue.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
                 Task { @MainActor [weak self] in
                     self?.setProgress(progress)
                 }

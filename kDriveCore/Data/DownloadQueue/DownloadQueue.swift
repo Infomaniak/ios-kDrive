@@ -330,7 +330,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     // MARK: - Private methods
 
-    private init() {
+    public init() {
         parallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
     }
 

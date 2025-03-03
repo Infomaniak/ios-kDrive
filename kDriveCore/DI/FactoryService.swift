@@ -94,6 +94,9 @@ public enum FactoryService {
             Factory(type: TokenStore.self) { _, _ in
                 TokenStore()
             },
+            Factory(type: DownloadQueue.self) { _, _ in
+                DownloadQueue()
+            },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },

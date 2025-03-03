@@ -48,6 +48,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     // MARK: - UIApplicationDelegate
 
@@ -114,8 +115,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Gracefully suspend upload/download queue before exiting.
         // Running operations will go on, but at least no more operations will start
-        DownloadQueue.instance.suspendAllOperations()
-        DownloadQueue.instance.cancelAllOperations()
+        downloadQueue.suspendAllOperations()
+        downloadQueue.cancelAllOperations()
 
         @InjectService var uploadQueue: UploadQueueable
         uploadQueue.suspendAllOperations()

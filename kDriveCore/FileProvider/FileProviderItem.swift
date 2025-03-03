@@ -55,6 +55,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     public var typeIdentifier: String
     public var capabilities: NSFileProviderItemCapabilities
     public var parentItemIdentifier: NSFileProviderItemIdentifier
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     // MARK: Optional properties
 
@@ -77,7 +78,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
             return false
         }
 
-        return DownloadQueue.instance.hasOperation(for: fileId)
+        return downloadQueue.hasOperation(for: fileId)
     }
 
     public var isDownloaded: Bool
@@ -124,6 +125,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     init(file: File, parent: NSFileProviderItemIdentifier? = nil, drive: Drive?, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
         @InjectService var fileProviderService: FileProviderServiceable
+        @LazyInjectService var downloadQueue: DownloadQueue
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
@@ -158,7 +160,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
             isDownloaded = true
-        } else if DownloadQueue.instance.hasOperation(for: file.id) {
+        } else if downloadQueue.hasOperation(for: file.id) {
             isDownloaded = false
         } else {
             isDownloaded = file.isDownloaded

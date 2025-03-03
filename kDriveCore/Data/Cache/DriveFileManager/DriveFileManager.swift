@@ -46,6 +46,7 @@ extension TransactionExecutor: CustomStringConvertible {
 public final class DriveFileManager {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.driveInfo) private var driveInfoDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var downloadQueue: DownloadQueue
 
     public static let constants = DriveFileManagerConstants()
 
@@ -1326,7 +1327,7 @@ public final class DriveFileManager {
             } else {
                 let safeFile = liveFile.freeze()
                 var token: ObservationToken?
-                token = DownloadQueue.instance.observeFileDownloaded(self, fileId: safeFile.id) { _, error in
+                token = downloadQueue.observeFileDownloaded(self, fileId: safeFile.id) { _, error in
                     token?.cancel()
                     if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
@@ -1339,7 +1340,7 @@ public final class DriveFileManager {
                         completion(error)
                     }
                 }
-                DownloadQueue.instance.addToQueue(file: safeFile, userId: drive.userId)
+                downloadQueue.addToQueue(file: safeFile, userId: drive.userId)
             }
         } else {
             updateFileProperty(fileUid: liveFile.uid) { writableFile in
@@ -1347,7 +1348,7 @@ public final class DriveFileManager {
             }
 
             // Cancel the download
-            DownloadQueue.instance.operation(for: file.id)?.cancel()
+            downloadQueue.operation(for: file.id)?.cancel()
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
             try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
             notifyObserversWith(file: file)
