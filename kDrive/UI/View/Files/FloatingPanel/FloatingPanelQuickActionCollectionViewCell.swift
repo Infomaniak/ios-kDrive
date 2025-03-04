@@ -115,7 +115,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     #if !ISEXTENSION
     func configureDownload(with file: File, action: FloatingPanelAction, progress: CGFloat?) {
-        @LazyInjectService var downloadQueue: DownloadQueueable
+        @InjectService var downloadQueue: DownloadQueueable
         observationToken?.cancel()
         if progress == nil {
             actionImage.isHidden = false

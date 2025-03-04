@@ -71,11 +71,13 @@ public protocol DownloadQueueable {
 
     func observeArchiveDownloaded<T: AnyObject>(_ observer: T,
                                                 archiveId: String?,
-                                                using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void) -> ObservationToken
+                                                using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)
+        -> ObservationToken
 
     func observeFileDownloadProgress<T: AnyObject>(_ observer: T,
                                                    fileId: Int?,
-                                                   using closure: @escaping (DownloadedFileId, Double) -> Void) -> ObservationToken
+                                                   using closure: @escaping (DownloadedFileId, Double) -> Void)
+        -> ObservationToken
 
     func publishProgress(_ progress: Double, for archiveId: String)
 

@@ -140,7 +140,8 @@ extension MultipleSelectionFloatingPanelViewController {
                                                     driveFileManager: driveFileManager,
                                                     publicShareProxy: publicShareProxy,
                                                     itemIdentifier: nil,
-                                                    onOperationCreated: nil, completion: nil)
+                                                    onOperationCreated: nil,
+                                                    completion: nil)
             } else {
                 downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId, itemIdentifier: nil)
             }

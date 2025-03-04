@@ -214,7 +214,8 @@ final class FilePresenter {
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
             downloadQueue.addPublicShareToQueue(file: file,
                                                 driveFileManager: driveFileManager,
-                                                publicShareProxy: publicShareProxy, itemIdentifier: nil,
+                                                publicShareProxy: publicShareProxy,
+                                                itemIdentifier: nil,
                                                 onOperationCreated: nil) { error in
                 self.onBookmarkDownloaded(for: file, error: error, completion: completion)
             }

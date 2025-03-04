@@ -94,7 +94,7 @@ public enum FactoryService {
             Factory(type: TokenStore.self) { _, _ in
                 TokenStore()
             },
-            Factory(type: DownloadQueue.self) { _, _ in
+            Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
             },
             Factory(type: UploadQueue.self) { _, _ in
@@ -114,12 +114,6 @@ public enum FactoryService {
             },
             Factory(type: UploadNotifiable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: DownloadQueueable.self) { _, resolver in
-                try resolver.resolve(type: DownloadQueue.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)

@@ -63,7 +63,6 @@ public final class DownloadTask: Object {
 }
 
 public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueable {
-
     /// Something to adapt the download parallelism live
     private var parallelismHeuristic: WorkloadParallelismHeuristic?
 
