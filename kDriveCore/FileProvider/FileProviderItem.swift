@@ -125,7 +125,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     init(file: File, parent: NSFileProviderItemIdentifier? = nil, drive: Drive?, domain: NSFileProviderDomain?) {
         Log.fileProvider("FileProviderItem init file:\(file.id)")
         @InjectService var fileProviderService: FileProviderServiceable
-        @InjectService var downloadQueue: DownloadQueueable
+        @InjectService var downloadQueueable: DownloadQueueable
 
         fileId = file.id
         itemIdentifier = NSFileProviderItemIdentifier(file.id)
@@ -160,7 +160,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
         if file.isDirectory {
             // TODO: Enable and allow to download all folder content locally
             isDownloaded = true
-        } else if downloadQueue.hasOperation(for: file.id) {
+        } else if downloadQueueable.hasOperation(for: file.id) {
             isDownloaded = false
         } else {
             isDownloaded = file.isDownloaded
