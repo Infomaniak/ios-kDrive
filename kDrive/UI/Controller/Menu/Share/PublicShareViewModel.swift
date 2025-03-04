@@ -24,9 +24,9 @@ import UIKit
 
 /// Public share view model, loading content from memory realm
 class PublicShareViewModel: InMemoryFileListViewModel {
-    @LazyInjectService private var accountManager: AccountManageable
-    @LazyInjectService private var router: AppNavigable
-    @LazyInjectService private var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var router: AppNavigable
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
     private var downloadObserver: ObservationToken?
@@ -170,7 +170,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
         downloadObserver = nil
     }
 
-    private func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+    func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
         guard accountManager.currentAccount != nil else {
             router.showUpsaleFloatingPanel()
             return

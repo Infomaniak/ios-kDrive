@@ -774,6 +774,7 @@ public struct AppRouter: AppNavigable {
             let viewModel = PublicShareSingleFileViewModel(publicShareProxy: publicShareProxy,
                                                            sortType: .nameAZ,
                                                            driveFileManager: driveFileManager,
+                                                           sharedFrozenFile: singleFrozenFile,
                                                            currentDirectory: virtualFrozenRootFolder,
                                                            apiFetcher: apiFetcher,
                                                            configuration: configuration)

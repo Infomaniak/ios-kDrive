@@ -20,8 +20,23 @@ import Foundation
 import kDriveCore
 
 final class PublicShareSingleFileViewModel: PublicShareViewModel {
-    override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
+    let sharedFrozenFile: File
+
+    init(
+        publicShareProxy: PublicShareProxy,
+        sortType: SortType,
+        driveFileManager: DriveFileManager,
+        sharedFrozenFile: File,
+        currentDirectory: File,
+        apiFetcher: PublicShareApiFetcher,
+        configuration: Configuration
+    ) {
+        self.sharedFrozenFile = sharedFrozenFile
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+
+        self.publicShareProxy = publicShareProxy
+        self.sortType = sortType
+        publicShareApiFetcher = apiFetcher
         title = currentDirectory.name
     }
 
@@ -32,5 +47,34 @@ final class PublicShareSingleFileViewModel: PublicShareViewModel {
     // No refresh for single file
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         endRefreshing()
+    }
+
+    override func addToMyDrive(sender: Any?, publicShareProxy: PublicShareProxy) {
+        guard accountManager.currentAccount != nil else {
+            router.showUpsaleFloatingPanel()
+            return
+        }
+
+        guard let currentUserDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        PublicShareAction().addToMyDrive(
+            publicShareProxy: publicShareProxy,
+            currentUserDriveFileManager: currentUserDriveFileManager,
+            selectedItemsIds: [],
+            exceptItemIds: [],
+            onPresentViewController: { saveNavigationViewController, animated in
+                onPresentViewController?(.modal, saveNavigationViewController, animated)
+            },
+            onSave: {
+                MatomoUtils.trackAddBulkToMykDrive()
+            },
+            onDismissViewController: { [weak self] in
+                guard let self else { return }
+                self.onDismissViewController?()
+                self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+            }
+        )
     }
 }
