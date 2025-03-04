@@ -23,7 +23,7 @@ import RealmSwift
 import UIKit
 
 /// Public share view model, loading content from memory realm
-final class PublicShareViewModel: InMemoryFileListViewModel {
+class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var router: AppNavigable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
