@@ -106,6 +106,14 @@ public struct InExtensionRouter: AppNavigable {
         apiFetcher: PublicShareApiFetcher
     ) {}
 
+    public func presentPublicShare(
+        singleFrozenFile: File,
+        virtualFrozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {}
+
     public func setRootViewController(_ viewController: UIViewController, animated: Bool) {}
 
     public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {}
