@@ -180,14 +180,23 @@ public enum UniversalLinksHelper {
                 let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                         linkUuid: linkUuid,
                                                                         fileId: fileId)
-                let frozenRootFolder: File
+
+                @InjectService var appNavigable: AppNavigable
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+
                 if publicShare.isDirectory {
                     // Root folder must be in database for the FileListViewModel to work
                     try driveFileManager.database.writeTransaction { writableRealm in
                         writableRealm.add(publicShare, update: .modified)
                     }
 
-                    frozenRootFolder = publicShare.freeze()
+                    let frozenRootFolder = publicShare.freeze()
+                    await appNavigable.presentPublicShare(
+                        frozenRootFolder: frozenRootFolder,
+                        publicShareProxy: publicShareProxy,
+                        driveFileManager: driveFileManager,
+                        apiFetcher: apiFetcher
+                    )
                 } else {
                     let virtualRoot = File(id: DriveFileManager.constants.rootID,
                                            name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
@@ -202,17 +211,17 @@ public enum UniversalLinksHelper {
                         writableRealm.add(publicShare, update: .modified)
                     }
 
-                    frozenRootFolder = virtualRoot.freeze()
+                    let frozenRootFolder = virtualRoot.freeze()
+                    let frozenPublicShareFile = publicShare.freeze()
+                    await appNavigable.presentPublicShare(
+                        singleFrozenFile: frozenPublicShareFile,
+                        virtualFrozenRootFolder: frozenRootFolder,
+                        publicShareProxy: publicShareProxy,
+                        driveFileManager: driveFileManager,
+                        apiFetcher: apiFetcher
+                    )
                 }
 
-                @InjectService var appNavigable: AppNavigable
-                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
-                await appNavigable.presentPublicShare(
-                    frozenRootFolder: frozenRootFolder,
-                    publicShareProxy: publicShareProxy,
-                    driveFileManager: driveFileManager,
-                    apiFetcher: apiFetcher
-                )
             } catch {
                 DDLogError(
                     "[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
