@@ -171,8 +171,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                         }
                     }
                 downloadQueue.addPublicShareArchiveToQueue(archiveId: response.uuid,
-                                                                    driveFileManager: driveFileManager,
-                                                                    publicShareProxy: publicShareProxy)
+                                                           driveFileManager: driveFileManager,
+                                                           publicShareProxy: publicShareProxy)
 
                 self.collectionView.reloadItems(at: [downloadCellPath])
             } catch {
@@ -208,12 +208,12 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
                 if let publicShareProxy = self.driveFileManager.publicShareProxy {
                     downloadQueue.addPublicShareArchiveToQueue(archiveId: response.uuid,
-                                                                        driveFileManager: driveFileManager,
-                                                                        publicShareProxy: publicShareProxy)
+                                                               driveFileManager: driveFileManager,
+                                                               publicShareProxy: publicShareProxy)
                 } else {
                     downloadQueue.addToQueue(archiveId: response.uuid,
-                                                      driveId: self.driveFileManager.driveId,
-                                                      userId: accountManager.currentUserId)
+                                             driveId: self.driveFileManager.driveId,
+                                             userId: accountManager.currentUserId)
                 }
 
                 self.collectionView.reloadItems(at: [downloadCellPath])
