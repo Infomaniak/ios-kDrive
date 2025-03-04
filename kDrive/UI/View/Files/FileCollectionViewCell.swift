@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -55,6 +56,7 @@ protocol FileCellDelegate: AnyObject {
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     var title: String {
         guard !file.isInvalidated else { return "" }
@@ -126,7 +128,7 @@ protocol FileCellDelegate: AnyObject {
         guard !file.isInvalidated else { return }
 
         downloadProgressObserver?.cancel()
-        downloadProgressObserver = DownloadQueue.instance
+        downloadProgressObserver = downloadQueue
             .observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
                 Task { @MainActor [weak self] in
                     guard let self else { return }
@@ -135,7 +137,7 @@ protocol FileCellDelegate: AnyObject {
                 }
             }
         downloadObserver?.cancel()
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
+        downloadObserver = downloadQueue.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 handler(!isAvailableOffline, true, 1)

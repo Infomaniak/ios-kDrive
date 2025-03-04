@@ -27,6 +27,7 @@ import UIKit
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -191,7 +192,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
-        downloadObserver = DownloadQueue.instance
+        downloadObserver = downloadQueue
             .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
                 self?.downloadAction = nil
                 self?.setLoading(true, action: action, at: indexPath)
@@ -205,12 +206,16 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
 
         if let publicShareProxy = driveFileManager.publicShareProxy {
-            DownloadQueue.instance.addPublicShareToQueue(file: file,
-                                                         driveFileManager: driveFileManager,
-                                                         publicShareProxy: publicShareProxy)
+            downloadQueue.addPublicShareToQueue(file: file,
+                                                driveFileManager: driveFileManager,
+                                                publicShareProxy: publicShareProxy,
+                                                itemIdentifier: nil,
+                                                onOperationCreated: nil,
+                                                completion: nil)
         } else {
-            DownloadQueue.instance.addToQueue(file: file,
-                                              userId: accountManager.currentUserId)
+            downloadQueue.addToQueue(file: file,
+                                     userId: accountManager.currentUserId,
+                                     itemIdentifier: nil)
         }
     }
 

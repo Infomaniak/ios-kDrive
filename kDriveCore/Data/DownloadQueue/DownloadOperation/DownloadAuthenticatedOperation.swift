@@ -40,6 +40,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var downloadManager: BackgroundDownloadSessionManager
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     let urlSession: FileDownloadSession
     let driveFileManager: DriveFileManager
@@ -89,7 +90,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
 
         if !appContextService.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
-                DownloadQueue.instance.suspendAllOperations()
+                self.downloadQueue.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
                 if let rescheduledSessionId = self.downloadManager.rescheduleForBackground(task: self.task),
                    let task = self.task,
@@ -176,7 +177,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
             guard let newValue = value.newValue else {
                 return
             }
-            DownloadQueue.instance.publishProgress(newValue, for: fileId)
+            self.downloadQueue.publishProgress(newValue, for: fileId)
         }
         if let itemIdentifier {
             driveInfosManager.getFileProviderManager(for: driveFileManager.drive) { manager in

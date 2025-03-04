@@ -58,7 +58,7 @@ public extension DriveFileManager {
             }
 
             for updatedFile in updatedFiles where updatedFile.isLocalVersionOlderThanRemote {
-                DownloadQueue.instance.addToQueue(file: updatedFile, userId: drive.userId)
+                downloadQueue.addToQueue(file: updatedFile, userId: drive.userId, itemIdentifier: nil)
             }
         }
     }

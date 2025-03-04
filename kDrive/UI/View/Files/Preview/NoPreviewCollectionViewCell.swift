@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -32,6 +33,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     weak var previewDelegate: PreviewContentCellDelegate?
 
     private var observationToken: ObservationToken?
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -77,7 +79,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         progressView.isHidden = !showProgress
         progressView.progress = 0
         if showProgress {
-            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+            observationToken = downloadQueue.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 Task { @MainActor [weak self] in
                     self?.progressView.progress = Float(progress)
                 }

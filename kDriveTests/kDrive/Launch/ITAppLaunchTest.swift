@@ -61,6 +61,9 @@ final class ITAppLaunchTest: XCTestCase {
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },
+            Factory(type: DownloadQueueable.self) { _, _ in
+                DownloadQueue()
+            },
             Factory(type: UploadQueueable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,

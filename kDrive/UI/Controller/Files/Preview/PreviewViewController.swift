@@ -36,6 +36,7 @@ import UIKit
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     @IBOutlet var collectionView: UICollectionView!
     private var previewFiles = [File]()
@@ -523,7 +524,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func downloadToOpenWith(completion: @escaping () -> Void) {
         guard let currentCell = collectionView.cellForItem(at: currentIndex) as? NoPreviewCollectionViewCell else { return }
 
-        DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
+        downloadQueue.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
             guard let self else { return }
             Task { @MainActor in
                 if error == nil {
@@ -534,7 +535,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 }
             }
         }
-        DownloadQueue.instance.addToQueue(file: currentFile, userId: accountManager.currentUserId)
+        downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
         currentCell.observeProgress(true, file: currentFile)
     }
 
@@ -555,7 +556,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if let publicShareProxy = driveFileManager.publicShareProxy {
             downloadPublicShareFile(at: indexPath, publicShareProxy: publicShareProxy)
         } else {
-            DownloadQueue.instance.temporaryDownload(
+            downloadQueue.temporaryDownload(
                 file: currentFile,
                 userId: accountManager.currentUserId,
                 onOperationCreated: { operation in
@@ -569,10 +570,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func downloadPublicShareFile(at indexPath: IndexPath, publicShareProxy: PublicShareProxy) {
-        DownloadQueue.instance.addPublicShareToQueue(
+        downloadQueue.addPublicShareToQueue(
             file: currentFile,
             driveFileManager: driveFileManager,
-            publicShareProxy: publicShareProxy,
+            publicShareProxy: publicShareProxy, itemIdentifier: nil,
             onOperationCreated: { operation in
                 self.trackOperationCreated(at: indexPath, downloadOperation: operation)
             }, completion: { error in

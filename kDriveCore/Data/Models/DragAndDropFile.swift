@@ -22,6 +22,7 @@ import InfomaniakDI
 
 public class DragAndDropFile: NSObject, Codable {
     static let localDragIdentifier = "private.kdrive.file"
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     public let fileId: Int
     public let driveId: Int
@@ -116,7 +117,7 @@ extension DragAndDropFile: NSItemProviderWriting {
                 return nil
             } else {
                 let progress = Progress(totalUnitCount: 100)
-                DownloadQueue.instance.temporaryDownload(file: file, userId: userId) { operation in
+                downloadQueue.temporaryDownload(file: file, userId: userId) { operation in
                     progress.cancellationHandler = {
                         operation?.cancel()
                     }

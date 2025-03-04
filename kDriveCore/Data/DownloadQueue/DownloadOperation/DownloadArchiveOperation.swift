@@ -27,6 +27,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     // MARK: - Attributes
 
     private let driveFileManager: DriveFileManager
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     let archiveId: String
     let shareDrive: AbstractDrive
@@ -58,7 +59,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
 
         if !appContextService.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
-                DownloadQueue.instance.suspendAllOperations()
+                self.downloadQueue.suspendAllOperations()
                 // We don't support task rescheduling for archive download but still need to pass error to differentiate from user
                 // cancel
                 self.error = .taskRescheduled
@@ -104,7 +105,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
             guard let newValue = value.newValue else {
                 return
             }
-            DownloadQueue.instance.publishProgress(newValue, for: self.archiveId)
+            self.downloadQueue.publishProgress(newValue, for: self.archiveId)
         }
         task?.resume()
     }

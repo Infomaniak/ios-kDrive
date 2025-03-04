@@ -62,7 +62,7 @@ public final class DownloadTask: Object {
     }
 }
 
-public final class DownloadQueue: ParallelismHeuristicDelegate {
+public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueable {
     /// Something to adapt the download parallelism live
     private var parallelismHeuristic: WorkloadParallelismHeuristic?
 
@@ -330,7 +330,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 
     // MARK: - Private methods
 
-    private init() {
+    public init() {
         parallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
     }
 
@@ -340,7 +340,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         }
     }
 
-    func publishProgress(_ progress: Double, for fileId: Int) {
+    public func publishProgress(_ progress: Double, for fileId: Int) {
         for closure in observations.didChangeProgress.values {
             closure(fileId, progress)
         }
@@ -352,7 +352,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
         }
     }
 
-    func publishProgress(_ progress: Double, for archiveId: String) {
+    public func publishProgress(_ progress: Double, for archiveId: String) {
         for closure in observations.didChangeArchiveProgress.values {
             closure(archiveId, progress)
         }
@@ -362,9 +362,6 @@ public final class DownloadQueue: ParallelismHeuristicDelegate {
 // MARK: - Observation
 
 public extension DownloadQueue {
-    typealias DownloadedFileId = Int
-    typealias DownloadedArchiveId = String
-
     @discardableResult
     func observeFileDownloaded<T: AnyObject>(_ observer: T,
                                              fileId: Int? = nil,

@@ -52,6 +52,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     FileDownloadSession {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var downloadQueue: DownloadQueueable
 
     public var identifier: String {
         return backgroundSession.identifier
@@ -95,7 +96,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
                         guard let newValue = value.newValue else {
                             return
                         }
-                        DownloadQueue.instance.publishProgress(newValue, for: fileId)
+                        self.downloadQueue.publishProgress(newValue, for: fileId)
                     }
                 }
             }

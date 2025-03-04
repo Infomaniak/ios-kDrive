@@ -122,7 +122,7 @@ extension MultipleSelectionFloatingPanelViewController {
             downloadInProgress = true
             collectionView.reloadItems(at: [indexPath])
             group.enter()
-            DownloadQueue.instance
+            downloadQueue
                 .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
                     guard let self else { return }
                     if error == nil {
@@ -136,19 +136,23 @@ extension MultipleSelectionFloatingPanelViewController {
                 }
 
             if let publicShareProxy = driveFileManager.publicShareProxy {
-                DownloadQueue.instance.addPublicShareToQueue(file: file,
-                                                             driveFileManager: driveFileManager,
-                                                             publicShareProxy: publicShareProxy)
+                downloadQueue.addPublicShareToQueue(file: file,
+                                                    driveFileManager: driveFileManager,
+                                                    publicShareProxy: publicShareProxy,
+                                                    itemIdentifier: nil,
+                                                    onOperationCreated: nil,
+                                                    completion: nil)
             } else {
-                DownloadQueue.instance.addToQueue(file: file, userId: accountManager.currentUserId)
+                downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId, itemIdentifier: nil)
             }
         }
     }
 
     private func downloadActionArchive(group: DispatchGroup, at indexPath: IndexPath) {
+        @InjectService var downloadQueue: DownloadQueue
         if downloadInProgress,
            let currentArchiveId,
-           let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+           let operation = downloadQueue.archiveOperationsInQueue[currentArchiveId] {
             group.enter()
             let alert = AlertTextViewController(
                 title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,

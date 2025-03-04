@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -114,6 +115,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     #if !ISEXTENSION
     func configureDownload(with file: File, action: FloatingPanelAction, progress: CGFloat?) {
+        @InjectService var downloadQueue: DownloadQueueable
         observationToken?.cancel()
         if progress == nil {
             actionImage.isHidden = false
@@ -123,7 +125,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
             actionImage.tintColor = action.tintColor
         } else {
             loadingIndicator.stopAnimating()
-            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+            observationToken = downloadQueue.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 Task { @MainActor [weak self] in
                     guard self?.observationToken != nil else { return }
                     self?.setProgress(progress)
