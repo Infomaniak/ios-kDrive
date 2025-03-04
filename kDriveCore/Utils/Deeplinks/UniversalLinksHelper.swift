@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
+import RealmSwift
 import SwiftRegex
 import UIKit
 
@@ -176,15 +177,33 @@ public enum UniversalLinksHelper {
                                         apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
-                let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
-                                                                       linkUuid: linkUuid,
-                                                                       fileId: fileId)
-                // Root folder must be in database for the FileListViewModel to work
-                try driveFileManager.database.writeTransaction { writableRealm in
-                    writableRealm.add(rootFolder, update: .modified)
-                }
+                let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                                                                        linkUuid: linkUuid,
+                                                                        fileId: fileId)
+                let frozenRootFolder: File
+                if publicShare.isDirectory {
+                    // Root folder must be in database for the FileListViewModel to work
+                    try driveFileManager.database.writeTransaction { writableRealm in
+                        writableRealm.add(publicShare, update: .modified)
+                    }
 
-                let frozenRootFolder = rootFolder.freeze()
+                    frozenRootFolder = publicShare.freeze()
+                } else {
+                    let virtualRoot = File(id: DriveFileManager.constants.rootID,
+                                           name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+                                           driveId: nil,
+                                           visibility: nil)
+
+                    virtualRoot.children.insert(publicShare)
+
+                    // Folder structure must be in database
+                    try driveFileManager.database.writeTransaction { writableRealm in
+                        writableRealm.add(virtualRoot, update: .modified)
+                        writableRealm.add(publicShare, update: .modified)
+                    }
+
+                    frozenRootFolder = virtualRoot.freeze()
+                }
 
                 @InjectService var appNavigable: AppNavigable
                 let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
