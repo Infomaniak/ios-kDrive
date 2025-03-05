@@ -118,42 +118,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
 
         downloadObserver = downloadQueue
             .observeFileDownloaded(self, fileId: currentDirectory.id) { [weak self] _, error in
-                Task { @MainActor in
-                    defer {
-                        button?.isEnabled = true
-                        self?.configuration.rightBarButtons = [.downloadAll]
-                        self?.loadButtonsConfiguration()
-                    }
-
-                    guard let self = self else {
-                        return
-                    }
-
-                    defer {
-                        self.clearDownloadObserver()
-                    }
-
-                    guard error == nil else {
-                        UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
-                        return
-                    }
-
-                    // present share sheet
-                    let activityViewController = UIActivityViewController(
-                        activityItems: [self.currentDirectory.localUrl],
-                        applicationActivities: nil
-                    )
-
-                    if let senderItem = sender as? UIBarButtonItem {
-                        activityViewController.popoverPresentationController?.barButtonItem = senderItem
-                    } else if let button = button {
-                        activityViewController.popoverPresentationController?.sourceRect = button.frame
-                    } else {
-                        fatalError("No sender button")
-                    }
-
-                    self.onPresentViewController?(.modal, activityViewController, true)
-                }
+                self?.downloadAllCompletion(sender: sender, error: error)
             }
 
         downloadQueue.addPublicShareToQueue(file: currentDirectory,
@@ -162,6 +127,42 @@ class PublicShareViewModel: InMemoryFileListViewModel {
                                             itemIdentifier: nil,
                                             onOperationCreated: nil,
                                             completion: nil)
+    }
+
+    func downloadAllCompletion(sender: Any?, error: Error?) {
+        Task { @MainActor in
+            let button = sender as? UIButton
+            defer {
+                button?.isEnabled = true
+                self.configuration.rightBarButtons = [.downloadAll]
+                self.loadButtonsConfiguration()
+            }
+
+            defer {
+                self.clearDownloadObserver()
+            }
+
+            guard error == nil else {
+                UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
+                return
+            }
+
+            // present share sheet
+            let activityViewController = UIActivityViewController(
+                activityItems: [self.currentDirectory.localUrl],
+                applicationActivities: nil
+            )
+
+            if let senderItem = sender as? UIBarButtonItem {
+                activityViewController.popoverPresentationController?.barButtonItem = senderItem
+            } else if let button = button {
+                activityViewController.popoverPresentationController?.sourceRect = button.frame
+            } else {
+                fatalError("No sender button")
+            }
+
+            self.onPresentViewController?(.modal, activityViewController, true)
+        }
     }
 
     func clearDownloadObserver() {

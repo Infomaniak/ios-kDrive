@@ -57,42 +57,7 @@ final class PublicShareSingleFileViewModel: PublicShareViewModel {
 
         downloadObserver = DownloadQueue.instance
             .observeFileDownloaded(self, fileId: sharedFrozenFile.id) { [weak self] _, error in
-                Task { @MainActor in
-                    defer {
-                        button?.isEnabled = true
-                        self?.configuration.rightBarButtons = [.downloadAll]
-                        self?.loadButtonsConfiguration()
-                    }
-
-                    guard let self = self else {
-                        return
-                    }
-
-                    defer {
-                        self.clearDownloadObserver()
-                    }
-
-                    guard error == nil else {
-                        UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
-                        return
-                    }
-
-                    // present share sheet
-                    let activityViewController = UIActivityViewController(
-                        activityItems: [self.sharedFrozenFile.localUrl],
-                        applicationActivities: nil
-                    )
-
-                    if let senderItem = sender as? UIBarButtonItem {
-                        activityViewController.popoverPresentationController?.barButtonItem = senderItem
-                    } else if let button = button {
-                        activityViewController.popoverPresentationController?.sourceRect = button.frame
-                    } else {
-                        fatalError("No sender button")
-                    }
-
-                    self.onPresentViewController?(.modal, activityViewController, true)
-                }
+                self?.downloadAllCompletion(sender: sender, error: error)
             }
 
         DownloadQueue.instance.addPublicShareToQueue(file: sharedFrozenFile,
