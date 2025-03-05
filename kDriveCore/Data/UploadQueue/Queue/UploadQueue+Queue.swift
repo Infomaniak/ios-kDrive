@@ -418,7 +418,49 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
+    public func restartPhotoSyncUploadIfNeeded(userId: Int, driveId: Int) {
+        Log.uploadQueue("restartPhotoSyncUploadIfNeeded userId:\(userId) driveId:\(driveId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        let status = ReachabilityListener.instance.currentStatus
+        let shouldBeRestarted = status != .offline || (status == .wifi && UserDefaults.shared.isWifiOnly)
+        guard shouldBeRestarted else {
+            Log.uploadQueue("Not restarting photo sync uploads")
+            return
+        }
+
+        serialQueue.async {
+            let failedFileIds = self.getAllPHAssetsUploading(userId: userId, driveId: driveId)
+            let batches = failedFileIds.chunks(ofCount: 100)
+
+            for batch in batches {
+                self.cancelAnyInBatch(batch)
+                self.enqueueAnyInBatch(batch)
+            }
+        }
+    }
+
     // MARK: - Private methods
+
+    private func getAllPHAssetsUploading(userId: Int, driveId: Int) -> [String] {
+        let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
+        let failedAssetPredicate = NSPredicate(
+            format: "assetLocalIdentifier != nil AND (_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@)",
+            ownedByFileProvider
+        )
+        let failedUploadingFiles = getUploadingFiles(
+            userId: userId,
+            driveId: driveId,
+            optionalPredicate: failedAssetPredicate
+        )
+
+        let failedFileIds = Array(failedUploadingFiles.map(\.id))
+        Log.uploadQueue("found failed uploading assets count:\(failedFileIds.count)")
+        return failedFileIds
+    }
 
     private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
         Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
