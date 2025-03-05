@@ -286,7 +286,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
     }
 
     var shouldSuspendQueue: Bool {
-        // Explicitly disable the upload queue from the share extension
+        // Explicitly disable the download queue from the share extension
         guard appContextService.context != .shareExtension else {
             return true
         }
