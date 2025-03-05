@@ -426,7 +426,7 @@ extension UploadQueue: UploadQueueable {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeRestarted = status != .offline || (status == .wifi && UserDefaults.shared.isWifiOnly)
+        let shouldBeRestarted = status == .wifi || status == .cellular && !UserDefaults.shared.isWifiOnly
         guard shouldBeRestarted else {
             Log.uploadQueue("Not restarting photo sync uploads")
             return
