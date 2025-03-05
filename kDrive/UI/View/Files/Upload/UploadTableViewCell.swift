@@ -82,16 +82,15 @@ final class UploadTableViewCell: InsetTableViewCell {
             }
 
         } else {
-            cardContentView.retryButton?
-                .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
-
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
+                cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0)
             } else if UserDefaults.shared.isWifiOnly
                 && ReachabilityListener.instance.currentStatus != .wifi
                 && uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
+                cardContentView.retryButton?.isHidden = true
             }
             if uploadFile.size > 0 {
                 cardContentView.detailsLabel.text = uploadFile.formattedSize + " • " + status
