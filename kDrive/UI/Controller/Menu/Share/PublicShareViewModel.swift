@@ -29,11 +29,10 @@ class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
-    private var downloadObserver: ObservationToken?
-
-    var publicShareProxy: PublicShareProxy?
     let rootProxy: ProxyFile
+    var publicShareProxy: PublicShareProxy?
     var publicShareApiFetcher: PublicShareApiFetcher?
+    var downloadObserver: ObservationToken?
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         rootProxy = currentDirectory.proxify()
@@ -111,7 +110,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
         loadButtonsConfiguration()
     }
 
-    private func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
+    func downloadAll(sender: Any?, publicShareProxy: PublicShareProxy) {
         let button = sender as? UIButton
         button?.isEnabled = false
         configuration.rightBarButtons = [.downloadingAll]
@@ -165,7 +164,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
                                             completion: nil)
     }
 
-    private func clearDownloadObserver() {
+    func clearDownloadObserver() {
         downloadObserver?.cancel()
         downloadObserver = nil
     }
