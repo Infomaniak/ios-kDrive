@@ -704,48 +704,30 @@ public struct AppRouter: AppNavigable {
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
     ) {
-        guard let window,
-              let rootViewController = window.rootViewController else {
-            return
-        }
-
-        if let topMostViewController, (topMostViewController as? LockedAppViewController) != nil {
-            return
-        }
-
-        rootViewController.dismiss(animated: false) {
-            let configuration = FileListViewModel.Configuration(selectAllSupported: true,
-                                                                rootTitle: nil,
-                                                                emptyViewType: .emptyFolder,
-                                                                supportsDrop: false,
-                                                                leftBarButtons: [.cancel],
-                                                                rightBarButtons: [.downloadAll],
-                                                                matomoViewPath: [
-                                                                    MatomoUtils.Views.menu.displayName,
-                                                                    "publicShare"
-                                                                ])
-
-            let viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
-                                                 sortType: .nameAZ,
-                                                 driveFileManager: driveFileManager,
-                                                 currentDirectory: frozenRootFolder,
-                                                 apiFetcher: apiFetcher,
-                                                 configuration: configuration)
-            let viewController = FileListViewController(viewModel: viewModel)
-            viewModel.onDismissViewController = { [weak viewController] in
-                viewController?.dismiss(animated: false)
-            }
-            let publicShareNavigationController = UINavigationController(rootViewController: viewController)
-            publicShareNavigationController.modalPresentationStyle = .fullScreen
-            publicShareNavigationController.modalTransitionStyle = .coverVertical
-
-            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
-        }
+        presentAnyPublicShare(frozenRootFolder: frozenRootFolder,
+                              singleFrozenFile: nil,
+                              publicShareProxy: publicShareProxy,
+                              driveFileManager: driveFileManager,
+                              apiFetcher: apiFetcher)
     }
 
     @MainActor public func presentPublicShare(
         singleFrozenFile: File,
         virtualFrozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        presentAnyPublicShare(frozenRootFolder: virtualFrozenRootFolder,
+                              singleFrozenFile: singleFrozenFile,
+                              publicShareProxy: publicShareProxy,
+                              driveFileManager: driveFileManager,
+                              apiFetcher: apiFetcher)
+    }
+
+    @MainActor private func presentAnyPublicShare(
+        frozenRootFolder: File,
+        singleFrozenFile: File?,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
@@ -771,13 +753,24 @@ public struct AppRouter: AppNavigable {
                                                                     "publicShare"
                                                                 ])
 
-            let viewModel = PublicShareSingleFileViewModel(publicShareProxy: publicShareProxy,
+            let viewModel: PublicShareViewModel
+            if let singleFrozenFile {
+                viewModel = PublicShareSingleFileViewModel(publicShareProxy: publicShareProxy,
                                                            sortType: .nameAZ,
                                                            driveFileManager: driveFileManager,
                                                            sharedFrozenFile: singleFrozenFile,
-                                                           currentDirectory: virtualFrozenRootFolder,
+                                                           currentDirectory: frozenRootFolder,
                                                            apiFetcher: apiFetcher,
                                                            configuration: configuration)
+            } else {
+                viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+                                                 sortType: .nameAZ,
+                                                 driveFileManager: driveFileManager,
+                                                 currentDirectory: frozenRootFolder,
+                                                 apiFetcher: apiFetcher,
+                                                 configuration: configuration)
+            }
+
             let viewController = FileListViewController(viewModel: viewModel)
             viewModel.onDismissViewController = { [weak viewController] in
                 viewController?.dismiss(animated: false)
