@@ -84,7 +84,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             self?.updateQueueSuspension()
-            DownloadQueue.instance.updateQueueSuspension()
         }
 
         queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)

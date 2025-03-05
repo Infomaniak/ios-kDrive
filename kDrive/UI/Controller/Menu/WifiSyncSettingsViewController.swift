@@ -28,7 +28,7 @@ protocol WifiSyncSettingsDelegate: AnyObject {
 
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
-    let downloadQueue = DownloadQueue.instance
+    @LazyInjectService private var downloadQueue: DownloadQueueable
 
     private var tableContent: [SyncMode] = SyncMode.allCases
     private var selectedMode: SyncMode

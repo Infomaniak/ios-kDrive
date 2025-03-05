@@ -89,6 +89,8 @@ public protocol DownloadQueueable {
     )
         -> ObservationToken
 
+    func updateQueueSuspension()
+
     var fileOperationsInQueue: SendableDictionary<Int, DownloadFileOperationable> { get }
 
     var archiveOperationsInQueue: SendableDictionary<String, DownloadArchiveOperation> { get }
