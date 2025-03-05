@@ -88,4 +88,6 @@ public protocol DownloadQueueable {
         using closure: @escaping (String, Double) -> Void
     )
         -> ObservationToken
+
+    func updateQueueSuspension()
 }

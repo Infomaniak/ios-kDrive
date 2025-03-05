@@ -349,6 +349,8 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
     public init() {
         parallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
 
+        resumeAllOperations()
+
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             self?.updateQueueSuspension()
