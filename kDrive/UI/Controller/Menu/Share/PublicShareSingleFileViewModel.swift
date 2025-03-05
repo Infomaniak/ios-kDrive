@@ -44,7 +44,6 @@ final class PublicShareSingleFileViewModel: PublicShareViewModel {
         fatalError("Use init(publicShareProxy:… ) instead")
     }
 
-    // No refresh for single file
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
         endRefreshing()
     }
