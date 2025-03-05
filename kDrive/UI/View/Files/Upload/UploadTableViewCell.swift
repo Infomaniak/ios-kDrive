@@ -88,7 +88,9 @@ final class UploadTableViewCell: InsetTableViewCell {
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-            } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
+            } else if UserDefaults.shared.isWifiOnly
+                && ReachabilityListener.instance.currentStatus != .wifi
+                && uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             if uploadFile.size > 0 {
@@ -125,7 +127,7 @@ final class UploadTableViewCell: InsetTableViewCell {
 
         // Set initial progress value if any
         if let progress {
-            updateProgress(fileId: uploadFileId, progress: progress, animated: true)
+            updateProgress(frozenUploadFile: frozenUploadFile, progress: progress, animated: true)
         }
 
         // observe the progres
@@ -141,7 +143,7 @@ final class UploadTableViewCell: InsetTableViewCell {
                     return
                 }
 
-                updateProgress(fileId: newFile.id, progress: progress, animated: false)
+                updateProgress(frozenUploadFile: newFile, progress: progress, animated: false)
             case .error, .deleted:
                 break
             }
@@ -189,8 +191,8 @@ final class UploadTableViewCell: InsetTableViewCell {
         thumbnailRequest = .qlThumbnailRequest(request)
     }
 
-    func updateProgress(fileId: String, progress: CGFloat, animated: Bool = true) {
-        if let currentFileId, fileId == currentFileId {
+    func updateProgress(frozenUploadFile: UploadFile, progress: CGFloat, animated: Bool = true) {
+        if let currentFileId, frozenUploadFile.id == currentFileId {
             cardContentView.iconView.isHidden = true
             cardContentView.progressView.isHidden = false
             cardContentView.progressView.updateProgress(progress, animated: animated)
@@ -198,7 +200,9 @@ final class UploadTableViewCell: InsetTableViewCell {
             var status = KDriveResourcesStrings.Localizable.uploadInProgressTitle
             if ReachabilityListener.instance.currentStatus == .offline {
                 status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-            } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
+            } else if UserDefaults.shared.isWifiOnly
+                && ReachabilityListener.instance.currentStatus != .wifi
+                && frozenUploadFile.isPhotoSyncUpload {
                 status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             cardContentView.detailsLabel.text = status
