@@ -28,6 +28,7 @@ protocol WifiSyncSettingsDelegate: AnyObject {
 
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService private var downloadQueue: DownloadQueueable
 
     private var tableContent: [SyncMode] = SyncMode.allCases
     private var selectedMode: SyncMode
@@ -87,6 +88,8 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         } else {
             UserDefaults.shared.syncOfflineMode = mode
         }
+
+        downloadQueue.updateQueueSuspension()
 
         navigationController?.popViewController(animated: true)
     }
