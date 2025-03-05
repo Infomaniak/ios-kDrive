@@ -72,7 +72,7 @@ final class UploadTableViewCell: InsetTableViewCell {
             return
         }
 
-        if let error = uploadFile.error, error != .taskRescheduled {
+        if let error = uploadFile.error, error != .taskRescheduled, error != .uploadOverDataRestrictedError {
             cardContentView.retryButton?.isHidden = false
             if error.localizedDescription == KDriveResourcesStrings.Localizable.uploadOverDataRestrictedError {
                 cardContentView.detailsLabel.text = error.localizedDescription
@@ -80,18 +80,23 @@ final class UploadTableViewCell: InsetTableViewCell {
                 cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
                     .errorUpload + " (\(error.localizedDescription))"
             }
-
+        } else if let error = uploadFile.error, error == .uploadOverDataRestrictedError {
+            cardContentView.retryButton?.isHidden = true
+            cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
         } else {
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-                cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0)
+                cardContentView.retryButton?.isHidden = true
             } else if UserDefaults.shared.isWifiOnly
                 && ReachabilityListener.instance.currentStatus != .wifi
                 && uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
                 cardContentView.retryButton?.isHidden = true
+            } else {
+                cardContentView.retryButton?.isHidden = (uploadFile.maxRetryCount > 0)
             }
+
             if uploadFile.size > 0 {
                 cardContentView.detailsLabel.text = uploadFile.formattedSize + " • " + status
             } else {
