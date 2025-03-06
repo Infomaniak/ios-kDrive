@@ -36,8 +36,9 @@ extension UploadQueue: UploadQueueable {
     /// Not uploaded yet, can retry, owned by `FileProvider`.
     static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
 
-    static let failedUploadingPhotoSyncQuery =
-        "uploadDate = nil AND assetLocalIdentifier != nil AND (_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@)"
+    static let excludingPhotoSyncQuery = "assetLocalIdentifier == nil"
+
+    static let isUploadingPhotoSyncQuery = "uploadDate = nil AND assetLocalIdentifier != nil"
 
     /// Query to fetch `UploadFiles` for the current execution context
     var uploadFileQuery: String? {
@@ -94,19 +95,32 @@ extension UploadQueue: UploadQueueable {
             let uploadingFileIds = Array(uploadingFiles.map(\.id))
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
 
+            // Excluding photoSync from rebuild queue if photoSync is blocked.
+            let excludePhotoSyncIfNeeded: NSPredicate?
+            let status = ReachabilityListener.instance.currentStatus
+            let canUpload = !(status == .cellular && UserDefaults.shared.isWifiOnly)
+            if canUpload || !UserDefaults.shared.isWifiOnly {
+                excludePhotoSyncIfNeeded = nil
+            } else {
+                excludePhotoSyncIfNeeded = NSPredicate(format: Self.excludingPhotoSyncQuery)
+            }
+
             let batches = uploadingFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batched count:\(batches.count)")
             for batch in batches {
                 Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
                 let batchArray = Array(batch)
                 let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
+                    lazyCollection
+                        .filter(optionalPredicate: excludePhotoSyncIfNeeded)
+                        .filter("id IN %@", batchArray)
+                        .freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
                     addToQueueIfNecessary(uploadFile: file)
                 }
-                self.resumeAllOperations()
             }
+            self.resumeAllOperations()
 
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
         }
@@ -421,27 +435,27 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func restartPhotoSyncUploadIfNeeded(userId: Int, driveId: Int) {
-        Log.uploadQueue("restartPhotoSyncUploadIfNeeded userId:\(userId) driveId:\(driveId)")
+    public func refreshPhotoSync(userId: Int, driveId: Int, newNetworkStatus: ReachabilityListener.NetworkStatus) {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
         }
 
-        let status = ReachabilityListener.instance.currentStatus
-        let shouldBeRestarted = status == .wifi || status == .cellular && !UserDefaults.shared.isWifiOnly
-        guard shouldBeRestarted else {
-            Log.uploadQueue("Not restarting photo sync uploads")
-            return
-        }
+        let shouldBeRestarted = newNetworkStatus == .wifi || newNetworkStatus == .cellular && !UserDefaults.shared.isWifiOnly
 
-        serialQueue.async {
-            let failedFileIds = self.getAllPHAssetsUploading(userId: userId, driveId: driveId)
-            let batches = failedFileIds.chunks(ofCount: 100)
+        cancelPhotoSyncUpload(andRestart: shouldBeRestarted, userId: userId, driveId: driveId)
+    }
 
-            for batch in batches {
-                self.cancelAnyInBatch(batch)
-                self.enqueueAnyInBatch(batch)
+    private func cancelPhotoSyncUpload(andRestart restart: Bool, userId: Int, driveId: Int) {
+        Log.uploadQueue("cancelPhotoSyncUpload restart:\(restart) userId:\(userId) driveId:\(driveId)")
+
+        let failedFileIds = getAllPHAssetsUploading(userId: userId, driveId: driveId)
+        let batches = failedFileIds.chunks(ofCount: 100)
+
+        for batch in batches {
+            cancelAnyInBatch(batch)
+            if restart {
+                enqueueAnyInBatch(batch)
             }
         }
     }
@@ -449,17 +463,15 @@ extension UploadQueue: UploadQueueable {
     // MARK: - Private methods
 
     private func getAllPHAssetsUploading(userId: Int, driveId: Int) -> [String] {
-        let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
-        let failedAssetPredicate = NSPredicate(format: Self.failedUploadingPhotoSyncQuery, ownedByFileProvider)
-        let failedUploadingFiles = getUploadingFiles(
+        let uploadingPhotoSyncFiles = getUploadingFiles(
             userId: userId,
             driveId: driveId,
-            optionalPredicate: failedAssetPredicate
+            optionalPredicate: NSPredicate(format: Self.isUploadingPhotoSyncQuery)
         )
 
-        let failedFileIds = Array(failedUploadingFiles.map(\.id))
-        Log.uploadQueue("found failed uploading assets count:\(failedFileIds.count)")
-        return failedFileIds
+        let uploadingPhotoSyncFileIDs = Array(uploadingPhotoSyncFiles.map(\.id))
+        Log.uploadQueue("found photoSync uploading assets count:\(uploadingPhotoSyncFileIDs.count)")
+        return uploadingPhotoSyncFileIDs
     }
 
     private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
