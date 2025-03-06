@@ -102,7 +102,7 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
+        let shouldBeSuspended = status == .offline
         return shouldBeSuspended
     }
 
@@ -132,8 +132,23 @@ public final class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         // Observe network state change
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            self?.updateQueueSuspension()
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] newNetworkStatus in
+            guard let self = self else {
+                return
+            }
+
+            guard UserDefaults.shared.isWifiOnly else {
+                self.updateQueueSuspension()
+                return
+            }
+
+            self.operationQueue.isSuspended = true
+            self.refreshPhotoSync(
+                userId: self.accountManager.currentUserId,
+                driveId: self.accountManager.currentDriveId,
+                newNetworkStatus: newNetworkStatus
+            )
+            self.updateQueueSuspension()
         }
 
         observeMemoryWarnings()

@@ -47,6 +47,7 @@ extension UploadQueue: UploadNotifiable {
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
                   uploadFile.error != .taskCancelled,
+                  uploadFile.error != .uploadOverDataRestrictedError,
                   !uploadFile.ownedByFileProvider else {
                 return
             }
