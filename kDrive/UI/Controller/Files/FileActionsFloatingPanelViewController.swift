@@ -30,7 +30,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var downloadQueue: DownloadQueueable
 
     private(set) var driveFileManager: DriveFileManager!
-    private(set) var file: File!
+    private(set) var frozenFile: File!
 
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
@@ -43,7 +43,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     var sharedWithMe: Bool {
-        return file.visibility == .isInSharedSpace
+        return frozenFile.visibility == .isInSharedSpace
     }
 
     enum Section: CaseIterable {
@@ -80,9 +80,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                guard self?.file != nil else { return }
-                self?.file.realm?.refresh()
-                if self?.file.isInvalidated == true {
+                guard self?.frozenFile != nil else { return }
+                self?.frozenFile.realm?.refresh()
+                if self?.frozenFile.isInvalidated == true {
                     // File has been removed
                     self?.dismiss(animated: true)
                 } else {
@@ -93,36 +93,39 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     func setFile(_ newFile: File, driveFileManager: DriveFileManager) {
-        self.driveFileManager = driveFileManager
-
-        // Try to get a live File
-        var newFile = newFile
-        if !newFile.isManagedByRealm || newFile.isFrozen {
-            if let file = driveFileManager.getCachedFile(id: newFile.id, freeze: false) {
-                newFile = file
-            } else {
-                let message = "Got a file that doesn't exist in Realm in FileQuickActionsFloatingPanelViewController!"
-                SentryDebug.capture(message: message)
-            }
+        guard newFile.isInvalidated == false else {
+            dismiss(animated: true)
+            return
         }
 
-        if file == nil || file != newFile {
-            file = newFile
-            fileObserver?.cancel()
-            fileObserver = driveFileManager.observeFileUpdated(self, fileId: file.id) { [weak self] _ in
-                Task { @MainActor in
-                    self?.file.realm?.refresh()
-                    if self?.file.isInvalidated == true {
-                        // File has been removed
-                        self?.dismiss(animated: true)
-                    } else {
-                        self?.reload(animated: true)
-                    }
+        guard frozenFile != newFile else {
+            dismiss(animated: true)
+            return
+        }
+
+        self.driveFileManager = driveFileManager
+        if newFile.realm == nil || newFile.isFrozen {
+            frozenFile = newFile
+        } else {
+            frozenFile = newFile.freeze()
+        }
+
+        defer { reload(animated: false) }
+
+        frozenFile = newFile
+        fileObserver?.cancel()
+        fileObserver = driveFileManager.observeFileUpdated(self, fileId: frozenFile.id) { [weak self] freshFile in
+            Task { @MainActor in
+                guard let self else { return }
+                assert(freshFile.isFrozen, "Realm should notify with a frozen file")
+                self.frozenFile = freshFile
+                if freshFile.isInvalidated {
+                    self.dismiss(animated: true)
+                } else {
+                    self.reload(animated: true)
                 }
             }
         }
-
-        reload(animated: false)
     }
 
     // MARK: - Private methods
@@ -175,7 +178,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     func presentShareSheet(from indexPath: IndexPath) {
-        let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: [frozenFile.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = collectionView
             .cellForItem(at: indexPath) ?? collectionView
         present(activityViewController, animated: true)
@@ -194,7 +197,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
         downloadObserver = downloadQueue
-            .observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
+            .observeFileDownloaded(observerViewController, fileId: frozenFile.id) { [weak self] _, error in
                 self?.downloadAction = nil
                 self?.setLoading(true, action: action, at: indexPath)
                 Task { @MainActor in
@@ -207,14 +210,14 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
 
         if let publicShareProxy = driveFileManager.publicShareProxy {
-            downloadQueue.addPublicShareToQueue(file: file,
+            downloadQueue.addPublicShareToQueue(file: frozenFile,
                                                 driveFileManager: driveFileManager,
                                                 publicShareProxy: publicShareProxy,
                                                 itemIdentifier: nil,
                                                 onOperationCreated: nil,
                                                 completion: nil)
         } else {
-            downloadQueue.addToQueue(file: file,
+            downloadQueue.addToQueue(file: frozenFile,
                                      userId: accountManager.currentUserId,
                                      itemIdentifier: nil)
         }
@@ -222,7 +225,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
         UIConstants.presentLinkPreviewForFile(
-            file,
+            frozenFile,
             link: link,
             from: self,
             sourceView: collectionView.cellForItem(at: indexPath) ?? collectionView
@@ -250,20 +253,20 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         switch Self.sections[indexPath.section] {
         case .header:
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
-            cell.configureWith(driveFileManager: driveFileManager, file: file)
+            cell.configureWith(driveFileManager: driveFileManager, file: frozenFile)
             cell.moreButton.isHidden = true
             return cell
         case .quickActions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = quickActions[indexPath.item]
-            cell.configure(with: action, file: file)
+            cell.configure(with: action, file: frozenFile)
             return cell
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
             cell.configure(
                 with: action,
-                file: file,
+                file: frozenFile,
                 showProgress: downloadAction == action,
                 driveFileManager: driveFileManager,
                 currentPackId: packId
@@ -305,7 +308,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             eventCategory = .fileListFileAction
         }
 
-        MatomoUtils.trackFileAction(action: action, file: file, category: eventCategory)
+        MatomoUtils.trackFileAction(action: action, file: frozenFile, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }
@@ -315,13 +318,13 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 extension FileActionsFloatingPanelViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
-        guard Self.sections[indexPath.section] == .header, file.capabilities.canMove && !sharedWithMe else {
+        guard Self.sections[indexPath.section] == .header, frozenFile.capabilities.canMove && !sharedWithMe else {
             return []
         }
 
-        let dragAndDropFile = DragAndDropFile(file: file, userId: driveFileManager.drive.userId)
+        let dragAndDropFile = DragAndDropFile(file: frozenFile, userId: driveFileManager.drive.userId)
         let itemProvider = NSItemProvider(object: dragAndDropFile)
-        itemProvider.suggestedName = file.name
+        itemProvider.suggestedName = frozenFile.name
         let draggedItem = UIDragItem(itemProvider: itemProvider)
         if let previewImageView = (collectionView.cellForItem(at: indexPath) as? FileCollectionViewCell)?.logoImage {
             draggedItem.previewProvider = {
