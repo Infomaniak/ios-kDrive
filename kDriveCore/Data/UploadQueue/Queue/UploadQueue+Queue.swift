@@ -36,6 +36,9 @@ extension UploadQueue: UploadQueueable {
     /// Not uploaded yet, can retry, owned by `FileProvider`.
     static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
 
+    static let failedUploadingPhotoSyncQuery =
+        "uploadDate = nil AND assetLocalIdentifier != nil AND (_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@)"
+
     /// Query to fetch `UploadFiles` for the current execution context
     var uploadFileQuery: String? {
         switch appContextService.context {
@@ -447,10 +450,7 @@ extension UploadQueue: UploadQueueable {
 
     private func getAllPHAssetsUploading(userId: Int, driveId: Int) -> [String] {
         let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
-        let failedAssetPredicate = NSPredicate(
-            format: "assetLocalIdentifier != nil AND (_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@)",
-            ownedByFileProvider
-        )
+        let failedAssetPredicate = NSPredicate(format: Self.failedUploadingPhotoSyncQuery, ownedByFileProvider)
         let failedUploadingFiles = getUploadingFiles(
             userId: userId,
             driveId: driveId,
