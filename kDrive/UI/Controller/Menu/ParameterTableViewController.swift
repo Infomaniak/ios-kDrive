@@ -77,7 +77,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case theme
         case notifications
         case security
-        case wifi
+        case offlineSync
         case storage
         case about
         case deleteAccount
@@ -92,8 +92,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.notificationTitle
             case .security:
                 return KDriveResourcesStrings.Localizable.securityTitle
-            case .wifi:
-                return KDriveResourcesStrings.Localizable.settingsOnlyWifiSyncTitle
+            case .offlineSync:
+                return KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
             case .storage:
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
@@ -116,6 +116,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterAboutTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
+        tableView.register(cellView: AboutDetailTableViewCell.self)
 
         navigationItem.hideBackButtonText()
         checkMykSuiteEnabledAndRefresh()
@@ -234,15 +235,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 cell.valueLabel.text = getNotificationText()
             }
             return cell
-        case .wifi:
-            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
-            cell.switchHandler = { sender in
-                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
-                UserDefaults.shared.isWifiOnly = sender.isOn
-            }
-            return cell
+
         case .security, .storage, .about, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
@@ -250,6 +243,16 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
             )
             cell.titleLabel.text = row.title
+            return cell
+
+        case .offlineSync:
+            let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(
+                isFirst: indexPath.row == 0,
+                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+            )
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+            cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
             return cell
         }
     }
@@ -316,8 +319,11 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(), animated: true)
-        case .wifi:
-            break
+        case .offlineSync:
+            navigationController?.pushViewController(
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
+                animated: true
+            )
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .deleteAccount:
