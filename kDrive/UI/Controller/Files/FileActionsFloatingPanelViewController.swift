@@ -29,8 +29,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
-    var driveFileManager: DriveFileManager!
-    var file: File!
+    private(set) var driveFileManager: DriveFileManager!
+    private(set) var file: File!
+
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
     weak var presentingParent: UIViewController?
@@ -120,7 +121,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         }
-        // Reload
+
         reload(animated: false)
     }
 
