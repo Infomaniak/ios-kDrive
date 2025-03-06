@@ -346,7 +346,7 @@ public extension UserDefaults {
                let mode = SyncMode(rawValue: rawValue) {
                 return mode
             }
-            return .onlyWifi
+            return .wifiAndMobileData
         }
         set {
             set(newValue.rawValue, forKey: key(.syncOfflineMode))
