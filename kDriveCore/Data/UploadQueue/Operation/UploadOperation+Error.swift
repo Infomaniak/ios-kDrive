@@ -130,6 +130,7 @@ extension UploadOperation {
 
                 case .uploadOverDataRestrictedError:
                     file.error = DriveError.uploadOverDataRestrictedError
+                    file.maxRetryCount = 0
                 }
 
                 errorHandled = true
