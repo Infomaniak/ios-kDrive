@@ -121,6 +121,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         await catching {
             try self.checkCancelation()
+
+            try self.checkForRestrictedUploadOverDataMode()
+
             try self.freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
             // Fetch a background task identifier
@@ -128,9 +131,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
             // Clean existing error if any
             try self.cleanUploadFileError()
-
-            // Pause the upload depending on the status
-            try self.checkForRestrictedUploadOverDataMode()
 
             // Fetch content from local library if needed
             try await self.getPhAssetIfNeeded()
