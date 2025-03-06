@@ -24,34 +24,16 @@ import SwiftUI
 
 enum AboutPrivacyViewBridgeController {
     static func instantiate() -> UIViewController {
-        let swiftUIView = AboutPrivacyView()
-        return UIHostingController(rootView: swiftUIView)
-    }
-}
-
-struct AboutPrivacyView: View {
-    @AppStorage(UserDefaults.shared.key(.matomoAuthorized)) private var matomoAuthorized = DefaultPreferences.matomoAuthorized
-
-    var body: some View {
-        PrivacyManagementView(
+        let swiftUIView = PrivacyManagementView(
             urlRepository: URLConstants.sourceCode.url,
             backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
             illustration: KDriveAsset.documentSignaturePencilBulb.swiftUIImage,
             userDefaultStore: .shared,
             userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
-            userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized)
+            userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),
+            matomo: MatomoUtils.shared
         )
-        .onChange(of: matomoAuthorized) { newValue in
-            @InjectService var matomo: InfomaniakCoreCommonUI.MatomoUtils
-            #if DEBUG || TEST
-            matomo.optOut(true)
-            #else
-            matomo.optOut(!newValue)
-            #endif
-        }
+        .defaultAppStorage(UserDefaults.shared)
+        return UIHostingController(rootView: swiftUIView)
     }
-}
-
-#Preview {
-    AboutPrivacyView()
 }

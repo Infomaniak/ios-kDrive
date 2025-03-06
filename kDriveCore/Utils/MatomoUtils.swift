@@ -18,10 +18,17 @@
 
 import Foundation
 import InfomaniakDI
+import InfomaniakPrivacyManagement
 import MatomoTracker
 
+extension MatomoTracker: @retroactive MatomoOptOutable {
+    public func optOut(_ setOptOut: Bool) {
+        isOptedOut = setOptOut
+    }
+}
+
 public enum MatomoUtils {
-    static let shared: MatomoTracker = {
+    public static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
 
         #if DEBUG
