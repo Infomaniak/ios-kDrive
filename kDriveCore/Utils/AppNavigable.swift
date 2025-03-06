@@ -89,6 +89,15 @@ public protocol RouterFileNavigable {
         apiFetcher: PublicShareApiFetcher
     )
 
+    /// Present a single file public share, regardless of authenticated state
+    @MainActor func presentPublicShare(
+        singleFrozenFile: File,
+        virtualFrozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    )
+
     /// Present a list of files from a folder
     /// - Parameters:
     ///   - frozenFolder: Folder to display

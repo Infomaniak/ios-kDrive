@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
+import RealmSwift
 import SwiftRegex
 import UIKit
 
@@ -176,24 +177,51 @@ public enum UniversalLinksHelper {
                                         apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
-                let rootFolder = try await apiFetcher.getShareLinkFile(driveId: driveId,
-                                                                       linkUuid: linkUuid,
-                                                                       fileId: fileId)
-                // Root folder must be in database for the FileListViewModel to work
-                try driveFileManager.database.writeTransaction { writableRealm in
-                    writableRealm.add(rootFolder, update: .modified)
-                }
-
-                let frozenRootFolder = rootFolder.freeze()
+                let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                                                                        linkUuid: linkUuid,
+                                                                        fileId: fileId)
 
                 @InjectService var appNavigable: AppNavigable
                 let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
-                await appNavigable.presentPublicShare(
-                    frozenRootFolder: frozenRootFolder,
-                    publicShareProxy: publicShareProxy,
-                    driveFileManager: driveFileManager,
-                    apiFetcher: apiFetcher
-                )
+
+                if publicShare.isDirectory {
+                    // Root folder must be in database for the FileListViewModel to work
+                    try driveFileManager.database.writeTransaction { writableRealm in
+                        writableRealm.add(publicShare, update: .modified)
+                    }
+
+                    let frozenRootFolder = publicShare.freeze()
+                    await appNavigable.presentPublicShare(
+                        frozenRootFolder: frozenRootFolder,
+                        publicShareProxy: publicShareProxy,
+                        driveFileManager: driveFileManager,
+                        apiFetcher: apiFetcher
+                    )
+                } else {
+                    let virtualRoot = File(id: DriveFileManager.constants.rootID,
+                                           name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+                                           driveId: nil,
+                                           visibility: nil)
+
+                    virtualRoot.children.insert(publicShare)
+
+                    // Folder structure must be in database
+                    try driveFileManager.database.writeTransaction { writableRealm in
+                        writableRealm.add(virtualRoot, update: .modified)
+                        writableRealm.add(publicShare, update: .modified)
+                    }
+
+                    let frozenRootFolder = virtualRoot.freeze()
+                    let frozenPublicShareFile = publicShare.freeze()
+                    await appNavigable.presentPublicShare(
+                        singleFrozenFile: frozenPublicShareFile,
+                        virtualFrozenRootFolder: frozenRootFolder,
+                        publicShareProxy: publicShareProxy,
+                        driveFileManager: driveFileManager,
+                        apiFetcher: apiFetcher
+                    )
+                }
+
             } catch {
                 DDLogError(
                     "[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"

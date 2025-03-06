@@ -182,4 +182,14 @@ public final class MCKRouter: AppNavigable {
     ) {
         logNoop()
     }
+
+    @MainActor public func presentPublicShare(
+        singleFrozenFile: File,
+        virtualFrozenRootFolder: File,
+        publicShareProxy: PublicShareProxy,
+        driveFileManager: DriveFileManager,
+        apiFetcher: PublicShareApiFetcher
+    ) {
+        logNoop()
+    }
 }
