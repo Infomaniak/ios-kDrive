@@ -31,7 +31,7 @@ enum AboutPrivacyViewBridgeController {
             userDefaultStore: .shared,
             userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
             userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),
-            matomo: MatomoUtils.shared
+            matomo: MatomoUtils()
         )
         .defaultAppStorage(UserDefaults.shared)
         return UIHostingController(rootView: swiftUIView)

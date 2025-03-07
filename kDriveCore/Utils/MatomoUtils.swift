@@ -21,14 +21,10 @@ import InfomaniakDI
 import InfomaniakPrivacyManagement
 import MatomoTracker
 
-extension MatomoTracker: @retroactive MatomoOptOutable {
-    public func optOut(_ setOptOut: Bool) {
-        isOptedOut = setOptOut
-    }
-}
+public struct MatomoUtils: MatomoOptOutable {
+    public init() {}
 
-public enum MatomoUtils {
-    public static let shared: MatomoTracker = {
+    public static var shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
 
         #if DEBUG
@@ -39,6 +35,10 @@ public enum MatomoUtils {
         tracker.userId = String(accountManager.currentUserId)
         return tracker
     }()
+
+    public func optOut(_ setOptOut: Bool) {
+        MatomoUtils.shared.isOptedOut = setOptOut
+    }
 
     public enum Views: String {
         case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
