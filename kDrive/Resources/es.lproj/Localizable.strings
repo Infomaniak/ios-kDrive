@@ -1720,6 +1720,9 @@
 /* loco:6049df4d5c2c3a04bc397a39 */
 "settingsOnlyWifiSyncTitle" = "Transferencia sólo con WiFi";
 
+/* loco:67bc4dd60ddd119f9d056e02 */
+"settingsOptionDataManagement" = "Gestión de datos";
+
 /* loco:67a9f25b711672a919072474 */
 "settingsSectionGeneral" = "General";
 
