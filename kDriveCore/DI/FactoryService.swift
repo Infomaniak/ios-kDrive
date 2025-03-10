@@ -36,7 +36,7 @@ private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9
 /// Something that setups the service factories
 public enum FactoryService {
     public static func setupDependencyInjection(other: [Factory] = []) {
-        let factoriesWithIdentifier = debugServices + transactionableServices
+        let factoriesWithIdentifier = debugServices + transactionableServices + uploadQueues
         SimpleResolver.register(factoriesWithIdentifier)
         let factories = networkingServices + miscServices + other
         SimpleResolver.register(factories)
@@ -100,22 +100,29 @@ public enum FactoryService {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
-            Factory(type: UploadQueue.self) { _, _ in
-                UploadQueue()
+            Factory(type: UploadQueue.self) { _, resolver in
+                // TODO: Remove, compatibility layer
+                try resolver.resolve(type: UploadQueueable.self,
+                                     forCustomTypeIdentifier: UploadQueueID.global,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
             },
             Factory(type: UploadQueueable.self) { _, resolver in
+                // TODO: Remove legacy
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
             Factory(type: UploadQueueObservable.self) { _, resolver in
+                // TODO: Remove legacy
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
             Factory(type: UploadNotifiable.self) { _, resolver in
+                // TODO: Remove legacy
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
@@ -225,6 +232,22 @@ public enum FactoryService {
             (driveInfoTransactionable, kDriveDBID.driveInfo)
         ]
 
+        return services
+    }
+
+    static var uploadQueues: [FactoryWithIdentifier] {
+        let globalUploadQueue = Factory(type: UploadQueueable.self) { _, _ in
+            UploadQueue()
+        }
+
+        let photoUploadQueue = Factory(type: UploadQueueable.self) { _, _ in
+            PhotoUploadQueue()
+        }
+
+        let services = [
+            (globalUploadQueue, UploadQueueID.global),
+            (photoUploadQueue, UploadQueueID.photo)
+        ]
         return services
     }
 }

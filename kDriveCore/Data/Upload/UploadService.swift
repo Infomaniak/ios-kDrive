@@ -18,11 +18,95 @@
 
 import Foundation
 
+// import RealmSwift
+import InfomaniakDI
+
 public protocol UploadServiceable {
-    func dummy()
+    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
+    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
+    /// - Returns:Matching UploadFile if any
+    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
+
+    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
+
+    /// Read database to enqueue all non finished upload tasks.
+    func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
+
+    func suspendAllOperations()
+
+    func resumeAllOperations()
+
+    /// Wait for all (started or not) enqueued operations to finish.
+    func waitForCompletion(_ completionHandler: @escaping () -> Void)
+
+    // Retry to upload a specific file, this re-enqueue the task.
+    func retry(_ uploadFileId: String)
+
+    // Retry all uploads within a specified graph, this re-enqueue the tasks.
+    func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
+
+    func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
+
+    /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
+    ///
+    /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
+    /// Further uploads will start from the mail app
+    func rescheduleRunningOperations()
+
+    /// Cancel all running operations, regardless of state
+    func cancelRunningOperations()
+
+    /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
+    /// - Parameter uploadFileId: the upload file id to cancel.
+    /// - Returns: true if fileId matched
+    func cancel(uploadFileId: String) -> Bool
+
+    /// Clean errors linked to any upload operation in base. Does not restart the operations.
+    ///
+    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
+    func cleanNetworkAndLocalErrorsForAllOperations()
 }
 
-public struct UploadService: UploadServiceable {
+public enum UploadQueueID {
+    public static let global = "global"
+    public static let photo = "photo"
+}
+
+public struct UploadService {
+    @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
+    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
+
     public init() {}
-    public func dummy() {}
+}
+
+extension UploadService: UploadServiceable {
+    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        return nil
+    }
+
+    public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        return nil
+    }
+
+    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString) {}
+
+    public func suspendAllOperations() {}
+
+    public func resumeAllOperations() {}
+
+    public func waitForCompletion(_ completionHandler: @escaping () -> Void) {}
+
+    public func retry(_ uploadFileId: String) {}
+
+    public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
+
+    public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
+
+    public func rescheduleRunningOperations() {}
+
+    public func cancelRunningOperations() {}
+
+    public func cancel(uploadFileId: String) -> Bool { return false }
+
+    public func cleanNetworkAndLocalErrorsForAllOperations() {}
 }
