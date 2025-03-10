@@ -97,6 +97,9 @@ public enum FactoryService {
             Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
             },
+            Factory(type: UploadServiceable.self) { _, _ in
+                UploadService()
+            },
             Factory(type: UploadQueue.self) { _, _ in
                 UploadQueue()
             },

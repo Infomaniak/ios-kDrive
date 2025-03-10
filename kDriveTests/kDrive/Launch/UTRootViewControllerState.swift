@@ -64,6 +64,9 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
             },
+            Factory(type: UploadServiceable.self) { _, _ in
+                UploadService()
+            },
             Factory(type: UploadQueueable.self) { _, resolver in
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
