@@ -111,7 +111,7 @@ extension UploadService: UploadServiceable {
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         globalUploadQueue.waitForCompletion {
-            photoUploadQueue.waitForCompletion {
+            self.photoUploadQueue.waitForCompletion {
                 completionHandler()
             }
         }
