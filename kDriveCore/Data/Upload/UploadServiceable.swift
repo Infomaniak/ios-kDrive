@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2024 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,36 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FileProvider
 import Foundation
-import RealmSwift
 
-public protocol UploadQueueable {
-    func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
+public enum UploadQueueID {
+    public static let global = "global"
+    public static let photo = "photo"
+}
 
+public protocol UploadServiceable {
     /// Fetch an uploading item for a given fileProviderItemIdentifier if any
     /// - Parameter fileProviderItemIdentifier: Identifier for lookup
     /// - Returns:Matching UploadFile if any
     func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
 
-    /// Fetch all uploading item for a given parent folder, userId, driveId
-    func getUploadingFiles(withParent parentId: Int,
-                           userId: Int,
-                           driveId: Int) -> Results<UploadFile>
-
     func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
 
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
-
-    /// Save an UploadFile in base and optionally enqueue the upload in main app
-    /// - Parameters:
-    ///   - uploadFile: The upload file to be processed
-    ///   - itemIdentifier: Optional item identifier
-    ///   - addToQueue: Should we schedule the upload as well ?
-    /// - Returns: An UploadOperation if any
-    func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?, addToQueue: Bool)
-        -> UploadOperationable?
 
     func suspendAllOperations()
 
@@ -71,10 +58,6 @@ public protocol UploadQueueable {
     /// Cancel all running operations, regardless of state
     func cancelRunningOperations()
 
-    /// Cancel an upload from an UploadFile. The UploadFile is removed and a matching operation is removed.
-    /// - Parameter file: the upload file id to cancel.
-    func cancel(uploadFile: UploadFile)
-
     /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
     /// - Parameter uploadFileId: the upload file id to cancel.
     /// - Returns: true if fileId matched
@@ -84,6 +67,4 @@ public protocol UploadQueueable {
     ///
     /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
     func cleanNetworkAndLocalErrorsForAllOperations()
-
-    var operationCount: Int { get }
 }

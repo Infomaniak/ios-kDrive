@@ -52,6 +52,10 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
+    public var operationCount: Int {
+        self.operationQueue.operationCount
+    }
+
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         Log.uploadQueue("waitForCompletion")
         DispatchQueue.global(qos: .default).async {

@@ -17,66 +17,44 @@
  */
 
 import Foundation
+import InfomaniakCoreDB
 
 // import RealmSwift
 import InfomaniakDI
 
-public protocol UploadServiceable {
-    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
-    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
-    /// - Returns:Matching UploadFile if any
-    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
-
-    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
-
-    /// Read database to enqueue all non finished upload tasks.
-    func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
-
-    func suspendAllOperations()
-
-    func resumeAllOperations()
-
-    /// Wait for all (started or not) enqueued operations to finish.
-    func waitForCompletion(_ completionHandler: @escaping () -> Void)
-
-    // Retry to upload a specific file, this re-enqueue the task.
-    func retry(_ uploadFileId: String)
-
-    // Retry all uploads within a specified graph, this re-enqueue the tasks.
-    func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
-
-    func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
-
-    /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
-    ///
-    /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
-    /// Further uploads will start from the mail app
-    func rescheduleRunningOperations()
-
-    /// Cancel all running operations, regardless of state
-    func cancelRunningOperations()
-
-    /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
-    /// - Parameter uploadFileId: the upload file id to cancel.
-    /// - Returns: true if fileId matched
-    func cancel(uploadFileId: String) -> Bool
-
-    /// Clean errors linked to any upload operation in base. Does not restart the operations.
-    ///
-    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
-    func cleanNetworkAndLocalErrorsForAllOperations()
-}
-
-public enum UploadQueueID {
-    public static let global = "global"
-    public static let photo = "photo"
-}
-
-public struct UploadService {
+public final class UploadService {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
 
+    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+//    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var appContextService: AppContextServiceable
+
+    let serialQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.upload-service",
+            qos: .userInitiated,
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
+
+    var pausedNotificationSent = false
+    var fileUploadedCount = 0
+    var observations = (
+        didUploadFile: [UUID: (UploadFile, File?) -> Void](),
+        didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
+        didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
+    )
+
     public init() {}
+
+    public var operationCount: Int {
+        globalUploadQueue.operationCount + photoUploadQueue.operationCount
+    }
 }
 
 extension UploadService: UploadServiceable {
