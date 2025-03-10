@@ -23,7 +23,7 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public final class UploadQueue: ParallelismHeuristicDelegate {
+public class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
 
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
