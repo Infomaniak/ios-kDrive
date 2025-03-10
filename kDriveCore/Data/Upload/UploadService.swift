@@ -81,32 +81,77 @@ public struct UploadService {
 
 extension UploadService: UploadServiceable {
     public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        return nil
+        guard let uploadFile = globalUploadQueue.getUploadingFile(fileProviderItemIdentifier: fileProviderItemIdentifier) else {
+            return photoUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier)
+        }
+        return uploadFile
     }
 
     public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        return nil
+        guard let file = globalUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier) else {
+            return photoUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier)
+        }
+        return file
     }
 
-    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString) {}
+    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString) {
+        globalUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
+        photoUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
+    }
 
-    public func suspendAllOperations() {}
+    public func suspendAllOperations() {
+        globalUploadQueue.suspendAllOperations()
+        photoUploadQueue.suspendAllOperations()
+    }
 
-    public func resumeAllOperations() {}
+    public func resumeAllOperations() {
+        globalUploadQueue.resumeAllOperations()
+        photoUploadQueue.resumeAllOperations()
+    }
 
-    public func waitForCompletion(_ completionHandler: @escaping () -> Void) {}
+    public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
+        globalUploadQueue.waitForCompletion {
+            photoUploadQueue.waitForCompletion {
+                completionHandler()
+            }
+        }
+    }
 
-    public func retry(_ uploadFileId: String) {}
+    public func retry(_ uploadFileId: String) {
+        globalUploadQueue.retry(uploadFileId)
+        photoUploadQueue.retry(uploadFileId)
+    }
 
-    public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
+    public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
+        globalUploadQueue.retryAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+        photoUploadQueue.retryAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+    }
 
-    public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
+    public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
+        globalUploadQueue.cancelAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+        photoUploadQueue.cancelAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+    }
 
-    public func rescheduleRunningOperations() {}
+    public func rescheduleRunningOperations() {
+        globalUploadQueue.rescheduleRunningOperations()
+        photoUploadQueue.rescheduleRunningOperations()
+    }
 
-    public func cancelRunningOperations() {}
+    public func cancelRunningOperations() {
+        globalUploadQueue.cancelRunningOperations()
+        photoUploadQueue.cancelRunningOperations()
+    }
 
-    public func cancel(uploadFileId: String) -> Bool { return false }
+    public func cancel(uploadFileId: String) -> Bool {
+        guard !globalUploadQueue.cancel(uploadFileId: uploadFileId) else {
+            return true
+        }
 
-    public func cleanNetworkAndLocalErrorsForAllOperations() {}
+        return photoUploadQueue.cancel(uploadFileId: uploadFileId)
+    }
+
+    public func cleanNetworkAndLocalErrorsForAllOperations() {
+        globalUploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
+        photoUploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
+    }
 }
