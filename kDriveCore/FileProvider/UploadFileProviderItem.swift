@@ -55,8 +55,8 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
     // MARK: optional NSFileProviderItem properties
 
     public var isUploading: Bool {
-        @InjectService var uploadQueue: UploadQueue
-        let uploadFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue)
+        @InjectService var uploadDataSource: UploadServiceDataSourceable
+        let uploadFile = uploadDataSource.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue)
         return uploadFile != nil
     }
 
