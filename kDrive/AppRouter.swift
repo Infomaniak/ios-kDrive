@@ -659,8 +659,8 @@ public struct AppRouter: AppNavigable {
         photoUploader.scheduleNewPicturesForUpload()
 
         // Resolving an upload queue will restart it if this is the first time
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+        @InjectService var uploadService: UploadServiceable
+        uploadService.rebuildUploadQueueFromObjectsInRealm()
     }
 
     // MARK: RouterFileNavigable
