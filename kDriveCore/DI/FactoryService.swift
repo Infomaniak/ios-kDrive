@@ -100,6 +100,12 @@ public enum FactoryService {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
+            Factory(type: UploadServiceDataSourceable.self) { _, resolver in
+                try resolver.resolve(type: UploadServiceable.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: UploadQueue.self) { _, resolver in
                 // TODO: Remove, compatibility layer
                 try resolver.resolve(type: UploadQueueable.self,

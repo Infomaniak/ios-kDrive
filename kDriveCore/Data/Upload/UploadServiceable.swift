@@ -24,13 +24,6 @@ public enum UploadQueueID {
 }
 
 public protocol UploadServiceable {
-    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
-    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
-    /// - Returns:Matching UploadFile if any
-    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
-
-    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
-
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
 

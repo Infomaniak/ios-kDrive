@@ -19,7 +19,53 @@
 import Foundation
 import RealmSwift
 
-public extension UploadService {
+public protocol UploadServiceDataSourceable {
+    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
+    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
+    /// - Returns:Matching UploadFile if any
+    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
+
+    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
+}
+
+extension UploadService: UploadServiceDataSourceable {
+    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
+    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
+
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
+                "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
+                fileProviderItemIdentifier,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .first
+        }
+
+        return matchedFile
+    }
+
+    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploaded within an execution context
+    public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
+        Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
+
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
+                "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
+                fileProviderItemIdentifier,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .first
+        }
+
+        return matchedFile
+    }
+}
+
+// TODO: Check if still in use
+extension UploadService {
     /// Returns all the UploadFiles currently uploading regardless of execution context
     func getAllUploadingFilesFrozen() -> Results<UploadFile> {
         return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
@@ -82,39 +128,5 @@ public extension UploadService {
         return writableRealm.objects(UploadFile.self)
             .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
             .filter(optionalPredicate: optionalPredicate)
-    }
-
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
-    func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
-
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
-            lazyCollection.filter(
-                "uploadDate = nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
-                fileProviderItemIdentifier,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .first
-        }
-
-        return matchedFile
-    }
-
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploaded within an execution context
-    func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
-
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let matchedFile = uploadsDatabase.fetchObject(ofType: UploadFile.self) { lazyCollection in
-            lazyCollection.filter(
-                "uploadDate != nil AND fileProviderItemIdentifier = %@ AND ownedByFileProvider == %@",
-                fileProviderItemIdentifier,
-                NSNumber(value: ownedByFileProvider)
-            )
-            .first
-        }
-
-        return matchedFile
     }
 }
