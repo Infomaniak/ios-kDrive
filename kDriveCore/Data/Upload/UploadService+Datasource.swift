@@ -20,16 +20,16 @@ import Foundation
 import RealmSwift
 
 public protocol UploadServiceDataSourceable {
-    /// Fetch an uploading item for a given fileProviderItemIdentifier if any
-    /// - Parameter fileProviderItemIdentifier: Identifier for lookup
-    /// - Returns:Matching UploadFile if any
     func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile?
 
     func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile?
+
+    func getUploadingFiles(withParent parentId: Int,
+                           userId: Int,
+                           driveId: Int) -> Results<UploadFile>
 }
 
 extension UploadService: UploadServiceDataSourceable {
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploading within an execution context
     public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
         Log.uploadQueue("getUploadingFile: \(fileProviderItemIdentifier)", level: .info)
 
@@ -46,7 +46,6 @@ extension UploadService: UploadServiceDataSourceable {
         return matchedFile
     }
 
-    /// Get an UploadFile matching a FileProviderItemIdentifier if any uploaded within an execution context
     public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
         Log.uploadQueue("getUploadedFile: \(fileProviderItemIdentifier)", level: .info)
 
@@ -62,6 +61,16 @@ extension UploadService: UploadServiceDataSourceable {
 
         return matchedFile
     }
+
+    public func getUploadingFiles(withParent parentId: Int,
+                                  userId: Int,
+                                  driveId: Int) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        let parentDirectoryPredicate = NSPredicate(format: "parentDirectoryId = %d AND ownedByFileProvider == %@",
+                                                   parentId,
+                                                   NSNumber(value: ownedByFileProvider))
+        return getUploadingFiles(userId: userId, driveId: driveId, optionalPredicate: parentDirectoryPredicate)
+    }
 }
 
 // TODO: Check if still in use
@@ -72,16 +81,6 @@ extension UploadService {
             lazyCollection.filter("uploadDate = nil")
                 .freezeIfNeeded()
         }
-    }
-
-    func getUploadingFiles(withParent parentId: Int,
-                           userId: Int,
-                           driveId: Int) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        let parentDirectoryPredicate = NSPredicate(format: "parentDirectoryId = %d AND ownedByFileProvider == %@",
-                                                   parentId,
-                                                   NSNumber(value: ownedByFileProvider))
-        return getUploadingFiles(userId: userId, driveId: driveId, optionalPredicate: parentDirectoryPredicate)
     }
 
     func getUploadingFiles(userId: Int,
