@@ -69,7 +69,6 @@ extension URLSession: Identifiable {
 public final class BackgroundUploadSessionManager: NSObject,
     BackgroundUploadSessionManageable,
     BackgroundUploadSessionCompletionable {
-    @LazyInjectService var uploadQueue: UploadQueue
 
     private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
 
