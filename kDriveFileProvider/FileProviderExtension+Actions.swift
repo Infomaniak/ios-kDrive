@@ -155,7 +155,7 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("renameItem")
         Task {
-            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+            guard self.uploadDataSource.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
                 Log.fileProvider("renameItem not supported while uploading", level: .error)
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
@@ -197,7 +197,7 @@ extension FileProviderExtension {
     ) {
         Log.fileProvider("reparentItem")
         Task {
-            guard self.uploadQueue.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
+            guard self.uploadDataSource.getUploadingFile(fileProviderItemIdentifier: itemIdentifier.rawValue) == nil else {
                 Log.fileProvider("reparentItem not supported while uploading", level: .error)
                 completionHandler(nil, NSFileProviderError(.noSuchItem))
                 return
@@ -273,7 +273,7 @@ extension FileProviderExtension {
         Log.fileProvider("trashItem withIdentifier:\(fileId as Int?) uploadFileId:\(uploadFileId)")
         Task {
             // Cancel upload if any matching
-            _ = self.uploadQueue.cancel(uploadFileId: uploadFileId)
+            _ = self.uploadService.cancel(uploadFileId: uploadFileId)
 
             guard let fileId,
                   let file = self.driveFileManager.getCachedFile(id: fileId) else {

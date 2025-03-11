@@ -16,7 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FileProvider
 import Foundation
+import InfomaniakCore
 import RealmSwift
 
 public protocol UploadServiceDataSourceable {
@@ -32,6 +34,17 @@ public protocol UploadServiceDataSourceable {
                            driveIds: [Int]) -> Results<UploadFile>
 
     func getAllUploadingFilesFrozen() -> Results<UploadFile>
+
+    /// Save an UploadFile in base and optionally enqueue the upload in main app
+    /// - Parameters:
+    ///   - uploadFile: The upload file to be processed
+    ///   - itemIdentifier: Optional item identifier
+    ///   - addToQueue: Should we schedule the upload as well ?
+    /// - Returns: An UploadOperation if any
+    @discardableResult
+    func saveToRealm(_ uploadFile: UploadFile,
+                     itemIdentifier: NSFileProviderItemIdentifier?,
+                     addToQueue: Bool) -> UploadOperationable?
 }
 
 extension UploadService: UploadServiceDataSourceable {
@@ -96,6 +109,55 @@ extension UploadService: UploadServiceDataSourceable {
             lazyCollection.filter("uploadDate = nil")
                 .freezeIfNeeded()
         }
+    }
+
+    @discardableResult
+    public func saveToRealm(_ uploadFile: UploadFile,
+                            itemIdentifier: NSFileProviderItemIdentifier? = nil,
+                            addToQueue: Bool = true) -> UploadOperationable? {
+        let expiringActivity = ExpiringActivity()
+        expiringActivity.start()
+        defer {
+            expiringActivity.endAll()
+        }
+
+        Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
+
+        assert(!uploadFile.isManagedByRealm, "we expect the file to be outside of realm at the moment")
+
+        // Save drive and directory
+        UserDefaults.shared.lastSelectedUser = uploadFile.userId
+        UserDefaults.shared.lastSelectedDrive = uploadFile.driveId
+        UserDefaults.shared.lastSelectedDirectory = uploadFile.parentDirectoryId
+
+        uploadFile.name = uploadFile.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if uploadFile.error != nil {
+            uploadFile.error = nil
+        }
+
+        // Keep a detached file for processing it later
+        let detachedFile = uploadFile.detached()
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            Log.uploadQueue("save ufid:\(uploadFile.id)")
+            writableRealm.add(uploadFile, update: .modified)
+            Log.uploadQueue("did save ufid:\(uploadFile.id)")
+        }
+
+        guard addToQueue else {
+            return nil
+        }
+
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("addToQueue disabled in ShareExtension", level: .error)
+            return nil
+        }
+
+        // TODO: Insert in queue
+//        // Process adding a detached file to the uploadQueue
+//        let uploadOperation = self.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
+//        return uploadOperation
+
+        return nil
     }
 }
 
