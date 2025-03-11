@@ -58,7 +58,8 @@ public final class UploadService {
 }
 
 extension UploadService: UploadServiceable {
-    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString) {
+    public func rebuildUploadQueueFromObjectsInRealm() {
+        let caller: StaticString = #function
         globalUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
         photoUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
     }

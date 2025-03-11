@@ -25,7 +25,7 @@ public enum UploadQueueID {
 
 public protocol UploadServiceable {
     /// Read database to enqueue all non finished upload tasks.
-    func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
+    func rebuildUploadQueueFromObjectsInRealm()
 
     func suspendAllOperations()
 
@@ -54,7 +54,7 @@ public protocol UploadServiceable {
     /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
     /// - Parameter uploadFileId: the upload file id to cancel.
     /// - Returns: true if fileId matched
-    func cancel(uploadFileId: String) -> Bool
+    @discardableResult func cancel(uploadFileId: String) -> Bool
 
     /// Clean errors linked to any upload operation in base. Does not restart the operations.
     ///
