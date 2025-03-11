@@ -35,6 +35,10 @@ public protocol UploadServiceDataSourceable {
 
     func getAllUploadingFilesFrozen() -> Results<UploadFile>
 
+    func getUploadedFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile>
+
+    func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate?) -> Results<UploadFile>
+
     /// Save an UploadFile in base and optionally enqueue the upload in main app
     /// - Parameters:
     ///   - uploadFile: The upload file to be processed
@@ -111,6 +115,22 @@ extension UploadService: UploadServiceDataSourceable {
         }
     }
 
+    public func getUploadedFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection
+                .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
+                .filter(optionalPredicate: optionalPredicate)
+        }
+    }
+
+    public func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return writableRealm.objects(UploadFile.self)
+            .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
+            .filter(optionalPredicate: optionalPredicate)
+    }
+
     @discardableResult
     public func saveToRealm(_ uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil,
@@ -177,21 +197,5 @@ extension UploadService {
             .filter(optionalPredicate: optionalPredicate)
             .sorted(byKeyPath: "taskCreationDate")
         }
-    }
-
-    func getUploadedFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-            lazyCollection
-                .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
-                .filter(optionalPredicate: optionalPredicate)
-        }
-    }
-
-    func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return writableRealm.objects(UploadFile.self)
-            .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
-            .filter(optionalPredicate: optionalPredicate)
     }
 }

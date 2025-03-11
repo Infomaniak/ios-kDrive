@@ -27,6 +27,9 @@ public protocol UploadServiceable {
     /// True if all upload queues are suspended
     var isSuspended: Bool { get }
 
+    /// Sum of all operations in all the queues
+    var operationCount: Int { get }
+
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm()
 
