@@ -43,7 +43,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     var photoPickerDelegate = PhotoPickerDelegate()
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var router: AppNavigable
 
@@ -385,15 +385,17 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    uploadQueue.saveToRealm(
-                        UploadFile(
-                            parentDirectoryId: documentPicker.importDriveDirectory.id,
-                            userId: accountManager.currentUserId,
-                            driveId: documentPicker.importDriveDirectory.driveId,
-                            url: targetURL,
-                            name: url.lastPathComponent
-                        )
+                    let newFile = UploadFile(
+                        parentDirectoryId: documentPicker.importDriveDirectory.id,
+                        userId: accountManager.currentUserId,
+                        driveId: documentPicker.importDriveDirectory.driveId,
+                        url: targetURL,
+                        name: url.lastPathComponent
                     )
+
+                    uploadDataSource.saveToRealm(newFile,
+                                                 itemIdentifier: nil,
+                                                 addToQueue: true)
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }
