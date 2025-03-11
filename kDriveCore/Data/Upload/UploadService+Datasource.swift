@@ -27,6 +27,9 @@ public protocol UploadServiceDataSourceable {
     func getUploadingFiles(withParent parentId: Int,
                            userId: Int,
                            driveId: Int) -> Results<UploadFile>
+
+    func getUploadingFiles(userId: Int,
+                           driveIds: [Int]) -> Results<UploadFile>
 }
 
 extension UploadService: UploadServiceDataSourceable {
@@ -71,6 +74,20 @@ extension UploadService: UploadServiceDataSourceable {
                                                    NSNumber(value: ownedByFileProvider))
         return getUploadingFiles(userId: userId, driveId: driveId, optionalPredicate: parentDirectoryPredicate)
     }
+
+    public func getUploadingFiles(userId: Int,
+                                  driveIds: [Int]) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
+                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
+                userId,
+                driveIds,
+                NSNumber(value: ownedByFileProvider)
+            )
+            .sorted(byKeyPath: "taskCreationDate")
+        }
+    }
 }
 
 // TODO: Check if still in use
@@ -95,20 +112,6 @@ extension UploadService {
                 NSNumber(value: ownedByFileProvider)
             )
             .filter(optionalPredicate: optionalPredicate)
-            .sorted(byKeyPath: "taskCreationDate")
-        }
-    }
-
-    func getUploadingFiles(userId: Int,
-                           driveIds: [Int]) -> Results<UploadFile> {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-            lazyCollection.filter(
-                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
-                userId,
-                driveIds,
-                NSNumber(value: ownedByFileProvider)
-            )
             .sorted(byKeyPath: "taskCreationDate")
         }
     }
