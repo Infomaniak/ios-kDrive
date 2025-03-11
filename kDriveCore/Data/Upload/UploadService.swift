@@ -58,20 +58,6 @@ public final class UploadService {
 }
 
 extension UploadService: UploadServiceable {
-    public func getUploadingFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        guard let uploadFile = globalUploadQueue.getUploadingFile(fileProviderItemIdentifier: fileProviderItemIdentifier) else {
-            return photoUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier)
-        }
-        return uploadFile
-    }
-
-    public func getUploadedFile(fileProviderItemIdentifier: String) -> UploadFile? {
-        guard let file = globalUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier) else {
-            return photoUploadQueue.getUploadedFile(fileProviderItemIdentifier: fileProviderItemIdentifier)
-        }
-        return file
-    }
-
     public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString) {
         globalUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
         photoUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
