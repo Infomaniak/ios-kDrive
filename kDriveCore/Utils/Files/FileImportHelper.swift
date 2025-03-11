@@ -71,7 +71,7 @@ public final class FileImportHelper {
     private let fileManager = FileManager.default
 
     @LazyInjectService var pathProvider: AppGroupPathProvidable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var appContextService: AppContextServiceable
 
     static let imageCompression = 0.8
