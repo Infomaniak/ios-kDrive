@@ -31,11 +31,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    public static let backgroundBaseIdentifier = ".backgroundsession.upload"
-    public static var backgroundIdentifier: String {
-        return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
-    }
-
     public var pausedNotificationSent = false
 
     /// A serial queue to lock access to ivars an observations.

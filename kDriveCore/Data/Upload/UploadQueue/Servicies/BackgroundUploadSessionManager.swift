@@ -97,7 +97,7 @@ public final class BackgroundUploadSessionManager: NSObject,
         Log.bgSessionManager("init")
         super.init()
 
-        backgroundSession = getSessionOrCreate(for: UploadQueue.backgroundIdentifier)
+        backgroundSession = getSessionOrCreate(for: UploadServiceBackgroundIdentifier.app)
     }
 
     public func getSessionOrCreate(for identifier: String) -> URLSession {

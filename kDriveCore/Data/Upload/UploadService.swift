@@ -22,6 +22,13 @@ import InfomaniakCoreDB
 // import RealmSwift
 import InfomaniakDI
 
+public enum UploadServiceBackgroundIdentifier {
+    public static let base = ".backgroundsession.upload"
+    public static let app: String = {
+        return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + base
+    }()
+}
+
 public final class UploadService {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable

@@ -27,7 +27,7 @@ extension AppDelegate {
         Log.bgSessionManager("background session relaunched identifier:\(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
             backgroundDownloadSessionManager.backgroundCompletionHandler = completionHandler
-        } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
+        } else if identifier.hasSuffix(UploadServiceBackgroundIdentifier.base) {
             backgroundUploadSessionManager.handleEventsForBackgroundURLSession(identifier: identifier,
                                                                                completionHandler: completionHandler)
         } else {
