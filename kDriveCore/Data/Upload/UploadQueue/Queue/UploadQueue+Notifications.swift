@@ -21,6 +21,10 @@ import InfomaniakDI
 import UIKit
 
 extension UploadQueue: UploadNotifiable {
+    public func setPausedNotificationSent(_ newValue: Bool) {
+        pausedNotificationSent = newValue
+    }
+
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
         serialQueue.async { [weak self] in

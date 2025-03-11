@@ -42,7 +42,6 @@ public final class UploadService {
         )
     }()
 
-    var pausedNotificationSent = false
     var fileUploadedCount = 0
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
@@ -50,11 +49,13 @@ public final class UploadService {
         didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
 
-    public init() {}
-
     public var operationCount: Int {
         globalUploadQueue.operationCount + photoUploadQueue.operationCount
     }
+
+    public var pausedNotificationSent = false
+
+    public init() {}
 }
 
 extension UploadService: UploadServiceable {

@@ -33,6 +33,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var deeplinkParser: DeeplinkParsable
+    @LazyInjectService var uploadNotifications: UploadNotifiable
 
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
@@ -116,8 +117,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(window)")
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.pausedNotificationSent = false
+        uploadNotifications.setPausedNotificationSent(false)
 
         let currentState = RootViewControllerState.getCurrentState()
         let session = scene.session

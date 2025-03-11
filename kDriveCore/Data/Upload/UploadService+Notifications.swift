@@ -21,6 +21,10 @@ import InfomaniakDI
 import UIKit
 
 public protocol UploadNotifiable {
+    var pausedNotificationSent: Bool { get }
+
+    func setPausedNotificationSent(_ newValue: Bool)
+
     /// Send a local notification that the system has paused the upload.
     func sendPausedNotificationIfNeeded()
 
@@ -29,6 +33,11 @@ public protocol UploadNotifiable {
 }
 
 extension UploadService: UploadNotifiable {
+    public func setPausedNotificationSent(_ newValue: Bool) {
+        Log.uploadQueue("setPausedNotificationSent newValue:\(newValue)")
+        pausedNotificationSent = newValue
+    }
+
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
         serialQueue.async { [weak self] in

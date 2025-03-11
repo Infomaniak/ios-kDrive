@@ -106,6 +106,12 @@ public enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
+            Factory(type: UploadNotifiable.self) { _, resolver in
+                try resolver.resolve(type: UploadServiceable.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: UploadQueue.self) { _, resolver in
                 // TODO: Remove, compatibility layer
                 try resolver.resolve(type: UploadQueueable.self,
@@ -121,13 +127,6 @@ public enum FactoryService {
                                      resolver: resolver)
             },
             Factory(type: UploadQueueObservable.self) { _, resolver in
-                // TODO: Remove legacy
-                try resolver.resolve(type: UploadQueue.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: UploadNotifiable.self) { _, resolver in
                 // TODO: Remove legacy
                 try resolver.resolve(type: UploadQueue.self,
                                      forCustomTypeIdentifier: nil,
