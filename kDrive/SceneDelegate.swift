@@ -34,6 +34,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var deeplinkParser: DeeplinkParsable
     @LazyInjectService var uploadNotifications: UploadNotifiable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService var uploadObservation: UploadQueueObservable
 
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
@@ -335,9 +337,8 @@ extension SceneDelegate {
                                             shouldRemoveAfterUpload: false)
                 group.enter()
                 shouldCleanFolder = true
-                @InjectService var uploadQueue: UploadQueue
                 var observationToken: ObservationToken?
-                observationToken = uploadQueue
+                observationToken = uploadObservation
                     .observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
                         observationToken?.cancel()
                         if let error = uploadFile.error {
@@ -354,7 +355,7 @@ extension SceneDelegate {
                         }
                         group.leave()
                     }
-                uploadQueue.saveToRealm(uploadFile, itemIdentifier: nil)
+                uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
             }
         }
 
