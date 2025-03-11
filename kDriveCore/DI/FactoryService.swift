@@ -118,16 +118,8 @@ public enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
-            Factory(type: UploadQueue.self) { _, resolver in
-                // TODO: Remove, compatibility layer
-                try resolver.resolve(type: UploadQueueable.self,
-                                     forCustomTypeIdentifier: UploadQueueID.global,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: UploadQueueable.self) { _, resolver in
-                // TODO: Remove legacy
-                try resolver.resolve(type: UploadQueue.self,
+            Factory(type: UploadPublishable.self) { _, resolver in
+                try resolver.resolve(type: UploadServiceable.self,
                                      forCustomTypeIdentifier: nil,
                                      factoryParameters: nil,
                                      resolver: resolver)

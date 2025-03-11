@@ -272,8 +272,11 @@ extension UploadQueue: UploadQueueable {
                     writableRealm.delete(toDelete)
 
                     Log.uploadQueue("publishFileUploaded ufid:\(uploadFileId)")
-                    self.publishFileUploaded(result: UploadCompletionResult(uploadFile: publishedToDelete, driveFile: nil))
-                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+                    self.uploadPublisher.publishFileUploaded(result: UploadCompletionResult(
+                        uploadFile: publishedToDelete,
+                        driveFile: nil
+                    ))
+                    self.uploadPublisher.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
                 } else {
                     Log.uploadQueue("could not find file to cancel:\(uploadFileId)", level: .error)
                 }
@@ -292,9 +295,9 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("suspend queue")
             self.suspendAllOperations()
 
-            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
-                                                        userId: userId,
-                                                        driveId: driveId)
+            let uploadingFiles = self.uploadDataSource.getUploadingFiles(withParent: parentId,
+                                                                         userId: userId,
+                                                                         driveId: driveId)
 
             let uploadingFilesIds = Array(uploadingFiles.map(\.id))
             Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
@@ -323,9 +326,9 @@ extension UploadQueue: UploadQueueable {
                 }
             }
 
-            self.publishUploadCount(withParent: parentId,
-                                    userId: userId,
-                                    driveId: driveId)
+            self.uploadPublisher.publishUploadCount(withParent: parentId,
+                                                    userId: userId,
+                                                    driveId: driveId)
 
             Log.uploadQueue("cancelAllOperations finished")
             self.resumeAllOperations()
@@ -431,9 +434,9 @@ extension UploadQueue: UploadQueueable {
     private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
         Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
         let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
-        let uploadingFiles = getUploadingFiles(withParent: parentId,
-                                               userId: userId,
-                                               driveId: driveId)
+        let uploadingFiles = uploadDataSource.getUploadingFiles(withParent: parentId,
+                                                                userId: userId,
+                                                                driveId: driveId)
 
         Log.uploadQueue("uploading:\(uploadingFiles.count)")
         let failedUploadFiles = uploadingFiles
@@ -556,8 +559,8 @@ extension UploadQueue: UploadQueueable {
                 return
             }
 
-            publishFileUploaded(result: operation.result)
-            publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+            uploadPublisher.publishFileUploaded(result: operation.result)
+            uploadPublisher.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
             OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !keyedUploadOperations.isEmpty)
         }
 
@@ -565,7 +568,7 @@ extension UploadQueue: UploadQueueable {
         operationQueue.addOperation(operation as Operation)
 
         keyedUploadOperations.setObject(operation, key: uploadFileId)
-        publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+        uploadPublisher.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
 
         return operation
     }

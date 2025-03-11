@@ -30,6 +30,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var uploadPublisher: UploadPublishable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     public var pausedNotificationSent = false
 

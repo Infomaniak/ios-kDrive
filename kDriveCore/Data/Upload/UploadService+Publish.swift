@@ -21,7 +21,7 @@ import Foundation
 import InfomaniakCore
 import RealmSwift
 
-protocol UploadPublishable {
+public protocol UploadPublishable {
     func publishUploadCount(withParent parentId: Int,
                             userId: Int,
                             driveId: Int)
@@ -39,9 +39,9 @@ protocol UploadPublishable {
 // MARK: - Publish
 
 extension UploadService: UploadPublishable {
-    func publishUploadCount(withParent parentId: Int,
-                            userId: Int,
-                            driveId: Int) {
+    public func publishUploadCount(withParent parentId: Int,
+                                   userId: Int,
+                                   driveId: Int) {
         Log.uploadQueue("publishUploadCount")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -50,9 +50,9 @@ extension UploadService: UploadPublishable {
         }
     }
 
-    func publishUploadCountInParent(parentId: Int,
-                                    userId: Int,
-                                    driveId: Int) {
+    public func publishUploadCountInParent(parentId: Int,
+                                           userId: Int,
+                                           driveId: Int) {
         Log.uploadQueue("publishUploadCountInParent")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -66,8 +66,8 @@ extension UploadService: UploadPublishable {
         }
     }
 
-    func publishUploadCountInDrive(userId: Int,
-                                   driveId: Int) {
+    public func publishUploadCountInDrive(userId: Int,
+                                          driveId: Int) {
         Log.uploadQueue("publishUploadCountInDrive")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -80,7 +80,7 @@ extension UploadService: UploadPublishable {
         }
     }
 
-    func publishFileUploaded(result: UploadCompletionResult) {
+    public func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
         logFileUploadedWithSuccess(for: result.uploadFile)
         sendFileUploadStateNotificationIfNeeded(with: result)
