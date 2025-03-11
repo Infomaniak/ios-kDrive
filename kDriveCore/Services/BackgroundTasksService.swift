@@ -48,7 +48,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
 
     @LazyInjectService private var scheduler: BGTaskScheduler
     @LazyInjectService private var accountManager: AccountManageable
-    @LazyInjectService private var uploadQueue: UploadQueue
+    @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoUploader: PhotoLibraryUploader
 
     public init() {
@@ -71,8 +71,8 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
 
         task.expirationHandler = {
             Log.backgroundTaskScheduling("Task \(identifier) EXPIRED", level: .error)
-            uploadQueue.suspendAllOperations()
-            uploadQueue.rescheduleRunningOperations()
+            uploadService.suspendAllOperations()
+            uploadService.rescheduleRunningOperations()
             task.setTaskCompleted(success: false)
         }
     }
@@ -111,7 +111,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("Clean errors for all uploads")
-        uploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
+        uploadService.cleanNetworkAndLocalErrorsForAllOperations()
 
         guard !expiringActivity.shouldTerminate else {
             Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
@@ -121,7 +121,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("Reload operations in queue")
-        uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+        uploadService.rebuildUploadQueueFromObjectsInRealm()
 
         guard !expiringActivity.shouldTerminate else {
             Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
@@ -131,7 +131,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("waitForCompletion")
-        uploadQueue.waitForCompletion {
+        uploadService.waitForCompletion {
             Log.backgroundTaskScheduling("Background activity ended with success")
             completion(true)
             expiringActivity.endAll()
