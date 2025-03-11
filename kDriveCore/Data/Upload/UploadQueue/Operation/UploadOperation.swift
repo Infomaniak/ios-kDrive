@@ -63,7 +63,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // MARK: - Attributes
 
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
-    @LazyInjectService var uploadQueue: UploadQueueable
+    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var fileManager: FileManagerable

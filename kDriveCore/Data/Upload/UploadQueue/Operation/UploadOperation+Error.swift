@@ -91,7 +91,7 @@ extension UploadOperation {
 
             // Not enough space
             else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
-                self.uploadQueue.suspendAllOperations()
+                self.uploadService.suspendAllOperations()
                 file.maxRetryCount = 0
                 file.progress = nil
                 file.error = .errorDeviceStorage.wrapping(error)
@@ -168,13 +168,13 @@ extension UploadOperation {
             case .productMaintenance, .driveMaintenance:
                 // We stop and hope the maintenance is finished at next execution
                 file.error = error
-                self.uploadQueue.suspendAllOperations()
+                self.uploadService.suspendAllOperations()
 
             case .quotaExceeded:
                 file.error = .quotaExceeded.wrapping(error)
                 file.maxRetryCount = 0
                 file.progress = nil
-                self.uploadQueue.suspendAllOperations()
+                self.uploadService.suspendAllOperations()
 
             case .uploadNotTerminatedError,
                  .uploadNotTerminated,
@@ -201,9 +201,9 @@ extension UploadOperation {
                 Task {
                     await self.cleanUploadFileSession()
                 }
-                self.uploadQueue.cancelAllOperations(withParent: file.parentDirectoryId,
-                                                     userId: file.userId,
-                                                     driveId: file.driveId)
+                self.uploadService.cancelAllOperations(withParent: file.parentDirectoryId,
+                                                       userId: file.userId,
+                                                       driveId: file.driveId)
 
                 if self.photoLibraryUploader.isSyncEnabled,
                    self.photoLibraryUploader.frozenSettings?.parentDirectoryId == file.parentDirectoryId {
