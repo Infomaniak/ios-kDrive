@@ -22,7 +22,7 @@ import InfomaniakDI
 import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
-    @LazyInjectService var uploadQueue: UploadQueueable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     let containerItemIdentifier: NSFileProviderItemIdentifier
     let driveFileManager: DriveFileManager
@@ -58,9 +58,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
             // Add uploading files within the first page
             var uploadFilesItems = [NSFileProviderItem]()
             if page.isInitialPage {
-                let uploadingFiles = uploadQueue.getUploadingFiles(withParent: parentDirectory.id,
-                                                                   userId: driveFileManager.drive.userId,
-                                                                   driveId: driveFileManager.driveId)
+                let uploadingFiles = uploadDataSource.getUploadingFiles(withParent: parentDirectory.id,
+                                                                        userId: driveFileManager.drive.userId,
+                                                                        driveId: driveFileManager.driveId)
                 for uploadFile in uploadingFiles {
                     let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
                     uploadFilesItems.append(uploadFileItem)
