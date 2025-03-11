@@ -118,13 +118,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         downloadQueue.suspendAllOperations()
         downloadQueue.cancelAllOperations()
 
-        @InjectService var uploadQueue: UploadQueueable
-        uploadQueue.suspendAllOperations()
-        uploadQueue.rescheduleRunningOperations()
+        @InjectService var uploadService: UploadServiceable
+        uploadService.suspendAllOperations()
+        uploadService.rescheduleRunningOperations()
 
         // Await on upload queue to terminate gracefully, if time allows for it.
         let group = TolerantDispatchGroup()
-        uploadQueue.waitForCompletion {
+        uploadService.waitForCompletion {
             // Clean temp files once the upload queue is stoped if needed
             @LazyInjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.auditCache()
