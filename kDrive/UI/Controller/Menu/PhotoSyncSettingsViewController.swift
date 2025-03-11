@@ -503,8 +503,8 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
         DispatchQueue.global(qos: .userInitiated).async {
             // Add new pictures to be uploaded and reload upload queue
             self.photoLibraryUploader.scheduleNewPicturesForUpload()
-            @InjectService var uploadQueue: UploadQueue
-            uploadQueue.rebuildUploadQueueFromObjectsInRealm()
+            @InjectService var uploadService: UploadServiceable
+            uploadService.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }
