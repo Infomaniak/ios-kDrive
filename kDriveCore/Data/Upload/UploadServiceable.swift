@@ -24,6 +24,9 @@ public enum UploadQueueID {
 }
 
 public protocol UploadServiceable {
+    /// True if all upload queues are suspended
+    var isSuspended: Bool { get }
+
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm()
 

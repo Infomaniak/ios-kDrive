@@ -58,6 +58,10 @@ public final class UploadService {
 }
 
 extension UploadService: UploadServiceable {
+    public var isSuspended: Bool {
+        return globalUploadQueue.isSuspended && globalUploadQueue.isSuspended
+    }
+
     public func rebuildUploadQueueFromObjectsInRealm() {
         let caller: StaticString = #function
         globalUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)

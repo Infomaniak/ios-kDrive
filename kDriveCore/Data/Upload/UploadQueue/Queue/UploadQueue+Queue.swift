@@ -53,7 +53,11 @@ extension UploadQueue: UploadQueueable {
     }
 
     public var operationCount: Int {
-        self.operationQueue.operationCount
+        operationQueue.operationCount
+    }
+
+    public var isSuspended: Bool {
+        operationQueue.isSuspended
     }
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {

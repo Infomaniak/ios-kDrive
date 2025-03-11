@@ -30,6 +30,8 @@ public protocol UploadServiceDataSourceable {
 
     func getUploadingFiles(userId: Int,
                            driveIds: [Int]) -> Results<UploadFile>
+
+    func getAllUploadingFilesFrozen() -> Results<UploadFile>
 }
 
 extension UploadService: UploadServiceDataSourceable {
@@ -88,18 +90,17 @@ extension UploadService: UploadServiceDataSourceable {
             .sorted(byKeyPath: "taskCreationDate")
         }
     }
-}
 
-// TODO: Check if still in use
-extension UploadService {
-    /// Returns all the UploadFiles currently uploading regardless of execution context
-    func getAllUploadingFilesFrozen() -> Results<UploadFile> {
+    public func getAllUploadingFilesFrozen() -> Results<UploadFile> {
         return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
             lazyCollection.filter("uploadDate = nil")
                 .freezeIfNeeded()
         }
     }
+}
 
+// TODO: Check if still in use
+extension UploadService {
     func getUploadingFiles(userId: Int,
                            driveId: Int,
                            optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {

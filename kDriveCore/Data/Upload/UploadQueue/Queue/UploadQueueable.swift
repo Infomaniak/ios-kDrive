@@ -86,4 +86,6 @@ public protocol UploadQueueable {
     func cleanNetworkAndLocalErrorsForAllOperations()
 
     var operationCount: Int { get }
+
+    var isSuspended: Bool { get }
 }
