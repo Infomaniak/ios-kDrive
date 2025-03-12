@@ -40,7 +40,7 @@ public protocol UploadQueueable {
     // Retry all uploads within a specified graph, this re-enqueue the tasks.
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
-    func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
+    func cancelAllOperations(uploadingFilesIds: [String])
 
     /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
     ///

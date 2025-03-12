@@ -139,8 +139,37 @@ extension UploadService: UploadServiceable {
     }
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
-        globalUploadQueue.cancelAllOperations(withParent: parentId, userId: userId, driveId: driveId)
-        photoUploadQueue.cancelAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+        Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
+        defer {
+            Log.uploadQueue("cancelAllOperations finished")
+        }
+
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        suspendAllOperations()
+
+        let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
+        let uploadingFilesIds = Array(uploadingFiles.map(\.id))
+        Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            // Delete all the linked UploadFiles from Realm. This is fast.
+            Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
+            let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
+
+            writableRealm.delete(objectsToDelete)
+            Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
+        }
+
+        // TODO: Split between queues in sub PR
+        globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+        photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+
+        publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+        resumeAllOperations()
     }
 
     public func rescheduleRunningOperations() {

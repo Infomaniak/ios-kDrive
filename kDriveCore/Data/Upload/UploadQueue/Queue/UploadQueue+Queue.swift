@@ -150,54 +150,27 @@ extension UploadQueue: UploadQueueable {
         keyedUploadOperations.removeObject(forKey: uploadFileId)
     }
 
-    public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
-        Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
+    public func cancelAllOperations(uploadingFilesIds: [String]) {
+        Log.uploadQueue("cancelAllOperations queue:\(type(of: self))")
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
         }
 
-        concurrentQueue.async {
-            Log.uploadQueue("suspend queue")
-            self.suspendAllOperations()
+        Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) queue:\(type(of: self))")
 
-            let uploadingFiles = self.uploadDataSource.getUploadingFiles(withParent: parentId,
-                                                                         userId: userId,
-                                                                         driveId: driveId)
-
-            let uploadingFilesIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("cancelAllOperations count:\(uploadingFiles.count) parentId:\(parentId)")
-            Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
-
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                // Delete all the linked UploadFiles from Realm. This is fast.
-                Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
-
-                writableRealm.delete(objectsToDelete)
-                Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
-            }
-
-            // Remove in batches from upload queue. This may take a while.
-            let batches = uploadingFilesIds.chunks(ofCount: 100)
-            for fileIds in batches {
-                autoreleasepool {
-                    for id in fileIds {
-                        // Cancel operation if any
-                        if let operation = self.keyedUploadOperations.getObject(forKey: id) {
-                            operation.cancel()
-                        }
-                        self.keyedUploadOperations.removeObject(forKey: id)
+        // Remove in batches from upload queue. This may take a while.
+        let batches = uploadingFilesIds.chunks(ofCount: 100)
+        for fileIds in batches {
+            autoreleasepool {
+                for id in fileIds {
+                    // Cancel operation if any
+                    if let operation = self.keyedUploadOperations.getObject(forKey: id) {
+                        operation.cancel()
                     }
+                    self.keyedUploadOperations.removeObject(forKey: id)
                 }
             }
-
-            self.uploadPublisher.publishUploadCount(withParent: parentId,
-                                                    userId: userId,
-                                                    driveId: driveId)
-
-            Log.uploadQueue("cancelAllOperations finished")
-            self.resumeAllOperations()
         }
     }
 
