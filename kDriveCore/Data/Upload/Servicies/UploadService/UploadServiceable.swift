@@ -54,9 +54,6 @@ public protocol UploadServiceable {
     /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
-    /// Cancel all running operations, regardless of state
-    func cancelRunningOperations()
-
     /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
     /// - Parameter uploadFileId: the upload file id to cancel.
     /// - Returns: true if fileId matched

@@ -18,8 +18,6 @@
 
 import Foundation
 import InfomaniakCoreDB
-
-// import RealmSwift
 import InfomaniakDI
 
 public enum UploadServiceBackgroundIdentifier {
@@ -30,9 +28,7 @@ public enum UploadServiceBackgroundIdentifier {
 public final class UploadService {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
-
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
-//    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
@@ -282,10 +278,6 @@ extension UploadService: UploadServiceable {
 
     public func rescheduleRunningOperations() {
         allQueues.forEach { $0.rescheduleRunningOperations() }
-    }
-
-    public func cancelRunningOperations() {
-        allQueues.forEach { $0.cancelRunningOperations() }
     }
 
     @discardableResult
