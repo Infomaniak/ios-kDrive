@@ -171,6 +171,7 @@ extension UploadService: UploadServiceDataSourceable {
             return nil
         }
 
+        // TODO: Add to the correct queue
         let uploadOperation = globalUploadQueue.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
         return uploadOperation
     }
