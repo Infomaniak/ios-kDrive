@@ -151,12 +151,23 @@ extension UploadService: UploadServiceable {
         allQueues.forEach { $0.cancelRunningOperations() }
     }
 
+    @discardableResult
     public func cancel(uploadFileId: String) -> Bool {
-        guard !globalUploadQueue.cancel(uploadFileId: uploadFileId) else {
-            return true
+        Log.uploadQueue("cancel uploadFileId:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return false
         }
 
-        return photoUploadQueue.cancel(uploadFileId: uploadFileId)
+        guard let toDeleteLive = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+            return false
+        }
+
+        // TODO: Select correct upload queue
+        let frozenFileToDelete = toDeleteLive.freeze()
+        globalUploadQueue.cancel(uploadFile: frozenFileToDelete)
+
+        return true
     }
 
     public func cleanNetworkAndLocalErrorsForAllOperations() {

@@ -133,28 +133,6 @@ extension UploadQueue: UploadQueueable {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    @discardableResult
-    public func cancel(uploadFileId: String) -> Bool {
-        Log.uploadQueue("cancel uploadFileId:\(uploadFileId)")
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
-            return false
-        }
-
-        var found = false
-        concurrentQueue.sync {
-            guard let toDeleteLive = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
-                return
-            }
-
-            found = true
-            let fileToDelete = toDeleteLive.detached()
-            self.cancel(uploadFile: fileToDelete)
-        }
-
-        return found
-    }
-
     public func cancel(uploadFile: UploadFile) {
         Log.uploadQueue("cancel UploadFile ufid:\(uploadFile.id)")
         guard appContextService.context != .shareExtension else {

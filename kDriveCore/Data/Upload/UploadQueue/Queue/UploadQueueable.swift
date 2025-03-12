@@ -55,11 +55,6 @@ public protocol UploadQueueable {
     /// - Parameter file: the upload file id to cancel.
     func cancel(uploadFile: UploadFile)
 
-    /// Cancel an upload from an UploadFile.id. The UploadFile is removed and a matching operation is removed.
-    /// - Parameter uploadFileId: the upload file id to cancel.
-    /// - Returns: true if fileId matched
-    func cancel(uploadFileId: String) -> Bool
-
     func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
 
     var operationCount: Int { get }
