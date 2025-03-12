@@ -123,16 +123,6 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func cancelRunningOperations() {
-        Log.uploadQueue("cancelRunningOperations")
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
-            return
-        }
-
-        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
-    }
-
     public func cancel(uploadFileId: String) {
         Log.uploadQueue("cancel UploadFile ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {

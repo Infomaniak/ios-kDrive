@@ -24,8 +24,9 @@ public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
 
     @discardableResult
-    func addToQueue(uploadFile: UploadFile,
-                    itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperation?
+    func addToQueue(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperation?
+
+    func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
 
     func suspendAllOperations()
 
@@ -42,12 +43,7 @@ public protocol UploadQueueable {
     /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
-    /// Cancel all running operations, regardless of state
-    func cancelRunningOperations()
-
     func cancel(uploadFileId: String)
-
-    func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
 
     var operationCount: Int { get }
 
