@@ -62,7 +62,11 @@ public final class UploadService {
 
     public var pausedNotificationSent = false
 
-    public init() {}
+    public init() {
+        Task {
+            self.rebuildUploadQueueFromObjectsInRealm()
+        }
+    }
 }
 
 extension UploadService: UploadServiceable {

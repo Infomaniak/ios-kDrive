@@ -122,8 +122,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
 
         concurrentQueue.async {
-            // Initialize operation queue with files from Realm, and make sure it restarts
-            self.rebuildUploadQueueFromObjectsInRealm()
             self.resumeAllOperations()
         }
 
