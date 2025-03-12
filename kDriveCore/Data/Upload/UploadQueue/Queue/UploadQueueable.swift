@@ -34,9 +34,6 @@ public protocol UploadQueueable {
     /// Wait for all (started or not) enqueued operations to finish.
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
-    // Retry to upload a specific file, this re-enqueue the task.
-    func retry(_ uploadFileId: String)
-
     func cancelAllOperations(uploadingFilesIds: [String])
 
     /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully

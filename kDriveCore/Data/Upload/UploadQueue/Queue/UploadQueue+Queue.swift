@@ -174,45 +174,6 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func retry(_ uploadFileId: String) {
-        Log.uploadQueue("retry ufid:\(uploadFileId)")
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
-            return
-        }
-
-        concurrentQueue.async {
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !file.isInvalidated else {
-                    Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
-                    return
-                }
-
-                // Remove operation from tracking
-                if let operation = self.operation(uploadFileId: uploadFileId) {
-                    operation.cancel()
-                    self.keyedUploadOperations.removeObject(forKey: uploadFileId)
-                }
-
-                // Clean error in base
-                file.clearErrorsForRetry()
-            }
-
-            // re-enqueue UploadOperation
-            defer {
-                self.resumeAllOperations()
-            }
-
-            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
-                .freeze() else {
-                return
-            }
-
-            self.addToQueue(uploadFile: frozenFile)
-        }
-    }
-
     private func operation(uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("operation fileId:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {

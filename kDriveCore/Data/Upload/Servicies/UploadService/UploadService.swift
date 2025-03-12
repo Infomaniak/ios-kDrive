@@ -129,8 +129,41 @@ extension UploadService: UploadServiceable {
     }
 
     public func retry(_ uploadFileId: String) {
-        globalUploadQueue.retry(uploadFileId)
-        photoUploadQueue.retry(uploadFileId)
+        Log.uploadQueue("retry ufid:\(uploadFileId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        Task {
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
+                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+                      !file.isInvalidated else {
+                    Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
+                    return
+                }
+
+                // Remove operation from tracking
+                // TODO: Split two specific queues
+                globalUploadQueue.cancel(uploadFileId: uploadFileId)
+
+                // Clean error in base
+                file.clearErrorsForRetry()
+            }
+
+            // re-enqueue UploadOperation
+            defer {
+                resumeAllOperations()
+            }
+
+            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
+                .freeze() else {
+                return
+            }
+
+            // TODO: Split two specific queues
+            globalUploadQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+        }
     }
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
