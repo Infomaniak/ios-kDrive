@@ -134,8 +134,83 @@ extension UploadService: UploadServiceable {
     }
 
     public func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
-        globalUploadQueue.retryAllOperations(withParent: parentId, userId: userId, driveId: driveId)
-        photoUploadQueue.retryAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+        Log.uploadQueue("retryAllOperations parentId:\(parentId)")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        Task {
+            let failedFileIds = getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
+            let batches = failedFileIds.chunks(ofCount: 100)
+            Log.uploadQueue("batches:\(batches.count)")
+
+            resumeAllOperations()
+
+            for batch in batches {
+                // Cancel Operation if any and reset errors
+                cancelAnyInBatch(batch)
+
+                // Second transaction to enqueue the UploadFile to the OperationQueue
+                enqueueAnyInBatch(batch)
+            }
+        }
+    }
+
+    private func getFailedFileIds(parentId: Int, userId: Int, driveId: Int) -> [String] {
+        Log.uploadQueue("retryAllOperations in dispatchQueue parentId:\(parentId)")
+        let ownedByFileProvider = NSNumber(value: appContextService.context == .fileProviderExtension)
+        let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
+
+        Log.uploadQueue("uploading:\(uploadingFiles.count)")
+        let failedUploadFiles = uploadingFiles
+            .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
+
+        let failedFileIds = Array(failedUploadFiles.map(\.id))
+        Log.uploadQueue("retying:\(failedFileIds.count)")
+
+        return failedFileIds
+    }
+
+    private func cancelAnyInBatch(_ batch: ArraySlice<String>) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            for uploadFileId in batch {
+                // TODO: Split two specific queues
+                // Cancel operation if any
+                globalUploadQueue.cancel(uploadFileId: uploadFileId)
+
+                // Clean errors in db file
+                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+                      !file.isInvalidated else {
+                    Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
+                    continue
+                }
+
+                file.clearErrorsForRetry()
+            }
+        }
+    }
+
+    private func enqueueAnyInBatch(_ batch: ArraySlice<String>) {
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        for uploadFileId in batch {
+            guard let file = uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+                Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
+                continue
+            }
+
+            // TODO: Split two specific queues
+            globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+        }
     }
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
