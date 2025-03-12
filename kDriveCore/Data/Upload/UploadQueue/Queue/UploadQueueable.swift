@@ -26,14 +26,9 @@ public protocol UploadQueueable {
     /// Read database to enqueue all non finished upload tasks.
     func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
 
-    /// Save an UploadFile in base and optionally enqueue the upload in main app
-    /// - Parameters:
-    ///   - uploadFile: The upload file to be processed
-    ///   - itemIdentifier: Optional item identifier
-    ///   - addToQueue: Should we schedule the upload as well ?
-    /// - Returns: An UploadOperation if any
-    func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?, addToQueue: Bool)
-        -> UploadOperationable?
+    @discardableResult
+    func addToQueue(uploadFile: UploadFile,
+                    itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperation?
 
     func suspendAllOperations()
 

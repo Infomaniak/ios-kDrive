@@ -155,7 +155,6 @@ extension UploadService: UploadServiceDataSourceable {
             uploadFile.error = nil
         }
 
-        // Keep a detached file for processing it later
         let detachedFile = uploadFile.detached()
         try? uploadsDatabase.writeTransaction { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
@@ -172,16 +171,11 @@ extension UploadService: UploadServiceDataSourceable {
             return nil
         }
 
-        // TODO: Insert in queue
-//        // Process adding a detached file to the uploadQueue
-//        let uploadOperation = self.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
-//        return uploadOperation
-
-        return nil
+        let uploadOperation = globalUploadQueue.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
+        return uploadOperation
     }
 }
 
-// TODO: Check if still in use
 extension UploadService {
     func getUploadingFiles(userId: Int,
                            driveId: Int,

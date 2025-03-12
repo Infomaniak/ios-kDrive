@@ -117,53 +117,6 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    @discardableResult
-    public func saveToRealm(_ uploadFile: UploadFile,
-                            itemIdentifier: NSFileProviderItemIdentifier? = nil,
-                            addToQueue: Bool = true) -> UploadOperationable? {
-        let expiringActivity = ExpiringActivity()
-        expiringActivity.start()
-        defer {
-            expiringActivity.endAll()
-        }
-
-        Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
-
-        assert(!uploadFile.isManagedByRealm, "we expect the file to be outside of realm at the moment")
-
-        // Save drive and directory
-        UserDefaults.shared.lastSelectedUser = uploadFile.userId
-        UserDefaults.shared.lastSelectedDrive = uploadFile.driveId
-        UserDefaults.shared.lastSelectedDirectory = uploadFile.parentDirectoryId
-
-        uploadFile.name = uploadFile.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if uploadFile.error != nil {
-            uploadFile.error = nil
-        }
-
-        // Keep a detached file for processing it later
-        let detachedFile = uploadFile.detached()
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            Log.uploadQueue("save ufid:\(uploadFile.id)")
-            writableRealm.add(uploadFile, update: .modified)
-            Log.uploadQueue("did save ufid:\(uploadFile.id)")
-        }
-
-        guard addToQueue else {
-            return nil
-        }
-
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("addToQueue disabled in ShareExtension", level: .error)
-            return nil
-        }
-
-        // Process adding a detached file to the uploadQueue
-        let uploadOperation = self.addToQueue(uploadFile: detachedFile, itemIdentifier: itemIdentifier)
-
-        return uploadOperation
-    }
-
     public func suspendAllOperations() {
         Log.uploadQueue("suspendAllOperations")
         guard appContextService.context != .shareExtension else {
@@ -526,7 +479,7 @@ extension UploadQueue: UploadQueueable {
     }
 
     @discardableResult
-    private func addToQueue(uploadFile: UploadFile,
+    public func addToQueue(uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
