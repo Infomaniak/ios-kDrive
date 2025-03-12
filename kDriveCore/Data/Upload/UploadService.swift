@@ -24,9 +24,7 @@ import InfomaniakDI
 
 public enum UploadServiceBackgroundIdentifier {
     public static let base = ".backgroundsession.upload"
-    public static let app: String = {
-        return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + base
-    }()
+    public static let app: String = (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + base
 }
 
 public final class UploadService {
@@ -48,6 +46,8 @@ public final class UploadService {
             autoreleaseFrequency: autoreleaseFrequency
         )
     }()
+
+    lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     var fileUploadedCount = 0
     var observations = (
@@ -75,19 +75,49 @@ extension UploadService: UploadServiceable {
     }
 
     public func rebuildUploadQueueFromObjectsInRealm() {
-        let caller: StaticString = #function
-        globalUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
-        photoUploadQueue.rebuildUploadQueueFromObjectsInRealm(caller)
+        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm")
+        serialQueue.sync {
+            // Clean cache if necessary before we try to restart the uploads.
+            @InjectService var freeSpaceService: FreeSpaceService
+            freeSpaceService.cleanCacheIfAlmostFull()
+
+            guard let uploadFileQuery = globalUploadQueue.uploadFileQuery else {
+                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
+                return
+            }
+
+            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                return lazyCollection.filter(uploadFileQuery)
+                    .sorted(byKeyPath: "taskCreationDate")
+            }
+            let uploadingFileIds = Array(uploadingFiles.map(\.id))
+            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
+
+            let batches = uploadingFileIds.chunks(ofCount: 100)
+            Log.uploadQueue("batched count:\(batches.count)")
+            for batch in batches {
+                Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
+                let batchArray = Array(batch)
+                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
+                }
+                for file in matchedFrozenFiles {
+                    // TODO: Do it in this object and forward objects to specific queues
+                    globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+                }
+                resumeAllOperations()
+            }
+
+            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
+        }
     }
 
     public func suspendAllOperations() {
-        globalUploadQueue.suspendAllOperations()
-        photoUploadQueue.suspendAllOperations()
+        allQueues.forEach { $0.suspendAllOperations() }
     }
 
     public func resumeAllOperations() {
-        globalUploadQueue.resumeAllOperations()
-        photoUploadQueue.resumeAllOperations()
+        allQueues.forEach { $0.resumeAllOperations() }
     }
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
@@ -114,13 +144,11 @@ extension UploadService: UploadServiceable {
     }
 
     public func rescheduleRunningOperations() {
-        globalUploadQueue.rescheduleRunningOperations()
-        photoUploadQueue.rescheduleRunningOperations()
+        allQueues.forEach { $0.rescheduleRunningOperations() }
     }
 
     public func cancelRunningOperations() {
-        globalUploadQueue.cancelRunningOperations()
-        photoUploadQueue.cancelRunningOperations()
+        allQueues.forEach { $0.cancelRunningOperations() }
     }
 
     public func cancel(uploadFileId: String) -> Bool {
@@ -132,7 +160,30 @@ extension UploadService: UploadServiceable {
     }
 
     public func cleanNetworkAndLocalErrorsForAllOperations() {
-        globalUploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
-        photoUploadQueue.cleanNetworkAndLocalErrorsForAllOperations()
+        Log.uploadQueue("cleanErrorsForAllOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            // UploadFile with an error, Or no more retry.
+            let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
+            let failedUploadFiles = writableRealm.objects(UploadFile.self)
+                .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
+                .filter { file in
+                    guard let error = file.error else {
+                        return false
+                    }
+
+                    return error.type != .serverError
+                }
+            Log.uploadQueue("will clean errors for uploads:\(failedUploadFiles.count)")
+            for file in failedUploadFiles {
+                file.clearErrorsForRetry()
+            }
+
+            Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
+        }
     }
 }

@@ -23,9 +23,6 @@ import RealmSwift
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
 
-    /// Read database to enqueue all non finished upload tasks.
-    func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString)
-
     @discardableResult
     func addToQueue(uploadFile: UploadFile,
                     itemIdentifier: NSFileProviderItemIdentifier?) -> UploadOperation?
@@ -63,12 +60,11 @@ public protocol UploadQueueable {
     /// - Returns: true if fileId matched
     func cancel(uploadFileId: String) -> Bool
 
-    /// Clean errors linked to any upload operation in base. Does not restart the operations.
-    ///
-    /// Also make sure that UploadFiles initiated in FileManager will restart at next retry.
-    func cleanNetworkAndLocalErrorsForAllOperations()
+    func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?)
 
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }
+
+    var uploadFileQuery: String? { get }
 }

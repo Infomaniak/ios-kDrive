@@ -37,7 +37,7 @@ extension UploadQueue: UploadQueueable {
     static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
 
     /// Query to fetch `UploadFiles` for the current execution context
-    var uploadFileQuery: String? {
+    public var uploadFileQuery: String? {
         switch appContextService.context {
         case .app, .appTests:
             return Self.appFilesToUploadQuery
@@ -78,43 +78,6 @@ extension UploadQueue: UploadQueueable {
 
         let operation = operation(uploadFileId: uploadFileId)
         return operation
-    }
-
-    public func rebuildUploadQueueFromObjectsInRealm(_ caller: StaticString = #function) {
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm caller:\(caller)")
-        serialQueue.sync {
-            // Clean cache if necessary before we try to restart the uploads.
-            @InjectService var freeSpaceService: FreeSpaceService
-            freeSpaceService.cleanCacheIfAlmostFull()
-
-            guard let uploadFileQuery else {
-                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
-                return
-            }
-
-            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                return lazyCollection.filter(uploadFileQuery)
-                    .sorted(byKeyPath: "taskCreationDate")
-            }
-            let uploadingFileIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
-
-            let batches = uploadingFileIds.chunks(ofCount: 100)
-            Log.uploadQueue("batched count:\(batches.count)")
-            for batch in batches {
-                Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
-                let batchArray = Array(batch)
-                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
-                }
-                for file in matchedFrozenFiles {
-                    addToQueueIfNecessary(uploadFile: file)
-                }
-                self.resumeAllOperations()
-            }
-
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
-        }
     }
 
     public func suspendAllOperations() {
@@ -288,36 +251,6 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
-    public func cleanNetworkAndLocalErrorsForAllOperations() {
-        Log.uploadQueue("cleanErrorsForAllOperations")
-        guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
-            return
-        }
-
-        concurrentQueue.sync {
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                // UploadFile with an error, Or no more retry.
-                let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
-                let failedUploadFiles = writableRealm.objects(UploadFile.self)
-                    .filter("_error != nil OR maxRetryCount <= 0 AND ownedByFileProvider == %@", ownedByFileProvider)
-                    .filter { file in
-                        guard let error = file.error else {
-                            return false
-                        }
-
-                        return error.type != .serverError
-                    }
-                Log.uploadQueue("will clean errors for uploads:\(failedUploadFiles.count)")
-                for file in failedUploadFiles {
-                    file.clearErrorsForRetry()
-                }
-
-                Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
-            }
-        }
-    }
-
     public func retry(_ uploadFileId: String) {
         Log.uploadQueue("retry ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
@@ -458,7 +391,7 @@ extension UploadQueue: UploadQueueable {
         return operation
     }
 
-    private func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
