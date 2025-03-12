@@ -71,7 +71,7 @@ public final class UploadService {
 
 extension UploadService: UploadServiceable {
     public var isSuspended: Bool {
-        return globalUploadQueue.isSuspended && globalUploadQueue.isSuspended
+        return globalUploadQueue.isSuspended && photoUploadQueue.isSuspended
     }
 
     public func rebuildUploadQueueFromObjectsInRealm() {
