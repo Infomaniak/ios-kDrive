@@ -64,7 +64,7 @@ public final class UploadService {
 
     public init() {
         Task {
-            self.rebuildUploadQueueFromObjectsInRealm()
+            rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }

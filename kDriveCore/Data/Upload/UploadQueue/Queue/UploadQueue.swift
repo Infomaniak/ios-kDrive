@@ -121,10 +121,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
         uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
 
-        concurrentQueue.async {
-            self.resumeAllOperations()
-        }
-
         // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else {
