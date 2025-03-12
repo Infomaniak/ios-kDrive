@@ -26,38 +26,8 @@ import Sentry
 public class UploadQueue: ParallelismHeuristicDelegate {
     private var memoryPressure: DispatchSourceMemoryPressure?
 
-    @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
-    @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var uploadPublisher: UploadPublishable
-    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
-
-    public var pausedNotificationSent = false
-
-    /// A serial queue to lock access to ivars an observations.
-    let serialQueue: DispatchQueue = {
-        @LazyInjectService var appContextService: AppContextServiceable
-        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
-
-        return DispatchQueue(
-            label: "com.infomaniak.drive.upload-sync",
-            qos: .userInitiated,
-            autoreleaseFrequency: autoreleaseFrequency
-        )
-    }()
-
-    /// A concurrent queue.
-    let concurrentQueue: DispatchQueue = {
-        @LazyInjectService var appContextService: AppContextServiceable
-        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
-
-        return DispatchQueue(label: "com.infomaniak.drive.upload-async",
-                             qos: .userInitiated,
-                             attributes: [.concurrent],
-                             autoreleaseFrequency: autoreleaseFrequency)
-
-    }()
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
@@ -85,12 +55,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
 
-    var fileUploadedCount = 0
-
-    var bestSession: URLSession {
-        return foregroundSession
-    }
-
     /// Should suspend operation queue based on network status
     var shouldSuspendQueue: Bool {
         // Explicitly disable the upload queue from the share extension
@@ -104,12 +68,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     var forceSuspendQueue = false
-
-    var observations = (
-        didUploadFile: [UUID: (UploadFile, File?) -> Void](),
-        didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
-        didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
-    )
 
     public init() {
         guard appContextService.context != .shareExtension else {

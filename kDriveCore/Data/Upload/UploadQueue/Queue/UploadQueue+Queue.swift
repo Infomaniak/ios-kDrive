@@ -231,7 +231,7 @@ extension UploadQueue: UploadQueueable {
         let priority = uploadFile.priority
         OperationQueueHelper.disableIdleTimer(true)
 
-        let operation = UploadOperation(uploadFileId: uploadFileId, urlSession: bestSession)
+        let operation = UploadOperation(uploadFileId: uploadFileId, urlSession: foregroundSession)
         operation.queuePriority = priority
         operation.completionBlock = { [weak self] in
             guard let self else { return }
