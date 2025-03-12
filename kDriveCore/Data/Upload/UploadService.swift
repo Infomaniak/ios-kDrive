@@ -163,10 +163,34 @@ extension UploadService: UploadServiceable {
             return false
         }
 
-        // TODO: Select correct upload queue
         let frozenFileToDelete = toDeleteLive.freeze()
-        globalUploadQueue.cancel(uploadFile: frozenFileToDelete)
+        frozenFileToDelete.cleanSourceFileIfNeeded()
 
+        // TODO: Select correct upload queue
+        globalUploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
+
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+               !toDelete.isInvalidated {
+                Log.uploadQueue("find UploadFile to delete :\(uploadFileId)")
+                let publishedToDelete = UploadFile(value: toDelete)
+                publishedToDelete.error = .taskCancelled
+                writableRealm.delete(toDelete)
+
+                Log.uploadQueue("publishFileUploaded ufid:\(uploadFileId)")
+                self.publishFileUploaded(result: UploadCompletionResult(
+                    uploadFile: publishedToDelete,
+                    driveFile: nil
+                ))
+                self.publishUploadCount(
+                    withParent: frozenFileToDelete.parentDirectoryId,
+                    userId: frozenFileToDelete.userId,
+                    driveId: frozenFileToDelete.driveId
+                )
+            } else {
+                Log.uploadQueue("could not find file to cancel:\(uploadFileId)", level: .error)
+            }
+        }
         return true
     }
 

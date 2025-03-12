@@ -133,49 +133,21 @@ extension UploadQueue: UploadQueueable {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    public func cancel(uploadFile: UploadFile) {
-        Log.uploadQueue("cancel UploadFile ufid:\(uploadFile.id)")
+    public func cancel(uploadFileId: String) {
+        Log.uploadQueue("cancel UploadFile ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
         }
 
-        uploadFile.cleanSourceFileIfNeeded()
-
-        let uploadFileId = uploadFile.id
-        let userId = uploadFile.userId
-        let parentId = uploadFile.parentDirectoryId
-        let driveId = uploadFile.driveId
-
-        concurrentQueue.async {
-            if let operation = self.keyedUploadOperations.getObject(forKey: uploadFileId) {
-                Log.uploadQueue("operation to cancel:\(operation)")
-                Task {
-                    await operation.cleanUploadFileSession()
-                    operation.cancel()
-                }
-            }
-            self.keyedUploadOperations.removeObject(forKey: uploadFileId)
-
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                   !toDelete.isInvalidated {
-                    Log.uploadQueue("find UploadFile to delete :\(uploadFileId)")
-                    let publishedToDelete = UploadFile(value: toDelete)
-                    publishedToDelete.error = .taskCancelled
-                    writableRealm.delete(toDelete)
-
-                    Log.uploadQueue("publishFileUploaded ufid:\(uploadFileId)")
-                    self.uploadPublisher.publishFileUploaded(result: UploadCompletionResult(
-                        uploadFile: publishedToDelete,
-                        driveFile: nil
-                    ))
-                    self.uploadPublisher.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
-                } else {
-                    Log.uploadQueue("could not find file to cancel:\(uploadFileId)", level: .error)
-                }
+        if let operation = keyedUploadOperations.getObject(forKey: uploadFileId) {
+            Log.uploadQueue("operation to cancel:\(operation)")
+            Task {
+                await operation.cleanUploadFileSession()
+                operation.cancel()
             }
         }
+        keyedUploadOperations.removeObject(forKey: uploadFileId)
     }
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
@@ -391,7 +363,7 @@ extension UploadQueue: UploadQueueable {
 
     @discardableResult
     public func addToQueue(uploadFile: UploadFile,
-                            itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
+                           itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return nil
