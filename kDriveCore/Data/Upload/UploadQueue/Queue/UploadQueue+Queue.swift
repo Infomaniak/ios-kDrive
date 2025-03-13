@@ -26,32 +26,6 @@ import RealmSwift
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
-    /// A query for the `UploadFiles` in the  __Main app__ context
-    ///
-    /// Not uploaded yet, can retry, not owned by `FileProvider`.
-    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
-
-    /// A query for the `UploadFiles` in the  __FileProvider__ context
-    ///
-    /// Not uploaded yet, can retry, owned by `FileProvider`.
-    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
-
-    /// Query to fetch `UploadFiles` for the current execution context
-    public var uploadFileQuery: String? {
-        switch appContextService.context {
-        case .app, .appTests:
-            return Self.appFilesToUploadQuery
-        case .fileProviderExtension:
-            return Self.fileProviderFilesToUploadQuery
-        case .actionExtension:
-            // not supported in actionExtension
-            return nil
-        case .shareExtension:
-            // not supported in shareExtension
-            return nil
-        }
-    }
-
     public var operationCount: Int {
         operationQueue.operationCount
     }
