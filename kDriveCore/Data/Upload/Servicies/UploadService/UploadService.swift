@@ -257,21 +257,34 @@ extension UploadService: UploadServiceable {
             }
 
             let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
-            let uploadingFilesIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+            let allUploadingFilesIds = Array(uploadingFiles.map(\.id))
+            let photoSyncUploadingFilesIds: [String] = uploadingFiles.compactMap { uploadFile in
+                guard uploadFile.isPhotoSyncUpload else { return nil }
+                return uploadFile.id
+            }
+            let globalUploadingFilesIds: [String] = uploadingFiles.compactMap { uploadFile in
+                guard !uploadFile.isPhotoSyncUpload else { return nil }
+                return uploadFile.id
+            }
+
+            assert(
+                photoSyncUploadingFilesIds.count + globalUploadingFilesIds.count == uploadingFiles.count,
+                "count of IDs should match"
+            )
+
+            Log.uploadQueue("cancelAllOperations IDS count:\(allUploadingFilesIds.count) parentId:\(parentId)")
 
             try? uploadsDatabase.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
+                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
 
                 writableRealm.delete(objectsToDelete)
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
 
-            // TODO: Directly remove in the correct queue
-            globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
-            photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+            globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
+            photoUploadQueue.cancelAllOperations(uploadingFilesIds: photoSyncUploadingFilesIds)
 
             publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
         }
