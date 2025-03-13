@@ -239,35 +239,36 @@ extension UploadService: UploadServiceable {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
-        defer {
-            Log.uploadQueue("cancelAllOperations finished")
-        }
-
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
         }
 
-        suspendAllOperations()
+        Task {
+            suspendAllOperations()
+            defer {
+                resumeAllOperations()
+                Log.uploadQueue("cancelAllOperations finished")
+            }
 
-        let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
-        let uploadingFilesIds = Array(uploadingFiles.map(\.id))
-        Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+            let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
+            let uploadingFilesIds = Array(uploadingFiles.map(\.id))
+            Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
 
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            // Delete all the linked UploadFiles from Realm. This is fast.
-            Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-            let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
+            try? uploadsDatabase.writeTransaction { writableRealm in
+                // Delete all the linked UploadFiles from Realm. This is fast.
+                Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
+                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
 
-            writableRealm.delete(objectsToDelete)
-            Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
+                writableRealm.delete(objectsToDelete)
+                Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
+            }
+
+            globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+            photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+
+            publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
         }
-
-        globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
-        photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
-
-        publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
-        resumeAllOperations()
     }
 
     public func rescheduleRunningOperations() {
