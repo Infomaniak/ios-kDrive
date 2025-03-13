@@ -39,12 +39,6 @@ public protocol UploadServiceDataSourceable {
 
     func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate?) -> Results<UploadFile>
 
-    /// Save an UploadFile in base and optionally enqueue the upload in main app
-    /// - Parameters:
-    ///   - uploadFile: The upload file to be processed
-    ///   - itemIdentifier: Optional item identifier
-    ///   - addToQueue: Should we schedule the upload as well ?
-    /// - Returns: An UploadOperation if any
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
                      itemIdentifier: NSFileProviderItemIdentifier?,
