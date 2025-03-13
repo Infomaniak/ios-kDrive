@@ -43,6 +43,4 @@ public protocol UploadQueueable {
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }
-
-    var uploadFileQuery: String? { get }
 }
