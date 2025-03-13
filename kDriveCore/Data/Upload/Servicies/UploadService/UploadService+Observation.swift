@@ -25,34 +25,17 @@ public typealias UploadedFileId = String
 public typealias UploadProgress = Double
 
 public protocol UploadObservable {
-    /// Observe the upload of a file
-    /// - Parameters:
-    ///   - observer: The observer type
-    ///   - fileId: The Id of the file to observe
-    ///   - closure: Called on completion, in MainQueue
-    /// - Returns: A token that should be cancelled first thing in your `closure`
+
     @discardableResult
     func observeFileUploaded<T: AnyObject>(_ observer: T,
                                            fileId: String?,
                                            using closure: @escaping (UploadFile, File?) -> Void) -> ObservationToken
 
-    /// Observe Uploaded files within a specific folder.
-    /// - Parameters:
-    ///   - observer: The observer type
-    ///   - parentId: parent Id
-    ///   - closure: Called on completion, in MainQueue
-    /// - Returns: A token that should be cancelled first thing in your `closure`
     @discardableResult
     func observeUploadCount<T: AnyObject>(_ observer: T,
                                           parentId: Int,
                                           using closure: @escaping (Int, Int) -> Void) -> ObservationToken
 
-    /// Observe the count of uploaded files within a Drive
-    /// - Parameters:
-    ///   - observer: The observer type
-    ///   - driveId: drive Id
-    ///   - closure: Called on completion, in MainQueue
-    /// - Returns: A token that should be cancelled first thing in your `closure`
     @discardableResult
     func observeUploadCount<T: AnyObject>(_ observer: T,
                                           driveId: Int,
