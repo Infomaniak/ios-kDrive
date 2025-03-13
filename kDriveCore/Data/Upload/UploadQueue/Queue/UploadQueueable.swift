@@ -32,15 +32,10 @@ public protocol UploadQueueable {
 
     func resumeAllOperations()
 
-    /// Wait for all (started or not) enqueued operations to finish.
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
     func cancelAllOperations(uploadingFilesIds: [String])
 
-    /// Mark all running `UploadOperation` as rescheduled, and terminate gracefully
-    ///
-    /// Takes more time than `cancel`, yet prefer it over a `cancel` for the sake of consistency.
-    /// Further uploads will start from the mail app
     func rescheduleRunningOperations()
 
     func cancel(uploadFileId: String)
