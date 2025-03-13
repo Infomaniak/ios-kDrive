@@ -25,7 +25,6 @@ public typealias UploadedFileId = String
 public typealias UploadProgress = Double
 
 public protocol UploadObservable {
-
     @discardableResult
     func observeFileUploaded<T: AnyObject>(_ observer: T,
                                            fileId: String?,
