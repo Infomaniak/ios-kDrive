@@ -137,9 +137,9 @@ public final class UploadFile: Object, UploadFilable {
     public var formattedSize: String {
         return Constants.formatFileSize(size)
     }
-    
+
     public var isPhotoSyncUpload: Bool {
-        return assetLocalIdentifier != nil
+        type == .phAsset
     }
 
     var type: UploadFileType {
