@@ -98,7 +98,6 @@ extension UploadService: UploadServiceable {
                     lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
-                    // TODO: Do it in this object and forward objects to specific queues
                     globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
                 }
                 resumeAllOperations()
@@ -140,7 +139,6 @@ extension UploadService: UploadServiceable {
                 }
 
                 // Remove operation from tracking
-                // TODO: Split two specific queues
                 globalUploadQueue.cancel(uploadFileId: uploadFileId)
 
                 // Clean error in base
@@ -157,7 +155,6 @@ extension UploadService: UploadServiceable {
                 return
             }
 
-            // TODO: Split two specific queues
             globalUploadQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
         }
     }
@@ -209,7 +206,6 @@ extension UploadService: UploadServiceable {
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
-                // TODO: Split two specific queues
                 // Cancel operation if any
                 globalUploadQueue.cancel(uploadFileId: uploadFileId)
 
@@ -237,7 +233,6 @@ extension UploadService: UploadServiceable {
                 continue
             }
 
-            // TODO: Split two specific queues
             globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
         }
     }
@@ -268,7 +263,6 @@ extension UploadService: UploadServiceable {
             Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
         }
 
-        // TODO: Split between queues in sub PR
         globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
         photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
 
@@ -295,7 +289,6 @@ extension UploadService: UploadServiceable {
         let frozenFileToDelete = toDeleteLive.freeze()
         frozenFileToDelete.cleanSourceFileIfNeeded()
 
-        // TODO: Select correct upload queue
         globalUploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
 
         try? uploadsDatabase.writeTransaction { writableRealm in
