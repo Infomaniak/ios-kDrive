@@ -77,6 +77,7 @@ extension UploadService: UploadServiceable {
             @InjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.cleanCacheIfAlmostFull()
 
+            // TODO: Extend uploadFileQuery for photo queue
             guard let uploadFileQuery = globalUploadQueue.uploadFileQuery else {
                 Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
                 return
@@ -86,6 +87,7 @@ extension UploadService: UploadServiceable {
                 return lazyCollection.filter(uploadFileQuery)
                     .sorted(byKeyPath: "taskCreationDate")
             }
+
             let uploadingFileIds = Array(uploadingFiles.map(\.id))
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
 
@@ -98,7 +100,7 @@ extension UploadService: UploadServiceable {
                     lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
-                    globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+                    file.uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
                 }
                 resumeAllOperations()
             }
@@ -131,6 +133,13 @@ extension UploadService: UploadServiceable {
         }
 
         Task {
+            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
+                .freeze() else {
+                return
+            }
+
+            let specificQueue = frozenFile.uploadQueue
+
             try? self.uploadsDatabase.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
@@ -138,24 +147,13 @@ extension UploadService: UploadServiceable {
                     return
                 }
 
-                // Remove operation from tracking
-                globalUploadQueue.cancel(uploadFileId: uploadFileId)
+                specificQueue.cancel(uploadFileId: uploadFileId)
 
-                // Clean error in base
                 file.clearErrorsForRetry()
             }
 
-            // re-enqueue UploadOperation
-            defer {
-                resumeAllOperations()
-            }
-
-            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
-                .freeze() else {
-                return
-            }
-
-            globalUploadQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+            specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+            resumeAllOperations()
         }
     }
 
@@ -206,8 +204,9 @@ extension UploadService: UploadServiceable {
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
-                // Cancel operation if any
+                // TODO: Refactor to directly point out to the correct queue
                 globalUploadQueue.cancel(uploadFileId: uploadFileId)
+                photoUploadQueue.cancel(uploadFileId: uploadFileId)
 
                 // Clean errors in db file
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
@@ -233,7 +232,7 @@ extension UploadService: UploadServiceable {
                 continue
             }
 
-            globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+            file.uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
         }
     }
 
@@ -264,6 +263,7 @@ extension UploadService: UploadServiceable {
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
 
+            // TODO: Directly remove in the correct queue
             globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
             photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
 
@@ -289,8 +289,7 @@ extension UploadService: UploadServiceable {
 
         let frozenFileToDelete = toDeleteLive.freeze()
         frozenFileToDelete.cleanSourceFileIfNeeded()
-
-        globalUploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
+        frozenFileToDelete.uploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
