@@ -43,7 +43,7 @@ public final class UploadService {
         )
     }()
 
-    lazy var allQueues = [globalUploadQueue, photoUploadQueue]
+    lazy var allQueues = [globalUploadQueue]
 
     var fileUploadedCount = 0
     var observations = (
@@ -53,7 +53,7 @@ public final class UploadService {
     )
 
     public var operationCount: Int {
-        globalUploadQueue.operationCount + photoUploadQueue.operationCount
+        globalUploadQueue.operationCount
     }
 
     public var pausedNotificationSent = false
@@ -67,7 +67,7 @@ public final class UploadService {
 
 extension UploadService: UploadServiceable {
     public var isSuspended: Bool {
-        return globalUploadQueue.isSuspended && photoUploadQueue.isSuspended
+        return globalUploadQueue.isSuspended
     }
 
     public func rebuildUploadQueueFromObjectsInRealm() {
@@ -117,9 +117,7 @@ extension UploadService: UploadServiceable {
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         globalUploadQueue.waitForCompletion {
-            self.photoUploadQueue.waitForCompletion {
-                completionHandler()
-            }
+            completionHandler()
         }
     }
 
@@ -265,7 +263,6 @@ extension UploadService: UploadServiceable {
             }
 
             globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
-            photoUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
 
             publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
         }
