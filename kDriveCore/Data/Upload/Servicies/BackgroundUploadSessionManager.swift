@@ -28,19 +28,12 @@ public typealias RequestCompletionHandler = (Data?, URLResponse?, Error?) -> Voi
 public typealias BackgroundCompletionHandler = () -> Void
 
 protocol BackgroundUploadSessionManageable: URLSessionTaskDelegate, URLSessionDelegate, URLSessionDataDelegate {
-    /// Returns the background session
     var backgroundSession: URLSession! { get }
 
-    /// Recreate the URLSessions from existing identifiers in base, and set this instance as delegate.
     func reconnectBackgroundTasks()
 
     func scheduled(task: URLSessionDataTask?, fileUrl: URL?)
 
-    /// Cancel a running request, reschedule it on the background session, and returns a dedicated identifier
-    /// - Parameters:
-    ///   - task: The task to reschedule
-    ///   - fileUrl: The url of the file to upload
-    /// - Returns: a dedicated request identifier, or nil if failed
     func rescheduleForBackground(task: URLSessionDataTask, fileUrl: URL) -> String?
 }
 
