@@ -29,7 +29,7 @@ typealias FileDisplayed = CornerCellContainer<File>
 final class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
-    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
 
     private var frozenUploadingFolders = [FileDisplayed]()
     private var notificationToken: NotificationToken?
