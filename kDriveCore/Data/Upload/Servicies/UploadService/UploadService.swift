@@ -66,6 +66,21 @@ public final class UploadService {
 }
 
 extension UploadService: UploadServiceable {
+    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
+
+    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
+
+    private var uploadFileQuery: String? {
+        switch appContextService.context {
+        case .app, .appTests:
+            return Self.appFilesToUploadQuery
+        case .fileProviderExtension:
+            return Self.fileProviderFilesToUploadQuery
+        case .actionExtension, .shareExtension:
+            return nil
+        }
+    }
+
     public var isSuspended: Bool {
         allQueues.allSatisfy(\.isSuspended)
     }
@@ -77,8 +92,7 @@ extension UploadService: UploadServiceable {
             @InjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.cleanCacheIfAlmostFull()
 
-            // TODO: Extend uploadFileQuery for photo queue
-            guard let uploadFileQuery = globalUploadQueue.uploadFileQuery else {
+            guard let uploadFileQuery = uploadFileQuery else {
                 Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
                 return
             }
