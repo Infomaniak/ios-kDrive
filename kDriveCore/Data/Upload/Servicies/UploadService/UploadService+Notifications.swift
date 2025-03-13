@@ -25,10 +25,8 @@ public protocol UploadNotifiable {
 
     func setPausedNotificationSent(_ newValue: Bool)
 
-    /// Send a local notification that the system has paused the upload.
     func sendPausedNotificationIfNeeded()
 
-    /// Send a local notification that n files were uploaded, or send a specific error message if in error state
     func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult)
 }
 
