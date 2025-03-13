@@ -186,10 +186,7 @@ extension UploadService: UploadServiceable {
             resumeAllOperations()
 
             for batch in batches {
-                // Cancel Operation if any and reset errors
                 cancelAnyInBatch(batch)
-
-                // Second transaction to enqueue the UploadFile to the OperationQueue
                 enqueueAnyInBatch(batch)
             }
         }
@@ -218,17 +215,12 @@ extension UploadService: UploadServiceable {
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
-                // TODO: Refactor to directly point out to the correct queue
-                globalUploadQueue.cancel(uploadFileId: uploadFileId)
-                photoUploadQueue.cancel(uploadFileId: uploadFileId)
-
-                // Clean errors in db file
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
                     continue
                 }
-
+                file.uploadQueue.cancel(uploadFileId: uploadFileId)
                 file.clearErrorsForRetry()
             }
         }
