@@ -69,7 +69,6 @@ extension URLSession: Identifiable {
 public final class BackgroundUploadSessionManager: NSObject,
     BackgroundUploadSessionManageable,
     BackgroundUploadSessionCompletionable {
-
     private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
 
     var backgroundSession: URLSession!
