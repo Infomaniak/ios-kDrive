@@ -38,13 +38,12 @@ extension UploadService: UploadNotifiable {
 
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
-        serialQueue.async { [weak self] in
-            guard let self else { return }
-            if !pausedNotificationSent {
-                notificationHelper.sendPausedUploadQueueNotification()
-                pausedNotificationSent = true
-            }
+        guard !pausedNotificationSent else {
+            return
         }
+
+        notificationHelper.sendPausedUploadQueueNotification()
+        pausedNotificationSent = true
     }
 
     public func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult) {
