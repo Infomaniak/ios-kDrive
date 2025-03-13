@@ -35,7 +35,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var deeplinkParser: DeeplinkParsable
     @LazyInjectService var uploadNotifications: UploadNotifiable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
-    @LazyInjectService var uploadObservation: UploadQueueObservable
+    @LazyInjectService var uploadObservation: UploadObservable
 
     var shortcutItemToProcess: UIApplicationShortcutItem?
 

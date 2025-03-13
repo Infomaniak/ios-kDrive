@@ -24,7 +24,7 @@ import RealmSwift
 public typealias UploadedFileId = String
 public typealias UploadProgress = Double
 
-public protocol UploadQueueObservable {
+public protocol UploadObservable {
     /// Observe the upload of a file
     /// - Parameters:
     ///   - observer: The observer type
@@ -61,7 +61,7 @@ public protocol UploadQueueObservable {
 
 // MARK: - Observation
 
-extension UploadService: UploadQueueObservable {
+extension UploadService: UploadObservable {
     @discardableResult
     public func observeFileUploaded<T: AnyObject>(_ observer: T,
                                                   fileId: String? = nil,

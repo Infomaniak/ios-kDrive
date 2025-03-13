@@ -63,7 +63,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     // Not lazy to force init of the object early, and set a userID in Sentry
     @InjectService var accountManager: AccountManageable
 
-    @LazyInjectService var uploadQueueObservable: UploadQueueObservable
+    @LazyInjectService var uploadQueueObservable: UploadObservable
     @LazyInjectService var fileProviderService: FileProviderServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
