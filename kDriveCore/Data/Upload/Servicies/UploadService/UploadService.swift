@@ -53,7 +53,7 @@ public final class UploadService {
     )
 
     public var operationCount: Int {
-        globalUploadQueue.operationCount + photoUploadQueue.operationCount
+        allQueues.reduce(0) { $0 + $1.operationCount }
     }
 
     public var pausedNotificationSent = false
