@@ -20,7 +20,7 @@ import FileProvider
 import Foundation
 import RealmSwift
 
-public protocol UploadQueueable {
+public protocol UploadQueueable: AnyObject {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
 
     @discardableResult
@@ -45,4 +45,6 @@ public protocol UploadQueueable {
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }
+
+    var isActive: Bool { get }
 }
