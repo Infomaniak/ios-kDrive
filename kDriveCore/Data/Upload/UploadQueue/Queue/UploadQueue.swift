@@ -24,16 +24,11 @@ import RealmSwift
 import Sentry
 
 public class UploadQueue: ParallelismHeuristicDelegate {
-    private var memoryPressure: DispatchSourceMemoryPressure?
-
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var uploadPublisher: UploadPublishable
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
-
-    /// Something to adapt the upload parallelism live
-    var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
 
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
@@ -76,10 +71,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         Log.uploadQueue("Starting up")
-
-        uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
-
-        // Observe network state change
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else {
                 return
@@ -89,42 +80,11 @@ public class UploadQueue: ParallelismHeuristicDelegate {
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
         }
-
-        observeMemoryWarnings()
-
-        Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")
-    }
-
-    // MARK: - Memory warnings
-
-    /// A critical memory warning in `FileProvider` context will reschedule, in order to transition uploads to Main App.
-    private func observeMemoryWarnings() {
-        guard appContextService.context == .fileProviderExtension else {
-            return
-        }
-
-        let source = DispatchSource.makeMemoryPressureSource(eventMask: .all, queue: .main)
-        memoryPressure = source
-        source.setEventHandler {
-            let event: DispatchSource.MemoryPressureEvent = source.data
-            switch event {
-            case DispatchSource.MemoryPressureEvent.normal:
-                Log.uploadQueue("MemoryPressureEvent normal", level: .info)
-            case DispatchSource.MemoryPressureEvent.warning:
-                Log.uploadQueue("MemoryPressureEvent warning", level: .info)
-            case DispatchSource.MemoryPressureEvent.critical:
-                Log.uploadQueue("MemoryPressureEvent critical", level: .error)
-                self.rescheduleRunningOperations()
-            default:
-                break
-            }
-        }
-        source.resume()
     }
 
     // MARK: - ParallelismHeuristicDelegate
 
-    func parallelismShouldChange(value: Int) {
+    public func parallelismShouldChange(value: Int) {
         Log.uploadQueue("Upload queue new parallelism: \(value)", level: .info)
         operationQueue.maxConcurrentOperationCount = value
     }
