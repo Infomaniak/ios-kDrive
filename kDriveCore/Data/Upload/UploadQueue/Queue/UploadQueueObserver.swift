@@ -1,0 +1,55 @@
+/*
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2025 Infomaniak Network SA
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import Foundation
+
+public class UploadQueueObserver: NSObject {
+    private var previousCount: Int?
+    private var observation: NSKeyValueObservation?
+
+    var uploadQueue: UploadQueue
+    weak var delegate: UploadQueueDelegate?
+
+    init(uploadQueue: UploadQueue, delegate: UploadQueueDelegate?) {
+        self.uploadQueue = uploadQueue
+        self.delegate = delegate
+        super.init()
+
+        observation = uploadQueue.operationQueue.observe(\.operationCount, options: [.new, .old]) { [weak self] _, change in
+            guard let self else { return }
+            guard let newCount = change.newValue else { return }
+
+            defer { previousCount = newCount }
+
+            guard let previousCount else {
+                delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                return
+            }
+
+            guard previousCount != newCount else {
+                return
+            }
+
+            if newCount == 0 {
+                delegate?.operationQueueBecameEmpty(uploadQueue)
+            } else {
+                delegate?.operationQueueNoLongerEmpty(uploadQueue)
+            }
+        }
+    }
+}
