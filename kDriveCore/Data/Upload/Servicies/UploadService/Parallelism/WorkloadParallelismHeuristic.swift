@@ -100,7 +100,7 @@ final class WorkloadParallelismHeuristic {
         currentParallelism = parallelism
     }
 
-    public private(set) var currentParallelism = 0 {
+    public private(set) var currentParallelism = WorkloadParallelismHeuristic.reducedParallelism {
         didSet {
             delegate?.parallelismShouldChange(value: currentParallelism)
         }
