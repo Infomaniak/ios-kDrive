@@ -56,9 +56,6 @@ final class WorkloadParallelismHeuristic {
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
             object: nil
         )
-
-        // Update the value a first time
-        computeParallelism()
     }
 
     deinit {
