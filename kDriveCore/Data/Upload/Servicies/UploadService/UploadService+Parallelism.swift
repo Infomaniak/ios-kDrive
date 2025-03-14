@@ -18,6 +18,16 @@
 
 import Foundation
 
+public final class UploadParallelismOrchestrator: UploadQueueDelegate {
+    public func operationQueueBecameEmpty(_ queue: UploadQueue) {
+        print("queue empty")
+    }
+
+    public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
+        print("queue not empty")
+    }
+}
+
 extension UploadService: ParallelismHeuristicDelegate {
     // MARK: - Memory warnings
 
