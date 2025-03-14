@@ -81,11 +81,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
         self.delegate = delegate
 
-        Log.uploadQueue("Starting up")
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            guard let self else {
-                return
-            }
+            guard let self else { return }
 
             let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
             operationQueue.isSuspended = isSuspended

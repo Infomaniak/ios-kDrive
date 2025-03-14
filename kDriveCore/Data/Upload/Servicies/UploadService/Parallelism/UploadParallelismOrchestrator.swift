@@ -25,8 +25,10 @@ public final class UploadParallelismOrchestrator {
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var appContextService: AppContextServiceable
 
-    private var uploadParallelismHeuristic: WorkloadParallelismHeuristic
+    private var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
     private var memoryPressureObserver: DispatchSourceMemoryPressure?
+
+    private lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     public init() {
         observeMemoryWarnings()
@@ -59,22 +61,37 @@ public final class UploadParallelismOrchestrator {
     }
 
     func computeUploadParallelismPerQueueAndApply() {
-        Log.uploadQueue("Current total upload parallelism :\(uploadParallelismHeuristic.currentParallelism)")
-        // let quota = …
+        let parallelismAvailable = uploadParallelismHeuristic?.currentParallelism ?? 2
+        Log.uploadQueue("Current total upload parallelism :\(parallelismAvailable)")
 
-//        globalUploadQueue
-//        photoUploadQueue
+        let activeQueues = allQueues.filter(\.isActive)
+        let inactiveQueues = allQueues.filter { lhs in
+            !activeQueues.contains { rhs in
+                lhs === rhs
+            }
+        }
+
+        assert(activeQueues.count + inactiveQueues.count == allQueues.count, "expecting to match")
+
+        inactiveQueues.forEach { $0.parallelismShouldChange(value: 1) }
+
+        Log.uploadQueue("Updating parallelism in inactiveQueues:\(inactiveQueues.count) activeQueues:\(activeQueues.count)")
+        guard !activeQueues.isEmpty else {
+            return
+        }
+
+        let parallelismPerActiveQueue = max(1, parallelismAvailable / activeQueues.count)
+        Log.uploadQueue("Parallelism per active queue :\(parallelismPerActiveQueue)")
+        activeQueues.forEach { $0.parallelismShouldChange(value: parallelismPerActiveQueue) }
     }
 }
 
 extension UploadParallelismOrchestrator: UploadQueueDelegate {
     public func operationQueueBecameEmpty(_ queue: UploadQueue) {
-        print("queue empty")
         computeUploadParallelismPerQueueAndApply()
     }
 
     public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
-        print("queue not empty")
         computeUploadParallelismPerQueueAndApply()
     }
 }
