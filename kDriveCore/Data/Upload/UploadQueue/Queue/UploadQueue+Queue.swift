@@ -34,6 +34,10 @@ extension UploadQueue: UploadQueueable {
         operationQueue.isSuspended
     }
 
+    public var isActive: Bool {
+        operationQueue.operationCount > 0 && !operationQueue.isSuspended
+    }
+
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         Log.uploadQueue("waitForCompletion")
         DispatchQueue.global(qos: .default).async {
