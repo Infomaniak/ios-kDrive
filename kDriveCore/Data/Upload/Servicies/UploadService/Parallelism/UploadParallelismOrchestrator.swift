@@ -28,6 +28,13 @@ public final class UploadParallelismOrchestrator {
     private var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
     private var memoryPressureObserver: DispatchSourceMemoryPressure?
 
+    private var availableParallelism: Int {
+        guard let uploadParallelismHeuristic else {
+            return ParallelismDefaults.reducedParallelism
+        }
+        return uploadParallelismHeuristic.currentParallelism
+    }
+
     private lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     public init() {
@@ -61,8 +68,8 @@ public final class UploadParallelismOrchestrator {
     }
 
     func computeUploadParallelismPerQueueAndApply() {
-        let parallelismAvailable = uploadParallelismHeuristic?.currentParallelism ?? 2
-        Log.uploadQueue("Current total upload parallelism :\(parallelismAvailable)")
+        let currentAvailableParallelism = availableParallelism
+        Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
 
         let activeQueues = allQueues.filter(\.isActive)
         let inactiveQueues = allQueues.filter { lhs in
@@ -71,17 +78,17 @@ public final class UploadParallelismOrchestrator {
             }
         }
 
-        assert(activeQueues.count + inactiveQueues.count == allQueues.count, "expecting to match")
+        assert(activeQueues.count + inactiveQueues.count == allQueues.count, "expecting to not miss a queue")
 
-        inactiveQueues.forEach { $0.parallelismShouldChange(value: 1) }
+        inactiveQueues.forEach { $0.parallelismShouldChange(value: ParallelismDefaults.serial) }
 
         Log.uploadQueue("Updating parallelism in inactiveQueues:\(inactiveQueues.count) activeQueues:\(activeQueues.count)")
         guard !activeQueues.isEmpty else {
             return
         }
 
-        let parallelismPerActiveQueue = max(1, parallelismAvailable / activeQueues.count)
-        Log.uploadQueue("Parallelism per active queue :\(parallelismPerActiveQueue)")
+        let parallelismPerActiveQueue = max(ParallelismDefaults.serial, currentAvailableParallelism / activeQueues.count)
+        Log.uploadQueue("New parallelism per active queue :\(parallelismPerActiveQueue)")
         activeQueues.forEach { $0.parallelismShouldChange(value: parallelismPerActiveQueue) }
     }
 }
