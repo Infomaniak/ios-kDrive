@@ -17,21 +17,22 @@
  */
 
 import Foundation
+import InfomaniakDI
 
-public final class UploadParallelismOrchestrator: UploadQueueDelegate {
-    public func operationQueueBecameEmpty(_ queue: UploadQueue) {
-        print("queue empty")
+public final class UploadParallelismOrchestrator {
+    @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
+    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
+    @LazyInjectService private var uploadService: UploadServiceable
+    @LazyInjectService private var appContextService: AppContextServiceable
+
+    private var uploadParallelismHeuristic: WorkloadParallelismHeuristic
+    private var memoryPressureObserver: DispatchSourceMemoryPressure?
+
+    public init() {
+        observeMemoryWarnings()
+        uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
     }
 
-    public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
-        print("queue not empty")
-    }
-}
-
-extension UploadService: ParallelismHeuristicDelegate {
-    // MARK: - Memory warnings
-
-    /// A critical memory warning in `FileProvider` context will reschedule, in order to transition uploads to Main App.
     func observeMemoryWarnings() {
         guard appContextService.context == .fileProviderExtension else {
             return
@@ -49,7 +50,7 @@ extension UploadService: ParallelismHeuristicDelegate {
                 Log.uploadQueue("MemoryPressureEvent warning", level: .info)
             case DispatchSource.MemoryPressureEvent.critical:
                 Log.uploadQueue("MemoryPressureEvent critical", level: .error)
-                self.rescheduleRunningOperations()
+                uploadService.rescheduleRunningOperations()
             default:
                 break
             }
@@ -57,10 +58,29 @@ extension UploadService: ParallelismHeuristicDelegate {
         source.resume()
     }
 
-    // MARK: - ParallelismHeuristicDelegate
+    func computeUploadParallelismPerQueueAndApply() {
+        Log.uploadQueue("Current total upload parallelism :\(uploadParallelismHeuristic.currentParallelism)")
+        // let quota = …
 
-    func parallelismShouldChange(value: Int) {
-        Log.uploadQueue("UploadQueue parallelism is:\(value)")
-        allQueues.forEach { $0.parallelismShouldChange(value: value) }
+//        globalUploadQueue
+//        photoUploadQueue
+    }
+}
+
+extension UploadParallelismOrchestrator: UploadQueueDelegate {
+    public func operationQueueBecameEmpty(_ queue: UploadQueue) {
+        print("queue empty")
+        computeUploadParallelismPerQueueAndApply()
+    }
+
+    public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
+        print("queue not empty")
+        computeUploadParallelismPerQueueAndApply()
+    }
+}
+
+extension UploadParallelismOrchestrator: ParallelismHeuristicDelegate {
+    public func parallelismShouldChange(value: Int) {
+        computeUploadParallelismPerQueueAndApply()
     }
 }
