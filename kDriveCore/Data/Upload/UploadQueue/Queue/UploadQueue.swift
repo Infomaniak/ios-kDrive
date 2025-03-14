@@ -23,9 +23,18 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
+public protocol UploadQueueDelegate: AnyObject {
+    func operationQueueBecameEmpty(_ queue: UploadQueue)
+    func operationQueueNoLongerEmpty(_ queue: UploadQueue)
+}
+
 public class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var uploadPublisher: UploadPublishable
+
+    private var queueObserver: UploadQueueObserver?
+
+    weak var delegate: UploadQueueDelegate?
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
@@ -64,11 +73,13 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     var forceSuspendQueue = false
 
-    public init() {
+    public init(delegate: UploadQueueDelegate?) {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
             return
         }
+
+        self.delegate = delegate
 
         Log.uploadQueue("Starting up")
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
@@ -80,6 +91,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
             operationQueue.isSuspended = isSuspended
             Log.uploadQueue("observeNetworkChange :\(isSuspended)")
         }
+
+        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
     }
 
     // MARK: - ParallelismHeuristicDelegate
