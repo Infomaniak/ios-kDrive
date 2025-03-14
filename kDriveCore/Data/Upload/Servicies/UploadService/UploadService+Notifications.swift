@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2023 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,23 +21,29 @@ import InfomaniakDI
 import UIKit
 
 public protocol UploadNotifiable {
-    /// Send a local notification that the system has paused the upload.
+    var pausedNotificationSent: Bool { get }
+
+    func setPausedNotificationSent(_ newValue: Bool)
+
     func sendPausedNotificationIfNeeded()
 
-    /// Send a local notification that n files were uploaded, or send a specific error message if in error state
     func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult)
 }
 
-extension UploadQueue: UploadNotifiable {
+extension UploadService: UploadNotifiable {
+    public func setPausedNotificationSent(_ newValue: Bool) {
+        Log.uploadQueue("setPausedNotificationSent newValue:\(newValue)")
+        pausedNotificationSent = newValue
+    }
+
     public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
-        serialQueue.async { [weak self] in
-            guard let self else { return }
-            if !pausedNotificationSent {
-                notificationHelper.sendPausedUploadQueueNotification()
-                pausedNotificationSent = true
-            }
+        guard !pausedNotificationSent else {
+            return
         }
+
+        notificationHelper.sendPausedUploadQueueNotification()
+        pausedNotificationSent = true
     }
 
     public func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult) {
@@ -52,6 +58,7 @@ extension UploadQueue: UploadNotifiable {
             }
 
             fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
+            let currentOperationCount = operationCount
             if let error = uploadFile.error {
                 let uploadedFileName = result.driveFile?.name ?? uploadFile.name
                 if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
@@ -63,10 +70,10 @@ extension UploadQueue: UploadNotifiable {
                                                               uploadFileId: uploadFile.id)
                 }
 
-                if operationQueue.operationCount == 0 {
+                if currentOperationCount == 0 {
                     fileUploadedCount = 0
                 }
-            } else if operationQueue.operationCount == 0 {
+            } else if currentOperationCount == 0 {
                 // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file
                 // *successfully* uploaded
                 if fileUploadedCount == 1 && uploadFile.error == nil {

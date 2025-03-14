@@ -33,6 +33,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var deeplinkParser: DeeplinkParsable
+    @LazyInjectService var uploadNotifications: UploadNotifiable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService var uploadObservation: UploadObservable
 
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
@@ -116,8 +119,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(window)")
-        @InjectService var uploadQueue: UploadQueue
-        uploadQueue.pausedNotificationSent = false
+        uploadNotifications.setPausedNotificationSent(false)
 
         let currentState = RootViewControllerState.getCurrentState()
         let session = scene.session
@@ -335,9 +337,8 @@ extension SceneDelegate {
                                             shouldRemoveAfterUpload: false)
                 group.enter()
                 shouldCleanFolder = true
-                @InjectService var uploadQueue: UploadQueue
                 var observationToken: ObservationToken?
-                observationToken = uploadQueue
+                observationToken = uploadObservation
                     .observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
                         observationToken?.cancel()
                         if let error = uploadFile.error {
@@ -354,7 +355,7 @@ extension SceneDelegate {
                         }
                         group.leave()
                     }
-                uploadQueue.saveToRealm(uploadFile, itemIdentifier: nil)
+                uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
             }
         }
 

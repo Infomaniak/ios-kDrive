@@ -22,7 +22,8 @@ import RealmSwift
 
 /// Something to monitor storage space
 public struct FreeSpaceService {
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService var uploadService: UploadServiceable
 
     public init() {
         // Required
@@ -81,7 +82,7 @@ public struct FreeSpaceService {
     /// Removes orphan import files, and cache if constrained in space
     /// This works on the assumption that the UploadQueue is stopped
     public func auditCache() {
-        assert(uploadQueue.operationQueue.isSuspended, "expecting the uploadQueue to be suspended")
+        assert(uploadService.isSuspended, "expecting the uploadQueue to be suspended")
 
         cleanOrphanImportFolderFiles()
         cleanOrphanRootImportFiles()
@@ -118,7 +119,7 @@ public struct FreeSpaceService {
         )
 
         // Keep only folders that are not present in any upload in progress
-        let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
+        let uploadingFiles = uploadDataSource.getAllUploadingFilesFrozen()
         let foldersToClean: [URL] = importUUIDsFolders.compactMap { folderUrl in
             let folderName = folderUrl.lastPathComponent
             let isUploading = uploadingFiles.contains { uploadFile in
@@ -155,7 +156,7 @@ public struct FreeSpaceService {
 
             Log.uploadOperation("found \(cachedFiles.count) in the \(importDirectory) folder")
             // Get uploading in progress tracked in DB
-            let uploadingFiles = uploadQueue.getAllUploadingFilesFrozen()
+            let uploadingFiles = uploadDataSource.getAllUploadingFilesFrozen()
 
             // Match files on SSD against DB, delete if not matched.
             let cachedFilesNames = cachedFiles.map { $0.lastPathComponent }

@@ -32,7 +32,7 @@ final class UploadTableViewCell: InsetTableViewCell {
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
     private var progressObservation: NotificationToken?
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadService: UploadServiceable
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -157,7 +157,7 @@ final class UploadTableViewCell: InsetTableViewCell {
                 return
             }
 
-            self.uploadQueue.cancel(uploadFile: file)
+            self.uploadService.cancel(uploadFileId: file.id)
         }
         cardContentView.retryButtonPressedHandler = { [weak self] in
             guard let self, !uploadFile.isInvalidated else {
@@ -165,7 +165,7 @@ final class UploadTableViewCell: InsetTableViewCell {
             }
 
             cardContentView.retryButton?.isHidden = true
-            uploadQueue.retry(uploadFileId)
+            uploadService.retry(uploadFileId)
         }
     }
 

@@ -47,7 +47,7 @@ public extension FileImportHelper {
                 name: file.name
             )
 
-            self.uploadQueue.saveToRealm(uploadFile, addToQueue: addToQueue)
+            self.uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: addToQueue)
         }
 
         expiringActivity.endAll()
@@ -179,7 +179,7 @@ public extension FileImportHelper {
             url: targetURL,
             name: name
         )
-        uploadQueue.saveToRealm(newFile)
+        uploadDataSource.saveToRealm(newFile, itemIdentifier: nil, addToQueue: true)
     }
 }
 

@@ -54,17 +54,16 @@ extension DriveFileManager {
 
 final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var uploadService: UploadService
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .fileProviderExtension)
 
-    /// Restart the dedicated `FileManager` upload queue on init
-    @InjectService var uploadQueue: UploadQueueable
-
     // Not lazy to force init of the object early, and set a userID in Sentry
     @InjectService var accountManager: AccountManageable
 
-    @LazyInjectService var uploadQueueObservable: UploadQueueObservable
+    @LazyInjectService var uploadQueueObservable: UploadObservable
     @LazyInjectService var fileProviderService: FileProviderServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
@@ -122,14 +121,14 @@ final class FileProviderExtension: NSFileProviderExtension {
         // TODO: working set in DB if workingSet return corresponding item
 
         // Read from upload queue
-        if let uploadingFile = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+        if let uploadingFile = uploadDataSource.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
             let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
             return uploadingItem
         }
 
         // Read form uploaded UploadFiles
-        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue),
+        else if let uploadedFile = uploadDataSource.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue),
                 let remoteFileId = uploadedFile.remoteFileId {
             guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
                 Log.fileProvider("Unable to bridge UploadFile \(uploadedFile.id) to File \(remoteFileId)", level: .error)
@@ -158,13 +157,13 @@ final class FileProviderExtension: NSFileProviderExtension {
         Log.fileProvider("urlForItem(withPersistentIdentifier identifier:)")
 
         // Read from upload queue
-        if let item = uploadQueue.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
+        if let item = uploadDataSource.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("urlForItem - Uploading file")
             return item.pathURL
         }
 
         // Read from uploaded UploadFile
-        else if let uploadedFile = uploadQueue.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue) {
+        else if let uploadedFile = uploadDataSource.getUploadedFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("urlForItem - Uploaded file")
             if let remoteFileId = uploadedFile.remoteFileId {
                 guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
@@ -414,8 +413,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
         }
 
-        uploadQueue.resumeAllOperations()
-        _ = uploadQueue.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
+        uploadService.resumeAllOperations()
+        _ = uploadDataSource.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
     }
 
     // MARK: - Enumeration

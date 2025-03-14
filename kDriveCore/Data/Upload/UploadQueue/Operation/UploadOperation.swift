@@ -63,7 +63,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     // MARK: - Attributes
 
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
-    @LazyInjectService var uploadQueue: UploadQueueable
+    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var fileManager: FileManagerable
@@ -250,10 +250,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             Log.uploadOperation("call finish ufid:\(uploadFileId)")
 
             // Make sure we stop the expiring activity
-            self.expiringActivity?.endAll()
+            expiringActivity?.endAll()
 
             // Make sure we stop all the network requests (if any)
-            self.cancelAllUploadRequests()
+            cancelAllUploadRequests()
 
             finish()
 
@@ -449,7 +449,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         defer {
-            self.end()
+            end()
         }
 
         if let data {

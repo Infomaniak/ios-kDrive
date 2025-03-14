@@ -23,7 +23,7 @@ import kDriveCore
 import RealmSwift
 
 final class UploadCountManager {
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
     private let driveFileManager: DriveFileManager
@@ -65,14 +65,14 @@ final class UploadCountManager {
 
     @discardableResult
     func updateUploadCount() -> Int {
-        uploadCount = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds).count
+        uploadCount = uploadDataSource.getUploadingFiles(userId: userId, driveIds: driveIds).count
         return uploadCount
     }
 
     private func observeUploads() {
         guard uploadsObserver == nil else { return }
 
-        uploadsObserver = uploadQueue
+        uploadsObserver = uploadDataSource
             .getUploadingFiles(userId: userId, driveIds: driveIds)
             .observe(on: observeQueue) { [weak self] change in
                 guard let self else {

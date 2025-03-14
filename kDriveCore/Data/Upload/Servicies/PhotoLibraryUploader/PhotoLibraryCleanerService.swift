@@ -35,16 +35,15 @@ typealias UploadFileAssetIdentifier = (uploadFileId: String, localAssetIdentifie
 
 public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
+    @LazyInjectService private var uploadService: UploadServiceable
+    @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploader
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
     /// A predicate to only keep the `phAsset`
     static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
-
-    @LazyInjectService private var uploadQueue: UploadQueue
-
-    @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploader
 
     /// `True` if feature setting is ON
     private var removePictureEnabled: Bool {
@@ -62,7 +61,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             return false
         }
 
-        let picturesToRemoveCount = uploadQueue
+        let picturesToRemoveCount = uploadDataSource
             .getUploadedFiles(optionalPredicate: Self.photoAssetPredicate)
             .count
 
@@ -71,7 +70,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
             return false
         }
 
-        guard uploadQueue.operationQueue.operationCount == 0 else {
+        guard uploadService.operationCount == 0 else {
             Log.photoLibraryUploader("Uploads underway, skipping")
             return false
         }
@@ -97,7 +96,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
 
         var assetsToRemove = [UploadFileAssetIdentifier]()
         try? uploadsDatabase.writeTransaction { writableRealm in
-            let uploadFilesToClean = uploadQueue
+            let uploadFilesToClean = uploadDataSource
                 .getUploadedFiles(writableRealm: writableRealm, optionalPredicate: Self.photoAssetPredicate)
 
             assetsToRemove = uploadFilesToClean.compactMap { uploadFile in

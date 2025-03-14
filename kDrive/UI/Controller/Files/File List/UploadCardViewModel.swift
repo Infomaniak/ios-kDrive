@@ -26,7 +26,7 @@ class UploadCardViewModel {
     @Published var uploadCount: Int
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     var driveFileManager: DriveFileManager {
         didSet {
@@ -46,12 +46,12 @@ class UploadCardViewModel {
 
     private func initObservation() {
         let driveId = driveFileManager.driveId
-        uploadCount = uploadQueue.getUploadingFiles(withParent: uploadDirectory.id,
-                                                    userId: accountManager.currentUserId,
-                                                    driveId: driveId).count
-        realmObservationToken = uploadQueue.getUploadingFiles(withParent: uploadDirectory.id,
-                                                              userId: accountManager.currentUserId,
-                                                              driveId: driveId).observe(on: .main) { [weak self] change in
+        uploadCount = uploadDataSource.getUploadingFiles(withParent: uploadDirectory.id,
+                                                         userId: accountManager.currentUserId,
+                                                         driveId: driveId).count
+        realmObservationToken = uploadDataSource.getUploadingFiles(withParent: uploadDirectory.id,
+                                                                   userId: accountManager.currentUserId,
+                                                                   driveId: driveId).observe(on: .main) { [weak self] change in
             switch change {
             case .initial(let results):
                 self?.uploadCount = results.count

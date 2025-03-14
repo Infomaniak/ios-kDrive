@@ -26,7 +26,6 @@ import RealmSwift
 import Sentry
 
 public final class PhotoLibraryUploader {
-    @LazyInjectService var uploadQueue: UploadQueue
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     let serialQueue: DispatchQueue = {

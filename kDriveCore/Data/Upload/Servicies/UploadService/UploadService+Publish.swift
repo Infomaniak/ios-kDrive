@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2023 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import Foundation
 import InfomaniakCore
 import RealmSwift
 
-protocol UploadPublishable {
+public protocol UploadPublishable {
     func publishUploadCount(withParent parentId: Int,
                             userId: Int,
                             driveId: Int)
@@ -38,10 +38,10 @@ protocol UploadPublishable {
 
 // MARK: - Publish
 
-extension UploadQueue: UploadPublishable {
-    func publishUploadCount(withParent parentId: Int,
-                            userId: Int,
-                            driveId: Int) {
+extension UploadService: UploadPublishable {
+    public func publishUploadCount(withParent parentId: Int,
+                                   userId: Int,
+                                   driveId: Int) {
         Log.uploadQueue("publishUploadCount")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -50,9 +50,9 @@ extension UploadQueue: UploadPublishable {
         }
     }
 
-    func publishUploadCountInParent(parentId: Int,
-                                    userId: Int,
-                                    driveId: Int) {
+    public func publishUploadCountInParent(parentId: Int,
+                                           userId: Int,
+                                           driveId: Int) {
         Log.uploadQueue("publishUploadCountInParent")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -66,8 +66,8 @@ extension UploadQueue: UploadPublishable {
         }
     }
 
-    func publishUploadCountInDrive(userId: Int,
-                                   driveId: Int) {
+    public func publishUploadCountInDrive(userId: Int,
+                                          driveId: Int) {
         Log.uploadQueue("publishUploadCountInDrive")
         serialQueue.async { [weak self] in
             guard let self else { return }
@@ -80,7 +80,7 @@ extension UploadQueue: UploadPublishable {
         }
     }
 
-    func publishFileUploaded(result: UploadCompletionResult) {
+    public func publishFileUploaded(result: UploadCompletionResult) {
         Log.uploadQueue("publishFileUploaded")
         logFileUploadedWithSuccess(for: result.uploadFile)
         sendFileUploadStateNotificationIfNeeded(with: result)

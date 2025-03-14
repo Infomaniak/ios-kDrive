@@ -29,7 +29,7 @@ typealias FileDisplayed = CornerCellContainer<File>
 final class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
-    @LazyInjectService private var uploadQueue: UploadQueue
+    @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
 
     private var frozenUploadingFolders = [FileDisplayed]()
     private var notificationToken: NotificationToken?
@@ -62,7 +62,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
         guard driveFileManager != nil else { return }
         let driveIds = [driveFileManager.driveId] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
-        let uploadingFiles = uploadQueue.getUploadingFiles(userId: userId, driveIds: driveIds)
+        let uploadingFiles = uploadDataSource.getUploadingFiles(userId: userId, driveIds: driveIds)
             .distinct(by: [\.parentDirectoryId])
 
         notificationToken = uploadingFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in

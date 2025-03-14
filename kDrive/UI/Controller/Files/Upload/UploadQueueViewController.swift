@@ -33,7 +33,8 @@ final class UploadQueueViewController: UIViewController {
     @IBOutlet var cancelButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadService: UploadServiceable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
@@ -74,9 +75,9 @@ final class UploadQueueViewController: UIViewController {
 
         notificationToken?.invalidate()
 
-        let observedFiles = AnyRealmCollection(uploadQueue.getUploadingFiles(withParent: currentDirectory.id,
-                                                                             userId: accountManager.currentUserId,
-                                                                             driveId: currentDirectory.driveId))
+        let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
+                                                                                  userId: accountManager.currentUserId,
+                                                                                  driveId: currentDirectory.driveId))
         notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
             guard let self else {
                 return
@@ -122,15 +123,15 @@ final class UploadQueueViewController: UIViewController {
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
-        uploadQueue.cancelAllOperations(withParent: currentDirectory.id,
-                                        userId: accountManager.currentUserId,
-                                        driveId: currentDirectory.driveId)
+        uploadService.cancelAllOperations(withParent: currentDirectory.id,
+                                          userId: accountManager.currentUserId,
+                                          driveId: currentDirectory.driveId)
     }
 
     @IBAction func retryButtonPressed(_ sender: UIBarButtonItem) {
-        uploadQueue.retryAllOperations(withParent: currentDirectory.id,
-                                       userId: accountManager.currentUserId,
-                                       driveId: currentDirectory.driveId)
+        uploadService.retryAllOperations(withParent: currentDirectory.id,
+                                         userId: accountManager.currentUserId,
+                                         driveId: currentDirectory.driveId)
     }
 
     static func instantiate() -> UploadQueueViewController {
