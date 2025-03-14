@@ -19,6 +19,12 @@
 import Foundation
 import InfomaniakDI
 
+public enum ParallelismDefaults {
+    static let reducedParallelism = 2
+
+    static let serial = 1
+}
+
 /// Delegate protocol of UploadParallelismHeuristic
 public protocol ParallelismHeuristicDelegate: AnyObject {
     /// This method is called with a new parallelism to apply each time to the uploadQueue
@@ -31,9 +37,6 @@ public protocol ParallelismHeuristicDelegate: AnyObject {
 /// Value can change depending on many factors, including thermal state battery or extension mode.
 /// Scaling is achieved given the number of active cores available.
 final class WorkloadParallelismHeuristic {
-    /// With 2 Operations max, and a chuck of 1MiB max, the UploadQueue can spike to max 4MiB memory usage.
-    private static let reducedParallelism = 2
-
     @LazyInjectService private var appContextService: AppContextServiceable
 
     private weak var delegate: ParallelismHeuristicDelegate?
@@ -69,19 +72,19 @@ final class WorkloadParallelismHeuristic {
         // If the device is too hot we cool down now
         let thermalState = processInfo.thermalState
         guard thermalState != .critical else {
-            currentParallelism = Self.reducedParallelism
+            currentParallelism = ParallelismDefaults.reducedParallelism
             return
         }
 
         // In low power mode, we reduce parallelism
         guard !processInfo.isLowPowerModeEnabled else {
-            currentParallelism = Self.reducedParallelism
+            currentParallelism = ParallelismDefaults.reducedParallelism
             return
         }
 
         // In extension, to reduce memory footprint, we reduce drastically parallelism
         guard !appContextService.isExtension else {
-            currentParallelism = Self.reducedParallelism
+            currentParallelism = ParallelismDefaults.reducedParallelism
             return
         }
 
@@ -90,14 +93,14 @@ final class WorkloadParallelismHeuristic {
 
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
-            currentParallelism = max(Self.reducedParallelism, parallelism / 2)
+            currentParallelism = max(ParallelismDefaults.reducedParallelism, parallelism / 2)
             return
         }
 
         currentParallelism = parallelism
     }
 
-    public private(set) var currentParallelism = WorkloadParallelismHeuristic.reducedParallelism {
+    public private(set) var currentParallelism = ParallelismDefaults.reducedParallelism {
         didSet {
             delegate?.parallelismShouldChange(value: currentParallelism)
         }
