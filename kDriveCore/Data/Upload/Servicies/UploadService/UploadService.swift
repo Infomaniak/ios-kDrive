@@ -45,6 +45,8 @@ public final class UploadService {
 
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
+    var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
+    var memoryPressureObserver: DispatchSourceMemoryPressure?
     var fileUploadedCount = 0
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
@@ -59,6 +61,9 @@ public final class UploadService {
     public var pausedNotificationSent = false
 
     public init() {
+        observeMemoryWarnings()
+        uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
+
         Task {
             rebuildUploadQueueFromObjectsInRealm()
         }
