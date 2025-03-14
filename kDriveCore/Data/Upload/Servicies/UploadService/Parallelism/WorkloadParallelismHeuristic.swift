@@ -20,7 +20,7 @@ import Foundation
 import InfomaniakDI
 
 /// Delegate protocol of UploadParallelismHeuristic
-protocol ParallelismHeuristicDelegate: AnyObject {
+public protocol ParallelismHeuristicDelegate: AnyObject {
     /// This method is called with a new parallelism to apply each time to the uploadQueue
     /// - Parameter value: The new parallelism value to use
     func parallelismShouldChange(value: Int)
