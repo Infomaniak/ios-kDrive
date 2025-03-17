@@ -149,7 +149,6 @@ extension MultipleSelectionFloatingPanelViewController {
     }
 
     private func downloadActionArchive(group: DispatchGroup, at indexPath: IndexPath) {
-        @InjectService var downloadQueue: DownloadQueue
         if downloadInProgress,
            let currentArchiveId,
            let operation = downloadQueue.archiveOperationsInQueue[currentArchiveId] {
