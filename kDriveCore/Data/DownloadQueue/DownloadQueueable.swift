@@ -88,4 +88,8 @@ public protocol DownloadQueueable {
         using closure: @escaping (String, Double) -> Void
     )
         -> ObservationToken
+
+    var fileOperationsInQueue: SendableDictionary<Int, DownloadFileOperationable> { get }
+
+    var archiveOperationsInQueue: SendableDictionary<String, DownloadArchiveOperation> { get }
 }
