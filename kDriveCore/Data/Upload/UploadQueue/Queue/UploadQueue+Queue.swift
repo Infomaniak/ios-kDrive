@@ -246,4 +246,10 @@ extension UploadQueue: UploadQueueable {
 
         return operation
     }
+
+    public func updateQueueSuspension() {
+        let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
+        operationQueue.isSuspended = isSuspended
+        Log.uploadQueue("update isSuspended to :\(isSuspended)")
+    }
 }

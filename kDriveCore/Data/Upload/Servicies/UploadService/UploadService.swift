@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 
@@ -59,6 +60,10 @@ public final class UploadService {
     public var pausedNotificationSent = false
 
     public init() {
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            self?.updateQueueSuspension()
+        }
+
         Task {
             rebuildUploadQueueFromObjectsInRealm()
         }
@@ -340,5 +345,9 @@ extension UploadService: UploadServiceable {
 
             Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
         }
+    }
+
+    public func updateQueueSuspension() {
+        allQueues.forEach { $0.updateQueueSuspension() }
     }
 }

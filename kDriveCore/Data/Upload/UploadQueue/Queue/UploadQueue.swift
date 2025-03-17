@@ -80,11 +80,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
         uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
 
-        // Observe network state change
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            self?.updateQueueSuspension()
-        }
-
         observeMemoryWarnings()
 
         Log.uploadQueue("UploadQueue parallelism is:\(operationQueue.maxConcurrentOperationCount)")

@@ -40,6 +40,8 @@ public protocol UploadQueueable {
 
     func cancel(uploadFileId: String)
 
+    func updateQueueSuspension()
+
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }

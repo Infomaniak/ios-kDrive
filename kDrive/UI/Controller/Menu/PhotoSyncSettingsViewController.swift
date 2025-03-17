@@ -27,10 +27,11 @@ import UIKit
 
 final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
+    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var freeSpaceService: FreeSpaceService
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadService: UploadServiceable
 
     private enum PhotoSyncSection: Int {
         case syncSwitch
@@ -227,12 +228,12 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
         photoLibraryUploader.enableSync(newSettings)
-        uploadQueue.retryAllOperations(
+        uploadService.retryAllOperations(
             withParent: newSettings.parentDirectoryId,
             userId: newSettings.userId,
             driveId: newSettings.driveId
         )
-        uploadQueue.updateQueueSuspension()
+        photoUploadQueue.updateQueueSuspension()
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
@@ -538,8 +539,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
         DispatchQueue.global(qos: .userInitiated).async {
             // Add new pictures to be uploaded and reload upload queue
             self.photoLibraryUploader.scheduleNewPicturesForUpload()
-            @InjectService var uploadService: UploadServiceable
-            uploadService.rebuildUploadQueueFromObjectsInRealm()
+            self.uploadService.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }
