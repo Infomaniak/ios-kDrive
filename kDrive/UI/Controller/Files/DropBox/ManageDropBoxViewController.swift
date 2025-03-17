@@ -318,7 +318,7 @@ extension ManageDropBoxViewController: NewFolderSettingsDelegate {
 // MARK: - FooterButtonDelegate
 
 extension ManageDropBoxViewController: FooterButtonDelegate {
-    func didClickOnButton(_ sender: AnyObject) {
+    func didClickOnButton(_ sender: IKLargeButton) {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let limitFileSize: BinaryDisplaySize?

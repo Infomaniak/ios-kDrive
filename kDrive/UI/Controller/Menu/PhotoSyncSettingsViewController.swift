@@ -487,7 +487,7 @@ extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
 // MARK: - Footer button delegate
 
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
-    func didClickOnButton(_ sender: AnyObject) {
+    func didClickOnButton(_ sender: IKLargeButton) {
         guard freeSpaceService.hasEnoughAvailableSpaceForChunkUpload else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
             return
