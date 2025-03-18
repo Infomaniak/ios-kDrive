@@ -114,7 +114,8 @@ extension UploadService: UploadServiceable {
                     lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
                 }
                 for file in matchedFrozenFiles {
-                    file.uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+                    let uploadQueue = uploadQueue(for: file)
+                    uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
                 }
                 resumeAllOperations()
             }
@@ -152,7 +153,7 @@ extension UploadService: UploadServiceable {
                 return
             }
 
-            let specificQueue = frozenFile.uploadQueue
+            let specificQueue = uploadQueue(for: frozenFile)
 
             try? self.uploadsDatabase.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
@@ -220,7 +221,8 @@ extension UploadService: UploadServiceable {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
                     continue
                 }
-                file.uploadQueue.cancel(uploadFileId: uploadFileId)
+                let uploadQueue = uploadQueue(for: file)
+                uploadQueue.cancel(uploadFileId: uploadFileId)
                 file.clearErrorsForRetry()
             }
         }
@@ -238,7 +240,8 @@ extension UploadService: UploadServiceable {
                 continue
             }
 
-            file.uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+            let uploadQueue = uploadQueue(for: file)
+            uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
         }
     }
 
@@ -308,7 +311,8 @@ extension UploadService: UploadServiceable {
 
         let frozenFileToDelete = toDeleteLive.freeze()
         frozenFileToDelete.cleanSourceFileIfNeeded()
-        frozenFileToDelete.uploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
+        let uploadQueue = uploadQueue(for: frozenFileToDelete)
+        uploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
@@ -360,6 +364,14 @@ extension UploadService: UploadServiceable {
             }
 
             Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
+        }
+    }
+
+    private func uploadQueue(for uploadFile: UploadFile) -> UploadQueueable {
+        if uploadFile.isPhotoSyncUpload {
+            return photoUploadQueue
+        } else {
+            return globalUploadQueue
         }
     }
 }
