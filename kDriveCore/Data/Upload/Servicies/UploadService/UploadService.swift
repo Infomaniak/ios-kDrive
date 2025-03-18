@@ -59,8 +59,8 @@ public final class UploadService {
     public var pausedNotificationSent = false
 
     public init() {
-        Task {
-            rebuildUploadQueueFromObjectsInRealm()
+        DispatchQueue.global(qos: .default).async {
+            self.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 }
