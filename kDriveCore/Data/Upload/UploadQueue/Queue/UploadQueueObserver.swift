@@ -47,7 +47,7 @@ public class UploadQueueObserver: NSObject {
 
             if newCount == 0 {
                 delegate?.operationQueueBecameEmpty(uploadQueue)
-            } else {
+            } else if previousCount == 0 && newCount > 0 {
                 delegate?.operationQueueNoLongerEmpty(uploadQueue)
             }
         }
