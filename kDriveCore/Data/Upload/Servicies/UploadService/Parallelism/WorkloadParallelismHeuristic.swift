@@ -59,6 +59,10 @@ final class WorkloadParallelismHeuristic {
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
             object: nil
         )
+
+        DispatchQueue.global(qos: .default).async {
+            self.computeParallelism()
+        }
     }
 
     deinit {
