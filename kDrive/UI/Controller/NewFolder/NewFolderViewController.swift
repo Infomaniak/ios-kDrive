@@ -399,7 +399,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - FooterButtonDelegate
 
 extension NewFolderViewController: FooterButtonDelegate {
-    func didClickOnButton(_ sender: AnyObject) {
+    func didClickOnButton(_ sender: IKLargeButton) {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView
         footer.footerButton.setLoading(true)
         footer.footerButton.layoutIfNeeded()

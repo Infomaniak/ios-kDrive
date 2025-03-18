@@ -20,7 +20,7 @@ import kDriveCore
 import UIKit
 
 protocol FooterButtonDelegate: AnyObject {
-    func didClickOnButton(_ sender: AnyObject)
+    func didClickOnButton(_ sender: IKLargeButton)
 }
 
 class FooterButtonView: UITableViewHeaderFooterView {

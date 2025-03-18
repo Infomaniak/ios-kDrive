@@ -70,7 +70,7 @@ final class SaveScanViewController: SaveFileViewController {
         }
     }
 
-    override func didClickOnButton(_ sender: AnyObject) {
+    override func didClickOnButton(_ sender: IKLargeButton) {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView
         footer.footerButton.setLoading(true)
         guard let filename = items.first?.name,
