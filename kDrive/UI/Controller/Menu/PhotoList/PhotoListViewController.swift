@@ -267,7 +267,11 @@ final class PhotoListViewController: FileListViewController {
                 CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY),
                 from: headerTitleLabel
             )) {
-                headerTitleLabel.text = viewModel.sections[indexPath.section].model.formattedDate
+                if let section = viewModel.sections[safe: indexPath.section] {
+                    headerTitleLabel.text = section.model.formattedDate
+                } else {
+                    headerTitleLabel.text = ""
+                }
             } else if !displayedSections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
                 headerTitleLabel.text = displayedSections[0].model.formattedDate
             }
