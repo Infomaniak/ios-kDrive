@@ -92,7 +92,7 @@ extension UploadService: UploadServiceable {
             @InjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.cleanCacheIfAlmostFull()
 
-            guard let uploadFileQuery = uploadFileQuery else {
+            guard let uploadFileQuery else {
                 Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
                 return
             }
