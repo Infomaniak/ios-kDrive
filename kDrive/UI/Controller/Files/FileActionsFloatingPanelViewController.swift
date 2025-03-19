@@ -32,6 +32,15 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     private(set) var driveFileManager: DriveFileManager!
     private(set) var frozenFile: File!
 
+    var freshFrozenFile: File {
+        guard let freshFrozenFile = frozenFile.thaw()?.freeze() else {
+            return frozenFile
+        }
+
+        frozenFile = freshFrozenFile
+        return frozenFile.freeze()
+    }
+
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
     weak var presentingParent: UIViewController?
@@ -253,20 +262,20 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         switch Self.sections[indexPath.section] {
         case .header:
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
-            cell.configureWith(driveFileManager: driveFileManager, file: frozenFile)
+            cell.configureWith(driveFileManager: driveFileManager, file: freshFrozenFile)
             cell.moreButton.isHidden = true
             return cell
         case .quickActions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = quickActions[indexPath.item]
-            cell.configure(with: action, file: frozenFile)
+            cell.configure(with: action, file: freshFrozenFile)
             return cell
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
             cell.configure(
                 with: action,
-                file: frozenFile,
+                file: freshFrozenFile,
                 showProgress: downloadAction == action,
                 driveFileManager: driveFileManager,
                 currentPackId: packId
