@@ -93,7 +93,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     func setFile(_ newFile: File, driveFileManager: DriveFileManager) {
-        guard newFile.isInvalidated == false else {
+        guard !newFile.isInvalidated else {
             dismiss(animated: true)
             return
         }
