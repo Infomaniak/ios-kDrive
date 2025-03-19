@@ -49,7 +49,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "18.5.1")),
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "1.0.4")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
-        .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.3")),
+        .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.4")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "10.0.0")),
         .package(url: "https://github.com/Infomaniak/LocalizeKit", .upToNextMajor(from: "1.0.2")),
