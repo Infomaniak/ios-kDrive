@@ -25,6 +25,7 @@ let packageSettings = PackageSettings(
         "InfomaniakLogin": .framework,
         "InternalCollectionsUtilities": .framework,
         "Kingfisher": .framework,
+        "LocalizeKit": .framework,
         "Lottie": .framework,
         "MyKSuite": .framework,
         "NIOConcurrencyHelpers": .framework,
@@ -46,7 +47,6 @@ let package = Package(
         .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.0.1")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "18.5.1")),
-
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "1.0.4")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.3")),
