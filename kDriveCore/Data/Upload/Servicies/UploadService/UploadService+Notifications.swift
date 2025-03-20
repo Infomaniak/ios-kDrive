@@ -48,7 +48,7 @@ extension UploadService: UploadNotifiable {
 
     public func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult) {
         Log.uploadQueue("sendFileUploadStateNotificationIfNeeded")
-        serialQueue.async { [weak self] in
+        serialEventQueue.async { [weak self] in
             guard let self else { return }
             guard let uploadFile = result.uploadFile,
                   uploadFile.error != .taskRescheduled,
