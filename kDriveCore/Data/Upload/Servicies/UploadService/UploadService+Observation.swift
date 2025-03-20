@@ -49,7 +49,7 @@ extension UploadService: UploadObservable {
                                                   fileId: String? = nil,
                                                   using closure: @escaping (UploadFile, File?) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [weak self] in
+        serialEventQueue.sync { [weak self] in
             guard let self else { return }
             let key = UUID()
             observations.didUploadFile[key] = { [weak self, weak observer] uploadFile, driveFile in
@@ -81,7 +81,7 @@ extension UploadService: UploadObservable {
                                                  parentId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [weak self] in
+        serialEventQueue.sync { [weak self] in
             guard let self else { return }
             let key = UUID()
             observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
@@ -111,7 +111,7 @@ extension UploadService: UploadObservable {
                                                  driveId: Int,
                                                  using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         var token: ObservationToken!
-        serialQueue.sync { [weak self] in
+        serialEventQueue.sync { [weak self] in
             guard let self else { return }
             let key = UUID()
             observations.didChangeUploadCountInDrive[key] = { [weak self, weak observer] updatedDriveId, count in
