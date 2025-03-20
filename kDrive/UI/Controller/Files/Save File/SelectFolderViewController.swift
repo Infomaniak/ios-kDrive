@@ -204,19 +204,23 @@ class SelectFolderViewController: FileListViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedFile = viewModel.getFile(at: indexPath)!
-        if selectedFile.isDirectory {
-            let destinationViewController = SelectFolderViewController(
-                viewModel: SelectFolderViewModel(
-                    driveFileManager: viewModel.driveFileManager,
-                    currentDirectory: selectedFile
-                ),
-                disabledDirectoriesSelection: disabledDirectoriesSelection,
-                fileToMove: fileToMove,
-                delegate: delegate,
-                selectHandler: selectHandler
-            )
-            navigationController?.pushViewController(destinationViewController, animated: true)
+        guard let navigationController,
+              let selectedFile = viewModel.getFile(at: indexPath),
+              selectedFile.isDirectory else {
+            return
         }
+
+        let destinationViewController = SelectFolderViewController(
+            viewModel: SelectFolderViewModel(
+                driveFileManager: viewModel.driveFileManager,
+                currentDirectory: selectedFile
+            ),
+            disabledDirectoriesSelection: disabledDirectoriesSelection,
+            fileToMove: fileToMove,
+            delegate: delegate,
+            selectHandler: selectHandler
+        )
+
+        navigationController.pushViewController(destinationViewController, animated: true)
     }
 }
