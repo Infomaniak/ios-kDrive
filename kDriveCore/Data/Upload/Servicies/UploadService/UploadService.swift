@@ -32,13 +32,24 @@ public final class UploadService {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    let serialQueue: DispatchQueue = {
+    private let serialRebuildUploadsQueue: DispatchQueue = {
         @LazyInjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
 
         return DispatchQueue(
-            label: "com.infomaniak.drive.upload-service",
-            qos: .userInitiated,
+            label: "com.infomaniak.drive.upload-service.rebuild-uploads",
+            qos: .default,
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
+
+    let serialEventQueue: DispatchQueue = {
+        @LazyInjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.upload-service.event",
+            qos: .default,
             autoreleaseFrequency: autoreleaseFrequency
         )
     }()
@@ -87,7 +98,7 @@ extension UploadService: UploadServiceable {
 
     public func rebuildUploadQueueFromObjectsInRealm() {
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm")
-        serialQueue.sync {
+        serialRebuildUploadsQueue.sync {
             // Clean cache if necessary before we try to restart the uploads.
             @InjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.cleanCacheIfAlmostFull()
