@@ -72,11 +72,7 @@ public final class UploadParallelismOrchestrator {
         Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
 
         let activeQueues = allQueues.filter(\.isActive)
-        let inactiveQueues = allQueues.filter { lhs in
-            !activeQueues.contains { rhs in
-                lhs === rhs
-            }
-        }
+        let inactiveQueues = allQueues.filter { !$0.isActive }
 
         assert(activeQueues.count + inactiveQueues.count == allQueues.count, "expecting to not miss a queue")
 
