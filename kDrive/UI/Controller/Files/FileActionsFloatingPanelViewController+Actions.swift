@@ -259,7 +259,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func manageCategoriesAction() {
         FileActionsHelper.manageCategories(
-            frozenFiles: [frozenFile.freezeIfNeeded()],
+            frozenFiles: [frozenFile],
             driveFileManager: driveFileManager,
             from: self,
             presentingParent: presentingViewController
