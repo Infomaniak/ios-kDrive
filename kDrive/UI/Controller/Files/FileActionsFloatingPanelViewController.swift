@@ -89,14 +89,17 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                guard self?.frozenFile != nil else { return }
-                self?.frozenFile.realm?.refresh()
-                if self?.frozenFile.isInvalidated == true {
-                    // File has been removed
-                    self?.dismiss(animated: true)
-                } else {
-                    self?.reload(animated: true)
+                guard let self, self.frozenFile != nil else {
+                    return
                 }
+
+                let freshFile = self.freshFrozenFile
+                guard !freshFile.isInvalidated else {
+                    self.dismiss(animated: true)
+                    return
+                }
+
+                self.reload(animated: true)
             }
         }
     }
