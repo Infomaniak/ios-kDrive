@@ -42,7 +42,7 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
     }
 }
 
-class SelectFolderViewController: FileListViewController {
+final class SelectFolderViewController: FileListViewController {
     lazy var selectFolderButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
