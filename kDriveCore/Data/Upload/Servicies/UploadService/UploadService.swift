@@ -26,22 +26,18 @@ public enum UploadServiceBackgroundIdentifier {
 }
 
 public final class UploadService {
-    @LazyInjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
-    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+    @InjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
+    @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    private let serialRebuildUploadsQueue: DispatchQueue = {
-        @LazyInjectService var appContextService: AppContextServiceable
-        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
-
-        return DispatchQueue(
-            label: "com.infomaniak.drive.upload-service.rebuild-uploads",
-            qos: .default,
-            autoreleaseFrequency: autoreleaseFrequency
-        )
-    }()
+    private let serialRebuildUploadsQueue = DispatchQueue(
+        label: "com.infomaniak.drive.upload-service.rebuild-uploads",
+        qos: .default,
+        autoreleaseFrequency: .workItem
+    )
 
     let serialEventQueue: DispatchQueue = {
         @LazyInjectService var appContextService: AppContextServiceable
@@ -71,7 +67,7 @@ public final class UploadService {
 
     public init() {
         DispatchQueue.global(qos: .default).async {
-            self.rebuildUploadQueueFromObjectsInRealm()
+            self.rebuildUploadQueue()
         }
     }
 }
@@ -96,43 +92,53 @@ extension UploadService: UploadServiceable {
         allQueues.allSatisfy(\.isSuspended)
     }
 
-    public func rebuildUploadQueueFromObjectsInRealm() {
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm")
+    public func blockingRebuildUploadQueue() {
         serialRebuildUploadsQueue.sync {
-            // Clean cache if necessary before we try to restart the uploads.
-            @InjectService var freeSpaceService: FreeSpaceService
-            freeSpaceService.cleanCacheIfAlmostFull()
-
-            guard let uploadFileQuery else {
-                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
-                return
-            }
-
-            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                return lazyCollection.filter(uploadFileQuery)
-                    .sorted(byKeyPath: "taskCreationDate")
-            }
-
-            let uploadingFileIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
-
-            let batches = uploadingFileIds.chunks(ofCount: 100)
-            Log.uploadQueue("batched count:\(batches.count)")
-            for batch in batches {
-                Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
-                let batchArray = Array(batch)
-                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
-                }
-                for file in matchedFrozenFiles {
-                    let uploadQueue = uploadQueue(for: file)
-                    uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
-                }
-                resumeAllOperations()
-            }
-
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
+            self.rebuildUploadQueueFromObjectsInRealm()
         }
+    }
+
+    public func rebuildUploadQueue() {
+        serialRebuildUploadsQueue.async {
+            self.rebuildUploadQueueFromObjectsInRealm()
+        }
+    }
+
+    private func rebuildUploadQueueFromObjectsInRealm() {
+        Log.uploadQueue("rebuildUploadQueue")
+        // Clean cache if necessary before we try to restart the uploads.
+        @InjectService var freeSpaceService: FreeSpaceService
+        freeSpaceService.cleanCacheIfAlmostFull()
+
+        guard let uploadFileQuery else {
+            Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
+            return
+        }
+
+        let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            return lazyCollection.filter(uploadFileQuery)
+                .sorted(byKeyPath: "taskCreationDate")
+        }
+
+        let uploadingFileIds = Array(uploadingFiles.map(\.id))
+        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
+
+        let batches = uploadingFileIds.chunks(ofCount: 100)
+        Log.uploadQueue("batched count:\(batches.count)")
+        for batch in batches {
+            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
+            let batchArray = Array(batch)
+            let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
+            }
+            for file in matchedFrozenFiles {
+                let uploadQueue = uploadQueue(for: file)
+                uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+            }
+            resumeAllOperations()
+        }
+
+        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
     }
 
     public func suspendAllOperations() {

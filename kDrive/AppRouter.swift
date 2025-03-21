@@ -660,7 +660,7 @@ public struct AppRouter: AppNavigable {
 
         // Resolving an upload queue will restart it if this is the first time
         @InjectService var uploadService: UploadServiceable
-        uploadService.rebuildUploadQueueFromObjectsInRealm()
+        uploadService.rebuildUploadQueue()
     }
 
     // MARK: RouterFileNavigable
