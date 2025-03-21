@@ -36,10 +36,15 @@ public protocol ParallelismHeuristicDelegate: AnyObject {
 ///
 /// Value can change depending on many factors, including thermal state battery or extension mode.
 /// Scaling is achieved given the number of active cores available.
-final class WorkloadParallelismHeuristic {
+public final class WorkloadParallelismHeuristic {
     @LazyInjectService private var appContextService: AppContextServiceable
 
     private weak var delegate: ParallelismHeuristicDelegate?
+
+    private let serialEventQueue = DispatchQueue(
+        label: "com.infomaniak.drive.parallelism-heuristic.event",
+        qos: .default
+    )
 
     init(delegate: ParallelismHeuristicDelegate) {
         self.delegate = delegate
@@ -47,7 +52,7 @@ final class WorkloadParallelismHeuristic {
         // Update on thermal change
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelism),
+            selector: #selector(computeParallelismInQueue),
             name: ProcessInfo.thermalStateDidChangeNotification,
             object: nil
         )
@@ -55,7 +60,7 @@ final class WorkloadParallelismHeuristic {
         // Update on low power mode
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelism),
+            selector: #selector(computeParallelismInQueue),
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
             object: nil
         )
@@ -63,6 +68,7 @@ final class WorkloadParallelismHeuristic {
         DispatchQueue.global(qos: .default).async {
             self.computeParallelism()
         }
+        computeParallelismInQueue()
     }
 
     deinit {
@@ -70,7 +76,13 @@ final class WorkloadParallelismHeuristic {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSProcessInfoPowerStateDidChange, object: nil)
     }
 
-    @objc private func computeParallelism() {
+    @objc private func computeParallelismInQueue() {
+        serialEventQueue.async {
+            self.computeParallelism()
+        }
+    }
+
+    private func computeParallelism() {
         let processInfo = ProcessInfo.processInfo
 
         // If the device is too hot we cool down now
