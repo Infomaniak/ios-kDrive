@@ -18,6 +18,7 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakCoreUIResources
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -80,6 +81,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case wifi
         case storage
         case about
+        case joinBeta
         case deleteAccount
 
         var title: String {
@@ -98,10 +100,16 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveResourcesStrings.Localizable.aboutTitle
+            case .joinBeta:
+                return CoreUILocalizable.joinTheBetaButton
             case .deleteAccount:
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
+    }
+
+    private var visibleRows: [GeneralParameterRow] {
+        GeneralParameterRow.allCases.filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
     }
 
     init(driveFileManager: DriveFileManager) {
@@ -187,7 +195,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard mykSuiteEnabled else {
-            return GeneralParameterRow.allCases.count
+            return visibleRows.count
         }
 
         switch section {
@@ -216,7 +224,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     private func generalCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = GeneralParameterRow.allCases[indexPath.row]
+        let row = visibleRows[indexPath.row]
         switch row {
         case .photos, .theme, .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
@@ -243,7 +251,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        case .security, .storage, .about, .deleteAccount:
+        case .security, .storage, .about, .joinBeta, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
@@ -304,7 +312,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     private func didSelectGeneralRowAt(indexPath: IndexPath) {
-        let row = GeneralParameterRow.allCases[indexPath.row]
+        let row = visibleRows[indexPath.row]
         switch row {
         case .storage:
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
@@ -320,6 +328,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             break
         case .about:
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
+        case .joinBeta:
+            UIApplication.shared.open(URLConstants.testFlight.url)
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
