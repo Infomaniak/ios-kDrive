@@ -22,7 +22,6 @@ import InfomaniakDI
 public final class UploadParallelismOrchestrator {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
-    @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var appContextService: AppContextServiceable
 
     private let serialEventQueue = DispatchQueue(
@@ -66,7 +65,10 @@ public final class UploadParallelismOrchestrator {
                 Log.uploadQueue("MemoryPressureEvent warning", level: .info)
             case DispatchSource.MemoryPressureEvent.critical:
                 Log.uploadQueue("MemoryPressureEvent critical", level: .error)
-                uploadService.rescheduleRunningOperations()
+                serialEventQueue.async {
+                    @InjectService var uploadService: UploadServiceable
+                    uploadService.rescheduleRunningOperations()
+                }
             default:
                 break
             }
