@@ -330,6 +330,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .joinBeta:
             UIApplication.shared.open(URLConstants.testFlight.url)
+            MatomoUtils.track(eventWithCategory: .settings, name: "joinBetaProgram")
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
