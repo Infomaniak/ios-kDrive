@@ -1,3 +1,1 @@
-- Single file public sharing
-- Matomo and Sentry opt-out settings
 - Stability improvements and bug fixes
