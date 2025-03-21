@@ -40,7 +40,7 @@ public final class UploadService {
     )
 
     let serialEventQueue: DispatchQueue = {
-        @LazyInjectService var appContextService: AppContextServiceable
+        @InjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
 
         return DispatchQueue(
