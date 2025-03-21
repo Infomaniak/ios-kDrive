@@ -121,7 +121,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("Reload operations in queue")
-        uploadService.rebuildUploadQueueFromObjectsInRealm()
+        uploadService.blockingRebuildUploadQueue()
 
         guard !expiringActivity.shouldTerminate else {
             Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
