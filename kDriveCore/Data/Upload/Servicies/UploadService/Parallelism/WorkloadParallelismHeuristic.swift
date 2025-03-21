@@ -65,9 +65,6 @@ public final class WorkloadParallelismHeuristic {
             object: nil
         )
 
-        DispatchQueue.global(qos: .default).async {
-            self.computeParallelism()
-        }
         computeParallelismInQueue()
     }
 
