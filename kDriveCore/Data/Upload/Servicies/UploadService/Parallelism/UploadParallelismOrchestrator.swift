@@ -25,6 +25,11 @@ public final class UploadParallelismOrchestrator {
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var appContextService: AppContextServiceable
 
+    private let serialEventQueue = DispatchQueue(
+        label: "com.infomaniak.drive.upload-parallelism-orchestrator.event",
+        qos: .default
+    )
+
     private var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
     private var memoryPressureObserver: DispatchSourceMemoryPressure?
 
@@ -38,8 +43,10 @@ public final class UploadParallelismOrchestrator {
     private lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     public init() {
-        observeMemoryWarnings()
-        uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
+        serialEventQueue.async {
+            self.observeMemoryWarnings()
+            self.uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
+        }
     }
 
     func observeMemoryWarnings() {
@@ -67,25 +74,28 @@ public final class UploadParallelismOrchestrator {
         source.resume()
     }
 
-    func computeUploadParallelismPerQueueAndApply() {
-        let currentAvailableParallelism = availableParallelism
-        Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
+    private func computeUploadParallelismPerQueueAndApply() {
+        serialEventQueue.async {
+            let currentAvailableParallelism = self.availableParallelism
+            Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
 
-        let activeQueues = allQueues.filter(\.isActive)
-        let inactiveQueues = allQueues.filter { !$0.isActive }
+            let activeQueues = self.allQueues.filter(\.isActive)
+            let inactiveQueues = self.allQueues.filter { !$0.isActive }
 
-        assert(activeQueues.count + inactiveQueues.count == allQueues.count, "expecting to not miss a queue")
+            assert(activeQueues.count + inactiveQueues.count == self.allQueues.count, "queue count should match")
 
-        inactiveQueues.forEach { $0.parallelismShouldChange(value: ParallelismDefaults.serial) }
+            inactiveQueues.forEach { $0.parallelismShouldChange(value: ParallelismDefaults.serial) }
 
-        Log.uploadQueue("Updating parallelism in inactiveQueues:\(inactiveQueues.count) activeQueues:\(activeQueues.count)")
-        guard !activeQueues.isEmpty else {
-            return
+            Log.uploadQueue("Inactive queues:\(inactiveQueues.count) set to serial")
+            guard !activeQueues.isEmpty else {
+                Log.uploadQueue("No active queues")
+                return
+            }
+
+            let parallelismPerActiveQueue = max(ParallelismDefaults.serial, currentAvailableParallelism / activeQueues.count)
+            Log.uploadQueue("Active queues \(activeQueues.count) new parallelism:\(parallelismPerActiveQueue)")
+            activeQueues.forEach { $0.parallelismShouldChange(value: parallelismPerActiveQueue) }
         }
-
-        let parallelismPerActiveQueue = max(ParallelismDefaults.serial, currentAvailableParallelism / activeQueues.count)
-        Log.uploadQueue("New parallelism per active queue :\(parallelismPerActiveQueue)")
-        activeQueues.forEach { $0.parallelismShouldChange(value: parallelismPerActiveQueue) }
     }
 }
 
