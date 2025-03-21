@@ -35,6 +35,10 @@ public class UploadQueueObserver: NSObject {
         self.delegate = delegate
         super.init()
 
+        setupObservation()
+    }
+
+    private func setupObservation() {
         observation = uploadQueue.operationQueue.observe(\.operationCount, options: [
             .new,
             .old
@@ -46,7 +50,7 @@ public class UploadQueueObserver: NSObject {
                 defer { self.previousCount = newCount }
 
                 guard let previousCount = self.previousCount else {
-                    delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                    self.delegate?.operationQueueNoLongerEmpty(self.uploadQueue)
                     return
                 }
 
@@ -55,9 +59,9 @@ public class UploadQueueObserver: NSObject {
                 }
 
                 if newCount == 0 {
-                    delegate?.operationQueueBecameEmpty(uploadQueue)
+                    self.delegate?.operationQueueBecameEmpty(self.uploadQueue)
                 } else if previousCount == 0 && newCount > 0 {
-                    delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                    self.delegate?.operationQueueNoLongerEmpty(self.uploadQueue)
                 }
             }
         }
