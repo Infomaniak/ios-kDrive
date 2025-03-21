@@ -43,7 +43,7 @@ extension UploadService: UploadPublishable {
                                    userId: Int,
                                    driveId: Int) {
         Log.uploadQueue("publishUploadCount")
-        serialQueue.async { [weak self] in
+        serialEventQueue.async { [weak self] in
             guard let self else { return }
             publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId)
             publishUploadCountInDrive(userId: userId, driveId: driveId)
@@ -54,7 +54,7 @@ extension UploadService: UploadPublishable {
                                            userId: Int,
                                            driveId: Int) {
         Log.uploadQueue("publishUploadCountInParent")
-        serialQueue.async { [weak self] in
+        serialEventQueue.async { [weak self] in
             guard let self else { return }
 
             let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId).count
@@ -69,7 +69,7 @@ extension UploadService: UploadPublishable {
     public func publishUploadCountInDrive(userId: Int,
                                           driveId: Int) {
         Log.uploadQueue("publishUploadCountInDrive")
-        serialQueue.async { [weak self] in
+        serialEventQueue.async { [weak self] in
             guard let self else { return }
             let uploadCount = getUploadingFiles(userId: userId, driveId: driveId).count
             for closure in observations.didChangeUploadCountInDrive.values {
@@ -84,7 +84,7 @@ extension UploadService: UploadPublishable {
         Log.uploadQueue("publishFileUploaded")
         logFileUploadedWithSuccess(for: result.uploadFile)
         sendFileUploadStateNotificationIfNeeded(with: result)
-        serialQueue.async { [weak self] in
+        serialEventQueue.async { [weak self] in
             guard let self else { return }
             for closure in observations.didUploadFile.values {
                 guard let uploadFile = result.uploadFile, !uploadFile.isInvalidated else {

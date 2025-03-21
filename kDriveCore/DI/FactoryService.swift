@@ -124,6 +124,9 @@ public enum FactoryService {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
+            Factory(type: UploadQueueDelegate.self) { _, _ in
+                UploadParallelismOrchestrator()
+            },
             Factory(type: BGTaskScheduler.self) { _, _ in
                 BGTaskScheduler.shared
             },
@@ -232,12 +235,22 @@ public enum FactoryService {
     }
 
     static var uploadQueues: [FactoryWithIdentifier] {
-        let globalUploadQueue = Factory(type: UploadQueueable.self) { _, _ in
-            UploadQueue()
+        let globalUploadQueue = Factory(type: UploadQueueable.self) { _, resolver in
+            let uploadQueueDelegate = try resolver.resolve(type: UploadQueueDelegate.self,
+                                                           forCustomTypeIdentifier: nil,
+                                                           factoryParameters: nil,
+                                                           resolver: resolver)
+
+            return UploadQueue(delegate: uploadQueueDelegate)
         }
 
-        let photoUploadQueue = Factory(type: UploadQueueable.self) { _, _ in
-            PhotoUploadQueue()
+        let photoUploadQueue = Factory(type: UploadQueueable.self) { _, resolver in
+            let uploadQueueDelegate = try resolver.resolve(type: UploadQueueDelegate.self,
+                                                           forCustomTypeIdentifier: nil,
+                                                           factoryParameters: nil,
+                                                           resolver: resolver)
+
+            return PhotoUploadQueue(delegate: uploadQueueDelegate)
         }
 
         let services = [

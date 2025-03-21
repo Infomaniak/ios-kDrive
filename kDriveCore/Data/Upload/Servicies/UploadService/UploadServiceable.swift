@@ -28,7 +28,9 @@ public protocol UploadServiceable {
 
     var operationCount: Int { get }
 
-    func rebuildUploadQueueFromObjectsInRealm()
+    func blockingRebuildUploadQueue()
+
+    func rebuildUploadQueue()
 
     func suspendAllOperations()
 
