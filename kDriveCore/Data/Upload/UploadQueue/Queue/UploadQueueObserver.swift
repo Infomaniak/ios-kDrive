@@ -22,6 +22,11 @@ public class UploadQueueObserver: NSObject {
     private var previousCount: Int?
     private var observation: NSKeyValueObservation?
 
+    private let serialEventQueue = DispatchQueue(
+        label: "com.infomaniak.drive.upload-queue-observer.event.\(UUID().uuidString)",
+        qos: .default
+    )
+
     var uploadQueue: UploadQueue
     weak var delegate: UploadQueueDelegate?
 
@@ -30,25 +35,30 @@ public class UploadQueueObserver: NSObject {
         self.delegate = delegate
         super.init()
 
-        observation = uploadQueue.operationQueue.observe(\.operationCount, options: [.new, .old]) { [weak self] _, change in
+        observation = uploadQueue.operationQueue.observe(\.operationCount, options: [
+            .new,
+            .old
+        ]) { [weak self] _, change in
             guard let self else { return }
-            guard let newCount = change.newValue else { return }
+            self.serialEventQueue.async {
+                guard let newCount = change.newValue else { return }
 
-            defer { previousCount = newCount }
+                defer { self.previousCount = newCount }
 
-            guard let previousCount else {
-                delegate?.operationQueueNoLongerEmpty(uploadQueue)
-                return
-            }
+                guard let previousCount = self.previousCount else {
+                    delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                    return
+                }
 
-            guard previousCount != newCount else {
-                return
-            }
+                guard previousCount != newCount else {
+                    return
+                }
 
-            if newCount == 0 {
-                delegate?.operationQueueBecameEmpty(uploadQueue)
-            } else if previousCount == 0 && newCount > 0 {
-                delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                if newCount == 0 {
+                    delegate?.operationQueueBecameEmpty(uploadQueue)
+                } else if previousCount == 0 && newCount > 0 {
+                    delegate?.operationQueueNoLongerEmpty(uploadQueue)
+                }
             }
         }
     }
