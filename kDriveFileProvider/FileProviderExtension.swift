@@ -54,7 +54,7 @@ extension DriveFileManager {
 
 final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var uploadService: UploadService
+    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     /// Making sure the DI is registered at a very early stage of the app launch.
