@@ -108,9 +108,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
-    private var visibleRows: [GeneralParameterRow] = {
-        GeneralParameterRow.allCases.filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
-    }()
+    private let visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
+        .filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
