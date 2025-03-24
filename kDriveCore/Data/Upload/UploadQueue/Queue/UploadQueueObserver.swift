@@ -46,24 +46,27 @@ public class UploadQueueObserver: NSObject {
             guard let self else { return }
             self.serialEventQueue.async {
                 guard let newCount = change.newValue else { return }
-
-                defer { self.previousCount = newCount }
-
-                guard let previousCount = self.previousCount else {
-                    self.delegate?.operationQueueNoLongerEmpty(self.uploadQueue)
-                    return
-                }
-
-                guard previousCount != newCount else {
-                    return
-                }
-
-                if newCount == 0 {
-                    self.delegate?.operationQueueBecameEmpty(self.uploadQueue)
-                } else if previousCount == 0 && newCount > 0 {
-                    self.delegate?.operationQueueNoLongerEmpty(self.uploadQueue)
-                }
+                self.operationCountDidChange(newCount: newCount)
             }
+        }
+    }
+
+    private func operationCountDidChange(newCount: Int) {
+        defer { previousCount = newCount }
+
+        guard let previousCount = previousCount else {
+            delegate?.operationQueueNoLongerEmpty(uploadQueue)
+            return
+        }
+
+        guard previousCount != newCount else {
+            return
+        }
+
+        if newCount == 0 {
+            delegate?.operationQueueBecameEmpty(uploadQueue)
+        } else if previousCount == 0 && newCount > 0 {
+            delegate?.operationQueueNoLongerEmpty(uploadQueue)
         }
     }
 }
