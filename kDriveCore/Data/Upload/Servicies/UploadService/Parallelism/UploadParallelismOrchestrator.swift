@@ -42,6 +42,10 @@ public final class UploadParallelismOrchestrator {
     private lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     public init() {
+        setupObservation()
+    }
+
+    private func setupObservation() {
         serialEventQueue.async {
             self.observeMemoryWarnings()
             self.uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
