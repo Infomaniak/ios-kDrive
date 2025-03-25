@@ -18,8 +18,7 @@
 
 import Foundation
 
-public class UploadQueueObserver: NSObject {
-    private var previousCount: Int?
+public final class UploadQueueObserver {
     private var observation: NSKeyValueObservation?
 
     private let serialEventQueue = DispatchQueue(
@@ -33,7 +32,6 @@ public class UploadQueueObserver: NSObject {
     init(uploadQueue: UploadQueue, delegate: UploadQueueDelegate?) {
         self.uploadQueue = uploadQueue
         self.delegate = delegate
-        super.init()
 
         setupObservation()
     }
@@ -45,21 +43,19 @@ public class UploadQueueObserver: NSObject {
         ]) { [weak self] _, change in
             guard let self else { return }
             self.serialEventQueue.async {
-                guard let newCount = change.newValue else { return }
-                self.operationCountDidChange(newCount: newCount)
+                self.operationCountDidChange(previousCount: change.oldValue, newCount: change.newValue)
             }
         }
     }
 
-    private func operationCountDidChange(newCount: Int) {
-        defer { previousCount = newCount }
-
-        guard let previousCount = previousCount else {
-            delegate?.operationQueueNoLongerEmpty(uploadQueue)
+    private func operationCountDidChange(previousCount: Int?, newCount: Int?) {
+        guard let newCount else {
+            delegate?.operationQueueBecameEmpty(uploadQueue)
             return
         }
 
-        guard previousCount != newCount else {
+        guard let previousCount else {
+            delegate?.operationQueueNoLongerEmpty(uploadQueue)
             return
         }
 
