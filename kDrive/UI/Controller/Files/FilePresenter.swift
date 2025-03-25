@@ -53,7 +53,7 @@ final class FilePresenter {
 
             navigationController.popToRootViewController(animated: false)
 
-            guard let fileListViewController = navigationController.topViewController as? FileListViewController else {
+            guard let fileListViewController = navigationController.topViewController else {
                 return
             }
 
