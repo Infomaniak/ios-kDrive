@@ -93,7 +93,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
 }
 
 public class FileActivity: Object, Decodable {
-    @LazyInjectService var driveInfosManager: DriveInfosManager
+    @InjectService var driveInfosManager: DriveInfosManager
 
     @Persisted(primaryKey: true) public var id = UUID().uuidString.hashValue
     /// Date Activity File was created at
