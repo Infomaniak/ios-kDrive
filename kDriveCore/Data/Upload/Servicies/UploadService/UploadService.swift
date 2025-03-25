@@ -66,9 +66,7 @@ public final class UploadService {
     public var pausedNotificationSent = false
 
     public init() {
-        DispatchQueue.global(qos: .default).async {
-            self.rebuildUploadQueue()
-        }
+        rebuildUploadQueue()
     }
 }
 
