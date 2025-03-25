@@ -104,7 +104,6 @@ extension UploadService: UploadServiceable {
 
     private func rebuildUploadQueueFromObjectsInRealm() {
         Log.uploadQueue("rebuildUploadQueue")
-        // Clean cache if necessary before we try to restart the uploads.
         @InjectService var freeSpaceService: FreeSpaceService
         freeSpaceService.cleanCacheIfAlmostFull()
 
