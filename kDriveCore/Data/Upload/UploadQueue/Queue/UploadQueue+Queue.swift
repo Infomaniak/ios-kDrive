@@ -167,14 +167,14 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ufid:\(uploadFile.id)")
+        Log.uploadQueue("addToQueueIfNecessary ufid:\(uploadFile.id)")
         guard operation(uploadFileId: uploadFile.id) != nil else {
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ADD ufid:\(uploadFile.id)")
+            Log.uploadQueue("addToQueueIfNecessary ADD ufid:\(uploadFile.id)")
             addToQueue(uploadFile: uploadFile, itemIdentifier: nil)
             return
         }
 
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm NOOP ufid:\(uploadFile.id)")
+        Log.uploadQueue("addToQueueIfNecessary NOOP ufid:\(uploadFile.id)")
     }
 
     @discardableResult
