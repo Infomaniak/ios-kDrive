@@ -33,7 +33,7 @@ public final class UploadService {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    private let serialRebuildUploadsQueue = DispatchQueue(
+    private let serialTransactionQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-service.rebuild-uploads",
         qos: .default,
         autoreleaseFrequency: .workItem
@@ -93,13 +93,13 @@ extension UploadService: UploadServiceable {
     }
 
     public func blockingRebuildUploadQueue() {
-        serialRebuildUploadsQueue.sync {
+        serialTransactionQueue.sync {
             self.rebuildUploadQueueFromObjectsInRealm()
         }
     }
 
     public func rebuildUploadQueue() {
-        serialRebuildUploadsQueue.async {
+        serialTransactionQueue.async {
             self.rebuildUploadQueueFromObjectsInRealm()
         }
     }
@@ -164,13 +164,13 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
+        serialTransactionQueue.async {
             guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
                 .freeze() else {
                 return
             }
 
-            let specificQueue = uploadQueue(for: frozenFile)
+            let specificQueue = self.uploadQueue(for: frozenFile)
 
             try? self.uploadsDatabase.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
@@ -185,7 +185,7 @@ extension UploadService: UploadServiceable {
             }
 
             specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
-            resumeAllOperations()
+            self.resumeAllOperations()
         }
     }
 
@@ -196,16 +196,16 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
-            let failedFileIds = getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
+        serialTransactionQueue.async {
+            let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
             let batches = failedFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batches:\(batches.count)")
 
-            resumeAllOperations()
+            self.resumeAllOperations()
 
             for batch in batches {
-                cancelAnyInBatch(batch)
-                enqueueAnyInBatch(batch)
+                self.cancelAnyInBatch(batch)
+                self.enqueueAnyInBatch(batch)
             }
         }
     }
@@ -269,14 +269,14 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
-            suspendAllOperations()
+        serialTransactionQueue.async {
+            self.suspendAllOperations()
             defer {
-                resumeAllOperations()
+                self.resumeAllOperations()
                 Log.uploadQueue("cancelAllOperations finished")
             }
 
-            let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
             let allUploadingFilesIds = Array(uploadingFiles.map(\.id))
             let photoSyncUploadingFilesIds: [String] = uploadingFiles.compactMap { uploadFile in
                 guard uploadFile.isPhotoSyncUpload else { return nil }
@@ -294,7 +294,7 @@ extension UploadService: UploadServiceable {
 
             Log.uploadQueue("cancelAllOperations IDS count:\(allUploadingFilesIds.count) parentId:\(parentId)")
 
-            try? uploadsDatabase.writeTransaction { writableRealm in
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
@@ -303,10 +303,10 @@ extension UploadService: UploadServiceable {
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
 
-            globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
-            photoUploadQueue.cancelAllOperations(uploadingFilesIds: photoSyncUploadingFilesIds)
+            self.globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
+            self.photoUploadQueue.cancelAllOperations(uploadingFilesIds: photoSyncUploadingFilesIds)
 
-            publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
         }
     }
 
