@@ -48,7 +48,10 @@ public final class WorkloadParallelismHeuristic {
 
     init(delegate: ParallelismHeuristicDelegate) {
         self.delegate = delegate
+        setupObservation()
+    }
 
+    private func setupObservation() {
         // Update on thermal change
         NotificationCenter.default.addObserver(
             self,
