@@ -26,7 +26,14 @@ import UIKit
 /// Something to read a file outside of the main actor
 struct CodePreviewWorker {
     func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
-        let data = try Data(contentsOf: localUrl, options: .alwaysMapped)
+        let rawData = try Data(contentsOf: localUrl, options: .alwaysMapped)
+
+        let dataToDeserialize: Data
+        if rawData.count > 512_000 {
+            dataToDeserialize = rawData.prefix(512_000)
+        } else {
+            dataToDeserialize = rawData
+        }
 
         let encodings: [String.Encoding] = [
             .utf8,
@@ -38,7 +45,7 @@ struct CodePreviewWorker {
         ]
 
         for encoding in encodings {
-            guard let deserializedString = String(data: data, encoding: encoding) else {
+            guard let deserializedString = String(data: dataToDeserialize, encoding: encoding) else {
                 continue
             }
 
