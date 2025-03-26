@@ -178,8 +178,7 @@ public extension UIConstants {
         let metadata = LPLinkMetadata()
         metadata.originalURL = url
         metadata.url = metadata.originalURL
-        metadata.title = file.isDropbox ? KDriveResourcesStrings.Localizable.buttonShareDropboxLink : KDriveResourcesStrings
-            .Localizable.buttonSharePublicLink
+        metadata.title = file.isDropbox ? KDriveResourcesStrings.Localizable.buttonShareDropboxLink : KDriveResourcesStrings.Localizable.buttonSharePublicLink
         metadata.iconProvider = NSItemProvider(object: thumbnail)
         return metadata
     }
