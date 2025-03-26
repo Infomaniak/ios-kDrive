@@ -1,1 +1,1 @@
-- Stability improvements and bug fixes.
+- Stability improvements and bug fixes
