@@ -25,16 +25,37 @@ import UIKit
 
 /// Something to read a file outside of the main actor
 struct CodePreviewWorker {
-    func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
-        let data = try Data(contentsOf: localUrl, options: .alwaysMapped)
-        var maybeString: NSString?
+    /// The JS text preview library will blow up in memory usage if the input is larger
+    static let textFilePreviewCap = 512_000
 
-        NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
-        guard let maybeString else {
-            throw DriveError.unknownError
+    func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
+        let rawData = try Data(contentsOf: localUrl, options: .alwaysMapped)
+
+        let dataToDeserialize: Data
+        if rawData.count > Self.textFilePreviewCap {
+            dataToDeserialize = rawData.prefix(Self.textFilePreviewCap)
+        } else {
+            dataToDeserialize = rawData
         }
 
-        return maybeString as String
+        let encodings: [String.Encoding] = [
+            .utf8,
+            .utf16,
+            .utf16BigEndian,
+            .utf16LittleEndian,
+            .ascii,
+            .iso2022JP
+        ]
+
+        for encoding in encodings {
+            guard let deserializedString = String(data: dataToDeserialize, encoding: encoding) else {
+                continue
+            }
+
+            return deserializedString
+        }
+
+        throw DriveError.unknownError
     }
 }
 
