@@ -25,12 +25,15 @@ import UIKit
 
 /// Something to read a file outside of the main actor
 struct CodePreviewWorker {
+    /// The JS text preview library will blow up in memory usage if the input is larger
+    static let textFilePreviewCap = 512_000
+
     func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
         let rawData = try Data(contentsOf: localUrl, options: .alwaysMapped)
 
         let dataToDeserialize: Data
-        if rawData.count > 512_000 {
-            dataToDeserialize = rawData.prefix(512_000)
+        if rawData.count > Self.textFilePreviewCap {
+            dataToDeserialize = rawData.prefix(Self.textFilePreviewCap)
         } else {
             dataToDeserialize = rawData
         }
