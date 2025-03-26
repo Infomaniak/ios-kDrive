@@ -20,7 +20,7 @@ import Foundation
 import InfomaniakCore
 
 public class PhotoUploadQueue: UploadQueue {
-    /// Should suspend operation queue based on network status and used defined parameters
+    /// Should suspend operation queue based on network status and user defined parameters
     override var shouldSuspendQueue: Bool {
         // Explicitly disable the upload queue from the share extension
         guard appContextService.context != .shareExtension else {
