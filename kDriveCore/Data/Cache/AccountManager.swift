@@ -317,7 +317,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.noDrive
         }
 
-        await updateMykSuite(apiFetcher: apiFetcher)
+        await updateMyKSuiteIfNeeded(for: driveResponse.drives, apiFetcher: apiFetcher)
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
@@ -351,14 +351,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
-        await updateMykSuite(apiFetcher: apiFetcher)
-
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
             removeAccount(toDeleteAccount: account)
             throw DriveError.NoDriveError.noDrive
         }
+
+        await updateMyKSuiteIfNeeded(for: driveResponse.drives, apiFetcher: apiFetcher)
 
         let driveRemovedList = driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
@@ -386,7 +386,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return account
     }
 
-    private func updateMykSuite(apiFetcher: DriveApiFetcher) async {
+    private func updateMyKSuiteIfNeeded(for drives: [Drive], apiFetcher: DriveApiFetcher) async {
+        guard drives.contains(where: { $0.pack.drivePackId == .myKSuite || $0.pack.drivePackId == .myKSuitePlus }) else {
+            return
+        }
         _ = try? await myKSuiteStore.updateMyKSuite(with: apiFetcher, id: currentUserId)
     }
 

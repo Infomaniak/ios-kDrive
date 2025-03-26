@@ -34,9 +34,11 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     let driveFileManager: DriveFileManager
 
-    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+    private var packId: DrivePackId {
+        driveFileManager.drive.pack.drivePackId
+    }
 
-    var mykSuiteEnabled = false
+    private var mykSuiteEnabled = false
 
     private enum ParameterSection: Int, CaseIterable {
         case mykSuite
