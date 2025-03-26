@@ -490,8 +490,8 @@ public extension DownloadQueue {
     }
 
     func updateQueueSuspension() {
-        let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
-        operationQueue.isSuspended = isSuspended
-        Log.uploadQueue("update isSuspended to :\(isSuspended)")
+        let suspended = (shouldSuspendQueue || forceSuspendQueue)
+        operationQueue.isSuspended = suspended
+        Log.uploadQueue("update isSuspended to :\(suspended)")
     }
 }
