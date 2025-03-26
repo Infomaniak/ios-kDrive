@@ -28,7 +28,7 @@ import VisionKit
 
 class OpenMediaHelper: NSObject {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var uploadQueue: UploadQueue
+    @LazyInjectService var uploadDatasource: UploadServiceDataSourceable
     @LazyInjectService var fileImportHelper: FileImportHelper
 
     let currentDirectory: File?
@@ -135,15 +135,14 @@ extension OpenMediaHelper: UIDocumentPickerDelegate {
                     }
 
                     try FileManager.default.moveItem(at: url, to: targetURL)
-                    uploadQueue.saveToRealm(
-                        UploadFile(
-                            parentDirectoryId: documentPicker.importDriveDirectory.id,
-                            userId: accountManager.currentUserId,
-                            driveId: documentPicker.importDriveDirectory.driveId,
-                            url: targetURL,
-                            name: url.lastPathComponent
-                        )
+                    let uploadFile = UploadFile(
+                        parentDirectoryId: documentPicker.importDriveDirectory.id,
+                        userId: accountManager.currentUserId,
+                        driveId: documentPicker.importDriveDirectory.driveId,
+                        url: targetURL,
+                        name: url.lastPathComponent
                     )
+                    uploadDatasource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }
