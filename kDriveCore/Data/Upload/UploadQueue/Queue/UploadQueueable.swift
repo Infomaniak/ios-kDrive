@@ -38,11 +38,13 @@ public protocol UploadQueueable {
 
     func rescheduleRunningOperations()
 
+    func parallelismShouldChange(value: Int)
+
     func cancel(uploadFileId: String)
 
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }
 
-    var uploadFileQuery: String? { get }
+    var isActive: Bool { get }
 }

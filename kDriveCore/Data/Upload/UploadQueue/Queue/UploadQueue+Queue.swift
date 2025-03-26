@@ -26,38 +26,16 @@ import RealmSwift
 // MARK: - Publish
 
 extension UploadQueue: UploadQueueable {
-    /// A query for the `UploadFiles` in the  __Main app__ context
-    ///
-    /// Not uploaded yet, can retry, not owned by `FileProvider`.
-    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
-
-    /// A query for the `UploadFiles` in the  __FileProvider__ context
-    ///
-    /// Not uploaded yet, can retry, owned by `FileProvider`.
-    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
-
-    /// Query to fetch `UploadFiles` for the current execution context
-    public var uploadFileQuery: String? {
-        switch appContextService.context {
-        case .app, .appTests:
-            return Self.appFilesToUploadQuery
-        case .fileProviderExtension:
-            return Self.fileProviderFilesToUploadQuery
-        case .actionExtension:
-            // not supported in actionExtension
-            return nil
-        case .shareExtension:
-            // not supported in shareExtension
-            return nil
-        }
-    }
-
     public var operationCount: Int {
         operationQueue.operationCount
     }
 
     public var isSuspended: Bool {
         operationQueue.isSuspended
+    }
+
+    public var isActive: Bool {
+        operationQueue.operationCount > 0 && !operationQueue.isSuspended
     }
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
@@ -189,14 +167,14 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ufid:\(uploadFile.id)")
+        Log.uploadQueue("addToQueueIfNecessary ufid:\(uploadFile.id)")
         guard operation(uploadFileId: uploadFile.id) != nil else {
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm ADD ufid:\(uploadFile.id)")
+            Log.uploadQueue("addToQueueIfNecessary ADD ufid:\(uploadFile.id)")
             addToQueue(uploadFile: uploadFile, itemIdentifier: nil)
             return
         }
 
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm NOOP ufid:\(uploadFile.id)")
+        Log.uploadQueue("addToQueueIfNecessary NOOP ufid:\(uploadFile.id)")
     }
 
     @discardableResult

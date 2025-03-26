@@ -138,6 +138,10 @@ public final class UploadFile: Object, UploadFilable {
         return Constants.formatFileSize(size)
     }
 
+    public var isPhotoSyncUpload: Bool {
+        type == .phAsset
+    }
+
     var type: UploadFileType {
         return UploadFileType(rawValue: rawType) ?? .unknown
     }

@@ -26,24 +26,31 @@ public enum UploadServiceBackgroundIdentifier {
 }
 
 public final class UploadService {
-    @LazyInjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
-    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+    @InjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
+    @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
 
-    let serialQueue: DispatchQueue = {
-        @LazyInjectService var appContextService: AppContextServiceable
+    private let serialTransactionQueue = DispatchQueue(
+        label: "com.infomaniak.drive.upload-service.rebuild-uploads",
+        qos: .default,
+        autoreleaseFrequency: .workItem
+    )
+
+    let serialEventQueue: DispatchQueue = {
+        @InjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
 
         return DispatchQueue(
-            label: "com.infomaniak.drive.upload-service",
-            qos: .userInitiated,
+            label: "com.infomaniak.drive.upload-service.event",
+            qos: .default,
             autoreleaseFrequency: autoreleaseFrequency
         )
     }()
 
-    lazy var allQueues = [globalUploadQueue]
+    lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     var fileUploadedCount = 0
     var observations = (
@@ -53,58 +60,82 @@ public final class UploadService {
     )
 
     public var operationCount: Int {
-        globalUploadQueue.operationCount
+        allQueues.reduce(0) { $0 + $1.operationCount }
     }
 
     public var pausedNotificationSent = false
 
     public init() {
-        Task {
-            rebuildUploadQueueFromObjectsInRealm()
-        }
+        rebuildUploadQueue()
     }
 }
 
 extension UploadService: UploadServiceable {
-    public var isSuspended: Bool {
-        return globalUploadQueue.isSuspended
+    static let appFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == false"
+
+    static let fileProviderFilesToUploadQuery = "uploadDate = nil AND maxRetryCount > 0 AND ownedByFileProvider == true"
+
+    private var uploadFileQuery: String? {
+        switch appContextService.context {
+        case .app, .appTests:
+            return Self.appFilesToUploadQuery
+        case .fileProviderExtension:
+            return Self.fileProviderFilesToUploadQuery
+        case .actionExtension, .shareExtension:
+            return nil
+        }
     }
 
-    public func rebuildUploadQueueFromObjectsInRealm() {
-        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm")
-        serialQueue.sync {
-            // Clean cache if necessary before we try to restart the uploads.
-            @InjectService var freeSpaceService: FreeSpaceService
-            freeSpaceService.cleanCacheIfAlmostFull()
+    public var isSuspended: Bool {
+        allQueues.allSatisfy(\.isSuspended)
+    }
 
-            guard let uploadFileQuery = globalUploadQueue.uploadFileQuery else {
-                Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
-                return
-            }
-
-            let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                return lazyCollection.filter(uploadFileQuery)
-                    .sorted(byKeyPath: "taskCreationDate")
-            }
-            let uploadingFileIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
-
-            let batches = uploadingFileIds.chunks(ofCount: 100)
-            Log.uploadQueue("batched count:\(batches.count)")
-            for batch in batches {
-                Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
-                let batchArray = Array(batch)
-                let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-                    lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
-                }
-                for file in matchedFrozenFiles {
-                    globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
-                }
-                resumeAllOperations()
-            }
-
-            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
+    public func blockingRebuildUploadQueue() {
+        serialTransactionQueue.sync {
+            self.rebuildUploadQueueFromObjectsInRealm()
         }
+    }
+
+    public func rebuildUploadQueue() {
+        serialTransactionQueue.async {
+            self.rebuildUploadQueueFromObjectsInRealm()
+        }
+    }
+
+    private func rebuildUploadQueueFromObjectsInRealm() {
+        Log.uploadQueue("rebuildUploadQueue")
+        @InjectService var freeSpaceService: FreeSpaceService
+        freeSpaceService.cleanCacheIfAlmostFull()
+
+        guard let uploadFileQuery else {
+            Log.uploadQueue("\(#function) disabled in \(appContextService.context.rawValue)", level: .error)
+            return
+        }
+
+        let uploadingFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            return lazyCollection.filter(uploadFileQuery)
+                .sorted(byKeyPath: "taskCreationDate")
+        }
+
+        let uploadingFileIds = Array(uploadingFiles.map(\.id))
+        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
+
+        let batches = uploadingFileIds.chunks(ofCount: 100)
+        Log.uploadQueue("batched count:\(batches.count)")
+        for batch in batches {
+            Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
+            let batchArray = Array(batch)
+            let matchedFrozenFiles = uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+                lazyCollection.filter("id IN %@", batchArray).freezeIfNeeded()
+            }
+            for file in matchedFrozenFiles {
+                let uploadQueue = uploadQueue(for: file)
+                uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+            }
+            resumeAllOperations()
+        }
+
+        Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm exit")
     }
 
     public func suspendAllOperations() {
@@ -117,7 +148,9 @@ extension UploadService: UploadServiceable {
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         globalUploadQueue.waitForCompletion {
-            completionHandler()
+            self.photoUploadQueue.waitForCompletion {
+                completionHandler()
+            }
         }
     }
 
@@ -128,7 +161,14 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
+        serialTransactionQueue.async {
+            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
+                .freeze() else {
+                return
+            }
+
+            let specificQueue = self.uploadQueue(for: frozenFile)
+
             try? self.uploadsDatabase.writeTransaction { writableRealm in
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
@@ -136,24 +176,13 @@ extension UploadService: UploadServiceable {
                     return
                 }
 
-                // Remove operation from tracking
-                globalUploadQueue.cancel(uploadFileId: uploadFileId)
+                specificQueue.cancel(uploadFileId: uploadFileId)
 
-                // Clean error in base
                 file.clearErrorsForRetry()
             }
 
-            // re-enqueue UploadOperation
-            defer {
-                resumeAllOperations()
-            }
-
-            guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
-                .freeze() else {
-                return
-            }
-
-            globalUploadQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+            specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+            self.resumeAllOperations()
         }
     }
 
@@ -164,19 +193,16 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
-            let failedFileIds = getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
+        serialTransactionQueue.async {
+            let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
             let batches = failedFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batches:\(batches.count)")
 
-            resumeAllOperations()
+            self.resumeAllOperations()
 
             for batch in batches {
-                // Cancel Operation if any and reset errors
-                cancelAnyInBatch(batch)
-
-                // Second transaction to enqueue the UploadFile to the OperationQueue
-                enqueueAnyInBatch(batch)
+                self.cancelAnyInBatch(batch)
+                self.enqueueAnyInBatch(batch)
             }
         }
     }
@@ -204,16 +230,13 @@ extension UploadService: UploadServiceable {
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
-                // Cancel operation if any
-                globalUploadQueue.cancel(uploadFileId: uploadFileId)
-
-                // Clean errors in db file
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
                       !file.isInvalidated else {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
                     continue
                 }
-
+                let uploadQueue = uploadQueue(for: file)
+                uploadQueue.cancel(uploadFileId: uploadFileId)
                 file.clearErrorsForRetry()
             }
         }
@@ -231,7 +254,8 @@ extension UploadService: UploadServiceable {
                 continue
             }
 
-            globalUploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
+            let uploadQueue = uploadQueue(for: file)
+            uploadQueue.addToQueueIfNecessary(uploadFile: file, itemIdentifier: nil)
         }
     }
 
@@ -242,29 +266,44 @@ extension UploadService: UploadServiceable {
             return
         }
 
-        Task {
-            suspendAllOperations()
+        serialTransactionQueue.async {
+            self.suspendAllOperations()
             defer {
-                resumeAllOperations()
+                self.resumeAllOperations()
                 Log.uploadQueue("cancelAllOperations finished")
             }
 
-            let uploadingFiles = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
-            let uploadingFilesIds = Array(uploadingFiles.map(\.id))
-            Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) parentId:\(parentId)")
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId)
+            let allUploadingFilesIds = Array(uploadingFiles.map(\.id))
+            let photoSyncUploadingFilesIds: [String] = uploadingFiles.compactMap { uploadFile in
+                guard uploadFile.isPhotoSyncUpload else { return nil }
+                return uploadFile.id
+            }
+            let globalUploadingFilesIds: [String] = uploadingFiles.compactMap { uploadFile in
+                guard !uploadFile.isPhotoSyncUpload else { return nil }
+                return uploadFile.id
+            }
 
-            try? uploadsDatabase.writeTransaction { writableRealm in
+            assert(
+                photoSyncUploadingFilesIds.count + globalUploadingFilesIds.count == uploadingFiles.count,
+                "count of IDs should match"
+            )
+
+            Log.uploadQueue("cancelAllOperations IDS count:\(allUploadingFilesIds.count) parentId:\(parentId)")
+
+            try? self.uploadsDatabase.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
-                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", uploadingFilesIds)
+                let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
 
                 writableRealm.delete(objectsToDelete)
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }
 
-            globalUploadQueue.cancelAllOperations(uploadingFilesIds: uploadingFilesIds)
+            self.globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
+            self.photoUploadQueue.cancelAllOperations(uploadingFilesIds: photoSyncUploadingFilesIds)
 
-            publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
+            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
         }
     }
 
@@ -286,8 +325,8 @@ extension UploadService: UploadServiceable {
 
         let frozenFileToDelete = toDeleteLive.freeze()
         frozenFileToDelete.cleanSourceFileIfNeeded()
-
-        globalUploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
+        let uploadQueue = uploadQueue(for: frozenFileToDelete)
+        uploadQueue.cancel(uploadFileId: frozenFileToDelete.id)
 
         try? uploadsDatabase.writeTransaction { writableRealm in
             if let toDelete = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
@@ -339,6 +378,14 @@ extension UploadService: UploadServiceable {
             }
 
             Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
+        }
+    }
+
+    private func uploadQueue(for uploadFile: UploadFile) -> UploadQueueable {
+        if uploadFile.isPhotoSyncUpload {
+            return photoUploadQueue
+        } else {
+            return globalUploadQueue
         }
     }
 }
