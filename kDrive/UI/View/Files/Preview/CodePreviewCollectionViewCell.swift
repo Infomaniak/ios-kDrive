@@ -27,14 +27,25 @@ import UIKit
 struct CodePreviewWorker {
     func readDataToStringInferEncoding(localUrl: URL) async throws -> String {
         let data = try Data(contentsOf: localUrl, options: .alwaysMapped)
-        var maybeString: NSString?
 
-        NSString.stringEncoding(for: data, convertedString: &maybeString, usedLossyConversion: nil)
-        guard let maybeString else {
-            throw DriveError.unknownError
+        let encodings: [String.Encoding] = [
+            .utf8,
+            .utf16,
+            .utf16BigEndian,
+            .utf16LittleEndian,
+            .ascii,
+            .iso2022JP
+        ]
+
+        for encoding in encodings {
+            guard let deserializedString = String(data: data, encoding: encoding) else {
+                continue
+            }
+
+            return deserializedString
         }
 
-        return maybeString as String
+        throw DriveError.unknownError
     }
 }
 
