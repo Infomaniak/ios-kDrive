@@ -69,7 +69,10 @@ public final class UploadService {
     public init() {
         rebuildUploadQueue()
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            self?.updateQueueSuspension()
+            guard let self else { return }
+            self.serialEventQueue.async {
+                self.updateQueueSuspension()
+            }
         }
     }
 }
