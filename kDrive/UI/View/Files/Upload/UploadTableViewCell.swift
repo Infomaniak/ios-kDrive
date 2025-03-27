@@ -88,9 +88,12 @@ final class UploadTableViewCell: InsetTableViewCell {
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-            } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
+            } else if UserDefaults.shared.isWifiOnly
+                && ReachabilityListener.instance.currentStatus != .wifi
+                && uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
             }
+
             if uploadFile.size > 0 {
                 cardContentView.detailsLabel.text = uploadFile.formattedSize + " • " + status
             } else {
