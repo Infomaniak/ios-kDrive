@@ -76,7 +76,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     public init(delegate: UploadQueueDelegate?) {
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) disabled in ShareExtension", level: .error)
             return
         }
 
@@ -88,7 +88,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     // MARK: - ParallelismHeuristicDelegate
 
     public func parallelismShouldChange(value: Int) {
-        Log.uploadQueue("Upload queue new parallelism: \(value)", level: .info)
+        Log.uploadQueue("\(self) new parallelism: \(value)", level: .info)
         operationQueue.maxConcurrentOperationCount = value
     }
 }
