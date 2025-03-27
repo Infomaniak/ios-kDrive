@@ -29,17 +29,12 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
-    private(set) var driveFileManager: DriveFileManager!
-    private(set) var frozenFile: File!
-
-    var freshFrozenFile: File {
-        guard let freshFrozenFile = frozenFile.thaw()?.freeze() else {
-            return frozenFile
-        }
-
-        frozenFile = freshFrozenFile
-        return frozenFile.freeze()
+    private var fileUid: String {
+        frozenFile.uid
     }
+
+    private(set) var frozenFile: File!
+    private(set) var driveFileManager: DriveFileManager!
 
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
@@ -93,8 +88,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                     return
                 }
 
-                let freshFile = self.freshFrozenFile
-                guard !freshFile.isInvalidated else {
+                guard !self.frozenFile.isInvalidated else {
                     self.dismiss(animated: true)
                     return
                 }
@@ -104,27 +98,16 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func setFile(_ newFile: File, driveFileManager: DriveFileManager) {
-        guard !newFile.isInvalidated else {
-            dismiss(animated: true)
-            return
-        }
-
-        guard frozenFile != newFile else {
+    func setFile(from fileUid: String, driveFileManager: DriveFileManager) {
+        guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
+        else {
             dismiss(animated: true)
             return
         }
 
         self.driveFileManager = driveFileManager
-        if newFile.realm == nil || newFile.isFrozen {
-            frozenFile = newFile
-        } else {
-            frozenFile = newFile.freeze()
-        }
+        frozenFile = freshFrozenFile
 
-        defer { reload(animated: false) }
-
-        frozenFile = newFile
         fileObserver?.cancel()
         fileObserver = driveFileManager.observeFileUpdated(self, fileId: frozenFile.id) { [weak self] freshFile in
             guard let self else { return }
@@ -138,9 +121,20 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         }
+
+        reload(animated: false)
     }
 
     // MARK: - Private methods
+
+    private func refreshFile() {
+        guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: self.fileUid)?.freeze()
+        else {
+            dismiss(animated: true)
+            return
+        }
+        frozenFile = freshFrozenFile
+    }
 
     private static func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { section, _ in
@@ -172,6 +166,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     private func reload(animated: Bool) {
+        refreshFile()
         setupContent()
         if animated {
             UIView.transition(with: collectionView, duration: 0.35, options: .transitionCrossDissolve) {
@@ -265,20 +260,20 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         switch Self.sections[indexPath.section] {
         case .header:
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
-            cell.configureWith(driveFileManager: driveFileManager, file: freshFrozenFile)
+            cell.configureWith(driveFileManager: driveFileManager, file: frozenFile)
             cell.moreButton.isHidden = true
             return cell
         case .quickActions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = quickActions[indexPath.item]
-            cell.configure(with: action, file: freshFrozenFile)
+            cell.configure(with: action, file: frozenFile)
             return cell
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
             cell.configure(
                 with: action,
-                file: freshFrozenFile,
+                file: frozenFile,
                 showProgress: downloadAction == action,
                 driveFileManager: driveFileManager,
                 currentPackId: packId

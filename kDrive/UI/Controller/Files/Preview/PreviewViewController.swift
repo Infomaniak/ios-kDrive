@@ -229,7 +229,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func updateFileForCurrentIndex() {
-        fileInformationsViewController.setFile(currentFile, driveFileManager: driveFileManager)
+        fileInformationsViewController.setFile(from: currentFile.uid, driveFileManager: driveFileManager)
     }
 
     override func viewDidAppear(_ animated: Bool) {
