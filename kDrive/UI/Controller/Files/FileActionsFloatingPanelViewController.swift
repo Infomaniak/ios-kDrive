@@ -128,7 +128,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     // MARK: - Private methods
 
     private func refreshFile() {
-        guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: self.fileUid)?.freeze()
+        guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
         else {
             dismiss(animated: true)
             return
