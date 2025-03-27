@@ -138,13 +138,13 @@ final class UploadTableViewCell: InsetTableViewCell {
             }
 
             switch change {
-            case .change(let newFile, _):
-                guard let progress = newFile.progress,
-                      newFile.error == nil || newFile.error == DriveError.taskRescheduled else {
+            case .change(let newLiveFile, _):
+                guard let progress = newLiveFile.progress,
+                      newLiveFile.error == nil || newLiveFile.error == DriveError.taskRescheduled else {
                     return
                 }
 
-                updateProgress(frozenUploadFile: newFile, progress: progress, animated: false)
+                updateProgress(frozenUploadFile: newLiveFile.freeze(), progress: progress, animated: false)
             case .error, .deleted:
                 break
             }
