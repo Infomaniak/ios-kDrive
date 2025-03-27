@@ -102,6 +102,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private var rootViewChildren: [File]?
     private var dataSource: MenuDataSource?
     private let refreshControl = UIRefreshControl()
+    private var isCompactView = false
 
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
@@ -145,22 +146,40 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.horizontalSizeClass != previousTraitCollection?.horizontalSizeClass ||
+            traitCollection.verticalSizeClass != previousTraitCollection?.verticalSizeClass {
+            setupViewForCurrentSizeClass()
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupViewForCurrentSizeClass()
+    }
+
+    private func setupViewForCurrentSizeClass() {
+        let hSize = traitCollection.horizontalSizeClass
+        let vSize = traitCollection.verticalSizeClass
         var avatar = UIImage()
-        accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
-            avatar = SidebarViewController.generateProfileTabImages(image: image)
-            let buttonMenu = UIBarButtonItem(
-                image: avatar,
-                style: .plain,
-                target: self,
-                action: #selector(self.buttonMenuClicked(_:))
-            )
-            self.navigationItem.rightBarButtonItem = buttonMenu
+        if hSize == .regular && vSize == .regular {
+            accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+                avatar = SidebarViewController.generateProfileTabImages(image: image)
+                let buttonMenu = UIBarButtonItem(
+                    image: avatar,
+                    style: .plain,
+                    target: self,
+                    action: #selector(self.buttonMenuClicked(_:))
+                )
+                self.navigationItem.rightBarButtonItem = buttonMenu
+            }
+        } else {
+            navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
         }
 
         navigationItem.title = driveFileManager.drive.name
-//        navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
