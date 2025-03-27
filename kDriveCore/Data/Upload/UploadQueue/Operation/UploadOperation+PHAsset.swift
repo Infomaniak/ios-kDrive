@@ -61,8 +61,7 @@ extension UploadOperation {
     func checkForRestrictedUploadOverDataMode() throws {
         let file = try readOnlyFile()
 
-        guard file.type == .phAsset else {
-            // This UploadFile is not a PHAsset, return silently
+        guard file.isPhotoSyncUpload else {
             return
         }
 
