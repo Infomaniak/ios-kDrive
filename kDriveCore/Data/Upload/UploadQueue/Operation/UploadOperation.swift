@@ -74,7 +74,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
-    @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
