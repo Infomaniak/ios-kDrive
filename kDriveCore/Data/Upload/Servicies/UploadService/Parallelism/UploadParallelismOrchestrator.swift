@@ -88,8 +88,6 @@ public final class UploadParallelismOrchestrator {
             let activeQueues = self.allQueues.filter(\.isActive)
             let inactiveQueues = self.allQueues.filter { !$0.isActive }
 
-            assert(activeQueues.count + inactiveQueues.count == self.allQueues.count, "queue count should match")
-
             inactiveQueues.forEach { $0.parallelismShouldChange(value: ParallelismDefaults.serial) }
 
             Log.uploadQueue("Inactive queues:\(inactiveQueues.count) set to serial")
