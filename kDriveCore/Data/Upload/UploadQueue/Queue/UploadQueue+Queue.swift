@@ -39,18 +39,18 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
-        Log.uploadQueue("waitForCompletion")
+        Log.uploadQueue("\(self) waitForCompletion")
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
-            Log.uploadQueue("🎉 AllOperationsAreFinished")
+            Log.uploadQueue("\(self) 🎉 AllOperationsAreFinished")
             completionHandler()
         }
     }
 
     public func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable? {
-        Log.uploadQueue("getOperation ufid:\(uploadFileId)")
+        Log.uploadQueue("\(self) getOperation ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return nil
         }
 
@@ -59,7 +59,7 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func suspendAllOperations() {
-        Log.uploadQueue("suspendAllOperations")
+        Log.uploadQueue("\(self) suspendAllOperations")
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
             return
@@ -70,9 +70,9 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func resumeAllOperations() {
-        Log.uploadQueue("resumeAllOperations")
+        Log.uploadQueue("\(self) resumeAllOperations")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return
         }
 
@@ -81,9 +81,9 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func rescheduleRunningOperations() {
-        Log.uploadQueue("rescheduleRunningOperations")
+        Log.uploadQueue("\(self) rescheduleRunningOperations")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return
         }
 
@@ -102,14 +102,14 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func cancel(uploadFileId: String) {
-        Log.uploadQueue("cancel UploadFile ufid:\(uploadFileId)")
+        Log.uploadQueue("\(self) cancel UploadFile ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return
         }
 
         if let operation = keyedUploadOperations.getObject(forKey: uploadFileId) {
-            Log.uploadQueue("operation to cancel:\(operation)")
+            Log.uploadQueue("\(self) operation to cancel:\(operation)")
             Task {
                 await operation.cleanUploadFileSession()
                 operation.cancel()
@@ -119,13 +119,13 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func cancelAllOperations(uploadingFilesIds: [String]) {
-        Log.uploadQueue("cancelAllOperations queue:\(type(of: self))")
+        Log.uploadQueue("\(self) cancelAllOperations queue:\(type(of: self))")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return
         }
 
-        Log.uploadQueue("cancelAllOperations IDS count:\(uploadingFilesIds.count) queue:\(type(of: self))")
+        Log.uploadQueue("\(self) cancelAllOperations IDS count:\(uploadingFilesIds.count) queue:\(type(of: self))")
 
         // Remove in batches from upload queue. This may take a while.
         let batches = uploadingFilesIds.chunks(ofCount: 100)
@@ -143,9 +143,9 @@ extension UploadQueue: UploadQueueable {
     }
 
     private func operation(uploadFileId: String) -> UploadOperationable? {
-        Log.uploadQueue("operation fileId:\(uploadFileId)")
+        Log.uploadQueue("\(self) operation fileId:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return nil
         }
 
@@ -159,7 +159,7 @@ extension UploadQueue: UploadQueueable {
 
     public func addToQueueIfNecessary(uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return
         }
 
@@ -167,28 +167,28 @@ extension UploadQueue: UploadQueueable {
             return
         }
 
-        Log.uploadQueue("addToQueueIfNecessary ufid:\(uploadFile.id)")
+        Log.uploadQueue("\(self) addToQueueIfNecessary ufid:\(uploadFile.id)")
         guard operation(uploadFileId: uploadFile.id) != nil else {
-            Log.uploadQueue("addToQueueIfNecessary ADD ufid:\(uploadFile.id)")
+            Log.uploadQueue("\(self) addToQueueIfNecessary ADD ufid:\(uploadFile.id)")
             addToQueue(uploadFile: uploadFile, itemIdentifier: nil)
             return
         }
 
-        Log.uploadQueue("addToQueueIfNecessary NOOP ufid:\(uploadFile.id)")
+        Log.uploadQueue("\(self) addToQueueIfNecessary NOOP ufid:\(uploadFile.id)")
     }
 
     @discardableResult
     public func addToQueue(uploadFile: UploadFile,
                            itemIdentifier: NSFileProviderItemIdentifier? = nil) -> UploadOperation? {
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) \(#function) disabled in ShareExtension", level: .error)
             return nil
         }
 
         guard !uploadFile.isInvalidated,
               uploadFile.maxRetryCount > 0,
               keyedUploadOperations.getObject(forKey: uploadFile.id) == nil else {
-            Log.uploadQueue("invalid file in \(#function)", level: .error)
+            Log.uploadQueue("\(self) invalid file in \(#function)", level: .error)
             return nil
         }
 
@@ -203,11 +203,11 @@ extension UploadQueue: UploadQueueable {
         operation.queuePriority = priority
         operation.completionBlock = { [weak self] in
             guard let self else { return }
-            Log.uploadQueue("operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
+            Log.uploadQueue("\(self) operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
             keyedUploadOperations.removeObject(forKey: uploadFileId)
             if let error = operation.result.uploadFile?.error,
                error == .taskRescheduled || error == .taskCancelled {
-                Log.uploadQueue("skipping task")
+                Log.uploadQueue("\(self) skipping task")
                 return
             }
 
@@ -216,7 +216,7 @@ extension UploadQueue: UploadQueueable {
             OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !keyedUploadOperations.isEmpty)
         }
 
-        Log.uploadQueue("add operation :\(operation) ufid:\(uploadFileId)")
+        Log.uploadQueue("\(self) add operation :\(operation) ufid:\(uploadFileId)")
         operationQueue.addOperation(operation as Operation)
 
         keyedUploadOperations.setObject(operation, key: uploadFileId)
@@ -228,6 +228,6 @@ extension UploadQueue: UploadQueueable {
     public func updateQueueSuspension() {
         let suspended = (shouldSuspendQueue || forceSuspendQueue)
         operationQueue.isSuspended = suspended
-        Log.uploadQueue("update isSuspended to :\(suspended)")
+        Log.uploadQueue("\(self) update isSuspended to :\(suspended)")
     }
 }
