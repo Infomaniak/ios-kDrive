@@ -49,4 +49,6 @@ public protocol UploadServiceable {
     @discardableResult func cancel(uploadFileId: String) -> Bool
 
     func cleanNetworkAndLocalErrorsForAllOperations()
+
+    func updateQueueSuspension()
 }

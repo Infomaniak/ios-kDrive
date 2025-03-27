@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 
@@ -67,6 +68,12 @@ public final class UploadService {
 
     public init() {
         rebuildUploadQueue()
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            guard let self else { return }
+            self.serialEventQueue.async {
+                self.updateQueueSuspension()
+            }
+        }
     }
 }
 
@@ -379,6 +386,10 @@ extension UploadService: UploadServiceable {
 
             Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
         }
+    }
+
+    public func updateQueueSuspension() {
+        allQueues.forEach { $0.updateQueueSuspension() }
     }
 
     private func uploadQueue(for uploadFile: UploadFile) -> UploadQueueable {

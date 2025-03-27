@@ -23,6 +23,7 @@ extension UploadOperation {
     func generateChunksAndFanOutIfNeeded() async throws {
         Log.uploadOperation("generateChunksAndFanOutIfNeeded ufid:\(uploadFileId)")
         try checkCancelation()
+        try checkForRestrictedUploadOverDataMode()
 
         var filePath = ""
         var chunksToGenerateCount = 0
@@ -107,6 +108,7 @@ extension UploadOperation {
     private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
         do {
             try checkCancelation()
+            try checkForRestrictedUploadOverDataMode()
 
             // Fan-out the chunk we just made
             enqueueCatching {
@@ -132,6 +134,7 @@ extension UploadOperation {
     /// Prepare chunk upload requests, and start them.
     func fanOutChunks() async throws {
         try checkCancelation()
+        try checkForRestrictedUploadOverDataMode()
 
         let freeSlots = availableWorkerSlots()
         guard freeSlots > 0 else {

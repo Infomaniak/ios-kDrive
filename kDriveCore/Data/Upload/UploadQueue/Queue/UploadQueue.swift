@@ -67,7 +67,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        return status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
+        let shouldBeSuspended = status == .offline
+        return shouldBeSuspended
     }
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
@@ -75,19 +76,11 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     public init(delegate: UploadQueueDelegate?) {
         guard appContextService.context != .shareExtension else {
-            Log.uploadQueue("UploadQueue disabled in ShareExtension", level: .error)
+            Log.uploadQueue("\(self) disabled in ShareExtension", level: .error)
             return
         }
 
         self.delegate = delegate
-
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            guard let self else { return }
-
-            let isSuspended = (shouldSuspendQueue || forceSuspendQueue)
-            operationQueue.isSuspended = isSuspended
-            Log.uploadQueue("observeNetworkChange :\(isSuspended)")
-        }
 
         queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
     }
@@ -95,7 +88,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     // MARK: - ParallelismHeuristicDelegate
 
     public func parallelismShouldChange(value: Int) {
-        Log.uploadQueue("Upload queue new parallelism: \(value)", level: .info)
+        Log.uploadQueue("\(self) new parallelism: \(value)", level: .info)
         operationQueue.maxConcurrentOperationCount = value
     }
 }
