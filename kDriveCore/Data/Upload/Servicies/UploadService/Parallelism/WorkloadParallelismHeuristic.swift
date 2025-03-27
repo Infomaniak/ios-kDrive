@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 
 public enum ParallelismDefaults {
@@ -67,6 +68,11 @@ public final class WorkloadParallelismHeuristic {
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
             object: nil
         )
+
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            guard let self else { return }
+            self.computeParallelismInQueue()
+        }
 
         computeParallelismInQueue()
     }
