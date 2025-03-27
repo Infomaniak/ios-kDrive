@@ -130,7 +130,7 @@ extension UploadOperation {
 
                 case .uploadOverDataRestrictedError:
                     file.error = DriveError.uploadOverDataRestrictedError
-                    self.photoUploadQueue.suspendAllOperations()
+                    self.uploadService.updateQueueSuspension()
                 }
 
                 errorHandled = true
