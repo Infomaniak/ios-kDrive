@@ -180,7 +180,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         Task { @MainActor [weak self] in
-            self?.collectionView.reloadItems(at: [indexPath])
+            guard let self else { return }
+            self.refreshFile()
+            self.collectionView.reloadItems(at: [indexPath])
         }
     }
 
