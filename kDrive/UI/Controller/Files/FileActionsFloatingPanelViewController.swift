@@ -111,14 +111,8 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         fileObserver?.cancel()
         fileObserver = driveFileManager.observeFileUpdated(self, fileId: frozenFile.id) { [weak self] freshFile in
             guard let self else { return }
-            assert(freshFile.isFrozen, "Realm should notify with a frozen file")
-            self.frozenFile = freshFile
             Task { @MainActor in
-                if freshFile.isInvalidated {
-                    self.dismiss(animated: true)
-                } else {
-                    self.reload(animated: true)
-                }
+                self.reload(animated: true)
             }
         }
 
