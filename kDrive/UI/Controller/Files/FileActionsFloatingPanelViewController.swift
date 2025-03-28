@@ -204,11 +204,11 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
                 self?.downloadAction = nil
                 self?.setLoading(true, action: action, at: indexPath)
                 Task { @MainActor in
-                    if error == nil {
-                        completion()
-                    } else {
+                    guard error == nil else {
                         UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
+                        return
                     }
+                    completion()
                 }
             }
 
