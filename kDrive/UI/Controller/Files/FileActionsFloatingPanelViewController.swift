@@ -164,6 +164,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         setupContent()
         if animated {
             UIView.transition(with: collectionView, duration: 0.35, options: .transitionCrossDissolve) {
+                self.refreshFile()
                 self.collectionView.reloadData()
             }
         } else {
@@ -175,7 +176,6 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         action.isLoading = isLoading
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.refreshFile()
             self.collectionView.reloadItems(at: [indexPath])
         }
     }
