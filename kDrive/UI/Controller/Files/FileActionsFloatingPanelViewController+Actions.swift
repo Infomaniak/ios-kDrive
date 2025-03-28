@@ -348,12 +348,16 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func offlineAction(at indexPath: IndexPath) {
-        FileActionsHelper.offline(files: [frozenFile], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
-            if let error {
+        FileActionsHelper
+            .offline(files: [frozenFile], driveFileManager: driveFileManager, filesNotAvailable: nil) { updatedFile, error in
+                guard let error else {
+                    self.refreshFile()
+                    self.collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
+                    return
+                }
+
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
-        }
-        collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
     }
 
     private func downloadAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {

@@ -119,9 +119,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         reload(animated: false)
     }
 
-    // MARK: - Private methods
-
-    private func refreshFile() {
+    func refreshFile() {
         guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
         else {
             dismiss(animated: true)
@@ -129,6 +127,8 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
         frozenFile = freshFrozenFile
     }
+
+    // MARK: - Private methods
 
     private static func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { section, _ in
