@@ -109,7 +109,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         frozenFile = freshFrozenFile
 
         fileObserver?.cancel()
-        fileObserver = driveFileManager.observeFileUpdated(self, fileId: frozenFile.id) { [weak self] freshFile in
+        fileObserver = driveFileManager.observeFileUpdated(self, fileId: frozenFile.id) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
                 self.reload(animated: true)
