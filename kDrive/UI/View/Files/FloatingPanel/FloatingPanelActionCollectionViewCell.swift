@@ -53,9 +53,11 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        observationToken?.cancel()
+        observationToken = nil
+        switchView.setOn(false, animated: false)
         switchView.isHidden = true
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
-        observationToken?.cancel()
     }
 
     func configure(with action: FloatingPanelAction,
