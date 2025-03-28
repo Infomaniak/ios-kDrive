@@ -164,6 +164,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     func observeProgress(_ showProgress: Bool, file: File) {
         observationToken?.cancel()
+        observationToken = nil
         setProgress(showProgress ? -1 : nil)
         if showProgress {
             observationToken = downloadQueue.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
