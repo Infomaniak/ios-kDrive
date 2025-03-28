@@ -1318,10 +1318,7 @@ public final class DriveFileManager {
                     notifyObserversWith(file: liveFile)
                     completion(nil)
                 } catch {
-                    updateFileProperty(fileUid: liveFile.uid) { writableFile in
-                        writableFile.isAvailableOffline = false
-                    }
-
+                    markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
                     completion(error)
                 }
             } else {
@@ -1331,9 +1328,7 @@ public final class DriveFileManager {
                     token?.cancel()
                     if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
-                        self.updateFileProperty(fileUid: safeFile.uid) { writableFile in
-                            writableFile.isAvailableOffline = false
-                        }
+                        self.markAsUnavailableOfflineAndStopDownload(fileUid: safeFile.uid, fileId: safeFile.id)
                     }
                     self.notifyObserversWith(file: safeFile)
                     Task { @MainActor in
@@ -1343,18 +1338,22 @@ public final class DriveFileManager {
                 downloadQueue.addToQueue(file: safeFile, userId: drive.userId, itemIdentifier: nil)
             }
         } else {
-            updateFileProperty(fileUid: liveFile.uid) { writableFile in
-                writableFile.isAvailableOffline = false
-            }
+            markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
 
-            // Cancel the download
-            downloadQueue.operation(for: file.id)?.cancel()
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
             try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
             notifyObserversWith(file: file)
             try? fileManager.removeItem(at: oldUrl)
             completion(nil)
         }
+    }
+
+    private func markAsUnavailableOfflineAndStopDownload(fileUid: String, fileId: Int) {
+        updateFileProperty(fileUid: fileUid) { writableFile in
+            writableFile.isAvailableOffline = false
+        }
+
+        downloadQueue.operation(for: fileId)?.cancel()
     }
 
     public func setLocalRecentActivities(detachedActivities: [FileActivity]) async {
