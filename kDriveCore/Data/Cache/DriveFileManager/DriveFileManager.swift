@@ -1353,7 +1353,7 @@ public final class DriveFileManager {
             writableFile.isAvailableOffline = false
         }
 
-        downloadQueue.operation(for: fileId)?.cancel()
+        downloadQueue.cancelFileOperation(for: fileId)
     }
 
     public func setLocalRecentActivities(detachedActivities: [FileActivity]) async {
