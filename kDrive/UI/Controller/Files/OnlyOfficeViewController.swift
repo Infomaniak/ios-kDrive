@@ -99,40 +99,11 @@ final class OnlyOfficeViewController: UIViewController {
         return onlyOfficeViewController
     }
 
-    override func loadView() {
-        /*
-         With iOS 16.1, WKWebView cannot handle SharedWorkers
-         We have to use this workaround while waiting for a solution from Apple
-         https://developer.apple.com/forums/thread/718757?answerId=734292022#734292022
-         */
-        let webConfiguration = WKWebViewConfiguration()
-        let dropSharedWorkersScript = WKUserScript(
-            source: "delete window.SharedWorker;",
-            injectionTime: WKUserScriptInjectionTime.atDocumentStart,
-            forMainFrameOnly: false
-        )
-        webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
-        // Force mobile mode for better usage on iPadOS
-        webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
-        webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.scrollView.isScrollEnabled = false
-        webView.uiDelegate = self
-        webView.navigationDelegate = self
-
-        progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, value in
-            guard let newValue = value.newValue else {
-                return
-            }
-            self?.progressView.isHidden = newValue == 1
-            self?.progressView.setProgress(Float(newValue), animated: true)
-        }
-        view = webView
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Add progress view
+        setupWebView()
+
         view.addSubview(progressView)
         progressView.progressViewStyle = .bar
         progressView.translatesAutoresizingMaskIntoConstraints = false
@@ -164,6 +135,45 @@ final class OnlyOfficeViewController: UIViewController {
         } else {
             showErrorMessage(context: ["URL": "nil"])
         }
+    }
+
+    private func setupWebView() {
+        /*
+         With iOS 16.1, WKWebView cannot handle SharedWorkers
+         We have to use this workaround while waiting for a solution from Apple
+         https://developer.apple.com/forums/thread/718757?answerId=734292022#734292022
+         */
+        let webConfiguration = WKWebViewConfiguration()
+        let dropSharedWorkersScript = WKUserScript(
+            source: "delete window.SharedWorker;",
+            injectionTime: WKUserScriptInjectionTime.atDocumentStart,
+            forMainFrameOnly: false
+        )
+        webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
+        // Force mobile mode for better usage on iPadOS
+        webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webView.scrollView.isScrollEnabled = false
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
+
+        progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, value in
+            guard let newValue = value.newValue else {
+                return
+            }
+            self?.progressView.isHidden = newValue == 1
+            self?.progressView.setProgress(Float(newValue), animated: true)
+        }
+
+        webView.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(webView)
+        NSLayoutConstraint.activate([
+            webView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            webView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            webView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor),
+            webView.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor)
+        ])
     }
 
     override func viewDidAppear(_ animated: Bool) {
