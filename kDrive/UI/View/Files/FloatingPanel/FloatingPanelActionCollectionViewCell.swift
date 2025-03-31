@@ -55,6 +55,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         observationToken?.cancel()
         observationToken = nil
+        setProgress(nil)
         switchView.setOn(false, animated: false)
         switchView.isHidden = true
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
