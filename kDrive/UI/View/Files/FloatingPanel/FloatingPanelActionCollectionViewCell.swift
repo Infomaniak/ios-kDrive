@@ -84,12 +84,11 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         case .convertToDropbox:
             guard currentPackId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded else { return }
             configureChip()
+        case .download:
+            guard let file else { return }
+            observeProgress(showProgress, file: file)
         default:
             break
-        }
-
-        if let file {
-            observeProgress(showProgress, file: file)
         }
     }
 
@@ -153,10 +152,12 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
            !downloadOperation.isCancelled,
            !fileExists {
             switchView.setOn(true, animated: true)
+            observeProgress(true, file: file)
         } else if file.isAvailableOffline, fileExists {
             switchView.setOn(true, animated: false)
         } else {
             switchView.setOn(false, animated: true)
+            observeProgress(false, file: file)
         }
 
         if file.isAvailableOffline, fileExists {
