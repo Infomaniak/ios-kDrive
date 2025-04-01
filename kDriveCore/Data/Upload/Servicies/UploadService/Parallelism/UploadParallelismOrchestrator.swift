@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 
 public final class UploadParallelismOrchestrator {
@@ -49,6 +50,11 @@ public final class UploadParallelismOrchestrator {
         serialEventQueue.async {
             self.observeMemoryWarnings()
             self.uploadParallelismHeuristic = WorkloadParallelismHeuristic(delegate: self)
+
+            ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+                guard let self else { return }
+                self.computeUploadParallelismPerQueueAndApply()
+            }
         }
     }
 
