@@ -451,6 +451,9 @@
 /* loco:606d7c4a2f511b00e97a0152 */
 "buttonShareDropboxLink" = "Comparte el enlace";
 
+/* loco:67dd44d13648dcecc500c052 */
+"buttonSharePrivateLink" = "Compartir enlace privado";
+
 /* loco:6049df4d5c2c3a04bc397943 */
 "buttonSharePublicLink" = "Compartir el enlace público";
 
