@@ -1,5 +1,5 @@
 {
-  "originHash" : "30f73eafbdb9edf55edd58ddff785192e7815374baeba7574089d4b25b439925",
+  "originHash" : "60af0795794195e9543025c3d6e2a116ceef78ab286a915870dd72adc2e903b1",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "fe053759c7f92d873cdf6e46ede34f28ca91df07",
-        "version" : "10.1.1"
+        "revision" : "e7e5aa360056392a78b885d052e63bf76bc19947",
+        "version" : "10.1.2"
       }
     },
     {
