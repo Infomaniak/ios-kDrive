@@ -1,1 +1,2 @@
+- Photo sync: Nouvelle option pour activer uniquement le téléversement en WiFi, sans affecter les autres fichiers.
 - Améliorations de la stabilité et corrections de bugs
