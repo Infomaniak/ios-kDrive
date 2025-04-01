@@ -73,25 +73,30 @@ final class UploadTableViewCell: InsetTableViewCell {
         }
 
         if let error = uploadFile.error, error != .taskRescheduled {
-            cardContentView.retryButton?.isHidden = false
             if error.localizedDescription == KDriveResourcesStrings.Localizable.uploadOverDataRestrictedError {
                 cardContentView.detailsLabel.text = error.localizedDescription
+                cardContentView.retryButton?.isHidden = true
             } else {
                 cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
                     .errorUpload + " (\(error.localizedDescription))"
+                cardContentView.retryButton?.isHidden = false
             }
 
         } else {
-            cardContentView.retryButton?
-                .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
-
             var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
+                cardContentView.retryButton?.isHidden = true
             } else if UserDefaults.shared.isWifiOnly,
                       ReachabilityListener.instance.currentStatus != .wifi,
                       uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
+                cardContentView.retryButton?.isHidden = true
+            } else if uploadFile.error != nil {
+                cardContentView.retryButton?
+                    .isHidden = (uploadFile.maxRetryCount > 0) // Display retry for uploads that reached automatic retry limit
+            } else {
+                cardContentView.retryButton?.isHidden = true
             }
 
             if uploadFile.size > 0 {
