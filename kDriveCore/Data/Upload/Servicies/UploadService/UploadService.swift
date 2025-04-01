@@ -71,6 +71,7 @@ public final class UploadService {
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else { return }
             self.serialEventQueue.async {
+                self.cleanWifiLimitationsErrorForAllOperationsAndRetry()
                 self.updateQueueSuspension()
             }
         }
@@ -205,12 +206,12 @@ extension UploadService: UploadServiceable {
             let batches = failedFileIds.chunks(ofCount: 100)
             Log.uploadQueue("batches:\(batches.count)")
 
-            self.resumeAllOperations()
-
             for batch in batches {
                 self.cancelAnyInBatch(batch)
                 self.enqueueAnyInBatch(batch)
             }
+
+            self.resumeAllOperations()
         }
     }
 
@@ -386,6 +387,38 @@ extension UploadService: UploadServiceable {
 
             Log.uploadQueue("cleaned errors on \(failedUploadFiles.count) files")
         }
+    }
+
+    private func cleanWifiLimitationsErrorForAllOperationsAndRetry() {
+        Log.uploadQueue("cleanWifiLimitationsErrorForAllOperations")
+        guard appContextService.context != .shareExtension else {
+            Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
+            return
+        }
+
+        guard ReachabilityListener.instance.currentStatus == .wifi else {
+            return
+        }
+
+        var fileIdsToRetry: [String] = []
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            let ownedByFileProvider = NSNumber(value: self.appContextService.context == .fileProviderExtension)
+            let failedUploadFiles = writableRealm.objects(UploadFile.self)
+                .filter(
+                    "rawType == 'phAsset' AND (_error != nil OR maxRetryCount <= 0) AND ownedByFileProvider == %@",
+                    ownedByFileProvider
+                )
+
+            fileIdsToRetry = failedUploadFiles.map { $0.id }
+
+            for file in failedUploadFiles {
+                file.clearErrorsForRetry()
+            }
+            Log.uploadQueue("cleaned wifi limitation errors on \(failedUploadFiles.count) files")
+        }
+
+        Log.uploadQueue("will retry for uploads:\(fileIdsToRetry.count)")
+        fileIdsToRetry.forEach { retry($0) }
     }
 
     public func updateQueueSuspension() {
