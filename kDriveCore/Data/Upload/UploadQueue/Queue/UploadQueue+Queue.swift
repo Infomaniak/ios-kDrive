@@ -206,7 +206,7 @@ extension UploadQueue: UploadQueueable {
             Log.uploadQueue("\(self) operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
             keyedUploadOperations.removeObject(forKey: uploadFileId)
             if let error = operation.result.uploadFile?.error,
-               error == .taskRescheduled || error == .taskCancelled {
+               error == .taskRescheduled || error == .taskCancelled || error == .uploadOverDataRestrictedError {
                 Log.uploadQueue("\(self) skipping task")
                 return
             }
