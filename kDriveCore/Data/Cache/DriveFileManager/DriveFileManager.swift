@@ -1305,16 +1305,22 @@ public final class DriveFileManager {
         }
 
         let oldUrl = liveFile.localUrl
-        let isLocalVersionOlderThanRemote = liveFile.isLocalVersionOlderThanRemote
+        let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
+
         if available {
             updateFileProperty(fileUid: liveFile.uid) { writableFile in
                 writableFile.isAvailableOffline = true
             }
+            let newUrl = liveFile.localUrl
+            let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
 
-            if !isLocalVersionOlderThanRemote {
+            if fileExists, !isLocalVersionOlderThanRemote {
                 do {
-                    try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
-                    try fileManager.moveItem(at: oldUrl, to: liveFile.localUrl)
+                    if oldUrl != newUrl {
+                        try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                        try fileManager.moveItem(at: oldUrl, to: newUrl)
+                    }
+
                     notifyObserversWith(file: liveFile)
                     completion(nil)
                 } catch {
@@ -1330,8 +1336,9 @@ public final class DriveFileManager {
                         // Mark it as not available offline
                         self.markAsUnavailableOfflineAndStopDownload(fileUid: safeFile.uid, fileId: safeFile.id)
                     }
-                    self.notifyObserversWith(file: safeFile)
+
                     Task { @MainActor in
+                        self.notifyObserversWith(file: safeFile)
                         completion(error)
                     }
                 }
@@ -1340,10 +1347,15 @@ public final class DriveFileManager {
         } else {
             markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
 
-            try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
-            notifyObserversWith(file: file)
-            try? fileManager.removeItem(at: oldUrl)
+            let safeFile = liveFile.freeze()
+            if oldUrl != safeFile.localUrl {
+                try? fileManager.createDirectory(at: safeFile.localContainerUrl, withIntermediateDirectories: true)
+                try? fileManager.moveItem(at: oldUrl, to: safeFile.localUrl)
+                try? fileManager.removeItem(at: oldUrl)
+            }
+
+            notifyObserversWith(file: safeFile)
+
             completion(nil)
         }
     }
