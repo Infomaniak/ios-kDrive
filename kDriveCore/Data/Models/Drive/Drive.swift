@@ -92,7 +92,7 @@ public final class Drive: Object, Codable {
     @Persisted public var categories: List<Category>
     @Persisted private var _categoryRights: CategoryRights?
     @Persisted public var inMaintenance = false
-    @Persisted public var maintenanceReason: MaintenanceReason?
+    @Persisted public var maintenanceReasons: List<MaintenanceReason>
     @Persisted public var updatedAt: Date
     @Persisted public var _account: DriveAccount?
     @Persisted public var quota: DriveQuota?
@@ -147,7 +147,7 @@ public final class Drive: Object, Codable {
     }
 
     public var isInTechnicalMaintenance: Bool {
-        return inMaintenance && maintenanceReason == .technical
+        return inMaintenance && maintenanceReasons.contains { $0 == .technical }
     }
 
     public required init(from decoder: Decoder) throws {
@@ -170,7 +170,7 @@ public final class Drive: Object, Codable {
         _capabilities = try values.decode(DriveCapabilities.self, forKey: ._capabilities)
         rights = try values.decode(DriveRights.self, forKey: .rights)
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
-        maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
+        maintenanceReasons = try values.decodeIfPresent(List<MaintenanceReason>.self, forKey: .maintenanceReasons) ?? List<MaintenanceReason>()
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
@@ -215,7 +215,7 @@ public final class Drive: Object, Codable {
         case rights
         case _capabilities = "capabilities"
         case inMaintenance
-        case maintenanceReason
+        case maintenanceReasons
         case updatedAt
         case _account = "account"
         case accountAdmin
