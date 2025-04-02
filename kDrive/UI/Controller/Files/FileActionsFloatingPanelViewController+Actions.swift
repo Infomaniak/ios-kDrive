@@ -349,7 +349,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func offlineAction(at indexPath: IndexPath) {
         FileActionsHelper
-            .offline(files: [frozenFile], driveFileManager: driveFileManager, filesNotAvailable: nil) { updatedFile, error in
+            .offline(files: [frozenFile], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
                 guard let error else {
                     self.refreshFile()
                     self.collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
