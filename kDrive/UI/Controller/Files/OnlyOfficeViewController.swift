@@ -104,6 +104,7 @@ final class OnlyOfficeViewController: UIViewController {
 
         setupWebView()
 
+        view.backgroundColor = KDriveResourcesAsset.onlyOfficeBackgroundColor.color
         view.addSubview(progressView)
         progressView.progressViewStyle = .bar
         progressView.translatesAutoresizingMaskIntoConstraints = false
