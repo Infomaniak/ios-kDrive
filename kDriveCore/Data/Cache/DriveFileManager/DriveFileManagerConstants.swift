@@ -230,7 +230,7 @@ public class DriveFileManagerConstants {
         objectTypes: [DownloadTask.self,
                       PhotoSyncSettings.self,
                       UploadSession.self,
-                      UploadFile.self, 
+                      UploadFile.self,
                       UploadingChunkTask.self,
                       UploadedChunk.self,
                       UploadingSessionTask.self]
