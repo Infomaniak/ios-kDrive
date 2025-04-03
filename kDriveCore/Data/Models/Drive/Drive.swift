@@ -51,6 +51,8 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     case notRenew = "not_renew"
     case demoEnd = "demo_end"
     case invoiceOverdue = "invoice_overdue"
+    case asleep
+    case wakingUp = "waking_up"
     case technical
     case unknown
 
@@ -170,7 +172,8 @@ public final class Drive: Object, Codable {
         _capabilities = try values.decode(DriveCapabilities.self, forKey: ._capabilities)
         rights = try values.decode(DriveRights.self, forKey: .rights)
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
-        maintenanceReasons = try values.decodeIfPresent(List<MaintenanceReason>.self, forKey: .maintenanceReasons) ?? List<MaintenanceReason>()
+        maintenanceReasons = try values
+            .decodeIfPresent(List<MaintenanceReason>.self, forKey: .maintenanceReasons) ?? List<MaintenanceReason>()
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
