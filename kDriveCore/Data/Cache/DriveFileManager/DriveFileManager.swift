@@ -1315,49 +1315,66 @@ public final class DriveFileManager {
             let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
 
             if fileExists, !isLocalVersionOlderThanRemote {
-                do {
-                    if oldUrl != newUrl {
-                        try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
-                        try fileManager.moveItem(at: oldUrl, to: newUrl)
-                    }
-
-                    notifyObserversWith(file: liveFile)
-                    completion(nil)
-                } catch {
-                    markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
-                    completion(error)
-                }
+                setFileAvailableOfflineWithLocalCopy(liveFile: liveFile, oldUrl: oldUrl, newUrl: newUrl, completion: completion)
             } else {
-                let safeFile = liveFile.freeze()
-                var token: ObservationToken?
-                token = downloadQueue.observeFileDownloaded(self, fileId: safeFile.id) { _, error in
-                    token?.cancel()
-                    if error != nil && error != .taskRescheduled {
-                        // Mark it as not available offline
-                        self.markAsUnavailableOfflineAndStopDownload(fileUid: safeFile.uid, fileId: safeFile.id)
-                    }
-
-                    Task { @MainActor in
-                        self.notifyObserversWith(file: safeFile)
-                        completion(error)
-                    }
-                }
-                downloadQueue.addToQueue(file: safeFile, userId: drive.userId, itemIdentifier: nil)
+                let frozenFile = liveFile.freeze()
+                setFileAvailableOfflineWithRemoteCopy(frozenFile: frozenFile, completion: completion)
             }
         } else {
-            markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+            setFileNotAvailableOffline(liveFile: liveFile, oldUrl: oldUrl, completion: completion)
+        }
+    }
 
-            let safeFile = liveFile.freeze()
-            if oldUrl != safeFile.localUrl {
-                try? fileManager.createDirectory(at: safeFile.localContainerUrl, withIntermediateDirectories: true)
-                try? fileManager.moveItem(at: oldUrl, to: safeFile.localUrl)
-                try? fileManager.removeItem(at: oldUrl)
+    private func setFileAvailableOfflineWithLocalCopy(
+        liveFile: File,
+        oldUrl: URL,
+        newUrl: URL,
+        completion: @escaping (Error?) -> Void
+    ) {
+        do {
+            if oldUrl != newUrl {
+                try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                try fileManager.moveItem(at: oldUrl, to: newUrl)
             }
 
-            notifyObserversWith(file: safeFile)
-
+            notifyObserversWith(file: liveFile)
             completion(nil)
+        } catch {
+            markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+            completion(error)
         }
+    }
+
+    private func setFileAvailableOfflineWithRemoteCopy(frozenFile: File, completion: @escaping (Error?) -> Void) {
+        var token: ObservationToken?
+        token = downloadQueue.observeFileDownloaded(self, fileId: frozenFile.id) { _, error in
+            token?.cancel()
+            if error != nil && error != .taskRescheduled {
+                // Mark it as not available offline
+                self.markAsUnavailableOfflineAndStopDownload(fileUid: frozenFile.uid, fileId: frozenFile.id)
+            }
+
+            Task { @MainActor in
+                self.notifyObserversWith(file: frozenFile)
+                completion(error)
+            }
+        }
+        downloadQueue.addToQueue(file: frozenFile, userId: drive.userId, itemIdentifier: nil)
+    }
+
+    private func setFileNotAvailableOffline(liveFile: File, oldUrl: URL, completion: @escaping (Error?) -> Void) {
+        markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+
+        let frozenFile = liveFile.freeze()
+        if oldUrl != frozenFile.localUrl {
+            try? fileManager.createDirectory(at: frozenFile.localContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localUrl)
+            try? fileManager.removeItem(at: oldUrl)
+        }
+
+        notifyObserversWith(file: frozenFile)
+
+        completion(nil)
     }
 
     private func markAsUnavailableOfflineAndStopDownload(fileUid: String, fileId: Int) {
