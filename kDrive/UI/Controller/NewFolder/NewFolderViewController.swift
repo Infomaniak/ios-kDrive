@@ -424,7 +424,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                     if toShare {
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            file: directory
+                            liveFile: directory
                         )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
@@ -445,7 +445,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                     if !forAllUser {
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            file: directory
+                            liveFile: directory
                         )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
@@ -487,7 +487,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                     if !onlyForMe {
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            file: directory
+                            liveFile: directory
                         )
                         self.folderCreated = true
                         self.dropBoxUrl = directory.dropbox?.url ?? ""
