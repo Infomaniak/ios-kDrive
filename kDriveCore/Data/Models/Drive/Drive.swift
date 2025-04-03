@@ -62,6 +62,24 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     }
 }
 
+public class MaintenanceType: EmbeddedObject, Codable {
+    let code: MaintenanceTypeValue
+}
+
+public enum MaintenanceTypeValue: String, PersistableEnum, Codable {
+    case managerInMaintenance
+    case managerIsBlocked
+    case moveNs
+    case moveSqlMaster
+    case moveSqlCluster
+    case rewind
+    case upgradeSchema
+    case hardDelete
+    case asleep
+    case wakingUp
+    case uninitializing
+}
+
 public final class DrivePreferences: EmbeddedObject, Codable {
     @Persisted public var color = "#0098FF"
     @Persisted public var hide = false
@@ -93,6 +111,7 @@ public final class Drive: Object, Codable {
     @Persisted private var _categoryRights: CategoryRights?
     @Persisted public var inMaintenance = false
     @Persisted public var maintenanceReason: MaintenanceReason?
+    @Persisted public var maintenanceTypes: List<MaintenanceType>
     @Persisted public var updatedAt: Date
     @Persisted public var _account: DriveAccount?
     @Persisted public var quota: DriveQuota?
