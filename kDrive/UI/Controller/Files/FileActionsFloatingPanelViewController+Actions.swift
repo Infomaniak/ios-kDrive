@@ -207,7 +207,11 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func shareAndRightsAction() {
-        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: frozenFile)
+        guard let liveFile = frozenFile.thaw() else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
         presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
         dismiss(animated: true)
     }

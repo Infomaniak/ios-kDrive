@@ -139,11 +139,12 @@ class ShareAndRightsViewController: UIViewController {
         _ = navigationController?.popViewController(animated: true)
     }
 
-    class func instantiate(driveFileManager: DriveFileManager, file: File) -> ShareAndRightsViewController {
+    class func instantiate(driveFileManager: DriveFileManager, liveFile: File) -> ShareAndRightsViewController {
+        assert(!liveFile.isFrozen && liveFile.realm != nil, "we expect a live object here for this class to work properly")
         let viewController = Storyboard.files
             .instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
         viewController.driveFileManager = driveFileManager
-        viewController.file = file
+        viewController.file = liveFile
         return viewController
     }
 }
