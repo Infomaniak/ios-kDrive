@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import RealmSwift
 
 public extension DriveFileManager {
@@ -70,5 +71,92 @@ public extension DriveFileManager {
             updatedFile.lastActionAt = lastActionAt
         }
         _ = try? updateFileInDatabase(updatedFile: updatedFile, oldFile: oldFile, writableRealm: writableRealm)
+    }
+
+    func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
+        guard let liveFile = getCachedFile(id: file.id, freeze: false) else {
+            completion(DriveError.fileNotFound)
+            return
+        }
+
+        let oldUrl = liveFile.localUrl
+        let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
+
+        if available {
+            updateFileProperty(fileUid: liveFile.uid) { writableFile in
+                writableFile.isAvailableOffline = true
+            }
+            let newUrl = liveFile.localUrl
+            let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
+
+            if fileExists, !isLocalVersionOlderThanRemote {
+                setFileAvailableOfflineWithLocalCopy(liveFile: liveFile, oldUrl: oldUrl, newUrl: newUrl, completion: completion)
+            } else {
+                let frozenFile = liveFile.freeze()
+                setFileAvailableOfflineWithRemoteCopy(frozenFile: frozenFile, completion: completion)
+            }
+        } else {
+            setFileNotAvailableOffline(liveFile: liveFile, oldUrl: oldUrl, completion: completion)
+        }
+    }
+
+    private func setFileAvailableOfflineWithLocalCopy(
+        liveFile: File,
+        oldUrl: URL,
+        newUrl: URL,
+        completion: @escaping (Error?) -> Void
+    ) {
+        do {
+            if oldUrl != newUrl {
+                try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                try fileManager.moveItem(at: oldUrl, to: newUrl)
+            }
+
+            notifyObserversWith(file: liveFile)
+            completion(nil)
+        } catch {
+            markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+            completion(error)
+        }
+    }
+
+    private func setFileAvailableOfflineWithRemoteCopy(frozenFile: File, completion: @escaping (Error?) -> Void) {
+        var token: ObservationToken?
+        token = downloadQueue.observeFileDownloaded(self, fileId: frozenFile.id) { _, error in
+            token?.cancel()
+            if error != nil && error != .taskRescheduled {
+                // Mark it as not available offline
+                self.markAsUnavailableOfflineAndStopDownload(fileUid: frozenFile.uid, fileId: frozenFile.id)
+            }
+
+            Task { @MainActor in
+                self.notifyObserversWith(file: frozenFile)
+                completion(error)
+            }
+        }
+        downloadQueue.addToQueue(file: frozenFile, userId: drive.userId, itemIdentifier: nil)
+    }
+
+    private func setFileNotAvailableOffline(liveFile: File, oldUrl: URL, completion: @escaping (Error?) -> Void) {
+        markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+
+        let frozenFile = liveFile.freeze()
+        if oldUrl != frozenFile.localUrl {
+            try? fileManager.createDirectory(at: frozenFile.localContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localUrl)
+            try? fileManager.removeItem(at: oldUrl)
+        }
+
+        notifyObserversWith(file: frozenFile)
+
+        completion(nil)
+    }
+
+    private func markAsUnavailableOfflineAndStopDownload(fileUid: String, fileId: Int) {
+        updateFileProperty(fileUid: fileUid) { writableFile in
+            writableFile.isAvailableOffline = false
+        }
+
+        downloadQueue.cancelFileOperation(for: fileId)
     }
 }
