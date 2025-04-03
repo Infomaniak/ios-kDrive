@@ -33,7 +33,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet var chipContainerView: UIView!
 
     private var observationToken: ObservationToken?
-    @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService private var downloadQueue: DownloadQueueable
 
     override var isHighlighted: Bool {
         didSet {
@@ -53,38 +53,40 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        observationToken?.cancel()
+        observationToken = nil
+        setProgress(nil)
+        switchView.setOn(false, animated: false)
         switchView.isHidden = true
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
-        observationToken?.cancel()
     }
 
     func configure(with action: FloatingPanelAction,
-                   file: File?, showProgress: Bool,
+                   file: File?,
+                   showProgress: Bool,
                    driveFileManager: DriveFileManager,
                    currentPackId: DrivePackId? = nil) {
         titleLabel.text = action.name
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
 
-        if let file {
-            if action == .favorite && file.isFavorite {
-                titleLabel.text = action.reverseName
-                iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
-            }
-            if action == .offline {
-                configureAvailableOffline(with: file)
-            } else {
-                observeProgress(showProgress, file: file)
-            }
-        }
-
         switch action {
+        case .offline:
+            guard let file else { return }
+            configureAvailableOffline(with: file)
+        case .favorite:
+            guard let file, file.isFavorite else { return }
+            titleLabel.text = action.reverseName
+            iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
         case .upsaleColor:
             guard currentPackId == .myKSuite else { return }
             configureChip()
         case .convertToDropbox:
             guard currentPackId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded else { return }
             configureChip()
+        case .download:
+            guard let file else { return }
+            observeProgress(showProgress, file: file)
         default:
             break
         }
@@ -144,24 +146,32 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     func configureAvailableOffline(with file: File) {
         switchView.isHidden = false
-        if switchView.isOn != file.isAvailableOffline {
-            switchView.setOn(file.isAvailableOffline, animated: true)
+        let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
+
+        if let downloadOperation = downloadQueue.operation(for: file.id),
+           !downloadOperation.isCancelled,
+           !fileExists {
+            switchView.setOn(true, animated: true)
+            observeProgress(true, file: file)
+        } else if file.isAvailableOffline, fileExists {
+            switchView.setOn(true, animated: false)
+        } else {
+            switchView.setOn(false, animated: true)
+            observeProgress(false, file: file)
         }
 
-        let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
-        if file.isAvailableOffline && fileExists {
+        if file.isAvailableOffline, fileExists {
             iconImageView.image = KDriveResourcesAsset.check.image
             iconImageView.tintColor = KDriveResourcesAsset.greenColor.color
         } else {
             iconImageView.image = KDriveResourcesAsset.availableOffline.image
             iconImageView.tintColor = KDriveResourcesAsset.iconColor.color
         }
-
-        observeProgress(file.isAvailableOffline && !fileExists, file: file)
     }
 
     func observeProgress(_ showProgress: Bool, file: File) {
         observationToken?.cancel()
+        observationToken = nil
         setProgress(showProgress ? -1 : nil)
         if showProgress {
             observationToken = downloadQueue.observeFileDownloadProgress(self, fileId: file.id) { _, progress in

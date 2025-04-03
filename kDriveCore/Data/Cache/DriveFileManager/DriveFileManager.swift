@@ -50,7 +50,7 @@ public final class DriveFileManager {
 
     public static let constants = DriveFileManagerConstants()
 
-    private let fileManager = FileManager.default
+    let fileManager = FileManager.default
     public static var favoriteRootFile: File {
         return File(id: -1, name: "Favorite")
     }
@@ -1159,7 +1159,7 @@ public final class DriveFileManager {
         writableRealm.delete(orphanFiles)
     }
 
-    private func updateFileProperty(fileUid: String, _ block: (File) -> Void) {
+    func updateFileProperty(fileUid: String, _ block: (File) -> Void) {
         try? database.writeTransaction { writableRealm in
             guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: fileUid) else {
                 return
@@ -1295,65 +1295,6 @@ public final class DriveFileManager {
 
             searchRoot.fullyDownloaded = false
             searchRoot.children.removeAll()
-        }
-    }
-
-    public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        guard let liveFile = getCachedFile(id: file.id, freeze: false) else {
-            completion(DriveError.fileNotFound)
-            return
-        }
-
-        let oldUrl = liveFile.localUrl
-        let isLocalVersionOlderThanRemote = liveFile.isLocalVersionOlderThanRemote
-        if available {
-            updateFileProperty(fileUid: liveFile.uid) { writableFile in
-                writableFile.isAvailableOffline = true
-            }
-
-            if !isLocalVersionOlderThanRemote {
-                do {
-                    try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
-                    try fileManager.moveItem(at: oldUrl, to: liveFile.localUrl)
-                    notifyObserversWith(file: liveFile)
-                    completion(nil)
-                } catch {
-                    updateFileProperty(fileUid: liveFile.uid) { writableFile in
-                        writableFile.isAvailableOffline = false
-                    }
-
-                    completion(error)
-                }
-            } else {
-                let safeFile = liveFile.freeze()
-                var token: ObservationToken?
-                token = downloadQueue.observeFileDownloaded(self, fileId: safeFile.id) { _, error in
-                    token?.cancel()
-                    if error != nil && error != .taskRescheduled {
-                        // Mark it as not available offline
-                        self.updateFileProperty(fileUid: safeFile.uid) { writableFile in
-                            writableFile.isAvailableOffline = false
-                        }
-                    }
-                    self.notifyObserversWith(file: safeFile)
-                    Task { @MainActor in
-                        completion(error)
-                    }
-                }
-                downloadQueue.addToQueue(file: safeFile, userId: drive.userId, itemIdentifier: nil)
-            }
-        } else {
-            updateFileProperty(fileUid: liveFile.uid) { writableFile in
-                writableFile.isAvailableOffline = false
-            }
-
-            // Cancel the download
-            downloadQueue.operation(for: file.id)?.cancel()
-            try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
-            notifyObserversWith(file: file)
-            try? fileManager.removeItem(at: oldUrl)
-            completion(nil)
         }
     }
 
