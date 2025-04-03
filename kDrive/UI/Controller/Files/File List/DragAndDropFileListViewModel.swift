@@ -109,11 +109,15 @@ final class DroppableFileListViewModel {
                                 driveFileManager: destinationDriveFileManager
                             )
                         } else {
-                            // TODO: enable copy from different driveFileManager
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
+                            Task { @MainActor in
+                                // TODO: enable copy from different driveFileManager
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
+                            }
                         }
                     } else {
-                        UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+                        Task { @MainActor in
+                            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+                        }
                     }
                 }
         }
