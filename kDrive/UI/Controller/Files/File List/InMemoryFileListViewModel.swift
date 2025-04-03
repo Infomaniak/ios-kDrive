@@ -49,8 +49,9 @@ class InMemoryFileListViewModel: FileListViewModel {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
 
         try? realm.write {
-            realm.add(currentDirectory)
+            realm.add(currentDirectory, update: .modified)
         }
+
         observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
 
