@@ -79,12 +79,24 @@ class RootMenuHeaderView: UICollectionReusableView {
         observeUploadCount(driveFileManager: driveFileManager)
 
         onUploadCardViewTapped = {
+            // TODO use protocol AppNavigable instead of `#if !ISEXTENSION`
+            /*
+             @InjectService var router: AppNavigable
+             router.presentUploadViewController(……)
+             */
+            #if !ISEXTENSION
             let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
             presenter.navigationController?.pushViewController(uploadViewController, animated: true)
+            #endif
         }
     }
 
     private func hideIfNeeded() {
+
+        // TODO share ext
+        // uploadCardView.isHidden = true
+        // return
+
         if uploadCardView.isHidden && offlineView.isHidden {
             topConstraint.constant = 0
             bottomConstraint.constant = 0
