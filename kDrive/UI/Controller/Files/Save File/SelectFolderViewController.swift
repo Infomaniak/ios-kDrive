@@ -103,6 +103,13 @@ final class SelectFolderViewController: FileListViewController {
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
+        #if ISEXTENSION
+        let a = TitleSizeAdjustingNavigationController()
+        let locationFolderViewController = LocationFolderViewController(driveFileManager: driveFileManager)
+        a.setViewControllers([locationFolderViewController], animated: false)
+        return a
+        #endif
+
         var viewControllers = [SelectFolderViewController]()
         if startDirectory == nil || startDirectory?.isRoot == true {
             let selectFolderViewController = SelectFolderViewController(
