@@ -902,3 +902,5 @@ public struct AppRouter: AppNavigable {
         navigationController.pushViewController(accountViewController, animated: animated)
     }
 }
+
+// TODO presentUploadViewController(……) avec tout
