@@ -103,39 +103,20 @@ final class SelectFolderViewController: FileListViewController {
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
-        #if ISEXTENSION
-        let a = TitleSizeAdjustingNavigationController()
-        let locationFolderViewController = LocationFolderViewController(driveFileManager: driveFileManager)
-        a.setViewControllers([locationFolderViewController], animated: false)
-        return a
-        #endif
-
-        var viewControllers = [SelectFolderViewController]()
+        var viewControllers = [LocationFolderViewController]()
         if startDirectory == nil || startDirectory?.isRoot == true {
-            let selectFolderViewController = SelectFolderViewController(
-                viewModel: SelectFolderViewModel(
-                    driveFileManager: driveFileManager,
-                    currentDirectory: nil
-                ),
-                disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
-                fileToMove: fileToMove,
-                delegate: delegate,
-                selectHandler: selectHandler
+            let selectFolderViewController = LocationFolderViewController(
+                driveFileManager: driveFileManager,
+                delegate: delegate
             )
             selectFolderViewController.navigationItem.hideBackButtonText()
             viewControllers.append(selectFolderViewController)
         } else {
             var directory = startDirectory
             while directory != nil {
-                let selectFolderViewController = SelectFolderViewController(
-                    viewModel: SelectFolderViewModel(
-                        driveFileManager: driveFileManager,
-                        currentDirectory: directory
-                    ),
-                    disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
-                    fileToMove: fileToMove,
-                    delegate: delegate,
-                    selectHandler: selectHandler
+                let selectFolderViewController = LocationFolderViewController(
+                    driveFileManager: driveFileManager,
+                    delegate: delegate
                 )
                 selectFolderViewController.navigationItem.hideBackButtonText()
                 viewControllers.append(selectFolderViewController)

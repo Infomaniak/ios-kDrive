@@ -29,6 +29,7 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
     private typealias LocationDataSource = UICollectionViewDiffableDataSource<LocationSection, LocationItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<LocationSection, LocationItem>
     private var selectedIndexPath: IndexPath?
+    weak var delegate: SelectFolderDelegate?
 
     private enum LocationSection {
         case recent
@@ -99,8 +100,13 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
         return snapshot
     }
 
-    init(driveFileManager: DriveFileManager) {
+    init(
+        driveFileManager: DriveFileManager,
+        delegate: SelectFolderDelegate? = nil
+    ) {
         self.driveFileManager = driveFileManager
+        self.delegate = delegate
+
         super.init(collectionViewLayout: LocationFolderViewController.createListLayout())
     }
 
@@ -263,7 +269,7 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
             )
         }
 
-        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        let destinationViewController = SelectFolderViewController(viewModel: destinationViewModel, delegate: delegate)
         destinationViewModel.onDismissViewController = { [weak destinationViewController] in
             destinationViewController?.dismiss(animated: true)
         }
