@@ -1,2 +1,3 @@
-- Photo sync: New option to limit it to WiFi only, while other files are uploaded regardless.
+- Photo sync: New option to limit it to WiFi only, while other files are uploaded regardless
+- Reworked File actions
 - Stability improvements and bug fixes
