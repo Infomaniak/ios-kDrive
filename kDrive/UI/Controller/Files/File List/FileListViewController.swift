@@ -457,7 +457,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
 
             if let file = files.first {
-                fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
+                fileInformationsViewController.setFile(from: file.uid, driveFileManager: driveFileManager)
             }
 
             floatingPanelViewController.set(contentViewController: fileInformationsViewController)

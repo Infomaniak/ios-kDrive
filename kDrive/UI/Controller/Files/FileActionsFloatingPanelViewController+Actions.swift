@@ -38,7 +38,7 @@ extension FileActionsFloatingPanelViewController {
 
         if driveFileManager.isPublicShare {
             quickActions = []
-        } else if file.isDirectory {
+        } else if frozenFile.isDirectory {
             quickActions = FloatingPanelAction.folderQuickActions
         } else {
             quickActions = FloatingPanelAction.quickActions
@@ -47,15 +47,15 @@ extension FileActionsFloatingPanelViewController {
         for action in quickActions {
             switch action {
             case .shareAndRights:
-                if !file.capabilities.canShare || offline {
+                if !frozenFile.capabilities.canShare || offline {
                     action.isEnabled = false
                 }
             case .shareLink:
-                if (!file.capabilities.canBecomeSharelink || offline) && !file.hasSharelink && !file.isDropbox {
+                if (!frozenFile.capabilities.canBecomeSharelink || offline) && !frozenFile.hasSharelink && !frozenFile.isDropbox {
                     action.isEnabled = false
                 }
             case .add:
-                if !file.capabilities.canCreateFile || !file.capabilities.canCreateDirectory {
+                if !frozenFile.capabilities.canCreateFile || !frozenFile.capabilities.canCreateDirectory {
                     action.isEnabled = false
                 }
             default:
@@ -66,7 +66,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func setupActions() {
         guard !driveFileManager.isPublicShare else {
-            if file.isDirectory {
+            if frozenFile.isDirectory {
                 actions = FloatingPanelAction.publicShareFolderActions
             } else {
                 actions = FloatingPanelAction.publicShareActions
@@ -74,47 +74,49 @@ extension FileActionsFloatingPanelViewController {
             return
         }
 
-        actions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action in
-            switch action {
-            case .openWith:
-                return file.capabilities.canWrite
-            case .edit:
-                return file.isOfficeFile && file.capabilities.canWrite
-            case .manageCategories:
-                return driveFileManager.drive.categoryRights.canPutOnFile && !file.isDisabled
-            case .favorite:
-                return file.capabilities.canUseFavorite
-            case .convertToDropbox:
-                return file.capabilities.canBecomeDropbox
-            case .manageDropbox:
-                return file.isDropbox
-            case .upsaleColor:
-                return file.isDirectory && driveFileManager.drive.isFreePack
-            case .folderColor:
-                return file.capabilities.canColor
-            case .seeFolder:
-                return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
-            case .offline:
-                return !sharedWithMe && presentationOrigin != .photoList
-            case .download:
-                return file.capabilities.canRead
-            case .move:
-                return file.capabilities.canMove && !sharedWithMe
-            case .duplicate:
-                return !sharedWithMe && file.capabilities.canRead && file.visibility != .isSharedSpace && file
-                    .visibility != .isTeamSpace
-            case .rename:
-                return file.capabilities.canRename && !sharedWithMe && !file.isImporting
-            case .delete:
-                return file.capabilities.canDelete && !file.isImporting
-            case .leaveShare:
-                return file.capabilities.canLeave
-            case .cancelImport:
-                return file.isImporting
-            default:
-                return true
+        actions = (frozenFile.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions)
+            .filter { action in
+                switch action {
+                case .openWith:
+                    return frozenFile.capabilities.canWrite
+                case .edit:
+                    return frozenFile.isOfficeFile && frozenFile.capabilities.canWrite
+                case .manageCategories:
+                    return driveFileManager.drive.categoryRights.canPutOnFile && !frozenFile.isDisabled
+                case .favorite:
+                    return frozenFile.capabilities.canUseFavorite
+                case .convertToDropbox:
+                    return frozenFile.capabilities.canBecomeDropbox
+                case .manageDropbox:
+                    return frozenFile.isDropbox
+                case .upsaleColor:
+                    return frozenFile.isDirectory && driveFileManager.drive.isFreePack
+                case .folderColor:
+                    return frozenFile.capabilities.canColor
+                case .seeFolder:
+                    return !normalFolderHierarchy && (frozenFile.parent != nil || frozenFile.parentId != 0)
+                case .offline:
+                    return !sharedWithMe && presentationOrigin != .photoList
+                case .download:
+                    return frozenFile.capabilities.canRead
+                case .move:
+                    return frozenFile.capabilities.canMove && !sharedWithMe
+                case .duplicate:
+                    return !sharedWithMe && frozenFile.capabilities.canRead && frozenFile
+                        .visibility != .isSharedSpace && frozenFile
+                        .visibility != .isTeamSpace
+                case .rename:
+                    return frozenFile.capabilities.canRename && !sharedWithMe && !frozenFile.isImporting
+                case .delete:
+                    return frozenFile.capabilities.canDelete && !frozenFile.isImporting
+                case .leaveShare:
+                    return frozenFile.capabilities.canLeave
+                case .cancelImport:
+                    return frozenFile.isImporting
+                default:
+                    return true
+                }
             }
-        }
     }
 
     // MARK: Handling
@@ -134,7 +136,7 @@ extension FileActionsFloatingPanelViewController {
         case .openWith:
             openWithAction(action, at: indexPath)
         case .edit:
-            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
+            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: frozenFile, viewController: self)
         case .manageCategories:
             manageCategoriesAction()
         case .favorite:
@@ -173,7 +175,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func informationsAction() {
-        let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
+        let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: frozenFile)
         presentingParent?.navigationController?.pushViewController(fileDetailViewController, animated: true)
         dismiss(animated: true)
     }
@@ -181,7 +183,7 @@ extension FileActionsFloatingPanelViewController {
     private func addAction() {
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
-                                                                                   folder: file,
+                                                                                   folder: frozenFile,
                                                                                    presentedFromPlusButton: false)
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = fileInformationsViewController
@@ -194,7 +196,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func sendCopyAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
-        if file.isMostRecentDownloaded {
+        if frozenFile.isMostRecentDownloaded {
             presentShareSheet(from: indexPath)
         } else {
             downloadFile(action: action,
@@ -205,22 +207,26 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func shareAndRightsAction() {
-        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
+        guard let liveFile = frozenFile.thaw() else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+            return
+        }
+        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
         presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
         dismiss(animated: true)
     }
 
     private func shareLinkAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
-        if let link = file.dropbox?.url {
+        if let link = frozenFile.dropbox?.url {
             // Copy share link
             copyShareLinkToPasteboard(from: indexPath, link: link)
-        } else if let link = file.sharelink?.url {
+        } else if let link = frozenFile.sharelink?.url {
             // Copy share link
             copyShareLinkToPasteboard(from: indexPath, link: link)
         } else {
             // Create share link
             setLoading(true, action: action, at: indexPath)
-            Task { [proxyFile = file.proxify()] in
+            Task { [proxyFile = frozenFile.proxify()] in
                 do {
                     let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
                     setLoading(false, action: action, at: indexPath)
@@ -245,19 +251,19 @@ extension FileActionsFloatingPanelViewController {
 
     private func openWithAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
-        if file.isMostRecentDownloaded {
-            FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
+        if frozenFile.isMostRecentDownloaded {
+            FileActionsHelper.instance.openWith(file: frozenFile, from: view, in: collectionView, delegate: self)
         } else {
             downloadFile(action: action, indexPath: indexPath) { [weak self] in
                 guard let self else { return }
-                FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
+                FileActionsHelper.instance.openWith(file: frozenFile, from: view, in: collectionView, delegate: self)
             }
         }
     }
 
     private func manageCategoriesAction() {
         FileActionsHelper.manageCategories(
-            frozenFiles: [file.freezeIfNeeded()],
+            frozenFiles: [frozenFile],
             driveFileManager: driveFileManager,
             from: self,
             presentingParent: presentingViewController
@@ -267,7 +273,7 @@ extension FileActionsFloatingPanelViewController {
     private func manageFavoriteAction() {
         Task {
             do {
-                let isFavored = try await FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager)
+                let isFavored = try await FileActionsHelper.favorite(files: [frozenFile], driveFileManager: driveFileManager)
                 if isFavored {
                     UIConstants
                         .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(1))
@@ -283,7 +289,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func convertToDropboxAction() {
-        guard file.capabilities.canBecomeDropbox else {
+        guard frozenFile.capabilities.canBecomeDropbox else {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController
                 .contentViewController as? DropBoxFloatingPanelViewController
@@ -308,7 +314,7 @@ extension FileActionsFloatingPanelViewController {
         let viewController = ManageDropBoxViewController.instantiate(
             driveFileManager: driveFileManager,
             convertingFolder: true,
-            folder: file
+            folder: frozenFile
         )
 
         presentingParent?.navigationController?.pushViewController(viewController, animated: true)
@@ -316,7 +322,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func manageDropboxAction() {
-        let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
+        let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: frozenFile)
         presentingParent?.navigationController?.pushViewController(viewController, animated: true)
         dismiss(animated: true)
     }
@@ -327,7 +333,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func folderColorAction() {
         FileActionsHelper.folderColor(
-            files: [file],
+            files: [frozenFile],
             driveFileManager: driveFileManager,
             from: self,
             presentingParent: presentingParent
@@ -341,23 +347,27 @@ extension FileActionsFloatingPanelViewController {
 
     private func seeFolderAction() {
         guard let viewController = presentingParent else { return }
-        FilePresenter.presentParent(of: file, driveFileManager: driveFileManager, viewController: viewController)
+        FilePresenter.presentParent(of: frozenFile, driveFileManager: driveFileManager, viewController: viewController)
         dismiss(animated: true)
     }
 
     private func offlineAction(at indexPath: IndexPath) {
-        FileActionsHelper.offline(files: [file], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
-            if let error {
+        FileActionsHelper
+            .offline(files: [frozenFile], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
+                guard let error else {
+                    self.refreshFile()
+                    self.collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
+                    return
+                }
+
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
-        }
-        collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
     }
 
     private func downloadAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
-        if file.isMostRecentDownloaded {
-            FileActionsHelper.save(file: file, from: self)
-        } else if let operation = downloadQueue.operation(for: file.id) {
+        if frozenFile.isMostRecentDownloaded {
+            FileActionsHelper.save(file: frozenFile, from: self)
+        } else if let operation = downloadQueue.operation(for: frozenFile.id) {
             // Download is already scheduled, ask to cancel
             let alert = AlertTextViewController(
                 title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
@@ -369,9 +379,9 @@ extension FileActionsFloatingPanelViewController {
             }
             present(alert, animated: true)
         } else {
-            downloadFile(action: action, indexPath: indexPath) { [weak self, file] in
-                guard let file else { return }
-                FileActionsHelper.save(file: file, from: self)
+            downloadFile(action: action, indexPath: indexPath) { [weak self, frozenFile] in
+                guard let frozenFile else { return }
+                FileActionsHelper.save(file: frozenFile, from: self)
             }
         }
     }
@@ -379,12 +389,12 @@ extension FileActionsFloatingPanelViewController {
     private func moveAction() {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
             driveFileManager: driveFileManager,
-            startDirectory: file.parent?.freeze(),
-            fileToMove: file.id,
-            disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]
+            startDirectory: frozenFile.parent?.freeze(),
+            fileToMove: frozenFile.id,
+            disabledDirectoriesSelection: [frozenFile.parent ?? driveFileManager.getCachedRootFile()]
         ) { [weak self] selectedFolder in
             guard let self else { return }
-            FileActionsHelper.instance.move(file: file, to: selectedFolder, driveFileManager: driveFileManager) { success in
+            FileActionsHelper.instance.move(file: frozenFile, to: selectedFolder, driveFileManager: driveFileManager) { success in
                 // Close preview
                 if success,
                    self.presentingParent is PreviewViewController {
@@ -396,16 +406,16 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func duplicateAction() {
-        guard file.isManagedByRealm else {
+        guard frozenFile.isManagedByRealm else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
-        let fileName = file.name
+        let fileName = frozenFile.name
         let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate,
                                              placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile,
                                              text: fileName,
                                              action: KDriveResourcesStrings.Localizable.buttonCopy,
-                                             loading: true) { [proxyFile = file.proxify()] duplicateName in
+                                             loading: true) { [proxyFile = frozenFile.proxify()] duplicateName in
             do {
                 _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
                 UIConstants
@@ -415,7 +425,7 @@ extension FileActionsFloatingPanelViewController {
             }
         }
         alert.textFieldConfiguration = .fileNameConfiguration
-        if !file.isDirectory {
+        if !frozenFile.isDirectory {
             alert.textFieldConfiguration.selectedRange = fileName
                 .startIndex ..< (fileName.lastIndex { $0 == "." } ?? fileName.endIndex)
         }
@@ -423,16 +433,19 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func renameAction() {
-        guard file.isManagedByRealm else {
+        guard frozenFile.isManagedByRealm else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
-        let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings
+        let placeholder = frozenFile.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings
             .Localizable.hintInputFileName
         let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename,
-                                             placeholder: placeholder, text: file.name,
+                                             placeholder: placeholder, text: frozenFile.name,
                                              action: KDriveResourcesStrings.Localizable.buttonSave,
-                                             loading: true) { [proxyFile = file.proxify(), filename = file.name] newName in
+                                             loading: true) { [
+            proxyFile = frozenFile.proxify(),
+            filename = frozenFile.name
+        ] newName in
             guard newName != filename else { return }
             do {
                 _ = try await self.driveFileManager.rename(file: proxyFile, newName: newName)
@@ -441,30 +454,30 @@ extension FileActionsFloatingPanelViewController {
             }
         }
         alert.textFieldConfiguration = .fileNameConfiguration
-        if !file.isDirectory {
-            alert.textFieldConfiguration.selectedRange = file.name
-                .startIndex ..< (file.name.lastIndex { $0 == "." } ?? file.name.endIndex)
+        if !frozenFile.isDirectory {
+            alert.textFieldConfiguration.selectedRange = frozenFile.name
+                .startIndex ..< (frozenFile.name.lastIndex { $0 == "." } ?? frozenFile.name.endIndex)
         }
         present(alert, animated: true)
     }
 
     private func deleteAction() {
-        guard file.isManagedByRealm else {
+        guard frozenFile.isManagedByRealm else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
         let attrString = NSMutableAttributedString(
-            string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name),
-            boldText: file.name
+            string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(frozenFile.name),
+            boldText: frozenFile.name
         )
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
                                             message: attrString,
                                             action: KDriveResourcesStrings.Localizable.buttonMove,
                                             destructive: true,
                                             loading: true) { [
-            proxyFile = file.proxify(),
-            filename = file.name,
-            proxyParent = file.parent?.proxify()
+            proxyFile = frozenFile.proxify(),
+            filename = frozenFile.name,
+            proxyParent = frozenFile.parent?.proxify()
         ] in
             do {
                 let response = try await self.driveFileManager.delete(file: proxyFile)
@@ -495,18 +508,18 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func leaveShareAction() {
-        guard file.isManagedByRealm else {
+        guard frozenFile.isManagedByRealm else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
         let attrString = NSMutableAttributedString(
-            string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name),
-            boldText: file.name
+            string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(frozenFile.name),
+            boldText: frozenFile.name
         )
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle,
                                             message: attrString,
                                             action: KDriveResourcesStrings.Localizable.buttonLeaveShare,
-                                            loading: true) { [proxyFile = file.proxify()] in
+                                            loading: true) { [proxyFile = frozenFile.proxify()] in
             do {
                 _ = try await self.driveFileManager.delete(file: proxyFile)
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
@@ -520,7 +533,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func cancelImportAction() {
-        guard let importId = file.externalImport?.id else { return }
+        guard let importId = frozenFile.externalImport?.id else { return }
         Task {
             do {
                 _ = try await driveFileManager.apiFetcher.cancelImport(drive: driveFileManager.drive, id: importId)
@@ -548,7 +561,7 @@ extension FileActionsFloatingPanelViewController {
         PublicShareAction().addToMyDrive(
             publicShareProxy: publicShareProxy,
             currentUserDriveFileManager: currentUserDriveFileManager,
-            selectedItemsIds: [file.id],
+            selectedItemsIds: [frozenFile.id],
             exceptItemIds: [],
             onPresentViewController: { saveNavigationViewController, animated in
                 self.present(saveNavigationViewController, animated: animated, completion: nil)

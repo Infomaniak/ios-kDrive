@@ -369,7 +369,11 @@ class FileListViewModel: SelectDelegate {
             switch action {
             case .share:
                 MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipeShareAndRights")
-                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
+                guard let liveFile = file.thaw() else {
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+                    return
+                }
+                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipePutInTrash")
