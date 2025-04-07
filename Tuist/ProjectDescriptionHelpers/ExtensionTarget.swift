@@ -103,7 +103,6 @@ public extension Target {
                        ],
                        resources: .resources(resources),
                        entitlements: Entitlements(stringLiteral: entitlements),
-                       scripts: [Constants.swiftlintScript],
                        dependencies: [
                            .target(name: "kDriveCore"),
                            .external(name: "FloatingPanel"),
