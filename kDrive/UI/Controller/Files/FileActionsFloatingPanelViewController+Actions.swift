@@ -208,7 +208,7 @@ extension FileActionsFloatingPanelViewController {
 
     private func shareAndRightsAction() {
         guard let liveFile = frozenFile.thaw() else {
-            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
             return
         }
         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
