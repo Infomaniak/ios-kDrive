@@ -416,15 +416,19 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
             Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDirectory(
+                    let frozenDirectory = try await driveFileManager.createDirectory(
                         in: proxyCurrentDirectory,
                         name: newFolderName,
                         onlyForMe: onlyForMe
                     )
                     if toShare {
+                        guard let liveDirectory = liveDirectory(forUid: frozenDirectory.uid) else {
+                            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+                            return
+                        }
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            liveFile: directory
+                            liveFile: liveDirectory
                         )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
@@ -441,11 +445,18 @@ extension NewFolderViewController: FooterButtonDelegate {
             let forAllUser = tableView.indexPathForSelectedRow?.row == 0
             Task {
                 do {
-                    let directory = try await driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser)
+                    let frozenDirectory = try await driveFileManager.createCommonDirectory(
+                        name: newFolderName,
+                        forAllUser: forAllUser
+                    )
                     if !forAllUser {
+                        guard let liveDirectory = liveDirectory(forUid: frozenDirectory.uid) else {
+                            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+                            return
+                        }
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            liveFile: directory
+                            liveFile: liveDirectory
                         )
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
@@ -478,23 +489,27 @@ extension NewFolderViewController: FooterButtonDelegate {
             MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
             Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDropBox(
+                    let frozenDirectory = try await driveFileManager.createDropBox(
                         parentDirectory: proxyCurrentDirectory,
                         name: newFolderName,
                         onlyForMe: onlyForMe,
                         settings: settings
                     )
                     if !onlyForMe {
+                        guard let liveDirectory = liveDirectory(forUid: frozenDirectory.uid) else {
+                            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+                            return
+                        }
                         let shareVC = ShareAndRightsViewController.instantiate(
                             driveFileManager: self.driveFileManager,
-                            liveFile: directory
+                            liveFile: liveDirectory
                         )
                         self.folderCreated = true
-                        self.dropBoxUrl = directory.dropbox?.url ?? ""
-                        self.folderName = directory.name
+                        self.dropBoxUrl = frozenDirectory.dropbox?.url ?? ""
+                        self.folderName = frozenDirectory.name
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
-                        self.showDropBoxLink(url: directory.dropbox?.url ?? "", fileName: directory.name)
+                        self.showDropBoxLink(url: frozenDirectory.dropbox?.url ?? "", fileName: frozenDirectory.name)
                     }
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
@@ -502,5 +517,12 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
             }
         }
+    }
+
+    private func liveDirectory(forUid directoryUid: String) -> File? {
+        return driveFileManager.database.fetchObject(
+            ofType: File.self,
+            forPrimaryKey: directoryUid
+        )
     }
 }
