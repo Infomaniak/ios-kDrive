@@ -63,21 +63,30 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
 }
 
 public class MaintenanceType: EmbeddedObject, Codable {
-    let code: MaintenanceTypeValue
+    @Persisted public var code: MaintenanceTypeValue
 }
 
 public enum MaintenanceTypeValue: String, PersistableEnum, Codable {
-    case managerInMaintenance
-    case managerIsBlocked
-    case moveNs
-    case moveSqlMaster
-    case moveSqlCluster
+    // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
+    case managerInMaintenance = "manager_in_maintenance"
+    case managerIsBlocked = "manager_is_blocked"
+    case moveNs = "move_ns"
+    case moveSqlMaster = "move_sql_master"
+    case moveSqlCluster = "move_sql_cluster"
     case rewind
-    case upgradeSchema
-    case hardDelete
+    case upgradeSchema = "upgrade_schema"
+    case hardDelete = "hard_delete"
     case asleep
-    case wakingUp
+    case wakingUp = "waking_up"
     case uninitializing
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = MaintenanceTypeValue(rawValue: value) ?? .unknown
+    }
 }
 
 public final class DrivePreferences: EmbeddedObject, Codable {
@@ -190,6 +199,7 @@ public final class Drive: Object, Codable {
         rights = try values.decode(DriveRights.self, forKey: .rights)
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
+        maintenanceTypes = try values.decode(List<MaintenanceType>.self, forKey: .maintenanceTypes)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
@@ -235,6 +245,7 @@ public final class Drive: Object, Codable {
         case _capabilities = "capabilities"
         case inMaintenance
         case maintenanceReason
+        case maintenanceTypes
         case updatedAt
         case _account = "account"
         case accountAdmin
