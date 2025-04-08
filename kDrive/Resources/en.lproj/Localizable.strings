@@ -1348,6 +1348,15 @@
 /* loco:6049df4d5c2c3a04bc3979fd */
 "lockAppTitle" = "Application locked";
 
+/* loco:67f50a35f35eb567990c2e32 */
+"maintenanceAsleepDescription" = "To reduce the impact on the environment, your kDrive has gone into standby mode following prolonged inactivity.\nRestart it to regain access to your files!";
+
+/* loco:67f509c180ba041c690a8e02 */
+"maintenanceAsleepTitle" = "Your kDrive %@ has taken a little nap!";
+
+/* loco:67f50e36f46a2825af088213 */
+"maintenanceWakeUpButton" = "Restart my kDrive";
+
 /* loco:616960e0fdf2c313b4239902 */
 "manageCategoriesCreateTitle" = "Create %@";
 

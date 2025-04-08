@@ -73,6 +73,8 @@ class DriveErrorViewController: UIViewController {
             UIApplication.shared.open(URLConstants.shop.url)
         } else if driveErrorViewType == .blocked {
             UIApplication.shared.open(URLConstants.renewDrive(accountId: drive!.accountId).url)
+        } else if let drive, drive.maintenanceTypes.contains(where: { $0.code == .asleep }) {
+            UIApplication.shared.open(URLConstants.kDriveWeb.url)
         }
     }
 
@@ -94,13 +96,19 @@ class DriveErrorViewController: UIViewController {
         case .maintenance:
             imageView.image = KDriveResourcesAsset.maintenance.image
             imageView.tintColor = KDriveResourcesAsset.iconColor.color
-            if let driveName {
-                titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(driveName)
+            if let drive, drive.maintenanceTypes.contains(where: { $0.code == .asleep }) {
+                titleLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepTitle(drive.name)
+                descriptionLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepDescription
+                mainButton.setTitle(KDriveResourcesStrings.Localizable.maintenanceWakeUpButton, for: .normal)
             } else {
-                titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitlePlural
+                if let driveName {
+                    titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(driveName)
+                } else {
+                    titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitlePlural
+                }
+                descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
+                mainButton.isHidden = true
             }
-            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
-            mainButton.isHidden = true
         case .blocked:
             imageView.image = KDriveResourcesAsset.driveBlocked.image
             mainButton.isHidden = true
