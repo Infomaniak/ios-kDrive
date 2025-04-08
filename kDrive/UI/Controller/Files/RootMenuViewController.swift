@@ -270,7 +270,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
-                currentDirectory: selectedRootFile
+                currentDirectory: selectedRootFile,
+                rightBarButtons: [.search]
             )
         }
 
