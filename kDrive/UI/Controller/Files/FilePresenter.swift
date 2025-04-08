@@ -166,7 +166,11 @@ final class FilePresenter {
         } else if file.isTrashed || file.deletedAt != nil {
             viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
         } else {
-            viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file, rightBarButtons: [.search])
+            viewModel = ConcreteFileListViewModel(
+                driveFileManager: driveFileManager,
+                currentDirectory: file,
+                rightBarButtons: [.search]
+            )
         }
 
         let destinationViewController = FileListViewController(viewModel: viewModel)
