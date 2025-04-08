@@ -73,6 +73,7 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
     @LazyInjectService private var accountManager: AccountManageable
 
     let driveFileManager: DriveFileManager
+    var viewModel: FileListViewModel
     private var rootChildrenObservationToken: NotificationToken?
     private var rootViewChildren: [File]?
     private var dataSource: LocationDataSource?
@@ -102,9 +103,12 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
 
     init(
         driveFileManager: DriveFileManager,
+        viewModel: FileListViewModel,
         delegate: SelectFolderDelegate? = nil
+
     ) {
         self.driveFileManager = driveFileManager
+        self.viewModel = viewModel
         self.delegate = delegate
 
         super.init(collectionViewLayout: LocationFolderViewController.createListLayout())
@@ -115,9 +119,18 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
         fatalError("init(coder:) has not been implemented")
     }
 
+    @objc func closeButtonPressed() {
+        dismiss(animated: true)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.title = driveFileManager.drive.name
+        navigationItem.leftBarButtonItem = closeButton
+
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
@@ -265,7 +278,8 @@ class LocationFolderViewController: CustomLargeTitleCollectionViewController, Se
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
-                currentDirectory: selectedRootFile
+                currentDirectory: selectedRootFile,
+                rightBarButtons: viewModel.currentRightBarButtons
             )
         }
 
