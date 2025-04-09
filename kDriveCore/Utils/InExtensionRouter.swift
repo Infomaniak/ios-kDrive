@@ -127,4 +127,6 @@ public struct InExtensionRouter: AppNavigable {
     public func updateTheme() {}
 
     public var topMostViewController: UIViewController?
+
+    public var rootViewController: UIViewController?
 }
