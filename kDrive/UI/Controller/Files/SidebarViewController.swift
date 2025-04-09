@@ -126,7 +126,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private var dataSource: MenuDataSource?
     private let refreshControl = UIRefreshControl()
 
-    private var itemsSnapshot: DataSourceSnapshot {
+    private var displayedSnapshot = DataSourceSnapshot()
+
+    private func getItemsSnapshot(horizontalSizeClass: UIUserInterfaceSizeClass) -> DataSourceSnapshot {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
@@ -137,7 +139,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         } ?? []
 
-        if traitCollection.horizontalSizeClass == .regular {
+        if horizontalSizeClass == .regular {
             let firstSectionItems = SidebarViewController.baseItems
             let secondSectionItems = userRootFolders + SidebarViewController.secondSectionItems
             let thirdSectionItems = SidebarViewController.thirdSectionItems
@@ -163,7 +165,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             snapshot.appendSections([RootMenuSection.main])
             snapshot.appendItems(menuItems)
         }
-        print(snapshot.itemIdentifiers.map(\.name))
         return snapshot
     }
 
@@ -180,22 +181,36 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        setDisplayedSnapshot()
+        setupViewForCurrentSizeClass()
+    }
 
-        if traitCollection.horizontalSizeClass != previousTraitCollection?.horizontalSizeClass ||
-            traitCollection.verticalSizeClass != previousTraitCollection?.verticalSizeClass {
-            setupViewForCurrentSizeClass()
-            dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+    func setDisplayedSnapshot() {
+        @InjectService var appRouter: AppNavigable
+        guard let rootViewController = appRouter.rootViewController else {
+            return
         }
+
+        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
+        displayedSnapshot = getItemsSnapshot(horizontalSizeClass: rootHorizontalSizeClass)
+        setupViewForCurrentSizeClass()
+        dataSource?.apply(displayedSnapshot, animatingDifferences: true)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setDisplayedSnapshot()
         setupViewForCurrentSizeClass()
         configureDataSource()
     }
 
     private func setupViewForCurrentSizeClass() {
-        let hSize = traitCollection.horizontalSizeClass
+        @InjectService var appRouter: AppNavigable
+        guard let rootViewController = appRouter.rootViewController else {
+            return
+        }
+
+        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         let buttonAdd = ImageButton()
         var avatar = UIImage()
 
@@ -210,7 +225,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         buttonAdd.layer.cornerRadius = 10
         buttonAdd.translatesAutoresizingMaskIntoConstraints = false
 
-        if hSize == .regular {
+        if rootHorizontalSizeClass == .regular {
             accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
                 avatar = SidebarViewController.generateProfileTabImages(image: image)
                 let buttonMenu = UIBarButtonItem(
@@ -234,6 +249,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         } else {
             navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
+            buttonAdd.removeFromSuperview()
         }
 
         navigationItem.title = driveFileManager.drive.name
@@ -262,10 +278,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+                dataSource?.apply(displayedSnapshot, animatingDifferences: false)
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
+                dataSource?.apply(displayedSnapshot, animatingDifferences: true)
             case .error:
                 break
             }
@@ -329,7 +345,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
         }
 
-        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+        dataSource?.apply(displayedSnapshot, animatingDifferences: false)
     }
 
     static func createListLayout() -> UICollectionViewLayout {
@@ -404,7 +420,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             let userRootFolders = rootViewChildren?.compactMap {
                 RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
             } ?? []
-            switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
+            switch displayedSnapshot.sectionIdentifiers[indexPath.section] {
             case .first:
                 let menuItems = SidebarViewController.baseItems
                 let selectedItemName = menuItems[indexPath.row].name
