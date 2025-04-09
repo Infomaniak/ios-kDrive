@@ -119,6 +119,14 @@ public struct AppRouter: AppNavigable {
         return topViewController
     }
 
+    @MainActor public var rootViewController: UIViewController? {
+        guard let rootViewController = window?.rootViewController as? UIViewController else {
+            return nil
+        }
+
+        return rootViewController
+    }
+
     // MARK: RouterRootNavigable
 
     @MainActor public func setRootViewController(_ viewController: UIViewController,

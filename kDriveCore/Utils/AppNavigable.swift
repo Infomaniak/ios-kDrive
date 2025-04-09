@@ -195,6 +195,9 @@ public protocol RouterRootNavigable {
 public protocol TopmostViewControllerFetchable {
     /// Access the current top most ViewController
     @MainActor var topMostViewController: UIViewController? { get }
+
+    /// Access the root controller of the app
+    @MainActor var rootViewController: UIViewController? { get }
 }
 
 /// Actions performed by router, `async` by design
