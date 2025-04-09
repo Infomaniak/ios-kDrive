@@ -249,7 +249,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         } else {
             navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
-            buttonAdd.removeFromSuperview()
+            for subview in collectionView.subviews {
+                if subview is UIButton {
+                    subview.removeFromSuperview()
+                }
+            }
         }
 
         navigationItem.title = driveFileManager.drive.name
