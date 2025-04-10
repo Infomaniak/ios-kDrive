@@ -25,8 +25,6 @@ import RealmSwift
 import UIKit
 
 class LocationFolderViewController: RootMenuViewController {
-    private typealias LocationDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
-    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     weak var delegate: SelectFolderDelegate?
 
@@ -47,9 +45,8 @@ class LocationFolderViewController: RootMenuViewController {
 
     var viewModel: FileListViewModel
     private var rootChildrenObservationToken: NotificationToken?
-    private var rootViewChildren: [File]?
-    private var dataSource: LocationDataSource?
-    private var itemsSnapshot: DataSourceSnapshot {
+    private var dataSource: MenuDataSource?
+    override var itemsSnapshot: DataSourceSnapshot {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
@@ -97,29 +94,7 @@ class LocationFolderViewController: RootMenuViewController {
         navigationItem.rightBarButtonItem = nil
 
         dataSource = configureDataSource(for: collectionView)
-
-        let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
-        guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
-            return
-        }
-
-        let rootChildren = root.children.filter(NSPredicate(
-            format: "rawVisibility IN %@",
-            [FileVisibility.isPrivateSpace.rawValue, FileVisibility.isTeamSpace.rawValue]
-        ))
-        rootChildrenObservationToken = rootChildren.observe { [weak self] changes in
-            guard let self else { return }
-            switch changes {
-            case .initial(let children):
-                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
-            case .update(let children, _, _, _):
-                rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
-            case .error:
-                break
-            }
-        }
+        setItemsSnapshot(for: collectionView)
     }
 
     override func viewDidAppear(_ animated: Bool) {
