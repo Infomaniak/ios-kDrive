@@ -25,8 +25,8 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
-    private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
-    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+    public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
     enum RootMenuSection: Hashable {
         case main
@@ -74,10 +74,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
-    private var rootViewChildren: [File]?
+    var rootViewChildren: [File]?
     private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
     let refreshControl = UIRefreshControl()
-    private var itemsSnapshot: DataSourceSnapshot {
+    var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
         } ?? []
@@ -120,7 +120,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         dataSource = configureDataSource(for: collectionView)
+        setItemsSnapshot(for: collectionView)
+    }
 
+    func setItemsSnapshot(for: UICollectionView) {
         let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
             return
@@ -136,9 +139,11 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource.apply(itemsSnapshot, animatingDifferences: false)
+
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource.apply(itemsSnapshot, animatingDifferences: true)
+
             case .error:
                 break
             }
