@@ -135,7 +135,7 @@ public final class Drive: Object, Codable {
     }
 
     public var isAsleep: Bool {
-        return maintenanceTypes.contains(where: { $0.code == .asleep })
+        return maintenanceTypes.contains { $0.code == .asleep }
     }
 
     public var preferences: DrivePreferences {
