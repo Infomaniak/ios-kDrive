@@ -28,11 +28,12 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
-    private enum RootMenuSection {
+    enum RootMenuSection: Hashable {
         case main
+        case recent
     }
 
-    private struct RootMenuItem: Equatable, Hashable {
+    struct RootMenuItem: Equatable, Hashable {
         var id: Int {
             return destinationFile.id
         }
@@ -69,14 +70,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                                                                  image: KDriveResourcesAsset.delete.image,
                                                                  destinationFile: DriveFileManager.trashRootFile)]
 
-    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
     private var rootViewChildren: [File]?
-    private var dataSource: MenuDataSource?
-    private let refreshControl = UIRefreshControl()
-
+    private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
+    let refreshControl = UIRefreshControl()
     private var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
@@ -119,7 +119,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
-        configureDataSource()
+        dataSource = configureDataSource(for: collectionView)
 
         let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
@@ -135,10 +135,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+                dataSource.apply(itemsSnapshot, animatingDifferences: false)
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
+                dataSource.apply(itemsSnapshot, animatingDifferences: true)
             case .error:
                 break
             }
@@ -170,21 +170,26 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         }
     }
 
-    func configureDataSource() {
-        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
-            guard let rootMenuCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: RootMenuCell.identifier,
-                for: indexPath
-            ) as? RootMenuCell else {
-                fatalError("Failed to dequeue cell")
+    func configureDataSource(
+        for collectionView: UICollectionView
+    )
+        -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
+        dataSource = UICollectionViewDiffableDataSource<RootMenuSection,
+            RootMenuItem>(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell?
+                in
+                guard let rootMenuCell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: RootMenuCell.identifier,
+                    for: indexPath
+                ) as? RootMenuCell else {
+                    fatalError("Failed to dequeue cell")
+                }
+
+                rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+                rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                return rootMenuCell
             }
 
-            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-            return rootMenuCell
-        }
-
-        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
 
             switch kind {
@@ -217,7 +222,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             }
         }
 
-        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+        dataSource.apply(itemsSnapshot, animatingDifferences: false)
+        return dataSource
     }
 
     static func createListLayout() -> UICollectionViewLayout {
@@ -241,6 +247,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 24, leading: 16, bottom: 24, trailing: 16)
         section.boundarySupplementaryItems = [sectionHeaderItem]
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
@@ -250,7 +257,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
+        guard let selectedRootFile = dataSource.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
         switch selectedRootFile.id {
