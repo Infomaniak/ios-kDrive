@@ -73,7 +73,7 @@ class DriveErrorViewController: UIViewController {
             UIApplication.shared.open(URLConstants.shop.url)
         } else if driveErrorViewType == .blocked {
             UIApplication.shared.open(URLConstants.renewDrive(accountId: drive!.accountId).url)
-        } else if let drive, drive.maintenanceTypes.contains(where: { $0.code == .asleep }) {
+        } else if let drive, drive.isAsleep {
             UIApplication.shared.open(URLConstants.kDriveWeb.url)
         }
     }
@@ -96,7 +96,7 @@ class DriveErrorViewController: UIViewController {
         case .maintenance:
             imageView.image = KDriveResourcesAsset.maintenance.image
             imageView.tintColor = KDriveResourcesAsset.iconColor.color
-            if let drive, drive.maintenanceTypes.contains(where: { $0.code == .asleep }) {
+            if let drive, drive.isAsleep {
                 titleLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepTitle(drive.name)
                 descriptionLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepDescription
                 mainButton.setTitle(KDriveResourcesStrings.Localizable.maintenanceWakeUpButton, for: .normal)
