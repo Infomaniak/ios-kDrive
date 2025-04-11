@@ -210,7 +210,10 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         writableRealm.delete(existingDeletedFile)
                     }
 
-                    parentDirectory.lastCursor = response.cursor
+                    // parentDirectory could have been deleted above, rendering it invalid
+                    if !parentDirectory.isInvalidated {
+                        parentDirectory.lastCursor = response.cursor
+                    }
                 }
 
                 observer.didUpdate(updatedItems.map {
