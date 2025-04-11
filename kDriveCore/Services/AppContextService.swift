@@ -34,6 +34,14 @@ public enum DriveAppContext: String {
 
     /// Current execution context is the share extension
     case shareExtension
+
+    public var isExtension: Bool {
+        guard self == .app || self == .appTests else {
+            return true
+        }
+
+        return false
+    }
 }
 
 /// Something that can provide the active execution context
@@ -49,11 +57,7 @@ public struct AppContextService: AppContextServiceable {
     public var context: DriveAppContext
 
     public var isExtension: Bool {
-        guard context == .app || context == .appTests else {
-            return true
-        }
-
-        return false
+        context.isExtension
     }
 
     public init(context: DriveAppContext) {
