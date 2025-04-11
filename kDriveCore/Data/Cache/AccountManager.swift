@@ -326,8 +326,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
-            throw driveResponse.drives.first?.isInTechnicalMaintenance == true ?
-                DriveError.productMaintenance : DriveError.blocked
+            if let drive = driveResponse.drives.first, drive.isInTechnicalMaintenance {
+                throw driveResponse.drives.count > 1 ? DriveError.productMaintenance : DriveError.NoDriveError
+                    .maintenance(drive: drive)
+            }
+            throw DriveError.blocked
         }
         driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
 

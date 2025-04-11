@@ -1348,6 +1348,15 @@
 /* loco:6049df4d5c2c3a04bc3979fd */
 "lockAppTitle" = "Application verrouillée";
 
+/* loco:67f50a35f35eb567990c2e32 */
+"maintenanceAsleepDescription" = "Pour réduire l’impact écologique, votre kDrive s’est mis en veille suite à une inactivité prolongée.\nRelancer-le pour retrouver l’accès à vos fichiers !";
+
+/* loco:67f509c180ba041c690a8e02 */
+"maintenanceAsleepTitle" = "Votre kDrive %@ s’est offert une petite sieste !";
+
+/* loco:67f50e36f46a2825af088213 */
+"maintenanceWakeUpButton" = "Relancer mon kDrive";
+
 /* loco:616960e0fdf2c313b4239902 */
 "manageCategoriesCreateTitle" = "Créer %@";
 
