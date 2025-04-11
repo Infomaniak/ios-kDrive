@@ -39,6 +39,8 @@ class SwitchUserViewController: UIViewController {
         }
     }
 
+    private var accounts = [Account]()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         infomaniakLogin.setupWebviewNavbar(title: "",
@@ -48,6 +50,9 @@ class SwitchUserViewController: UIViewController {
                                            clearCookie: true,
                                            timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
+
+        accounts = accountManager.accounts.values
+
         // Try to update other accounts infos
         Task {
             try await withThrowingTaskGroup(of: Void.self) { group in
@@ -58,7 +63,8 @@ class SwitchUserViewController: UIViewController {
                 }
                 try await group.waitForAll()
             }
-            tableView.reloadData()
+
+            reloadDataSource()
         }
     }
 
@@ -84,13 +90,23 @@ class SwitchUserViewController: UIViewController {
         present(nextViewController, animated: true)
     }
 
+    private func reloadDataSource() {
+        accounts = accountManager.accounts.values
+        tableView.reloadData()
+    }
+
     private func switchToConnectedAccount(_ account: Account) {
         do {
-            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
+            guard let existingAccount = accountManager.account(for: account.userId) else {
+                reloadDataSource()
+                return
+            }
+
+            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
             MatomoUtils.track(eventWithCategory: .account, name: "switch")
             MatomoUtils.connectUser()
 
-            accountManager.switchAccount(newAccount: account)
+            accountManager.switchAccount(newAccount: existingAccount)
             appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
@@ -127,7 +143,7 @@ class SwitchUserViewController: UIViewController {
 
 extension SwitchUserViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let account = accountManager.accounts[indexPath.row]
+        let account = accounts[indexPath.row]
         switchToConnectedAccount(account)
     }
 }
@@ -136,11 +152,11 @@ extension SwitchUserViewController: UITableViewDelegate {
 
 extension SwitchUserViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return accountManager.accounts.count
+        return accounts.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let account = accountManager.accounts[indexPath.row]
+        let account = accounts[indexPath.row]
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         cell.titleLabel.text = account.user.displayName
