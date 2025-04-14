@@ -80,6 +80,9 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
             let driveErrorVC = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
             topMostViewController.present(driveErrorVC, animated: true)
+        } else if let driveError = error as? DriveError.NoDriveError, case .maintenance(let drive) = driveError {
+            let driveErrorVC = DriveErrorViewController.instantiate(errorType: .maintenance, drive: drive)
+            topMostViewController.present(driveErrorVC, animated: true)
         } else if let driveError = error as? DriveError,
                   driveError == .noDrive
                   || driveError == .productMaintenance

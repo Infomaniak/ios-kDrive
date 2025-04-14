@@ -62,6 +62,33 @@ public enum MaintenanceReason: String, PersistableEnum, Codable {
     }
 }
 
+public class MaintenanceType: EmbeddedObject, Codable {
+    @Persisted public var code: MaintenanceTypeValue
+}
+
+public enum MaintenanceTypeValue: String, PersistableEnum, Codable {
+    // ⚠️ For some reason PersistableEnum breaks something with key decoding, that's why we are explicitly writing snake case
+    case managerInMaintenance = "manager_in_maintenance"
+    case managerIsBlocked = "manager_is_blocked"
+    case moveNs = "move_ns"
+    case moveSqlMaster = "move_sql_master"
+    case moveSqlCluster = "move_sql_cluster"
+    case rewind
+    case upgradeSchema = "upgrade_schema"
+    case hardDelete = "hard_delete"
+    case asleep
+    case wakingUp = "waking_up"
+    case uninitializing
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let singleKeyContainer = try decoder.singleValueContainer()
+        let value = try singleKeyContainer.decode(String.self)
+
+        self = MaintenanceTypeValue(rawValue: value) ?? .unknown
+    }
+}
+
 public final class DrivePreferences: EmbeddedObject, Codable {
     @Persisted public var color = "#0098FF"
     @Persisted public var hide = false
@@ -93,6 +120,7 @@ public final class Drive: Object, Codable {
     @Persisted private var _categoryRights: CategoryRights?
     @Persisted public var inMaintenance = false
     @Persisted public var maintenanceReason: MaintenanceReason?
+    @Persisted public var maintenanceTypes: List<MaintenanceType>
     @Persisted public var updatedAt: Date
     @Persisted public var _account: DriveAccount?
     @Persisted public var quota: DriveQuota?
@@ -104,6 +132,10 @@ public final class Drive: Object, Codable {
         didSet {
             objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
         }
+    }
+
+    public var isAsleep: Bool {
+        return maintenanceTypes.contains { $0.code == .asleep }
     }
 
     public var preferences: DrivePreferences {
@@ -171,6 +203,8 @@ public final class Drive: Object, Codable {
         rights = try values.decode(DriveRights.self, forKey: .rights)
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
+        maintenanceTypes = try values
+            .decodeIfPresent(List<MaintenanceType>.self, forKey: .maintenanceTypes) ?? List<MaintenanceType>()
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
@@ -216,6 +250,7 @@ public final class Drive: Object, Codable {
         case _capabilities = "capabilities"
         case inMaintenance
         case maintenanceReason
+        case maintenanceTypes
         case updatedAt
         case _account = "account"
         case accountAdmin

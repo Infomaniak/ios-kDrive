@@ -45,6 +45,14 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
                 leftButton.isHidden = false
             }
             #endif
+        } else if let drive, drive.isAsleep {
+            titleLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepTitle(drive.name)
+            imageView.image = KDriveResourcesAsset.maintenance.image
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.maintenanceAsleepDescription
+            #if !ISEXTENSION
+            leftButton.setTitle(KDriveResourcesStrings.Localizable.maintenanceWakeUpButton, for: .normal)
+            leftButton.isHidden = false
+            #endif
         } else {
             titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(drive?.name ?? "")
             imageView.image = KDriveResourcesAsset.maintenance.image
@@ -55,7 +63,11 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
     #if !ISEXTENSION
     override func leftButtonPressed(_ sender: UIButton) {
         guard let drive else { return }
-        UIApplication.shared.open(URLConstants.renewDrive(accountId: drive.accountId).url)
+        if drive.isAsleep {
+            UIApplication.shared.open(URLConstants.kDriveWeb.url)
+        } else {
+            UIApplication.shared.open(URLConstants.renewDrive(accountId: drive.accountId).url)
+        }
     }
     #endif
 
