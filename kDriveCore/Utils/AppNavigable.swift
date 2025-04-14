@@ -161,6 +161,17 @@ public protocol RouterFileNavigable {
         navigationController: UINavigationController,
         animated: Bool
     )
+
+    /// Present the UploadViewController
+    /// - Parameters:
+    ///   - driveFileManager: driveFileManager
+    ///   - navigationController: The navigation controller to use
+    ///   - animated: Should be animated
+    @MainActor func presentUploadViewController(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    )
 }
 
 /// Something that can set an arbitrary RootView controller

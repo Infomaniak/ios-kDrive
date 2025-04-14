@@ -95,6 +95,12 @@ public struct InExtensionRouter: AppNavigable {
 
     public func presentAccountViewController(navigationController: UINavigationController, animated: Bool) {}
 
+    public func presentUploadViewController(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {}
+
     public func presentPublicShareLocked(_ destinationURL: URL) {}
 
     public func presentPublicShareExpired() {}
@@ -121,6 +127,4 @@ public struct InExtensionRouter: AppNavigable {
     public func updateTheme() {}
 
     public var topMostViewController: UIViewController?
-
-    // TODO: presentUploadViewController(……) NOOP
 }
