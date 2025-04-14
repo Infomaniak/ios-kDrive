@@ -203,7 +203,8 @@ public final class Drive: Object, Codable {
         rights = try values.decode(DriveRights.self, forKey: .rights)
         inMaintenance = try values.decode(Bool.self, forKey: .inMaintenance)
         maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
-        maintenanceTypes = try values.decode(List<MaintenanceType>.self, forKey: .maintenanceTypes)
+        maintenanceTypes = try values
+            .decodeIfPresent(List<MaintenanceType>.self, forKey: .maintenanceTypes) ?? List<MaintenanceType>()
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         _account = try values.decode(DriveAccount.self, forKey: ._account)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
