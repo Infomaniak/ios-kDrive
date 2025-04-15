@@ -21,20 +21,6 @@ import InfomaniakDI
 import kDriveCore
 import UIKit
 
-/// Something that centralize the App Restoration logic
-public protocol AppRestorationServiceable {
-    /// Is restoration enabled
-    var shouldRestoreApplicationState: Bool { get }
-
-    /// Should save the scene sate
-    var shouldSaveApplicationState: Bool { get }
-
-    /// Saves a restoration version, for forward compatibility
-    func saveRestorationVersion()
-
-    func reloadAppUI(for driveId: Int, userId: Int) async
-}
-
 public final class AppRestorationService: AppRestorationServiceable {
     @LazyInjectService var appNavigable: AppNavigable
 
