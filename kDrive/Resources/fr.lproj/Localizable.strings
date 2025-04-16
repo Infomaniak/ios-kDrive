@@ -767,7 +767,7 @@
 "errorDelete" = "Erreur lors de la suppression";
 
 /* loco:60a693f631a0a90e163445f2 */
-"errorDeviceStorage" = "Stockage insuffisant";
+"errorDeviceStorage" = "Stockage de l’appareil insuffisant";
 
 /* loco:6099440fdb741c2c6d66d332 */
 "errorDisconnected" = "Une erreur s’est produite. Veuillez vous reconnecter pour continuer.";
