@@ -51,7 +51,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.4")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "10.1.2")),
+        .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "10.1.3")),
         .package(url: "https://github.com/Infomaniak/LocalizeKit", .upToNextMajor(from: "1.0.2")),
         .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.52.0")),
         .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
