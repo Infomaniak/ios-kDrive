@@ -40,6 +40,8 @@ public enum SentryDebug {
         case PHAsset
         /// DriveInfosManager, and communication with FileProvider APIs
         case DriveInfosManager
+        /// Cleanup of cache used by the app
+        case cacheCleanup
     }
 
     public enum EventNames {
