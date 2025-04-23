@@ -275,6 +275,12 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
+    func didSelectFiles(_ files: Set<File>) {
+        exceptItemIds.removeAll()
+        selectedCount = files.count
+        selectedItems = files
+    }
+
     func deleteSelectedItems() async {
         if isSelectAllModeEnabled {
             await bulkDeleteAll()

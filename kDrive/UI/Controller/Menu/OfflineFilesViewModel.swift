@@ -61,10 +61,10 @@ class OfflineFilesViewModel: FileListViewModel {
         viewModel?.rightBarButtons = [.loading]
         viewModel?.onSelectAll?()
         if type == .selectAll {
-            let files = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+            let frozenFiles = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
                 lazyCollection.filter("isAvailableOffline = true")
-            }
-            viewModel?.selectedCount = files.count
+            }.freeze()
+            viewModel?.didSelectFiles(Set(frozenFiles))
             viewModel?.rightBarButtons = [.deselectAll]
         } else {
             super.barButtonPressed(sender: sender, type: type)
