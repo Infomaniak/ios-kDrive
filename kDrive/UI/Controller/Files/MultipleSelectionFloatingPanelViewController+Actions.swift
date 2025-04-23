@@ -205,6 +205,7 @@ extension MultipleSelectionFloatingPanelViewController {
                                exceptFileIds: exceptFileIds ?? [],
                                from: currentDirectory,
                                allItemsSelected: allItemsSelected,
+                               forceMoveDistinctFiles: forceMoveDistinctFiles,
                                observer: self,
                                driveFileManager: driveFileManager) { [weak self] viewController in
             guard let self else {

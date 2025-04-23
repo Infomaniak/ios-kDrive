@@ -58,6 +58,7 @@ class OfflineFilesViewModel: FileListViewModel {
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
         let viewModel = multipleSelectionViewModel
         viewModel?.isSelectAllModeEnabled = true
+        viewModel?.forceMoveDistinctFiles = true
         viewModel?.rightBarButtons = [.loading]
         viewModel?.onSelectAll?()
         if type == .selectAll {

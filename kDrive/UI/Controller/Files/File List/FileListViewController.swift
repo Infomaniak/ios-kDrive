@@ -474,6 +474,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                 .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
         case .multipleSelection(let downloadOnly):
             let allItemsSelected: Bool
+            let forceMoveDistinctFiles: Bool
             let exceptFileIds: [Int]?
             let selectedFiles: [File]
             if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
@@ -486,11 +487,17 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
                 exceptFileIds = nil
             }
 
+            if viewModel.multipleSelectionViewModel?.forceMoveDistinctFiles == true {
+                forceMoveDistinctFiles = true
+            } else {
+                forceMoveDistinctFiles = false
+            }
             let selectViewController = MultipleSelectionFloatingPanelViewController(
                 driveFileManager: driveFileManager,
                 currentDirectory: viewModel.currentDirectory,
                 files: selectedFiles,
                 allItemsSelected: allItemsSelected,
+                forceMoveDistinctFiles: forceMoveDistinctFiles,
                 exceptFileIds: exceptFileIds,
                 reloadAction: { [weak self] in
                     self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false

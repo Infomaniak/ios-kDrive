@@ -170,6 +170,7 @@ public final class FileActionsHelper {
                             exceptFileIds: [Int],
                             from currentDirectory: File,
                             allItemsSelected: Bool,
+                            forceMoveDistinctFiles: Bool = false,
                             observer: AnyObject,
                             driveFileManager: DriveFileManager,
                             presentViewController: (UIViewController) -> Void,
@@ -191,6 +192,7 @@ public final class FileActionsHelper {
                                             files: files,
                                             exceptFileIds: exceptFileIds,
                                             allItemsSelected: allItemsSelected,
+                                            forceMoveDistinctFiles: forceMoveDistinctFiles,
                                             observer: observer,
                                             driveFileManager: driveFileManager,
                                             completion: completion)
@@ -205,10 +207,11 @@ public final class FileActionsHelper {
                                           files: [File],
                                           exceptFileIds: [Int],
                                           allItemsSelected: Bool,
+                                          forceMoveDistinctFiles: Bool = false,
                                           observer: AnyObject,
                                           driveFileManager: DriveFileManager,
                                           completion: (() -> Void)?) async {
-        if allItemsSelected {
+        if allItemsSelected && !forceMoveDistinctFiles {
             await bulkMove(exceptFileIds: exceptFileIds,
                            from: currentDirectory,
                            to: destinationDirectory,

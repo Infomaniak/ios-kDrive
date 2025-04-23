@@ -31,6 +31,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     let driveFileManager: DriveFileManager
     var files: [File]
     let allItemsSelected: Bool
+    let forceMoveDistinctFiles: Bool
     let exceptFileIds: [Int]?
     let currentDirectory: File
     let reloadAction: (() -> Void)?
@@ -56,6 +57,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         currentDirectory: File,
         files: [File],
         allItemsSelected: Bool,
+        forceMoveDistinctFiles: Bool,
         exceptFileIds: [Int]?,
         reloadAction: (() -> Void)?,
         presentingParent: UIViewController?
@@ -64,6 +66,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         self.currentDirectory = currentDirectory
         self.files = files
         self.allItemsSelected = allItemsSelected
+        self.forceMoveDistinctFiles = forceMoveDistinctFiles
         self.exceptFileIds = exceptFileIds
         self.reloadAction = reloadAction
         self.presentingParent = presentingParent
