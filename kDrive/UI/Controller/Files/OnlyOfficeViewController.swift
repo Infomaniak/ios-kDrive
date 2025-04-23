@@ -138,6 +138,20 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
+    private func clearWebViewCache() {
+        let websiteDataStore = WKWebsiteDataStore.default()
+
+        let dataTypes: Set<String> = [
+            WKWebsiteDataTypeDiskCache,
+            WKWebsiteDataTypeMemoryCache,
+            WKWebsiteDataTypeCookies,
+            WKWebsiteDataTypeLocalStorage,
+            WKWebsiteDataTypeSessionStorage
+        ]
+
+        websiteDataStore.removeData(ofTypes: dataTypes, modifiedSince: Date(timeIntervalSince1970: 0)) { }
+    }
+
     private func setupWebView() {
         /*
          With iOS 16.1, WKWebView cannot handle SharedWorkers
@@ -151,8 +165,13 @@ final class OnlyOfficeViewController: UIViewController {
             forMainFrameOnly: false
         )
         webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
+
         // Force mobile mode for better usage on iPadOS
         webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
+
+        // Clean web cache force to apply the current OS theme to OnlyOffice
+        clearWebViewCache()
+
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.scrollView.isScrollEnabled = false
         webView.uiDelegate = self
