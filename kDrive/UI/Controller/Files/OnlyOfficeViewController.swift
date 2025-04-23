@@ -138,18 +138,10 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
-    private func clearWebViewCache() {
+    private func clearWebViewLocalStorage() {
         let websiteDataStore = WKWebsiteDataStore.default()
-
-        let dataTypes: Set<String> = [
-            WKWebsiteDataTypeDiskCache,
-            WKWebsiteDataTypeMemoryCache,
-            WKWebsiteDataTypeCookies,
-            WKWebsiteDataTypeLocalStorage,
-            WKWebsiteDataTypeSessionStorage
-        ]
-
-        websiteDataStore.removeData(ofTypes: dataTypes, modifiedSince: Date(timeIntervalSince1970: 0)) { }
+        websiteDataStore.removeData(ofTypes: [WKWebsiteDataTypeLocalStorage],
+                                    modifiedSince: Date(timeIntervalSince1970: 0)) {}
     }
 
     private func setupWebView() {
@@ -170,7 +162,7 @@ final class OnlyOfficeViewController: UIViewController {
         webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
 
         // Clean web cache force to apply the current OS theme to OnlyOffice
-        clearWebViewCache()
+        clearWebViewLocalStorage()
 
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.scrollView.isScrollEnabled = false
