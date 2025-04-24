@@ -28,6 +28,7 @@ import kDriveCore
 import kDriveResources
 import Kingfisher
 import os.log
+import Sentry
 import StoreKit
 import UIKit
 import UserNotifications
@@ -110,10 +111,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         Log.appDelegate("applicationWillTerminate")
 
-        SentryDebug.addBreadcrumb(message: "applicationWillTerminate",
-                                  category: SentryDebug.Category.cacheCleanup,
-                                  level: .info,
-                                  metadata: nil)
+        addCacheBreadcrumbSynchronously(message: "applicationWillTerminate")
 
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
@@ -130,19 +128,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Await on upload queue to terminate gracefully, if time allows for it.
         let group = TolerantDispatchGroup()
         uploadService.waitForCompletion {
-            SentryDebug.addBreadcrumb(message: "will cleanup cache",
-                                      category: SentryDebug.Category.cacheCleanup,
-                                      level: .info,
-                                      metadata: nil)
+            self.addCacheBreadcrumbSynchronously(message: "will cleanup cache")
 
             // Clean temp files once the upload queue is stoped if needed
             @LazyInjectService var freeSpaceService: FreeSpaceService
             freeSpaceService.auditCache()
 
-            SentryDebug.addBreadcrumb(message: "did cleanup cache",
-                                      category: SentryDebug.Category.cacheCleanup,
-                                      level: .info,
-                                      metadata: nil)
+            self.addCacheBreadcrumbSynchronously(message: "did cleanup cache")
 
             group.leave()
         }
@@ -150,10 +142,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // The documentation specifies `approximately five seconds [to] return` from applicationWillTerminate
         // Therefore to not display a crash feedback on TestFlight, we give up after 4.5 seconds
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + AppDelegateConstants.closeApplicationGiveUpTime) {
-            SentryDebug.addBreadcrumb(message: "interrupt cleanup cache",
-                                      category: SentryDebug.Category.cacheCleanup,
-                                      level: .error,
-                                      metadata: nil)
+            self.addCacheBreadcrumbSynchronously(message: "interrupt cleanup cache", level: .error)
             group.leave()
         }
 
@@ -171,6 +160,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                      annotation: Any) -> Bool {
         Log.appDelegate("application open url:\(url)) sourceApplication:\(sourceApplication)")
         return infomaniakLogin.handleRedirectUri(url: url)
+    }
+
+    @inline(__always) private func addCacheBreadcrumbSynchronously(message: String, level: SentryLevel = .info) {
+        let breadcrumb = Breadcrumb(level: level, category: SentryDebug.Category.cacheCleanup.rawValue)
+        breadcrumb.message = message
+        SentrySDK.addBreadcrumb(breadcrumb)
     }
 }
 
