@@ -77,9 +77,17 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
 
         task.expirationHandler = {
             Log.backgroundTaskScheduling("Task \(identifier) EXPIRED", level: .error)
+            defer {
+                task.setTaskCompleted(success: false)
+            }
+
+            if UIApplication.shared.applicationState != .background {
+                Log.backgroundTaskScheduling("Task \(identifier) EXPIRED not in BACKGROUND", level: .error)
+                return
+            }
+
             uploadService.suspendAllOperations()
             uploadService.rescheduleRunningOperations()
-            task.setTaskCompleted(success: false)
         }
     }
 
