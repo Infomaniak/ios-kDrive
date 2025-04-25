@@ -230,14 +230,11 @@ public final class FileActionsHelper {
                 // Move files only if needed
                 let proxySelectedItems = files.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
                 let proxyDestinationDirectory = destinationDirectory.proxify()
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask {
-                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
-                        }
-                    }
-                    try await group.waitForAll()
+
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.maxNetworkParallelism) { proxyFile in
+                    _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                 }
+
                 UIConstants
                     .showSnackBar(message: KDriveResourcesStrings.Localizable
                         .fileListMoveFileConfirmationSnackbar(files.count, destinationDirectory.name))
