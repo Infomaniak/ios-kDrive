@@ -218,7 +218,7 @@ public final class FileActionsHelper {
                            observer: observer,
                            driveFileManager: driveFileManager,
                            completion: completion)
-        } else if files.count > Constants.bulkActionThreshold {
+        } else if files.count > Constants.bulkActionThreshold && !forceMoveDistinctFiles {
             await bulkMove(files,
                            from: currentDirectory,
                            to: destinationDirectory,
