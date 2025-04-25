@@ -117,7 +117,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
-            if allItemsSelected {
+            if allItemsSelected && !forceMoveDistinctFiles {
                 action = BulkAction(
                     action: .copy,
                     parentId: currentDirectory.id,
