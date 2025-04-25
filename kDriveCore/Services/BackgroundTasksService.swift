@@ -64,6 +64,12 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     public func buildBackgroundTask(_ task: BGTask, identifier: String) {
         scheduleBackgroundRefresh()
 
+        if UIApplication.shared.applicationState != .background {
+            Log.backgroundTaskScheduling("Task \(identifier) only active in BACKGROUND")
+            task.setTaskCompleted(success: true)
+            return
+        }
+
         handleBackgroundRefresh { _ in
             Log.backgroundTaskScheduling("Task \(identifier) completed with SUCCESS")
             task.setTaskCompleted(success: true)
@@ -71,9 +77,17 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
 
         task.expirationHandler = {
             Log.backgroundTaskScheduling("Task \(identifier) EXPIRED", level: .error)
+            defer {
+                task.setTaskCompleted(success: false)
+            }
+
+            if UIApplication.shared.applicationState != .background {
+                Log.backgroundTaskScheduling("Task \(identifier) EXPIRED not in BACKGROUND", level: .error)
+                return
+            }
+
             uploadService.suspendAllOperations()
             uploadService.rescheduleRunningOperations()
-            task.setTaskCompleted(success: false)
         }
     }
 
