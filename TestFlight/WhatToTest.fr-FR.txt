@@ -1,4 +1,4 @@
 - Photo sync: Nouvelle option pour activer uniquement le téléversement en WiFi, sans affecter les autres fichiers
 - Travail sur les Actions de Fichier
 - Support des Drives endormis
-- Améliorations de la stabilité et corrections de bugs
+- Fix d'un bug rare relatif à la synchronisation photo
