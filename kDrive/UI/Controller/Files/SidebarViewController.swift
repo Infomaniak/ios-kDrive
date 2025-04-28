@@ -192,16 +192,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
 
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        displayedSnapshot = getItemsSnapshot(horizontalSizeClass: rootHorizontalSizeClass)
         setupViewForCurrentSizeClass()
+        displayedSnapshot = getItemsSnapshot(horizontalSizeClass: rootHorizontalSizeClass)
         dataSource?.apply(displayedSnapshot, animatingDifferences: true)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setDisplayedSnapshot()
         setupViewForCurrentSizeClass()
-        configureDataSource()
+        setDisplayedSnapshot()
     }
 
     private func setupViewForCurrentSizeClass() {
@@ -267,6 +266,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+
+        configureDataSource()
 
         let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
