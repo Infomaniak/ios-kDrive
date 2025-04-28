@@ -19,8 +19,13 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import UIKit
 
 public enum ParallelismDefaults {
+    static let highParallelism = 6
+
+    static let mediumParallelism = 4
+
     static let reducedParallelism = 2
 
     static let serial = 1
@@ -40,15 +45,13 @@ public protocol ParallelismHeuristicDelegate: AnyObject {
 public final class WorkloadParallelismHeuristic {
     @LazyInjectService private var appContextService: AppContextServiceable
 
-    private weak var delegate: ParallelismHeuristicDelegate?
+    private var computeTask: Task<Void, Never>?
 
-    private let serialEventQueue = DispatchQueue(
-        label: "com.infomaniak.drive.parallelism-heuristic.event",
-        qos: .default
-    )
+    private weak var delegate: ParallelismHeuristicDelegate?
 
     init(delegate: ParallelismHeuristicDelegate) {
         self.delegate = delegate
+
         setupObservation()
     }
 
@@ -56,7 +59,7 @@ public final class WorkloadParallelismHeuristic {
         // Update on thermal change
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelismInQueue),
+            selector: #selector(computeParallelismInTask),
             name: ProcessInfo.thermalStateDidChangeNotification,
             object: nil
         )
@@ -64,22 +67,46 @@ public final class WorkloadParallelismHeuristic {
         // Update on low power mode
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelismInQueue),
+            selector: #selector(computeParallelismInTask),
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else { return }
-            self.computeParallelismInQueue()
+            self.computeParallelismInTask()
         }
 
-        computeParallelismInQueue()
+        computeParallelismInTask()
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self, name: ProcessInfo.thermalStateDidChangeNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSProcessInfoPowerStateDidChange, object: nil)
+        NotificationCenter.default.removeObserver(self)
     }
 
     @objc private func computeParallelismInTask() {
