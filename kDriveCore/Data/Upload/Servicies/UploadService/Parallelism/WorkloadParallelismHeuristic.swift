@@ -22,11 +22,11 @@ import InfomaniakDI
 import UIKit
 
 public enum ParallelismDefaults {
-    static let highParallelism = 6
+    static let high = 6
 
-    static let mediumParallelism = 4
+    static let medium = 4
 
-    static let reducedParallelism = 2
+    static let reduced = 2
 
     static let serial = 1
 }
@@ -136,25 +136,25 @@ public final class WorkloadParallelismHeuristic {
         // If the device is too hot we cool down now
         let thermalState = processInfo.thermalState
         guard thermalState != .critical else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
         // In low power mode, we reduce parallelism
         guard !processInfo.isLowPowerModeEnabled else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
         // In extension, to reduce memory footprint, we reduce drastically parallelism
         guard !appContextService.isExtension else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
         // In state .background or .inactive, to reduce memory footprint, we reduce drastically parallelism
         guard await appIsActive else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
@@ -163,7 +163,7 @@ public final class WorkloadParallelismHeuristic {
 
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
-            currentParallelism = max(ParallelismDefaults.reducedParallelism, parallelism / 2)
+            currentParallelism = max(ParallelismDefaults.reduced, parallelism / 2)
             return
         }
 
