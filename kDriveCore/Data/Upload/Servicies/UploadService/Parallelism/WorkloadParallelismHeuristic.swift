@@ -88,7 +88,7 @@ public final class WorkloadParallelismHeuristic {
         }
     }
 
-    private func computeParallelism() {
+    private func computeParallelism() async {
         let processInfo = ProcessInfo.processInfo
 
         // If the device is too hot we cool down now
@@ -111,7 +111,7 @@ public final class WorkloadParallelismHeuristic {
         }
 
         // In state .background or .inactive, to reduce memory footprint, we reduce drastically parallelism
-        guard UIApplication.shared.applicationState == .active else {
+        guard await appIsActive else {
             currentParallelism = ParallelismDefaults.reducedParallelism
             return
         }
@@ -122,6 +122,10 @@ public final class WorkloadParallelismHeuristic {
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
             currentParallelism = max(ParallelismDefaults.reducedParallelism, parallelism / 2)
+            return
+        }
+
+        guard !Task.isCancelled else {
             return
         }
 
