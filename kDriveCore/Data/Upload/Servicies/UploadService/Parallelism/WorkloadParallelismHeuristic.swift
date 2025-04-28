@@ -45,6 +45,8 @@ public protocol ParallelismHeuristicDelegate: AnyObject {
 public final class WorkloadParallelismHeuristic {
     @LazyInjectService private var appContextService: AppContextServiceable
 
+    private weak var delegate: ParallelismHeuristicDelegate?
+
     private var computeTask: Task<Void, Never>?
 
     private let serialEventQueue = DispatchQueue(
@@ -52,11 +54,8 @@ public final class WorkloadParallelismHeuristic {
         qos: .default
     )
 
-    private weak var delegate: ParallelismHeuristicDelegate?
-
     init(delegate: ParallelismHeuristicDelegate) {
         self.delegate = delegate
-
         setupObservation()
     }
 
@@ -159,7 +158,8 @@ public final class WorkloadParallelismHeuristic {
         }
 
         // Scaling with the number of activeProcessor to a point
-        let parallelism = min(6, max(4, processInfo.activeProcessorCount))
+        let parallelism = min(ParallelismDefaults.high,
+                              max(ParallelismDefaults.medium, processInfo.activeProcessorCount))
 
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
