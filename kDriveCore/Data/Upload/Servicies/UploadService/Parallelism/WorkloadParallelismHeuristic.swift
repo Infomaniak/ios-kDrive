@@ -110,6 +110,12 @@ public final class WorkloadParallelismHeuristic {
             return
         }
 
+        // In state .background or .inactive, to reduce memory footprint, we reduce drastically parallelism
+        guard UIApplication.shared.applicationState == .active else {
+            currentParallelism = ParallelismDefaults.reducedParallelism
+            return
+        }
+
         // Scaling with the number of activeProcessor to a point
         let parallelism = min(6, max(4, processInfo.activeProcessorCount))
 
