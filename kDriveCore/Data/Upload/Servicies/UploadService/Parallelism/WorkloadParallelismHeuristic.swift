@@ -174,9 +174,19 @@ public final class WorkloadParallelismHeuristic {
         currentParallelism = parallelism
     }
 
-    public private(set) var currentParallelism = ParallelismDefaults.reducedParallelism {
+    private var _currentParallelism = ParallelismDefaults.serial {
         didSet {
-            delegate?.parallelismShouldChange(value: currentParallelism)
+            delegate?.parallelismShouldChange(value: _currentParallelism)
+        }
+    }
+
+    public private(set) var currentParallelism: Int {
+        get {
+            _currentParallelism
+        }
+        set {
+            guard _currentParallelism != newValue else { return }
+            _currentParallelism = newValue
         }
     }
 }
