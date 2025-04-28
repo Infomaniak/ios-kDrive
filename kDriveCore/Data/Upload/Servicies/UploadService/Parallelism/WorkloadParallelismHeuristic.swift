@@ -47,6 +47,11 @@ public final class WorkloadParallelismHeuristic {
 
     private var computeTask: Task<Void, Never>?
 
+    private let serialEventQueue = DispatchQueue(
+        label: "com.infomaniak.drive.parallelism-heuristic.event",
+        qos: .default
+    )
+
     private weak var delegate: ParallelismHeuristicDelegate?
 
     init(delegate: ParallelismHeuristicDelegate) {
@@ -110,13 +115,15 @@ public final class WorkloadParallelismHeuristic {
     }
 
     @objc private func computeParallelismInTask() {
-        computeTask?.cancel()
+        serialEventQueue.async {
+            self.computeTask?.cancel()
 
-        let computeParallelismTask = Task {
-            await computeParallelism()
+            let computeParallelismTask = Task {
+                await self.computeParallelism()
+            }
+
+            self.computeTask = computeParallelismTask
         }
-
-        computeTask = computeParallelismTask
     }
 
     @MainActor private var appIsActive: Bool {
