@@ -198,8 +198,55 @@ public struct AppRouter: AppNavigable {
 
             guard let sceneUserInfo,
                   let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
-                  SceneRestorationScreens(rawValue: lastViewControllerString) != nil else {
+                  let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
                 return
+            }
+            guard let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
+                  previousDriveId == driveFileManager.driveId else {
+                Log.sceneDelegate("driveId do not match for restore :\(sceneUserInfo)", level: .error)
+                return
+            }
+
+            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                Log.sceneDelegate("unable to access tabBarViewController", level: .error)
+                return
+            }
+
+            let selectedIndex = mainTabViewController.selectedIndex
+            let viewControllers = mainTabViewController.viewControllers
+            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
+                Log.sceneDelegate("unable to access navigationController", level: .error)
+                return
+            }
+
+            switch lastViewController {
+            case .FileDetailViewController:
+                await restoreFileDetailViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
+
+            case .FileListViewController:
+                await restoreFileListViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
+
+            case .PreviewViewController:
+                await restorePreviewViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
+
+            case .StoreViewController:
+                await restoreStoreViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: rootNavigationController,
+                    sceneUserInfo: sceneUserInfo
+                )
             }
         }
     }
