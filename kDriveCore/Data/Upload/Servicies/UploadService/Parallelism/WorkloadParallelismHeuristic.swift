@@ -82,10 +82,18 @@ public final class WorkloadParallelismHeuristic {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSProcessInfoPowerStateDidChange, object: nil)
     }
 
-    @objc private func computeParallelismInQueue() {
-        serialEventQueue.async {
-            self.computeParallelism()
+    @objc private func computeParallelismInTask() {
+        computeTask?.cancel()
+
+        let computeParallelismTask = Task {
+            await computeParallelism()
         }
+
+        computeTask = computeParallelismTask
+    }
+
+    @MainActor private var appIsActive: Bool {
+        UIApplication.shared.applicationState == .active
     }
 
     private func computeParallelism() async {
