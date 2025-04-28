@@ -396,6 +396,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        @InjectService var appRouter: AppNavigable
+
         guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
@@ -420,7 +422,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 currentDirectory: selectedRootFile
             )
         }
-        if indexPath != selectedIndexPath {
+
+        guard let rootViewController = appRouter.rootViewController else {
+            return
+        }
+        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
+
+        if indexPath != selectedIndexPath || rootHorizontalSizeClass == .compact {
             let userRootFolders = rootViewChildren?.compactMap {
                 RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
             } ?? []
