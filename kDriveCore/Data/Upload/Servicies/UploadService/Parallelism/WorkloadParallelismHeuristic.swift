@@ -110,8 +110,8 @@ public final class WorkloadParallelismHeuristic {
             return
         }
 
-        // Scaling with the number of activeProcessor
-        let parallelism = max(4, processInfo.activeProcessorCount)
+        // Scaling with the number of activeProcessor to a point
+        let parallelism = min(6, max(4, processInfo.activeProcessorCount))
 
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
