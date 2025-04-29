@@ -409,7 +409,7 @@ public final class FileActionsHelper {
         let areFavored = !areFilesFavorites
 
         let canFavoriteFilesProxy = files.filter { $0.capabilities.canUseFavorite }.map { $0.proxify() }
-        try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: 4) { proxyFile in
+        try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
             try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
             await completion?(proxyFile)
         }

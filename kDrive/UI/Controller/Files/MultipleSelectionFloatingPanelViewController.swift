@@ -153,7 +153,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             // MainActor should ensure that this call is safe as file was created on the main thread ?
             let proxyFiles = files.map { $0.proxify() }
             let proxySelectedDirectory = selectedDirectory.proxify()
-            try await proxyFiles.concurrentForEach(customConcurrency: 4) { proxyFile in
+            try await proxyFiles.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
                 _ = try await self.driveFileManager.apiFetcher.copy(file: proxyFile, to: proxySelectedDirectory)
             }
         }

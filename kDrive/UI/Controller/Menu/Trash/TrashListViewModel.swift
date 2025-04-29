@@ -162,7 +162,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
         directoryName: String? = nil
     ) async {
         do {
-            try await restoredFiles.concurrentForEach(customConcurrency: 4) { file in
+            try await restoredFiles.concurrentForEach(customConcurrency: Constants.networkParallelism) { file in
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: directory)
                 // We don't have an alert for moving multiple files, snackbar is spammed until end
                 if let directoryName {
@@ -273,10 +273,11 @@ private enum TrashViewModelHelper {
     private static func deleteFiles(_ deletedFiles: [ProxyFile], firstFilename: String,
                                     driveFileManager: DriveFileManager) async -> [ProxyFile] {
         do {
-            let definitelyDeletedFiles: [ProxyFile] = try await deletedFiles.concurrentMap(customConcurrency: 4) { file in
-                _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
-                return file
-            }
+            let definitelyDeletedFiles: [ProxyFile] = try await deletedFiles
+                .concurrentMap(customConcurrency: Constants.networkParallelism) { file in
+                    _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
+                    return file
+                }
 
             await UIConstants
                 .showSnackBar(message: KDriveResourcesStrings.Localizable

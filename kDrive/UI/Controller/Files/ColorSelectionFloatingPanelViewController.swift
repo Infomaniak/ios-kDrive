@@ -193,7 +193,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         Task {
             do {
                 let canBeColoredFiles = frozenFiles.filter { $0.canBeColored }
-                let success = try await canBeColoredFiles.concurrentMap(customConcurrency: 4) { file in
+                let success = try await canBeColoredFiles.concurrentMap(customConcurrency: Constants.networkParallelism) { file in
                     return try await self.driveFileManager.updateColor(directory: file, color: color.hex)
                 }.allSatisfy { $0 }
                 self.completionHandler?(success)

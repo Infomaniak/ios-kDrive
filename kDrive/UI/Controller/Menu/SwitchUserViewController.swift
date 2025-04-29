@@ -57,7 +57,7 @@ class SwitchUserViewController: UIViewController {
         Task {
             let currentAccount = accountManager.currentAccount
             let allAccountsToUpdate = accountManager.accounts.values.filter { $0 != currentAccount }
-            try await allAccountsToUpdate.concurrentForEach(customConcurrency: 4) { account in
+            try await allAccountsToUpdate.concurrentForEach(customConcurrency: Constants.networkParallelism) { account in
                 _ = try await self.accountManager.updateUser(for: account, registerToken: false)
             }
 

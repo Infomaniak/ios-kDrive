@@ -291,7 +291,7 @@ class MultipleSelectionFileListViewModel {
         } else {
             do {
                 let proxySelectedItems = selectedItems.map { $0.proxify() }
-                try await proxySelectedItems.concurrentForEach(customConcurrency: 4) { proxyFile in
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
                     _ = try await self.driveFileManager.delete(file: proxyFile)
                 }
 
