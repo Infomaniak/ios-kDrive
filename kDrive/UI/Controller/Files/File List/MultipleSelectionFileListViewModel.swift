@@ -291,13 +291,8 @@ class MultipleSelectionFileListViewModel {
         } else {
             do {
                 let proxySelectedItems = selectedItems.map { $0.proxify() }
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask { [self] in
-                            _ = try await driveFileManager.delete(file: proxyFile)
-                        }
-                    }
-                    try await group.waitForAll()
+                try await proxySelectedItems.concurrentForEach(customConcurrency: 4) { proxyFile in
+                    _ = try await self.driveFileManager.delete(file: proxyFile)
                 }
 
                 UIConstants
