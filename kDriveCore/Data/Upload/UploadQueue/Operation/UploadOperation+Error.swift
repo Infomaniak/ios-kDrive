@@ -55,6 +55,21 @@ extension UploadOperation {
 
     @discardableResult
     func handleLocalErrors(error: Error) -> Bool {
+        if let error = error as? UploadOperation.ErrorDomain {
+            switch error {
+            case .operationFinished, .operationCanceled:
+                Log.uploadOperation("operation is terminating, NOOP")
+                return true
+
+            case .databaseUploadFileNotFound:
+                // Silently stop if an UploadFile is no longer in base
+                cancel()
+                return true
+
+            default: break
+            }
+        }
+
         var errorHandled = false
         try? transactionWithFile { file in
             let nsError = error as NSError
