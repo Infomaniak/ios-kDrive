@@ -407,14 +407,11 @@ public final class FileActionsHelper {
     ) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [proxyFile = file.proxify()] in
-                    try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
-                    await completion?(file)
-                }
-            }
-            try await group.waitForAll()
+
+        let canFavoriteFilesProxy = files.filter { $0.capabilities.canUseFavorite }.map { $0.proxify() }
+        try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: 4) { proxyFile in
+            try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
+            await completion?(file)
         }
 
         return areFavored
