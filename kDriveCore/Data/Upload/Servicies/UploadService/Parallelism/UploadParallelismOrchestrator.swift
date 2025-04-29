@@ -35,7 +35,7 @@ public final class UploadParallelismOrchestrator {
 
     private var availableParallelism: Int {
         guard let uploadParallelismHeuristic else {
-            return ParallelismDefaults.reducedParallelism
+            return ParallelismDefaults.reduced
         }
         return uploadParallelismHeuristic.currentParallelism
     }

@@ -19,9 +19,14 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import UIKit
 
 public enum ParallelismDefaults {
-    static let reducedParallelism = 2
+    static let high = 6
+
+    static let medium = 4
+
+    static let reduced = 2
 
     static let serial = 1
 }
@@ -42,6 +47,8 @@ public final class WorkloadParallelismHeuristic {
 
     private weak var delegate: ParallelismHeuristicDelegate?
 
+    private var computeTask: Task<Void, Never>?
+
     private let serialEventQueue = DispatchQueue(
         label: "com.infomaniak.drive.parallelism-heuristic.event",
         qos: .default
@@ -56,7 +63,7 @@ public final class WorkloadParallelismHeuristic {
         // Update on thermal change
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelismInQueue),
+            selector: #selector(computeParallelismInTask),
             name: ProcessInfo.thermalStateDidChangeNotification,
             object: nil
         )
@@ -64,67 +71,122 @@ public final class WorkloadParallelismHeuristic {
         // Update on low power mode
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(computeParallelismInQueue),
+            selector: #selector(computeParallelismInTask),
             name: NSNotification.Name.NSProcessInfoPowerStateDidChange,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(computeParallelismInTask),
+            name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             guard let self else { return }
-            self.computeParallelismInQueue()
+            self.computeParallelismInTask()
         }
 
-        computeParallelismInQueue()
+        computeParallelismInTask()
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self, name: ProcessInfo.thermalStateDidChangeNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSProcessInfoPowerStateDidChange, object: nil)
+        NotificationCenter.default.removeObserver(self)
     }
 
-    @objc private func computeParallelismInQueue() {
+    @objc private func computeParallelismInTask() {
         serialEventQueue.async {
-            self.computeParallelism()
+            self.computeTask?.cancel()
+
+            let computeParallelismTask = Task {
+                await self.computeParallelism()
+            }
+
+            self.computeTask = computeParallelismTask
         }
     }
 
-    private func computeParallelism() {
+    @MainActor private var appIsActive: Bool {
+        UIApplication.shared.applicationState == .active
+    }
+
+    private func computeParallelism() async {
         let processInfo = ProcessInfo.processInfo
 
         // If the device is too hot we cool down now
         let thermalState = processInfo.thermalState
         guard thermalState != .critical else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
         // In low power mode, we reduce parallelism
         guard !processInfo.isLowPowerModeEnabled else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
         // In extension, to reduce memory footprint, we reduce drastically parallelism
         guard !appContextService.isExtension else {
-            currentParallelism = ParallelismDefaults.reducedParallelism
+            currentParallelism = ParallelismDefaults.reduced
             return
         }
 
-        // Scaling with the number of activeProcessor
-        let parallelism = max(4, processInfo.activeProcessorCount)
+        // In state .background or .inactive, to reduce memory footprint, we reduce drastically parallelism
+        guard await appIsActive else {
+            currentParallelism = ParallelismDefaults.reduced
+            return
+        }
+
+        // Scaling with the number of activeProcessor to a point
+        let parallelism = min(ParallelismDefaults.high,
+                              max(ParallelismDefaults.medium, processInfo.activeProcessorCount))
 
         // Beginning with .serious state, we start reducing the load on the system
         guard thermalState != .serious else {
-            currentParallelism = max(ParallelismDefaults.reducedParallelism, parallelism / 2)
+            currentParallelism = max(ParallelismDefaults.reduced, parallelism / 2)
+            return
+        }
+
+        guard !Task.isCancelled else {
             return
         }
 
         currentParallelism = parallelism
     }
 
-    public private(set) var currentParallelism = ParallelismDefaults.reducedParallelism {
+    private var _currentParallelism = ParallelismDefaults.serial {
         didSet {
-            delegate?.parallelismShouldChange(value: currentParallelism)
+            delegate?.parallelismShouldChange(value: _currentParallelism)
+        }
+    }
+
+    public private(set) var currentParallelism: Int {
+        get {
+            _currentParallelism
+        }
+        set {
+            guard _currentParallelism != newValue else { return }
+            _currentParallelism = newValue
         }
     }
 }
