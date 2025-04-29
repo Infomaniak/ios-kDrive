@@ -403,7 +403,7 @@ public final class FileActionsHelper {
     public static func favorite(
         files: [File],
         driveFileManager: DriveFileManager,
-        completion: ((File) async -> Void)? = nil
+        completion: ((ProxyFile) async -> Void)? = nil
     ) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
@@ -411,7 +411,7 @@ public final class FileActionsHelper {
         let canFavoriteFilesProxy = files.filter { $0.capabilities.canUseFavorite }.map { $0.proxify() }
         try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: 4) { proxyFile in
             try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
-            await completion?(file)
+            await completion?(proxyFile)
         }
 
         return areFavored

@@ -248,7 +248,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    func favorite(file: File) async {
+    func favorite(file: ProxyFile) async {
         if let file = driveFileManager.getCachedFile(id: file.id) {
             await MainActor.run {
                 self.changedFiles?.append(file)
