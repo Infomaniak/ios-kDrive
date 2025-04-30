@@ -126,7 +126,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
 
     @MainActor func testRootMenuViewController() {
         // GIVEN
-        let rootMenuViewController = RootMenuViewController(driveFileManager: Self.driveFileManager)
+        let rootMenuViewController = MainTabViewController(driveFileManager: Self.driveFileManager)
 
         // WHEN
         let metadata = rootMenuViewController.currentSceneMetadata
