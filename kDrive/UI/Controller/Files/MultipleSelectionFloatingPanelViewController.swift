@@ -93,7 +93,12 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         } else if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            actions = FloatingPanelAction.selectAllActions
+            guard let parentId = files.first?.parent?.id else { return }
+            if files.allSatisfy({ $0.parent?.id == parentId }) {
+                actions = FloatingPanelAction.selectAllActions
+            } else {
+                actions = FloatingPanelAction.selectAllActionsWithoutDownload
+            }
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             actions = FloatingPanelAction.multipleSelectionBulkActions
             if files.contains(where: { $0.parentId != files.first?.parentId }) {

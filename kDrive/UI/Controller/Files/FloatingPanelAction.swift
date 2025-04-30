@@ -275,6 +275,10 @@ public class FloatingPanelAction: Equatable {
         return [.offline, download, move, duplicate].map { $0.reset() }
     }
 
+    static var selectAllActionsWithoutDownload: [FloatingPanelAction] {
+        return [.offline, move, duplicate].map { $0.reset() }
+    }
+
     public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {
         return lhs.id == rhs.id
     }
