@@ -369,6 +369,12 @@ extension MainTabViewController: MainTabBarDelegate {
 
         MatomoUtils.track(eventWithCategory: .account, name: "switchDoubleTap")
     }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
+    }
 }
 
 // MARK: - Tab bar controller delegate
