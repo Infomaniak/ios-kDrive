@@ -75,7 +75,9 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         if let settings = photoUploader.frozenSettings {
             return PhotoSyncSettings(value: settings as Any)
         } else {
-            return PhotoSyncSettings()
+            let syncSetting = PhotoSyncSettings()
+            syncSetting.wifiSync = .onlyWifi
+            return syncSetting
         }
     }()
 
