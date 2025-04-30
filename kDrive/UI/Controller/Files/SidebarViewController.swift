@@ -28,7 +28,16 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
-    private let removeSelectionIndexPath: IndexPath = [-1, -1]
+    private let menuIndexPath: IndexPath = [-1, -1]
+
+    private var isMenuIndexPathSelected: Bool {
+        if selectedIndexPath != menuIndexPath {
+            selectedIndexPath = menuIndexPath
+            return false
+        }
+
+        return true
+    }
 
     private enum RootMenuSection {
         case main
@@ -489,8 +498,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
-        if selectedIndexPath != removeSelectionIndexPath {
-            selectedIndexPath = removeSelectionIndexPath
+        if !isMenuIndexPathSelected {
             delegate?.didSelectItem(
                 destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager),
                 name: KDriveResourcesStrings.Localizable.menuTitle
