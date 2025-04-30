@@ -2,3 +2,4 @@
 - Travail sur les Actions de Fichier
 - Support des Drives endormis
 - Fix d'un bug rare relatif à la synchronisation photo
+- Optimisations de la synchronisation photo

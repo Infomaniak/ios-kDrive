@@ -2,3 +2,4 @@
 - Reworked File actions
 - Support for the new Drive asleep state
 - Fix a rare bug that can suspend photo sync
+- Photo sync optimisations
