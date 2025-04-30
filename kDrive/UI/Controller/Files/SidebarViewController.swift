@@ -28,6 +28,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
+    private let removeSelectionIndexPath: IndexPath = [-1, -1]
 
     private enum RootMenuSection {
         case main
@@ -83,7 +84,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                         destinationFile: DriveFileManager.offlineRoot
                                                     )]
 
-    private static var secondSectionItems: [RootMenuItem] = [
+    private static var sharedItems: [RootMenuItem] = [
         RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                      image: KDriveResourcesAsset.folderSelect2.image,
                      destinationFile: DriveFileManager.sharedWithMeRootFile),
@@ -92,9 +93,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                      destinationFile: DriveFileManager.mySharedRootFile)
     ]
 
-    private static var thirdSectionItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
-                                                                         image: KDriveResourcesAsset.delete.image,
-                                                                         destinationFile: DriveFileManager.trashRootFile)]
+    private static var trashItem: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
+                                                                 image: KDriveResourcesAsset.delete.image,
+                                                                 destinationFile: DriveFileManager.trashRootFile)]
 
     private static let compactModeItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                         image: KDriveResourcesAsset.favorite.image,
@@ -141,8 +142,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         if horizontalSizeClass == .regular {
             let firstSectionItems = SidebarViewController.baseItems
-            let secondSectionItems = userRootFolders + SidebarViewController.secondSectionItems
-            let thirdSectionItems = SidebarViewController.thirdSectionItems
+            let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
+            let thirdSectionItems = SidebarViewController.trashItem
             var sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
             let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
 
@@ -441,14 +442,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             case .second:
                 let length = (SidebarViewController.baseItems).count
                 let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .secondSectionItems)
+                    .sharedItems)
                 let selectedItemName = menuItems[indexPath.row + length].name
                 delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
             case .third:
                 let length = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .secondSectionItems).count
+                    .sharedItems).count
                 let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .secondSectionItems + SidebarViewController.thirdSectionItems)
+                    .sharedItems + SidebarViewController.trashItem)
                 let selectedItemName = menuItems[indexPath.row + length].name
                 delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
             case .main:
@@ -488,8 +489,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
-        if selectedIndexPath != [-1, -1] {
-            selectedIndexPath = [-1, -1]
+        if selectedIndexPath != removeSelectionIndexPath {
+            selectedIndexPath = removeSelectionIndexPath
             delegate?.didSelectItem(
                 destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager),
                 name: KDriveResourcesStrings.Localizable.menuTitle

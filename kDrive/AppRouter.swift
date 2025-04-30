@@ -652,8 +652,8 @@ public struct AppRouter: AppNavigable {
         }
 
         let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
-        rootViewController?.didUpdateCurrentAccountInformations(account)
+        let viewController = window?.rootViewController as? UpdateAccountDelegate
+        viewController?.didUpdateCurrentAccountInformations(account)
 
         if let oldDriveId,
            let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),

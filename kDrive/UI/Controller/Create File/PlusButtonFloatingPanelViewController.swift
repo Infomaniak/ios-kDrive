@@ -248,7 +248,6 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         let documentPicker = DriveImportDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
         documentPicker.importDrive = driveFileManager.drive
         documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
-//        documentPicker.delegate = mainTabViewController
         mainTabViewController.present(documentPicker, animated: true)
     }
 
