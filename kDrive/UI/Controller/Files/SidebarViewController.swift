@@ -158,11 +158,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
             for i in 0 ... sectionsItems.count - 1 {
                 if !sections.isEmpty {
-                    sectionsItems[i][0].isFirst = true
-                    sectionsItems[i][sectionsItems[i].count - 1].isLast = true
+                    var sectionItems = sectionsItems[i]
+                    let section = sections[i]
+                    sectionItems[0].isFirst = true
+                    sectionItems[sectionItems.count - 1].isLast = true
 
-                    snapshot.appendSections([sections[i]])
-                    snapshot.appendItems(sectionsItems[i], toSection: sections[i])
+                    snapshot.appendSections([section])
+                    snapshot.appendItems(sectionItems, toSection: section)
                 }
             }
         } else {
