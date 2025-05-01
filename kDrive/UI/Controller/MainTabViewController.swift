@@ -49,7 +49,7 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         super.viewDidLoad()
 
         let sidebarViewController = SidebarViewController(driveFileManager: driveFileManager)
-        let detailViewController = DetailViewController()
+        let detailViewController = UIViewController()
 
         sidebarViewController.delegate = self
 
@@ -59,6 +59,9 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         viewControllers = [sidebarNav, detailNav]
         setViewController(MainTabViewController(driveFileManager: driveFileManager), for: .compact)
         preferredDisplayMode = .oneBesideSecondary
+
+        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+        detailNav.setViewControllers([homeViewController], animated: false)
     }
 
     // MARK: - SidebarViewControllerDelegate
@@ -79,26 +82,6 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
                 detailNav.setViewControllers([destinationViewController], animated: false)
             }
         }
-    }
-}
-
-class DetailViewController: UIViewController {
-    private var label = UILabel()
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        view.backgroundColor = .white
-        label.text = "Select a folder"
-        label.textAlignment = .center
-
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
     }
 }
 
