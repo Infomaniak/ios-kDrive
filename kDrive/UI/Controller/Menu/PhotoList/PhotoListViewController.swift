@@ -157,7 +157,17 @@ final class PhotoListViewController: FileListViewController {
         let gradient = CAGradientLayer()
         let bounds = view.frame
         gradient.frame = bounds
-        gradient.colors = [UIColor.black.withAlphaComponent(0.8).cgColor, UIColor.clear.cgColor]
+        gradient.colors = [
+            UIColor.black.withAlphaComponent(0.8).cgColor,
+            UIColor.black.withAlphaComponent(0.70).cgColor,
+            UIColor.black.withAlphaComponent(0.6).cgColor,
+            UIColor.black.withAlphaComponent(0.5).cgColor,
+            UIColor.black.withAlphaComponent(0.45).cgColor,
+            UIColor.black.withAlphaComponent(0.40).cgColor,
+            UIColor.black.withAlphaComponent(0.35).cgColor,
+            UIColor.black.withAlphaComponent(0.30).cgColor,
+            UIColor.clear.cgColor
+        ]
         let renderer = UIGraphicsImageRenderer(size: gradient.frame.size)
         view.image = renderer.image { ctx in
             gradient.render(in: ctx.cgContext)
