@@ -117,6 +117,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             } else {
                 actions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
             }
+
+            if files.contains(where: { $0.parentId != files.first?.parentId }) && !filesAreAllMedia {
+                actions.removeAll { $0 == .download }
+            }
         }
     }
 
