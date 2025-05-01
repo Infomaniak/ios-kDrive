@@ -32,7 +32,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @InjectService var appRouter: AppNavigable
+    @LazyInjectService var appRouter: AppNavigable
 
     private var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }

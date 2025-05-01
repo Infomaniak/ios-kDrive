@@ -25,10 +25,16 @@ import RealmSwift
 import UIKit
 
 class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
+    @LazyInjectService var appRouter: AppNavigable
     private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     private let menuIndexPath: IndexPath = [-1, -1]
+
+    private var isCompactView: Bool {
+        guard let rootViewController = appRouter.rootViewController else { return false }
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
+    }
 
     private var isMenuIndexPathSelected: Bool {
         if selectedIndexPath != menuIndexPath {
@@ -138,7 +144,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     private var displayedSnapshot = DataSourceSnapshot()
 
-    private func getItemsSnapshot(horizontalSizeClass: UIUserInterfaceSizeClass) -> DataSourceSnapshot {
+    private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
@@ -149,11 +155,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         } ?? []
 
-        if horizontalSizeClass == .regular {
+        if !isCompactView {
             let firstSectionItems = SidebarViewController.baseItems
             let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
             let thirdSectionItems = SidebarViewController.trashItem
-            var sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
+            let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
             let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
 
             for i in 0 ... sectionsItems.count - 1 {
@@ -198,14 +204,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     func setDisplayedSnapshot() {
-        @InjectService var appRouter: AppNavigable
-        guard let rootViewController = appRouter.rootViewController else {
-            return
-        }
-
-        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         setupViewForCurrentSizeClass()
-        displayedSnapshot = getItemsSnapshot(horizontalSizeClass: rootHorizontalSizeClass)
+        displayedSnapshot = getItemsSnapshot(isCompactView: isCompactView)
         dataSource?.apply(displayedSnapshot, animatingDifferences: true)
     }
 
@@ -216,12 +216,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     private func setupViewForCurrentSizeClass() {
-        @InjectService var appRouter: AppNavigable
-        guard let rootViewController = appRouter.rootViewController else {
-            return
-        }
-
-        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         let buttonAdd = ImageButton()
         var avatar = UIImage()
 
@@ -236,7 +230,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         buttonAdd.layer.cornerRadius = 10
         buttonAdd.translatesAutoresizingMaskIntoConstraints = false
 
-        if rootHorizontalSizeClass == .regular {
+        if !isCompactView {
             accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
                 avatar = SidebarViewController.generateProfileTabImages(image: image)
                 let buttonMenu = UIBarButtonItem(
@@ -366,32 +360,37 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     static func createListLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                              heightDimension: .estimated(60))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, _ in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .estimated(60))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .estimated(60))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(60))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                           subitems: [item])
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 24, trailing: 0)
 
-        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: RootMenuHeaderView.kind.rawValue,
-            alignment: .top
-        )
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
-        sectionHeaderItem.pinToVisibleBounds = true
+            if sectionIndex == 0 {
+                let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                        heightDimension: .estimated(0))
+                let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: RootMenuHeaderView.kind.rawValue,
+                    alignment: .top
+                )
+                sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+                section.boundarySupplementaryItems = [sectionHeaderItem]
+            }
 
-        let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [sectionHeaderItem]
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 24, trailing: 0)
+            return section
+        }
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration.boundarySupplementaryItems = [generateHeaderItem()]
-        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
         return layout
     }
 
@@ -409,8 +408,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        @InjectService var appRouter: AppNavigable
-
         guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
@@ -436,12 +433,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         }
 
-        guard let rootViewController = appRouter.rootViewController else {
-            return
-        }
-        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-
-        if indexPath != selectedIndexPath || rootHorizontalSizeClass == .compact {
+        if indexPath != selectedIndexPath || isCompactView {
             let userRootFolders = rootViewChildren?.compactMap {
                 RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
             } ?? []
