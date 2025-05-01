@@ -49,6 +49,8 @@ public final class PhotoLibraryUploader {
         case importCancelledBySystem
     }
 
+    let syncWorker = PhotoLibrarySyncWorker()
+
     public var frozenSettings: PhotoSyncSettings? {
         let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
             lazyCollection.first
