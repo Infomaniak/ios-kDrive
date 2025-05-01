@@ -56,6 +56,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
     }
 
+    private var filesAreWithinTheSameFolder: Bool {
+        !files.contains { $0.parentId != files.first?.parentId }
+    }
+
     init(
         driveFileManager: DriveFileManager,
         currentDirectory: File,
@@ -92,35 +96,35 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
+        var newActions: [FloatingPanelAction]
+        defer { actions = newActions }
+
         if driveFileManager.isPublicShare {
-            actions = FloatingPanelAction.multipleSelectionPublicShareActions
+            newActions = FloatingPanelAction.multipleSelectionPublicShareActions
         } else if sharedWithMe {
-            actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
+            newActions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            guard let parentId = files.first?.parent?.id else { return }
-            let filesWithinSameFolder = files.allSatisfy { $0.parent?.id == parentId }
-            if  filesWithinSameFolder || filesAreAllMedia {
-                actions = FloatingPanelAction.selectAllActions
-            } else {
-                actions = FloatingPanelAction.selectAllActionsWithoutDownload
-            }
+            newActions = FloatingPanelAction.selectAllActions
+            removeDownloadActionIfNeeded(&newActions)
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
-            actions = FloatingPanelAction.multipleSelectionBulkActions
-            if files.contains(where: { $0.parentId != files.first?.parentId }) && !filesAreAllMedia {
-                actions.removeAll { $0 == .download }
-            }
+            newActions = FloatingPanelAction.multipleSelectionBulkActions
+            removeDownloadActionIfNeeded(&newActions)
         } else if presentingParent is PhotoListViewController {
-            actions = FloatingPanelAction.multipleSelectionPhotosListActions
+            newActions = FloatingPanelAction.multipleSelectionPhotosListActions
         } else {
             if files.contains(where: { !$0.isDirectory }) {
-                actions = FloatingPanelAction.multipleSelectionActions
+                newActions = FloatingPanelAction.multipleSelectionActions
             } else {
-                actions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
+                newActions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
             }
 
-            if files.contains(where: { $0.parentId != files.first?.parentId }) && !filesAreAllMedia {
-                actions.removeAll { $0 == .download }
-            }
+            removeDownloadActionIfNeeded(&newActions)
+        }
+    }
+
+    private func removeDownloadActionIfNeeded(_ newActions: inout [FloatingPanelAction]) {
+        if !filesAreWithinTheSameFolder && !filesAreAllMedia {
+            newActions.removeAll { $0 == .download }
         }
     }
 
