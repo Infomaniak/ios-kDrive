@@ -52,6 +52,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
+    private var filesAreAllMedia: Bool {
+        files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
+    }
+
     init(
         driveFileManager: DriveFileManager,
         currentDirectory: File,
@@ -94,14 +98,15 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
             guard let parentId = files.first?.parent?.id else { return }
-            if files.allSatisfy({ $0.parent?.id == parentId }) {
+            let filesWithinSameFolder = files.allSatisfy { $0.parent?.id == parentId }
+            if  filesWithinSameFolder || filesAreAllMedia {
                 actions = FloatingPanelAction.selectAllActions
             } else {
                 actions = FloatingPanelAction.selectAllActionsWithoutDownload
             }
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             actions = FloatingPanelAction.multipleSelectionBulkActions
-            if files.contains(where: { $0.parentId != files.first?.parentId }) {
+            if files.contains(where: { $0.parentId != files.first?.parentId }) && !filesAreAllMedia {
                 actions.removeAll { $0 == .download }
             }
         } else if presentingParent is PhotoListViewController {
