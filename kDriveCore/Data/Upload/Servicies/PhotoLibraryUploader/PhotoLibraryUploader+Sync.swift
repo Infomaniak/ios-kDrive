@@ -17,12 +17,14 @@
  */
 
 import Foundation
+import InfomaniakCoreDB
 import RealmSwift
 
-public extension PhotoLibraryUploader {
-    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
-        let currentSyncSettings = frozenSettings
-        try? uploadsDatabase.writeTransaction { writableRealm in
+public struct PhotoLibrarySyncWorker: Codable {
+    func enableSync(liveNewSyncSettings: PhotoSyncSettings,
+                    currentSyncSettings: PhotoSyncSettings?,
+                    database: Transactionable) async {
+        try? database.writeTransaction { writableRealm in
             guard liveNewSyncSettings.userId != -1,
                   liveNewSyncSettings.driveId != -1,
                   liveNewSyncSettings.parentDirectoryId != -1 else {
@@ -56,9 +58,26 @@ public extension PhotoLibraryUploader {
         }
     }
 
-    func disableSync() {
-        try? uploadsDatabase.writeTransaction { writableRealm in
+    func disableSync(database: Transactionable) async {
+        try? database.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
+        }
+    }
+}
+
+public extension PhotoLibraryUploader {
+    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
+        let currentSyncSettings = frozenSettings
+        Task {
+            await syncWorker.enableSync(liveNewSyncSettings: liveNewSyncSettings,
+                                        currentSyncSettings: frozenSettings,
+                                        database: uploadsDatabase)
+        }
+    }
+
+    func disableSync() {
+        Task {
+            await syncWorker.disableSync(database: uploadsDatabase)
         }
     }
 }
