@@ -31,6 +31,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     let driveFileManager: DriveFileManager
     var files: [File]
     let allItemsSelected: Bool
+    let forceMoveDistinctFiles: Bool
     let exceptFileIds: [Int]?
     let currentDirectory: File
     let reloadAction: (() -> Void)?
@@ -51,11 +52,20 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
+    private var filesAreAllMedia: Bool {
+        files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
+    }
+
+    private var filesAreWithinTheSameFolder: Bool {
+        !files.contains { $0.parentId != files.first?.parentId }
+    }
+
     init(
         driveFileManager: DriveFileManager,
         currentDirectory: File,
         files: [File],
         allItemsSelected: Bool,
+        forceMoveDistinctFiles: Bool,
         exceptFileIds: [Int]?,
         reloadAction: (() -> Void)?,
         presentingParent: UIViewController?
@@ -64,6 +74,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         self.currentDirectory = currentDirectory
         self.files = files
         self.allItemsSelected = allItemsSelected
+        self.forceMoveDistinctFiles = forceMoveDistinctFiles
         self.exceptFileIds = exceptFileIds
         self.reloadAction = reloadAction
         self.presentingParent = presentingParent
@@ -85,25 +96,35 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
+        var newActions: [FloatingPanelAction]
+        defer { actions = newActions }
+
         if driveFileManager.isPublicShare {
-            actions = FloatingPanelAction.multipleSelectionPublicShareActions
+            newActions = FloatingPanelAction.multipleSelectionPublicShareActions
         } else if sharedWithMe {
-            actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
+            newActions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            actions = FloatingPanelAction.selectAllActions
+            newActions = FloatingPanelAction.selectAllActions
+            removeDownloadActionIfNeeded(&newActions)
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
-            actions = FloatingPanelAction.multipleSelectionBulkActions
-            if files.contains(where: { $0.parentId != files.first?.parentId }) {
-                actions.removeAll { $0 == .download }
-            }
+            newActions = FloatingPanelAction.multipleSelectionBulkActions
+            removeDownloadActionIfNeeded(&newActions)
         } else if presentingParent is PhotoListViewController {
-            actions = FloatingPanelAction.multipleSelectionPhotosListActions
+            newActions = FloatingPanelAction.multipleSelectionPhotosListActions
         } else {
             if files.contains(where: { !$0.isDirectory }) {
-                actions = FloatingPanelAction.multipleSelectionActions
+                newActions = FloatingPanelAction.multipleSelectionActions
             } else {
-                actions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
+                newActions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
             }
+
+            removeDownloadActionIfNeeded(&newActions)
+        }
+    }
+
+    private func removeDownloadActionIfNeeded(_ newActions: inout [FloatingPanelAction]) {
+        if !filesAreWithinTheSameFolder && !filesAreAllMedia {
+            newActions.removeAll { $0 == .download }
         }
     }
 
@@ -114,7 +135,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
-            if allItemsSelected {
+            if allItemsSelected && !forceMoveDistinctFiles {
                 action = BulkAction(
                     action: .copy,
                     parentId: currentDirectory.id,

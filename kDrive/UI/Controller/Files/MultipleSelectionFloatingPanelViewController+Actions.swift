@@ -100,8 +100,8 @@ extension MultipleSelectionFloatingPanelViewController {
     }
 
     private func downloadAction(group: DispatchGroup, at indexPath: IndexPath) {
-        if !allItemsSelected,
-           files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1 {
+        if !allItemsSelected || forceMoveDistinctFiles,
+           files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) || files.count <= 1 {
             downloadActionMediaOrSingleFile(group: group, at: indexPath)
         } else {
             downloadActionArchive(group: group, at: indexPath)
@@ -112,7 +112,7 @@ extension MultipleSelectionFloatingPanelViewController {
         for file in files {
             guard !file.isDownloaded else {
                 FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
-                return
+                continue
             }
 
             guard let observerViewController = view.window?.rootViewController else {
@@ -205,6 +205,7 @@ extension MultipleSelectionFloatingPanelViewController {
                                exceptFileIds: exceptFileIds ?? [],
                                from: currentDirectory,
                                allItemsSelected: allItemsSelected,
+                               forceMoveDistinctFiles: forceMoveDistinctFiles,
                                observer: self,
                                driveFileManager: driveFileManager) { [weak self] viewController in
             guard let self else {

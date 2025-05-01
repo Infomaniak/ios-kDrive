@@ -114,6 +114,7 @@ class MultipleSelectionFileListViewModel {
     private(set) var selectedItems = Set<File>()
     private(set) var exceptItemIds = Set<Int>()
     var isSelectAllModeEnabled = false
+    var forceMoveDistinctFiles = false
 
     var driveFileManager: DriveFileManager
     private var currentDirectory: File
@@ -156,6 +157,7 @@ class MultipleSelectionFileListViewModel {
                                    exceptFileIds: Array(exceptItemIds),
                                    from: currentDirectory,
                                    allItemsSelected: isSelectAllModeEnabled,
+                                   forceMoveDistinctFiles: forceMoveDistinctFiles,
                                    observer: self,
                                    driveFileManager: driveFileManager) { [weak self] viewController in
                 self?.onPresentViewController?(.modal, viewController, true)
@@ -273,6 +275,12 @@ class MultipleSelectionFileListViewModel {
             selectedItems.remove(file)
             selectedCount = selectedItems.count
         }
+    }
+
+    func didSelectFiles(_ files: Set<File>) {
+        exceptItemIds.removeAll()
+        selectedCount = files.count
+        selectedItems = files
     }
 
     func deleteSelectedItems() async {
