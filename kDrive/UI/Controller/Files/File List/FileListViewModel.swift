@@ -340,7 +340,7 @@ class FileListViewModel: SelectDelegate {
         isLoading = false
         isRefreshing = false
         currentDirectory = getRefreshedCurrentDirectory()
-        isShowingEmptyView = currentDirectory.children.isEmpty && currentDirectory.fullyDownloaded
+        isShowingEmptyView = shouldShowEmptyView()
     }
 
     func loadActivities() async throws {
