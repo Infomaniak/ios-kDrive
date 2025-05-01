@@ -180,8 +180,6 @@ public enum Constants {
     public static func appVersionLabel() -> String {
         return CorePlatform.appVersionLabel(fallbackAppName: "Mail")
     }
-
-    public static let maxNetworkParallelism = 4
 }
 
 /// App lifecycle Constants

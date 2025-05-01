@@ -231,7 +231,7 @@ public final class FileActionsHelper {
                 let proxySelectedItems = files.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
                 let proxyDestinationDirectory = destinationDirectory.proxify()
 
-                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.maxNetworkParallelism) { proxyFile in
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
                     _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                 }
 
