@@ -259,6 +259,9 @@ final class PhotoListViewController: FileListViewController {
         guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
             (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+            isLargeTitle = false
+        }
         photoHeaderView.isHidden = isLargeTitle
         headerImageView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
