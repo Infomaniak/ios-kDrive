@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import Combine
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -50,6 +51,9 @@ final class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
     private lazy var sections = buildSections(files: [UploadFileDisplayed]())
+    private var cancellables = Set<AnyCancellable>()
+    private let observedFilesSubject = PassthroughSubject<[UploadFileDisplayed], Never>()
+    private let observationQueue = DispatchQueue(label: "UploadQueueViewController.observationQueue.serial")
     private var observedFilesNotificationToken: NotificationToken?
 
     override func viewDidLoad() {
@@ -67,6 +71,7 @@ final class UploadQueueViewController: UIViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
+                guard let self else { return }
                 self?.reloadCollectionView(with: nil)
             }
         }
@@ -102,6 +107,7 @@ final class UploadQueueViewController: UIViewController {
     }
 
     deinit {
+        cancellables.forEach { $0.cancel() }
         observedFilesNotificationToken?.invalidate()
         wifiOnlyNotificationToken?.invalidate()
     }
@@ -111,13 +117,14 @@ final class UploadQueueViewController: UIViewController {
             return
         }
 
+        cancellables.forEach { $0.cancel() }
         observedFilesNotificationToken?.invalidate()
 
         let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
                                                                                   userId: accountManager.currentUserId,
                                                                                   driveId: currentDirectory.driveId))
         observedFilesNotificationToken = observedFiles
-            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+            .observe(keyPaths: UploadFile.observedProperties, on: observationQueue) { [weak self] change in
                 guard let self else {
                     return
                 }
@@ -134,7 +141,7 @@ final class UploadQueueViewController: UIViewController {
                 }
 
                 guard let newResults else {
-                    reloadCollectionView(with: [])
+                    observedFilesSubject.send([])
                     return
                 }
 
@@ -145,32 +152,33 @@ final class UploadQueueViewController: UIViewController {
                                                content: frozenFile)
                 }
 
-                reloadCollectionView(with: wrappedFrozenFiles)
+                observedFilesSubject.send(wrappedFrozenFiles)
             }
+
+        observedFilesSubject
+            .throttle(for: .seconds(1), scheduler: observationQueue, latest: true)
+            .sink { [weak self] throttledFiles in
+                self?.reloadCollectionView(with: throttledFiles)
+            }
+            .store(in: &cancellables)
     }
 
-    @MainActor func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]? = nil) {
-        let newSections: [ArraySection<SectionModel, UploadFileDisplayed>]
-        if let frozenFiles {
-            newSections = buildSections(files: frozenFiles)
-        } else {
-            newSections = buildSections(files: frozenUploadingFiles)
-        }
-
+    func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]) {
+        let newSections = buildSections(files: frozenFiles)
         let changeSet = StagedChangeset(source: sections, target: newSections)
 
-        tableView.reload(using: changeSet,
-                         with: UITableView.RowAnimation.automatic,
-                         interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                         setData: { newValues in
-                             if let frozenFiles {
+        Task { @MainActor in
+            tableView.reload(using: changeSet,
+                             with: UITableView.RowAnimation.automatic,
+                             interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                             setData: { newValues in
                                  frozenUploadingFiles = frozenFiles
-                             }
-                             sections = newValues
-                         })
+                                 sections = newValues
+                             })
 
-        if let frozenFiles, frozenFiles.isEmpty {
-            navigationController?.popViewController(animated: true)
+            if frozenFiles.isEmpty {
+                navigationController?.popViewController(animated: true)
+            }
         }
     }
 
