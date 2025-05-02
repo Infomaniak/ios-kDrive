@@ -339,9 +339,12 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     private func bindUploadCardViewModel() {
-        viewModel.uploadViewModel?.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
-            self?.updateUploadCard(uploadCount: uploadCount)
-        }
+        viewModel.uploadViewModel?.$uploadCount
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
+            .sink { [weak self] uploadCount in
+                self?.updateUploadCard(uploadCount: uploadCount)
+            }
+            .store(in: &bindStore)
     }
 
     private func bindMultipleSelectionViewModel() {
