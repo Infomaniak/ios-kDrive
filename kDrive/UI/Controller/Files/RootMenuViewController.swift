@@ -252,7 +252,12 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 24, leading: 16, bottom: 24, trailing: 16)
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: UIConstants.Padding.standard,
+            leading: UIConstants.Padding.medium,
+            bottom: UIConstants.Padding.standard,
+            trailing: UIConstants.Padding.medium
+        )
         section.boundarySupplementaryItems = [sectionHeaderItem]
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()

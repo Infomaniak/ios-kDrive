@@ -55,15 +55,17 @@ class LocationFolderViewController: RootMenuViewController {
         let firstSectionItems = LocationFolderViewController.recentItems
         let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
         let sections = [RootMenuSection.recent, RootMenuSection.main]
-        var sectionItems = [firstSectionItems, secondSectionItems]
+        let sectionItems = [firstSectionItems, secondSectionItems]
 
         for i in 0 ... sectionItems.count - 1 {
-            if !sectionItems[i].isEmpty {
-                sectionItems[i][0].isFirst = true
-                sectionItems[i][sectionItems[i].count - 1].isLast = true
+            guard var sectionItem = sectionItems[safe: i] else { continue }
+            guard let section = sections[safe: i] else { continue }
+            if !sectionItem.isEmpty {
+                sectionItem[0].isFirst = true
+                sectionItem[sectionItem.count - 1].isLast = true
 
-                snapshot.appendSections([sections[i]])
-                snapshot.appendItems(sectionItems[i], toSection: sections[i])
+                snapshot.appendSections([section])
+                snapshot.appendItems(sectionItem, toSection: section)
             }
         }
         return snapshot
