@@ -96,7 +96,7 @@ public extension PhotoLibraryUploader {
             var burstIdentifier: String?
             var burstCount = 0
 
-            assetsFetchResult.enumerateObjects { [self] asset, idx, stop in
+            assetsFetchResult.enumerateObjects { [self] asset, _, stop in
                 guard !expiringActivity.shouldTerminate else {
                     Log.photoLibraryUploader("system is asking to terminate")
                     stop.pointee = true
