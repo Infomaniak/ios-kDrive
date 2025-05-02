@@ -81,6 +81,11 @@ public extension PhotoLibraryUploader {
     private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
                                              initial: Bool) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
+        guard let frozenSettings else {
+            Log.photoLibraryUploader("no settings")
+            return
+        }
+
         let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
         defer {
@@ -97,13 +102,6 @@ public extension PhotoLibraryUploader {
                     stop.pointee = true
                     return
                 }
-
-                guard let frozenSettings else {
-                    Log.photoLibraryUploader("no settings")
-                    stop.pointee = true
-                    return
-                }
-                let settings = frozenSettings
 
                 @InjectService var photoLibrarySaver: PhotoLibrarySavable
                 if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
@@ -124,7 +122,7 @@ public extension PhotoLibraryUploader {
                 // Get a unique file identifier while taking care of the burst state
                 let finalName = getPhotoLibraryName(
                     forAsset: asset,
-                    settings: settings,
+                    settings: frozenSettings,
                     burstIdentifier: &burstIdentifier,
                     burstCount: &burstCount
                 )
@@ -167,9 +165,9 @@ public extension PhotoLibraryUploader {
 
                     // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
                     let uploadFile = UploadFile(
-                        parentDirectoryId: settings.parentDirectoryId,
-                        userId: settings.userId,
-                        driveId: settings.driveId,
+                        parentDirectoryId: frozenSettings.parentDirectoryId,
+                        userId: frozenSettings.userId,
+                        driveId: frozenSettings.driveId,
                         name: finalName,
                         asset: asset,
                         bestResourceSHA256: bestResourceSHA256,
@@ -179,7 +177,7 @@ public extension PhotoLibraryUploader {
                     )
 
                     // Lazy creation of sub folder if required in the upload file
-                    if settings.createDatedSubFolders {
+                    if frozenSettings.createDatedSubFolders {
                         uploadFile.setDatedRelativePath()
                     }
 
