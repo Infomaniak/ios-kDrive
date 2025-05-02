@@ -147,10 +147,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if isCompactView {
-            navigationItem.title = driveFileManager.drive.name
-        }
-
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
@@ -263,6 +259,12 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             homeViewController: self
         )
         self.recentActivitiesController = recentActivitiesController
+
+        if isCompactView {
+            navigationItem.title = driveFileManager.drive.name
+        } else {
+            navigationItem.title = recentActivitiesController.title
+        }
 
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
             .compactMap { $0 as? HomeRecentFilesHeaderView }.first
@@ -422,7 +424,8 @@ extension HomeViewController {
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    addLeadingConstraint: false
                 )
                 if !isCompactView {
                     homeLargeTitleHeaderView.isEnabled = false

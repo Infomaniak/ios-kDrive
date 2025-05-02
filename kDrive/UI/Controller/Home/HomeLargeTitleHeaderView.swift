@@ -23,6 +23,8 @@ import UIKit
 class HomeLargeTitleHeaderView: UICollectionReusableView {
     @IBOutlet var chevronButton: UIButton!
     @IBOutlet var titleButton: IKButton!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
+
     var titleButtonPressedHandler: ((UIButton) -> Void)?
 
     var text: String? {
@@ -51,10 +53,14 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
     func configureForDriveSwitch(
         accountManager: AccountManageable,
         driveFileManager: DriveFileManager,
-        presenter: SelectSwitchDriveDelegate
+        presenter: SelectSwitchDriveDelegate,
+        addLeadingConstraint: Bool
     ) {
         isEnabled = accountManager.drives.count > 1
         text = driveFileManager.drive.name
+        if addLeadingConstraint {
+            leadingConstraint.constant = 16
+        }
         titleButtonPressedHandler = { [weak self] _ in
             guard let self else { return }
             let drives = accountManager.drives
