@@ -52,7 +52,21 @@ class LocationFolderViewController: RootMenuViewController {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
         } ?? []
 
-        let firstSectionItems = LocationFolderViewController.recentItems
+        let children = userRootFolders.last?.destinationFile.children
+        let directories = children?.filter { $0.isDirectory }
+        let sortedDirectories = directories?.sorted { $0.lastModifiedAt > $1.lastModifiedAt }.prefix(2)
+
+        let recentDirectories = sortedDirectories?.enumerated().map { index, file in
+            RootMenuItem(
+                name: file.name,
+                image: file.icon,
+                destinationFile: file,
+                isFirst: index == 0,
+                isLast: index == (sortedDirectories?.count ?? 1) - 1
+            )
+        }
+
+        let firstSectionItems = recentDirectories ?? LocationFolderViewController.recentItems
         let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
         let sections = [RootMenuSection.recent, RootMenuSection.main]
         let sectionItems = [firstSectionItems, secondSectionItems]
@@ -68,6 +82,7 @@ class LocationFolderViewController: RootMenuViewController {
                 snapshot.appendItems(sectionItem, toSection: section)
             }
         }
+
         return snapshot
     }
 
