@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import Combine
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakDI
@@ -45,7 +46,10 @@ final class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
     private lazy var sections = buildSections(files: [UploadFileDisplayed]())
+    private var cancellables = Set<AnyCancellable>()
     private var notificationToken: NotificationToken?
+    private let observedFilesSubject = PassthroughSubject<[UploadFileDisplayed], Never>()
+    private let observationQueue = DispatchQueue(label: "UploadQueueViewController.observationQueue.serial")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,7 +66,8 @@ final class UploadQueueViewController: UIViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                self?.reloadCollectionView()
+                guard let self else { return }
+                self.reloadCollectionView(with: self.frozenUploadingFiles)
             }
         }
     }
@@ -74,6 +79,7 @@ final class UploadQueueViewController: UIViewController {
 
     deinit {
         notificationToken?.invalidate()
+        cancellables.forEach { $0.cancel() }
     }
 
     func setUpObserver() {
@@ -82,64 +88,67 @@ final class UploadQueueViewController: UIViewController {
         }
 
         notificationToken?.invalidate()
+        cancellables.forEach { $0.cancel() }
 
         let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
                                                                                   userId: accountManager.currentUserId,
                                                                                   driveId: currentDirectory.driveId))
-        notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
-            guard let self else {
-                return
+        notificationToken = observedFiles
+            .observe(keyPaths: UploadFile.observedProperties, on: observationQueue) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
+                let newResults: AnyRealmCollection<UploadFile>?
+                switch change {
+                case .initial(let results):
+                    newResults = results
+                case .update(let results, _, _, _):
+                    newResults = results
+                case .error(let error):
+                    newResults = nil
+                    DDLogError("Realm observer error: \(error)")
+                }
+
+                guard let newResults else {
+                    observedFilesSubject.send([])
+                    return
+                }
+
+                let wrappedFrozenFiles = newResults.enumerated().map { index, file in
+                    let frozenFile = file.freeze()
+                    return UploadFileDisplayed(isFirstInList: index == 0,
+                                               isLastInList: index == newResults.count - 1,
+                                               content: frozenFile)
+                }
+
+                observedFilesSubject.send(wrappedFrozenFiles)
             }
 
-            let newResults: AnyRealmCollection<UploadFile>?
-            switch change {
-            case .initial(let results):
-                newResults = results
-            case .update(let results, _, _, _):
-                newResults = results
-            case .error(let error):
-                newResults = nil
-                DDLogError("Realm observer error: \(error)")
+        observedFilesSubject
+            .throttle(for: .seconds(1), scheduler: observationQueue, latest: true)
+            .sink { [weak self] throttledFiles in
+                self?.reloadCollectionView(with: throttledFiles)
             }
-
-            guard let newResults else {
-                reloadCollectionView(with: [])
-                return
-            }
-
-            let wrappedFrozenFiles = newResults.enumerated().map { index, file in
-                let frozenFile = file.freeze()
-                return UploadFileDisplayed(isFirstInList: index == 0,
-                                           isLastInList: index == newResults.count - 1,
-                                           content: frozenFile)
-            }
-
-            reloadCollectionView(with: wrappedFrozenFiles)
-        }
+            .store(in: &cancellables)
     }
 
-    @MainActor func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]? = nil) {
-        let newSections: [ArraySection<SectionModel, UploadFileDisplayed>]
-        if let frozenFiles {
-            newSections = buildSections(files: frozenFiles)
-        } else {
-            newSections = buildSections(files: frozenUploadingFiles)
-        }
-
+    func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]) {
+        let newSections = buildSections(files: frozenFiles)
         let changeSet = StagedChangeset(source: sections, target: newSections)
 
-        tableView.reload(using: changeSet,
-                         with: UITableView.RowAnimation.automatic,
-                         interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                         setData: { newValues in
-                             if let frozenFiles {
+        Task { @MainActor in
+            tableView.reload(using: changeSet,
+                             with: UITableView.RowAnimation.automatic,
+                             interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                             setData: { newValues in
                                  frozenUploadingFiles = frozenFiles
-                             }
-                             sections = newValues
-                         })
+                                 sections = newValues
+                             })
 
-        if let frozenFiles, frozenFiles.isEmpty {
-            navigationController?.popViewController(animated: true)
+            if frozenFiles.isEmpty {
+                navigationController?.popViewController(animated: true)
+            }
         }
     }
 
