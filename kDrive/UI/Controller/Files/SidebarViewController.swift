@@ -246,10 +246,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             buttonAdd.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
 
             NSLayoutConstraint.activate([
-                buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 48),
+                buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 50),
                 buttonAdd.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-                buttonAdd.heightAnchor.constraint(equalToConstant: 48),
-                buttonAdd.widthAnchor.constraint(equalToConstant: 200)
+                buttonAdd.heightAnchor.constraint(equalToConstant: 50),
+                buttonAdd.widthAnchor.constraint(equalToConstant: 275)
             ])
 
         } else {
@@ -337,7 +337,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    addLeadingConstraint: !isCompactView
                 )
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height

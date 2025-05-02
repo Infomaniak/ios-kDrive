@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22503" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22503"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -53,16 +53,12 @@
             </constraints>
             <connections>
                 <outlet property="chevronButton" destination="aWr-uO-KB8" id="OyX-55-R3I"/>
+                <outlet property="leadingConstraint" destination="l83-oL-9ta" id="JQs-JS-ajq"/>
                 <outlet property="titleButton" destination="NKR-TM-U8a" id="tfP-wx-Pdm"/>
             </connections>
             <point key="canvasLocation" x="255.07246376811597" y="105.80357142857143"/>
         </collectionReusableView>
     </objects>
-    <designables>
-        <designable name="NKR-TM-U8a">
-            <size key="intrinsicContentSize" width="30" height="30"/>
-        </designable>
-    </designables>
     <resources>
         <image name="chevron-down" width="24" height="24"/>
         <namedColor name="iconColor">
