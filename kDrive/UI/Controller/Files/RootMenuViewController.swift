@@ -192,20 +192,20 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         for collectionView: UICollectionView
     )
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
-        dataSource = UICollectionViewDiffableDataSource<RootMenuSection,
-            RootMenuItem>(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell?
-                in
-                guard let rootMenuCell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: RootMenuCell.identifier,
-                    for: indexPath
-                ) as? RootMenuCell else {
-                    fatalError("Failed to dequeue cell")
-                }
-
-                rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-                rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-                return rootMenuCell
+        dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
+            collectionView, indexPath, menuItem -> RootMenuCell?
+            in
+            guard let rootMenuCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: RootMenuCell.identifier,
+                for: indexPath
+            ) as? RootMenuCell else {
+                fatalError("Failed to dequeue cell")
             }
+
+            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+            return rootMenuCell
+        }
 
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
