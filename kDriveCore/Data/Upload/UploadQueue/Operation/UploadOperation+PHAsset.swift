@@ -19,6 +19,11 @@
 import Foundation
 import InfomaniakCore
 
+enum PHAssetUploadError: Error {
+    case unableToFetch
+    case unableToGetURL
+}
+
 extension UploadOperation {
     func getPhAssetIfNeeded() async throws {
         Log.uploadOperation("getPhAssetIfNeeded ufid:\(uploadFileId)")
@@ -35,6 +40,7 @@ extension UploadOperation {
                 "Unable to fetch PHAsset ufid:\(uploadFileId) assetLocalIdentifier:\(String(describing: file.assetLocalIdentifier)) ",
                 level: .error
             )
+            SentryDebug.capturePHAssetResourceManagerError(PHAssetUploadError.unableToFetch)
             // This UploadFile is not a PHAsset, return silently
             return
         }
@@ -48,6 +54,7 @@ extension UploadOperation {
         // Async load the url of the asset
         guard let url = await photoLibraryUploader.getUrl(for: asset) else {
             Log.uploadOperation("Failed to get photo asset URL ufid:\(uploadFileId)", level: .error)
+            SentryDebug.capturePHAssetResourceManagerError(PHAssetUploadError.unableToGetURL)
             return
         }
 
