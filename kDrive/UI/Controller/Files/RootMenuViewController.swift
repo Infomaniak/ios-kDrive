@@ -25,12 +25,21 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
+    @LazyInjectService private var appContextService: AppContextServiceable
+
     public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
-    enum RootMenuSection: Hashable {
+    public enum RootMenuSection: Hashable, CaseIterable {
         case main
         case recent
+
+        var title: String {
+            switch self {
+            case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
+            case .recent: return KDriveResourcesStrings.Localizable.buttonRecent
+            }
+        }
     }
 
     struct RootMenuItem: Equatable, Hashable {
@@ -116,6 +125,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+        collectionView.register(
+            supplementaryView: PhotoSectionHeaderView.self,
+            forSupplementaryViewOfKind: PhotoSectionHeaderView.kind
+        )
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
@@ -213,6 +226,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
+
             case RootMenuHeaderView.kind.rawValue:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -222,6 +236,20 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
                 headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
                 return headerView
+
+            case PhotoSectionHeaderView.kind.rawValue:
+                let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: PhotoSectionHeaderView.kind.rawValue,
+                    for: indexPath
+                ) as! PhotoSectionHeaderView
+
+                if let sectionIdentifier = dataSource.snapshot().sectionIdentifiers[safe: indexPath.section] {
+                    header.titleLabel.text = sectionIdentifier.title
+                }
+
+                return header
+
             default:
                 fatalError("Unhandled kind \(kind)")
             }
@@ -232,6 +260,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     }
 
     static func createListLayout() -> UICollectionViewLayout {
+        @InjectService var appContextService: AppContextServiceable
+
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -245,15 +275,14 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: RootMenuHeaderView.kind.rawValue,
+            elementKind: appContextService.isExtension ? PhotoSectionHeaderView.kind.rawValue : RootMenuHeaderView.kind
+                .rawValue,
             alignment: .top
         )
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
-        sectionHeaderItem.pinToVisibleBounds = true
 
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(
-            top: UIConstants.Padding.standard,
+            top: -UIConstants.Padding.small,
             leading: UIConstants.Padding.medium,
             bottom: UIConstants.Padding.standard,
             trailing: UIConstants.Padding.medium
