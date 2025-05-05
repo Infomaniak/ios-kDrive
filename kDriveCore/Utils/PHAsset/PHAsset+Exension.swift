@@ -21,6 +21,11 @@ import InfomaniakCore
 import InfomaniakDI
 import Photos
 
+enum PHAssetError: Error {
+    case JPGConversionFailed
+    case JPGConversionDataEmpty
+}
+
 public extension PHAsset {
     // MARK: - Hash
 
@@ -137,6 +142,7 @@ public extension PHAsset {
             }
 
             guard try await writeJpegData(to: targetURL, resource: resource, options: requestResourceOption) else {
+                SentryDebug.capturePHAssetResourceManagerError(PHAssetError.JPGConversionFailed)
                 return nil
             }
 
@@ -167,6 +173,11 @@ public extension PHAsset {
     private func writeJpegData(to url: URL, resource: PHAssetResource,
                                options: PHAssetResourceRequestOptions) async throws -> Bool {
         guard let jpegData = try await getJpegData(for: resource, options: options) else { return false }
+
+        if jpegData.isEmpty {
+            SentryDebug.capturePHAssetResourceManagerError(PHAssetError.JPGConversionDataEmpty)
+        }
+
         try jpegData.write(to: url)
         let date = Date()
         let attributes = [
