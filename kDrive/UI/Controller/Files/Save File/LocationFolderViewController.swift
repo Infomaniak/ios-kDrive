@@ -49,24 +49,34 @@ class LocationFolderViewController: RootMenuViewController {
     override var itemsSnapshot: DataSourceSnapshot {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
+            RootMenuItem(
+                name: $0.formattedLocalizedName(drive: driveFileManager.drive),
+                image: $0.icon,
+                destinationFile: $0
+            )
         } ?? []
 
-        let children = userRootFolders.last?.destinationFile.children
-        let directories = children?.filter { $0.isDirectory }
-        let sortedDirectories = directories?.sorted { $0.lastModifiedAt > $1.lastModifiedAt }.prefix(2)
+        let recentFrozenFoldersSlice = driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+            lazyCollection
+                .filter("rawType == %@", FileType.dir.rawValue)
+                .filter("id > %@", DriveFileManager.constants.rootID)
+                .filter("parentId > %@", DriveFileManager.constants.rootID)
+                .sorted(byKeyPath: "lastModifiedAt", ascending: false)
+                .freeze()
+        }.prefix(3)
+        let recentFrozenFolders = Array(recentFrozenFoldersSlice)
 
-        let recentDirectories = sortedDirectories?.enumerated().map { index, file in
+        let recentDirectories = recentFrozenFolders.enumerated().map { index, file in
             RootMenuItem(
                 name: file.name,
                 image: file.icon,
                 destinationFile: file,
                 isFirst: index == 0,
-                isLast: index == (sortedDirectories?.count ?? 1) - 1
+                isLast: index == recentFrozenFolders.count - 1
             )
         }
 
-        let firstSectionItems = recentDirectories ?? LocationFolderViewController.recentItems
+        let firstSectionItems = recentDirectories
         let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
         let sections = [RootMenuSection.recent, RootMenuSection.main]
         let sectionItems = [firstSectionItems, secondSectionItems]
@@ -90,7 +100,6 @@ class LocationFolderViewController: RootMenuViewController {
         driveFileManager: DriveFileManager,
         viewModel: FileListViewModel,
         delegate: SelectFolderDelegate? = nil
-
     ) {
         self.viewModel = viewModel
         self.delegate = delegate

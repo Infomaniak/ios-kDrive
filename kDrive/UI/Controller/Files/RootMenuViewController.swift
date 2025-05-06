@@ -25,8 +25,6 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
-    @LazyInjectService private var appContextService: AppContextServiceable
-
     public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
@@ -79,7 +77,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                                                                  image: KDriveResourcesAsset.delete.image,
                                                                  destinationFile: DriveFileManager.trashRootFile)]
 
-    @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService private var accountManager: AccountManageable
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
@@ -126,8 +124,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
         collectionView.register(
-            supplementaryView: PhotoSectionHeaderView.self,
-            forSupplementaryViewOfKind: PhotoSectionHeaderView.kind
+            supplementaryView: ReusableHeaderView.self,
+            forSupplementaryViewOfKind: ReusableHeaderView.kind
         )
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
@@ -237,15 +235,16 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                 headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
                 return headerView
 
-            case PhotoSectionHeaderView.kind.rawValue:
+            case ReusableHeaderView.kind.rawValue:
                 let header = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
-                    withReuseIdentifier: PhotoSectionHeaderView.kind.rawValue,
+                    withReuseIdentifier: ReusableHeaderView.kind.rawValue,
                     for: indexPath
-                ) as! PhotoSectionHeaderView
+                )
 
-                if let sectionIdentifier = dataSource.snapshot().sectionIdentifiers[safe: indexPath.section] {
-                    header.titleLabel.text = sectionIdentifier.title
+                if let reusableHeader = header as? ReusableHeaderView,
+                   let sectionIdentifier = dataSource.snapshot().sectionIdentifiers[safe: indexPath.section] {
+                    reusableHeader.titleLabel.text = sectionIdentifier.title
                 }
 
                 return header
@@ -275,7 +274,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: appContextService.isExtension ? PhotoSectionHeaderView.kind.rawValue : RootMenuHeaderView.kind
+            elementKind: appContextService.isExtension ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
                 .rawValue,
             alignment: .top
         )

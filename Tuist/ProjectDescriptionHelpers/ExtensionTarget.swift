@@ -48,7 +48,7 @@ public extension Target {
             "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.xib",
             "kDrive/UI/View/Footer view/*.xib",
             "kDrive/UI/View/Menu/MenuTableViewCell.xib",
-            "kDrive/UI/View/Menu/PhotoList/PhotoSectionHeaderView.xib",
+            "kDrive/UI/View/Menu/PhotoList/ReusableHeaderView.xib",
             "kDrive/UI/View/Menu/SwitchUser/*.xib",
             "kDrive/UI/View/NewFolder/*.xib",
             "kDrive/**/*.xcassets",
@@ -110,7 +110,7 @@ public extension Target {
                            "kDrive/UI/View/Footer view/**",
                            "kDrive/UI/View/Menu/SwitchUser/**",
                            "kDrive/UI/View/Menu/MenuTableViewCell.swift",
-                           "kDrive/UI/View/Menu/PhotoList/PhotoSectionHeaderView.swift",
+                           "kDrive/UI/View/Menu/PhotoList/ReusableHeaderView.swift",
                            "kDrive/UI/View/Menu/RootMenuCell.swift",
                            "kDrive/UI/View/NewFolder/**",
                            "kDrive/Utils/**"

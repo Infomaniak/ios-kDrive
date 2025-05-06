@@ -256,7 +256,7 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
         for visibleHeaderView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-            if let photoSectionHeaderView = visibleHeaderView as? PhotoSectionHeaderView {
+            if let photoSectionHeaderView = visibleHeaderView as? ReusableHeaderView {
                 let position = collectionView.convert(photoSectionHeaderView.frame.origin, to: view)
                 photoSectionHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
@@ -366,7 +366,7 @@ final class PhotoListViewController: FileListViewController {
                 ofKind: kind,
                 withReuseIdentifier: headerIdentifier,
                 for: indexPath
-            ) as! PhotoSectionHeaderView
+            ) as! ReusableHeaderView
             if indexPath.section > 0 {
                 let yearMonth = displayedSections[indexPath.section].model
                 photoSectionHeaderView.titleLabel.text = yearMonth.formattedDate
