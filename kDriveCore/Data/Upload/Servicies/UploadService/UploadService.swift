@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Algorithms
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreDB
@@ -316,9 +317,23 @@ extension UploadService: UploadServiceable {
     }
 
     public func cancelAnyPhotoSync() async throws {
-        let allPhotoSyncUploads = getAllUploadingPhotoSyncFilesFrozen()
-        try self.uploadsDatabase.writeTransaction { writableRealm in
-            writableRealm.delete(allPhotoSyncUploads)
+        suspendAllOperations()
+        defer {
+            resumeAllOperations()
+        }
+
+        let allPhotoSyncUploadIDs = getAllUploadingPhotoSyncFileIDs()
+        let chunks = allPhotoSyncUploadIDs.chunks(ofCount: 50)
+
+        try chunks.forEach { chunk in
+            try self.uploadsDatabase.writeTransaction { writableRealm in
+                for uploadFileId in chunk {
+                    guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+                        continue
+                    }
+                    writableRealm.delete(objectToRemove)
+                }
+            }
         }
 
         Log.uploadQueue("Done deleting all uploads from photo sync")
