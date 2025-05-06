@@ -192,14 +192,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         MatomoUtils.track(eventWithCategory: .colorFolder, name: "switch")
         Task {
             do {
-                let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
-                    for file in frozenFiles where file.canBeColored {
-                        group.addTask {
-                            try await self.driveFileManager.updateColor(directory: file, color: color.hex)
-                        }
-                    }
-                    return try await group.allSatisfy { $0 }
-                }
+                let canBeColoredFiles = frozenFiles.filter { $0.canBeColored }
+                let success = try await canBeColoredFiles.concurrentMap(customConcurrency: Constants.networkParallelism) { file in
+                    return try await self.driveFileManager.updateColor(directory: file, color: color.hex)
+                }.allSatisfy { $0 }
                 self.completionHandler?(success)
                 self.dismiss(animated: true)
             } catch {

@@ -231,7 +231,7 @@ public final class FileActionsHelper {
                 let proxySelectedItems = files.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
                 let proxyDestinationDirectory = destinationDirectory.proxify()
 
-                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.maxNetworkParallelism) { proxyFile in
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
                     _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                 }
 
@@ -403,18 +403,15 @@ public final class FileActionsHelper {
     public static func favorite(
         files: [File],
         driveFileManager: DriveFileManager,
-        completion: ((File) async -> Void)? = nil
+        completion: ((ProxyFile) async -> Void)? = nil
     ) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [proxyFile = file.proxify()] in
-                    try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
-                    await completion?(file)
-                }
-            }
-            try await group.waitForAll()
+
+        let canFavoriteFilesProxy = files.filter { $0.capabilities.canUseFavorite }.map { $0.proxify() }
+        try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
+            try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
+            await completion?(proxyFile)
         }
 
         return areFavored

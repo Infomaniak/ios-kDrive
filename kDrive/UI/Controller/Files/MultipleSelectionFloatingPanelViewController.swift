@@ -153,13 +153,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             // MainActor should ensure that this call is safe as file was created on the main thread ?
             let proxyFiles = files.map { $0.proxify() }
             let proxySelectedDirectory = selectedDirectory.proxify()
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for proxyFile in proxyFiles {
-                    group.addTask {
-                        _ = try await self.driveFileManager.apiFetcher.copy(file: proxyFile, to: proxySelectedDirectory)
-                    }
-                }
-                try await group.waitForAll()
+            try await proxyFiles.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
+                _ = try await self.driveFileManager.apiFetcher.copy(file: proxyFile, to: proxySelectedDirectory)
             }
         }
     }
@@ -253,7 +248,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    func favorite(file: File) async {
+    func favorite(file: ProxyFile) async {
         if let file = driveFileManager.getCachedFile(id: file.id) {
             await MainActor.run {
                 self.changedFiles?.append(file)

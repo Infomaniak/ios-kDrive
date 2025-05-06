@@ -85,6 +85,8 @@ public enum Constants {
         public static let diskSizeLimit: UInt = 512 * 1024 * 1024 // 512 Mi
     }
 
+    public static let networkParallelism = 4
+
     public static let kDriveTeams = "Solo, Team & Pro"
 
     private static var dateFormatter = DateFormatter()
@@ -178,8 +180,6 @@ public enum Constants {
     public static func appVersionLabel() -> String {
         return CorePlatform.appVersionLabel(fallbackAppName: "Mail")
     }
-
-    public static let maxNetworkParallelism = 4
 }
 
 /// App lifecycle Constants

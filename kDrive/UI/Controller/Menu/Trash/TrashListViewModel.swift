@@ -162,27 +162,23 @@ class TrashListViewModel: InMemoryFileListViewModel {
         directoryName: String? = nil
     ) async {
         do {
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for file in restoredFiles {
-                    group.addTask { [self] in
-                        _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
-                        // We don't have an alert for moving multiple files, snackbar is spammed until end
-                        if let directoryName {
-                            await UIConstants
-                                .showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(
-                                    firstFilename,
-                                    directoryName
-                                ))
+            try await restoredFiles.concurrentForEach(customConcurrency: Constants.networkParallelism) { file in
+                _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: directory)
+                // We don't have an alert for moving multiple files, snackbar is spammed until end
+                if let directoryName {
+                    await UIConstants
+                        .showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(
+                            firstFilename,
+                            directoryName
+                        ))
 
-                        } else {
-                            await UIConstants
-                                .showSnackBar(message: KDriveResourcesStrings.Localizable
-                                    .trashedFileRestoreFileToOriginalPlaceSuccess(firstFilename))
-                        }
-                    }
+                } else {
+                    await UIConstants
+                        .showSnackBar(message: KDriveResourcesStrings.Localizable
+                            .trashedFileRestoreFileToOriginalPlaceSuccess(firstFilename))
                 }
-                try await group.waitForAll()
             }
+
         } catch {
             UIConstants.showSnackBarIfNeeded(error: error)
         }
@@ -277,20 +273,11 @@ private enum TrashViewModelHelper {
     private static func deleteFiles(_ deletedFiles: [ProxyFile], firstFilename: String,
                                     driveFileManager: DriveFileManager) async -> [ProxyFile] {
         do {
-            let definitelyDeletedFiles = try await withThrowingTaskGroup(of: ProxyFile.self) { group -> [ProxyFile] in
-                for file in deletedFiles {
-                    group.addTask {
-                        _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
-                        return file
-                    }
+            let definitelyDeletedFiles: [ProxyFile] = try await deletedFiles
+                .concurrentMap(customConcurrency: Constants.networkParallelism) { file in
+                    _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
+                    return file
                 }
-
-                var successFullyDeletedFile = [ProxyFile]()
-                for try await file in group {
-                    successFullyDeletedFile.append(file)
-                }
-                return successFullyDeletedFile
-            }
 
             await UIConstants
                 .showSnackBar(message: KDriveResourcesStrings.Localizable
