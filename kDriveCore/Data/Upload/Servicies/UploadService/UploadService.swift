@@ -315,6 +315,15 @@ extension UploadService: UploadServiceable {
         }
     }
 
+    public func cancelAnyPhotoSync() async throws {
+        let allPhotoSyncUploads = getAllUploadingPhotoSyncFilesFrozen()
+        try self.uploadsDatabase.writeTransaction { writableRealm in
+            writableRealm.delete(allPhotoSyncUploads)
+        }
+
+        Log.uploadQueue("Done deleting all uploads from photo sync")
+    }
+
     public func rescheduleRunningOperations() {
         allQueues.forEach { $0.rescheduleRunningOperations() }
     }
