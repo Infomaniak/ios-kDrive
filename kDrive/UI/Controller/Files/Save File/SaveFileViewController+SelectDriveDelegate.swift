@@ -28,6 +28,10 @@ extension SaveFileViewController: SelectDriveDelegate {
             if itemProvidersContainHeicPhotos {
                 sections.append(.photoFormatOption)
             }
+
+            Task {
+                try? await selectedDriveFileManager.initRoot()
+            }
         }
         updateButton()
     }
