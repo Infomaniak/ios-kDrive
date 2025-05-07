@@ -99,11 +99,12 @@ class LocationFolderViewController: RootMenuViewController {
     init(
         driveFileManager: DriveFileManager,
         viewModel: FileListViewModel,
+        selectMode: Bool,
         delegate: SelectFolderDelegate? = nil
     ) {
         self.viewModel = viewModel
         self.delegate = delegate
-        super.init(driveFileManager: driveFileManager)
+        super.init(driveFileManager: driveFileManager, selectMode: selectMode)
     }
 
     @objc func closeButtonPressed() {

@@ -25,6 +25,8 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
+    let selectMode: Bool
+
     public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
 
@@ -101,8 +103,9 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         return snapshot
     }
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectMode: Bool) {
         self.driveFileManager = driveFileManager
+        self.selectMode = selectMode
         super.init(collectionViewLayout: RootMenuViewController.createListLayout())
     }
 
@@ -219,7 +222,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    selectMode: selectMode
                 )
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
