@@ -209,6 +209,10 @@ final class PhotoListViewController: FileListViewController {
     }
 
     @objc override func forceRefresh() {
+        guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false else {
+            viewModel.endRefreshing()
+            return
+        }
         Task {
             driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
             super.forceRefresh()
@@ -229,6 +233,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func toggleMultipleSelection(_ on: Bool) {
         if on {
+            collectionView.refreshControl = nil
             navigationItem.title = nil
             photoHeaderView.actionsView.isHidden = false
             headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
@@ -238,6 +243,7 @@ final class PhotoListViewController: FileListViewController {
             generator.prepare()
             generator.impactOccurred()
         } else {
+            collectionView.refreshControl = refreshControl
             photoHeaderView.actionsView.isHidden = true
             headerTitleLabel.style = .header2
             headerTitleLabel.textColor = .white
