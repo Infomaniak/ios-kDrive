@@ -26,6 +26,7 @@ import UIKit
 
 public enum UIConstants {
     public enum Padding {
+        public static let none: CGFloat = 0.0
         public static let small: CGFloat = 8.0
         public static let medium: CGFloat = 16.0
         public static let standard: CGFloat = 24.0

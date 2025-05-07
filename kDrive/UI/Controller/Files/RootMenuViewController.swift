@@ -286,9 +286,9 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(
             top: -UIConstants.Padding.small,
-            leading: UIConstants.Padding.medium,
+            leading: UIConstants.Padding.none,
             bottom: UIConstants.Padding.standard,
-            trailing: UIConstants.Padding.medium
+            trailing: UIConstants.Padding.none
         )
         section.boundarySupplementaryItems = [sectionHeaderItem]
 
