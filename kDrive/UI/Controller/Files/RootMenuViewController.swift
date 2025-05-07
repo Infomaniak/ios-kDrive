@@ -106,7 +106,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     init(driveFileManager: DriveFileManager, selectMode: Bool) {
         self.driveFileManager = driveFileManager
         self.selectMode = selectMode
-        super.init(collectionViewLayout: RootMenuViewController.createListLayout())
+        super.init(collectionViewLayout: RootMenuViewController.createListLayout(selectMode: selectMode))
     }
 
     @available(*, unavailable)
@@ -262,7 +262,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         return dataSource
     }
 
-    static func createListLayout() -> UICollectionViewLayout {
+    static func createListLayout(selectMode: Bool) -> UICollectionViewLayout {
         @InjectService var appContextService: AppContextServiceable
 
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
@@ -278,7 +278,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: appContextService.isExtension ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
+            elementKind: selectMode ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
                 .rawValue,
             alignment: .top
         )
