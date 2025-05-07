@@ -58,7 +58,7 @@ final class PhotoListViewController: FileListViewController {
     private let minColumns = 3
     private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
-    private let headerIdentifier = "PhotoSectionHeaderView"
+    private let headerIdentifier = "ReusableHeaderView"
     private var displayedSections = PhotoListViewModel.emptySections
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -93,7 +93,7 @@ final class PhotoListViewController: FileListViewController {
         collectionView.register(UICollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
                                 withReuseIdentifier: footerIdentifier)
-        collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil),
+        collectionView.register(UINib(nibName: "ReusableHeaderView", bundle: nil),
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: headerIdentifier)
         selectView = photoHeaderView
@@ -256,9 +256,9 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
         for visibleHeaderView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-            if let photoSectionHeaderView = visibleHeaderView as? ReusableHeaderView {
-                let position = collectionView.convert(photoSectionHeaderView.frame.origin, to: view)
-                photoSectionHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
+            if let reusableHeaderView = visibleHeaderView as? ReusableHeaderView {
+                let position = collectionView.convert(reusableHeaderView.frame.origin, to: view)
+                reusableHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
         }
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false {
@@ -362,16 +362,16 @@ final class PhotoListViewController: FileListViewController {
             ])
             return footerView
         } else {
-            let photoSectionHeaderView = collectionView.dequeueReusableSupplementaryView(
+            let reusableHeaderView = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: headerIdentifier,
                 for: indexPath
             ) as! ReusableHeaderView
             if indexPath.section > 0 {
                 let yearMonth = displayedSections[indexPath.section].model
-                photoSectionHeaderView.titleLabel.text = yearMonth.formattedDate
+                reusableHeaderView.titleLabel.text = yearMonth.formattedDate
             }
-            return photoSectionHeaderView
+            return reusableHeaderView
         }
     }
 
