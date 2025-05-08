@@ -51,7 +51,7 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         super.viewDidLoad()
 
         let sidebarViewController = SidebarViewController(driveFileManager: driveFileManager)
-        let detailViewController = UIViewController()
+        let detailViewController = HomeViewController(driveFileManager: driveFileManager)
 
         sidebarViewController.delegate = self
 
@@ -61,9 +61,6 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         viewControllers = [sidebarNav, detailNav]
         setViewController(MainTabViewController(driveFileManager: driveFileManager), for: .compact)
         preferredDisplayMode = .oneBesideSecondary
-
-        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
-        detailNav.setViewControllers([homeViewController], animated: false)
     }
 
     // MARK: - SidebarViewControllerDelegate

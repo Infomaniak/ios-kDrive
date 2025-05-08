@@ -173,6 +173,23 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    @MainActor private func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
+        guard let rootViewController = window?.rootViewController else { return nil }
+        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
+        if rootHorizontalSizeClass == .compact {
+            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                Log.sceneDelegate("unable to access tabBarViewController", level: .error)
+                return nil
+            }
+
+            let selectedIndex = mainTabViewController.selectedIndex
+            let viewControllers = mainTabViewController.viewControllers
+            return viewControllers?[safe: selectedIndex]
+        } else {
+            return tabBarViewController?.viewControllers.last
+        }
+    }
+
     /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
         let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
@@ -207,14 +224,8 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
-                Log.sceneDelegate("unable to access tabBarViewController", level: .error)
-                return
-            }
-
-            let selectedIndex = mainTabViewController.selectedIndex
-            let viewControllers = mainTabViewController.viewControllers
-            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
+            let viewController = getControllerForRestoration(tabBarViewController: tabBarViewController!)
+            guard let rootNavigationController = viewController as? UINavigationController else {
                 Log.sceneDelegate("unable to access navigationController", level: .error)
                 return
             }
