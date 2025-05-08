@@ -242,6 +242,7 @@ final class PhotoListViewController: FileListViewController {
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
+            collectionView.contentInset.top = 50
         } else {
             collectionView.refreshControl = refreshControl
             photoHeaderView.actionsView.isHidden = true
@@ -250,6 +251,7 @@ final class PhotoListViewController: FileListViewController {
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
+            collectionView.contentInset.top = 0
             scrollViewDidScroll(collectionView)
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
