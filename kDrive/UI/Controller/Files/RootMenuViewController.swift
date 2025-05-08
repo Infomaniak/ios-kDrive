@@ -283,6 +283,15 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             alignment: .top
         )
 
+        if !selectMode {
+            sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
+                top: UIConstants.Padding.none,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: UIConstants.Padding.none,
+                trailing: UIConstants.Padding.mediumSmall
+            )
+        }
+
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(
             top: -UIConstants.Padding.small,
