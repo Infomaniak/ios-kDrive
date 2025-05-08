@@ -114,6 +114,7 @@ class MultipleSelectionFileListViewModel {
     private(set) var selectedItems = Set<File>()
     private(set) var exceptItemIds = Set<Int>()
     var isSelectAllModeEnabled = false
+    var forceMoveDistinctFiles = false
 
     var driveFileManager: DriveFileManager
     private var currentDirectory: File
@@ -156,6 +157,7 @@ class MultipleSelectionFileListViewModel {
                                    exceptFileIds: Array(exceptItemIds),
                                    from: currentDirectory,
                                    allItemsSelected: isSelectAllModeEnabled,
+                                   forceMoveDistinctFiles: forceMoveDistinctFiles,
                                    observer: self,
                                    driveFileManager: driveFileManager) { [weak self] viewController in
                 self?.onPresentViewController?(.modal, viewController, true)
@@ -275,6 +277,12 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
+    func didSelectFiles(_ files: Set<File>) {
+        exceptItemIds.removeAll()
+        selectedCount = files.count
+        selectedItems = files
+    }
+
     func deleteSelectedItems() async {
         if isSelectAllModeEnabled {
             await bulkDeleteAll()
@@ -283,13 +291,8 @@ class MultipleSelectionFileListViewModel {
         } else {
             do {
                 let proxySelectedItems = selectedItems.map { $0.proxify() }
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask { [self] in
-                            _ = try await driveFileManager.delete(file: proxyFile)
-                        }
-                    }
-                    try await group.waitForAll()
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
+                    _ = try await self.driveFileManager.delete(file: proxyFile)
                 }
 
                 UIConstants

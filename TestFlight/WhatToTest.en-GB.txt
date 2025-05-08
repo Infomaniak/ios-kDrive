@@ -1,5 +1,2 @@
-- Photo sync: New option to limit it to WiFi only, while other files are uploaded regardless
-- Reworked File actions
-- Support for the new Drive asleep state
-- Fix a rare bug that can suspend photo sync
-- Photo sync optimisations
+- New "select all" action in offline section
+- Stability improvements and bug fixes

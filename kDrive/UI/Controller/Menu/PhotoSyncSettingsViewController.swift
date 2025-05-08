@@ -127,6 +127,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             driveFileManager = accountManager.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
         }
         updateSaveButtonState()
+        updateSections()
 
         if liveNewSyncSettings.parentDirectoryId != -1 {
             // We should always have the folder in cache but just in case we don't...

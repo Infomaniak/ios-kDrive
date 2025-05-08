@@ -170,6 +170,7 @@ public final class FileActionsHelper {
                             exceptFileIds: [Int],
                             from currentDirectory: File,
                             allItemsSelected: Bool,
+                            forceMoveDistinctFiles: Bool = false,
                             observer: AnyObject,
                             driveFileManager: DriveFileManager,
                             presentViewController: (UIViewController) -> Void,
@@ -191,6 +192,7 @@ public final class FileActionsHelper {
                                             files: files,
                                             exceptFileIds: exceptFileIds,
                                             allItemsSelected: allItemsSelected,
+                                            forceMoveDistinctFiles: forceMoveDistinctFiles,
                                             observer: observer,
                                             driveFileManager: driveFileManager,
                                             completion: completion)
@@ -205,17 +207,18 @@ public final class FileActionsHelper {
                                           files: [File],
                                           exceptFileIds: [Int],
                                           allItemsSelected: Bool,
+                                          forceMoveDistinctFiles: Bool = false,
                                           observer: AnyObject,
                                           driveFileManager: DriveFileManager,
                                           completion: (() -> Void)?) async {
-        if allItemsSelected {
+        if allItemsSelected && !forceMoveDistinctFiles {
             await bulkMove(exceptFileIds: exceptFileIds,
                            from: currentDirectory,
                            to: destinationDirectory,
                            observer: observer,
                            driveFileManager: driveFileManager,
                            completion: completion)
-        } else if files.count > Constants.bulkActionThreshold {
+        } else if files.count > Constants.bulkActionThreshold && !forceMoveDistinctFiles {
             await bulkMove(files,
                            from: currentDirectory,
                            to: destinationDirectory,
@@ -227,14 +230,11 @@ public final class FileActionsHelper {
                 // Move files only if needed
                 let proxySelectedItems = files.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
                 let proxyDestinationDirectory = destinationDirectory.proxify()
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask {
-                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
-                        }
-                    }
-                    try await group.waitForAll()
+
+                try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
+                    _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                 }
+
                 UIConstants
                     .showSnackBar(message: KDriveResourcesStrings.Localizable
                         .fileListMoveFileConfirmationSnackbar(files.count, destinationDirectory.name))
@@ -403,18 +403,15 @@ public final class FileActionsHelper {
     public static func favorite(
         files: [File],
         driveFileManager: DriveFileManager,
-        completion: ((File) async -> Void)? = nil
+        completion: ((ProxyFile) async -> Void)? = nil
     ) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [proxyFile = file.proxify()] in
-                    try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
-                    await completion?(file)
-                }
-            }
-            try await group.waitForAll()
+
+        let canFavoriteFilesProxy = files.filter { $0.capabilities.canUseFavorite }.map { $0.proxify() }
+        try await canFavoriteFilesProxy.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
+            try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
+            await completion?(proxyFile)
         }
 
         return areFavored
