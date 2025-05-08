@@ -77,6 +77,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         } else {
             let syncSetting = PhotoSyncSettings()
             syncSetting.wifiSync = .onlyWifi
+            UserDefaults.shared.isWifiOnly = true
             return syncSetting
         }
     }()
