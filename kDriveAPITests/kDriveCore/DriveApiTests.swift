@@ -24,7 +24,7 @@ import kDriveCore
 import XCTest
 
 final class DriveApiTests: XCTestCase {
-    private static let defaultTimeout = 30.0
+    private static let defaultTimeout = 120.0
     private static let token = ApiToken(accessToken: Env.token,
                                         expiresIn: Int.max,
                                         refreshToken: "",
@@ -33,7 +33,12 @@ final class DriveApiTests: XCTestCase {
                                         userId: Env.userId,
                                         expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-    private let currentApiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+    private var currentApiFetcher: DriveApiFetcher = {
+        let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+        apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
+        return apiFetcher
+    }()
+
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
 
@@ -49,6 +54,7 @@ final class DriveApiTests: XCTestCase {
         Task {
             let drive = ProxyDrive(id: Env.driveId)
             let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+            apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
             _ = try await apiFetcher.emptyTrash(drive: drive)
             group.leave()
         }
