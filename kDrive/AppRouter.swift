@@ -224,7 +224,10 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            let viewController = getControllerForRestoration(tabBarViewController: tabBarViewController!)
+            guard let viewController = getControllerForRestoration(tabBarViewController: tabBarViewController) else {
+                Log.sceneDelegate("unable to access viewControllers", level: .error)
+                return
+            }
             guard let rootNavigationController = viewController as? UINavigationController else {
                 Log.sceneDelegate("unable to access navigationController", level: .error)
                 return
