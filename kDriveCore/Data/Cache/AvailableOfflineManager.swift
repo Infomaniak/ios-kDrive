@@ -33,7 +33,8 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
     public func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
         Log.appDelegate("updateAvailableOfflineFiles")
 
-        guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
+        let wifiSyncOnly = UserDefaults.shared.syncOfflineMode == .onlyWifi
+        guard status != .offline && (!wifiSyncOnly || status == .wifi) else {
             return
         }
 

@@ -73,7 +73,7 @@ extension UploadOperation {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let canUpload = !(status == .cellular && UserDefaults.shared.isWifiOnly)
+        let canUpload = !(status == .cellular && photoLibraryUploader.isWifiOnly)
 
         guard !canUpload else {
             return

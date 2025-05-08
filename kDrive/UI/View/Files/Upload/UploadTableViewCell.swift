@@ -33,6 +33,7 @@ final class UploadTableViewCell: InsetTableViewCell {
     private var progressObservation: NotificationToken?
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -87,7 +88,7 @@ final class UploadTableViewCell: InsetTableViewCell {
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
                 cardContentView.retryButton?.isHidden = true
-            } else if UserDefaults.shared.isWifiOnly,
+            } else if photoLibraryUploader.isWifiOnly,
                       ReachabilityListener.instance.currentStatus != .wifi,
                       uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
@@ -208,7 +209,7 @@ final class UploadTableViewCell: InsetTableViewCell {
         var status = KDriveResourcesStrings.Localizable.uploadInProgressTitle
         if ReachabilityListener.instance.currentStatus == .offline {
             status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-        } else if UserDefaults.shared.isWifiOnly,
+        } else if photoLibraryUploader.isWifiOnly,
                   ReachabilityListener.instance.currentStatus != .wifi,
                   frozenUploadFile.isPhotoSyncUpload {
             status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
