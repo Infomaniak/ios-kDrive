@@ -30,6 +30,12 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var appRouter: AppNavigable
+
+    private var isCompactView: Bool {
+        guard let rootViewController = appRouter.rootViewController else { return false }
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
+    }
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
@@ -140,7 +146,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
@@ -254,6 +259,12 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             homeViewController: self
         )
         self.recentActivitiesController = recentActivitiesController
+
+        if isCompactView {
+            navigationItem.title = driveFileManager.drive.name
+        } else {
+            navigationItem.title = recentActivitiesController.title
+        }
 
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
             .compactMap { $0 as? HomeRecentFilesHeaderView }.first
@@ -413,9 +424,13 @@ extension HomeViewController {
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    addLeadingConstraint: false
                 )
-
+                if !isCompactView {
+                    homeLargeTitleHeaderView.isEnabled = false
+                    homeLargeTitleHeaderView.text = recentActivitiesController?.title ?? ""
+                }
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
             case .recentFiles:
@@ -424,7 +439,11 @@ extension HomeViewController {
                     view: HomeRecentFilesHeaderView.self,
                     for: indexPath
                 )
-                headerView.titleLabel.text = recentActivitiesController?.title ?? ""
+                if isCompactView {
+                    headerView.titleLabel.text = recentActivitiesController?.title ?? ""
+                } else {
+                    headerView.titleLabel.text = ""
+                }
                 return headerView
             }
         } else if kind == RootMenuHeaderView.kind.rawValue {
