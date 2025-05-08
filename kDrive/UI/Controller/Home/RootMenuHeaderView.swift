@@ -17,12 +17,15 @@
  */
 
 import InfomaniakCore
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class RootMenuHeaderView: UICollectionReusableView {
     static let kind: UICollectionView.UICollectionViewSupplementaryViewKind = .custom("menuHeader")
+
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     @IBOutlet var topConstraint: NSLayoutConstraint!
     @IBOutlet var bottomConstraint: NSLayoutConstraint!
@@ -133,7 +136,7 @@ class RootMenuHeaderView: UICollectionReusableView {
     }
 
     private func updateWifiView() {
-        if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+        if photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
             uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadPausedTitle
             uploadCardView.progressView.isHidden = true
             uploadCardView.iconView.image = UIImage(systemName: "exclamationmark.arrow.triangle.2.circlepath")

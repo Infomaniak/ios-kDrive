@@ -61,6 +61,13 @@ public final class PhotoLibraryUploader {
         return frozenSettings != nil
     }
 
+    public var isWifiOnly: Bool {
+        guard let frozenSettings else {
+            return false
+        }
+        return frozenSettings.wifiSync == .onlyWifi
+    }
+
     public init() {
         // META: SonarClound happy
     }

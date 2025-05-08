@@ -41,6 +41,7 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
@@ -157,7 +158,7 @@ final class UploadQueueViewController: UIViewController {
     }
 
     private var isUploadLimited: Bool {
-        UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
+        photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {

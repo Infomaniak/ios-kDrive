@@ -27,13 +27,14 @@ public protocol AvailableOfflineManageable {
 public class AvailableOfflineManager: AvailableOfflineManageable {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     public init() {}
 
     public func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
         Log.appDelegate("updateAvailableOfflineFiles")
 
-        guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
+        guard status != .offline && (!photoLibraryUploader.isWifiOnly || status == .wifi) else {
             return
         }
 

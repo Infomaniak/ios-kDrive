@@ -18,8 +18,11 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 public class PhotoUploadQueue: UploadQueue {
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+
     /// Should suspend operation queue based on network status and user defined parameters
     override var shouldSuspendQueue: Bool {
         // Explicitly disable the upload queue from the share extension
@@ -28,7 +31,7 @@ public class PhotoUploadQueue: UploadQueue {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline || (status != .wifi && UserDefaults.shared.isWifiOnly)
+        let shouldBeSuspended = status == .offline || (status != .wifi && photoLibraryUploader.isWifiOnly)
         return shouldBeSuspended
     }
 }

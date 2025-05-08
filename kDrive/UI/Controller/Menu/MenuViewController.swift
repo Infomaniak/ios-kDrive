@@ -26,6 +26,7 @@ import UIKit
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     private let driveFileManager: DriveFileManager
     var uploadCountManager: UploadCountManager?
@@ -212,7 +213,7 @@ extension MenuViewController {
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
-            if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
+            if photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
                 let cell = tableView.dequeueReusableCell(type: UploadsPausedTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
