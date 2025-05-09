@@ -49,11 +49,14 @@ public final class PhotoLibraryUploader {
         case importCancelledBySystem
     }
 
-    public var frozenSettings: PhotoSyncSettings? {
-        let settings = uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
+    public var liveSettings: PhotoSyncSettings? {
+        return uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
             lazyCollection.first
         }
+    }
 
+    public var frozenSettings: PhotoSyncSettings? {
+        let settings = liveSettings
         return settings?.freeze()
     }
 
@@ -65,7 +68,7 @@ public final class PhotoLibraryUploader {
         guard let frozenSettings else {
             return false
         }
-        return frozenSettings.wifiSync == .onlyWifi
+        return frozenSettings.isWifiOnly
     }
 
     public init() {

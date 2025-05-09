@@ -102,3 +102,9 @@ public final class PhotoSyncSettings: Object {
             wifiSync == settings.wifiSync
     }
 }
+
+public extension PhotoSyncSettings {
+    var isWifiOnly: Bool {
+        return wifiSync == .onlyWifi
+    }
+}
