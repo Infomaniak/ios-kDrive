@@ -48,7 +48,7 @@ final class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
     private lazy var sections = buildSections(files: [UploadFileDisplayed]())
-    private var notificationToken: NotificationToken?
+    private var observedFilesNotificationToken: NotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -95,7 +95,7 @@ final class UploadQueueViewController: UIViewController {
     }
 
     deinit {
-        notificationToken?.invalidate()
+        observedFilesNotificationToken?.invalidate()
         wifiOnlyNotificationToken?.invalidate()
     }
 
@@ -104,12 +104,12 @@ final class UploadQueueViewController: UIViewController {
             return
         }
 
-        notificationToken?.invalidate()
+        observedFilesNotificationToken?.invalidate()
 
         let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
                                                                                   userId: accountManager.currentUserId,
                                                                                   driveId: currentDirectory.driveId))
-        notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+        observedFilesNotificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
             guard let self else {
                 return
             }
