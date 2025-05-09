@@ -157,7 +157,17 @@ final class PhotoListViewController: FileListViewController {
         let gradient = CAGradientLayer()
         let bounds = view.frame
         gradient.frame = bounds
-        gradient.colors = [UIColor.black.withAlphaComponent(0.8).cgColor, UIColor.clear.cgColor]
+        gradient.colors = [
+            UIColor.black.withAlphaComponent(0.8).cgColor,
+            UIColor.black.withAlphaComponent(0.70).cgColor,
+            UIColor.black.withAlphaComponent(0.6).cgColor,
+            UIColor.black.withAlphaComponent(0.5).cgColor,
+            UIColor.black.withAlphaComponent(0.45).cgColor,
+            UIColor.black.withAlphaComponent(0.40).cgColor,
+            UIColor.black.withAlphaComponent(0.35).cgColor,
+            UIColor.black.withAlphaComponent(0.30).cgColor,
+            UIColor.clear.cgColor
+        ]
         let renderer = UIGraphicsImageRenderer(size: gradient.frame.size)
         view.image = renderer.image { ctx in
             gradient.render(in: ctx.cgContext)
@@ -199,6 +209,10 @@ final class PhotoListViewController: FileListViewController {
     }
 
     @objc override func forceRefresh() {
+        guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false else {
+            viewModel.endRefreshing()
+            return
+        }
         Task {
             driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
             super.forceRefresh()
@@ -219,6 +233,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func toggleMultipleSelection(_ on: Bool) {
         if on {
+            collectionView.refreshControl = nil
             navigationItem.title = nil
             photoHeaderView.actionsView.isHidden = false
             headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
@@ -227,13 +242,16 @@ final class PhotoListViewController: FileListViewController {
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
+            collectionView.contentInset.top = 50
         } else {
+            collectionView.refreshControl = refreshControl
             photoHeaderView.actionsView.isHidden = true
             headerTitleLabel.style = .header2
             headerTitleLabel.textColor = .white
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
+            collectionView.contentInset.top = 0
             scrollViewDidScroll(collectionView)
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
@@ -249,6 +267,9 @@ final class PhotoListViewController: FileListViewController {
         guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
             (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+            isLargeTitle = false
+        }
         photoHeaderView.isHidden = isLargeTitle
         headerImageView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
