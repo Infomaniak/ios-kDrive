@@ -44,6 +44,8 @@ public protocol UploadServiceable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    func cancelAnyPhotoSync() async throws
+
     func rescheduleRunningOperations()
 
     @discardableResult func cancel(uploadFileId: String) -> Bool

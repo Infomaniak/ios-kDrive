@@ -109,6 +109,14 @@ extension UploadService: UploadServiceDataSourceable {
         }
     }
 
+    public func getAllUploadingPhotoSyncFileIDs() -> [String] {
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection
+                .filter("uploadDate == nil")
+                .filter("rawType = %@", UploadFileType.phAsset.rawValue)
+        }.map { $0.id }
+    }
+
     public func getUploadedFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
