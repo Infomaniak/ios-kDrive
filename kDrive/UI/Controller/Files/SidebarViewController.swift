@@ -144,6 +144,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     private var displayedSnapshot = DataSourceSnapshot()
 
+    private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
+
     private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
@@ -477,13 +479,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         guard let currentDirectoryOrRoot else {
             return
         }
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        floatingPanelViewController = AdaptiveDriveFloatingPanelController()
 
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectoryOrRoot
         )
-
+        guard let floatingPanelViewController else { return }
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = plusButtonFloatingPanel
 
