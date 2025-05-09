@@ -21,11 +21,15 @@ import kDriveCore
 import RealmSwift
 
 class ConcreteFileListViewModel: FileListViewModel {
-    required convenience init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+    required convenience init(
+        driveFileManager: DriveFileManager,
+        currentDirectory: File?,
+        rightBarButtons: [FileListBarButtonType]? = [.search]
+    ) {
         let configuration = FileListViewModel.Configuration(
             emptyViewType: .emptyFolder,
             supportsDrop: true,
-            rightBarButtons: [.search]
+            rightBarButtons: rightBarButtons
         )
         self.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
@@ -34,6 +38,10 @@ class ConcreteFileListViewModel: FileListViewModel {
         let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile(freeze: false)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
+    }
+
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {

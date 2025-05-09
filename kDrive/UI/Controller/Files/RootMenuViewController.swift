@@ -25,14 +25,24 @@ import RealmSwift
 import UIKit
 
 class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
-    private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
-    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+    let selectMode: Bool
 
-    private enum RootMenuSection {
+    public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+
+    public enum RootMenuSection: Hashable, CaseIterable {
         case main
+        case recent
+
+        var title: String {
+            switch self {
+            case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
+            case .recent: return KDriveResourcesStrings.Localizable.buttonRecent
+            }
+        }
     }
 
-    private struct RootMenuItem: Equatable, Hashable {
+    struct RootMenuItem: Equatable, Hashable {
         var id: Int {
             return destinationFile.id
         }
@@ -73,11 +83,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
-    private var rootViewChildren: [File]?
-    private var dataSource: MenuDataSource?
-    private let refreshControl = UIRefreshControl()
-
-    private var itemsSnapshot: DataSourceSnapshot {
+    var rootViewChildren: [File]?
+    private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
+    let refreshControl = UIRefreshControl()
+    var itemsSnapshot: DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
         } ?? []
@@ -94,9 +103,10 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         return snapshot
     }
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectMode: Bool) {
         self.driveFileManager = driveFileManager
-        super.init(collectionViewLayout: RootMenuViewController.createListLayout())
+        self.selectMode = selectMode
+        super.init(collectionViewLayout: RootMenuViewController.createListLayout(selectMode: selectMode))
     }
 
     @available(*, unavailable)
@@ -116,11 +126,18 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+        collectionView.register(
+            supplementaryView: ReusableHeaderView.self,
+            forSupplementaryViewOfKind: ReusableHeaderView.kind
+        )
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
-        configureDataSource()
+        dataSource = configureDataSource(for: collectionView)
+        setItemsSnapshot(for: collectionView)
+    }
 
+    func setItemsSnapshot(for: UICollectionView) {
         let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
             return
@@ -135,10 +152,12 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+                dataSource.apply(itemsSnapshot, animatingDifferences: false)
+
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(itemsSnapshot, animatingDifferences: true)
+                dataSource.apply(itemsSnapshot, animatingDifferences: true)
+
             case .error:
                 break
             }
@@ -170,8 +189,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         }
     }
 
-    func configureDataSource() {
-        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
+    func configureDataSource(
+        for collectionView: UICollectionView
+    )
+        -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
+        dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
+            collectionView, indexPath, menuItem -> RootMenuCell?
+            in
             guard let rootMenuCell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: RootMenuCell.identifier,
                 for: indexPath
@@ -184,7 +208,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
             return rootMenuCell
         }
 
-        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
 
             switch kind {
@@ -198,11 +222,13 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    selectMode: selectMode
                 )
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
+
             case RootMenuHeaderView.kind.rawValue:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -212,15 +238,31 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
                 headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
                 return headerView
+
+            case ReusableHeaderView.kind.rawValue:
+                let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: ReusableHeaderView.kind.rawValue,
+                    for: indexPath
+                )
+
+                if let reusableHeader = header as? ReusableHeaderView,
+                   let sectionIdentifier = dataSource.snapshot().sectionIdentifiers[safe: indexPath.section] {
+                    reusableHeader.titleLabel.text = sectionIdentifier.title
+                }
+
+                return header
+
             default:
                 fatalError("Unhandled kind \(kind)")
             }
         }
 
-        dataSource?.apply(itemsSnapshot, animatingDifferences: false)
+        dataSource.apply(itemsSnapshot, animatingDifferences: false)
+        return dataSource
     }
 
-    static func createListLayout() -> UICollectionViewLayout {
+    static func createListLayout(selectMode: Bool) -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -234,13 +276,27 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
 
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
-            elementKind: RootMenuHeaderView.kind.rawValue,
+            elementKind: selectMode ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
+                .rawValue,
             alignment: .top
         )
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
-        sectionHeaderItem.pinToVisibleBounds = true
+
+        if !selectMode {
+            sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
+                top: UIConstants.Padding.none,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: UIConstants.Padding.none,
+                trailing: UIConstants.Padding.mediumSmall
+            )
+        }
 
         let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: -UIConstants.Padding.small,
+            leading: UIConstants.Padding.none,
+            bottom: UIConstants.Padding.standard,
+            trailing: UIConstants.Padding.none
+        )
         section.boundarySupplementaryItems = [sectionHeaderItem]
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
@@ -250,7 +306,7 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
+        guard let selectedRootFile = dataSource.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
         switch selectedRootFile.id {
@@ -270,7 +326,8 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
-                currentDirectory: selectedRootFile
+                currentDirectory: selectedRootFile,
+                rightBarButtons: [.search]
             )
         }
 

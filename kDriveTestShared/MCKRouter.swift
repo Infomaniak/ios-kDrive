@@ -192,4 +192,12 @@ public final class MCKRouter: AppNavigable {
     ) {
         logNoop()
     }
+
+    public func presentUploadViewController(
+        driveFileManager: kDriveCore.DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        logNoop()
+    }
 }

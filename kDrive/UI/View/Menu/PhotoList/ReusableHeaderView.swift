@@ -20,7 +20,8 @@ import InfomaniakCoreUIKit
 import kDriveCore
 import UIKit
 
-class PhotoSectionHeaderView: UICollectionReusableView {
+class ReusableHeaderView: UICollectionReusableView {
+    static let kind: UICollectionView.UICollectionViewSupplementaryViewKind = .custom("ReusableHeaderView")
     @IBOutlet var titleLabel: IKLabel!
 
     override func prepareForReuse() {

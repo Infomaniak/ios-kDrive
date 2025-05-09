@@ -40,6 +40,14 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
+
+    required convenience init(
+        driveFileManager: DriveFileManager,
+        currentDirectory: File?,
+        rightBarButtons: [FileListBarButtonType]?
+    ) {
+        fatalError("init(driveFileManager:currentDirectory:rightBarButtons:) has not been implemented")
+    }
 }
 
 final class SelectFolderViewController: FileListViewController {
@@ -103,38 +111,17 @@ final class SelectFolderViewController: FileListViewController {
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
-        var viewControllers = [SelectFolderViewController]()
-        if startDirectory == nil || startDirectory?.isRoot == true {
-            let selectFolderViewController = SelectFolderViewController(
-                viewModel: SelectFolderViewModel(
-                    driveFileManager: driveFileManager,
-                    currentDirectory: nil
-                ),
-                disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
-                fileToMove: fileToMove,
-                delegate: delegate,
-                selectHandler: selectHandler
-            )
-            selectFolderViewController.navigationItem.hideBackButtonText()
-            viewControllers.append(selectFolderViewController)
-        } else {
-            var directory = startDirectory
-            while directory != nil {
-                let selectFolderViewController = SelectFolderViewController(
-                    viewModel: SelectFolderViewModel(
-                        driveFileManager: driveFileManager,
-                        currentDirectory: directory
-                    ),
-                    disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
-                    fileToMove: fileToMove,
-                    delegate: delegate,
-                    selectHandler: selectHandler
-                )
-                selectFolderViewController.navigationItem.hideBackButtonText()
-                viewControllers.append(selectFolderViewController)
-                directory = directory?.parent
-            }
-        }
+        var viewControllers = [LocationFolderViewController]()
+
+        let selectFolderViewController = LocationFolderViewController(
+            driveFileManager: driveFileManager,
+            viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: startDirectory),
+            selectMode: true,
+            delegate: delegate
+        )
+        selectFolderViewController.navigationItem.hideBackButtonText()
+        viewControllers.append(selectFolderViewController)
+
         let navigationController = TitleSizeAdjustingNavigationController()
         navigationController.setViewControllers(viewControllers.reversed(), animated: false)
         navigationController.navigationBar.prefersLargeTitles = true
@@ -182,13 +169,7 @@ final class SelectFolderViewController: FileListViewController {
         }
         delegate?.didSelectFolder(frozenSelectedDirectory)
         selectHandler?(frozenSelectedDirectory)
-        // We are only selecting files we can dismiss
-        if navigationController?.viewControllers.first is SelectFolderViewController {
-            navigationController?.dismiss(animated: true)
-        } else {
-            // We are creating file, go back to file name
-            navigationController?.popToRootViewController(animated: true)
-        }
+        navigationController?.dismiss(animated: true)
     }
 
     // MARK: - Collection view data source

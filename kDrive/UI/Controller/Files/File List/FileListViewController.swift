@@ -58,7 +58,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     private let gridMinColumns = 2
     private let gridCellMaxWidth = 200.0
     private let gridCellRatio = 3.0 / 4.0
-    private let leftRightInset = 12.0
+    private let leftRightInset = UIConstants.Padding.mediumSmall
     private let gridInnerSpacing = 16.0
     private let headerViewIdentifier = "FilesHeaderView"
 

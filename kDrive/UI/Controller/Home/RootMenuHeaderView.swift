@@ -79,8 +79,14 @@ class RootMenuHeaderView: UICollectionReusableView {
         observeUploadCount(driveFileManager: driveFileManager)
 
         onUploadCardViewTapped = {
-            let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
-            presenter.navigationController?.pushViewController(uploadViewController, animated: true)
+            @InjectService var router: AppNavigable
+            if let navigationController = presenter.navigationController {
+                router.presentUploadViewController(
+                    driveFileManager: driveFileManager,
+                    navigationController: navigationController,
+                    animated: true
+                )
+            }
         }
     }
 

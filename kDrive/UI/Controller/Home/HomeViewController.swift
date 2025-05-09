@@ -413,7 +413,8 @@ extension HomeViewController {
                 homeLargeTitleHeaderView.configureForDriveSwitch(
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
-                    presenter: self
+                    presenter: self,
+                    selectMode: false
                 )
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height

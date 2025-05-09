@@ -135,7 +135,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
-        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager)
+        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager, selectMode: false)
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle

@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: de, German
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Thu, 13 Feb 2025 09:38:13 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Mon, 05 May 2025 14:41:23 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -117,6 +117,9 @@
 
 /* loco:6049df4d5c2c3a04bc39791b */
 "allFileRename" = "%@ erfolgreich umbenannt";
+
+/* loco:6818aeac478090df7b0df2e2 */
+"allFilesTitle" = "Alle meine Dateien";
 
 /* loco:6049df4d5c2c3a04bc39791c */
 "allFolder" = "Ordner";
@@ -405,6 +408,9 @@
 
 /* loco:6049df4d5c2c3a04bc39795d */
 "buttonPlayerRew" = "Einige Sekunden zurückspulen";
+
+/* loco:6818ae071c7e870445011a44 */
+"buttonRecent" = "Neueste";
 
 /* loco:61434c587ac8854bf40efa02 */
 "buttonRedeemPromoCode" = "Einen Promo-Code einlösen";

@@ -901,4 +901,13 @@ public struct AppRouter: AppNavigable {
         let accountViewController = SwitchUserViewController.instantiate()
         navigationController.pushViewController(accountViewController, animated: animated)
     }
+
+    @MainActor public func presentUploadViewController(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        animated: Bool
+    ) {
+        let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+        navigationController.pushViewController(uploadViewController, animated: animated)
+    }
 }

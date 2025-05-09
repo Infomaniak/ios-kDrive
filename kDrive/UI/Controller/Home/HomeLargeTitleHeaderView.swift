@@ -51,9 +51,10 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
     func configureForDriveSwitch(
         accountManager: AccountManageable,
         driveFileManager: DriveFileManager,
-        presenter: SelectSwitchDriveDelegate
+        presenter: SelectSwitchDriveDelegate,
+        selectMode: Bool
     ) {
-        isEnabled = accountManager.drives.count > 1
+        isEnabled = accountManager.drives.count > 1 && !selectMode
         text = driveFileManager.drive.name
         titleButtonPressedHandler = { [weak self] _ in
             guard let self else { return }

@@ -98,6 +98,9 @@ class RootMenuCell: UICollectionViewCell {
         topConstraint = contentInsetView.topAnchor.constraint(equalTo: contentView.topAnchor)
         bottomConstraint = contentInsetView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
 
+        titleLabel.numberOfLines = 1
+        titleLabel.lineBreakMode = .byTruncatingTail
+
         NSLayoutConstraint.activate([
             separatorView.leadingAnchor.constraint(equalTo: contentInsetView.leadingAnchor),
             separatorView.trailingAnchor.constraint(equalTo: contentInsetView.trailingAnchor),
@@ -117,6 +120,7 @@ class RootMenuCell: UICollectionViewCell {
 
             titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: contentInsetView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: chevronImageView.trailingAnchor, constant: -12),
 
             chevronImageView.trailingAnchor.constraint(equalTo: contentInsetView.trailingAnchor, constant: -24),
             chevronImageView.centerYAnchor.constraint(equalTo: contentInsetView.centerYAnchor),
