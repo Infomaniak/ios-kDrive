@@ -1,2 +1,3 @@
 - Nouvelle action "Sélectionner tout" dans la section hors ligne
+- Améliorations de l'écran de sélection des dossiers
 - Améliorations de la stabilité et corrections de bugs

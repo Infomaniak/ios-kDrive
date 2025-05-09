@@ -1,2 +1,3 @@
 - New "select all" action in offline section
+- New and improved folder selection
 - Stability improvements and bug fixes
