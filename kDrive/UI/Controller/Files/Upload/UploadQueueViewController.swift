@@ -29,6 +29,8 @@ typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
 
 final class UploadQueueViewController: UIViewController {
     private let errorFile = UploadFileDisplayed(isFirstInList: true, isLastInList: true, content: UploadFile())
+    private var isWifiOnly = false
+    private var wifiOnlyNotificationToken: NotificationToken?
 
     enum SectionModel: Differentiable {
         case error, files
@@ -46,11 +48,10 @@ final class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
     private lazy var sections = buildSections(files: [UploadFileDisplayed]())
-    private var notificationToken: NotificationToken?
+    private var observedFilesNotificationToken: NotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         navigationItem.hideBackButtonText()
 
         tableView.register(cellView: UploadTableViewCell.self)
@@ -59,11 +60,36 @@ final class UploadQueueViewController: UIViewController {
         retryButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonRetry
         cancelButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCancel
 
-        setUpObserver()
+        setUpFileObserver()
+        setupSyncSettingsObservation()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                self?.reloadCollectionView()
+                self?.reloadCollectionView(with: nil)
+            }
+        }
+    }
+
+    private func setupSyncSettingsObservation() {
+        guard let liveSettings = photoLibraryUploader.liveSettings else {
+            return
+        }
+
+        isWifiOnly = liveSettings.isWifiOnly
+        wifiOnlyNotificationToken = liveSettings.observe(keyPaths: ["syncMode"], on: .main) { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            switch change {
+            case .change(let object, _):
+                guard let syncSettings = object as? PhotoSyncSettings else { return }
+                self.isWifiOnly = syncSettings.isWifiOnly
+                reloadCollectionView(with: nil)
+            case .error(let error):
+                DDLogError("[Realm Observation] Error sync settings \(error)")
+            case .deleted:
+                DDLogError("[Realm Observation] Deleted sync settings")
             }
         }
     }
@@ -74,49 +100,51 @@ final class UploadQueueViewController: UIViewController {
     }
 
     deinit {
-        notificationToken?.invalidate()
+        observedFilesNotificationToken?.invalidate()
+        wifiOnlyNotificationToken?.invalidate()
     }
 
-    func setUpObserver() {
+    func setUpFileObserver() {
         guard let currentDirectory, !currentDirectory.isInvalidated else {
             return
         }
 
-        notificationToken?.invalidate()
+        observedFilesNotificationToken?.invalidate()
 
         let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
                                                                                   userId: accountManager.currentUserId,
                                                                                   driveId: currentDirectory.driveId))
-        notificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
-            guard let self else {
-                return
-            }
+        observedFilesNotificationToken = observedFiles
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
 
-            let newResults: AnyRealmCollection<UploadFile>?
-            switch change {
-            case .initial(let results):
-                newResults = results
-            case .update(let results, _, _, _):
-                newResults = results
-            case .error(let error):
-                newResults = nil
-                DDLogError("Realm observer error: \(error)")
-            }
+                let newResults: AnyRealmCollection<UploadFile>?
+                switch change {
+                case .initial(let results):
+                    newResults = results
+                case .update(let results, _, _, _):
+                    newResults = results
+                case .error(let error):
+                    newResults = nil
+                    DDLogError("Realm observer error: \(error)")
+                }
 
-            guard let newResults else {
-                reloadCollectionView(with: [])
-                return
-            }
+                guard let newResults else {
+                    reloadCollectionView(with: [])
+                    return
+                }
 
-            let wrappedFrozenFiles = newResults.enumerated().map { index, file in
-                let frozenFile = file.freeze()
-                return UploadFileDisplayed(isFirstInList: index == 0,
-                                           isLastInList: index == newResults.count - 1,
-                                           content: frozenFile)
-            }
+                let wrappedFrozenFiles = newResults.enumerated().map { index, file in
+                    let frozenFile = file.freeze()
+                    return UploadFileDisplayed(isFirstInList: index == 0,
+                                               isLastInList: index == newResults.count - 1,
+                                               content: frozenFile)
+                }
 
-            reloadCollectionView(with: wrappedFrozenFiles)
-        }
+                reloadCollectionView(with: wrappedFrozenFiles)
+            }
     }
 
     @MainActor func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]? = nil) {
@@ -158,7 +186,7 @@ final class UploadQueueViewController: UIViewController {
     }
 
     private var isUploadLimited: Bool {
-        photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
+        isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -214,7 +242,7 @@ extension UploadQueueViewController: UITableViewDataSource {
             }
 
             let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-            cell.configureWith(frozenUploadFile: file, progress: progress)
+            cell.configureWith(frozenUploadFile: file, progress: progress, isUploadLimited: isUploadLimited)
             cell.selectionStyle = .none
             return cell
         }

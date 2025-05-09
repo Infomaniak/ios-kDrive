@@ -28,12 +28,12 @@ import UIKit
 final class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet var cardContentView: UploadCardView!
+    private var isUploadLimited = false
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
     private var progressObservation: NotificationToken?
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -62,13 +62,14 @@ final class UploadTableViewCell: InsetTableViewCell {
         cardContentView.progressView.updateProgress(0, animated: false)
         cardContentView.iconViewHeightConstraint.constant = 24
         progressObservation?.invalidate()
+        isUploadLimited = false
     }
 
     deinit {
         thumbnailRequest?.cancel()
     }
 
-    private func setStatusFor(uploadFile: UploadFile) {
+    private func setStatusFor(uploadFile: UploadFile, isUploadLimited: Bool) {
         guard !uploadFile.isInvalidated else {
             return
         }
@@ -88,8 +89,7 @@ final class UploadTableViewCell: InsetTableViewCell {
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
                 cardContentView.retryButton?.isHidden = true
-            } else if photoLibraryUploader.isWifiOnly,
-                      ReachabilityListener.instance.currentStatus != .wifi,
+            } else if isUploadLimited,
                       uploadFile.isPhotoSyncUpload {
                 status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
                 cardContentView.retryButton?.isHidden = true
@@ -118,11 +118,13 @@ final class UploadTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(frozenUploadFile: UploadFile, progress: CGFloat?) {
+    func configureWith(frozenUploadFile: UploadFile, progress: CGFloat?, isUploadLimited: Bool) {
         assert(frozenUploadFile.isFrozen, "Expected a frozen upload file")
         guard let uploadFile = frozenUploadFile.thaw() else {
             return
         }
+
+        self.isUploadLimited = isUploadLimited
 
         // set `uploadFileId` asap so the configuration is applied correctly
         let uploadFileId = uploadFile.id
@@ -130,32 +132,14 @@ final class UploadTableViewCell: InsetTableViewCell {
 
         // Set initial text
         cardContentView.titleLabel.text = uploadFile.name
-        setStatusFor(uploadFile: uploadFile)
+        setStatusFor(uploadFile: uploadFile, isUploadLimited: isUploadLimited)
 
         // Set initial progress value if any
         if let progress {
             updateProgress(frozenUploadFile: frozenUploadFile, progress: progress, animated: true)
         }
 
-        // observe the progres
-        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
-            guard let self else {
-                return
-            }
-
-            switch change {
-            case .change(let newLiveFile, _):
-                guard let progress = newLiveFile.progress,
-                      newLiveFile.error == nil || newLiveFile.error == DriveError.taskRescheduled else {
-                    return
-                }
-
-                updateProgress(frozenUploadFile: newLiveFile.freeze(), progress: progress, animated: false)
-            case .error, .deleted:
-                break
-            }
-        }
-        progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
+        setupObservation(liveFile: uploadFile)
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in
@@ -181,6 +165,27 @@ final class UploadTableViewCell: InsetTableViewCell {
             cardContentView.retryButton?.isHidden = true
             uploadService.retry(uploadFileId)
         }
+    }
+
+    private func setupObservation(liveFile: UploadFile) {
+        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            switch change {
+            case .change(let newLiveFile, _):
+                guard let progress = newLiveFile.progress,
+                      newLiveFile.error == nil || newLiveFile.error == DriveError.taskRescheduled else {
+                    return
+                }
+
+                updateProgress(frozenUploadFile: newLiveFile.freeze(), progress: progress, animated: false)
+            case .error, .deleted:
+                break
+            }
+        }
+        progressObservation = liveFile.observe(keyPaths: ["progress"], observationClosure)
     }
 
     func configureWith(importedFile: ImportedFile) {
@@ -209,8 +214,7 @@ final class UploadTableViewCell: InsetTableViewCell {
         var status = KDriveResourcesStrings.Localizable.uploadInProgressTitle
         if ReachabilityListener.instance.currentStatus == .offline {
             status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
-        } else if photoLibraryUploader.isWifiOnly,
-                  ReachabilityListener.instance.currentStatus != .wifi,
+        } else if isUploadLimited,
                   frozenUploadFile.isPhotoSyncUpload {
             status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
         }
