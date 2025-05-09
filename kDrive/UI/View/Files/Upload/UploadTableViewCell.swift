@@ -139,25 +139,7 @@ final class UploadTableViewCell: InsetTableViewCell {
             updateProgress(frozenUploadFile: frozenUploadFile, progress: progress, animated: true)
         }
 
-        // observe the progres
-        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
-            guard let self else {
-                return
-            }
-
-            switch change {
-            case .change(let newLiveFile, _):
-                guard let progress = newLiveFile.progress,
-                      newLiveFile.error == nil || newLiveFile.error == DriveError.taskRescheduled else {
-                    return
-                }
-
-                updateProgress(frozenUploadFile: newLiveFile.freeze(), progress: progress, animated: false)
-            case .error, .deleted:
-                break
-            }
-        }
-        progressObservation = uploadFile.observe(keyPaths: ["progress"], observationClosure)
+        setupObservation(liveFile: uploadFile)
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in
@@ -183,6 +165,27 @@ final class UploadTableViewCell: InsetTableViewCell {
             cardContentView.retryButton?.isHidden = true
             uploadService.retry(uploadFileId)
         }
+    }
+
+    private func setupObservation(liveFile: UploadFile) {
+        let observationClosure: (ObjectChange<UploadFile>) -> Void = { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            switch change {
+            case .change(let newLiveFile, _):
+                guard let progress = newLiveFile.progress,
+                      newLiveFile.error == nil || newLiveFile.error == DriveError.taskRescheduled else {
+                    return
+                }
+
+                updateProgress(frozenUploadFile: newLiveFile.freeze(), progress: progress, animated: false)
+            case .error, .deleted:
+                break
+            }
+        }
+        progressObservation = liveFile.observe(keyPaths: ["progress"], observationClosure)
     }
 
     func configureWith(importedFile: ImportedFile) {
