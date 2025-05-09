@@ -65,7 +65,7 @@ final class UploadQueueViewController: UIViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                self?.reloadCollectionView()
+                self?.reloadCollectionView(with: nil)
             }
         }
     }
