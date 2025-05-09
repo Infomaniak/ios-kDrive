@@ -214,7 +214,7 @@ extension UploadQueueViewController: UITableViewDataSource {
             }
 
             let progress: CGFloat? = (file.progress != nil) ? CGFloat(file.progress!) : nil
-            cell.configureWith(frozenUploadFile: file, progress: progress)
+            cell.configureWith(frozenUploadFile: file, progress: progress, isUploadLimited: isUploadLimited)
             cell.selectionStyle = .none
             return cell
         }
