@@ -51,8 +51,7 @@ public extension PhotoLibraryUploader {
                 }
             }
 
-            writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
-            writableRealm.add(liveNewSyncSettings)
+            writableRealm.add(liveNewSyncSettings, update: .all)
         }
     }
 
