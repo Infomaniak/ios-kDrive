@@ -29,7 +29,7 @@ typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
 
 final class UploadQueueViewController: UIViewController {
     private let errorFile = UploadFileDisplayed(isFirstInList: true, isLastInList: true, content: UploadFile())
-    private var isWifiOnly: Bool = false
+    private var isWifiOnly = false
     private var wifiOnlyNotificationToken: NotificationToken?
 
     enum SectionModel: Differentiable {

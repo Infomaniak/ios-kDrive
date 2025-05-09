@@ -28,7 +28,7 @@ import UIKit
 final class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet var cardContentView: UploadCardView!
-    private var isUploadLimited: Bool = false
+    private var isUploadLimited = false
     private var currentFileId: String?
     private var thumbnailRequest: UploadFile.ThumbnailRequest?
     private var progressObservation: NotificationToken?
