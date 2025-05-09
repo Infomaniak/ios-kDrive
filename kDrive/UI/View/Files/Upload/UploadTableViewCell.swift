@@ -34,7 +34,6 @@ final class UploadTableViewCell: InsetTableViewCell {
     private var progressObservation: NotificationToken?
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
     override func awakeFromNib() {
         super.awakeFromNib()
