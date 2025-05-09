@@ -24,7 +24,7 @@ import kDriveCore
 import XCTest
 
 final class DriveApiTests: XCTestCase {
-    private static let defaultTimeout = 30.0
+    private static let defaultTimeout = 120.0
     private static let token = ApiToken(accessToken: Env.token,
                                         expiresIn: Int.max,
                                         refreshToken: "",
@@ -33,7 +33,12 @@ final class DriveApiTests: XCTestCase {
                                         userId: Env.userId,
                                         expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-    private let currentApiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+    private var currentApiFetcher: DriveApiFetcher = {
+        let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+        apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
+        return apiFetcher
+    }()
+
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
 
@@ -49,6 +54,7 @@ final class DriveApiTests: XCTestCase {
         Task {
             let drive = ProxyDrive(id: Env.driveId)
             let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
+            apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
             _ = try await apiFetcher.emptyTrash(drive: drive)
             group.leave()
         }
@@ -64,10 +70,8 @@ final class DriveApiTests: XCTestCase {
         return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func tearDownTest(directory: ProxyFile) {
-        Task {
-            _ = try await currentApiFetcher.delete(file: directory)
-        }
+    func tearDownTest(directory: ProxyFile) async {
+        _ = try? await currentApiFetcher.delete(file: directory)
     }
 
     // MARK: - Helping methods
@@ -153,7 +157,7 @@ final class DriveApiTests: XCTestCase {
     func testCreateDirectory() async throws {
         let testDirectory = try await setUpTest(testName: "Create directory")
         _ = try await currentApiFetcher.createDirectory(in: testDirectory, name: "Test directory", onlyForMe: true)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testCreateCommonDirectory() async throws {
@@ -162,13 +166,13 @@ final class DriveApiTests: XCTestCase {
             name: "Create common directory-\(Date())",
             forAllUser: true
         )
-        tearDownTest(directory: testDirectory.proxify())
+        await tearDownTest(directory: testDirectory.proxify())
     }
 
     func testCreateFile() async throws {
         let testDirectory = try await setUpTest(testName: "Create file")
         _ = try await currentApiFetcher.createFile(in: testDirectory, name: "Test file", type: "docx")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Dropbox
@@ -185,7 +189,7 @@ final class DriveApiTests: XCTestCase {
         let dir = try await createTestDirectory(name: "Create dropbox", parentDirectory: testDirectory)
         let dropBox = try await currentApiFetcher.createDropBox(directory: dir, settings: settings)
         XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropbox should have a password")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testGetDropBox() async throws {
@@ -203,7 +207,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(dropBox.capabilities.validity.date, TestsMessages.notNil("validity"))
         XCTAssertTrue(dropBox.capabilities.hasSizeLimit, "Dropbox should have a size limit")
         XCTAssertNotNil(dropBox.capabilities.size.limit, TestsMessages.notNil("size limit"))
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDeleteDropBox() async throws {
@@ -211,7 +215,7 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
         let response = try await currentApiFetcher.deleteDropBox(directory: dropBoxDir)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Get directories
@@ -235,7 +239,7 @@ final class DriveApiTests: XCTestCase {
         let shareLink1 = try await currentApiFetcher.createShareLink(for: testDirectory, isFreeDrive: isFreeDrive)
         let shareLink2 = try await currentApiFetcher.shareLink(for: testDirectory)
         XCTAssertEqual(shareLink1.url, shareLink2.url, "Share link url should match")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testUpdateShareLink() async throws {
@@ -260,7 +264,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertTrue(updatedShareLink.capabilities.canSeeStats, "canSeeStats should be true")
         XCTAssertTrue(updatedShareLink.right == ShareLinkPermission.password.rawValue, "Right should be equal to 'password'")
         XCTAssertNil(updatedShareLink.validUntil, "validUntil should be nil")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testRemoveShareLink() async throws {
@@ -268,7 +272,7 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.createShareLink(for: testDirectory, isFreeDrive: isFreeDrive)
         let response = try await currentApiFetcher.removeShareLink(for: testDirectory)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: File access
@@ -276,14 +280,14 @@ final class DriveApiTests: XCTestCase {
     func testGetFileAccess() async throws {
         let testDirectory = try await setUpTest(testName: "Get file access")
         _ = try await currentApiFetcher.access(for: testDirectory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testCheckAccessChange() async throws {
         let testDirectory = try await setUpTest(testName: "Check access")
         let settings = FileAccessSettings(right: .write, emails: [Env.inviteMail], userIds: [Env.inviteUserId])
         _ = try await currentApiFetcher.checkAccessChange(to: testDirectory, settings: settings)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testAddAccess() async throws {
@@ -303,7 +307,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(invitation, "Invitation should be in share list")
         XCTAssertEqual(invitation?.right, .write, "Invitation right should be equal to 'write'")
         XCTAssertTrue(fileAccess.teams.isEmpty, "There should be no team in share list")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testUpdateUserAccess() async throws {
@@ -320,7 +324,7 @@ final class DriveApiTests: XCTestCase {
             XCTAssertNotNil(updatedUser, TestsMessages.notNil("user"))
             XCTAssertEqual(updatedUser?.right, .write, "User permission should be equal to 'write'")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testRemoveUserAccess() async throws {
@@ -336,7 +340,7 @@ final class DriveApiTests: XCTestCase {
             let deletedUser = fileAccess.users.first { $0.id == Env.inviteUserId }
             XCTAssertNil(deletedUser, "Deleted user should be nil")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testUpdateInvitationAccess() async throws {
@@ -357,7 +361,7 @@ final class DriveApiTests: XCTestCase {
             XCTAssertNotNil(updatedInvitation, TestsMessages.notNil("invitation"))
             XCTAssertEqual(updatedInvitation?.right, .write, "Invitation right should be equal to 'write'")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDeleteInvitation() async throws {
@@ -373,7 +377,7 @@ final class DriveApiTests: XCTestCase {
             let deletedInvitation = fileAccess.invitations.first { $0.email == Env.inviteMail }
             XCTAssertNil(deletedInvitation, "Deleted invitation should be nil")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testUpdateTeamAccess() async throws {
@@ -390,7 +394,7 @@ final class DriveApiTests: XCTestCase {
             XCTAssertNotNil(updatedTeam, TestsMessages.notNil("team"))
             XCTAssertEqual(updatedTeam?.right, .write, "Team right should be equal to 'write'")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testRemoveTeamAccess() async throws {
@@ -406,7 +410,7 @@ final class DriveApiTests: XCTestCase {
             let deletedTeam = fileAccess.teams.first { $0.id == Env.inviteTeam }
             XCTAssertNil(deletedTeam, "Deleted team should be nil")
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Comments
@@ -414,7 +418,7 @@ final class DriveApiTests: XCTestCase {
     func testGetComments() async throws {
         let testDirectory = try await setUpTest(testName: "Get comments")
         _ = try await currentApiFetcher.comments(file: testDirectory, page: 1)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testAddComment() async throws {
@@ -424,7 +428,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertEqual(comment.body, body, "Comment body should be equal to 'Testing comment'")
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         XCTAssertNotNil(comments.first { $0.id == comment.id }, TestsMessages.notNil("comment"))
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testLikeComment() async throws {
@@ -435,11 +439,11 @@ final class DriveApiTests: XCTestCase {
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
             XCTFail(TestsMessages.notNil("comment"))
-            tearDownTest(directory: testDirectory)
+            await tearDownTest(directory: testDirectory)
             return
         }
         XCTAssertTrue(fetchedComment.liked, "Comment should be liked")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDeleteComment() async throws {
@@ -449,7 +453,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         XCTAssertNil(comments.first { $0.id == comment.id }, "Comment should be deleted")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testEditComment() async throws {
@@ -461,11 +465,11 @@ final class DriveApiTests: XCTestCase {
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
             XCTFail(TestsMessages.notNil("edited comment"))
-            tearDownTest(directory: testDirectory)
+            await tearDownTest(directory: testDirectory)
             return
         }
         XCTAssertEqual(editedComment.body, editedBody, "Edited comment body is wrong")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testAnswerComment() async throws {
@@ -475,11 +479,11 @@ final class DriveApiTests: XCTestCase {
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
             XCTFail(TestsMessages.notNil("comment"))
-            tearDownTest(directory: testDirectory)
+            await tearDownTest(directory: testDirectory)
             return
         }
         XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, TestsMessages.notNil("answer"))
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Action on files
@@ -487,7 +491,7 @@ final class DriveApiTests: XCTestCase {
     func testFileInfo() async throws {
         let testDirectory = try await setUpTest(testName: "Get file detail")
         _ = try await currentApiFetcher.fileInfo(testDirectory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDeleteFile() async throws {
@@ -513,14 +517,14 @@ final class DriveApiTests: XCTestCase {
             let deletedDefinitelyFile = trashedFiles.first { $0.id == proxyFile.id }
             XCTAssertNil(deletedDefinitelyFile, TestsMessages.notNil("deleted file"))
         }
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testRenameFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Rename file")
         let newName = "renamed office file"
         _ = try await currentApiFetcher.rename(file: file, newName: newName)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDuplicateFile() async throws {
@@ -528,14 +532,14 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.duplicate(file: file, duplicateName: "duplicate-\(Date())")
         let files = try await currentApiFetcher.files(in: testDirectory).validApiResponse.data.files
         XCTAssertEqual(files.count, 2, "Root file should have 2 children")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testCopyFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Copy file")
         let copiedFile = try await currentApiFetcher.copy(file: file, to: testDirectory)
         try await checkIfFileIsInDestination(file: copiedFile.proxify(), directory: testDirectory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testMoveFile() async throws {
@@ -543,7 +547,7 @@ final class DriveApiTests: XCTestCase {
         let destination = try await createTestDirectory(name: "destination-\(Date())", parentDirectory: testDirectory)
         _ = try await currentApiFetcher.move(file: file, to: destination)
         try await checkIfFileIsInDestination(file: file, directory: destination)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testFavoriteFile() async throws {
@@ -564,7 +568,7 @@ final class DriveApiTests: XCTestCase {
         // Check file
         let finalFile = try await currentApiFetcher.fileInfo(file).validApiResponse.data
         XCTAssertFalse(finalFile.isFavorite, "File shouldn't be favorite")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Bulk actions
@@ -572,21 +576,21 @@ final class DriveApiTests: XCTestCase {
     func testBuildArchive() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Build archive")
         _ = try await currentApiFetcher.buildArchive(drive: proxyDrive, body: .init(files: [file]))
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testBulkAction() async throws {
         let (testDirectory, files) = try await initSeveralFiles(testName: "Bulk action")
         let bulkAction = BulkAction(action: .trash, fileIds: files[0 ... 1].map(\.id))
         _ = try await currentApiFetcher.bulkAction(drive: proxyDrive, action: bulkAction)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testBulkSelectAll() async throws {
         let (testDirectory, _) = try await initSeveralFiles(testName: "Bulk action : select all")
         let bulkAction = BulkAction(action: .trash, parentId: testDirectory.id)
         _ = try await currentApiFetcher.bulkAction(drive: proxyDrive, action: bulkAction)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Activity
@@ -598,14 +602,14 @@ final class DriveApiTests: XCTestCase {
     func testGetFileActivities() async throws {
         let testDirectory = try await setUpTest(testName: "Get file detail activity")
         _ = try await currentApiFetcher.fileActivities(file: testDirectory, cursor: nil)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testGetFileActivitiesFromDate() async throws {
         let earlyDate = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
         let (testDirectory, file) = try await initOfficeFile(testName: "Get file activity from date")
         _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, cursor: nil)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Trashed files
@@ -626,7 +630,7 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.delete(file: file)
         _ = try await currentApiFetcher.restore(file: file)
         try await checkIfFileIsInDestination(file: file, directory: testDirectory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testRestoreTrashedFileInFolder() async throws {
@@ -635,7 +639,7 @@ final class DriveApiTests: XCTestCase {
         let directory = try await createTestDirectory(name: "restore destination - \(Date())", parentDirectory: testDirectory)
         _ = try await currentApiFetcher.restore(file: file, in: directory)
         try await checkIfFileIsInDestination(file: file, directory: directory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: Miscellaneous
@@ -651,7 +655,7 @@ final class DriveApiTests: XCTestCase {
         let deleteResponse = try await currentApiFetcher.delete(file: file)
         try await currentApiFetcher.undoAction(drive: proxyDrive, cancelId: deleteResponse.id)
         try await checkIfFileIsInDestination(file: file, directory: testDirectory)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testGetFileCount() async throws {
@@ -662,7 +666,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertEqual(count.count, 3, "Root file should contain 3 elements")
         XCTAssertEqual(count.files, 2, "Root file should contain 2 files")
         XCTAssertEqual(count.directories, 1, "Root file should contain 1 folder")
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     // MARK: - Complementary tests
@@ -701,13 +705,13 @@ final class DriveApiTests: XCTestCase {
         let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)
         XCTAssertTrue(deleteResponse, TestsMessages.shouldReturnTrue)
 
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 
     func testDirectoryColor() async throws {
         let testDirectory = try await setUpTest(testName: "DirectoryColor")
         let result = try await currentApiFetcher.updateColor(directory: testDirectory, color: "#E91E63")
         XCTAssertTrue(result, TestsMessages.shouldReturnTrue)
-        tearDownTest(directory: testDirectory)
+        await tearDownTest(directory: testDirectory)
     }
 }
