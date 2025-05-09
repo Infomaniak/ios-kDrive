@@ -109,36 +109,37 @@ final class UploadQueueViewController: UIViewController {
         let observedFiles = AnyRealmCollection(uploadDataSource.getUploadingFiles(withParent: currentDirectory.id,
                                                                                   userId: accountManager.currentUserId,
                                                                                   driveId: currentDirectory.driveId))
-        observedFilesNotificationToken = observedFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
-            guard let self else {
-                return
-            }
+        observedFilesNotificationToken = observedFiles
+            .observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
 
-            let newResults: AnyRealmCollection<UploadFile>?
-            switch change {
-            case .initial(let results):
-                newResults = results
-            case .update(let results, _, _, _):
-                newResults = results
-            case .error(let error):
-                newResults = nil
-                DDLogError("Realm observer error: \(error)")
-            }
+                let newResults: AnyRealmCollection<UploadFile>?
+                switch change {
+                case .initial(let results):
+                    newResults = results
+                case .update(let results, _, _, _):
+                    newResults = results
+                case .error(let error):
+                    newResults = nil
+                    DDLogError("Realm observer error: \(error)")
+                }
 
-            guard let newResults else {
-                reloadCollectionView(with: [])
-                return
-            }
+                guard let newResults else {
+                    reloadCollectionView(with: [])
+                    return
+                }
 
-            let wrappedFrozenFiles = newResults.enumerated().map { index, file in
-                let frozenFile = file.freeze()
-                return UploadFileDisplayed(isFirstInList: index == 0,
-                                           isLastInList: index == newResults.count - 1,
-                                           content: frozenFile)
-            }
+                let wrappedFrozenFiles = newResults.enumerated().map { index, file in
+                    let frozenFile = file.freeze()
+                    return UploadFileDisplayed(isFirstInList: index == 0,
+                                               isLastInList: index == newResults.count - 1,
+                                               content: frozenFile)
+                }
 
-            reloadCollectionView(with: wrappedFrozenFiles)
-        }
+                reloadCollectionView(with: wrappedFrozenFiles)
+            }
     }
 
     @MainActor func reloadCollectionView(with frozenFiles: [UploadFileDisplayed]? = nil) {
