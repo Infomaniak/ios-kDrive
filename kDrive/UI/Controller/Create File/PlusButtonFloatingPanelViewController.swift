@@ -37,6 +37,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
     let presentedFromPlusButton: Bool
     let presentedAboveFileList: Bool
+    let mediaHelper: OpenMediaHelper
 
     private struct PlusButtonMenuAction: Equatable {
         let name: String
@@ -120,6 +121,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         currentDirectory = folder
         self.presentedFromPlusButton = presentedFromPlusButton
         self.presentedAboveFileList = presentedAboveFileList
+        mediaHelper = OpenMediaHelper(currentDirectory: folder, driveFileManager: driveFileManager)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -277,8 +279,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     }
 
     private func mediaAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {
-        let openMediaHelper = OpenMediaHelper(currentDirectory: currentDirectory, driveFileManager: driveFileManager)
-        openMediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
+        mediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
     }
 
     private func documentAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {

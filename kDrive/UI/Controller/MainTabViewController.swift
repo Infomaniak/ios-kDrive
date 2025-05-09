@@ -100,6 +100,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     let driveFileManager: DriveFileManager
 
+    private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
+
     lazy var legacyTabBarActive: Bool = {
         if #available(iOS 18.0, *),
            UIDevice.current.userInterfaceIdiom == .pad {
@@ -322,13 +324,17 @@ extension MainTabViewController: MainTabBarDelegate {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         guard let currentDirectory else { return }
 
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+
         let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
             presentedAboveFileList: fromFileList
         )
+
+        guard let floatingPanelViewController else { return }
+
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = plusButtonFloatingPanel
 
