@@ -52,26 +52,6 @@ final class UploadQueueViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        if let liveSettings = photoLibraryUploader.liveSettings {
-            isWifiOnly = liveSettings.isWifiOnly
-            wifiOnlyNotificationToken = liveSettings.observe(keyPaths: ["syncMode"], on: .main) { [weak self] change in
-                guard let self else {
-                    return
-                }
-
-                switch change {
-                case .change(let object, _):
-                    guard let syncSettings = object as? PhotoSyncSettings else { return }
-                    self.isWifiOnly = syncSettings.isWifiOnly
-                case .error(let error):
-                    DDLogError("[Realm Observation] Error sync settings \(error)")
-                case .deleted:
-                    DDLogError("[Realm Observation] Deleted sync settings")
-                }
-            }
-        }
-
         navigationItem.hideBackButtonText()
 
         tableView.register(cellView: UploadTableViewCell.self)
@@ -80,11 +60,36 @@ final class UploadQueueViewController: UIViewController {
         retryButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonRetry
         cancelButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCancel
 
-        setUpObserver()
+        setUpFileObserver()
+        setupSyncSettingsObservation()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
                 self?.reloadCollectionView()
+            }
+        }
+    }
+
+    private func setupSyncSettingsObservation() {
+        guard let liveSettings = photoLibraryUploader.liveSettings else {
+            return
+        }
+
+        isWifiOnly = liveSettings.isWifiOnly
+        wifiOnlyNotificationToken = liveSettings.observe(keyPaths: ["syncMode"], on: .main) { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            switch change {
+            case .change(let object, _):
+                guard let syncSettings = object as? PhotoSyncSettings else { return }
+                self.isWifiOnly = syncSettings.isWifiOnly
+                reloadCollectionView(with: nil)
+            case .error(let error):
+                DDLogError("[Realm Observation] Error sync settings \(error)")
+            case .deleted:
+                DDLogError("[Realm Observation] Deleted sync settings")
             }
         }
     }
@@ -99,7 +104,7 @@ final class UploadQueueViewController: UIViewController {
         wifiOnlyNotificationToken?.invalidate()
     }
 
-    func setUpObserver() {
+    func setUpFileObserver() {
         guard let currentDirectory, !currentDirectory.isInvalidated else {
             return
         }
