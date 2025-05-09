@@ -29,6 +29,8 @@ typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
 
 final class UploadQueueViewController: UIViewController {
     private let errorFile = UploadFileDisplayed(isFirstInList: true, isLastInList: true, content: UploadFile())
+    private var isWifiOnly: Bool = false
+    private var wifiOnlyNotificationToken: NotificationToken?
 
     enum SectionModel: Differentiable {
         case error, files
@@ -50,6 +52,25 @@ final class UploadQueueViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        if let liveSettings = photoLibraryUploader.liveSettings {
+            isWifiOnly = liveSettings.isWifiOnly
+            wifiOnlyNotificationToken = liveSettings.observe(keyPaths: ["syncMode"], on: .main) { [weak self] change in
+                guard let self else {
+                    return
+                }
+
+                switch change {
+                case .change(let object, _):
+                    guard let syncSettings = object as? PhotoSyncSettings else { return }
+                    self.isWifiOnly = syncSettings.isWifiOnly
+                case .error(let error):
+                    DDLogError("[Realm Observation] Error sync settings \(error)")
+                case .deleted:
+                    DDLogError("[Realm Observation] Deleted sync settings")
+                }
+            }
+        }
 
         navigationItem.hideBackButtonText()
 
@@ -75,6 +96,7 @@ final class UploadQueueViewController: UIViewController {
 
     deinit {
         notificationToken?.invalidate()
+        wifiOnlyNotificationToken?.invalidate()
     }
 
     func setUpObserver() {
@@ -158,7 +180,7 @@ final class UploadQueueViewController: UIViewController {
     }
 
     private var isUploadLimited: Bool {
-        photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
+        isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
