@@ -263,8 +263,6 @@ class RootMenuViewController: CustomLargeTitleCollectionViewController, SelectSw
     }
 
     static func createListLayout(selectMode: Bool) -> UICollectionViewLayout {
-        @InjectService var appContextService: AppContextServiceable
-
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
