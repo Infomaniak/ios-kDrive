@@ -24,9 +24,9 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class LocationFolderViewController: RootMenuViewController {
+class LocationFolderViewController: SidebarViewController {
     private var selectedIndexPath: IndexPath?
-    weak var delegate: SelectFolderDelegate?
+    weak var locationDelegate: SelectFolderDelegate?
 
     private static let recentItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                                    image: KDriveResourcesAsset.clock.image,
@@ -78,7 +78,7 @@ class LocationFolderViewController: RootMenuViewController {
 
         let firstSectionItems = recentDirectories
         let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
-        let sections = [RootMenuSection.recent, RootMenuSection.main]
+        let sections = [RootMenuSection.first, RootMenuSection.main]
         let sectionItems = [firstSectionItems, secondSectionItems]
 
         for i in 0 ... sectionItems.count - 1 {
@@ -100,10 +100,10 @@ class LocationFolderViewController: RootMenuViewController {
         driveFileManager: DriveFileManager,
         viewModel: FileListViewModel,
         selectMode: Bool,
-        delegate: SelectFolderDelegate? = nil
+        locationDelegate: SelectFolderDelegate? = nil
     ) {
         self.viewModel = viewModel
-        self.delegate = delegate
+        self.locationDelegate = locationDelegate
         super.init(driveFileManager: driveFileManager, selectMode: selectMode)
     }
 
@@ -152,7 +152,7 @@ class LocationFolderViewController: RootMenuViewController {
             )
         }
 
-        let destinationViewController = SelectFolderViewController(viewModel: destinationViewModel, delegate: delegate)
+        let destinationViewController = SelectFolderViewController(viewModel: destinationViewModel, delegate: locationDelegate)
         destinationViewModel.onDismissViewController = { [weak destinationViewController] in
             destinationViewController?.dismiss(animated: true)
         }

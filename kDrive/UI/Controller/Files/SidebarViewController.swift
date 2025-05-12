@@ -26,10 +26,12 @@ import UIKit
 
 class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     @LazyInjectService var appRouter: AppNavigable
-    private typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
-    private typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+    @LazyInjectService private var accountManager: AccountManageable
+    public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     private let menuIndexPath: IndexPath = [-1, -1]
+    let selectMode: Bool
 
     private var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }
@@ -45,14 +47,22 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return true
     }
 
-    private enum RootMenuSection {
+    public enum RootMenuSection {
         case main
         case first
         case second
         case third
+
+        var title: String {
+            switch self {
+            case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
+            case .first: return KDriveResourcesStrings.Localizable.buttonRecent
+            default: return ""
+            }
+        }
     }
 
-    private struct RootMenuItem: Equatable, Hashable {
+    public struct RootMenuItem: Equatable, Hashable {
         var id: Int {
             return destinationFile.id
         }
@@ -135,14 +145,16 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                         destinationFile: DriveFileManager.trashRootFile)]
 
     weak var delegate: SidebarViewControllerDelegate?
-    @LazyInjectService private var accountManager: AccountManageable
+
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
-    private var rootViewChildren: [File]?
-    private var dataSource: MenuDataSource?
+    public var rootViewChildren: [File]?
+    private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
     private let refreshControl = UIRefreshControl()
 
-    private var displayedSnapshot = DataSourceSnapshot()
+    var itemsSnapshot: DataSourceSnapshot {
+        getItemsSnapshot(isCompactView: isCompactView)
+    }
 
     private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
 
@@ -188,9 +200,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return snapshot
     }
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectMode: Bool) {
         self.driveFileManager = driveFileManager
-        super.init(collectionViewLayout: SidebarViewController.createListLayout())
+        self.selectMode = selectMode
+        super.init(collectionViewLayout: SidebarViewController.createListLayout(selectMode: selectMode))
     }
 
     @available(*, unavailable)
@@ -207,8 +220,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     func setDisplayedSnapshot() {
         setupViewForCurrentSizeClass()
-        displayedSnapshot = getItemsSnapshot(isCompactView: isCompactView)
-        dataSource?.apply(displayedSnapshot, animatingDifferences: true)
+        dataSource.apply(itemsSnapshot, animatingDifferences: true)
     }
 
     override func viewDidLoad() {
@@ -272,12 +284,29 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
+        collectionView.register(
+            supplementaryView: ReusableHeaderView.self,
+            forSupplementaryViewOfKind: ReusableHeaderView.kind
+        )
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
-        configureDataSource()
+        dataSource = configureDataSource(for: collectionView)
+        setItemsSnapshot(for: collectionView)
+    }
 
-        let rootFileUid = File.uid(driveId: driveFileManager.drive.id, fileId: DriveFileManager.constants.rootID)
+    private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
+        let iconSize = 28.0
+
+        let image = image
+            .resize(size: CGSize(width: iconSize, height: iconSize))
+            .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
+            .withRenderingMode(.alwaysOriginal)
+        return image
+    }
+
+    func setItemsSnapshot(for: UICollectionView) {
+        let rootFileUid = File.uid(driveId: driveFileManager.driveId, fileId: DriveFileManager.constants.rootID)
         guard let root = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: rootFileUid) else {
             return
         }
@@ -291,28 +320,25 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(displayedSnapshot, animatingDifferences: false)
+                dataSource.apply(itemsSnapshot, animatingDifferences: false)
+
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource?.apply(displayedSnapshot, animatingDifferences: true)
+                dataSource.apply(itemsSnapshot, animatingDifferences: true)
+
             case .error:
                 break
             }
         }
     }
 
-    private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
-        let iconSize = 28.0
-
-        let image = image
-            .resize(size: CGSize(width: iconSize, height: iconSize))
-            .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
-            .withRenderingMode(.alwaysOriginal)
-        return image
-    }
-
-    func configureDataSource() {
-        dataSource = MenuDataSource(collectionView: collectionView) { collectionView, indexPath, menuItem -> RootMenuCell? in
+    func configureDataSource(
+        for collectionView: UICollectionView
+    )
+        -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
+        dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
+            collectionView, indexPath, menuItem -> RootMenuCell?
+            in
             guard let rootMenuCell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: RootMenuCell.identifier,
                 for: indexPath
@@ -325,7 +351,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             return rootMenuCell
         }
 
-        dataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self else { return UICollectionReusableView() }
 
             switch kind {
@@ -340,11 +366,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
                     presenter: self,
-                    addLeadingConstraint: !isCompactView
+                    addLeadingConstraint: !isCompactView,
+                    selectMode: selectMode
                 )
 
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
+
             case RootMenuHeaderView.kind.rawValue:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -354,46 +382,70 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
                 headerView.configureInCollectionView(collectionView, driveFileManager: driveFileManager, presenter: self)
                 return headerView
+
+            case ReusableHeaderView.kind.rawValue:
+                let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: ReusableHeaderView.kind.rawValue,
+                    for: indexPath
+                )
+
+                if let reusableHeader = header as? ReusableHeaderView,
+                   let sectionIdentifier = dataSource.snapshot().sectionIdentifiers[safe: indexPath.section] {
+                    reusableHeader.titleLabel.text = sectionIdentifier.title
+                }
+
+                return header
+
             default:
                 fatalError("Unhandled kind \(kind)")
             }
         }
 
-        dataSource?.apply(displayedSnapshot, animatingDifferences: false)
+        dataSource.apply(itemsSnapshot, animatingDifferences: false)
+        return dataSource
     }
 
-    static func createListLayout() -> UICollectionViewLayout {
-        let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, _ in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                  heightDimension: .estimated(60))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+    static func createListLayout(selectMode: Bool) -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                              heightDimension: .estimated(60))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .estimated(60))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                           subitems: [item])
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                               heightDimension: .estimated(60))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                       subitems: [item])
 
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 24, trailing: 0)
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
 
-            if sectionIndex == 0 {
-                let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                        heightDimension: .estimated(0))
-                let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: headerSize,
-                    elementKind: RootMenuHeaderView.kind.rawValue,
-                    alignment: .top
-                )
-                sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
-                section.boundarySupplementaryItems = [sectionHeaderItem]
-            }
+        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: selectMode ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
+                .rawValue,
+            alignment: .top
+        )
 
-            return section
+        if !selectMode {
+            sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
+                top: UIConstants.Padding.none,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: UIConstants.Padding.none,
+                trailing: UIConstants.Padding.mediumSmall
+            )
         }
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: -UIConstants.Padding.small,
+            leading: UIConstants.Padding.none,
+            bottom: UIConstants.Padding.standard,
+            trailing: UIConstants.Padding.none
+        )
+        section.boundarySupplementaryItems = [sectionHeaderItem]
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration.boundarySupplementaryItems = [generateHeaderItem()]
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
     }
 
@@ -411,7 +463,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
+        guard let selectedRootFile = dataSource.itemIdentifier(for: indexPath)?.destinationFile else { return }
 
         let destinationViewModel: FileListViewModel
 
@@ -432,7 +484,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
-                currentDirectory: selectedRootFile
+                currentDirectory: selectedRootFile,
+                rightBarButtons: [.search]
             )
         }
 
@@ -440,7 +493,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             let userRootFolders = rootViewChildren?.compactMap {
                 RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
             } ?? []
-            switch displayedSnapshot.sectionIdentifiers[indexPath.section] {
+            switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
             case .first:
                 let menuItems = SidebarViewController.baseItems
                 let selectedItemName = menuItems[indexPath.row].name
@@ -472,6 +525,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonAddClicked() {
+        #if !ISEXTENSION
         let currentDriveFileManager = driveFileManager
         let currentDirectory = (splitViewController?.viewController(for: .secondary) as? UINavigationController)?
             .topViewController as? FileListViewController
@@ -492,6 +546,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
         floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
         present(floatingPanelViewController, animated: true)
+        #endif
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {

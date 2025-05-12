@@ -29,7 +29,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+public class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
     @LazyInjectService private var matomo: MatomoUtils
 
     let currentDirectory: File
@@ -130,7 +130,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
@@ -151,7 +151,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         #endif
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 && indexPath.section == 0 {
             return UIConstants.FloatingPanel.headerHeight
         } else {
@@ -159,18 +159,18 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         }
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    public override func numberOfSections(in tableView: UITableView) -> Int {
         return content.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 1
         }
         return content[section].count
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
             cell.titleLabel.text = currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
@@ -201,7 +201,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             return
         }
@@ -239,7 +239,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         return true
     }
 
-    func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
+    public func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
         // Remove the panel when it's pushed one third down
         return location.y > fpc.backdropView.frame.height * 1 / 3
     }
