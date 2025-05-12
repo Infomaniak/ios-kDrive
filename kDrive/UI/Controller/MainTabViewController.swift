@@ -71,6 +71,7 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         let photoListViewController = PhotoListViewController(viewModel: PhotoListViewModel(driveFileManager: driveFileManager))
         let menuViewController = MenuViewController(driveFileManager: driveFileManager)
         if let detailNav = viewControllers.last as? UINavigationController {
+            detailNav.setNavigationBarHidden(false, animated: true)
             if name == KDriveResourcesStrings.Localizable.homeTitle {
                 detailNav.setViewControllers([homeViewController], animated: false)
             } else if name == KDriveResourcesStrings.Localizable.allPictures {
