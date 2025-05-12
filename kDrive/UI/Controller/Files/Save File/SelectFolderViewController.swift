@@ -117,7 +117,7 @@ final class SelectFolderViewController: FileListViewController {
             driveFileManager: driveFileManager,
             viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: startDirectory),
             selectMode: true,
-            delegate: delegate
+            locationDelegate: delegate
         )
         selectFolderViewController.navigationItem.hideBackButtonText()
         viewControllers.append(selectFolderViewController)
