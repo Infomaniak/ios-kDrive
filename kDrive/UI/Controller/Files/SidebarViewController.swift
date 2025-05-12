@@ -233,44 +233,50 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let buttonAdd = ImageButton()
         var avatar = UIImage()
 
-        buttonAdd.setImage(KDriveResourcesAsset.plus.image, for: .normal)
-        buttonAdd.tintColor = .white
-        buttonAdd.imageWidth = 18
-        buttonAdd.imageHeight = 18
-        buttonAdd.imageSpacing = 20
-        buttonAdd.setTitle(KDriveResourcesStrings.Localizable.buttonAdd, for: .normal)
-        buttonAdd.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-        buttonAdd.setTitleColor(.white, for: .normal)
-        buttonAdd.layer.cornerRadius = 10
-        buttonAdd.translatesAutoresizingMaskIntoConstraints = false
+        if !selectMode {
+            buttonAdd.setImage(KDriveResourcesAsset.plus.image, for: .normal)
+            buttonAdd.tintColor = .white
+            buttonAdd.imageWidth = 18
+            buttonAdd.imageHeight = 18
+            buttonAdd.imageSpacing = 20
+            buttonAdd.setTitle(KDriveResourcesStrings.Localizable.buttonAdd, for: .normal)
+            buttonAdd.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+            buttonAdd.setTitleColor(.white, for: .normal)
+            buttonAdd.layer.cornerRadius = 10
+            buttonAdd.translatesAutoresizingMaskIntoConstraints = false
 
-        if !isCompactView {
-            accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
-                avatar = SidebarViewController.generateProfileTabImages(image: image)
-                let buttonMenu = UIBarButtonItem(
-                    image: avatar,
-                    style: .plain,
+            if !isCompactView {
+                accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+                    avatar = SidebarViewController.generateProfileTabImages(image: image)
+                    let buttonMenu = UIBarButtonItem(
+                        image: avatar,
+                        style: .plain,
+                        target: self,
+                        action: #selector(self.buttonMenuClicked(_:))
+                    )
+                    self.navigationItem.rightBarButtonItem = buttonMenu
+                }
+                collectionView.addSubview(buttonAdd)
+
+                buttonAdd.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
+
+                NSLayoutConstraint.activate([
+                    buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 50),
+                    buttonAdd.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+                    buttonAdd.heightAnchor.constraint(equalToConstant: 50),
+                    buttonAdd.widthAnchor.constraint(equalToConstant: 275)
+                ])
+
+            } else {
+                navigationItem.rightBarButtonItem = FileListBarButton(
+                    type: .search,
                     target: self,
-                    action: #selector(self.buttonMenuClicked(_:))
+                    action: #selector(presentSearch)
                 )
-                self.navigationItem.rightBarButtonItem = buttonMenu
-            }
-            collectionView.addSubview(buttonAdd)
-
-            buttonAdd.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
-
-            NSLayoutConstraint.activate([
-                buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 50),
-                buttonAdd.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-                buttonAdd.heightAnchor.constraint(equalToConstant: 50),
-                buttonAdd.widthAnchor.constraint(equalToConstant: 275)
-            ])
-
-        } else {
-            navigationItem.rightBarButtonItem = FileListBarButton(type: .search, target: self, action: #selector(presentSearch))
-            for subview in collectionView.subviews {
-                if subview is UIButton {
-                    subview.removeFromSuperview()
+                for subview in collectionView.subviews {
+                    if subview is UIButton {
+                        subview.removeFromSuperview()
+                    }
                 }
             }
         }
