@@ -100,11 +100,12 @@ class LocationFolderViewController: SidebarViewController {
         driveFileManager: DriveFileManager,
         viewModel: FileListViewModel,
         selectMode: Bool,
+        isCompactView: Bool,
         locationDelegate: SelectFolderDelegate? = nil
     ) {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate
-        super.init(driveFileManager: driveFileManager, selectMode: selectMode)
+        super.init(driveFileManager: driveFileManager, selectMode: selectMode, isCompactView: isCompactView)
     }
 
     @objc func closeButtonPressed() {

@@ -33,7 +33,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private let menuIndexPath: IndexPath = [-1, -1]
     let selectMode: Bool
 
-    private var isCompactView: Bool {
+    public var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }
         return rootViewController.traitCollection.horizontalSizeClass == .compact
     }
@@ -200,10 +200,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return snapshot
     }
 
-    init(driveFileManager: DriveFileManager, selectMode: Bool) {
+    init(driveFileManager: DriveFileManager, selectMode: Bool, isCompactView: Bool) {
         self.driveFileManager = driveFileManager
         self.selectMode = selectMode
-        super.init(collectionViewLayout: SidebarViewController.createListLayout(selectMode: selectMode))
+        super.init(collectionViewLayout: SidebarViewController.createListLayout(
+            selectMode: selectMode,
+            isCompactView: isCompactView
+        ))
     }
 
     @available(*, unavailable)
@@ -412,7 +415,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return dataSource
     }
 
-    static func createListLayout(selectMode: Bool) -> UICollectionViewLayout {
+    static func createListLayout(selectMode: Bool, isCompactView: Bool) -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .estimated(60))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -450,7 +453,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         section.boundarySupplementaryItems = [sectionHeaderItem]
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration.boundarySupplementaryItems = [generateHeaderItem()]
+        configuration
+            .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
         let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
     }
