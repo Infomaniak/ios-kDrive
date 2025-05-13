@@ -130,7 +130,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
@@ -151,7 +151,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
         #endif
     }
 
-    public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 && indexPath.section == 0 {
             return UIConstants.FloatingPanel.headerHeight
         } else {
@@ -159,18 +159,18 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
         }
     }
 
-    public override func numberOfSections(in tableView: UITableView) -> Int {
+    override public func numberOfSections(in tableView: UITableView) -> Int {
         return content.count
     }
 
-    public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 1
         }
         return content[section].count
     }
 
-    public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
             cell.titleLabel.text = currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
@@ -201,7 +201,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
         return cell
     }
 
-    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             return
         }
