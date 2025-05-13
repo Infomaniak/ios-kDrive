@@ -27,6 +27,7 @@ import Sentry
 
 public final class PhotoLibraryUploader {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+    @LazyInjectService var uploadService: UploadServiceable
 
     let serialQueue: DispatchQueue = {
         @LazyInjectService var appContextService: AppContextServiceable

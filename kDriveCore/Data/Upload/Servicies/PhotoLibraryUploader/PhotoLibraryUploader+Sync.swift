@@ -59,5 +59,13 @@ public extension PhotoLibraryUploader {
         try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
+
+        Task {
+            do {
+                try await uploadService.cancelAnyPhotoSync()
+            } catch {
+                Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)
+            }
+        }
     }
 }
