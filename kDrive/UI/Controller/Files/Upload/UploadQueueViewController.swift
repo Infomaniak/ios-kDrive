@@ -72,7 +72,7 @@ final class UploadQueueViewController: UIViewController {
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
-                self?.reloadCollectionView(with: nil)
+                self.reloadCollectionView(with: self.frozenUploadingFiles)
             }
         }
     }
@@ -92,7 +92,7 @@ final class UploadQueueViewController: UIViewController {
             case .change(let object, _):
                 guard let syncSettings = object as? PhotoSyncSettings else { return }
                 self.isWifiOnly = syncSettings.isWifiOnly
-                reloadCollectionView(with: nil)
+                reloadCollectionView(with: self.frozenUploadingFiles)
             case .error(let error):
                 DDLogError("[Realm Observation] Error sync settings \(error)")
             case .deleted:
