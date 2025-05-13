@@ -285,7 +285,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     private func createLayout() -> UICollectionViewLayout {
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem()]
+        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem(leading: 24)]
 
         let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, _ in
             guard let self else { return nil }
