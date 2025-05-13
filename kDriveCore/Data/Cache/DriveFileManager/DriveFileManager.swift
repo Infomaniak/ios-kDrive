@@ -870,8 +870,8 @@ public final class DriveFileManager {
             newFile.name = newName
             _ = try updateFileInDatabase(updatedFile: newFile, oldFile: fetchedFile, writableRealm: writableRealm)
             newFile.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newFile)
         }
+        notifyObserversWith(file: newFile)
 
         return fetchedFile
     }
