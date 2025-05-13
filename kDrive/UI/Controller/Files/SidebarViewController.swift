@@ -416,46 +416,62 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     static func createListLayout(selectMode: Bool, isCompactView: Bool) -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                              heightDimension: .estimated(60))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, _ in
 
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .estimated(60))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .estimated(60))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(0))
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(60))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                           subitems: [item])
 
-        let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: selectMode ? ReusableHeaderView.kind.rawValue : RootMenuHeaderView.kind
-                .rawValue,
-            alignment: .top
-        )
-
-        if !selectMode {
-            sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
-                top: UIConstants.Padding.none,
-                leading: UIConstants.Padding.mediumSmall,
-                bottom: UIConstants.Padding.none,
-                trailing: UIConstants.Padding.mediumSmall
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: -UIConstants.Padding.small,
+                leading: UIConstants.Padding.none,
+                bottom: UIConstants.Padding.standard,
+                trailing: UIConstants.Padding.none
             )
-        }
 
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: -UIConstants.Padding.small,
-            leading: UIConstants.Padding.none,
-            bottom: UIConstants.Padding.standard,
-            trailing: UIConstants.Padding.none
-        )
-        section.boundarySupplementaryItems = [sectionHeaderItem]
+            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                    heightDimension: .estimated(0))
+
+            if sectionIndex == 0 && !selectMode {
+                let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: RootMenuHeaderView.kind.rawValue,
+                    alignment: .top
+                )
+
+                sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
+                    top: UIConstants.Padding.none,
+                    leading: UIConstants.Padding.mediumSmall,
+                    bottom: UIConstants.Padding.none,
+                    trailing: UIConstants.Padding.mediumSmall
+                )
+
+                section.boundarySupplementaryItems = [sectionHeaderItem]
+            }
+
+            if selectMode {
+                let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: ReusableHeaderView.kind.rawValue,
+                    alignment: .top
+                )
+
+                section.boundarySupplementaryItems = [sectionHeaderItem]
+            }
+
+            return section
+        }
 
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration
             .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
-        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
         return layout
     }
 
