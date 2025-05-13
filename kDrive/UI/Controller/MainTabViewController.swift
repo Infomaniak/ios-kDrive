@@ -50,7 +50,11 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let sidebarViewController = SidebarViewController(driveFileManager: driveFileManager, selectMode: false)
+        let sidebarViewController = SidebarViewController(
+            driveFileManager: driveFileManager,
+            selectMode: false,
+            isCompactView: false
+        )
         let detailViewController = HomeViewController(driveFileManager: driveFileManager)
 
         sidebarViewController.delegate = self
@@ -196,7 +200,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
-        let homeViewController = SidebarViewController(driveFileManager: driveFileManager, selectMode: false)
+        let homeViewController = SidebarViewController(
+            driveFileManager: driveFileManager,
+            selectMode: false,
+            isCompactView: true
+        )
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
