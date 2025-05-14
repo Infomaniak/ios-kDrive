@@ -29,13 +29,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private static let loadingCellCount = 12
 
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var router: AppNavigable
-    @LazyInjectService var appRouter: AppNavigable
-
-    private var isCompactView: Bool {
-        guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass == .compact
-    }
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
@@ -374,7 +367,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    router.presentUpSaleSheet()
+                    appRouter.presentUpSaleSheet()
                     MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
                 }
                 cell.closeHandler = { [weak self] _ in
