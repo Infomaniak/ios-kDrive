@@ -38,21 +38,19 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         driveFileManager.drive.pack.drivePackId
     }
 
-    private var mykSuiteEnabled = false
+    private var mykSuite: MyKSuite?
 
     private enum ParameterSection: Int, CaseIterable {
         case mykSuite
         case general
 
-        func title(packId: DrivePackId?) -> String {
+        func title(isFree: Bool) -> String {
             switch self {
             case .mykSuite:
-                if packId == .myKSuite {
+                if isFree {
                     return "my kSuite"
-                } else if packId == .myKSuitePlus {
-                    return "my kSuite+"
                 } else {
-                    return ""
+                    return "my kSuite+"
                 }
             case .general:
                 return KDriveResourcesStrings.Localizable.settingsSectionGeneral
@@ -64,11 +62,10 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case email
         case mySubscription
 
-        var title: String {
+        func title(email: String?) -> String {
             switch self {
             case .email:
-                @InjectService var accountManager: AccountManageable
-                return accountManager.currentAccount?.user.email ?? ""
+                return email ?? ""
             case .mySubscription:
                 return MyKSuiteLocalizable.iosMyKSuiteDashboardSubscriptionButton
             }
@@ -160,7 +157,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let currentSection: ParameterSection?
-        if mykSuiteEnabled {
+        if mykSuite != nil {
             currentSection = ParameterSection(rawValue: section)
         } else {
             currentSection = ParameterSection.general
@@ -172,7 +169,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         headerView.backgroundColor = .clear
 
         let label = IKLabel()
-        label.text = currentSection.title(packId: packId)
+        label.text = currentSection.title(isFree: mykSuite?.isFree ?? false)
         label.font = TextStyle.header3.font
 
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -188,7 +185,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        guard mykSuiteEnabled else {
+        guard mykSuite != nil else {
             return 1
         }
 
@@ -196,7 +193,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard mykSuiteEnabled else {
+        guard mykSuite != nil else {
             return visibleRows.count
         }
 
@@ -211,7 +208,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard mykSuiteEnabled else {
+        guard mykSuite != nil else {
             return generalCell(tableView, forRowAt: indexPath)
         }
 
@@ -276,11 +273,11 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         let row = MykSuiteParameterRow.allCases[indexPath.row]
         switch row {
         case .email:
-            cell.titleLabel.text = row.title
+            cell.titleLabel.text = row.title(email: mykSuite?.email)
             cell.titleLabel.font = TextStyle.body1.font
             cell.selectionStyle = .none
         case .mySubscription:
-            cell.titleLabel.text = row.title
+            cell.titleLabel.text = row.title(email: mykSuite?.email)
         }
         return cell
     }
@@ -288,7 +285,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        guard mykSuiteEnabled else {
+        guard mykSuite != nil else {
             didSelectGeneralRowAt(indexPath: indexPath)
             return
         }
@@ -352,15 +349,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
     private func checkMykSuiteEnabledAndRefresh() {
         Task { @MainActor in
             @InjectService var mykSuiteStore: MyKSuiteStore
-            let packIsMykSuite: Bool
-            if await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId) != nil,
-               packId == .myKSuite || packId == .myKSuitePlus {
-                packIsMykSuite = true
-            } else {
-                packIsMykSuite = false
-            }
 
-            self.mykSuiteEnabled = packIsMykSuite
+            self.mykSuite = await mykSuiteStore.getMyKSuite(id: accountManager.currentUserId)
             self.tableView.reloadData()
         }
     }
