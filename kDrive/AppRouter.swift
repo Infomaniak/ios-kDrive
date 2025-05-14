@@ -820,14 +820,11 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
-            return
-        }
+        guard let rootViewController = window?.rootViewController as? UISplitViewController else { return }
+        guard let viewController = getControllerForRestoration(tabBarViewController: rootViewController) else { return }
 
-        rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navController = rootViewController.selectedViewController as? UINavigationController else {
+        viewController.dismiss(animated: false) {
+            guard let navController = viewController as? UINavigationController else {
                 return
             }
 
@@ -841,7 +838,7 @@ public struct AppRouter: AppNavigable {
                 navController.popToRootViewController(animated: false)
             }
 
-            guard let rootMenuViewController = navController.topViewController as? SidebarViewController else {
+            guard let rootMenuViewController = navController.topViewController else {
                 return
             }
 
