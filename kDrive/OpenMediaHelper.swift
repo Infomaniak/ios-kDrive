@@ -125,27 +125,26 @@ class OpenMediaHelper: NSObject {
 
 extension OpenMediaHelper: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        if let documentPicker = controller as? DriveImportDocumentPickerViewController {
-            for url in urls {
-                let targetURL = fileImportHelper.generateImportURL(for: url.uti)
+        guard let documentPicker = controller as? DriveImportDocumentPickerViewController else { return }
+        for url in urls {
+            let targetURL = fileImportHelper.generateImportURL(for: url.uti)
 
-                do {
-                    if FileManager.default.fileExists(atPath: targetURL.path) {
-                        try FileManager.default.removeItem(at: targetURL)
-                    }
-
-                    try FileManager.default.moveItem(at: url, to: targetURL)
-                    let uploadFile = UploadFile(
-                        parentDirectoryId: documentPicker.importDriveDirectory.id,
-                        userId: accountManager.currentUserId,
-                        driveId: documentPicker.importDriveDirectory.driveId,
-                        url: targetURL,
-                        name: url.lastPathComponent
-                    )
-                    uploadDatasource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            do {
+                if FileManager.default.fileExists(atPath: targetURL.path) {
+                    try FileManager.default.removeItem(at: targetURL)
                 }
+
+                try FileManager.default.moveItem(at: url, to: targetURL)
+                let uploadFile = UploadFile(
+                    parentDirectoryId: documentPicker.importDriveDirectory.id,
+                    userId: accountManager.currentUserId,
+                    driveId: documentPicker.importDriveDirectory.driveId,
+                    url: targetURL,
+                    name: url.lastPathComponent
+                )
+                uploadDatasource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             }
         }
     }
