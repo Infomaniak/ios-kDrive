@@ -18,6 +18,7 @@
 
 import BackgroundTasks
 import Foundation
+import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
@@ -174,6 +175,9 @@ public enum FactoryService {
             },
             Factory(type: MyKSuiteStore.self) { _, _ in
                 MyKSuiteStore()
+            },
+            Factory(type: BugTracker.self) { _, _ in
+                BugTracker(info: BugTrackerInfo(project: "app-mobile-drive"))
             }
         ]
 
