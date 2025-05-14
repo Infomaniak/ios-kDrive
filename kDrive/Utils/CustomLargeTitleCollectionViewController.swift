@@ -17,9 +17,13 @@
  */
 
 import InfomaniakCoreCommonUI
+import InfomaniakDI
+import kDriveCore
 import UIKit
 
 class CustomLargeTitleCollectionViewController: UICollectionViewController {
+    @InjectService private var appRouter: AppNavigable
+
     private var navigationBarHeight: CGFloat {
         return navigationController?.navigationBar.frame.height ?? 0
     }
@@ -28,12 +32,31 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     private var originalTitle: String?
 
+    private var isCompactView: Bool {
+        guard let rootViewController = appRouter.rootViewController else { return false }
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .never
         navigationItem.hideBackButtonText()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        guard !isCompactView else {
+            return
+        }
+
+        coordinator.animate(alongsideTransition: { _ in
+            self.updateNavigationBarAppearance()
+        }, completion: { _ in
+            self.updateNavigationBarAppearance()
+        })
     }
 
     static func generateHeaderItem(leading: CGFloat = 0) -> NSCollectionLayoutBoundarySupplementaryItem {
