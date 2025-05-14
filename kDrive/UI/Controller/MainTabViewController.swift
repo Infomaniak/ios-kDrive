@@ -17,6 +17,7 @@
  */
 
 import FloatingPanel
+import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
@@ -95,6 +96,13 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         (tabBar as? MainTabBar)?.tabDelegate = self
         photoPickerDelegate.viewController = self
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(userDidTakeScreenshot),
+            name: UIApplication.userDidTakeScreenshotNotification,
+            object: nil
+        )
     }
 
     override func viewWillLayoutSubviews() {
@@ -249,6 +257,10 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         }
         let canCreateFile = currentDirectory.isRoot || currentDirectory.capabilities.canCreateFile
         (tabBar as? MainTabBar)?.centerButton?.isEnabled = canCreateFile
+    }
+
+    @objc private func userDidTakeScreenshot() {
+        present(BugTrackerViewController(), animated: true)
     }
 }
 
