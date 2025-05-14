@@ -204,7 +204,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @available(*, unavailable)
-    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -299,7 +298,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
-        let iconSize = 28.0
+        let iconSize = UIConstants.Button.profileImageSize
 
         let image = image
             .resize(size: CGSize(width: iconSize, height: iconSize))
