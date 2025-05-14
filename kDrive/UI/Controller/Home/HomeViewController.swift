@@ -31,13 +31,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var router: AppNavigable
-    @LazyInjectService var appRouter: AppNavigable
-
-    private var isCompactView: Bool {
-        guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass == .compact
-    }
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
