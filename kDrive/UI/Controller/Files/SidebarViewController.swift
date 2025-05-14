@@ -25,18 +25,12 @@ import RealmSwift
 import UIKit
 
 class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
-    @LazyInjectService var appRouter: AppNavigable
     @LazyInjectService private var accountManager: AccountManageable
     public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
     public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     private let menuIndexPath: IndexPath = [-1, -1]
     let selectMode: Bool
-
-    public var isCompactView: Bool {
-        guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass == .compact
-    }
 
     private var isMenuIndexPathSelected: Bool {
         if selectedIndexPath != menuIndexPath {
