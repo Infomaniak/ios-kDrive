@@ -202,7 +202,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         downloadObserver = downloadQueue
             .observeFileDownloaded(observerViewController, fileId: frozenFile.id) { [weak self] _, error in
                 self?.downloadAction = nil
-                self?.setLoading(true, action: action, at: indexPath)
+                self?.setLoading(false, action: action, at: indexPath)
                 Task { @MainActor in
                     guard error == nil else {
                         UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
