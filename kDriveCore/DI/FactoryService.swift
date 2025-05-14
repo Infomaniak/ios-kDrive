@@ -18,6 +18,7 @@
 
 import BackgroundTasks
 import Foundation
+import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
@@ -205,6 +206,9 @@ public enum FactoryService {
                 matomo.optOut(true)
                 #endif
                 return matomo
+            },
+            Factory(type: BugTracker.self) { _, _ in
+                BugTracker(info: BugTrackerInfo(project: "app-mobile-drive"))
             }
         ]
 
