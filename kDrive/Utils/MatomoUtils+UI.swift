@@ -41,31 +41,4 @@ extension MatomoUtils {
         track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
         track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
     }
-
-    // MARK: - File action
-
-    #if !ISEXTENSION
-
-    func trackBuklAction(action: FloatingPanelAction, files: [File], category: EventCategory) {
-        let numberOfFiles = files.count
-        switch action {
-        // Quick Actions
-        case .duplicate:
-            trackBulkEvent(eventWithCategory: category, name: "Copy", numberOfItems: numberOfFiles)
-        case .download:
-            trackBulkEvent(eventWithCategory: category, name: "Download", numberOfItems: numberOfFiles)
-        case .favorite:
-            trackBulkEvent(eventWithCategory: category, name: "Add_favorite", numberOfItems: numberOfFiles)
-        case .offline:
-            trackBulkEvent(eventWithCategory: category, name: "Set_offline", numberOfItems: numberOfFiles)
-        case .delete:
-            trackBulkEvent(eventWithCategory: category, name: "Trash", numberOfItems: numberOfFiles)
-        case .folderColor:
-            trackBulkEvent(eventWithCategory: category, name: "Color_folder", numberOfItems: numberOfFiles)
-        default:
-            break
-        }
-    }
-
-    #endif
 }
