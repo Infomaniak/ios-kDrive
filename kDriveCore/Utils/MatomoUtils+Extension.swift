@@ -93,10 +93,4 @@ public extension MatomoUtils {
     func trackMediaPlayer(leaveAt percentage: Double?) {
         track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
     }
-
-    // MARK: - Deeplink
-
-    func trackDeeplink(name: String) {
-        track(eventWithCategory: .deeplink, name: name)
-    }
 }

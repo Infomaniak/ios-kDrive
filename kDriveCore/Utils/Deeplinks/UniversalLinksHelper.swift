@@ -120,10 +120,10 @@ public enum UniversalLinksHelper {
             guard let publicShareURL else {
                 return false
             }
-            matomo.trackDeeplink(name: "publicShareWithPassword")
+            matomo.track(eventWithCategory: .deeplink, name: "publicShareWithPassword")
             await appNavigable.presentPublicShareLocked(publicShareURL)
         case .expired:
-            matomo.trackDeeplink(name: "publicShareExpired")
+            matomo.track(eventWithCategory: .deeplink, name: "publicShareExpired")
             await appNavigable.presentPublicShareExpired()
         }
 
@@ -137,7 +137,7 @@ public enum UniversalLinksHelper {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
 
-        matomo.trackDeeplink(name: "publicShare")
+        matomo.track(eventWithCategory: .deeplink, name: "publicShare")
 
         guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,
