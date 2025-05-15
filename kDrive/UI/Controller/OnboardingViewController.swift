@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -29,6 +30,7 @@ class OnboardingViewController: UIViewController {
     @LazyInjectService private var appNavigable: AppNavigable
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
@@ -107,7 +109,7 @@ class OnboardingViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Onboarding"])
+        matomo.track(view: ["Onboarding"])
     }
 
     override func viewDidLayoutSubviews() {

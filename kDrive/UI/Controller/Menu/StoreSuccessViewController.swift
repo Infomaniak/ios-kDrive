@@ -16,13 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
+        @InjectService var matomo: MatomoUtils
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName, "Success"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.store.displayName, "Success"])
     }
 
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {

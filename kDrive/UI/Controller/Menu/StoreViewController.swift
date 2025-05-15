@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -25,6 +26,7 @@ import UIKit
 
 final class StoreViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService private var matomo: MatomoUtils
 
     struct Item {
         let packId: DrivePackId
@@ -117,7 +119,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.store.displayName])
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -412,7 +414,7 @@ extension StoreViewController: StoreManagerDelegate {
 
 extension StoreViewController: StoreObserverDelegate {
     func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String) {
-        MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
+        matomo.track(eventWithCategory: .inApp, name: "buy")
         // Send receipt to the server
         let body = ReceiptInfo(latestReceipt: receiptString,
                                userId: accountManager.currentUserId,

@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LocalAuthentication
@@ -24,6 +26,8 @@ import UIKit
 class AppLockSettingsViewController: UIViewController {
     @IBOutlet var faceIdSwitch: UISwitch!
     @IBOutlet var navigationBar: UINavigationBar!
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var closeActionHandler: (() -> Void)?
 
@@ -37,8 +41,8 @@ class AppLockSettingsViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName,
-                                 MatomoUtils.Views.security.displayName, "AppLock"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName,
+                            MatomoUtils.View.security.displayName, "AppLock"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -54,7 +58,7 @@ class AppLockSettingsViewController: UIViewController {
         let context = LAContext()
         let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
         var error: NSError?
-        MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
+        matomo.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in

@@ -18,6 +18,7 @@
 
 import Combine
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveResources
 import MediaPlayer
@@ -25,6 +26,7 @@ import MediaPlayer
 /// Track one file been played
 public final class SingleTrackPlayer: Pausable {
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
+    @LazyInjectService private var matomo: MatomoUtils
 
     let registeredCommands: [NowPlayableCommand] = [
         .togglePausePlay,
@@ -362,10 +364,10 @@ public final class SingleTrackPlayer: Pausable {
         switch playerState {
         case .playing:
             pause()
-            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
+            matomo.track(eventWithCategory: .mediaPlayer, name: "pause")
         case .stopped, .paused:
             play()
-            MatomoUtils.trackMediaPlayer(playMedia: .audio)
+            matomo.trackMediaPlayer(playMedia: .audio)
         }
     }
 

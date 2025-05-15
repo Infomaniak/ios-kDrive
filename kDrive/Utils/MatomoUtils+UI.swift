@@ -17,35 +17,36 @@
  */
 
 import Foundation
+import InfomaniakCoreCommonUI
 import kDriveCore
 
 extension MatomoUtils {
     // MARK: - Share and Rights
 
-    static func trackRightSelection(type: RightsSelectionType, selected right: String) {
+    func trackRightSelection(type: RightsSelectionType, selected right: String) {
         switch type {
         case .shareLinkSettings:
-            MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(right)ShareLink")
+            track(eventWithCategory: .shareAndRights, name: "\(right)ShareLink")
         case .addUserRights, .officeOnly:
             if right == UserPermission.delete.rawValue {
-                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "deleteUser")
+                track(eventWithCategory: .shareAndRights, name: "deleteUser")
             } else {
-                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(right)Right")
+                track(eventWithCategory: .shareAndRights, name: "\(right)Right")
             }
         }
     }
 
-    static func trackShareLinkSettings(protectWithPassword: Bool, downloadFromLink: Bool, expirationDateLink: Bool) {
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: protectWithPassword)
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
+    func trackShareLinkSettings(protectWithPassword: Bool, downloadFromLink: Bool, expirationDateLink: Bool) {
+        track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: protectWithPassword)
+        track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
+        track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
     }
 
     // MARK: - File action
 
     #if !ISEXTENSION
 
-    static func trackFileAction(action: FloatingPanelAction, file: File, category: EventCategory) {
+    func trackFileAction(action: FloatingPanelAction, file: File, category: EventCategory) {
         switch action {
         // Quick Actions
         case .sendCopy:
@@ -76,7 +77,7 @@ extension MatomoUtils {
         }
     }
 
-    static func trackBuklAction(action: FloatingPanelAction, files: [File], category: EventCategory) {
+    func trackBuklAction(action: FloatingPanelAction, files: [File], category: EventCategory) {
         let numberOfFiles = files.count
         switch action {
         // Quick Actions

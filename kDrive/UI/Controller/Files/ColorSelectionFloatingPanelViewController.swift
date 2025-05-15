@@ -17,7 +17,9 @@
  */
 
 import FloatingPanel
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -58,6 +60,8 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
             return UIColor(hex: hex)
         }
     }
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
     var files = [File]()
@@ -189,7 +193,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
         let frozenFiles = files.map { $0.freeze() }
-        MatomoUtils.track(eventWithCategory: .colorFolder, name: "switch")
+        matomo.track(eventWithCategory: .colorFolder, name: "switch")
         Task {
             do {
                 let canBeColoredFiles = frozenFiles.filter { $0.canBeColored }

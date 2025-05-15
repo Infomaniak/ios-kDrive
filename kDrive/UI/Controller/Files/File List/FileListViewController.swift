@@ -21,6 +21,7 @@ import Combine
 import DifferenceKit
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -52,6 +53,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     // MARK: - Constants
 
@@ -175,7 +177,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: viewModel.configuration.matomoViewPath)
+        matomo.track(view: viewModel.configuration.matomoViewPath)
 
         saveSceneState()
     }

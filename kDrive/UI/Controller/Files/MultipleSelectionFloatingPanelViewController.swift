@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -27,6 +28,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService private var matomo: MatomoUtils
 
     let driveFileManager: DriveFileManager
     var files: [File]
@@ -292,6 +294,6 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             eventCategory = .fileListFileAction
         }
 
-        MatomoUtils.trackBuklAction(action: action, files: files, category: eventCategory)
+        matomo.trackBuklAction(action: action, files: files, category: eventCategory)
     }
 }

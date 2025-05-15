@@ -17,6 +17,8 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
@@ -35,6 +37,8 @@ class DriveErrorViewController: UIViewController {
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var descriptionLabel: UILabel!
     @IBOutlet var mainButton: IKLargeButton!
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var driveErrorViewType = DriveErrorViewType.noDrive
     var driveName: String?
@@ -65,7 +69,7 @@ class DriveErrorViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["DriveError"])
+        matomo.track(view: ["DriveError"])
     }
 
     @IBAction func mainButtonPressed(_ sender: Any) {

@@ -17,6 +17,8 @@
  */
 
 import Foundation
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import UIKit
 
@@ -84,7 +86,8 @@ final class PublicShareSingleFileViewModel: PublicShareViewModel {
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
             onSave: {
-                MatomoUtils.trackAddBulkToMykDrive()
+                @InjectService var matomo: MatomoUtils
+                matomo.trackAddBulkToMykDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }

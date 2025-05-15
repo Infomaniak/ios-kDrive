@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -23,6 +24,7 @@ import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
     @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     @IBOutlet var tableView: UITableView!
 
@@ -171,7 +173,7 @@ class ShareLinkSettingsViewController: UIViewController {
         navigationBarAppearanceLarge.configureWithTransparentBackground()
         navigationBarAppearanceLarge.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
-        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "ShareLinkSettings"])
+        matomo.track(view: [MatomoUtils.View.shareAndRights.displayName, "ShareLinkSettings"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -254,9 +256,9 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             cell.actionHandler = { [weak self] _ in
                 self?.router.presentUpSaleSheet()
                 if option == .optionPassword {
-                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
+                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
                 } else if option == .optionDate {
-                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
+                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
                 }
             }
         }
@@ -375,8 +377,8 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
-        MatomoUtils.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
-                                           downloadFromLink: getSetting(for: .optionDownload),
-                                           expirationDateLink: getSetting(for: .optionDate))
+        matomo.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
+                                      downloadFromLink: getSetting(for: .optionDownload),
+                                      expirationDateLink: getSetting(for: .optionDate))
     }
 }

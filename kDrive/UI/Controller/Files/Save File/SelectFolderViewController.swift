@@ -16,7 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -36,7 +38,7 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
                                           leftBarButtons: currentDirectory.id == DriveFileManager.constants
                                               .rootID ? [.cancel] : nil,
                                           rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
-                                          matomoViewPath: [MatomoUtils.Views.save.displayName, "SelectFolder"])
+                                          matomoViewPath: [MatomoUtils.View.save.displayName, "SelectFolder"])
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
@@ -148,10 +150,11 @@ final class SelectFolderViewController: FileListViewController {
     // MARK: - Actions
 
     override func barButtonPressed(_ sender: FileListBarButton) {
+        @InjectService var matomo: MatomoUtils
         if sender.type == .cancel {
             dismiss(animated: true)
         } else if sender.type == .addFolder {
-            MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
+            matomo.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
             let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
                 parentDirectory: viewModel.currentDirectory,
                 driveFileManager: viewModel.driveFileManager

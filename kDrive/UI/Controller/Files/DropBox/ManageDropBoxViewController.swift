@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -26,6 +27,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet var tableView: UITableView!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var driveFileManager: DriveFileManager!
     private var directory: File! {
@@ -87,7 +89,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["ManageDropBox"])
+        matomo.track(view: ["ManageDropBox"])
     }
 
     deinit {
@@ -335,7 +337,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
             validUntil: validUntil
         )
 
-        MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
+        matomo.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
 
         Task { [proxyDirectory = directory.proxify()] in
             if convertingFolder {
@@ -374,7 +376,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
 
 extension ManageDropBoxViewController: DropBoxLinkDelegate {
     func didClickOnShareLink(link: String, sender: UIView) {
-        MatomoUtils.track(eventWithCategory: .dropbox, name: "share")
+        matomo.track(eventWithCategory: .dropbox, name: "share")
         let items = [URL(string: link)!]
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
         ac.popoverPresentationController?.sourceView = sender

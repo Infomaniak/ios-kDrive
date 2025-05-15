@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -44,6 +45,7 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService private var matomo: MatomoUtils
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()
@@ -96,7 +98,7 @@ final class UploadQueueViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Main"])
+        matomo.track(view: [MatomoUtils.View.uploadQueue.displayName, "Main"])
     }
 
     deinit {

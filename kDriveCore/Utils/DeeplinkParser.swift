@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import MatomoTracker
 import SwiftUI
@@ -34,6 +35,7 @@ public struct DeeplinkParser: DeeplinkParsable {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     public init() {
         // META: keep SonarCloud happy
@@ -55,7 +57,7 @@ public struct DeeplinkParser: DeeplinkParsable {
            let driveId = params.first(where: { $0.name == "driveId" })?.value,
            let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
             await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
-            MatomoUtils.trackDeeplink(name: DeeplinkPath.store.rawValue)
+            matomo.trackDeeplink(name: DeeplinkPath.store.rawValue)
             return true
 
         } else if components.host == DeeplinkPath.file.rawValue {
@@ -70,7 +72,7 @@ public struct DeeplinkParser: DeeplinkParsable {
                 return false
             }
             await router.navigate(to: .saveFiles(files: files))
-            MatomoUtils.trackDeeplink(name: DeeplinkPath.file.rawValue)
+            matomo.trackDeeplink(name: DeeplinkPath.file.rawValue)
             return true
         }
 

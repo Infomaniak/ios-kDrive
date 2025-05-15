@@ -24,6 +24,7 @@ import SwiftUI
 
 enum AboutPrivacyViewBridgeController {
     static func instantiate() -> UIViewController {
+        @InjectService var matomo: MatomoUtils
         let swiftUIView = PrivacyManagementView(
             urlRepository: URLConstants.sourceCode.url,
             backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
@@ -31,7 +32,7 @@ enum AboutPrivacyViewBridgeController {
             userDefaultStore: .shared,
             userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
             userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),
-            matomo: MatomoUtils()
+            matomo: matomo
         )
         .defaultAppStorage(UserDefaults.shared)
         return UIHostingController(rootView: swiftUIView)

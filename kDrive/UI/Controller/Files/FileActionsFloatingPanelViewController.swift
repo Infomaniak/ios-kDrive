@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -28,6 +29,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var fileUid: String {
         frozenFile.uid
@@ -311,7 +313,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             eventCategory = .fileListFileAction
         }
 
-        MatomoUtils.trackFileAction(action: action, file: frozenFile, category: eventCategory)
+        matomo.trackFileAction(action: action, file: frozenFile, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }

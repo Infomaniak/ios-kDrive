@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -47,6 +49,8 @@ extension ConvertedType: Selectable {
 }
 
 class SearchFiltersViewController: UITableViewController {
+    @LazyInjectService private var matomo: MatomoUtils
+
     var driveFileManager: DriveFileManager!
     var filters = Filters()
 
@@ -214,7 +218,7 @@ class SearchFiltersViewController: UITableViewController {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
-            MatomoUtils.track(eventWithCategory: .search, name: "filterDate")
+            matomo.track(eventWithCategory: .search, name: "filterDate")
             let customDateOption: DateOption
             if let option = filters.date, case .custom = option {
                 customDateOption = option
@@ -234,7 +238,7 @@ class SearchFiltersViewController: UITableViewController {
         case .type:
 
             if indexPath.row == 0 {
-                MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
+                matomo.track(eventWithCategory: .search, name: "filterFileType")
                 var fileTypes = ConvertedType.allCases
                 fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
                 let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(
@@ -251,7 +255,7 @@ class SearchFiltersViewController: UITableViewController {
 
         case .categories:
             if indexPath.row == 0 {
-                MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
+                matomo.track(eventWithCategory: .search, name: "filterCategory")
                 let manageCategoriesViewController = ManageCategoriesViewController
                     .instantiate(driveFileManager: driveFileManager)
                 manageCategoriesViewController.canEdit = false
@@ -272,7 +276,7 @@ class SearchFiltersViewController: UITableViewController {
             break
         case .type:
             if indexPath.row != 0 {
-                MatomoUtils.track(eventWithCategory: .search, name: "filterExtension")
+                matomo.track(eventWithCategory: .search, name: "filterExtension")
                 if let inputCell = getTextInputCell() {
                     inputCell.setSelected(true, animated: true)
                 }

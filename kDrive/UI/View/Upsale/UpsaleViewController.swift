@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -23,6 +24,8 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
+    @LazyInjectService private var matomo: MatomoUtils
+
     var onLoginCompleted: (() -> Void)?
     var onFreeTrialCompleted: (() -> Void)?
 
@@ -66,7 +69,7 @@ public class UpsaleViewController: UIViewController {
         setupBody()
         layoutStackView()
 
-        MatomoUtils.trackUpsalePresented()
+        matomo.trackUpsalePresented()
     }
 
     func configureHeader() {

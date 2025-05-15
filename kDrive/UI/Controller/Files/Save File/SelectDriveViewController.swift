@@ -18,6 +18,7 @@
 
 import DropDown
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -31,6 +32,7 @@ class SelectDriveViewController: UIViewController {
 
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var driveList: [Drive]!
     private var currentAccount: Account!
@@ -77,7 +79,7 @@ class SelectDriveViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SelectDrive"])
+        matomo.track(view: [MatomoUtils.View.save.displayName, "SelectDrive"])
     }
 
     private func initForCurrentAccount(_ account: Account) {

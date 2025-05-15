@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -138,7 +139,8 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 
 extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton(_ sender: IKLargeButton) {
-        MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
+        @InjectService var matomo: MatomoUtils
+        matomo.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
         Task { [proxyFilesToAdd = filesToAdd?.map { $0.proxify() }] in
             do {
                 if let category {

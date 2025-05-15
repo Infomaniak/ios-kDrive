@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -31,6 +32,7 @@ final class ManageCategoriesViewController: UITableViewController {
     @IBOutlet var createButton: UIBarButtonItem!
 
     @LazyInjectService var accountManager: AccountManageable
+    @LazyInjectService var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
     var frozenFiles: [File]?
@@ -108,7 +110,7 @@ final class ManageCategoriesViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["ManageCategories"])
+        matomo.track(view: ["ManageCategories"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -278,7 +280,7 @@ final class ManageCategoriesViewController: UITableViewController {
         let category = category(at: indexPath)
 
         if frozenFiles != nil {
-            MatomoUtils.track(eventWithCategory: .categories, name: "assign")
+            matomo.track(eventWithCategory: .categories, name: "assign")
         }
 
         if category == dummyCategory {
@@ -311,7 +313,7 @@ final class ManageCategoriesViewController: UITableViewController {
         guard category != dummyCategory else { return }
 
         if frozenFiles != nil {
-            MatomoUtils.track(eventWithCategory: .categories, name: "remove")
+            matomo.track(eventWithCategory: .categories, name: "remove")
         }
 
         category.isSelected = false

@@ -19,6 +19,8 @@
 import CocoaLumberjackSwift
 import InfomaniakConcurrency
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -28,6 +30,8 @@ final class StorageTableViewController: UITableViewController {
     private enum Section: CaseIterable {
         case header, directories, files
     }
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     private let sections = Section.allCases
 
@@ -51,7 +55,7 @@ final class StorageTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "Storage"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "Storage"])
     }
 
     private func reload() async {

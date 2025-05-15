@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
 import InfomaniakDI
 import kDriveCore
@@ -27,6 +28,7 @@ import UIKit
 
 final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var freeSpaceService: FreeSpaceService
@@ -149,7 +151,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationController?.navigationBar.isTranslucent = false
 
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "PhotoSync"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "PhotoSync"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -534,7 +536,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             return
         }
 
-        MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
+        matomo.trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
 
         saveSettings()
         Task { @MainActor in

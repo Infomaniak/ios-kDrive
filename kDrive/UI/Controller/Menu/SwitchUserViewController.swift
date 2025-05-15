@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -30,6 +31,7 @@ class SwitchUserViewController: UIViewController {
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService var appNavigable: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
@@ -72,7 +74,7 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "SwitchUser"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, "SwitchUser"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -81,7 +83,7 @@ class SwitchUserViewController: UIViewController {
     }
 
     @IBAction func buttonAddUserClicked(_ sender: UIButton) {
-        MatomoUtils.track(eventWithCategory: .account, name: "add")
+        matomo.track(eventWithCategory: .account, name: "add")
         let nextViewController = OnboardingViewController.instantiate()
         nextViewController.addUser = true
         present(nextViewController, animated: true)
@@ -100,8 +102,8 @@ class SwitchUserViewController: UIViewController {
             }
 
             let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
-            MatomoUtils.track(eventWithCategory: .account, name: "switch")
-            MatomoUtils.connectUser()
+            matomo.track(eventWithCategory: .account, name: "switch")
+            matomo.connectUser(userId: account.userId.description)
 
             accountManager.switchAccount(newAccount: existingAccount)
             appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)

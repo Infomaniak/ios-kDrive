@@ -19,6 +19,7 @@
 import DifferenceKit
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -80,7 +81,7 @@ class SearchFilesViewModel: FileListViewModel {
                                           leftBarButtons: [.cancel],
                                           rightBarButtons: [.searchFilters],
                                           sortingOptions: [.newer, .older, .relevance],
-                                          matomoViewPath: [MatomoUtils.Views.search.displayName])
+                                          matomoViewPath: [MatomoUtils.View.search.displayName])
         filters = Filters()
         let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)

@@ -15,7 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -23,6 +23,7 @@ import UIKit
 
 class SelectThemeTableViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var tableContent: [Theme] = Theme.allCases
     private var selectedTheme: Theme!
@@ -40,7 +41,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "SelectTheme"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "SelectTheme"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -63,7 +64,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let theme = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
+        matomo.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
         UserDefaults.shared.theme = theme
         appNavigable.updateTheme()
         navigationController?.popViewController(animated: true)

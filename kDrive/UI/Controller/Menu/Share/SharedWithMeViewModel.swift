@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import kDriveCore
 import RealmSwift
 import UIKit
@@ -27,7 +28,7 @@ class SharedWithMeViewModel: FileListViewModel {
                                           rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
                                           emptyViewType: .noSharedWithMe,
                                           supportsDrop: false,
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "SharedWithMe"])
+                                          matomoViewPath: [MatomoUtils.View.menu.displayName, "SharedWithMe"])
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: sharedWithMeRootFile)
         observedFiles = AnyRealmCollection(AnyRealmCollection(sharedWithMeRootFile.children).filesSorted(by: sortType))

@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import RealmSwift
@@ -28,6 +29,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService private var matomo: MatomoUtils
 
     let rootProxy: ProxyFile
     var publicShareProxy: PublicShareProxy?
@@ -196,7 +198,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
             onSave: {
-                MatomoUtils.trackAddBulkToMykDrive()
+                self.matomo.trackAddBulkToMykDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }

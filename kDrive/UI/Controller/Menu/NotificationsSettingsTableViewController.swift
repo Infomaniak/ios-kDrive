@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -52,8 +54,9 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        @InjectService var matomo: MatomoUtils
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "Notifications"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "Notifications"])
     }
 
     deinit {

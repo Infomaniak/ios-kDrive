@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -289,6 +290,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func convertToDropboxAction() {
+        @InjectService var matomo: MatomoUtils
         guard frozenFile.capabilities.canBecomeDropbox else {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController
@@ -298,7 +300,7 @@ extension FileActionsFloatingPanelViewController {
                 driveFloatingPanelController.dismiss(animated: true) {
                     guard let self else { return }
                     self.router.presentUpSaleSheet()
-                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+                    matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
                 }
             }
             present(driveFloatingPanelController, animated: true)
@@ -307,7 +309,7 @@ extension FileActionsFloatingPanelViewController {
 
         if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
             router.presentUpSaleSheet()
-            MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             return
         }
 
@@ -546,6 +548,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func addToMyDrive() {
+        @InjectService var matomo: MatomoUtils
         guard accountManager.currentAccount != nil else {
             dismiss(animated: true) {
                 self.router.showUpsaleFloatingPanel()
@@ -567,7 +570,7 @@ extension FileActionsFloatingPanelViewController {
                 self.present(saveNavigationViewController, animated: animated, completion: nil)
             },
             onSave: {
-                MatomoUtils.trackAddToMyDrive()
+                matomo.trackAddToMyDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }

@@ -25,13 +25,14 @@ import UIKit
 class LockedAppViewController: UIViewController {
     @LazyInjectService private var appLockHelper: AppLockHelper
     @LazyInjectService private var appNavigable: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     @IBOutlet var unlockAppButton: IKLargeButton!
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tryToUnlock()
-        MatomoUtils.track(view: ["LockedApp"])
+        matomo.track(view: ["LockedApp"])
     }
 
     func tryToUnlock() {
