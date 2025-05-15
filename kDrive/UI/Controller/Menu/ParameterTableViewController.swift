@@ -105,7 +105,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             case .joinBeta:
                 return CoreUILocalizable.joinTheBetaButton
             case .feedback:
-                return "Feedback"
+                return KDriveResourcesStrings.Localizable.buttonFeedback
             case .deleteAccount:
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
@@ -235,7 +235,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
-                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+                isLast: indexPath.row == visibleRows.count - 1
             )
             cell.titleLabel.text = row.title
             if row == .photos {
@@ -252,7 +252,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
-                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+                isLast: indexPath.row == visibleRows.count - 1
             )
             cell.titleLabel.text = row.title
             return cell
@@ -261,7 +261,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
-                isLast: indexPath.row == GeneralParameterRow.allCases.count - 1
+                isLast: indexPath.row == visibleRows.count - 1
             )
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
             cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
