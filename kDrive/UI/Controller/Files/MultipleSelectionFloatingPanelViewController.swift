@@ -25,7 +25,6 @@ import kDriveResources
 import UIKit
 
 final class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
-    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
@@ -294,6 +293,6 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             eventCategory = .fileListFileAction
         }
 
-        matomo.trackBuklAction(action: action, files: files, category: eventCategory)
+        trackBuklAction(action: action, files: files, category: eventCategory)
     }
 }

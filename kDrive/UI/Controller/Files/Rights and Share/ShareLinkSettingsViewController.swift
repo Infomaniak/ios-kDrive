@@ -377,7 +377,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
-        matomo.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
+        trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
                                       downloadFromLink: getSetting(for: .optionDownload),
                                       expirationDateLink: getSetting(for: .optionDate))
     }

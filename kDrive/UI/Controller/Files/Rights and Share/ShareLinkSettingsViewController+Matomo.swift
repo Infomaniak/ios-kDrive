@@ -1,6 +1,7 @@
+//
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2024 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,23 +17,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 
-extension MatomoUtils {
-    // MARK: - Share and Rights
-
-    func trackRightSelection(type: RightsSelectionType, selected right: String) {
-        switch type {
-        case .shareLinkSettings:
-            track(eventWithCategory: .shareAndRights, name: "\(right)ShareLink")
-        case .addUserRights, .officeOnly:
-            if right == UserPermission.delete.rawValue {
-                track(eventWithCategory: .shareAndRights, name: "deleteUser")
-            } else {
-                track(eventWithCategory: .shareAndRights, name: "\(right)Right")
-            }
-        }
+extension ShareLinkSettingsViewController {
+    func trackShareLinkSettings(protectWithPassword: Bool, downloadFromLink: Bool, expirationDateLink: Bool) {
+        @InjectService var matomo: MatomoUtils
+        matomo.track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: protectWithPassword)
+        matomo.track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
+        matomo.track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
     }
 }

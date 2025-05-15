@@ -26,7 +26,6 @@ import LinkPresentation
 import UIKit
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
-    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
@@ -313,7 +312,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             eventCategory = .fileListFileAction
         }
 
-        matomo.trackFileAction(action: action, file: frozenFile, category: eventCategory)
+        trackFileAction(action: action, file: frozenFile, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }
