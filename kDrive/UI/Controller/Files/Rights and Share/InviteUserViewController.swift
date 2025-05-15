@@ -26,9 +26,9 @@ import UIKit
 class InviteUserViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService private var matomo: MatomoUtils
 
     var file: File!
     var fileAccess: FileAccess!

@@ -33,9 +33,9 @@ public struct DeeplinkParser: DeeplinkParsable {
         case file
     }
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     public init() {
         // META: keep SonarCloud happy

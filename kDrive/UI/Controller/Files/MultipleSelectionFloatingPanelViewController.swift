@@ -25,10 +25,10 @@ import kDriveResources
 import UIKit
 
 final class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
-    @LazyInjectService private var matomo: MatomoUtils
 
     let driveFileManager: DriveFileManager
     var files: [File]

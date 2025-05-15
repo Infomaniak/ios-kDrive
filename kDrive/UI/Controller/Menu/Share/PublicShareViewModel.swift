@@ -25,11 +25,11 @@ import UIKit
 
 /// Public share view model, loading content from memory realm
 class PublicShareViewModel: InMemoryFileListViewModel {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
-    @LazyInjectService private var matomo: MatomoUtils
 
     let rootProxy: ProxyFile
     var publicShareProxy: PublicShareProxy?

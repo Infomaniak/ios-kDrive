@@ -26,8 +26,8 @@ import UIKit
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet var tableView: UITableView!
 
-    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var accountManager: AccountManageable
 
     private var driveFileManager: DriveFileManager!
     private var directory: File! {

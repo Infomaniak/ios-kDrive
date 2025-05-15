@@ -26,10 +26,10 @@ import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var appContextService: AppContextServiceable
-    @LazyInjectService private var matomo: MatomoUtils
 
     private var originalDriveId: Int = {
         @InjectService var accountManager: AccountManageable

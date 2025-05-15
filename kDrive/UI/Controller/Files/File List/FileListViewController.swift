@@ -51,9 +51,9 @@ extension SortType: Selectable {
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     // MARK: - Constants
 

@@ -43,11 +43,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     let driveFileManager: DriveFileManager
 

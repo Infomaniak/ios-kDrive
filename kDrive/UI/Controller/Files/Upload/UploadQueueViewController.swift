@@ -41,11 +41,11 @@ final class UploadQueueViewController: UIViewController {
     @IBOutlet var retryButton: UIBarButtonItem!
     @IBOutlet var cancelButton: UIBarButtonItem!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
-    @LazyInjectService private var matomo: MatomoUtils
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()

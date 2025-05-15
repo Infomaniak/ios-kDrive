@@ -31,8 +31,8 @@ protocol ManageCategoriesDelegate: AnyObject {
 final class ManageCategoriesViewController: UITableViewController {
     @IBOutlet var createButton: UIBarButtonItem!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
     var frozenFiles: [File]?

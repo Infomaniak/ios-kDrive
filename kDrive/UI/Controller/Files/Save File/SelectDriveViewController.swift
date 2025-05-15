@@ -30,9 +30,9 @@ protocol SelectDriveDelegate: AnyObject {
 class SelectDriveViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService private var matomo: MatomoUtils
 
     private var driveList: [Drive]!
     private var currentAccount: Account!

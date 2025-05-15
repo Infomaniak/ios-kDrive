@@ -25,10 +25,10 @@ import kDriveCore
 import kDriveResources
 
 public final class LoginDelegateHandler: InfomaniakLoginDelegate {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
@@ -53,7 +53,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
                     throw DriveError.NoDriveError.noDriveFileManager
                 }
 
-                self.matomo.connectUser(userId: "")
+                self.matomo.connectUser(userId: accountManager.currentUserId.description)
                 goToMainScreen(with: currentDriveFileManager)
             } catch {
                 didCompleteLoginWithError(error, previousAccount: previousAccount, topMostViewController: topMostViewController)

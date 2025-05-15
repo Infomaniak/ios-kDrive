@@ -36,9 +36,9 @@ import UIKit
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadQueue: DownloadQueueable
-    @LazyInjectService var matomo: MatomoUtils
 
     @IBOutlet var collectionView: UICollectionView!
     private var previewFiles = [File]()

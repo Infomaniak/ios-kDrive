@@ -28,9 +28,9 @@ import UIKit
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService private var matomo: MatomoUtils
 
     private enum ShareAndRightsSections: CaseIterable {
         case invite

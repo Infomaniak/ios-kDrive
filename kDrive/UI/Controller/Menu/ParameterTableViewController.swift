@@ -28,10 +28,10 @@ import Sentry
 import UIKit
 
 class ParameterTableViewController: BaseGroupedTableViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var appNavigable: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     let driveFileManager: DriveFileManager
 

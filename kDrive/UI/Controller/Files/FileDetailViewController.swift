@@ -29,9 +29,9 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var commentButton: UIButton!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService var matomo: MatomoUtils
 
     var file: File!
     var driveFileManager: DriveFileManager!

@@ -27,11 +27,11 @@ import UIKit
 class SwitchUserViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService var appNavigable: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {

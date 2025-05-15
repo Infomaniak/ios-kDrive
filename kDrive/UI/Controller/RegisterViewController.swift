@@ -29,8 +29,8 @@ class RegisterViewController: UIViewController {
     @IBOutlet var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
-    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var infomaniakLogin: InfomaniakLoginable
 
     private let progressView = UIProgressView(progressViewStyle: .default)
     private var estimatedProgressObserver: NSKeyValueObservation?

@@ -29,9 +29,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]

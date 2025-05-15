@@ -25,8 +25,8 @@ import StoreKit
 import UIKit
 
 final class StoreViewController: UICollectionViewController, SceneStateRestorable {
-    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var accountManager: AccountManageable
 
     struct Item {
         let packId: DrivePackId

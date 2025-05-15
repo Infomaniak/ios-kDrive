@@ -26,10 +26,10 @@ import LinkPresentation
 import UIKit
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
-    @LazyInjectService private var matomo: MatomoUtils
 
     private var fileUid: String {
         frozenFile.uid
