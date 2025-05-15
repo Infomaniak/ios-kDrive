@@ -548,7 +548,6 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func addToMyDrive() {
-        @InjectService var matomo: MatomoUtils
         guard accountManager.currentAccount != nil else {
             dismiss(animated: true) {
                 self.router.showUpsaleFloatingPanel()
@@ -570,7 +569,7 @@ extension FileActionsFloatingPanelViewController {
                 self.present(saveNavigationViewController, animated: animated, completion: nil)
             },
             onSave: {
-                matomo.trackAddToMyDrive()
+                self.trackAddToMyDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }
