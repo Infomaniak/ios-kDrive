@@ -590,7 +590,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func enableBugTrackerIfAvailable() {
         if let currentUser = currentAccount?.user,
            let token = tokenStore.tokenFor(userId: currentUser.id),
-           currentUser.isStaff == true {
+           let isStaff = currentUser.isStaff,
+           isStaff {
             bugTracker.activateOnScreenshot()
             let apiFetcher = getApiFetcher(for: currentUser.id, token: token)
             bugTracker.configure(with: apiFetcher)
