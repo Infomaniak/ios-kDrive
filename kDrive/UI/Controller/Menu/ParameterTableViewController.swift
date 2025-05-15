@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakBugTracker
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakCoreUIResources
@@ -81,6 +82,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case storage
         case about
         case joinBeta
+        case feedback
         case deleteAccount
 
         var title: String {
@@ -101,14 +103,17 @@ class ParameterTableViewController: BaseGroupedTableViewController {
                 return KDriveResourcesStrings.Localizable.aboutTitle
             case .joinBeta:
                 return CoreUILocalizable.joinTheBetaButton
+            case .feedback:
+                return "Feedback"
             case .deleteAccount:
                 return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
     }
 
-    private let visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
+    private lazy var visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
         .filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
+        .filter { $0 != .feedback || accountManager.currentAccount?.user.isStaff == true }
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
@@ -242,7 +247,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             }
             return cell
 
-        case .security, .storage, .about, .joinBeta, .deleteAccount:
+        case .security, .storage, .about, .joinBeta, .feedback, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(
                 isFirst: indexPath.row == 0,
@@ -335,6 +340,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .joinBeta:
             UIApplication.shared.open(URLConstants.testFlight.url)
             MatomoUtils.track(eventWithCategory: .settings, name: "joinBetaProgram")
+        case .feedback:
+            present(BugTrackerViewController(), animated: true)
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
