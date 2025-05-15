@@ -1,5 +1,5 @@
 {
-  "originHash" : "d4e3520cbaf1971d82a9988e5c2103852a07ba52b239bf639a62ae458c3cb257",
+  "originHash" : "309003d36137217e4e9bd6c197e5e65f931d8a3ef28a91c32ecddd0cf73caa90",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -80,6 +80,15 @@
       "state" : {
         "revision" : "3b8e98233634591bbf6fbdd6654f79455e02288b",
         "version" : "1.16.0"
+      }
+    },
+    {
+      "identity" : "ios-bug-tracker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-bug-tracker",
+      "state" : {
+        "revision" : "a16f6cd80dd88c0aa20e19370b6deb1062bb98a6",
+        "version" : "10.0.1"
       }
     },
     {
