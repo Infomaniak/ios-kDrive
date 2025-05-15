@@ -99,10 +99,4 @@ public extension MatomoUtils {
     func trackDeeplink(name: String) {
         track(eventWithCategory: .deeplink, name: name)
     }
-
-    // MARK: - Public Share
-
-    func trackAddBulkToMykDrive() {
-        track(eventWithCategory: .publicShareAction, name: "bulkSaveToKDrive")
-    }
 }

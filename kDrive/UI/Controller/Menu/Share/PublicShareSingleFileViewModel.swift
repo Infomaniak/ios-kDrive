@@ -86,8 +86,7 @@ final class PublicShareSingleFileViewModel: PublicShareViewModel {
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
             onSave: {
-                @InjectService var matomo: MatomoUtils
-                matomo.trackAddBulkToMykDrive()
+                self.trackAddBulkToMykDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }
