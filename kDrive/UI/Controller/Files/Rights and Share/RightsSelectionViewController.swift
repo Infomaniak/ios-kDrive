@@ -175,7 +175,7 @@ class RightsSelectionViewController: UIViewController {
     @IBAction func closeButtonPressed(_ sender: Any) {
         let rightKey = rights[tableView.indexPathForSelectedRow?.row ?? 0].key
         delegate?.didUpdateRightValue(newValue: rightKey)
-        matomo.trackRightSelection(type: rightSelectionType, selected: rightKey)
+        trackRightSelection(type: rightSelectionType, selected: rightKey)
         dismiss(animated: true)
     }
 
