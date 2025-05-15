@@ -361,7 +361,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             throw DriveError.NoDriveError.noDrive
         }
 
-        await updateMyKSuiteIfNeeded(for: driveResponse.drives, userId: user.id, apiFetcher: apiFetcher)
+        await updateMyKSuiteIfNeeded(for: driveResponse.drives, userId: account.userId, apiFetcher: apiFetcher)
 
         let driveRemovedList = driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
