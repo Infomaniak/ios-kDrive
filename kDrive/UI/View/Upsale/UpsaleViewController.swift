@@ -24,8 +24,6 @@ import kDriveResources
 import UIKit
 
 public class UpsaleViewController: UIViewController {
-    @LazyInjectService private var matomo: MatomoUtils
-
     var onLoginCompleted: (() -> Void)?
     var onFreeTrialCompleted: (() -> Void)?
 
@@ -69,7 +67,7 @@ public class UpsaleViewController: UIViewController {
         setupBody()
         layoutStackView()
 
-        matomo.trackUpsalePresented()
+        trackUpsalePresented()
     }
 
     func configureHeader() {

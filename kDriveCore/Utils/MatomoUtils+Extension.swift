@@ -109,8 +109,4 @@ public extension MatomoUtils {
     func trackPublicSharePasswordAction() {
         track(eventWithCategory: .publicSharePasswordAction, name: "openInBrowser")
     }
-
-    func trackUpsalePresented() {
-        track(eventWithCategory: .publicShareAction, name: "adBottomSheet")
-    }
 }
