@@ -78,24 +78,6 @@ public extension MatomoUtils {
         }
     }
 
-    // MARK: - Photo Sync
-
-    func trackPhotoSync(isEnabled: Bool, with settings: PhotoSyncSettings) {
-        track(eventWithCategory: .photoSync, name: isEnabled ? "enabled" : "disabled")
-        if isEnabled {
-            track(
-                eventWithCategory: .photoSync,
-                name: "sync\(["New", "All", "FromDate"][settings.syncMode.rawValue])"
-            )
-            track(eventWithCategory: .photoSync, name: "importDCIM", value: settings.syncPicturesEnabled)
-            track(eventWithCategory: .photoSync, name: "importVideos", value: settings.syncVideosEnabled)
-            track(eventWithCategory: .photoSync, name: "importScreenshots", value: settings.syncScreenshotsEnabled)
-            track(eventWithCategory: .photoSync, name: "createDatedFolders", value: settings.createDatedSubFolders)
-            track(eventWithCategory: .photoSync, name: "deleteAfterImport", value: settings.deleteAssetsAfterImport)
-            track(eventWithCategory: .photoSync, name: "importPhotosIn\(settings.photoFormat.title)")
-        }
-    }
-
     // MARK: - Preview file
 
     func trackPreview(file: File) {

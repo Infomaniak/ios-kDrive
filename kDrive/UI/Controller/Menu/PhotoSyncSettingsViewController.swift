@@ -536,7 +536,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             return
         }
 
-        matomo.trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
+        trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
 
         saveSettings()
         Task { @MainActor in

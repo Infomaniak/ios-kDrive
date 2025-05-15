@@ -378,7 +378,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
             }
         }
         trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
-                                      downloadFromLink: getSetting(for: .optionDownload),
-                                      expirationDateLink: getSetting(for: .optionDate))
+                               downloadFromLink: getSetting(for: .optionDownload),
+                               expirationDateLink: getSetting(for: .optionDate))
     }
 }
