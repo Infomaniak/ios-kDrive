@@ -55,4 +55,11 @@ extension FileActionsFloatingPanelViewController {
         }
     }
     #endif
+
+    // MARK: - Public Share
+
+    func trackAddToMyDrive() {
+        @InjectService var matomo: MatomoUtils
+        matomo.track(eventWithCategory: .publicShareAction, name: "saveToKDrive")
+    }
 }

@@ -102,10 +102,6 @@ public extension MatomoUtils {
 
     // MARK: - Public Share
 
-    func trackAddToMyDrive() {
-        track(eventWithCategory: .publicShareAction, name: "saveToKDrive")
-    }
-
     func trackAddBulkToMykDrive() {
         track(eventWithCategory: .publicShareAction, name: "bulkSaveToKDrive")
     }
