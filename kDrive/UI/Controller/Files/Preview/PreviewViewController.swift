@@ -600,6 +600,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         Task { @MainActor [weak self] in
             guard let self else { return }
 
+            self.updateFileForCurrentIndex()
             currentDownloadOperation = nil
 
             guard view.window != nil else { return }
