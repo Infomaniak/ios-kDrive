@@ -46,37 +46,6 @@ extension MatomoUtils {
 
     #if !ISEXTENSION
 
-    func trackFileAction(action: FloatingPanelAction, file: File, category: EventCategory) {
-        switch action {
-        // Quick Actions
-        case .sendCopy:
-            track(eventWithCategory: category, name: "sendFileCopy")
-        case .shareLink:
-            track(eventWithCategory: category, name: "shareLink")
-        case .informations:
-            track(eventWithCategory: category, name: "openFileInfos")
-        // Actions
-        case .duplicate:
-            track(eventWithCategory: category, name: "copy")
-        case .move:
-            track(eventWithCategory: category, name: "move")
-        case .download:
-            track(eventWithCategory: category, name: "download")
-        case .favorite:
-            track(eventWithCategory: category, name: "favorite", value: !file.isFavorite)
-        case .offline:
-            track(eventWithCategory: category, name: "offline", value: !file.isAvailableOffline)
-        case .rename:
-            track(eventWithCategory: category, name: "rename")
-        case .delete:
-            track(eventWithCategory: category, name: "putInTrash")
-        case .convertToDropbox:
-            track(eventWithCategory: category, name: "convertToDropBox")
-        default:
-            break
-        }
-    }
-
     func trackBuklAction(action: FloatingPanelAction, files: [File], category: EventCategory) {
         let numberOfFiles = files.count
         switch action {
