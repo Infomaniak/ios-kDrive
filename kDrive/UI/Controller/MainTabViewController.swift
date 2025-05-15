@@ -262,7 +262,10 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     @objc private func userDidTakeScreenshot() {
-        present(BugTrackerViewController(), animated: true)
+        if let currentUser = accountManager.currentAccount?.user,
+           currentUser.isStaff == true {
+            present(BugTrackerViewController(), animated: true)
+        }
     }
 }
 
