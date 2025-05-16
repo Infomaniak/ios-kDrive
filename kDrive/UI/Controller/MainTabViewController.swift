@@ -26,10 +26,65 @@ import UIKit
 
 /// Enum to explicit tab names
 public enum MainTabBarIndex: Int {
-    case home = 0
-    case files = 1
+    case files = 0
+    case home = 1
     case gallery = 3
     case profile = 4
+}
+
+class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
+    let driveFileManager: DriveFileManager
+
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+        super.init(style: .doubleColumn)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        let sidebarViewController = SidebarViewController(
+            driveFileManager: driveFileManager,
+            selectMode: false,
+            isCompactView: false
+        )
+        let detailViewController = HomeViewController(driveFileManager: driveFileManager)
+
+        sidebarViewController.delegate = self
+
+        let sidebarNav = UINavigationController(rootViewController: sidebarViewController)
+        let detailNav = UINavigationController(rootViewController: detailViewController)
+
+        viewControllers = [sidebarNav, detailNav]
+        setViewController(MainTabViewController(driveFileManager: driveFileManager), for: .compact)
+        preferredDisplayMode = .oneBesideSecondary
+    }
+
+    // MARK: - SidebarViewControllerDelegate
+
+    func didSelectItem(destinationViewModel: FileListViewModel, name: String) {
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+        let photoListViewController = PhotoListViewController(viewModel: PhotoListViewModel(driveFileManager: driveFileManager))
+        let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+        if let detailNav = viewControllers.last as? UINavigationController {
+            detailNav.setNavigationBarHidden(false, animated: true)
+            if name == KDriveResourcesStrings.Localizable.homeTitle {
+                detailNav.setViewControllers([homeViewController], animated: false)
+            } else if name == KDriveResourcesStrings.Localizable.allPictures {
+                detailNav.setViewControllers([photoListViewController], animated: false)
+            } else if name == KDriveResourcesStrings.Localizable.menuTitle {
+                detailNav.setViewControllers([menuViewController], animated: false)
+            } else {
+                detailNav.setViewControllers([destinationViewController], animated: false)
+            }
+        }
+    }
 }
 
 class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver {
@@ -39,15 +94,14 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     /// Time between two tap events that feels alright for a double tap
     private static let doubleTapInterval = TimeInterval(0.350)
 
-    // swiftlint:disable:next weak_delegate
-    var photoPickerDelegate = PhotoPickerDelegate()
-
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var router: AppNavigable
 
     let driveFileManager: DriveFileManager
+
+    private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
 
     lazy var legacyTabBarActive: Bool = {
         if #available(iOS 18.0, *),
@@ -94,7 +148,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         delegate = self
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         (tabBar as? MainTabBar)?.tabDelegate = self
-        photoPickerDelegate.viewController = self
     }
 
     override func viewWillLayoutSubviews() {
@@ -135,7 +188,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initRootMenuViewController(driveFileManager: DriveFileManager) -> UIViewController {
-        let homeViewController = RootMenuViewController(driveFileManager: driveFileManager, selectMode: false)
+        let homeViewController = SidebarViewController(
+            driveFileManager: driveFileManager,
+            selectMode: false,
+            isCompactView: true
+        )
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
         navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
@@ -258,13 +315,17 @@ extension MainTabViewController: MainTabBarDelegate {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         guard let currentDirectory else { return }
 
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+
         let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
             presentedAboveFileList: fromFileList
         )
+
+        guard let floatingPanelViewController else { return }
+
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = plusButtonFloatingPanel
 
@@ -302,6 +363,12 @@ extension MainTabViewController: MainTabBarDelegate {
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
 
         MatomoUtils.track(eventWithCategory: .account, name: "switchDoubleTap")
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [:]
     }
 }
 
@@ -367,39 +434,6 @@ extension MainTabViewController: UpdateAccountDelegate {
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
                 .didUpdateCurrentAccountInformations(currentAccount)
-        }
-    }
-}
-
-// MARK: - UIDocumentPickerDelegate
-
-extension MainTabViewController: UIDocumentPickerDelegate {
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        if let documentPicker = controller as? DriveImportDocumentPickerViewController {
-            for url in urls {
-                let targetURL = fileImportHelper.generateImportURL(for: url.uti)
-
-                do {
-                    if FileManager.default.fileExists(atPath: targetURL.path) {
-                        try FileManager.default.removeItem(at: targetURL)
-                    }
-
-                    try FileManager.default.moveItem(at: url, to: targetURL)
-                    let newFile = UploadFile(
-                        parentDirectoryId: documentPicker.importDriveDirectory.id,
-                        userId: accountManager.currentUserId,
-                        driveId: documentPicker.importDriveDirectory.driveId,
-                        url: targetURL,
-                        name: url.lastPathComponent
-                    )
-
-                    uploadDataSource.saveToRealm(newFile,
-                                                 itemIdentifier: nil,
-                                                 addToQueue: true)
-                } catch {
-                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-                }
-            }
         }
     }
 }

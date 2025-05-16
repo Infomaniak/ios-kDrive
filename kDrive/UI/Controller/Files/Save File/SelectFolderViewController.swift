@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -111,13 +112,19 @@ final class SelectFolderViewController: FileListViewController {
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
+        @InjectService var appRouter: AppNavigable
         var viewControllers = [LocationFolderViewController]()
+        var isCompactView: Bool {
+            guard let rootViewController = appRouter.rootViewController else { return false }
+            return rootViewController.traitCollection.horizontalSizeClass == .compact
+        }
 
         let selectFolderViewController = LocationFolderViewController(
             driveFileManager: driveFileManager,
             viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: startDirectory),
             selectMode: true,
-            delegate: delegate
+            isCompactView: isCompactView,
+            locationDelegate: delegate
         )
         selectFolderViewController.navigationItem.hideBackButtonText()
         viewControllers.append(selectFolderViewController)

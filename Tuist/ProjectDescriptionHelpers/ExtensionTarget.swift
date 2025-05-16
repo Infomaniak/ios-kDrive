@@ -77,7 +77,7 @@ public extension Target {
                            "kDrive/UI/Controller/Files/Search/**",
                            "kDrive/UI/Controller/Files/MultipleSelectionViewController.swift",
                            "kDrive/UI/Controller/Files/File List/**",
-                           "kDrive/UI/Controller/Files/RootMenuViewController.swift",
+                           "kDrive/UI/Controller/Files/SidebarViewController.swift",
                            "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
                            "kDrive/UI/Controller/Floating Panel Information/**",
                            "kDrive/UI/Controller/Favorite/FavoritesViewModel.swift",
