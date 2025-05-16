@@ -85,7 +85,7 @@ class LaunchPanelsController {
                 return driveFloatingPanelController
             },
             displayCondition: InjectService<AccountManageable>().wrappedValue.currentDriveFileManager != nil && UserDefaults
-                .shared.numberOfConnections == 1 && !InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled,
+                .shared.numberOfConnections == 1 && !InjectService<PhotoLibraryUploadable>().wrappedValue.isSyncEnabled,
             priority: 3
         )
 
