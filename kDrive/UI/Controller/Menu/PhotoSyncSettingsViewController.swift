@@ -30,7 +30,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadService: UploadServiceable
 
@@ -72,7 +72,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
     private var liveNewSyncSettings: PhotoSyncSettings = {
-        @InjectService var photoUploader: PhotoLibraryUploader
+        @InjectService var photoUploader: PhotoLibraryUploadable
 
         if let settings = photoUploader.frozenSettings {
             return PhotoSyncSettings(value: settings as Any)
@@ -83,7 +83,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
     }()
 
-    private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploader>().wrappedValue.isSyncEnabled
+    private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploadable>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
             liveNewSyncSettings.parentDirectoryId = selectedDirectory?.id ?? -1
@@ -225,13 +225,14 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     func saveSettings() {
+        @InjectService var photoLibrarySync: PhotoLibrarySyncable
         guard photoSyncEnabled else {
-            photoLibraryUploader.disableSync()
+            photoLibrarySync.disableSync()
             return
         }
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
-        photoLibraryUploader.enableSync(newSettings)
+        photoLibrarySync.enableSync(newSettings)
         uploadService.retryAllOperations(
             withParent: newSettings.parentDirectoryId,
             userId: newSettings.userId,
@@ -546,7 +547,8 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
 
         DispatchQueue.global(qos: .default).async {
             // Add new pictures to be uploaded and reload upload queue
-            self.photoLibraryUploader.scheduleNewPicturesForUpload()
+            @InjectService var photoLibraryScan: PhotoLibraryScanable
+            photoLibraryScan.scheduleNewPicturesForUpload()
             @InjectService var uploadService: UploadServiceable
             uploadService.rebuildUploadQueue()
         }
