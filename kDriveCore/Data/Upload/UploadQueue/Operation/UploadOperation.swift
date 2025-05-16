@@ -67,7 +67,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var backgroundUploadManager: BackgroundUploadSessionManager
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
+    @LazyInjectService var photoLibrarySync: PhotoLibrarySyncable
     @LazyInjectService var fileManager: FileManagerable
     @LazyInjectService var fileMetadata: FileMetadatable
     @LazyInjectService var freeSpaceService: FreeSpaceService
