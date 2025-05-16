@@ -22,6 +22,10 @@ import InfomaniakDI
 import Photos
 import RealmSwift
 
+protocol PhotoLibraryScanable {
+    @discardableResult func scheduleNewPicturesForUpload() -> Int
+}
+
 public extension PhotoLibraryUploader {
     @discardableResult
     func scheduleNewPicturesForUpload() -> Int {
