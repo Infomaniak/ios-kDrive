@@ -49,7 +49,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     @LazyInjectService private var scheduler: BGTaskScheduler
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var uploadService: UploadServiceable
-    @LazyInjectService private var photoUploader: PhotoLibraryUploader
+    @LazyInjectService private var photoScan: PhotoLibraryScanable
 
     public init() {
         // META: keep SonarCloud happy
@@ -115,7 +115,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
         }
 
         Log.backgroundTaskScheduling("Enqueue new pictures")
-        photoUploader.scheduleNewPicturesForUpload()
+        photoScan.scheduleNewPicturesForUpload()
 
         guard !expiringActivity.shouldTerminate else {
             Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)

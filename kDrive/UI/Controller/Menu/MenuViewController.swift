@@ -28,7 +28,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var appNavigable: AppNavigable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
 
     private let driveFileManager: DriveFileManager
     var uploadCountManager: UploadCountManager?

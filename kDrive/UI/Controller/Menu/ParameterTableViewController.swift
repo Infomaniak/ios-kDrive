@@ -30,7 +30,7 @@ import UIKit
 class ParameterTableViewController: BaseGroupedTableViewController {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var appNavigable: AppNavigable
 
     let driveFileManager: DriveFileManager

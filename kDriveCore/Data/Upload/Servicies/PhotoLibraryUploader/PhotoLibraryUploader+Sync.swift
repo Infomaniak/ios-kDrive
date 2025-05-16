@@ -19,8 +19,13 @@
 import Foundation
 import RealmSwift
 
-public extension PhotoLibraryUploader {
-    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
+public protocol PhotoLibrarySyncable {
+    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
+    func disableSync()
+}
+
+extension PhotoLibraryUploader: PhotoLibrarySyncable {
+    @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard liveNewSyncSettings.userId != -1,
@@ -55,7 +60,7 @@ public extension PhotoLibraryUploader {
         }
     }
 
-    func disableSync() {
+    public func disableSync() {
         try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }

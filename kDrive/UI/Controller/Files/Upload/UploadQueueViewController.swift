@@ -46,7 +46,7 @@ final class UploadQueueViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
 
     var currentDirectory: File!
     private var frozenUploadingFiles = [UploadFileDisplayed]()

@@ -76,8 +76,17 @@ final class ITAppLaunchTest: XCTestCase {
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper()
             },
-            Factory(type: PhotoLibraryUploader.self) { _, _ in
-                PhotoLibraryUploader()
+            Factory(type: PhotoLibraryUploadable.self) { _, _ in
+                MCKPhotoLibraryUploadable()
+            },
+            Factory(type: PhotoLibraryQueryable.self) { _, _ in
+                MCKPhotoLibraryQueryable()
+            },
+            Factory(type: PhotoLibrarySyncable.self) { _, _ in
+                MCKPhotoLibrarySyncable()
+            },
+            Factory(type: PhotoLibraryScanable.self) { _, _ in
+                MCKPhotoLibraryScanable()
             },
             Factory(type: DriveInfosManager.self) { _, _ in
                 DriveInfosManager()

@@ -94,7 +94,8 @@ public protocol AccountManageable: AnyObject {
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var driveInfosManager: DriveInfosManager
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
+    @LazyInjectService var photoLibrarySync: PhotoLibrarySyncable
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
@@ -371,7 +372,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             if photoLibraryUploader.isSyncEnabled,
                frozenSettings?.userId == user.id,
                frozenSettings?.driveId == driveRemoved.id {
-                photoLibraryUploader.disableSync()
+                photoLibrarySync.disableSync()
             }
             if currentDriveFileManager?.driveId == driveRemoved.id {
                 setCurrentDriveForCurrentAccount(for: firstDrive.id, userId: firstDrive.userId)
@@ -525,7 +526,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentUserId = 0
         }
         if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == toDeleteAccount.userId {
-            photoLibraryUploader.disableSync()
+            photoLibrarySync.disableSync()
         }
         driveInfosManager.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)

@@ -657,8 +657,8 @@ public struct AppRouter: AppNavigable {
         backgroundUploadSessionManager.reconnectBackgroundTasks()
 
         Log.sceneDelegate("Restart queue")
-        @InjectService var photoUploader: PhotoLibraryUploader
-        photoUploader.scheduleNewPicturesForUpload()
+        @InjectService var photoScan: PhotoLibraryScanable
+        photoScan.scheduleNewPicturesForUpload()
 
         // Resolving an upload queue will restart it if this is the first time
         @InjectService var uploadService: UploadServiceable
