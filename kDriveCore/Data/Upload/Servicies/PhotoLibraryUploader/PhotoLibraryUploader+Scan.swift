@@ -47,23 +47,22 @@ public extension PhotoLibraryUploader {
             let assetsFetchResult = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
 
-            try? uploadsDatabase.writeTransaction { writableRealm in
-                do {
-                    try addImageAssetsToUploadQueue(
-                        assetsFetchResult: assetsFetchResult,
-                        initial: frozenSettings.lastSync.timeIntervalSince1970 == 0,
-                        writableRealm: writableRealm
-                    )
+            do {
+                try addImageAssetsToUploadQueue(
+                    assetsFetchResult: assetsFetchResult,
+                    initial: frozenSettings.lastSync.timeIntervalSince1970 == 0
+                )
 
+                try uploadsDatabase.writeTransaction { writableRealm in
                     updateLastSyncDate(syncDate, writableRealm: writableRealm)
-
-                    newAssetsCount = assetsFetchResult.count
-                    Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
-                } catch ErrorDomain.importCancelledBySystem {
-                    Log.photoLibraryUploader("System is requesting to stop", level: .error)
-                } catch {
-                    Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
                 }
+
+                newAssetsCount = assetsFetchResult.count
+                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+            } catch ErrorDomain.importCancelledBySystem {
+                Log.photoLibraryUploader("System is requesting to stop", level: .error)
+            } catch {
+                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
             }
         }
 
@@ -80,9 +79,13 @@ public extension PhotoLibraryUploader {
     }
 
     private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
-                                             initial: Bool,
-                                             writableRealm: Realm) throws {
+                                             initial: Bool) throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
+        guard let frozenSettings else {
+            Log.photoLibraryUploader("no settings")
+            return
+        }
+
         let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
         defer {
@@ -93,17 +96,9 @@ public extension PhotoLibraryUploader {
             var burstIdentifier: String?
             var burstCount = 0
 
-            assetsFetchResult.enumerateObjects { [self] asset, idx, stop in
+            assetsFetchResult.enumerateObjects { [self] asset, _, stop in
                 guard !expiringActivity.shouldTerminate else {
                     Log.photoLibraryUploader("system is asking to terminate")
-                    writableRealm.cancelWrite()
-                    stop.pointee = true
-                    return
-                }
-
-                guard let frozenSettings else {
-                    Log.photoLibraryUploader("no settings")
-                    writableRealm.cancelWrite()
                     stop.pointee = true
                     return
                 }
@@ -124,12 +119,10 @@ public extension PhotoLibraryUploader {
                     }
                 }
 
-                let settings = frozenSettings
-
                 // Get a unique file identifier while taking care of the burst state
                 let finalName = getPhotoLibraryName(
                     forAsset: asset,
-                    settings: settings,
+                    settings: frozenSettings,
                     burstIdentifier: &burstIdentifier,
                     burstCount: &burstCount
                 )
@@ -145,54 +138,54 @@ public extension PhotoLibraryUploader {
 
                 Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
 
-                // Check if picture uploaded before
-                guard !assetAlreadyUploaded(assetName: finalName,
-                                            localIdentifier: asset.localIdentifier,
-                                            bestResourceSHA256: bestResourceSHA256,
-                                            writableRealm: writableRealm) else {
-                    Log.photoLibraryUploader("Asset ignored because it was uploaded before")
-                    return
-                }
+                try? uploadsDatabase.writeTransaction { writableRealm in
+                    guard !expiringActivity.shouldTerminate else {
+                        Log.photoLibraryUploader("system is asking to terminate")
+                        writableRealm.cancelWrite()
+                        stop.pointee = true
+                        return
+                    }
 
-                guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
-                                                 writableRealm: writableRealm) else {
-                    Log.photoLibraryUploader("Asset already in pending upload")
-                    return
-                }
+                    // Check if picture uploaded before
+                    guard !assetAlreadyUploaded(assetName: finalName,
+                                                localIdentifier: asset.localIdentifier,
+                                                bestResourceSHA256: bestResourceSHA256,
+                                                writableRealm: writableRealm) else {
+                        Log.photoLibraryUploader("Asset ignored because it was uploaded before")
+                        return
+                    }
 
-                let algorithmImportVersion = currentDiffAlgorithmVersion
+                    guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
+                                                     writableRealm: writableRealm) else {
+                        Log.photoLibraryUploader("Asset already in pending upload")
+                        return
+                    }
 
-                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
-                let uploadFile = UploadFile(
-                    parentDirectoryId: settings.parentDirectoryId,
-                    userId: settings.userId,
-                    driveId: settings.driveId,
-                    name: finalName,
-                    asset: asset,
-                    bestResourceSHA256: bestResourceSHA256,
-                    algorithmImportVersion: algorithmImportVersion,
-                    conflictOption: .version,
-                    priority: initial ? .low : .normal
-                )
+                    let algorithmImportVersion = currentDiffAlgorithmVersion
 
-                // Lazy creation of sub folder if required in the upload file
-                if settings.createDatedSubFolders {
-                    uploadFile.setDatedRelativePath()
-                }
+                    // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
+                    let uploadFile = UploadFile(
+                        parentDirectoryId: frozenSettings.parentDirectoryId,
+                        userId: frozenSettings.userId,
+                        driveId: frozenSettings.driveId,
+                        name: finalName,
+                        asset: asset,
+                        bestResourceSHA256: bestResourceSHA256,
+                        algorithmImportVersion: algorithmImportVersion,
+                        conflictOption: .version,
+                        priority: initial ? .low : .normal
+                    )
 
-                // DB insertion
-                writableRealm.add(uploadFile, update: .modified)
+                    // Lazy creation of sub folder if required in the upload file
+                    if frozenSettings.createDatedSubFolders {
+                        uploadFile.setDatedRelativePath()
+                    }
 
-                // Batching writes
-                if idx < assetsFetchResult.count - 1 && idx % 99 == 0 {
-                    Log.photoLibraryUploader("Commit assets batch up to :\(idx)")
+                    // DB insertion
+                    writableRealm.add(uploadFile, update: .modified)
                     if let creationDate = asset.creationDate {
                         updateLastSyncDate(creationDate, writableRealm: writableRealm)
                     }
-
-                    // Commit write every 100 assets if it's not the last
-                    try? writableRealm.commitWrite()
-                    writableRealm.beginWrite()
                 }
             }
         }
