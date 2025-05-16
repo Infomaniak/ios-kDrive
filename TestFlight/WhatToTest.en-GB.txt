@@ -1,3 +1,4 @@
 - New "select all" action in offline section
 - New and improved folder selection
+- PDF scroll performance
 - Stability improvements and bug fixes
