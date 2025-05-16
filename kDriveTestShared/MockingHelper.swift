@@ -71,6 +71,12 @@ public enum MockingHelper {
                                          forCustomTypeIdentifier: nil,
                                          factoryParameters: nil,
                                          resolver: resolver)
+                },
+                Factory(type: PhotoLibrarySyncable.self) { _, resolver in
+                    try resolver.resolve(type: PhotoLibraryUploader.self,
+                                         forCustomTypeIdentifier: nil,
+                                         factoryParameters: nil,
+                                         resolver: resolver)
                 }
             ]
         case .minimal:
