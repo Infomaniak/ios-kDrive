@@ -33,6 +33,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadService: UploadServiceable
+    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private enum PhotoSyncSection: Int {
         case syncSwitch
@@ -232,8 +233,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
 
         if didDriveSelectionChange {
-            @InjectService var uploadDataSource: UploadServiceDataSourceable
-            @InjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
             let objectsToDelete = uploadDataSource
                 .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
             try? uploadsDatabase.writeTransaction { writableRealm in
