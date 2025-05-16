@@ -37,7 +37,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
-    @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
