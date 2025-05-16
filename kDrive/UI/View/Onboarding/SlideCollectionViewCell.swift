@@ -22,7 +22,7 @@ import UIKit
 
 class SlideCollectionViewCell: UICollectionViewCell {
     @IBOutlet var backgroundImageView: UIImageView!
-    @IBOutlet var illustrationAnimationView: AnimationView!
+    @IBOutlet var illustrationAnimationView: LottieAnimationView!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var descriptionLabel: UILabel!
     @IBOutlet var animationViewTopConstraint: NSLayoutConstraint!
@@ -39,7 +39,7 @@ class SlideCollectionViewCell: UICollectionViewCell {
     func configureCell(slide: Slide, isSmallDevice: Bool = false) {
         backgroundImageView.image = slide.backgroundImage
         backgroundImageView.tintColor = KDriveResourcesAsset.backgroundColor.color
-        illustrationAnimationView.animation = Animation.named(slide.animationName)
+        illustrationAnimationView.animation = LottieAnimation.named(slide.animationName)
         titleLabel.text = slide.title
         descriptionLabel.text = slide.description
     }

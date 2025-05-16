@@ -59,7 +59,7 @@ let package = Package(
         .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
         .package(url: "https://github.com/ProxymanApp/atlantis", .upToNextMajor(from: "1.3.0")),
         .package(url: "https://github.com/ra1028/DifferenceKit", .upToNextMajor(from: "1.3.0")),
-        .package(url: "https://github.com/airbnb/lottie-ios", .upToNextMinor(from: "3.4.0")),
+        .package(url: "https://github.com/airbnb/lottie-spm.git", .upToNextMinor(from: "4.4.3")),
         .package(url: "https://github.com/CocoaLumberjack/CocoaLumberjack", .upToNextMajor(from: "3.7.0")),
         .package(url: "https://github.com/Infomaniak/DropDown", branch: "master"),
         .package(url: "https://github.com/flowbe/SwiftRegex", .upToNextMajor(from: "1.0.0")),
