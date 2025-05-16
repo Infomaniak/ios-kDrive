@@ -26,7 +26,7 @@ class DropBoxFloatingPanelViewController: InformationFloatingPanelViewController
         super.viewDidLoad()
 
         imageView.isHidden = true
-        animationView.animation = Animation.named("illu_drop_box")
+        animationView.animation = LottieAnimation.named("illu_drop_box")
         animationViewHeightConstraint.constant = 130
         titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription

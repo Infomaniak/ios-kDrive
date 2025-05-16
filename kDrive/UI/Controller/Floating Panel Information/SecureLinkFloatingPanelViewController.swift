@@ -26,7 +26,7 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
         super.viewDidLoad()
 
         imageView.isHidden = true
-        animationView.animation = Animation.named("illu_upgrade")
+        animationView.animation = LottieAnimation.named("illu_upgrade")
         animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareDescription

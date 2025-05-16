@@ -24,7 +24,7 @@ import UIKit
 class InformationFloatingPanelViewController: UIViewController {
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet var animationView: AnimationView!
+    @IBOutlet var animationView: LottieAnimationView!
     @IBOutlet var animationViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var descriptionLabel: UILabel!

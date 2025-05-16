@@ -26,7 +26,7 @@ class FolderColorFloatingPanelViewController: InformationFloatingPanelViewContro
         super.viewDidLoad()
 
         imageView.isHidden = true
-        animationView.animation = Animation.named("illu_upgrade")
+        animationView.animation = LottieAnimation.named("illu_upgrade")
         animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveResourcesStrings.Localizable.folderColorTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.folderColorDescription
