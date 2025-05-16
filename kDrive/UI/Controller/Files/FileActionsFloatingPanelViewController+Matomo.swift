@@ -22,7 +22,6 @@ import kDriveCore
 
 extension FileActionsFloatingPanelViewController {
     #if !ISEXTENSION
-
     func trackFileAction(action: FloatingPanelAction, file: File, category: MatomoUtils.EventCategory) {
         @InjectService var matomo: MatomoUtils
         switch action {

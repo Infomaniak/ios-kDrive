@@ -22,7 +22,6 @@ import kDriveCore
 
 extension MultipleSelectionFloatingPanelViewController {
     #if !ISEXTENSION
-
     func trackBuklAction(action: FloatingPanelAction, files: [File], category: MatomoUtils.EventCategory) {
         @InjectService var matomo: MatomoUtils
         let numberOfFiles = files.count
@@ -44,6 +43,5 @@ extension MultipleSelectionFloatingPanelViewController {
             break
         }
     }
-
     #endif
 }
