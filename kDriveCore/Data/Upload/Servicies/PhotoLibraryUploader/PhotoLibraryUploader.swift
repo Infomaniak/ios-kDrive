@@ -25,7 +25,14 @@ import Photos
 import RealmSwift
 import Sentry
 
-public final class PhotoLibraryUploader {
+public protocol PhotoLibraryUploadable {
+    var liveSettings: PhotoSyncSettings? { get }
+    var frozenSettings: PhotoSyncSettings? { get }
+    var isSyncEnabled: Bool { get }
+    var isWifiOnly: Bool { get }
+}
+
+public final class PhotoLibraryUploader: PhotoLibraryUploadable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
 
