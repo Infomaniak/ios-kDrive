@@ -22,13 +22,13 @@ import InfomaniakDI
 import Photos
 import RealmSwift
 
-protocol PhotoLibraryScanable {
+public protocol PhotoLibraryScanable {
     @discardableResult func scheduleNewPicturesForUpload() -> Int
 }
 
-public extension PhotoLibraryUploader {
+extension PhotoLibraryUploader: PhotoLibraryScanable {
     @discardableResult
-    func scheduleNewPicturesForUpload() -> Int {
+    public func scheduleNewPicturesForUpload() -> Int {
         Log.photoLibraryUploader("scheduleNewPicturesForUpload")
         guard let frozenSettings,
               PHPhotoLibrary.authorizationStatus() == .authorized else {
