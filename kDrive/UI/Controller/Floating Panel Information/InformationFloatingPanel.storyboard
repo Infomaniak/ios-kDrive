@@ -26,7 +26,7 @@
                                             <constraint firstAttribute="height" constant="78" id="pbg-9J-lMV"/>
                                         </constraints>
                                     </imageView>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wIJ-5v-apn" customClass="LottieAnimationView">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wIJ-5v-apn" customClass="LottieAnimationView" customModule="Lottie">
                                         <rect key="frame" x="0.0" y="102" width="366" height="258"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
@@ -157,7 +157,7 @@
                     </view>
                     <connections>
                         <outlet property="additionalInformationLabel" destination="BGB-3b-Vqr" id="Q6c-E0-H3b"/>
-                        <outlet property="animationView" destination="wIJ-5v-apn" id="gbt-co-J23"/>
+                        <outlet property="animationView" destination="wIJ-5v-apn" id="DXe-RO-ITm"/>
                         <outlet property="animationViewHeightConstraint" destination="shu-kX-2pj" id="rU9-re-p5o"/>
                         <outlet property="copyStackView" destination="GUP-ZN-kSf" id="zBT-QD-GKo"/>
                         <outlet property="copyTextField" destination="V97-ak-e55" id="XfL-wB-5Z0"/>
@@ -181,7 +181,7 @@
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="blueColor">
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
@@ -190,7 +190,7 @@
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
