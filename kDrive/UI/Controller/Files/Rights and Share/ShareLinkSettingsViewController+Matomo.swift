@@ -18,23 +18,13 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakDI
-import InfomaniakPrivacyManagement
 import kDriveCore
-import SwiftUI
 
-enum AboutPrivacyViewBridgeController {
-    static func instantiate() -> UIViewController {
+extension ShareLinkSettingsViewController {
+    func trackShareLinkSettings(protectWithPassword: Bool, downloadFromLink: Bool, expirationDateLink: Bool) {
         @InjectService var matomo: MatomoUtils
-        let swiftUIView = PrivacyManagementView(
-            urlRepository: URLConstants.sourceCode.url,
-            backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
-            illustration: KDriveAsset.documentSignaturePencilBulb.swiftUIImage,
-            userDefaultStore: .shared,
-            userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
-            userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),
-            matomo: matomo
-        )
-        .defaultAppStorage(UserDefaults.shared)
-        return UIHostingController(rootView: swiftUIView)
+        matomo.track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: protectWithPassword)
+        matomo.track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
+        matomo.track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
     }
 }

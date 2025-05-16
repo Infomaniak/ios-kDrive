@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -66,7 +67,7 @@ public class UpsaleViewController: UIViewController {
         setupBody()
         layoutStackView()
 
-        MatomoUtils.trackUpsalePresented()
+        trackUpsalePresented()
     }
 
     func configureHeader() {

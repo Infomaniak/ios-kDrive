@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -28,7 +29,7 @@ class MySharesViewModel: FileListViewModel {
                                           selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
                                           emptyViewType: .noShared,
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "MyShares"])
+                                          matomoViewPath: [MatomoUtils.View.menu.displayName, "MyShares"])
         let mySharesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.mySharedRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: mySharesFakeRoot)
         observedFiles =

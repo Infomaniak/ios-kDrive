@@ -17,6 +17,8 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Sentry
@@ -189,9 +191,10 @@ final class OnlyOfficeViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        @InjectService var matomo: MatomoUtils
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.preview.displayName, "OnlyOffice"])
-        MatomoUtils.trackPreview(file: file)
+        matomo.track(view: [MatomoUtils.View.preview.displayName, "OnlyOffice"])
+        matomo.trackPreview(file: file)
     }
 
     deinit {

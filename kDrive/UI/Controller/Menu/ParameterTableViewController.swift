@@ -28,6 +28,7 @@ import Sentry
 import UIKit
 
 class ParameterTableViewController: BaseGroupedTableViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
     @LazyInjectService var appNavigable: AppNavigable
@@ -136,7 +137,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName])
     }
 
     private func getNotificationText() -> String {
@@ -308,7 +309,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             apiFetcher: driveFileManager.apiFetcher,
             currentAccount: currentAccount
         )
-        MatomoUtils.track(eventWithCategory: .myKSuite, name: "openDashboard")
+        matomo.track(eventWithCategory: .myKSuite, name: "openDashboard")
         navigationController?.present(dashboardViewController, animated: true)
     }
 
@@ -334,7 +335,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(AboutTableViewController(), animated: true)
         case .joinBeta:
             UIApplication.shared.open(URLConstants.testFlight.url)
-            MatomoUtils.track(eventWithCategory: .settings, name: "joinBetaProgram")
+            matomo.track(eventWithCategory: .settings, name: "joinBetaProgram")
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,

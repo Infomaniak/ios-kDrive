@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveResources
 import RealmSwift
@@ -113,15 +114,16 @@ public enum UniversalLinksHelper {
     private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
                                                              publicShareURL: URL?) async -> Bool {
         @InjectService var appNavigable: AppNavigable
+        @InjectService var matomo: MatomoUtils
         switch limitation {
         case .passwordProtected:
             guard let publicShareURL else {
                 return false
             }
-            MatomoUtils.trackDeeplink(name: "publicShareWithPassword")
+            matomo.track(eventWithCategory: .deeplink, name: "publicShareWithPassword")
             await appNavigable.presentPublicShareLocked(publicShareURL)
         case .expired:
-            MatomoUtils.trackDeeplink(name: "publicShareExpired")
+            matomo.track(eventWithCategory: .deeplink, name: "publicShareExpired")
             await appNavigable.presentPublicShareExpired()
         }
 
@@ -133,8 +135,9 @@ public enum UniversalLinksHelper {
                                                    shareLinkUid: String,
                                                    apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
+        @InjectService var matomo: MatomoUtils
 
-        MatomoUtils.trackDeeplink(name: "publicShare")
+        matomo.track(eventWithCategory: .deeplink, name: "publicShare")
 
         guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,

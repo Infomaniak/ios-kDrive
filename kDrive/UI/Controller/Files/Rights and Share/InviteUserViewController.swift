@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -25,6 +26,7 @@ import UIKit
 class InviteUserViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
@@ -91,7 +93,7 @@ class InviteUserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "InviteUser"])
+        matomo.track(view: [MatomoUtils.View.shareAndRights.displayName, "InviteUser"])
     }
 
     deinit {
@@ -333,7 +335,7 @@ extension InviteUserViewController: RightsSelectionDelegate {
 
 extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton(_ sender: IKLargeButton) {
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
+        matomo.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         let settings = FileAccessSettings(
             message: message,
             right: newPermission,

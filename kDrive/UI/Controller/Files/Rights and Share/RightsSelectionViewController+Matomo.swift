@@ -18,23 +18,20 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakDI
-import InfomaniakPrivacyManagement
 import kDriveCore
-import SwiftUI
 
-enum AboutPrivacyViewBridgeController {
-    static func instantiate() -> UIViewController {
+extension RightsSelectionViewController {
+    func trackRightSelection(type: RightsSelectionType, selected right: String) {
         @InjectService var matomo: MatomoUtils
-        let swiftUIView = PrivacyManagementView(
-            urlRepository: URLConstants.sourceCode.url,
-            backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
-            illustration: KDriveAsset.documentSignaturePencilBulb.swiftUIImage,
-            userDefaultStore: .shared,
-            userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
-            userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),
-            matomo: matomo
-        )
-        .defaultAppStorage(UserDefaults.shared)
-        return UIHostingController(rootView: swiftUIView)
+        switch type {
+        case .shareLinkSettings:
+            matomo.track(eventWithCategory: .shareAndRights, name: "\(right)ShareLink")
+        case .addUserRights, .officeOnly:
+            if right == UserPermission.delete.rawValue {
+                matomo.track(eventWithCategory: .shareAndRights, name: "deleteUser")
+            } else {
+                matomo.track(eventWithCategory: .shareAndRights, name: "\(right)Right")
+            }
+        }
     }
 }

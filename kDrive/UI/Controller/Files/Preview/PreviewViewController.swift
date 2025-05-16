@@ -19,6 +19,7 @@
 import AVFoundation
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -35,6 +36,7 @@ import UIKit
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
@@ -213,7 +215,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
         if initialLoading {
-            MatomoUtils.trackPreview(file: currentFile)
+            matomo.trackPreview(file: currentFile)
 
             collectionView.setNeedsLayout()
             collectionView.layoutIfNeeded()
@@ -239,7 +241,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         becomeFirstResponder()
 
         heightToHide = backButton.frame.minY
-        MatomoUtils.track(view: [MatomoUtils.Views.preview.displayName, "File"])
+        matomo.track(view: [MatomoUtils.View.preview.displayName, "File"])
 
         saveSceneState()
     }
@@ -379,7 +381,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     @objc private func editFile() {
         guard !driveFileManager.isPublicShare else { return }
-        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
+        matomo.track(eventWithCategory: .mediaPlayer, name: "edit")
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
     }
@@ -439,7 +441,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        MatomoUtils.trackPreview(file: currentFile)
+        matomo.trackPreview(file: currentFile)
 
         let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         previousCell?.didEndDisplaying()

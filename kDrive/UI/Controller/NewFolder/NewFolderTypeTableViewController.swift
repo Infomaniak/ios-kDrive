@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -26,6 +27,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     private lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
@@ -116,7 +118,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         if content[indexPath.row] == .dropbox {
             if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
                 router.presentUpSaleSheet()
-                MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+                matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController
@@ -126,7 +128,7 @@ class NewFolderTypeTableViewController: UITableViewController {
                     driveFloatingPanelController.dismiss(animated: true) { [weak self] in
                         guard let self else { return }
                         router.presentUpSaleSheet()
-                        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "convertToDropbox")
+                        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "convertToDropbox")
                     }
                 }
                 present(driveFloatingPanelController, animated: true)

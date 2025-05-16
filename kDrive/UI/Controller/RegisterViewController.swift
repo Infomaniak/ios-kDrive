@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
@@ -28,6 +29,7 @@ class RegisterViewController: UIViewController {
     @IBOutlet var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var infomaniakLogin: InfomaniakLoginable
 
     private let progressView = UIProgressView(progressViewStyle: .default)
@@ -48,7 +50,7 @@ class RegisterViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Register"])
+        matomo.track(view: ["Register"])
     }
 
     private func setupProgressView() {

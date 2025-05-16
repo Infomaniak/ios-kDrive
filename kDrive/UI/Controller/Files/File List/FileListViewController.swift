@@ -21,6 +21,7 @@ import Combine
 import DifferenceKit
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -50,6 +51,7 @@ extension SortType: Selectable {
 
 class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
     SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
 
@@ -175,7 +177,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: viewModel.configuration.matomoViewPath)
+        matomo.track(view: viewModel.configuration.matomoViewPath)
 
         saveSceneState()
     }

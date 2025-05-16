@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
@@ -38,6 +39,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
+    @LazyInjectService private var matomo: MatomoUtils
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -479,7 +481,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
+        matomo.track(eventWithCategory: .account, name: "openCreationWebview")
         let registerViewController = RegisterViewController.instantiateInNavigationController(delegate: delegate)
         topMostViewController.present(registerViewController, animated: true)
     }
@@ -489,7 +491,7 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
+        matomo.track(eventWithCategory: .account, name: "openLoginWebview")
         infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
                                          hideCreateAccountButton: true,
                                          delegate: delegate)
@@ -580,17 +582,17 @@ public struct AppRouter: AppNavigable {
 
             presentingViewController.present(alert, animated: true)
         }
-        MatomoUtils.track(eventWithCategory: .appReview, name: "alertPresented")
+        matomo.track(eventWithCategory: .appReview, name: "alertPresented")
     }
 
     @MainActor private func requestAppStoreReview() {
-        MatomoUtils.track(eventWithCategory: .appReview, name: "like")
+        matomo.track(eventWithCategory: .appReview, name: "like")
         UserDefaults.shared.appReview = .readyForReview
         reviewManager.requestReview()
     }
 
     @MainActor private func openUserReport() {
-        MatomoUtils.track(eventWithCategory: .appReview, name: "dislike")
+        matomo.track(eventWithCategory: .appReview, name: "dislike")
         guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS),
               let presentingViewController = window?.rootViewController else {
             return
@@ -749,7 +751,7 @@ public struct AppRouter: AppNavigable {
                                                                 leftBarButtons: [.cancel],
                                                                 rightBarButtons: [.downloadAll],
                                                                 matomoViewPath: [
-                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    MatomoUtils.View.menu.displayName,
                                                                     "publicShare"
                                                                 ])
 

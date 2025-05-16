@@ -18,12 +18,14 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 
 public final class LoginDelegateHandler: InfomaniakLoginDelegate {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
@@ -39,7 +41,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     @MainActor public func didCompleteLoginWith(code: String, verifier: String) {
         guard let topMostViewController = router.topMostViewController else { return }
 
-        MatomoUtils.track(eventWithCategory: .account, name: "loggedIn")
+        matomo.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = accountManager.currentAccount
 
         didStartLoginCallback?()
@@ -51,7 +53,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
                     throw DriveError.NoDriveError.noDriveFileManager
                 }
 
-                MatomoUtils.connectUser()
+                self.matomo.connectUser(userId: accountManager.currentUserId.description)
                 goToMainScreen(with: currentDriveFileManager)
             } catch {
                 didCompleteLoginWithError(error, previousAccount: previousAccount, topMostViewController: topMostViewController)

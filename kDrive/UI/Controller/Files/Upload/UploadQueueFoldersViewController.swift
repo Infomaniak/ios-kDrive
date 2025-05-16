@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import RealmSwift
@@ -30,6 +31,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var frozenUploadingFolders = [FileDisplayed]()
     private var notificationToken: NotificationToken?
@@ -51,7 +53,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Folders"])
+        matomo.track(view: [MatomoUtils.View.uploadQueue.displayName, "Folders"])
     }
 
     deinit {

@@ -17,6 +17,8 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -29,6 +31,8 @@ enum FolderType {
 
 class NewFolderViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var folderType = FolderType.folder
     var driveFileManager: DriveFileManager!
@@ -135,7 +139,7 @@ class NewFolderViewController: UIViewController {
                 dismissAndRefreshDataSource()
             }
         }
-        MatomoUtils.track(view: ["NewFolder"])
+        matomo.track(view: ["NewFolder"])
     }
 
     private func setupTableViewRows() {
@@ -486,7 +490,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                 password: password,
                 validUntil: validUntil
             )
-            MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
+            matomo.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
             Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
                     let frozenDirectory = try await driveFileManager.createDropBox(

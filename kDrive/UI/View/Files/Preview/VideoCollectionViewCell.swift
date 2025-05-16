@@ -19,6 +19,8 @@
 import AVKit
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -37,6 +39,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     @IBOutlet var previewFrameImageView: UIImageView!
     @IBOutlet var playButton: UIButton!
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
     weak var parentViewController: UIViewController?
@@ -71,13 +75,13 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
+        matomo.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
         guard let player = videoPlayer?.playerViewController.player else { return }
 
-        MatomoUtils.trackMediaPlayer(playMedia: .video)
+        matomo.trackMediaPlayer(playMedia: .video)
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
@@ -86,7 +90,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
-            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
+            self?.matomo.track(eventWithCategory: .mediaPlayer, name: "pause")
             self?.videoPlayer?.stopPlayback()
             self?.presentFloatingPanel()
         }

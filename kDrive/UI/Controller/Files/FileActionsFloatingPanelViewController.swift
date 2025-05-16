@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -311,7 +312,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             eventCategory = .fileListFileAction
         }
 
-        MatomoUtils.trackFileAction(action: action, file: frozenFile, category: eventCategory)
+        trackFileAction(action: action, file: frozenFile, category: eventCategory)
         handleAction(action, at: indexPath)
     }
 }

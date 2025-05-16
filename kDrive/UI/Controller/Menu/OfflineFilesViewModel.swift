@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -29,7 +30,7 @@ class OfflineFilesViewModel: FileListViewModel {
                                           selectAllSupported: true,
                                           rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
                                           emptyViewType: .noOffline,
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "Offline"])
+                                          matomoViewPath: [MatomoUtils.View.menu.displayName, "Offline"])
         // We don't really need a current directory for offline files
         super.init(
             configuration: configuration,

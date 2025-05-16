@@ -16,7 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -81,6 +83,8 @@ class RightsSelectionViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var closeButton: UIButton!
 
+    @LazyInjectService private var matomo: MatomoUtils
+
     var fileAccessElement: FileAccessElement?
 
     var rightSelectionType = RightsSelectionType.addUserRights
@@ -122,7 +126,7 @@ class RightsSelectionViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "RightsSelection"])
+        matomo.track(view: [MatomoUtils.View.shareAndRights.displayName, "RightsSelection"])
     }
 
     private func setupView() {
@@ -171,7 +175,7 @@ class RightsSelectionViewController: UIViewController {
     @IBAction func closeButtonPressed(_ sender: Any) {
         let rightKey = rights[tableView.indexPathForSelectedRow?.row ?? 0].key
         delegate?.didUpdateRightValue(newValue: rightKey)
-        MatomoUtils.trackRightSelection(type: rightSelectionType, selected: rightKey)
+        trackRightSelection(type: rightSelectionType, selected: rightKey)
         dismiss(animated: true)
     }
 

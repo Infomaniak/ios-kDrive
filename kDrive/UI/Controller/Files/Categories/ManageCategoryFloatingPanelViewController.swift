@@ -17,7 +17,9 @@
  */
 
 import FloatingPanel
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -118,6 +120,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     }
 
     private func handleAction(_ action: CategoryFloatingPanelAction, at indexPath: IndexPath) {
+        @InjectService var matomo: MatomoUtils
         switch action {
         case .edit:
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
@@ -134,7 +137,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                                                 action: KDriveResourcesStrings.Localizable.buttonDelete,
                                                 destructive: true,
                                                 loading: true) {
-                MatomoUtils.track(eventWithCategory: .categories, name: "delete")
+                matomo.track(eventWithCategory: .categories, name: "delete")
                 do {
                     let response = try await self.driveFileManager.delete(category: self.category)
                     if response {

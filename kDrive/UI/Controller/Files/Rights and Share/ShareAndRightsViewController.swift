@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import DropDown
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -27,6 +28,7 @@ import UIKit
 class ShareAndRightsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var accountManager: AccountManageable
 
@@ -76,7 +78,7 @@ class ShareAndRightsViewController: UIViewController {
             updateShareList()
         }
         initialLoading = false
-        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName])
+        matomo.track(view: [MatomoUtils.View.shareAndRights.displayName])
     }
 
     private func setTitle() {
@@ -215,7 +217,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .link:
             guard !showMykSuiteRestriction(fileHasShareLink: file.hasSharelink) else {
                 router.presentUpSaleSheet()
-                MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
+                matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
                 return
             }
 
@@ -329,7 +331,7 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSettingsButtonPressed() {
         if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
             router.presentUpSaleSheet()
-            MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
+            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
             return
         }
 

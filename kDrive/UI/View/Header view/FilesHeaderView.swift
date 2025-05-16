@@ -38,6 +38,7 @@ extension FilesHeaderViewDelegate {
 
 class FilesHeaderView: UICollectionReusableView {
     @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
@@ -119,7 +120,7 @@ class FilesHeaderView: UICollectionReusableView {
 
     @objc func didTapOnTrashHeaderView() {
         router.presentUpSaleSheet()
-        MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
     }
 
     @objc private func didTapOnCard() {

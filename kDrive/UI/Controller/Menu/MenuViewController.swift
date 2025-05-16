@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -25,6 +26,7 @@ import UIKit
 
 final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
 
@@ -135,7 +137,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateContentIfNeeded()
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName])
+        matomo.track(view: [MatomoUtils.View.menu.displayName])
         saveSceneState()
     }
 

@@ -174,6 +174,13 @@ public enum FactoryService {
             },
             Factory(type: MyKSuiteStore.self) { _, _ in
                 MyKSuiteStore()
+            },
+            Factory(type: MatomoUtils.self) { _, _ in
+                let matomo = MatomoUtils(siteId: Constants.matomoId, baseURL: URLConstants.matomo.url)
+                #if DEBUG
+                matomo.optOut(true)
+                #endif
+                return matomo
             }
         ]
 

@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import RealmSwift
@@ -24,6 +25,7 @@ import UIKit
 
 /// Public share view model, loading content from memory realm
 class PublicShareViewModel: InMemoryFileListViewModel {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
@@ -196,7 +198,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
                 onPresentViewController?(.modal, saveNavigationViewController, animated)
             },
             onSave: {
-                MatomoUtils.trackAddBulkToMykDrive()
+                self.trackAddBulkToMykDrive()
             },
             onDismissViewController: { [weak self] in
                 guard let self else { return }

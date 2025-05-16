@@ -20,6 +20,8 @@ import CocoaLumberjackSwift
 import Combine
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -94,6 +96,8 @@ class FileListViewModel: SelectDelegate {
         var sortingOptions: [SortType] = [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest]
         var matomoViewPath = ["FileList"]
     }
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var realmObservationToken: NotificationToken?
     var currentDirectoryObservationToken: NotificationToken?
@@ -297,7 +301,7 @@ class FileListViewModel: SelectDelegate {
 
     func listStyleButtonPressed() {
         FileListOptions.instance.currentStyle = listStyle == .grid ? .list : .grid
-        MatomoUtils.track(
+        matomo.track(
             eventWithCategory: .displayList,
             name: FileListOptions.instance.currentStyle == .grid ? "viewGrid" : "viewList"
         )
@@ -368,7 +372,7 @@ class FileListViewModel: SelectDelegate {
         if let file = getFile(at: indexPath) {
             switch action {
             case .share:
-                MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipeShareAndRights")
+                matomo.track(eventWithCategory: .fileListFileAction, name: "swipeShareAndRights")
                 guard let liveFile = file.thaw() else {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
                     return
@@ -376,7 +380,7 @@ class FileListViewModel: SelectDelegate {
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
-                MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipePutInTrash")
+                matomo.track(eventWithCategory: .fileListFileAction, name: "swipePutInTrash")
                 // Keep the filename before it is invalidated
                 Task { [proxyFile = file.proxify(), proxyParent = currentDirectory.proxify(), filename = file.name] in
                     do {
@@ -454,7 +458,7 @@ class FileListViewModel: SelectDelegate {
 
     func didSelect(option: Selectable) {
         guard let type = option as? SortType else { return }
-        MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
+        matomo.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
         FileListOptions.instance.currentSortType = type
     }
 }

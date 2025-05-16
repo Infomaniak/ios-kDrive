@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -153,7 +154,7 @@ final class FilePresenter {
                                                                 supportsDrop: false,
                                                                 rightBarButtons: [.downloadAll],
                                                                 matomoViewPath: [
-                                                                    MatomoUtils.Views.menu.displayName,
+                                                                    MatomoUtils.View.menu.displayName,
                                                                     "publicShare"
                                                                 ])
 

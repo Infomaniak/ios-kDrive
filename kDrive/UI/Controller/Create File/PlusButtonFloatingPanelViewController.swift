@@ -20,6 +20,8 @@ import AVFoundation
 import CocoaLumberjackSwift
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import PhotosUI
@@ -28,6 +30,8 @@ import Vision
 import VisionKit
 
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+    @LazyInjectService private var matomo: MatomoUtils
+
     let currentDirectory: File
     let driveFileManager: DriveFileManager
 
@@ -209,7 +213,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         // Folder creation is already tracked through its creation page
         if action != .folderAction {
             let suffix = presentedFromPlusButton ? "FromFAB" : "FromFolder"
-            MatomoUtils.track(eventWithCategory: .newElement, name: "\(action.matomoName)\(suffix)")
+            matomo.track(eventWithCategory: .newElement, name: "\(action.matomoName)\(suffix)")
         }
 
         switch action {

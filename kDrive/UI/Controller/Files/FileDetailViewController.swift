@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -28,6 +29,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var commentButton: UIButton!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
 
@@ -161,7 +163,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["FileDetail"])
+        matomo.track(view: ["FileDetail"])
 
         saveSceneState()
     }
@@ -342,7 +344,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     }
 
     @IBAction func addComment(_ sender: UIButton) {
-        MatomoUtils.track(eventWithCategory: .comment, name: "add")
+        matomo.track(eventWithCategory: .comment, name: "add")
         let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment,
                                                     placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName,
                                                     action: KDriveResourcesStrings.Localizable.buttonSend,
@@ -404,7 +406,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     @MainActor
     private func delete(at indexPath: IndexPath, actionCompletion: (Bool) -> Void) async {
-        MatomoUtils.track(eventWithCategory: .comment, name: "delete")
+        matomo.track(eventWithCategory: .comment, name: "delete")
 
         // MainActor should ensure that this call is safe as file was created on the main thread ?
         let proxyFile = file.proxify()
@@ -439,7 +441,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     @MainActor
     private func edit(at indexPath: IndexPath, body: String, actionCompletion: (Bool) -> Void) async {
-        MatomoUtils.track(eventWithCategory: .comment, name: "edit")
+        matomo.track(eventWithCategory: .comment, name: "edit")
 
         // MainActor should ensure that this call is safe as file was created on the main thread ?
         let proxyFile = file.proxify()
@@ -462,7 +464,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     @MainActor
     private func answer(at indexPath: IndexPath, reply: String, actionCompletion: (Bool) -> Void) async {
-        MatomoUtils.track(eventWithCategory: .comment, name: "answer")
+        matomo.track(eventWithCategory: .comment, name: "answer")
 
         // MainActor should ensure that this call is safe as file was created on the main thread ?
         let proxyFile = file.proxify()
@@ -804,7 +806,7 @@ extension FileDetailViewController {
 
 extension FileDetailViewController: FileDetailDelegate {
     func didUpdateSegmentedControl(value: Int) {
-        MatomoUtils.track(eventWithCategory: .fileInfo, name: "switchView\(["Info", "Activities", "Comments"][value])")
+        matomo.track(eventWithCategory: .fileInfo, name: "switchView\(["Info", "Activities", "Comments"][value])")
         oldSections = tableView.numberOfSections
         currentTab = Tabs(rawValue: value) ?? .informations
         switch currentTab {
@@ -862,7 +864,7 @@ extension FileDetailViewController: FileLocationDelegate {
 
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
-        MatomoUtils.track(eventWithCategory: .comment, name: "like")
+        matomo.track(eventWithCategory: .comment, name: "like")
         guard let currentAccount = accountManager.currentAccount else { return }
 
         Task { [proxyFile = file.proxify()] in
@@ -928,7 +930,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSettingsButtonPressed() {
         if packId == .myKSuite, driveFileManager.drive.sharedLinkQuotaExceeded {
             router.presentUpSaleSheet()
-            MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
+            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
             return
         }
 

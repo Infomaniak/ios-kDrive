@@ -18,6 +18,8 @@
 
 import Combine
 import InfomaniakCore
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -34,6 +36,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
     @IBOutlet var songTitleLabel: UILabel!
     @IBOutlet var artistNameLabel: UILabel!
+
+    @LazyInjectService private var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
 
@@ -207,7 +211,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.trackMediaPlayer(leaveAt: singleTrackPlayer.progressPercentage)
+        matomo.trackMediaPlayer(leaveAt: singleTrackPlayer.progressPercentage)
         singleTrackPlayer.pause()
     }
 

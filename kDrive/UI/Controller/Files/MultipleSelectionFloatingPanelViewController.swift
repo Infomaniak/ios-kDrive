@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -292,6 +293,6 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             eventCategory = .fileListFileAction
         }
 
-        MatomoUtils.trackBuklAction(action: action, files: files, category: eventCategory)
+        trackBuklAction(action: action, files: files, category: eventCategory)
     }
 }

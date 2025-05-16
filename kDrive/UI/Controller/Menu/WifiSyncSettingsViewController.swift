@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -29,6 +30,7 @@ protocol WifiSyncSettingsDelegate: AnyObject {
 class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService private var appNavigable: AppNavigable
     @LazyInjectService private var downloadQueue: DownloadQueueable
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var tableContent: [SyncMode] = SyncMode.allCases
     private var selectedMode: SyncMode
@@ -57,7 +59,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "SelectSyncMode"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "SelectSyncMode"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -82,7 +84,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
-        MatomoUtils.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
+        matomo.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
         if !offlineSync {
             delegate?.didSelectSyncMode(mode)
         } else {

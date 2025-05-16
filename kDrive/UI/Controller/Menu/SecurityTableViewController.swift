@@ -29,6 +29,7 @@ class SecurityTableViewController: BaseGroupedTableViewController {
     }
 
     @LazyInjectService private var lockHelper: AppLockHelper
+    @LazyInjectService private var matomo: MatomoUtils
 
     private var tableContent = [SecurityOption]()
 
@@ -50,8 +51,8 @@ class SecurityTableViewController: BaseGroupedTableViewController {
         super.viewWillAppear(animated)
         tableView.reloadData()
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName,
-                                 MatomoUtils.Views.security.displayName])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName,
+                            MatomoUtils.View.security.displayName])
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

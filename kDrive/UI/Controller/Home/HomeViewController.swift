@@ -18,6 +18,7 @@
 
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -28,6 +29,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
 
@@ -174,7 +176,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Home"])
+        matomo.track(view: ["Home"])
 
         saveSceneState()
     }
@@ -364,7 +366,7 @@ extension HomeViewController {
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
                     router.presentUpSaleSheet()
-                    MatomoUtils.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
+                    matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }

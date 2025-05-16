@@ -26,6 +26,7 @@ import UIKit
 import VersionChecker
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
@@ -169,21 +170,21 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         case Constants.applicationShortcutScan:
             let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
             openMediaHelper.openScan(rootViewController, false)
-            MatomoUtils.track(eventWithCategory: .shortcuts, name: "scan")
+            matomo.track(eventWithCategory: .shortcuts, name: "scan")
         case Constants.applicationShortcutSearch:
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
             viewController.present(
                 SearchViewController.instantiateInNavigationController(viewModel: viewModel),
                 animated: true
             )
-            MatomoUtils.track(eventWithCategory: .shortcuts, name: "search")
+            matomo.track(eventWithCategory: .shortcuts, name: "search")
         case Constants.applicationShortcutUpload:
             let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
             openMediaHelper.openMedia(rootViewController, .library)
-            MatomoUtils.track(eventWithCategory: .shortcuts, name: "upload")
+            matomo.track(eventWithCategory: .shortcuts, name: "upload")
         case Constants.applicationShortcutSupport:
             UIApplication.shared.open(URLConstants.support.url)
-            MatomoUtils.track(eventWithCategory: .shortcuts, name: "support")
+            matomo.track(eventWithCategory: .shortcuts, name: "support")
         default:
             break
         }

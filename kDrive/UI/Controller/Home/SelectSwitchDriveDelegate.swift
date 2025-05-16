@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -30,7 +31,8 @@ extension SelectSwitchDriveDelegate {
             let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             present(driveFloatingPanelController, animated: true)
         } else {
-            MatomoUtils.track(eventWithCategory: .drive, name: "switch")
+            @InjectService var matomo: MatomoUtils
+            matomo.track(eventWithCategory: .drive, name: "switch")
 
             let driveId = drive.id
             let driveUserId = drive.userId

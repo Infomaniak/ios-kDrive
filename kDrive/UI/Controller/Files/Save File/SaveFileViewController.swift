@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -25,6 +26,7 @@ import PhotosUI
 import UIKit
 
 class SaveFileViewController: UIViewController {
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var appContextService: AppContextServiceable
@@ -178,7 +180,7 @@ class SaveFileViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SaveFile"])
+        matomo.track(view: [MatomoUtils.View.save.displayName, "SaveFile"])
     }
 
     deinit {

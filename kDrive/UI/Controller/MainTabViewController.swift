@@ -18,6 +18,7 @@
 
 import FloatingPanel
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -42,6 +43,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     // swiftlint:disable:next weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var fileImportHelper: FileImportHelper
@@ -286,7 +288,7 @@ extension MainTabViewController: MainTabBarDelegate {
 
         router.presentAccountViewController(navigationController: rootNavigationController, animated: true)
 
-        MatomoUtils.track(eventWithCategory: .account, name: "longPressDirectAccess")
+        matomo.track(eventWithCategory: .account, name: "longPressDirectAccess")
     }
 
     func avatarDoubleTap() {
@@ -301,7 +303,7 @@ extension MainTabViewController: MainTabBarDelegate {
         _ = router.showMainViewController(driveFileManager: accountManager,
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
 
-        MatomoUtils.track(eventWithCategory: .account, name: "switchDoubleTap")
+        matomo.track(eventWithCategory: .account, name: "switchDoubleTap")
     }
 }
 

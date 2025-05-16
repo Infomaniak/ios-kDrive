@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
+import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -71,7 +72,7 @@ class PhotoListViewModel: FileListViewModel {
                                                 rootTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                                                 emptyViewType: .noImages,
                                                 rightBarButtons: [.search, .photoSort],
-                                                matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
+                                                matomoViewPath: [MatomoUtils.View.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
                    currentDirectory: lastPicturesFakeRoot)
 

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -40,6 +41,7 @@ final class UploadQueueViewController: UIViewController {
     @IBOutlet var retryButton: UIBarButtonItem!
     @IBOutlet var cancelButton: UIBarButtonItem!
 
+    @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
@@ -96,7 +98,7 @@ final class UploadQueueViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Main"])
+        matomo.track(view: [MatomoUtils.View.uploadQueue.displayName, "Main"])
     }
 
     deinit {

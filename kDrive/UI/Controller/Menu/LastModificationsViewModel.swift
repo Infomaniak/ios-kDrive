@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -29,7 +30,7 @@ class LastModificationsViewModel: FileListViewModel {
                                           rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                           emptyViewType: .noActivitiesSolo,
                                           sortingOptions: [],
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "LastModifications"])
+                                          matomoViewPath: [MatomoUtils.View.menu.displayName, "LastModifications"])
         super.init(
             configuration: configuration,
             driveFileManager: driveFileManager,

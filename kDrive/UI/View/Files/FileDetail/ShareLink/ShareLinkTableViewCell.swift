@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -30,6 +31,7 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 
 class ShareLinkTableViewCell: InsetTableViewCell {
     @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var matomo: MatomoUtils
 
     @IBOutlet var shareLinkTitleLabel: IKLabel!
     @IBOutlet var shareIconImageView: UIImageView!
@@ -184,7 +186,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
+        matomo.track(eventWithCategory: .shareAndRights, name: "shareButton")
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 

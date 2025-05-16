@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
+import InfomaniakDI
 import InfomaniakPrivacyManagement
 import kDriveCore
 import kDriveResources
@@ -55,8 +57,9 @@ class AboutTableViewController: BaseGroupedTableViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        @InjectService var matomo: MatomoUtils
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "About"])
+        matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "About"])
     }
 
     // MARK: - Table view data source

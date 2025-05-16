@@ -18,7 +18,9 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -26,12 +28,14 @@ import RealmSwift
 import UIKit
 
 class TrashListViewModel: InMemoryFileListViewModel {
+    @LazyInjectService private var matomo: MatomoUtils
+
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
                                           emptyViewType: currentDirectory == nil ? .noTrash : .emptyFolder,
                                           sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest],
-                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "TrashList"])
+                                          matomoViewPath: [MatomoUtils.View.menu.displayName, "TrashList"])
         super.init(configuration: configuration,
                    driveFileManager: driveFileManager,
                    currentDirectory: currentDirectory == nil ? DriveFileManager.trashRootFile : currentDirectory!)
@@ -99,7 +103,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
                                                 message: KDriveResourcesStrings.Localizable.modalEmptyTrashDescription,
                                                 action: KDriveResourcesStrings.Localizable.buttonEmpty,
                                                 destructive: true, loading: true) { [self] in
-                MatomoUtils.track(eventWithCategory: .trash, name: "emptyTrash")
+                matomo.track(eventWithCategory: .trash, name: "emptyTrash")
                 await emptyTrash()
             }
             onPresentViewController?(.modal, alert, true)
@@ -206,7 +210,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
 
         switch option {
         case .restoreIn:
-            MatomoUtils.track(eventWithCategory: .trash, name: "restoreGivenFolder")
+            matomo.track(eventWithCategory: .trash, name: "restoreGivenFolder")
             let selectFolderNavigationViewController: TitleSizeAdjustingNavigationController
             selectFolderNavigationViewController = SelectFolderViewController
                 .instantiateInNavigationController(driveFileManager: driveFileManager) { directory in
@@ -222,7 +226,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
                 }
             onPresentViewController?(.modal, selectFolderNavigationViewController, true)
         case .restore:
-            MatomoUtils.track(eventWithCategory: .trash, name: "restoreOriginFolder")
+            matomo.track(eventWithCategory: .trash, name: "restoreOriginFolder")
             Task { [weak self] in
                 await self?.restoreTrashedFiles(proxyFiles, firstFilename: firstFilename)
                 self?.removeFilesAndDisableMultiSelection(proxyFiles)
@@ -233,7 +237,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
                 firstFilename: firstFilename,
                 driveFileManager: driveFileManager
             ) { [weak self] _ in
-                MatomoUtils.track(eventWithCategory: .trash, name: "deleteFromTrash")
+                self?.matomo.track(eventWithCategory: .trash, name: "deleteFromTrash")
                 Task { [weak self] in
                     self?.removeFilesAndDisableMultiSelection(proxyFiles)
                 }
@@ -305,7 +309,8 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
                                                                  firstFilename: firstSelectedItem.name,
                                                                  driveFileManager: driveFileManager) { [weak self] deletedFiles in
-                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "DeleteFromTrash", numberOfItems: selectedItemCount)
+                @InjectService var matomo: MatomoUtils
+                matomo.trackBulkEvent(eventWithCategory: .trash, name: "DeleteFromTrash", numberOfItems: selectedItemCount)
                 self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
             }
             onPresentViewController?(.modal, alert, true)
