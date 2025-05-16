@@ -25,7 +25,7 @@ import UIKit
 class RootMenuHeaderView: UICollectionReusableView {
     static let kind: UICollectionView.UICollectionViewSupplementaryViewKind = .custom("menuHeader")
 
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
 
     @IBOutlet var topConstraint: NSLayoutConstraint!
     @IBOutlet var bottomConstraint: NSLayoutConstraint!
