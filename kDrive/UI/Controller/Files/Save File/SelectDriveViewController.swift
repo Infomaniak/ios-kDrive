@@ -19,6 +19,7 @@
 import DropDown
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakCoreDB
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -173,6 +174,15 @@ extension SelectDriveViewController: UITableViewDelegate {
             dropDown.show()
         case .selectDrive:
             let drive = driveList[indexPath.row]
+            if selectedDrive?.objectId != drive.objectId {
+                @InjectService var uploadDataSource: UploadServiceDataSourceable
+                @InjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+                let objectsToDelete = uploadDataSource
+                    .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+                try? uploadsDatabase.writeTransaction { writableRealm in
+                    writableRealm.delete(objectsToDelete)
+                }
+            }
             delegate?.didSelectDrive(drive)
             if let navigationController {
                 navigationController.popViewController(animated: true)
