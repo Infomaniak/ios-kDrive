@@ -21,7 +21,7 @@ import InfomaniakCore
 import InfomaniakDI
 
 public class PhotoUploadQueue: UploadQueue {
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploader
+    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
 
     /// Should suspend operation queue based on network status and user defined parameters
     override var shouldSuspendQueue: Bool {
