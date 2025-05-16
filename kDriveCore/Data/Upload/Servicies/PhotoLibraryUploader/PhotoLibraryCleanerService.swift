@@ -43,7 +43,7 @@ public struct PhotoLibraryCleanerService: PhotoLibraryCleanerServiceable {
     static let removeAssetsCountThreshold = 10
 
     /// A predicate to only keep the `phAsset`
-    static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
+    public static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
 
     /// `True` if feature setting is ON
     private var removePictureEnabled: Bool {
