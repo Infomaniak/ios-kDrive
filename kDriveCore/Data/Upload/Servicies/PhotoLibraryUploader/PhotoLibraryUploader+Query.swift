@@ -19,8 +19,15 @@
 import Foundation
 import Photos
 
-extension PhotoLibraryUploader {
+protocol PhotoLibraryQueryable {
     /// Create predicate related to dates from settings
+    func getDatePredicate(with settings: PhotoSyncSettings) -> NSPredicate
+
+    /// Create predicate related to file format from settings
+    func getAssetPredicates(forSettings settings: PhotoSyncSettings) -> [NSPredicate]
+}
+
+extension PhotoLibraryUploader: PhotoLibraryQueryable {
     func getDatePredicate(with settings: PhotoSyncSettings) -> NSPredicate {
         let lastSyncDate = settings.lastSync as NSDate
         let syncFromDate = settings.fromDate as NSDate
@@ -40,7 +47,6 @@ extension PhotoLibraryUploader {
         return datePredicate
     }
 
-    /// Create predicate related to file format from settings
     func getAssetPredicates(forSettings settings: PhotoSyncSettings) -> [NSPredicate] {
         var typesPredicates = [NSPredicate]()
 
