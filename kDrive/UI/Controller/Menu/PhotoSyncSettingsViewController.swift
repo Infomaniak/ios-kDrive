@@ -83,6 +83,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
     }()
 
+    private var didDriveSelectionChange = false
     private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploadable>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
@@ -229,6 +230,16 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         guard photoSyncEnabled else {
             photoLibrarySync.disableSync()
             return
+        }
+
+        if didDriveSelectionChange {
+            @InjectService var uploadDataSource: UploadServiceDataSourceable
+            @InjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+            let objectsToDelete = uploadDataSource
+                .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+            try? uploadsDatabase.writeTransaction { writableRealm in
+                writableRealm.delete(objectsToDelete)
+            }
         }
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
@@ -481,6 +492,10 @@ extension PhotoSyncSettingsViewController {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
+        let previousDriveId = driveFileManager?.driveId
+        if previousDriveId != drive.id {
+            didDriveSelectionChange = true
+        }
         driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
