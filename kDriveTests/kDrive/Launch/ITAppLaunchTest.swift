@@ -85,8 +85,8 @@ final class ITAppLaunchTest: XCTestCase {
             Factory(type: PhotoLibrarySyncable.self) { _, _ in
                 MCKPhotoLibrarySyncable()
             },
-            Factory(type: PhotoLibrarySyncable.self) { _, _ in
-                MCKPhotoLibrarySyncable()
+            Factory(type: PhotoLibraryScanable.self) { _, _ in
+                MCKPhotoLibraryScanable()
             },
             Factory(type: DriveInfosManager.self) { _, _ in
                 DriveInfosManager()
