@@ -808,6 +808,9 @@
 /* loco:605b1457dbf343111f56d112 */
 "errorLeaveShare" = "Error when stopping sharing";
 
+/* loco:67f4dd4c65f3979e8004d539 */
+"errorLimitExceeded" = "Limit exceeded";
+
 /* loco:6298868323a9de35a129f1f2 */
 "errorLoadingInfomaniakManager" = "Unable to load the Infomaniak Manager";
 

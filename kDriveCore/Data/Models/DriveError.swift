@@ -223,7 +223,7 @@ public struct DriveError: Error, Equatable {
     public static let limitExceededError = DriveError(
         type: .serverError,
         code: "limit_exceeded_error",
-        localizedString: KDriveResourcesStrings.Localizable.errorFilesLimitExceeded
+        localizedString: KDriveResourcesStrings.Localizable.errorLimitExceeded
     )
 
     public static let networkError = DriveError(
