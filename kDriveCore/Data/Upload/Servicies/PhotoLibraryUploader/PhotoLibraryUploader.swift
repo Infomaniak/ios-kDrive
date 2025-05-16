@@ -30,6 +30,7 @@ public protocol PhotoLibraryUploadable {
     var frozenSettings: PhotoSyncSettings? { get }
     var isSyncEnabled: Bool { get }
     var isWifiOnly: Bool { get }
+    func getUrl(for asset: PHAsset) async -> URL?
 }
 
 public final class PhotoLibraryUploader: PhotoLibraryUploadable {
@@ -83,7 +84,7 @@ public final class PhotoLibraryUploader: PhotoLibraryUploadable {
         // META: SonarClound happy
     }
 
-    func getUrl(for asset: PHAsset) async -> URL? {
+    public func getUrl(for asset: PHAsset) async -> URL? {
         return await asset.getUrl(preferJPEGFormat: frozenSettings?.photoFormat == .jpg)
     }
 }
