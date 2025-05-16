@@ -808,6 +808,9 @@
 /* loco:605b1457dbf343111f56d112 */
 "errorLeaveShare" = "Fehler beim Abbrechen der Freigabe";
 
+/* loco:67f4dd4c65f3979e8004d539 */
+"errorLimitExceeded" = "Limit erreicht";
+
 /* loco:6298868323a9de35a129f1f2 */
 "errorLoadingInfomaniakManager" = "Der Infomaniak-Manager kann nicht geladen werden";
 
