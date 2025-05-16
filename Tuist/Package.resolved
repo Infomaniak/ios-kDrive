@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "17a022ee4c2342ebaa54bfae7509dd459df0b380",
-        "version" : "15.1.0"
+        "revision" : "df97b17e5a4f0117b53ea76c847831745e0d862c",
+        "version" : "15.3.0"
       }
     },
     {
@@ -204,8 +204,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server-community/mqtt-nio",
       "state" : {
-        "revision" : "aa23a1a17344bea48d7585afc817e7dd75ce2a52",
-        "version" : "2.12.0"
+        "revision" : "493ca8bae5b3e93f9246a1a182a87efe25b5e6ba",
+        "version" : "2.12.1"
       }
     },
     {
@@ -240,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "491c87a32af58414bd03825b3029526640d3e73d",
-        "version" : "8.50.0"
+        "revision" : "d87b07a27cd9a082d367261d7199a96a54e59f1d",
+        "version" : "8.50.2"
       }
     },
     {
@@ -312,8 +312,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "0f54d58bb5db9e064f332e8524150de379d1e51c",
-        "version" : "2.82.1"
+        "revision" : "34d486b01cd891297ac615e40d5999536a1e138d",
+        "version" : "2.83.0"
       }
     },
     {
@@ -321,8 +321,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "6df102a39c8da5fdc2eae29a0f63546d660866fc",
-        "version" : "2.30.0"
+        "revision" : "4b38f35946d00d8f6176fe58f96d83aba64b36c7",
+        "version" : "2.31.0"
       }
     },
     {
