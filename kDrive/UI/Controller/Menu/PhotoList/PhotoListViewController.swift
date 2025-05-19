@@ -150,7 +150,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.navigationBar.tintColor = nil
+        navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
     private func applyGradient(view: UIImageView) {
