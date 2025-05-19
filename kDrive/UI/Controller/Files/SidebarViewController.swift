@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -146,6 +147,25 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
     private let refreshControl = UIRefreshControl()
 
+    private lazy var addButton: UIButton = {
+        var imageButtonConfiguration = UIButton.Configuration.filled()
+        imageButtonConfiguration.image = KDriveResourcesAsset.plus.image
+        imageButtonConfiguration.imagePlacement = .leading
+        imageButtonConfiguration.imagePadding = UIConstants.Padding.small
+        imageButtonConfiguration.background.cornerRadius = UIConstants.Button.cornerRadius
+        var container = AttributeContainer()
+        container.font = TextStyle.header3.font
+        imageButtonConfiguration.attributedTitle = AttributedString(
+            KDriveResourcesStrings.Localizable.buttonAdd,
+            attributes: container
+        )
+
+        let addButton = UIButton(configuration: imageButtonConfiguration)
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+        addButton.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
+        return addButton
+    }()
+
     var itemsSnapshot: DataSourceSnapshot {
         getItemsSnapshot(isCompactView: isCompactView)
     }
@@ -226,24 +246,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     private func setupViewForCurrentSizeClass() {
-        let buttonAdd = ImageButton()
-        var avatar = UIImage()
-
         if !selectMode {
-            buttonAdd.setImage(KDriveResourcesAsset.plus.image, for: .normal)
-            buttonAdd.tintColor = .white
-            buttonAdd.imageWidth = 18
-            buttonAdd.imageHeight = 18
-            buttonAdd.imageSpacing = 20
-            buttonAdd.setTitle(KDriveResourcesStrings.Localizable.buttonAdd, for: .normal)
-            buttonAdd.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-            buttonAdd.setTitleColor(.white, for: .normal)
-            buttonAdd.layer.cornerRadius = 10
-            buttonAdd.translatesAutoresizingMaskIntoConstraints = false
-
             if !isCompactView {
                 accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
-                    avatar = SidebarViewController.generateProfileTabImages(image: image)
+                    let avatar = SidebarViewController.generateProfileTabImages(image: image)
                     let buttonMenu = UIBarButtonItem(
                         image: avatar,
                         style: .plain,
@@ -252,17 +258,16 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     )
                     self.navigationItem.rightBarButtonItem = buttonMenu
                 }
-                collectionView.addSubview(buttonAdd)
 
-                buttonAdd.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
+                collectionView.addSubview(addButton)
 
                 NSLayoutConstraint.activate([
-                    buttonAdd.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 50),
-                    buttonAdd.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-                    buttonAdd.heightAnchor.constraint(equalToConstant: 50),
-                    buttonAdd.widthAnchor.constraint(equalToConstant: 275)
+                    addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
+                    addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
+                    addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+                    addButton.heightAnchor.constraint(equalToConstant: 54),
+                    addButton.widthAnchor.constraint(lessThanOrEqualToConstant: 500)
                 ])
-
             } else {
                 navigationItem.rightBarButtonItem = FileListBarButton(
                     type: .search,
