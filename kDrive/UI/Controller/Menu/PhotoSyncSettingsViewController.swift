@@ -33,7 +33,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadService: UploadServiceable
-    @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private enum PhotoSyncSection: Int {
         case syncSwitch
@@ -231,14 +230,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         guard photoSyncEnabled else {
             photoLibrarySync.disableSync()
             return
-        }
-
-        if didDriveSelectionChange {
-            let objectsToDelete = uploadDataSource
-                .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
-            try? uploadsDatabase.writeTransaction { writableRealm in
-                writableRealm.delete(objectsToDelete)
-            }
         }
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
