@@ -369,7 +369,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    router.presentUpSaleSheet()
+                    appRouter.presentUpSaleSheet()
                     matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
                 }
                 cell.closeHandler = { [weak self] _ in
