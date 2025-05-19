@@ -137,7 +137,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             try await self.getPhAssetIfNeeded()
 
             // Check if the file is empty, and uses the 1 shot upload method for it if needed.
-            let handledEmptyFile = try await self.handleEmptyFileIfNeeded()
+            let handledEmptyFile = try await self.handleSmallFileIfNeeded()
 
             // Continue if we are dealing with a file with data
             guard !handledEmptyFile else {
@@ -168,7 +168,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         return free
     }
 
-    func handleEmptyFileIfNeeded() async throws -> Bool {
+    func handleSmallFileIfNeeded() async throws -> Bool {
         try checkCancelation()
 
         let uploadFile = try readOnlyFile()
@@ -178,7 +178,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             throw DriveError.fileNotFound
         }
 
-        guard fileSize == 0 else {
+        guard fileSize < RangeProvider.APIConstants.smallFileMaxSize else {
             return false // Continue with standard upload operation
         }
 
@@ -187,14 +187,14 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         let drive = driveFileManager.drive
 
         let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
-                                                                           totalSize: 0,
+                                                                           totalSize: fileSize,
                                                                            fileName: uploadFile.name,
                                                                            conflictResolution: uploadFile.conflictOption,
                                                                            lastModifiedAt: uploadFile.modificationDate,
                                                                            createdAt: uploadFile.creationDate,
                                                                            directoryId: uploadFile.parentDirectoryId,
                                                                            directoryPath: uploadFile.relativePath,
-                                                                           fileData: Data())
+                                                                           fileData: Data(contentsOf: fileUrl))
 
         // Make sure the parent of the `File` is transferred from the `UploadFile`
         driveFile.parentId = uploadFile.parentDirectoryId
