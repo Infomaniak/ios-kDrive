@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 import RealmSwift
 
 public protocol PhotoLibrarySyncable {
@@ -58,6 +59,14 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
             writableRealm.add(liveNewSyncSettings, update: .all)
         }
+
+        guard currentSyncSettings?.driveId != liveNewSyncSettings.driveId else {
+            return
+        }
+
+        Task {
+            await cleanUploadedPhotos()
+        }
     }
 
     public func disableSync() {
@@ -68,9 +77,19 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         Task {
             do {
                 try await uploadService.cancelAnyPhotoSync()
+                await cleanUploadedPhotos()
             } catch {
                 Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)
             }
+        }
+    }
+
+    private func cleanUploadedPhotos() async {
+        @InjectService var uploadDataSource: UploadServiceDataSourceable
+        let objectsToDelete = uploadDataSource
+            .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            writableRealm.delete(objectsToDelete)
         }
     }
 }
