@@ -59,12 +59,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     public struct RootMenuItem: Equatable, Hashable {
         var id: Int {
-            return destinationFile.id
+            return destination.hashValue
         }
 
         let name: String
         var image: UIImage
-        let destinationFile: File
+        let destination: RootMenuDestination
         var isFirst = false
         var isLast = false
         var priority = 0
@@ -76,68 +76,86 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
+    enum RootMenuDestination: Equatable, Hashable {
+        case home
+        case menu
+        case photoList
+        case file(File)
+
+        static func == (lhs: RootMenuDestination, rhs: RootMenuDestination) -> Bool {
+            switch (lhs, rhs) {
+            case (.home, .home):
+                return true
+            case (.menu, .menu):
+                return true
+            case (.photoList, .photoList):
+                return true
+            case (.file(let lhsFile), .file(let rhsFile)):
+                return lhsFile.id == rhsFile.id
+            default:
+                return false
+            }
+        }
+    }
+
     private static var baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
                                                                  image: KDriveResourcesAsset.house.image,
-                                                                 destinationFile: DriveFileManager.favoriteRootFile,
+                                                                 destination: .home,
                                                                  priority: 3),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.allPictures,
                                                                  image: KDriveResourcesAsset.mediaInline.image,
-                                                                 destinationFile: DriveFileManager.trashRootFile,
+                                                                 destination: .photoList,
                                                                  priority: 2),
                                                     RootMenuItem(
                                                         name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                         image: KDriveResourcesAsset.favorite.image,
-                                                        destinationFile: DriveFileManager.favoriteRootFile
+                                                        destination: .file(DriveFileManager.favoriteRootFile)
                                                     ),
                                                     RootMenuItem(
-                                                        name: KDriveResourcesStrings.Localizable
-                                                            .lastEditsTitle,
+                                                        name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                         image: KDriveResourcesAsset.clock.image,
-                                                        destinationFile: DriveFileManager
-                                                            .lastModificationsRootFile
+                                                        destination: .file(DriveFileManager.lastModificationsRootFile)
                                                     ),
                                                     RootMenuItem(
-                                                        name: KDriveResourcesStrings.Localizable
-                                                            .offlineFileTitle,
-                                                        image: KDriveResourcesAsset.availableOffline
-                                                            .image,
-                                                        destinationFile: DriveFileManager.offlineRoot
+                                                        name: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                                                        image: KDriveResourcesAsset.availableOffline.image,
+                                                        destination: .file(DriveFileManager.offlineRoot)
                                                     )]
 
     private static var sharedItems: [RootMenuItem] = [
         RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                      image: KDriveResourcesAsset.folderSelect2.image,
-                     destinationFile: DriveFileManager.sharedWithMeRootFile),
+                     destination: .file(DriveFileManager.sharedWithMeRootFile)),
         RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                      image: KDriveResourcesAsset.folderSelect.image,
-                     destinationFile: DriveFileManager.mySharedRootFile)
+                     destination: .file(DriveFileManager.mySharedRootFile))
     ]
 
     private static var trashItem: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                  image: KDriveResourcesAsset.delete.image,
-                                                                 destinationFile: DriveFileManager.trashRootFile)]
+                                                                 destination: .file(DriveFileManager.trashRootFile))]
 
     private static let compactModeItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                         image: KDriveResourcesAsset.favorite.image,
-                                                                        destinationFile: DriveFileManager.favoriteRootFile),
+                                                                        destination: .file(DriveFileManager.favoriteRootFile)),
                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                                         image: KDriveResourcesAsset.clock.image,
-                                                                        destinationFile: DriveFileManager
-                                                                            .lastModificationsRootFile),
+                                                                        destination: .file(DriveFileManager
+                                                                            .lastModificationsRootFile)),
                                                            RootMenuItem(
                                                                name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                                                                image: KDriveResourcesAsset.folderSelect2.image,
-                                                               destinationFile: DriveFileManager.sharedWithMeRootFile
+                                                               destination: .file(DriveFileManager.sharedWithMeRootFile)
                                                            ),
                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                                                                         image: KDriveResourcesAsset.folderSelect.image,
-                                                                        destinationFile: DriveFileManager.mySharedRootFile),
+                                                                        destination: .file(DriveFileManager.mySharedRootFile)),
                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.offlineFileTitle,
                                                                         image: KDriveResourcesAsset.availableOffline.image,
-                                                                        destinationFile: DriveFileManager.offlineRoot),
+                                                                        destination: .file(DriveFileManager.offlineRoot)),
                                                            RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
                                                                         image: KDriveResourcesAsset.delete.image,
-                                                                        destinationFile: DriveFileManager.trashRootFile)]
+                                                                        destination: .file(DriveFileManager.trashRootFile))]
 
     weak var delegate: SidebarViewControllerDelegate?
 
@@ -178,7 +196,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             RootMenuItem(
                 name: $0.formattedLocalizedName(drive: driveFileManager.drive),
                 image: $0.icon,
-                destinationFile: $0,
+                destination: .file($0),
                 priority: 1
             )
         } ?? []
@@ -487,11 +505,37 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedRootFile = dataSource.itemIdentifier(for: indexPath)?.destinationFile else { return }
+        guard let destination = dataSource.itemIdentifier(for: indexPath)?.destination else { return }
 
+        if isCompactView {
+            guard case .file(let selectedRootFile) = destination else { return }
+            let destinationViewModel = getViewModelForRootFile(selectedRootFile)
+            let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+            destinationViewModel.onDismissViewController = { [weak destinationViewController] in
+                destinationViewController?.dismiss(animated: true)
+            }
+
+            navigationController?.pushViewController(destinationViewController, animated: true)
+        } else if selectedIndexPath != indexPath {
+            switch destination {
+            case .home:
+                delegate?.didSelectItem(destination: .home)
+            case .menu:
+                delegate?.didSelectItem(destination: .menu)
+            case .photoList:
+                delegate?.didSelectItem(destination: .photoList)
+            case .file(let selectedRootFile):
+                let destinationViewModel = getViewModelForRootFile(selectedRootFile)
+                delegate?.didSelectItem(destination: .file(destinationViewModel))
+            }
+
+            selectedIndexPath = indexPath
+        }
+    }
+
+    func getViewModelForRootFile(_ rootFile: File) -> FileListViewModel {
         let destinationViewModel: FileListViewModel
-
-        switch selectedRootFile.id {
+        switch rootFile.id {
         case DriveFileManager.favoriteRootFile.id:
             destinationViewModel = FavoritesViewModel(driveFileManager: driveFileManager)
         case DriveFileManager.lastModificationsRootFile.id:
@@ -508,44 +552,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         default:
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
-                currentDirectory: selectedRootFile,
+                currentDirectory: rootFile,
                 rightBarButtons: [.search]
             )
         }
 
-        if indexPath != selectedIndexPath || isCompactView {
-            let userRootFolders = rootViewChildren?.compactMap {
-                RootMenuItem(name: $0.formattedLocalizedName(drive: driveFileManager.drive), image: $0.icon, destinationFile: $0)
-            } ?? []
-            switch itemsSnapshot.sectionIdentifiers[indexPath.section] {
-            case .first:
-                let menuItems = SidebarViewController.baseItems
-                let selectedItemName = menuItems[indexPath.row].name
-                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-            case .second:
-                let length = (SidebarViewController.baseItems).count
-                let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .sharedItems)
-                let selectedItemName = menuItems[indexPath.row + length].name
-                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-            case .third:
-                let length = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .sharedItems).count
-                let menuItems = (SidebarViewController.baseItems + userRootFolders + SidebarViewController
-                    .sharedItems + SidebarViewController.trashItem)
-                let selectedItemName = menuItems[indexPath.row + length].name
-                delegate?.didSelectItem(destinationViewModel: destinationViewModel, name: selectedItemName)
-            case .main:
-                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-                destinationViewModel.onDismissViewController = { [weak destinationViewController] in
-                    destinationViewController?.dismiss(animated: true)
-                }
-
-                navigationController?.pushViewController(destinationViewController, animated: true)
-            }
-        }
-
-        selectedIndexPath = indexPath
+        return destinationViewModel
     }
 
     @objc func buttonAddClicked() {
@@ -574,15 +586,18 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
-        if !isMenuIndexPathSelected {
-            delegate?.didSelectItem(
-                destinationViewModel: MySharesViewModel(driveFileManager: driveFileManager),
-                name: KDriveResourcesStrings.Localizable.menuTitle
-            )
-        }
+        guard !isMenuIndexPathSelected else { return }
+        delegate?.didSelectItem(destination: .menu)
     }
 }
 
+enum SidebarDestination {
+    case home
+    case menu
+    case photoList
+    case file(FileListViewModel)
+}
+
 protocol SidebarViewControllerDelegate: AnyObject {
-    func didSelectItem(destinationViewModel: FileListViewModel, name: String)
+    func didSelectItem(destination: SidebarDestination)
 }
