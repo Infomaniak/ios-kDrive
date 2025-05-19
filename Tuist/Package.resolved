@@ -137,6 +137,15 @@
       }
     },
     {
+      "identity" : "ios-onboarding",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-onboarding",
+      "state" : {
+        "revision" : "aeec72fba628a17e868e8fcecea6134c35a0ebf2",
+        "version" : "1.2.2"
+      }
+    },
+    {
       "identity" : "ios-version-checker",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
