@@ -69,22 +69,24 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
 
     // MARK: - SidebarViewControllerDelegate
 
-    func didSelectItem(destinationViewModel: FileListViewModel, name: String) {
-        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-        let homeViewController = HomeViewController(driveFileManager: driveFileManager)
-        let photoListViewController = PhotoListViewController(viewModel: PhotoListViewModel(driveFileManager: driveFileManager))
-        let menuViewController = MenuViewController(driveFileManager: driveFileManager)
-        if let detailNav = viewControllers.last as? UINavigationController {
-            detailNav.setNavigationBarHidden(false, animated: true)
-            if name == KDriveResourcesStrings.Localizable.homeTitle {
-                detailNav.setViewControllers([homeViewController], animated: false)
-            } else if name == KDriveResourcesStrings.Localizable.allPictures {
-                detailNav.setViewControllers([photoListViewController], animated: false)
-            } else if name == KDriveResourcesStrings.Localizable.menuTitle {
-                detailNav.setViewControllers([menuViewController], animated: false)
-            } else {
-                detailNav.setViewControllers([destinationViewController], animated: false)
-            }
+    func didSelectItem(destination: SidebarDestination) {
+        guard let detailNavigationController = viewControllers.last as? UINavigationController else { return }
+        detailNavigationController.setNavigationBarHidden(false, animated: true)
+
+        switch destination {
+        case .home:
+            let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+            detailNavigationController.setViewControllers([homeViewController], animated: false)
+        case .photoList:
+            let photoListViewModel = PhotoListViewModel(driveFileManager: driveFileManager)
+            let photoListViewController = PhotoListViewController(viewModel: photoListViewModel)
+            detailNavigationController.setViewControllers([photoListViewController], animated: false)
+        case .menu:
+            let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+            detailNavigationController.setViewControllers([menuViewController], animated: false)
+        case .file(let fileListViewModel):
+            let destinationViewController = FileListViewController(viewModel: fileListViewModel)
+            detailNavigationController.setViewControllers([destinationViewController], animated: false)
         }
     }
 }

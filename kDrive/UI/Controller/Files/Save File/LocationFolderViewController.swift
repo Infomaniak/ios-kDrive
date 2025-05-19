@@ -30,18 +30,18 @@ class LocationFolderViewController: SidebarViewController {
 
     private static let recentItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                                    image: KDriveResourcesAsset.clock.image,
-                                                                   destinationFile: DriveFileManager
-                                                                       .lastModificationsRootFile)]
+                                                                   destination: .file(DriveFileManager
+                                                                       .lastModificationsRootFile))]
 
     private static let mainItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                  image: KDriveResourcesAsset.favorite.image,
-                                                                 destinationFile: DriveFileManager.favoriteRootFile),
+                                                                 destination: .file(DriveFileManager.favoriteRootFile)),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                                                                  image: KDriveResourcesAsset.folderSelect2.image,
-                                                                 destinationFile: DriveFileManager.sharedWithMeRootFile),
+                                                                 destination: .file(DriveFileManager.sharedWithMeRootFile)),
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                                                                  image: KDriveResourcesAsset.folderSelect.image,
-                                                                 destinationFile: DriveFileManager.mySharedRootFile)]
+                                                                 destination: .file(DriveFileManager.mySharedRootFile))]
 
     var viewModel: FileListViewModel
     private var rootChildrenObservationToken: NotificationToken?
@@ -52,7 +52,7 @@ class LocationFolderViewController: SidebarViewController {
             RootMenuItem(
                 name: $0.formattedLocalizedName(drive: driveFileManager.drive),
                 image: $0.icon,
-                destinationFile: $0
+                destination: .file($0)
             )
         } ?? []
 
@@ -70,7 +70,7 @@ class LocationFolderViewController: SidebarViewController {
             RootMenuItem(
                 name: file.name,
                 image: file.icon,
-                destinationFile: file,
+                destination: .file(file),
                 isFirst: index == 0,
                 isLast: index == recentFrozenFolders.count - 1
             )
@@ -132,7 +132,9 @@ class LocationFolderViewController: SidebarViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedRootFile = dataSource?.itemIdentifier(for: indexPath)?.destinationFile else { return }
+        guard let selectedRootDestination = dataSource?.itemIdentifier(for: indexPath)?.destination,
+              case .file(let selectedRootFile) = selectedRootDestination
+        else { return }
         let destinationViewModel: FileListViewModel
 
         switch selectedRootFile.id {
