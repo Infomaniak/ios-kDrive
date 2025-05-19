@@ -124,7 +124,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.setNavigationBarHidden(true, animated: false)
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 
