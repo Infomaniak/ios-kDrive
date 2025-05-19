@@ -227,7 +227,7 @@ extension UploadOperation {
 
                 if self.photoLibraryUploader.isSyncEnabled,
                    self.photoLibraryUploader.frozenSettings?.parentDirectoryId == file.parentDirectoryId {
-                    self.photoLibraryUploader.disableSync()
+                    self.photoLibrarySync.disableSync()
                     self.notificationHelper.sendPhotoSyncErrorNotification()
                 }
 

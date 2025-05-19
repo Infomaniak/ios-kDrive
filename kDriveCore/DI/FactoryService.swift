@@ -69,6 +69,30 @@ public enum FactoryService {
             Factory(type: PhotoLibraryUploader.self) { _, _ in
                 PhotoLibraryUploader()
             },
+            Factory(type: PhotoLibraryUploadable.self) { _, resolver in
+                try resolver.resolve(type: PhotoLibraryUploader.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: PhotoLibraryQueryable.self) { _, resolver in
+                try resolver.resolve(type: PhotoLibraryUploader.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: PhotoLibraryScanable.self) { _, resolver in
+                try resolver.resolve(type: PhotoLibraryUploader.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
+            Factory(type: PhotoLibrarySyncable.self) { _, resolver in
+                try resolver.resolve(type: PhotoLibraryUploader.self,
+                                     forCustomTypeIdentifier: nil,
+                                     factoryParameters: nil,
+                                     resolver: resolver)
+            },
             Factory(type: FileImportHelper.self) { _, _ in
                 FileImportHelper()
             },

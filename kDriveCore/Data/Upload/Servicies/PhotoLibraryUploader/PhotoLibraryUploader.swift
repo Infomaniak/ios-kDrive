@@ -25,7 +25,15 @@ import Photos
 import RealmSwift
 import Sentry
 
-public final class PhotoLibraryUploader {
+public protocol PhotoLibraryUploadable {
+    var liveSettings: PhotoSyncSettings? { get }
+    var frozenSettings: PhotoSyncSettings? { get }
+    var isSyncEnabled: Bool { get }
+    var isWifiOnly: Bool { get }
+    func getUrl(for asset: PHAsset) async -> URL?
+}
+
+public final class PhotoLibraryUploader: PhotoLibraryUploadable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
 
@@ -76,7 +84,7 @@ public final class PhotoLibraryUploader {
         // META: SonarClound happy
     }
 
-    func getUrl(for asset: PHAsset) async -> URL? {
+    public func getUrl(for asset: PHAsset) async -> URL? {
         return await asset.getUrl(preferJPEGFormat: frozenSettings?.photoFormat == .jpg)
     }
 }

@@ -50,6 +50,33 @@ public enum MockingHelper {
                 },
                 Factory(type: AppNavigable.self) { _, _ in
                     AppRouter()
+                },
+                Factory(type: PhotoLibraryUploader.self) { _, _ in
+                    PhotoLibraryUploader()
+                },
+                Factory(type: PhotoLibraryUploadable.self) { _, resolver in
+                    try resolver.resolve(type: PhotoLibraryUploader.self,
+                                         forCustomTypeIdentifier: nil,
+                                         factoryParameters: nil,
+                                         resolver: resolver)
+                },
+                Factory(type: PhotoLibraryQueryable.self) { _, resolver in
+                    try resolver.resolve(type: PhotoLibraryUploader.self,
+                                         forCustomTypeIdentifier: nil,
+                                         factoryParameters: nil,
+                                         resolver: resolver)
+                },
+                Factory(type: PhotoLibraryScanable.self) { _, resolver in
+                    try resolver.resolve(type: PhotoLibraryUploader.self,
+                                         forCustomTypeIdentifier: nil,
+                                         factoryParameters: nil,
+                                         resolver: resolver)
+                },
+                Factory(type: PhotoLibrarySyncable.self) { _, resolver in
+                    try resolver.resolve(type: PhotoLibraryUploader.self,
+                                         forCustomTypeIdentifier: nil,
+                                         factoryParameters: nil,
+                                         resolver: resolver)
                 }
             ]
         case .minimal:
@@ -62,6 +89,18 @@ public enum MockingHelper {
                 },
                 Factory(type: AppNavigable.self) { _, _ in
                     MCKRouter()
+                },
+                Factory(type: PhotoLibraryUploadable.self) { _, _ in
+                    MCKPhotoLibraryUploadable()
+                },
+                Factory(type: PhotoLibraryQueryable.self) { _, _ in
+                    MCKPhotoLibraryQueryable()
+                },
+                Factory(type: PhotoLibraryScanable.self) { _, _ in
+                    MCKPhotoLibraryScanable()
+                },
+                Factory(type: PhotoLibrarySyncable.self) { _, _ in
+                    MCKPhotoLibrarySyncable()
                 }
             ]
         }

@@ -17,21 +17,17 @@
  */
 
 import Foundation
-import InfomaniakCore
-import InfomaniakDI
+import kDriveCore
+import Photos
 
-public class PhotoUploadQueue: UploadQueue {
-    @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
+struct MCKPhotoLibraryUploadable: PhotoLibraryUploadable {
+    var liveSettings: PhotoSyncSettings? { nil }
 
-    /// Should suspend operation queue based on network status and user defined parameters
-    override var shouldSuspendQueue: Bool {
-        // Explicitly disable the upload queue from the share extension
-        guard appContextService.context != .shareExtension else {
-            return true
-        }
+    var frozenSettings: PhotoSyncSettings? { nil }
 
-        let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline || (status != .wifi && photoLibraryUploader.isWifiOnly)
-        return shouldBeSuspended
-    }
+    var isSyncEnabled: Bool { false }
+
+    var isWifiOnly: Bool { false }
+
+    func getUrl(for asset: PHAsset) async -> URL? { nil }
 }

@@ -99,7 +99,7 @@ public enum Logging {
             options.dsn = "https://ba647a8cc6fc437baf797d2eb33dfafb@sentry-mobile.infomaniak.com/6"
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
-                @InjectService var photoLibraryUploader: PhotoLibraryUploader
+                @InjectService var photoLibraryUploader: PhotoLibraryUploadable
                 event.context?["AppState"] = [
                     "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": photoLibraryUploader.isWifiOnly
