@@ -96,7 +96,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     /// Time between two tap events that feels alright for a double tap
     private static let doubleTapInterval = TimeInterval(0.350)
 
-
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
