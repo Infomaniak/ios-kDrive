@@ -54,7 +54,6 @@ final class PhotoListViewController: FileListViewController {
         return max(minColumns, maxColumns)
     }
 
-    private var isLargeTitle = true
     private let minColumns = 3
     private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
@@ -62,7 +61,7 @@ final class PhotoListViewController: FileListViewController {
     private var displayedSections = PhotoListViewModel.emptySections
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        return isLargeTitle ? .default : .lightContent
+        return .lightContent
     }
 
     private var photoListViewModel: PhotoListViewModel! {
@@ -71,6 +70,7 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.largeTitleDisplayMode = .never
         view.addSubview(headerImageView)
         view.addSubview(photoHeaderView)
         selectView = photoHeaderView
@@ -83,12 +83,13 @@ final class PhotoListViewController: FileListViewController {
             headerImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             headerImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
             headerImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
-            headerImageView.bottomAnchor.constraint(equalTo: photoHeaderView.bottomAnchor, constant: 0)
+            headerImageView.bottomAnchor.constraint(equalTo: photoHeaderView.bottomAnchor, constant: 16)
         ])
 
         (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing = 4
         (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumLineSpacing = 4
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: photoHeaderView.frame.height, left: 0, bottom: 0, right: 0)
+        collectionView.contentInset.top = photoHeaderView.frame.height
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
@@ -115,11 +116,10 @@ final class PhotoListViewController: FileListViewController {
         let changeSet = StagedChangeset(source: displayedSections, target: sections)
         collectionView.reload(using: changeSet,
                               interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                              setData: { self.displayedSections = $0 })
-
-        if let collectionView {
-            scrollViewDidScroll(collectionView)
-        }
+                              setData: {
+                                  self.displayedSections = $0
+                                  scrollViewDidScroll(collectionView)
+                              })
     }
 
     override func reloadCollectionViewWith(files: [File]) {
@@ -159,13 +159,6 @@ final class PhotoListViewController: FileListViewController {
         gradient.frame = bounds
         gradient.colors = [
             UIColor.black.withAlphaComponent(0.8).cgColor,
-            UIColor.black.withAlphaComponent(0.70).cgColor,
-            UIColor.black.withAlphaComponent(0.6).cgColor,
-            UIColor.black.withAlphaComponent(0.5).cgColor,
-            UIColor.black.withAlphaComponent(0.45).cgColor,
-            UIColor.black.withAlphaComponent(0.40).cgColor,
-            UIColor.black.withAlphaComponent(0.35).cgColor,
-            UIColor.black.withAlphaComponent(0.30).cgColor,
             UIColor.clear.cgColor
         ]
         let renderer = UIGraphicsImageRenderer(size: gradient.frame.size)
@@ -177,7 +170,7 @@ final class PhotoListViewController: FileListViewController {
     private func setPhotosNavigationBar() {
         navigationController?.navigationBar.layoutMargins.left = 16
         navigationController?.navigationBar.layoutMargins.right = 16
-        navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
+        navigationController?.navigationBar.tintColor = .white
         let largeTitleStyle = TextStyle.header1
         let largeTitleTextAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: largeTitleStyle.color,
@@ -238,20 +231,16 @@ final class PhotoListViewController: FileListViewController {
             photoHeaderView.actionsView.isHidden = false
             headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
             collectionView.allowsMultipleSelection = true
-            navigationController?.navigationBar.prefersLargeTitles = false
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
-            collectionView.contentInset.top = 50
         } else {
             collectionView.refreshControl = refreshControl
             photoHeaderView.actionsView.isHidden = true
             headerTitleLabel.style = .header2
             headerTitleLabel.textColor = .white
             collectionView.allowsMultipleSelection = false
-            navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
-            collectionView.contentInset.top = 0
             scrollViewDidScroll(collectionView)
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
@@ -265,36 +254,31 @@ final class PhotoListViewController: FileListViewController {
 
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = photoListViewModel else { return }
-        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ?
-            (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
-        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            isLargeTitle = false
-        }
-        photoHeaderView.isHidden = isLargeTitle
-        headerImageView.isHidden = isLargeTitle
-        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
-        navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
+        photoHeaderView.isHidden = false
+        headerImageView.isHidden = false
+        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = false
+        navigationController?.navigationBar.tintColor = .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
         for visibleHeaderView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
             if let reusableHeaderView = visibleHeaderView as? ReusableHeaderView {
                 let position = collectionView.convert(reusableHeaderView.frame.origin, to: view)
-                reusableHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
+                reusableHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY
             }
         }
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false {
             // Disable this behavior in selection mode because we reuse the view
             if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(
-                CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY),
+                CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY + 16),
                 from: headerTitleLabel
             )) {
-                if let section = viewModel.sections[safe: indexPath.section] {
+                if let section = displayedSections[safe: indexPath.section] {
                     headerTitleLabel.text = section.model.formattedDate
                 } else {
                     headerTitleLabel.text = ""
                 }
-            } else if !displayedSections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
-                headerTitleLabel.text = displayedSections[0].model.formattedDate
+            } else if let firstSection = displayedSections.first, headerTitleLabel.text?.isEmpty ?? true {
+                headerTitleLabel.text = firstSection.model.formattedDate
             }
         }
 

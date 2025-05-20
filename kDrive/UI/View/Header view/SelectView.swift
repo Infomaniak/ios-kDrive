@@ -60,6 +60,7 @@ class SelectView: UIView {
         super.awakeFromNib()
         titleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
         titleLabel.accessibilityTraits = .header
+        titleLabel.text = ""
     }
 
     func setActions(_ actions: [MultipleSelectionAction]) {
