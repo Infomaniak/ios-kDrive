@@ -72,11 +72,13 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     private var sections: [Section] = []
     private var currentAccount: Account?
     private var needsContentUpdate = false
+    private let isModallyPresented: Bool
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, isModallyPresented: Bool = false) {
         @InjectService var manager: AccountManageable
         currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
+        self.isModallyPresented = isModallyPresented
         super.init(style: .plain)
 
         observeUploadCount()
@@ -104,7 +106,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
         updateTableContent()
 
-        navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
+        navigationItem.title = isModallyPresented ? "" : KDriveResourcesStrings.Localizable.menuTitle
         navigationItem.hideBackButtonText()
 
         NotificationCenter.default.addObserver(
@@ -124,7 +126,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.setNavigationBarHidden(!isModallyPresented, animated: false)
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 

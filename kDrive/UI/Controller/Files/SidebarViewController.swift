@@ -78,15 +78,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     enum RootMenuDestination: Equatable, Hashable {
         case home
-        case menu
         case photoList
         case file(File)
 
         static func == (lhs: RootMenuDestination, rhs: RootMenuDestination) -> Bool {
             switch (lhs, rhs) {
             case (.home, .home):
-                return true
-            case (.menu, .menu):
                 return true
             case (.photoList, .photoList):
                 return true
@@ -246,60 +243,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        setDisplayedSnapshot()
-        setupViewForCurrentSizeClass()
-    }
-
-    func setDisplayedSnapshot() {
-        setupViewForCurrentSizeClass()
-        dataSource.apply(itemsSnapshot, animatingDifferences: true)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupViewForCurrentSizeClass()
-        setDisplayedSnapshot()
-    }
-
-    private func setupViewForCurrentSizeClass() {
-        if !selectMode {
-            if !isCompactView {
-                accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
-                    let avatar = SidebarViewController.generateProfileTabImages(image: image)
-                    let buttonMenu = UIBarButtonItem(
-                        image: avatar,
-                        style: .plain,
-                        target: self,
-                        action: #selector(self.buttonMenuClicked(_:))
-                    )
-                    self.navigationItem.rightBarButtonItem = buttonMenu
-                }
-
-                collectionView.addSubview(addButton)
-
-                NSLayoutConstraint.activate([
-                    addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
-                    addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
-                    addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-                    addButton.heightAnchor.constraint(equalToConstant: 54),
-                    addButton.widthAnchor.constraint(lessThanOrEqualToConstant: 500)
-                ])
-            } else {
-                navigationItem.rightBarButtonItem = FileListBarButton(
-                    type: .search,
-                    target: self,
-                    action: #selector(presentSearch)
-                )
-                for subview in collectionView.subviews {
-                    if subview is UIButton {
-                        subview.removeFromSuperview()
-                    }
-                }
-            }
-        }
-
         navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
@@ -318,6 +263,41 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         dataSource = configureDataSource(for: collectionView)
         setItemsSnapshot(for: collectionView)
+
+        guard !selectMode else { return }
+        if !isCompactView {
+            accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+                let avatar = SidebarViewController.generateProfileTabImages(image: image)
+                let buttonMenu = UIBarButtonItem(
+                    image: avatar,
+                    style: .plain,
+                    target: self,
+                    action: #selector(self.buttonMenuClicked(_:))
+                )
+                self.navigationItem.rightBarButtonItem = buttonMenu
+            }
+
+            collectionView.addSubview(addButton)
+
+            NSLayoutConstraint.activate([
+                addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
+                addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
+                addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+                addButton.heightAnchor.constraint(equalToConstant: 54),
+                addButton.widthAnchor.constraint(lessThanOrEqualToConstant: 500)
+            ])
+        } else {
+            navigationItem.rightBarButtonItem = FileListBarButton(
+                type: .search,
+                target: self,
+                action: #selector(presentSearch)
+            )
+            for subview in collectionView.subviews {
+                if subview is UIButton {
+                    subview.removeFromSuperview()
+                }
+            }
+        }
     }
 
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
@@ -357,9 +337,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    func configureDataSource(
-        for collectionView: UICollectionView
-    )
+    func configureDataSource(for collectionView: UICollectionView)
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
             collectionView, indexPath, menuItem -> RootMenuCell?
@@ -520,8 +498,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             switch destination {
             case .home:
                 delegate?.didSelectItem(destination: .home)
-            case .menu:
-                delegate?.didSelectItem(destination: .menu)
             case .photoList:
                 delegate?.didSelectItem(destination: .photoList)
             case .file(let selectedRootFile):
@@ -586,8 +562,19 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
-        guard !isMenuIndexPathSelected else { return }
-        delegate?.didSelectItem(destination: .menu)
+        #if !ISEXTENSION
+        let menuViewController = MenuViewController(driveFileManager: driveFileManager, isModallyPresented: true)
+        let menuNavigationController = UINavigationController(rootViewController: menuViewController)
+        menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            systemItem: .stop,
+            primaryAction: UIAction { _ in
+                menuNavigationController.dismiss(animated: true)
+            }
+        )
+
+        menuNavigationController.modalPresentationStyle = .formSheet
+        present(menuNavigationController, animated: true)
+        #endif
     }
 }
 
