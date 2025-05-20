@@ -68,6 +68,8 @@ final class PhotoListViewController: FileListViewController {
         return viewModel as? PhotoListViewModel
     }
 
+    private weak var currentNavigationController: UINavigationController?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
@@ -150,7 +152,8 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.setInfomaniakAppearanceNavigationBar()
+        currentNavigationController?.setInfomaniakAppearanceNavigationBar()
+        currentNavigationController?.navigationBar.tintColor = nil
     }
 
     private func applyGradient(view: UIImageView) {
@@ -171,6 +174,7 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.layoutMargins.left = 16
         navigationController?.navigationBar.layoutMargins.right = 16
         navigationController?.navigationBar.tintColor = .white
+
         let largeTitleStyle = TextStyle.header1
         let largeTitleTextAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: largeTitleStyle.color,
@@ -187,6 +191,8 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+
+        currentNavigationController = navigationController
     }
 
     override func showEmptyView(_ isShowing: Bool) {
