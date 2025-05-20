@@ -51,7 +51,7 @@ class PhotoListViewModel: FileListViewModel {
         }
     }
 
-    static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
+    static let emptySections = [Section]()
 
     @Published var sections = emptySections
     private var moreComing: Bool {
