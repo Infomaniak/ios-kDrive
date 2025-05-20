@@ -53,6 +53,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     private var filesAreAllMedia: Bool {
         files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
     }
@@ -286,7 +288,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             files: files,
             driveFileManager: driveFileManager,
             showProgress: downloadInProgress,
-            archiveId: currentArchiveId
+            archiveId: currentArchiveId,
+            currentPackId: packId
         )
         return cell
     }

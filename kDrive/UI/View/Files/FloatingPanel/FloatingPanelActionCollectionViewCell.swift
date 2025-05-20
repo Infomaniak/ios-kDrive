@@ -96,8 +96,9 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
                    files: [File],
                    driveFileManager: DriveFileManager,
                    showProgress: Bool,
-                   archiveId: String?) {
-        configure(with: action, file: nil, showProgress: false, driveFileManager: driveFileManager)
+                   archiveId: String?,
+                   currentPackId: DrivePackId? = nil) {
+        configure(with: action, file: nil, showProgress: false, driveFileManager: driveFileManager, currentPackId: currentPackId)
 
         switch action {
         case .favorite:
