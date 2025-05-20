@@ -97,29 +97,40 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
-        var newActions: [FloatingPanelAction]
-        defer { actions = newActions }
+        let filteredActions = currentActions.filter { action in
+            switch action {
+            case .upsaleColor:
+                return files.allSatisfy { file in
+                    file.isDirectory && self.driveFileManager.drive.isFreePack
+                }
+            case .folderColor:
+                return files.allSatisfy(\.capabilities.canColor)
+            case .download:
+                return filesAreWithinTheSameFolder || filesAreAllMedia
+            default:
+                return true
+            }
+        }
+        actions = filteredActions
+    }
 
+    private var currentActions: [FloatingPanelAction] {
         if driveFileManager.isPublicShare {
-            newActions = FloatingPanelAction.multipleSelectionPublicShareActions
+            return FloatingPanelAction.multipleSelectionPublicShareActions
         } else if sharedWithMe {
-            newActions = FloatingPanelAction.multipleSelectionSharedWithMeActions
+            return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            newActions = FloatingPanelAction.selectAllActions
-            removeDownloadActionIfNeeded(&newActions)
+            return FloatingPanelAction.selectAllActions
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
-            newActions = FloatingPanelAction.multipleSelectionBulkActions
-            removeDownloadActionIfNeeded(&newActions)
+            return FloatingPanelAction.multipleSelectionBulkActions
         } else if presentingParent is PhotoListViewController {
-            newActions = FloatingPanelAction.multipleSelectionPhotosListActions
+            return FloatingPanelAction.multipleSelectionPhotosListActions
         } else {
             if files.contains(where: { !$0.isDirectory }) {
-                newActions = FloatingPanelAction.multipleSelectionActions
+                return FloatingPanelAction.multipleSelectionActions
             } else {
-                newActions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
+                return FloatingPanelAction.multipleSelectionActionsOnlyFolders
             }
-
-            removeDownloadActionIfNeeded(&newActions)
         }
     }
 
