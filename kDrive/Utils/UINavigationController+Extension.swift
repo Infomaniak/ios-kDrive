@@ -52,9 +52,6 @@ extension UINavigationController {
         navigationBar.standardAppearance = navbarAppearance
         navigationBar.compactAppearance = navbarAppearance
         navigationBar.scrollEdgeAppearance = navbarAppearance
-
-        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).tintColor = KDriveResourcesAsset
-            .infomaniakColor.color
     }
 
     override open var childForStatusBarStyle: UIViewController? {
