@@ -188,7 +188,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
 
     private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
-        var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
                 name: $0.formattedLocalizedName(drive: driveFileManager.drive),
@@ -199,33 +198,44 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         } ?? []
 
         if !isCompactView {
-            let firstSectionItems = SidebarViewController.baseItems
-            let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
-            let thirdSectionItems = SidebarViewController.trashItem
-            let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
-            let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
-
-            for i in 0 ... sectionsItems.count - 1 {
-                if !sections.isEmpty {
-                    var sectionItems = sectionsItems[i]
-                    let section = sections[i]
-                    sectionItems[0].isFirst = true
-                    sectionItems[sectionItems.count - 1].isLast = true
-
-                    snapshot.appendSections([section])
-                    snapshot.appendItems(sectionItems, toSection: section)
-                }
-            }
+            return snapshotForCompactView(userRootFolders: userRootFolders)
         } else {
-            var menuItems = userRootFolders + SidebarViewController.compactModeItems
-            if !menuItems.isEmpty {
-                menuItems[0].isFirst = true
-                menuItems[menuItems.count - 1].isLast = true
-            }
-
-            snapshot.appendSections([RootMenuSection.main])
-            snapshot.appendItems(menuItems)
+            return snapshotForLargeView(userRootFolders: userRootFolders)
         }
+    }
+
+    private func snapshotForCompactView(userRootFolders: [SidebarViewController.RootMenuItem]) -> DataSourceSnapshot {
+        var snapshot = DataSourceSnapshot()
+        let firstSectionItems = SidebarViewController.baseItems
+        let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
+        let thirdSectionItems = SidebarViewController.trashItem
+        let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
+        let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
+
+        for i in 0 ... sectionsItems.count - 1 {
+            if !sections.isEmpty {
+                var sectionItems = sectionsItems[i]
+                let section = sections[i]
+                sectionItems[0].isFirst = true
+                sectionItems[sectionItems.count - 1].isLast = true
+
+                snapshot.appendSections([section])
+                snapshot.appendItems(sectionItems, toSection: section)
+            }
+        }
+        return snapshot
+    }
+
+    private func snapshotForLargeView(userRootFolders: [SidebarViewController.RootMenuItem]) -> DataSourceSnapshot {
+        var snapshot = DataSourceSnapshot()
+        var menuItems = userRootFolders + SidebarViewController.compactModeItems
+        if !menuItems.isEmpty {
+            menuItems[0].isFirst = true
+            menuItems[menuItems.count - 1].isLast = true
+        }
+
+        snapshot.appendSections([RootMenuSection.main])
+        snapshot.appendItems(menuItems)
         return snapshot
     }
 
