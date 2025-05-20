@@ -175,9 +175,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             attributes: container
         )
 
-        let addButton = UIButton(configuration: imageButtonConfiguration)
+        let addButton = UIButton(configuration: imageButtonConfiguration, primaryAction: UIAction { [weak self] _ in
+            self?.buttonAddClicked()
+        })
         addButton.translatesAutoresizingMaskIntoConstraints = false
-        addButton.addTarget(self, action: #selector(buttonAddClicked), for: .touchUpInside)
         return addButton
     }()
 
@@ -278,12 +279,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         if !isCompactView {
             accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
                 let avatar = SidebarViewController.generateProfileTabImages(image: image)
-                let buttonMenu = UIBarButtonItem(
-                    image: avatar,
-                    style: .plain,
-                    target: self,
-                    action: #selector(self.buttonMenuClicked(_:))
-                )
+                let buttonMenu = UIBarButtonItem(image: avatar, primaryAction: UIAction { [weak self] _ in
+                    self?.buttonMenuClicked()
+                })
                 self.navigationItem.rightBarButtonItem = buttonMenu
             }
 
@@ -546,7 +544,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return destinationViewModel
     }
 
-    @objc func buttonAddClicked() {
+    func buttonAddClicked() {
         #if !ISEXTENSION
         let currentDriveFileManager = driveFileManager
         let currentDirectory = (splitViewController?.viewController(for: .secondary) as? UINavigationController)?
@@ -571,7 +569,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         #endif
     }
 
-    @objc func buttonMenuClicked(_ sender: UIBarButtonItem) {
+    func buttonMenuClicked() {
         #if !ISEXTENSION
         let menuViewController = MenuViewController(driveFileManager: driveFileManager, isModallyPresented: true)
         let menuNavigationController = UINavigationController(rootViewController: menuViewController)
