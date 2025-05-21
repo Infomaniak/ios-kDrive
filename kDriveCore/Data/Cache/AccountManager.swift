@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
@@ -97,6 +98,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var photoLibrarySync: PhotoLibrarySyncable
     @LazyInjectService var tokenStore: TokenStore
+    @LazyInjectService var bugTracker: BugTracker
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var networkLogin: InfomaniakNetworkLoginable
     @LazyInjectService var appNavigable: AppNavigable
@@ -490,6 +492,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     private func setCurrentAccount(account: Account) {
         currentAccount = account
         currentUserId = account.userId
+        enableBugTrackerIfAvailable()
     }
 
     private func setSentryUserId(userId: Int) {
@@ -581,6 +584,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 currentState: RootViewControllerState.getCurrentState(),
                 restoration: false
             )
+        }
+    }
+
+    public func enableBugTrackerIfAvailable() {
+        if let currentUser = currentAccount?.user,
+           let token = tokenStore.tokenFor(userId: currentUser.id),
+           let isStaff = currentUser.isStaff,
+           isStaff {
+            bugTracker.activateOnScreenshot()
+            let apiFetcher = getApiFetcher(for: currentUser.id, token: token)
+            bugTracker.configure(with: apiFetcher)
+        } else {
+            bugTracker.stopActivatingOnScreenshot()
         }
     }
 }
