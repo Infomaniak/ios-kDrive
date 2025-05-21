@@ -83,10 +83,20 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
     public func cleanUploadedPhotos() async {
         @InjectService var uploadDataSource: UploadServiceDataSourceable
-        let objectsToDelete = uploadDataSource
-            .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
-        try? uploadsDatabase.writeTransaction { writableRealm in
-            writableRealm.delete(objectsToDelete)
+
+        let objectsIdsToDelete = uploadDataSource
+            .getUploadedFilesIDs(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+        let chunks = objectsIdsToDelete.chunks(ofCount: 50)
+
+        try? chunks.forEach { chunk in
+            try self.uploadsDatabase.writeTransaction { writableRealm in
+                for uploadFileId in chunk {
+                    guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+                        continue
+                    }
+                    writableRealm.delete(objectToRemove)
+                }
+            }
         }
     }
 }
