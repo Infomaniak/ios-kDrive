@@ -21,13 +21,15 @@ import InfomaniakDI
 import RealmSwift
 
 public protocol PhotoLibrarySyncable {
-    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
+    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) -> Bool
     func disableSync()
+    func cleanUploadedPhotos() async
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
-    @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
+    @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) -> Bool {
         let currentSyncSettings = frozenSettings
+        let shouldReset = currentSyncSettings?.driveId != liveNewSyncSettings.driveId
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard liveNewSyncSettings.userId != -1,
                   liveNewSyncSettings.driveId != -1,
@@ -40,7 +42,8 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                 liveNewSyncSettings.lastSync = Date()
             case .all:
                 if let currentSyncSettings,
-                   currentSyncSettings.syncMode == .all {
+                   currentSyncSettings.syncMode == .all,
+                   !shouldReset {
                     liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
@@ -50,7 +53,8 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                    currentSyncSettings
                    .syncMode == .all ||
                    (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending) {
+                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending),
+                   !shouldReset {
                     liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     liveNewSyncSettings.lastSync = liveNewSyncSettings.fromDate
@@ -59,14 +63,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
             writableRealm.add(liveNewSyncSettings, update: .all)
         }
-
-        guard currentSyncSettings?.driveId != liveNewSyncSettings.driveId else {
-            return
-        }
-
-        Task {
-            await cleanUploadedPhotos()
-        }
+        return shouldReset
     }
 
     public func disableSync() {
@@ -84,7 +81,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         }
     }
 
-    private func cleanUploadedPhotos() async {
+    public func cleanUploadedPhotos() async {
         @InjectService var uploadDataSource: UploadServiceDataSourceable
         let objectsToDelete = uploadDataSource
             .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
