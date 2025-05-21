@@ -46,7 +46,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
         .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
-        .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "10.0.1")),
+        .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "11.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.0.1")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "18.6.0")),
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "1.0.4")),

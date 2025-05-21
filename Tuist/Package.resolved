@@ -1,5 +1,5 @@
 {
-  "originHash" : "703e9c1727a0ff035fdd04486a4e80c5dae75784eb59ba90af8844a2717e87cf",
+  "originHash" : "5b12c2913feb3869fbab35b81d92ecf99111ddb47f7176f8b6852b325aba48c1",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "a16f6cd80dd88c0aa20e19370b6deb1062bb98a6",
-        "version" : "10.0.1"
+        "revision" : "632b1fd53ee624d79a62de2c81ce1bec2c8c6d18",
+        "version" : "11.0.0"
       }
     },
     {
