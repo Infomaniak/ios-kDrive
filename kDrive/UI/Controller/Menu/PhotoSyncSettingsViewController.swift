@@ -233,13 +233,25 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
-        photoLibrarySync.enableSync(newSettings)
-        uploadService.retryAllOperations(
-            withParent: newSettings.parentDirectoryId,
-            userId: newSettings.userId,
-            driveId: newSettings.driveId
-        )
-        uploadService.updateQueueSuspension()
+        let shouldReset = photoLibrarySync.enableSync(newSettings)
+
+        Task {
+            if shouldReset {
+                await photoLibrarySync.cleanUploadedPhotos()
+            }
+
+            uploadService.retryAllOperations(
+                withParent: newSettings.parentDirectoryId,
+                userId: newSettings.userId,
+                driveId: newSettings.driveId
+            )
+            uploadService.updateQueueSuspension()
+
+            @InjectService var photoLibraryScan: PhotoLibraryScanable
+            photoLibraryScan.scheduleNewPicturesForUpload()
+            @InjectService var uploadService: UploadServiceable
+            uploadService.rebuildUploadQueue()
+        }
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
@@ -544,17 +556,10 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
         trackPhotoSync(isEnabled: photoSyncEnabled, with: liveNewSyncSettings)
 
         saveSettings()
+
         Task { @MainActor in
             self.navigationController?.popViewController(animated: true)
             sender.setLoading(false)
-        }
-
-        DispatchQueue.global(qos: .default).async {
-            // Add new pictures to be uploaded and reload upload queue
-            @InjectService var photoLibraryScan: PhotoLibraryScanable
-            photoLibraryScan.scheduleNewPicturesForUpload()
-            @InjectService var uploadService: UploadServiceable
-            uploadService.rebuildUploadQueue()
         }
     }
 }
