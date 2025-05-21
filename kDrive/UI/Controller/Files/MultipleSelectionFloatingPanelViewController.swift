@@ -109,6 +109,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 return files.allSatisfy(\.capabilities.canColor)
             case .download:
                 return filesAreWithinTheSameFolder || filesAreAllMedia
+            case .offline:
+                return !files.contains { $0.isDirectory }
             default:
                 return true
             }
