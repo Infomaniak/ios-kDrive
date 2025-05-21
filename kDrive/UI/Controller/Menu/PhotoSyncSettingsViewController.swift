@@ -83,7 +83,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
     }()
 
-    private var didDriveSelectionChange = false
     private var photoSyncEnabled: Bool = InjectService<PhotoLibraryUploadable>().wrappedValue.isSyncEnabled
     private var selectedDirectory: File? {
         didSet {
@@ -495,9 +494,6 @@ extension PhotoSyncSettingsViewController {
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         let previousDriveId = driveFileManager?.driveId
-        if previousDriveId != drive.id {
-            didDriveSelectionChange = true
-        }
         driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
