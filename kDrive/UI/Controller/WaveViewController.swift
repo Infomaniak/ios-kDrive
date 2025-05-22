@@ -50,18 +50,11 @@ class WaveViewController: UIViewController {
         return loginDelegateHandler
     }()
 
-    let configuration: OnboardingConfiguration
     let onboardingViewController: OnboardingViewController
     let slideCount: Int
-    let isScrollEnabled: Bool
-    let isPageIndicatorHidden: Bool
+
     let slides: [Slide]
-    let headerImage: UIImage?
-    let pageIndicatorColor: UIColor?
-
     let dismissHandler: (() -> Void)?
-
-    let shouldAnimateBottomViewForIndex: (Int) -> Bool
 
     var showAuthButtons = false {
         didSet {
@@ -69,28 +62,17 @@ class WaveViewController: UIViewController {
         }
     }
 
-    init(slides: [Slide],
-         headerImage: UIImage? = KDriveResourcesAsset.logo.image,
-         isScrollEnabled: Bool = true,
-         isPageIndicatorHidden: Bool = false,
-         pageIndicatorColor: UIColor? = KDriveResourcesAsset.infomaniakColor.color,
-         dismissHandler: (() -> Void)? = nil,
-         shouldAnimateBottomViewForIndex: @escaping (Int) -> Bool = { _ in return false }) {
+    init(slides: [Slide], dismissHandler: (() -> Void)? = nil) {
         self.slides = slides
-        self.headerImage = headerImage
-        self.isScrollEnabled = isScrollEnabled
-        self.isPageIndicatorHidden = isPageIndicatorHidden
-        self.pageIndicatorColor = pageIndicatorColor
         self.dismissHandler = dismissHandler
-        self.shouldAnimateBottomViewForIndex = shouldAnimateBottomViewForIndex
 
-        configuration = OnboardingConfiguration(
-            headerImage: headerImage,
+        let configuration = OnboardingConfiguration(
+            headerImage: KDriveResourcesAsset.logo.image,
             slides: slides,
-            pageIndicatorColor: pageIndicatorColor,
-            isScrollEnabled: isScrollEnabled,
+            pageIndicatorColor: KDriveResourcesAsset.infomaniakColor.color,
+            isScrollEnabled: true,
             dismissHandler: dismissHandler,
-            isPageIndicatorHidden: isPageIndicatorHidden
+            isPageIndicatorHidden: false
         )
         onboardingViewController = OnboardingViewController(configuration: configuration)
         slideCount = slides.count
@@ -214,7 +196,7 @@ class WaveViewController: UIViewController {
 
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
-        return shouldAnimateBottomViewForIndex(index)
+        return false
     }
 
     func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {}
