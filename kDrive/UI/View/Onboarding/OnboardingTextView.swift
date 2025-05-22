@@ -16,22 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class OnboardingTextView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textColor = .label
-        label.numberOfLines = 0
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        label.textColor = KDriveResourcesAsset.titleColor.color
+        label.numberOfLines = 2
         label.textAlignment = .center
         return label
     }()
 
     private let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16)
-        label.textColor = .secondaryLabel
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
         return label
