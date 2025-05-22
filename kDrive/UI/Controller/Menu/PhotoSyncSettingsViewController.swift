@@ -248,7 +248,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
 
             @InjectService var photoLibraryScan: PhotoLibraryScanable
             photoLibraryScan.scheduleNewPicturesForUpload()
-            @InjectService var uploadService: UploadServiceable
             uploadService.rebuildUploadQueue()
         }
     }
@@ -494,7 +493,6 @@ extension PhotoSyncSettingsViewController {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        let previousDriveId = driveFileManager?.driveId
         driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId)
         selectedDirectory = nil
         updateSaveButtonState()
