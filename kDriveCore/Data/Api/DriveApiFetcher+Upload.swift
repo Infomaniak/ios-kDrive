@@ -218,6 +218,7 @@ public extension DriveApiFetcher {
             .conflict: conflictResolution?.rawValue,
             .directoryId: directoryId,
             .directoryPath: directoryPath,
+            .totalChunks: 1,
             .with: FileWith.chunkUpload.toQueryItem().value
         ]
         if let lastModifiedAt {
@@ -232,11 +233,15 @@ public extension DriveApiFetcher {
 
         let route: Endpoint = .directUpload(drive: drive)
 
+//        let request = try URLRequest(url: route.url, method: .post)
+//        let uploadTask = URLSession.shared.uploadTask(with: request, from: fileData)
+
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: apiParameters.toParameters(),
                               body: .requestBody(fileData))
 
+        // Il faut peut etre ajouter les chunk dans les calls d'upload unique (voir kdrive web)
         let result: File = try await dispatch(request, networkStack: .Alamofire)
         return result
     }

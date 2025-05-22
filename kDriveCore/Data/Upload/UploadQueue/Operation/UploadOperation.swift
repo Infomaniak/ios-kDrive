@@ -178,7 +178,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             throw DriveError.fileNotFound
         }
 
-        guard fileSize < RangeProvider.APIConstants.smallFileMaxSize else {
+        // fileData doesn't work with empty file
+        guard fileSize < RangeProvider.APIConstants.smallFileMaxSize,
+              let fileData = try FileHandle(forReadingAtPath: fileUrl.path)?.readToEnd() else {
             return false // Continue with standard upload operation
         }
 
@@ -186,6 +188,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
         let drive = driveFileManager.drive
 
+        // fileData n'est pas créer correctement je pense
+        // Finalement NON:
+        // Ca doit pouvoir marcher normalement avec `data(contentsOf:)`
         let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
                                                                            totalSize: fileSize,
                                                                            fileName: uploadFile.name,
@@ -194,7 +199,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                                            createdAt: uploadFile.creationDate,
                                                                            directoryId: uploadFile.parentDirectoryId,
                                                                            directoryPath: uploadFile.relativePath,
-                                                                           fileData: Data(contentsOf: fileUrl))
+                                                                           fileData: fileData)
 
         // Make sure the parent of the `File` is transferred from the `UploadFile`
         driveFile.parentId = uploadFile.parentDirectoryId
