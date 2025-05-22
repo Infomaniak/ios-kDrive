@@ -162,6 +162,7 @@ class WaveViewController: UIViewController {
         signInButton.setTitleColor(.white, for: .normal)
         signInButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
         signInButton.layer.cornerRadius = 8
+        signInButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
         signInButton.isHidden = true
         signInButton.addTarget(self, action: #selector(signInButtonPressed), for: .touchUpInside)
         view.addSubview(signInButton)
@@ -170,20 +171,24 @@ class WaveViewController: UIViewController {
         registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
         registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
         registerButton.layer.cornerRadius = 8
+        registerButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
         registerButton.isHidden = true
         registerButton.addTarget(self, action: #selector(registerButtonPressed), for: .touchUpInside)
         view.addSubview(registerButton)
 
         NSLayoutConstraint.activate([
-            signInButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            signInButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-            signInButton.bottomAnchor.constraint(equalTo: registerButton.topAnchor, constant: -12),
-            signInButton.heightAnchor.constraint(equalToConstant: 45),
+            signInButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
+            signInButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
+            signInButton.bottomAnchor.constraint(equalTo: registerButton.topAnchor, constant: -UIConstants.Padding.medium),
+            signInButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
 
-            registerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            registerButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-            registerButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            registerButton.heightAnchor.constraint(equalToConstant: 45)
+            registerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
+            registerButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
+            registerButton.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -UIConstants.Padding.medium
+            ),
+            registerButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight)
         ])
     }
 
