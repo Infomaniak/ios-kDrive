@@ -82,6 +82,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
     private func postSaveSettings(shouldReset: Bool, parentDirectoryId: Int, userId: Int, driveId: Int) async {
         if shouldReset {
+            try? await uploadService.cancelAnyPhotoSync()
             await forgetUploadedPhotos()
         }
 
