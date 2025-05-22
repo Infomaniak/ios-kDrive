@@ -28,7 +28,8 @@ public protocol PhotoLibrarySyncable {
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
     @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
-        let shouldReset = currentSyncSettings?.driveId != liveNewSyncSettings.driveId
+        let shouldReset = (currentSyncSettings?.driveId != liveNewSyncSettings.driveId)
+            || (currentSyncSettings?.userId != liveNewSyncSettings.userId)
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard liveNewSyncSettings.userId != -1,
                   liveNewSyncSettings.driveId != -1,
