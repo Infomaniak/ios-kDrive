@@ -232,24 +232,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         }
 
         let newSettings = PhotoSyncSettings(value: liveNewSyncSettings)
-        let shouldReset = photoLibrarySync.enableSync(newSettings)
-
-        Task {
-            if shouldReset {
-                await photoLibrarySync.cleanUploadedPhotos()
-            }
-
-            uploadService.retryAllOperations(
-                withParent: newSettings.parentDirectoryId,
-                userId: newSettings.userId,
-                driveId: newSettings.driveId
-            )
-            uploadService.updateQueueSuspension()
-
-            @InjectService var photoLibraryScan: PhotoLibraryScanable
-            photoLibraryScan.scheduleNewPicturesForUpload()
-            uploadService.rebuildUploadQueue()
-        }
+        photoLibrarySync.enableSync(newSettings)
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {

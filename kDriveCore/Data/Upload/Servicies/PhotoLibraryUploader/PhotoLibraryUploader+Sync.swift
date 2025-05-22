@@ -21,13 +21,13 @@ import InfomaniakDI
 import RealmSwift
 
 public protocol PhotoLibrarySyncable {
-    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) -> Bool
+    @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
     func disableSync()
     func cleanUploadedPhotos() async
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
-    @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) -> Bool {
+    @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
         let shouldReset = currentSyncSettings?.driveId != liveNewSyncSettings.driveId
         try? uploadsDatabase.writeTransaction { writableRealm in
@@ -63,7 +63,38 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
             writableRealm.add(liveNewSyncSettings, update: .all)
         }
-        return shouldReset
+
+        guard shouldReset else { return }
+
+        let parentDirectoryId = liveNewSyncSettings.parentDirectoryId
+        let userId = liveNewSyncSettings.userId
+        let driveId = liveNewSyncSettings.driveId
+
+        Task {
+            await postSaveSettings(
+                shouldReset: shouldReset,
+                parentDirectoryId: parentDirectoryId,
+                userId: userId,
+                driveId: driveId
+            )
+        }
+    }
+
+    private func postSaveSettings(shouldReset: Bool, parentDirectoryId: Int, userId: Int, driveId: Int) async {
+        if shouldReset {
+            await cleanUploadedPhotos()
+        }
+
+        uploadService.retryAllOperations(
+            withParent: parentDirectoryId,
+            userId: userId,
+            driveId: driveId
+        )
+        uploadService.updateQueueSuspension()
+
+        @InjectService var photoLibraryScan: PhotoLibraryScanable
+        photoLibraryScan.scheduleNewPicturesForUpload()
+        uploadService.rebuildUploadQueue()
     }
 
     public func disableSync() {
