@@ -79,6 +79,27 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         return floatingPanelViewController
     }
 
+    static func instantiateSheet(options: [T], selectedOption: T? = nil, headerTitle: String,
+                                 delegate: SelectDelegate? = nil) -> FloatingPanelSelectOptionViewController<T> {
+        let sheetViewController = FloatingPanelSelectOptionViewController<T>()
+
+        sheetViewController.options = options
+        sheetViewController.selectedOption = selectedOption
+        sheetViewController.headerTitle = headerTitle
+        sheetViewController.delegate = delegate
+
+        sheetViewController.modalPresentationStyle = .pageSheet
+        if #available(iOS 16.0, *), let sheet = sheetViewController.sheetPresentationController {
+            sheet.prefersGrabberVisible = true
+
+            sheetViewController.tableView.layoutIfNeeded()
+
+            sheet.detents = [.custom { _ in CGFloat(sheetViewController.tableView.contentSize.height) }]
+        }
+
+        return sheetViewController
+    }
+
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
