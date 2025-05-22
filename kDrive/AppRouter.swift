@@ -409,7 +409,7 @@ public struct AppRouter: AppNavigable {
         }
 
         keychainHelper.deleteAllTokens()
-        window.rootViewController = WaveViewController()
+        window.rootViewController = WaveViewController(slides: Slide.onboardingSlides)
         window.makeKeyAndVisible()
     }
 
