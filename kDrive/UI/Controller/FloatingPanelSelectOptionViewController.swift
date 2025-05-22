@@ -89,7 +89,13 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         sheetViewController.delegate = delegate
 
         sheetViewController.modalPresentationStyle = .pageSheet
-        sheetViewController.sheetPresentationController?.prefersGrabberVisible = true
+        if #available(iOS 16.0, *), let sheet = sheetViewController.sheetPresentationController {
+            sheet.prefersGrabberVisible = true
+
+            sheetViewController.tableView.layoutIfNeeded()
+
+            sheet.detents = [.custom { _ in CGFloat(sheetViewController.tableView.contentSize.height) }]
+        }
 
         return sheetViewController
     }
