@@ -23,7 +23,6 @@ import RealmSwift
 public protocol PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
     func disableSync()
-    func cleanUploadedPhotos() async
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
@@ -82,7 +81,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
     private func postSaveSettings(shouldReset: Bool, parentDirectoryId: Int, userId: Int, driveId: Int) async {
         if shouldReset {
-            await cleanUploadedPhotos()
+            await forgetUploadedPhotos()
         }
 
         uploadService.retryAllOperations(
@@ -105,14 +104,14 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         Task {
             do {
                 try await uploadService.cancelAnyPhotoSync()
-                await cleanUploadedPhotos()
+                await forgetUploadedPhotos()
             } catch {
                 Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)
             }
         }
     }
 
-    public func cleanUploadedPhotos() async {
+    public func forgetUploadedPhotos() async {
         @InjectService var uploadDataSource: UploadServiceDataSourceable
 
         let objectsIdsToDelete = uploadDataSource
