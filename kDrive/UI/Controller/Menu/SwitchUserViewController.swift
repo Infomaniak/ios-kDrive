@@ -85,7 +85,10 @@ class SwitchUserViewController: UIViewController {
 
     @IBAction func buttonAddUserClicked(_ sender: UIButton) {
         matomo.track(eventWithCategory: .account, name: "add")
-        let nextViewController = WaveViewController()
+        let nextViewController = WaveViewController(slides: Slide.pleaseLogin) { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        nextViewController.modalPresentationStyle = .fullScreen
         present(nextViewController, animated: true)
     }
 

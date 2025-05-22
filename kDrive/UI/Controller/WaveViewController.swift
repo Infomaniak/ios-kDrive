@@ -53,6 +53,15 @@ class WaveViewController: UIViewController {
     let configuration: OnboardingConfiguration
     let onboardingViewController: OnboardingViewController
     let slideCount: Int
+    let isScrollEnabled: Bool
+    let isPageIndicatorHidden: Bool
+    let slides: [Slide]
+    let headerImage: UIImage?
+    let pageIndicatorColor: UIColor?
+
+    let dismissHandler: (() -> Void)?
+
+    let shouldAnimateBottomViewForIndex: (Int) -> Bool
 
     var showAuthButtons = false {
         didSet {
@@ -60,17 +69,31 @@ class WaveViewController: UIViewController {
         }
     }
 
-    init() {
+    init(slides: [Slide],
+         headerImage: UIImage? = KDriveResourcesAsset.logo.image,
+         isScrollEnabled: Bool = true,
+         isPageIndicatorHidden: Bool = false,
+         pageIndicatorColor: UIColor? = KDriveResourcesAsset.infomaniakColor.color,
+         dismissHandler: (() -> Void)? = nil,
+         shouldAnimateBottomViewForIndex: @escaping (Int) -> Bool = { _ in return false }) {
+        self.slides = slides
+        self.headerImage = headerImage
+        self.isScrollEnabled = isScrollEnabled
+        self.isPageIndicatorHidden = isPageIndicatorHidden
+        self.pageIndicatorColor = pageIndicatorColor
+        self.dismissHandler = dismissHandler
+        self.shouldAnimateBottomViewForIndex = shouldAnimateBottomViewForIndex
+
         configuration = OnboardingConfiguration(
-            headerImage: KDriveResourcesAsset.logo.image,
-            slides: Slide.onboardingSlides,
-            pageIndicatorColor: nil,
-            isScrollEnabled: true,
-            dismissHandler: nil,
-            isPageIndicatorHidden: false
+            headerImage: headerImage,
+            slides: slides,
+            pageIndicatorColor: pageIndicatorColor,
+            isScrollEnabled: isScrollEnabled,
+            dismissHandler: dismissHandler,
+            isPageIndicatorHidden: isPageIndicatorHidden
         )
         onboardingViewController = OnboardingViewController(configuration: configuration)
-        slideCount = Slide.onboardingSlides.count
+        slideCount = slides.count
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -104,6 +127,10 @@ class WaveViewController: UIViewController {
 
         setupNextButton()
         setupAuthButtons()
+
+        if slideCount == 1 {
+            showAuthButtons = true
+        }
     }
 
     private func setupNextButton() {
@@ -182,7 +209,7 @@ class WaveViewController: UIViewController {
 
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
-        return false
+        return shouldAnimateBottomViewForIndex(index)
     }
 
     func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {}
@@ -240,4 +267,22 @@ extension Slide {
                   ))
         ]
     }
+
+    static var pleaseLogin =
+        [
+            Slide(backgroundImage: KDriveResourcesAsset.background3.image,
+                  backgroundImageTintColor: KDriveResourcesAsset.backgroundColor.color,
+                  content: .animation(IKLottieConfiguration(
+                      id: 3,
+                      filename: "illu_photos",
+                      bundle: KDriveResources.bundle,
+                      loopFrameStart: 111,
+                      loopFrameEnd: 187,
+                      lottieConfiguration: .init(renderingEngine: .mainThread)
+                  )),
+                  bottomViewController: OnboardingBottomViewController(
+                      title: KDriveResourcesStrings.Localizable.onBoardingTitle3,
+                      description: KDriveResourcesStrings.Localizable.onBoardingDescription3
+                  ))
+        ]
 }
