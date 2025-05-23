@@ -1,4 +1,5 @@
-- New "select all" action in offline section
-- New and improved folder selection
-- PDF scroll performance
+- Bug report for staff members
+- Optimized photo sync scan
+- Optimized photo gallery display
+- Fixed some actions in multiple selection
 - Stability improvements and bug fixes
