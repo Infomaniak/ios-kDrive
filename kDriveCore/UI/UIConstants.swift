@@ -36,6 +36,7 @@ public enum UIConstants {
     public enum Button {
         public static let largeHeight: CGFloat = 60.0
         public static let cornerRadius = 10.0
+        public static let profileImageSize: CGFloat = 32.0
     }
 
     public enum List {

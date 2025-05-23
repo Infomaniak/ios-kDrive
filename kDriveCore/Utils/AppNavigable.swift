@@ -27,7 +27,7 @@ public protocol RouterAppNavigable {
     /// - Parameters:
     ///   - driveFileManager: driveFileManager to use
     ///   - selectedIndex: Nil will try to use state restoration if available
-    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UITabBarController?
+    @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UISplitViewController?
 
     @MainActor func showPreloading(currentAccount: Account)
 
@@ -195,6 +195,9 @@ public protocol RouterRootNavigable {
 public protocol TopmostViewControllerFetchable {
     /// Access the current top most ViewController
     @MainActor var topMostViewController: UIViewController? { get }
+
+    /// Access the root controller of the app
+    @MainActor var rootViewController: UIViewController? { get }
 }
 
 /// Actions performed by router, `async` by design

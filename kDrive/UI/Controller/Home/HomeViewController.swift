@@ -31,7 +31,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var router: AppNavigable
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
@@ -142,7 +141,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
@@ -257,6 +255,12 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
         self.recentActivitiesController = recentActivitiesController
 
+        if isCompactView {
+            navigationItem.title = driveFileManager.drive.name
+        } else {
+            navigationItem.title = recentActivitiesController.title
+        }
+
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
             .compactMap { $0 as? HomeRecentFilesHeaderView }.first
         headerView?.titleLabel.text = recentActivitiesController.title
@@ -276,7 +280,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     private func createLayout() -> UICollectionViewLayout {
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem()]
+        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem(leading: 24)]
 
         let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, _ in
             guard let self else { return nil }
@@ -365,7 +369,7 @@ extension HomeViewController {
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    router.presentUpSaleSheet()
+                    appRouter.presentUpSaleSheet()
                     matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
                 }
                 cell.closeHandler = { [weak self] _ in
@@ -416,9 +420,13 @@ extension HomeViewController {
                     accountManager: accountManager,
                     driveFileManager: driveFileManager,
                     presenter: self,
+                    addLeadingConstraint: false,
                     selectMode: false
                 )
-
+                if !isCompactView {
+                    homeLargeTitleHeaderView.isEnabled = false
+                    homeLargeTitleHeaderView.text = recentActivitiesController?.title ?? ""
+                }
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
             case .recentFiles:
@@ -427,7 +435,11 @@ extension HomeViewController {
                     view: HomeRecentFilesHeaderView.self,
                     for: indexPath
                 )
-                headerView.titleLabel.text = recentActivitiesController?.title ?? ""
+                if isCompactView {
+                    headerView.titleLabel.text = recentActivitiesController?.title ?? ""
+                } else {
+                    headerView.titleLabel.text = ""
+                }
                 return headerView
             }
         } else if kind == RootMenuHeaderView.kind.rawValue {
