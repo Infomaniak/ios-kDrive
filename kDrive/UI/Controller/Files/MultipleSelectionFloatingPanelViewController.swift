@@ -53,6 +53,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
+    lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
+
     private var filesAreAllMedia: Bool {
         files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
     }
@@ -97,35 +99,42 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     func setupContent() {
-        var newActions: [FloatingPanelAction]
-        defer { actions = newActions }
-
-        if driveFileManager.isPublicShare {
-            newActions = FloatingPanelAction.multipleSelectionPublicShareActions
-        } else if sharedWithMe {
-            newActions = FloatingPanelAction.multipleSelectionSharedWithMeActions
-        } else if allItemsSelected {
-            newActions = FloatingPanelAction.selectAllActions
-            removeDownloadActionIfNeeded(&newActions)
-        } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
-            newActions = FloatingPanelAction.multipleSelectionBulkActions
-            removeDownloadActionIfNeeded(&newActions)
-        } else if presentingParent is PhotoListViewController {
-            newActions = FloatingPanelAction.multipleSelectionPhotosListActions
-        } else {
-            if files.contains(where: { !$0.isDirectory }) {
-                newActions = FloatingPanelAction.multipleSelectionActions
-            } else {
-                newActions = FloatingPanelAction.multipleSelectionActionsOnlyFolders
+        let filteredActions = currentActions.filter { action in
+            switch action {
+            case .upsaleColor:
+                return files.allSatisfy { file in
+                    file.isDirectory && self.driveFileManager.drive.isFreePack
+                }
+            case .folderColor:
+                return files.allSatisfy(\.capabilities.canColor)
+            case .download:
+                return filesAreWithinTheSameFolder || filesAreAllMedia
+            case .offline:
+                return !files.contains { $0.isDirectory }
+            default:
+                return true
             }
-
-            removeDownloadActionIfNeeded(&newActions)
         }
+        actions = filteredActions
     }
 
-    private func removeDownloadActionIfNeeded(_ newActions: inout [FloatingPanelAction]) {
-        if !filesAreWithinTheSameFolder && !filesAreAllMedia {
-            newActions.removeAll { $0 == .download }
+    private var currentActions: [FloatingPanelAction] {
+        if driveFileManager.isPublicShare {
+            return FloatingPanelAction.multipleSelectionPublicShareActions
+        } else if sharedWithMe {
+            return FloatingPanelAction.multipleSelectionSharedWithMeActions
+        } else if allItemsSelected {
+            return FloatingPanelAction.selectAllActions
+        } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
+            return FloatingPanelAction.multipleSelectionBulkActions
+        } else if presentingParent is PhotoListViewController {
+            return FloatingPanelAction.multipleSelectionPhotosListActions
+        } else {
+            if files.contains(where: { !$0.isDirectory }) {
+                return FloatingPanelAction.multipleSelectionActions
+            } else {
+                return FloatingPanelAction.multipleSelectionActionsOnlyFolders
+            }
         }
     }
 
@@ -275,7 +284,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             files: files,
             driveFileManager: driveFileManager,
             showProgress: downloadInProgress,
-            archiveId: currentArchiveId
+            archiveId: currentArchiveId,
+            currentPackId: packId
         )
         return cell
     }

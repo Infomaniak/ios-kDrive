@@ -41,6 +41,8 @@ extension MultipleSelectionFloatingPanelViewController {
             manageCategoriesAction(group: group)
         case .folderColor:
             folderColorAction(group: group)
+        case .upsaleColor:
+            upsaleColorAction()
         case .download:
             downloadAction(group: group, at: indexPath)
         case .move:
@@ -97,6 +99,10 @@ extension MultipleSelectionFloatingPanelViewController {
                                       group: group) { isSuccess in
             self.success = isSuccess
         }
+    }
+
+    private func upsaleColorAction() {
+        FileActionsHelper.upsaleFolderColor()
     }
 
     private func downloadAction(group: DispatchGroup, at indexPath: IndexPath) {
