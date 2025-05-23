@@ -91,67 +91,98 @@ class WaveViewController: UIViewController {
         ])
     }
 
-    @objc private func nextButtonPressed() {
-        onboardingViewController.pageIndicator.currentPage += 1
-        onboardingViewController.setSelectedSlide(index: onboardingViewController.pageIndicator.currentPage)
+    func createNextButton(in containerView: UIView) {
+        let nextButton = IKRoundButton()
+        let nextButtonHeight = 80.0
+        nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
+        nextButton.imageView?.tintColor = .white
+        nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
+        nextButton.elevated = true
+
+        nextButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+        nextButton.translatesAutoresizingMaskIntoConstraints = false
+        nextButton.layer.cornerRadius = nextButtonHeight / 2
+        nextButton.clipsToBounds = true
+        nextButton.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            onboardingViewController.pageIndicator.currentPage += 1
+            onboardingViewController.setSelectedSlide(index: onboardingViewController.pageIndicator.currentPage)
+        }, for: .touchUpInside)
+
+        containerView.addSubview(nextButton)
+        NSLayoutConstraint.activate([
+            nextButton.widthAnchor.constraint(equalToConstant: nextButtonHeight),
+            nextButton.heightAnchor.constraint(equalToConstant: nextButtonHeight),
+            nextButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            nextButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            nextButton.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 0),
+            nextButton.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: 0),
+            nextButton.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor, constant: 0),
+            nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: 0),
+        ])
     }
 
-    @objc private func signInButtonPressed() {
-        appNavigable.showLogin(delegate: loginDelegateHandler)
-    }
+    func createSignInRegisterButton(in containerView: UIView) {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = UIConstants.Padding.mediumSmall
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .fill
+        stackView.translatesAutoresizingMaskIntoConstraints = false
 
-    @objc private func registerButtonPressed() {
-        appNavigable.showRegister(delegate: loginDelegateHandler)
+        let signInButton = IKLargeButton()
+        signInButton.elevated = true
+        signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
+        signInButton.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            appNavigable.showLogin(delegate: loginDelegateHandler)
+        }, for: .touchUpInside)
+
+        let registerButton = IKButton()
+        registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
+        registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+        registerButton.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            appNavigable.showRegister(delegate: loginDelegateHandler)
+        }, for: .touchUpInside)
+
+        stackView.addArrangedSubview(signInButton)
+        stackView.addArrangedSubview(registerButton)
+        containerView.addSubview(stackView)
+
+        NSLayoutConstraint.activate([
+            registerButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
+            signInButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
+            stackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor,
+                                               constant: UIConstants.Padding.standard),
+            stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor,
+                                                constant: -UIConstants.Padding.standard),
+            stackView.widthAnchor.constraint(lessThanOrEqualToConstant: 350)
+        ])
     }
 }
 
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
-        return false
+        guard slides.count > 1 else { return false }
+
+        return index == slideCount - 1
     }
 
     func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {}
 
     func bottomUIViewForIndex(_ index: Int) -> UIView? {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+
         if index != slideCount - 1 {
-            let nextButton = IKRoundButton()
-            let nextButtonHeight = 80.0
-            nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
-            nextButton.imageView?.tintColor = .white
-            nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
-            nextButton.elevated = true
-
-            nextButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-            nextButton.translatesAutoresizingMaskIntoConstraints = false
-            nextButton.layer.cornerRadius = nextButtonHeight / 2
-            nextButton.clipsToBounds = true
-            nextButton.addTarget(self, action: #selector(nextButtonPressed), for: .touchUpInside)
-
-            return nextButton
+            createNextButton(in: containerView)
         } else {
-            let stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.spacing = UIConstants.Padding.mediumSmall
-            stackView.distribution = .fillProportionally
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-
-            let registerButton = IKButton()
-            registerButton.translatesAutoresizingMaskIntoConstraints = false
-            registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
-            registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
-            registerButton.addTarget(self, action: #selector(registerButtonPressed), for: .touchUpInside)
-
-            let signInButton = IKLargeButton()
-            signInButton.elevated = true
-            signInButton.translatesAutoresizingMaskIntoConstraints = false
-            signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
-            signInButton.addTarget(self, action: #selector(signInButtonPressed), for: .touchUpInside)
-
-            stackView.addArrangedSubview(signInButton)
-            stackView.addArrangedSubview(registerButton)
-
-            return stackView
+            createSignInRegisterButton(in: containerView)
         }
+
+        return containerView
     }
 
     func currentIndexChanged(newIndex: Int) {}
@@ -222,4 +253,14 @@ extension Slide {
                       description: KDriveResourcesStrings.Localizable.onBoardingDescription3
                   ))
         ]
+}
+
+@available(iOS 17, *)
+#Preview {
+    WaveViewController(slides: Slide.onboardingSlides)
+}
+
+@available(iOS 17, *)
+#Preview {
+    WaveViewController(slides: Slide.pleaseLogin)
 }
