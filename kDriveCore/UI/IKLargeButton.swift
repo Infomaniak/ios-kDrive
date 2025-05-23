@@ -71,8 +71,14 @@ import UIKit
             backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color,
             rawValue: "whiteButton"
         )
+        public static let plainButton = Style(
+            titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
+            titleColor: KDriveResourcesAsset.infomaniakColor.color,
+            backgroundColor: .clear,
+            rawValue: "plainButton"
+        )
 
-        static let allValues = [primaryButton, secondaryButton, whiteButton]
+        static let allValues = [primaryButton, secondaryButton, whiteButton, plainButton]
 
         public var rawValue: String
 

@@ -98,11 +98,8 @@ class WaveViewController: UIViewController {
         nextButton.imageView?.tintColor = .white
         nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
         nextButton.elevated = true
-
-        nextButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-        nextButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.layer.cornerRadius = nextButtonHeight / 2
-        nextButton.clipsToBounds = true
+        nextButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             onboardingViewController.pageIndicator.currentPage += 1
@@ -118,7 +115,7 @@ class WaveViewController: UIViewController {
             nextButton.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 0),
             nextButton.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: 0),
             nextButton.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor, constant: 0),
-            nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: 0),
+            nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: 0)
         ])
     }
 
@@ -129,8 +126,11 @@ class WaveViewController: UIViewController {
         stackView.distribution = .fillProportionally
         stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.Padding.medium, right: 0)
 
         let signInButton = IKLargeButton()
+        signInButton.style = .primaryButton
         signInButton.elevated = true
         signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
         signInButton.addAction(UIAction { [weak self] _ in
@@ -138,9 +138,9 @@ class WaveViewController: UIViewController {
             appNavigable.showLogin(delegate: loginDelegateHandler)
         }, for: .touchUpInside)
 
-        let registerButton = IKButton()
+        let registerButton = IKLargeButton()
+        registerButton.style = .plainButton
         registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
-        registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
         registerButton.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             appNavigable.showRegister(delegate: loginDelegateHandler)
