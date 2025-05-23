@@ -24,6 +24,7 @@ import RealmSwift
 
 public protocol PhotoLibraryScanable {
     @discardableResult func scheduleNewPicturesForUpload() -> Int
+    func cancelScan()
 }
 
 extension PhotoLibraryUploader: PhotoLibraryScanable {
@@ -38,7 +39,8 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
 
         var newAssetsCount = 0
 
-        serialQueue.sync {
+        cancelScan()
+        workerTask = Task {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
@@ -71,6 +73,11 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
 
         return newAssetsCount
+    }
+
+    public func cancelScan() {
+        workerTask?.cancel()
+        workerTask = nil
     }
 
     // MARK: - Private
