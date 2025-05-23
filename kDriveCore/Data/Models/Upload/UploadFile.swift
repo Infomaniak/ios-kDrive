@@ -312,7 +312,9 @@ public final class UploadFile: Object, UploadFilable {
             return nil
         }
 
-        localAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetLocalIdentifier], options: nil).firstObject
+        let fetchAssetOption = PHFetchOptions()
+        fetchAssetOption.fetchLimit = 1
+        localAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetLocalIdentifier], options: fetchAssetOption).firstObject
         return localAsset
     }
 
