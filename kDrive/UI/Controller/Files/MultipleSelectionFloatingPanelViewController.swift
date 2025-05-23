@@ -138,12 +138,6 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         }
     }
 
-    private func removeDownloadActionIfNeeded(_ newActions: inout [FloatingPanelAction]) {
-        if !filesAreWithinTheSameFolder && !filesAreAllMedia {
-            newActions.removeAll { $0 == .download }
-        }
-    }
-
     // MARK: - Private methods
 
     @MainActor
