@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
+import InfomaniakOnboarding
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -84,8 +85,10 @@ class SwitchUserViewController: UIViewController {
 
     @IBAction func buttonAddUserClicked(_ sender: UIButton) {
         matomo.track(eventWithCategory: .account, name: "add")
-        let nextViewController = OnboardingViewController.instantiate()
-        nextViewController.addUser = true
+        let nextViewController = WaveViewController(slides: Slide.pleaseLogin) { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        nextViewController.modalPresentationStyle = .fullScreen
         present(nextViewController, animated: true)
     }
 

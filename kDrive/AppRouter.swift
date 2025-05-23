@@ -21,6 +21,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
+import InfomaniakOnboarding
 import kDriveCore
 import kDriveResources
 import MyKSuite
@@ -408,7 +409,7 @@ public struct AppRouter: AppNavigable {
         }
 
         keychainHelper.deleteAllTokens()
-        window.rootViewController = OnboardingViewController.instantiate()
+        window.rootViewController = WaveViewController(slides: Slide.onboardingSlides)
         window.makeKeyAndVisible()
     }
 

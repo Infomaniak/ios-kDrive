@@ -1,5 +1,5 @@
 {
-  "originHash" : "ee57329e986157f263079f26947dc171457d999d19b613fbaf228e1696b9cdaf",
+  "originHash" : "83044df28652f2c46f47cf90f8e6d67213e495fea2ec7743998a72c8deda5e87",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -137,6 +137,15 @@
       }
     },
     {
+      "identity" : "ios-onboarding",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-onboarding",
+      "state" : {
+        "revision" : "fd233a30ae84458b6e794948188bcd39975ac2f9",
+        "version" : "1.2.3"
+      }
+    },
+    {
       "identity" : "ios-version-checker",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
@@ -249,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "d87b07a27cd9a082d367261d7199a96a54e59f1d",
-        "version" : "8.50.2"
+        "revision" : "11aee2d3efdd74db8ce51533118500d140210292",
+        "version" : "8.51.0"
       }
     },
     {
@@ -294,8 +303,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
-        "version" : "1.1.4"
+        "revision" : "c1805596154bb3a265fd91b8ac0c4433b4348fb0",
+        "version" : "1.2.0"
       }
     },
     {
