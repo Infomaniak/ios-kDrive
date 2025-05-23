@@ -106,6 +106,9 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         }
 
         Task {
+            @InjectService var photoLibraryScan: PhotoLibraryScanable
+            photoLibraryScan.cancelScan()
+
             do {
                 try await uploadService.cancelAnyPhotoSync()
                 await forgetUploadedPhotos()
