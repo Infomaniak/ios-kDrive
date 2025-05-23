@@ -30,20 +30,6 @@ import UIKit
 class WaveViewController: UIViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
-    private lazy var loginDelegateHandler: LoginDelegateHandler = {
-        let loginDelegateHandler = LoginDelegateHandler()
-        loginDelegateHandler.didStartLoginCallback = { [weak self] in
-            guard let self else { return }
-        }
-        loginDelegateHandler.didCompleteLoginCallback = { [weak self] in
-            guard let self else { return }
-        }
-        loginDelegateHandler.didFailLoginWithErrorCallback = { [weak self] _ in
-            guard let self else { return }
-        }
-        return loginDelegateHandler
-    }()
-
     let onboardingViewController: OnboardingViewController
     let slideCount: Int
 
@@ -91,6 +77,23 @@ class WaveViewController: UIViewController {
         ])
     }
 
+    private func loginDelegateHandler(signInButton: UIButton, registerButton: UIButton) -> LoginDelegateHandler {
+        let loginDelegateHandler = LoginDelegateHandler()
+        loginDelegateHandler.didStartLoginCallback = {
+            signInButton.isEnabled = false
+            registerButton.isEnabled = false
+        }
+        loginDelegateHandler.didCompleteLoginCallback = {
+            signInButton.isEnabled = true
+            registerButton.isEnabled = true
+        }
+        loginDelegateHandler.didFailLoginWithErrorCallback = { _ in
+            signInButton.isEnabled = true
+            registerButton.isEnabled = true
+        }
+        return loginDelegateHandler
+    }
+
     func createNextButton(in containerView: UIView) {
         let nextButton = IKRoundButton()
         let nextButtonHeight = 80.0
@@ -130,6 +133,9 @@ class WaveViewController: UIViewController {
         stackView.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.Padding.medium, right: 0)
 
         let signInButton = IKLargeButton()
+        let registerButton = IKLargeButton()
+        let loginDelegateHandler = loginDelegateHandler(signInButton: signInButton, registerButton: registerButton)
+
         signInButton.style = .primaryButton
         signInButton.elevated = true
         signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
@@ -138,7 +144,6 @@ class WaveViewController: UIViewController {
             appNavigable.showLogin(delegate: loginDelegateHandler)
         }, for: .touchUpInside)
 
-        let registerButton = IKLargeButton()
         registerButton.style = .plainButton
         registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
         registerButton.addAction(UIAction { [weak self] _ in
