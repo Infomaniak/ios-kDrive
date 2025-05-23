@@ -34,18 +34,12 @@ class WaveViewController: UIViewController {
         let loginDelegateHandler = LoginDelegateHandler()
         loginDelegateHandler.didStartLoginCallback = { [weak self] in
             guard let self else { return }
-            signInButton.setLoading(true)
-            registerButton.isEnabled = false
         }
         loginDelegateHandler.didCompleteLoginCallback = { [weak self] in
             guard let self else { return }
-            self.signInButton.setLoading(false)
-            self.registerButton.isEnabled = true
         }
         loginDelegateHandler.didFailLoginWithErrorCallback = { [weak self] _ in
             guard let self else { return }
-            self.signInButton.setLoading(false)
-            self.registerButton.isEnabled = true
         }
         return loginDelegateHandler
     }()
@@ -55,12 +49,6 @@ class WaveViewController: UIViewController {
 
     let slides: [Slide]
     let dismissHandler: (() -> Void)?
-
-    var showAuthButtons = false {
-        didSet {
-            updateButtonsVisibility()
-        }
-    }
 
     init(slides: [Slide], dismissHandler: (() -> Void)? = nil) {
         self.slides = slides
@@ -84,11 +72,6 @@ class WaveViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    let nextButton = UIButton(type: .custom)
-    let nextButtonHeight = 80.0
-    let registerButton = UIButton(type: .system)
-    let signInButton = UIButton(type: .system)
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -106,78 +89,6 @@ class WaveViewController: UIViewController {
             onboardingViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             onboardingViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
-        setupNextButton()
-        setupAuthButtons()
-
-        if slideCount == 1 {
-            showAuthButtons = true
-        }
-    }
-
-    private func setupNextButton() {
-        nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
-        nextButton.imageView?.tintColor = .white
-        nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
-
-        nextButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-        nextButton.translatesAutoresizingMaskIntoConstraints = false
-        nextButton.layer.cornerRadius = nextButtonHeight / 2
-        nextButton.clipsToBounds = true
-        nextButton.addTarget(self, action: #selector(nextButtonPressed), for: .touchUpInside)
-
-        view.addSubview(nextButton)
-
-        NSLayoutConstraint.activate([
-            nextButton.widthAnchor.constraint(equalToConstant: nextButtonHeight),
-            nextButton.heightAnchor.constraint(equalToConstant: nextButtonHeight),
-            nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30)
-        ])
-
-        view.bringSubviewToFront(nextButton)
-    }
-
-    private func setupAuthButtons() {
-        signInButton.translatesAutoresizingMaskIntoConstraints = false
-        signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
-        signInButton.setTitleColor(.white, for: .normal)
-        signInButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
-        signInButton.layer.cornerRadius = 8
-        signInButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
-        signInButton.isHidden = true
-        signInButton.addTarget(self, action: #selector(signInButtonPressed), for: .touchUpInside)
-        view.addSubview(signInButton)
-
-        registerButton.translatesAutoresizingMaskIntoConstraints = false
-        registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
-        registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
-        registerButton.layer.cornerRadius = 8
-        registerButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
-        registerButton.isHidden = true
-        registerButton.addTarget(self, action: #selector(registerButtonPressed), for: .touchUpInside)
-        view.addSubview(registerButton)
-
-        NSLayoutConstraint.activate([
-            signInButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
-            signInButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
-            signInButton.bottomAnchor.constraint(equalTo: registerButton.topAnchor, constant: -UIConstants.Padding.medium),
-            signInButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
-
-            registerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
-            registerButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
-            registerButton.bottomAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                constant: -UIConstants.Padding.medium
-            ),
-            registerButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight)
-        ])
-    }
-
-    private func updateButtonsVisibility() {
-        nextButton.isHidden = showAuthButtons
-        registerButton.isHidden = !showAuthButtons
-        signInButton.isHidden = !showAuthButtons
     }
 
     @objc private func nextButtonPressed() {
@@ -201,10 +112,49 @@ extension WaveViewController: OnboardingViewControllerDelegate {
 
     func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {}
 
-    func currentIndexChanged(newIndex: Int) {
-        let isLast = newIndex == slideCount - 1
-        showAuthButtons = isLast
+    func bottomUIViewForIndex(_ index: Int) -> UIView? {
+        if index != slideCount - 1 {
+            let nextButton = IKRoundButton()
+            let nextButtonHeight = 80.0
+            nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
+            nextButton.imageView?.tintColor = .white
+            nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
+            nextButton.elevated = true
+
+            nextButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+            nextButton.translatesAutoresizingMaskIntoConstraints = false
+            nextButton.layer.cornerRadius = nextButtonHeight / 2
+            nextButton.clipsToBounds = true
+            nextButton.addTarget(self, action: #selector(nextButtonPressed), for: .touchUpInside)
+
+            return nextButton
+        } else {
+            let stackView = UIStackView()
+            stackView.axis = .vertical
+            stackView.spacing = UIConstants.Padding.mediumSmall
+            stackView.distribution = .fillProportionally
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+
+            let registerButton = IKButton()
+            registerButton.translatesAutoresizingMaskIntoConstraints = false
+            registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
+            registerButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+            registerButton.addTarget(self, action: #selector(registerButtonPressed), for: .touchUpInside)
+
+            let signInButton = IKLargeButton()
+            signInButton.elevated = true
+            signInButton.translatesAutoresizingMaskIntoConstraints = false
+            signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
+            signInButton.addTarget(self, action: #selector(signInButtonPressed), for: .touchUpInside)
+
+            stackView.addArrangedSubview(signInButton)
+            stackView.addArrangedSubview(registerButton)
+
+            return stackView
+        }
     }
+
+    func currentIndexChanged(newIndex: Int) {}
 }
 
 extension Slide {
