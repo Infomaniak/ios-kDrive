@@ -105,6 +105,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     @LazyInjectService var router: AppNavigable
 
     let driveFileManager: DriveFileManager
+    let photoPickerDelegate = PhotoPickerDelegate()
 
     private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
 
