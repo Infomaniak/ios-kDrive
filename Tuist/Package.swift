@@ -36,6 +36,8 @@ let packageSettings = PackageSettings(
         "NIO": .framework,
         "RealmSwift": .framework,
         "Realm": .framework,
+        "VersionChecker": .framework,
+        "_LottieStub": .framework,
         "_NIOBase64": .framework,
         "_NIODataStructures": .framework
     ]
