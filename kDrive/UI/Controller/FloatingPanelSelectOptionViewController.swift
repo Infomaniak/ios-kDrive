@@ -42,6 +42,8 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     var selectedOption: T?
     var options = [T]()
 
+    private var hasConfiguredDetents = false
+
     weak var delegate: SelectDelegate?
 
     override func viewDidLoad() {
@@ -79,6 +81,19 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         return floatingPanelViewController
     }
 
+    override func viewDidLayoutSubviews() { // Call après que tous les éléments soient correctement positionnés
+        super.viewDidLayoutSubviews()
+
+        if #available(iOS 16.0, *), !hasConfiguredDetents,
+           let sheet = sheetPresentationController {
+            tableView.layoutIfNeeded()
+            let contentHeight = tableView.contentSize.height
+
+            sheet.detents = [.custom { _ in contentHeight }]
+            hasConfiguredDetents = true
+        }
+    }
+
     static func instantiateSheet(options: [T], selectedOption: T? = nil, headerTitle: String,
                                  delegate: SelectDelegate? = nil) -> FloatingPanelSelectOptionViewController<T> {
         let sheetViewController = FloatingPanelSelectOptionViewController<T>()
@@ -89,13 +104,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         sheetViewController.delegate = delegate
 
         sheetViewController.modalPresentationStyle = .pageSheet
-        if #available(iOS 16.0, *), let sheet = sheetViewController.sheetPresentationController {
-            sheet.prefersGrabberVisible = true
-
-            sheetViewController.tableView.layoutIfNeeded()
-
-            sheet.detents = [.custom { _ in CGFloat(sheetViewController.tableView.contentSize.height) }]
-        }
+        sheetViewController.sheetPresentationController?.prefersGrabberVisible = true
 
         return sheetViewController
     }
