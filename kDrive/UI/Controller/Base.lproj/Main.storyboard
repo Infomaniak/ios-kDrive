@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -27,255 +27,6 @@
             </objects>
             <point key="canvasLocation" x="2216" y="644"/>
         </scene>
-        <!--Onboarding View Controller-->
-        <scene sceneID="QEI-PU-Yin">
-            <objects>
-                <viewController storyboardIdentifier="OnboardingViewController" modalPresentationStyle="overCurrentContext" id="wQU-0Z-Dua" customClass="OnboardingViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Gxt-p0-BqF">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Rkb-an-uwN">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="633"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9ub-9i-xp5">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="wQU-0Z-Dua" id="cEF-KK-09N"/>
-                                    <outlet property="delegate" destination="wQU-0Z-Dua" id="qQS-Ca-oZf"/>
-                                </connections>
-                            </collectionView>
-                            <navigationBar hidden="YES" contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AYI-gW-lNx">
-                                <rect key="frame" x="0.0" y="47" width="390" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="xpr-42-6P9"/>
-                                </constraints>
-                                <items>
-                                    <navigationItem id="wbc-wv-6zL">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="S4s-1x-x6z">
-                                            <color key="tintColor" name="primaryButtonColor"/>
-                                            <connections>
-                                                <action selector="closeButtonPressed:" destination="wQU-0Z-Dua" id="Jgk-Wt-SND"/>
-                                            </connections>
-                                        </barButtonItem>
-                                    </navigationItem>
-                                </items>
-                            </navigationBar>
-                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v0X-JU-4vd">
-                                <rect key="frame" x="24" y="674" width="342" height="136"/>
-                                <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iEM-pL-yBh" customClass="IKLargeButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="60"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="40" id="vqH-hB-2KA"/>
-                                            <constraint firstAttribute="height" constant="60" id="z6P-Jy-Pa5"/>
-                                        </constraints>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                        <state key="normal" title="Se connecter"/>
-                                        <state key="disabled">
-                                            <color key="titleColor" name="blueColor"/>
-                                        </state>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonLogin"/>
-                                            <userDefinedRuntimeAttribute type="boolean" keyPath="elevated" value="YES"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
-                                        </userDefinedRuntimeAttributes>
-                                        <variation key="default">
-                                            <mask key="constraints">
-                                                <exclude reference="vqH-hB-2KA"/>
-                                            </mask>
-                                        </variation>
-                                        <variation key="heightClass=compact-widthClass=compact">
-                                            <mask key="constraints">
-                                                <include reference="vqH-hB-2KA"/>
-                                            </mask>
-                                        </variation>
-                                        <connections>
-                                            <action selector="signInButtonPressed:" destination="wQU-0Z-Dua" eventType="touchUpInside" id="9ED-hk-qgY"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ws-Ei-OPK" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="76" width="342" height="60"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="40" id="jYi-89-rFU"/>
-                                            <constraint firstAttribute="height" constant="60" id="z06-T3-LeA"/>
-                                        </constraints>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                        <state key="normal" title="Créer un compte">
-                                            <color key="titleColor" name="infomaniakColor"/>
-                                        </state>
-                                        <state key="disabled">
-                                            <color key="titleColor" name="blueColor"/>
-                                        </state>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                                <real key="value" value="10"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSignIn"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
-                                        </userDefinedRuntimeAttributes>
-                                        <variation key="default">
-                                            <mask key="constraints">
-                                                <exclude reference="jYi-89-rFU"/>
-                                            </mask>
-                                        </variation>
-                                        <variation key="heightClass=compact-widthClass=compact">
-                                            <mask key="constraints">
-                                                <include reference="jYi-89-rFU"/>
-                                            </mask>
-                                        </variation>
-                                        <connections>
-                                            <action selector="registerButtonPressed:" destination="wQU-0Z-Dua" eventType="touchUpInside" id="VH9-ve-deN"/>
-                                        </connections>
-                                    </button>
-                                </subviews>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstItem="1Ws-Ei-OPK" firstAttribute="leading" secondItem="v0X-JU-4vd" secondAttribute="leading" id="4hh-6g-xSR"/>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="350" id="BHz-yd-QnT"/>
-                                    <constraint firstItem="1Ws-Ei-OPK" firstAttribute="top" secondItem="iEM-pL-yBh" secondAttribute="bottom" constant="16" id="Fge-AZ-2eZ"/>
-                                    <constraint firstAttribute="trailing" secondItem="1Ws-Ei-OPK" secondAttribute="trailing" id="Hiq-Ue-Fby"/>
-                                    <constraint firstItem="iEM-pL-yBh" firstAttribute="top" secondItem="v0X-JU-4vd" secondAttribute="top" id="Hz9-aq-T5u"/>
-                                    <constraint firstItem="1Ws-Ei-OPK" firstAttribute="top" secondItem="iEM-pL-yBh" secondAttribute="bottom" id="LMZ-Sf-Hn7"/>
-                                    <constraint firstAttribute="trailing" secondItem="iEM-pL-yBh" secondAttribute="trailing" id="O2K-qw-Zty"/>
-                                    <constraint firstAttribute="bottom" secondItem="1Ws-Ei-OPK" secondAttribute="bottom" id="VYn-Ic-Fzw"/>
-                                    <constraint firstItem="iEM-pL-yBh" firstAttribute="leading" secondItem="v0X-JU-4vd" secondAttribute="leading" id="gIO-06-pI6"/>
-                                    <constraint firstItem="1Ws-Ei-OPK" firstAttribute="centerX" secondItem="v0X-JU-4vd" secondAttribute="centerX" id="qDh-x4-0YV"/>
-                                </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="LMZ-Sf-Hn7"/>
-                                    </mask>
-                                </variation>
-                                <variation key="heightClass=compact-widthClass=compact">
-                                    <mask key="constraints">
-                                        <include reference="LMZ-Sf-Hn7"/>
-                                    </mask>
-                                </variation>
-                            </view>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="HSs-Te-s3x">
-                                <rect key="frame" x="48" y="79" width="294" height="62"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="62" id="G2k-qc-MOL"/>
-                                    <constraint firstAttribute="height" constant="40" id="ayt-8O-zDk"/>
-                                </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="ayt-8O-zDk"/>
-                                    </mask>
-                                </variation>
-                                <variation key="heightClass=compact-widthClass=compact">
-                                    <mask key="constraints">
-                                        <include reference="ayt-8O-zDk"/>
-                                    </mask>
-                                </variation>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="53t-Hq-IZI" customClass="IKRoundButton" customModule="kDriveCore">
-                                <rect key="frame" x="155" y="702" width="80" height="80"/>
-                                <color key="backgroundColor" name="infomaniakColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="80" id="9nz-Tp-P0E"/>
-                                    <constraint firstAttribute="width" constant="40" id="BYQ-Iq-jEG"/>
-                                    <constraint firstAttribute="height" constant="40" id="IbL-K4-3ai"/>
-                                    <constraint firstAttribute="width" secondItem="53t-Hq-IZI" secondAttribute="height" multiplier="1:1" id="Uie-vN-qBJ"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal" image="arrow-right">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </state>
-                                <state key="disabled">
-                                    <color key="titleColor" name="blueColor"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="elevated" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="BYQ-Iq-jEG"/>
-                                        <exclude reference="IbL-K4-3ai"/>
-                                    </mask>
-                                </variation>
-                                <variation key="heightClass=compact-widthClass=compact">
-                                    <mask key="constraints">
-                                        <exclude reference="BYQ-Iq-jEG"/>
-                                        <exclude reference="IbL-K4-3ai"/>
-                                    </mask>
-                                </variation>
-                                <connections>
-                                    <action selector="nextButtonPressed:" destination="wQU-0Z-Dua" eventType="touchUpInside" id="Zex-hO-vqr"/>
-                                </connections>
-                            </button>
-                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="Ygk-pb-gfq">
-                                <rect key="frame" x="24" y="633" width="342" height="25"/>
-                                <color key="pageIndicatorTintColor" systemColor="systemGray4Color"/>
-                                <color key="currentPageIndicatorTintColor" name="infomaniakColor"/>
-                            </pageControl>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="jln-yN-Yav"/>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
-                        <constraints>
-                            <constraint firstItem="jln-yN-Yav" firstAttribute="trailing" secondItem="HSs-Te-s3x" secondAttribute="trailing" constant="48" id="1v3-kh-cuu"/>
-                            <constraint firstItem="AYI-gW-lNx" firstAttribute="trailing" secondItem="jln-yN-Yav" secondAttribute="trailing" id="5x4-vz-apT"/>
-                            <constraint firstItem="v0X-JU-4vd" firstAttribute="centerX" secondItem="Gxt-p0-BqF" secondAttribute="centerX" id="KlX-Gg-9h6"/>
-                            <constraint firstItem="v0X-JU-4vd" firstAttribute="bottom" secondItem="jln-yN-Yav" secondAttribute="bottom" id="LSi-Dw-VDg"/>
-                            <constraint firstItem="jln-yN-Yav" firstAttribute="trailing" secondItem="Ygk-pb-gfq" secondAttribute="trailing" constant="24" id="Ofe-1x-6jK"/>
-                            <constraint firstItem="v0X-JU-4vd" firstAttribute="leading" secondItem="jln-yN-Yav" secondAttribute="leading" priority="999" constant="24" id="QV3-9v-ood"/>
-                            <constraint firstItem="Rkb-an-uwN" firstAttribute="leading" secondItem="Gxt-p0-BqF" secondAttribute="leading" id="Tus-ke-tlb"/>
-                            <constraint firstItem="53t-Hq-IZI" firstAttribute="centerX" secondItem="v0X-JU-4vd" secondAttribute="centerX" id="agt-Uc-JSM"/>
-                            <constraint firstItem="v0X-JU-4vd" firstAttribute="top" secondItem="Ygk-pb-gfq" secondAttribute="bottom" constant="16" id="hSg-aq-Oov"/>
-                            <constraint firstItem="HSs-Te-s3x" firstAttribute="centerX" secondItem="Gxt-p0-BqF" secondAttribute="centerX" id="hkt-eB-AXe"/>
-                            <constraint firstItem="AYI-gW-lNx" firstAttribute="leading" secondItem="jln-yN-Yav" secondAttribute="leading" id="iYg-0K-07Z"/>
-                            <constraint firstItem="HSs-Te-s3x" firstAttribute="top" secondItem="AYI-gW-lNx" secondAttribute="bottom" constant="-24" id="inh-wa-9zC"/>
-                            <constraint firstItem="Ygk-pb-gfq" firstAttribute="leading" secondItem="jln-yN-Yav" secondAttribute="leading" constant="24" id="kIA-hL-HEY"/>
-                            <constraint firstItem="v0X-JU-4vd" firstAttribute="top" secondItem="Ygk-pb-gfq" secondAttribute="bottom" id="lQX-Lm-ILK"/>
-                            <constraint firstItem="Ygk-pb-gfq" firstAttribute="top" secondItem="Rkb-an-uwN" secondAttribute="bottom" id="mgh-x2-YkZ"/>
-                            <constraint firstItem="HSs-Te-s3x" firstAttribute="leading" secondItem="jln-yN-Yav" secondAttribute="leading" constant="48" id="o6v-dA-XDi"/>
-                            <constraint firstItem="HSs-Te-s3x" firstAttribute="top" secondItem="jln-yN-Yav" secondAttribute="top" constant="32" id="qZh-PA-Q39"/>
-                            <constraint firstItem="Rkb-an-uwN" firstAttribute="top" secondItem="Gxt-p0-BqF" secondAttribute="top" id="vS1-qN-ZUi"/>
-                            <constraint firstItem="Rkb-an-uwN" firstAttribute="trailing" secondItem="Gxt-p0-BqF" secondAttribute="trailing" id="wHZ-3L-OY8"/>
-                            <constraint firstItem="AYI-gW-lNx" firstAttribute="top" secondItem="jln-yN-Yav" secondAttribute="top" id="xb4-wy-N3j"/>
-                            <constraint firstItem="53t-Hq-IZI" firstAttribute="centerY" secondItem="v0X-JU-4vd" secondAttribute="centerY" id="yt2-UO-7qI"/>
-                            <constraint firstItem="jln-yN-Yav" firstAttribute="trailing" secondItem="v0X-JU-4vd" secondAttribute="trailing" priority="999" constant="24" id="yuM-HE-RRd"/>
-                        </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="inh-wa-9zC"/>
-                                <exclude reference="lQX-Lm-ILK"/>
-                            </mask>
-                        </variation>
-                        <variation key="heightClass=compact-widthClass=compact">
-                            <mask key="constraints">
-                                <include reference="inh-wa-9zC"/>
-                                <include reference="lQX-Lm-ILK"/>
-                            </mask>
-                        </variation>
-                    </view>
-                    <connections>
-                        <outlet property="buttonContentView" destination="v0X-JU-4vd" id="CND-Zr-eRe"/>
-                        <outlet property="closeBarButtonItem" destination="S4s-1x-x6z" id="8bG-YK-u1K"/>
-                        <outlet property="collectionView" destination="Rkb-an-uwN" id="9cZ-80-H7j"/>
-                        <outlet property="collectionViewTopConstraint" destination="vS1-qN-ZUi" id="UDE-QA-7La"/>
-                        <outlet property="navigationBar" destination="AYI-gW-lNx" id="PA5-u2-lM6"/>
-                        <outlet property="nextButton" destination="53t-Hq-IZI" id="me3-U9-Y4B"/>
-                        <outlet property="nextButtonHeight" destination="9nz-Tp-P0E" id="RyY-l1-PKX"/>
-                        <outlet property="pageControl" destination="Ygk-pb-gfq" id="AMG-rA-tc0"/>
-                        <outlet property="registerButton" destination="1Ws-Ei-OPK" id="623-dh-mwe"/>
-                        <outlet property="registerButtonHeight" destination="z06-T3-LeA" id="7NR-SS-nit"/>
-                        <outlet property="signInButton" destination="iEM-pL-yBh" id="dfy-a3-GAO"/>
-                        <outlet property="signInButtonHeight" destination="z6P-Jy-Pa5" id="dNh-lR-87u"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="yo7-cx-Rb3" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="108.69565217391305" y="643.52678571428567"/>
-        </scene>
         <!--Drive Error View Controller-->
         <scene sceneID="Zye-tK-ZkE">
             <objects>
@@ -285,7 +36,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="EAA-pP-XDD">
-                                <rect key="frame" x="48" y="91" width="294" height="62"/>
+                                <rect key="frame" x="48" y="138" width="294" height="62"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="62" id="a9W-Hv-uK5"/>
                                 </constraints>
@@ -330,7 +81,7 @@
                                 </constraints>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="nYe-2W-A5z">
-                                <rect key="frame" x="24" y="670" width="342" height="140"/>
+                                <rect key="frame" x="24" y="636" width="342" height="140"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1ka-pK-vme" customClass="IKLargeButton" customModule="kDriveCore">
                                         <rect key="frame" x="0.0" y="0.0" width="342" height="60"/>
@@ -424,13 +175,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="g4c-X4-Qk2">
-                                <rect key="frame" x="48" y="91" width="294" height="62"/>
+                                <rect key="frame" x="48" y="138" width="294" height="62"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="62" id="DNC-yc-Mkk"/>
                                 </constraints>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QKz-Y6-C7W" customClass="IKLargeButton" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="615" width="342" height="60"/>
+                                <rect key="frame" x="24" y="581" width="342" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="3EF-Mn-aFf"/>
                                 </constraints>
@@ -546,7 +297,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow-right" width="24" height="24"/>
         <image name="lock_infomaniak" width="187" height="187"/>
         <image name="logo" width="209" height="56"/>
         <image name="no-drive" width="89" height="86"/>
@@ -562,20 +312,14 @@
         <namedColor name="infomaniakColor">
             <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <namedColor name="primaryButtonColor">
-            <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemGray4Color">
-            <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

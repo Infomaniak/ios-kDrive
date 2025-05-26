@@ -24,6 +24,7 @@ let packageSettings = PackageSettings(
         "InfomaniakCore": .framework,
         "InfomaniakDI": .framework,
         "InfomaniakLogin": .framework,
+        "InfomaniakOnboarding": .framework,
         "InternalCollectionsUtilities": .framework,
         "Kingfisher": .framework,
         "LocalizeKit": .framework,
@@ -35,6 +36,8 @@ let packageSettings = PackageSettings(
         "NIO": .framework,
         "RealmSwift": .framework,
         "Realm": .framework,
+        "VersionChecker": .framework,
+        "_LottieStub": .framework,
         "_NIOBase64": .framework,
         "_NIODataStructures": .framework
     ]
@@ -50,6 +53,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.3.0")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "18.8.0")),
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "1.0.4")),
+        .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.2.3")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.4")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),

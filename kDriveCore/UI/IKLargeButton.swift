@@ -46,12 +46,11 @@ import UIKit
         }
     }
 
-    public var disabledBackgroundColor = KDriveResourcesAsset.buttonDisabledBackgroundColor.color
-
     public struct Style: RawRepresentable {
         public var titleFont: UIFont
         public var titleColor: UIColor
         public var backgroundColor: UIColor
+        public var disabledBackgroundColor: UIColor
 
         public static let primaryButton = Style(
             titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
@@ -71,15 +70,29 @@ import UIKit
             backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color,
             rawValue: "whiteButton"
         )
+        public static let plainButton = Style(
+            titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium),
+            titleColor: KDriveResourcesAsset.infomaniakColor.color,
+            backgroundColor: .clear,
+            disabledBackgroundColor: .clear,
+            rawValue: "plainButton"
+        )
 
-        static let allValues = [primaryButton, secondaryButton, whiteButton]
+        static let allValues = [primaryButton, secondaryButton, whiteButton, plainButton]
 
         public var rawValue: String
 
-        init(titleFont: UIFont, titleColor: UIColor, backgroundColor: UIColor, rawValue: RawValue) {
+        init(
+            titleFont: UIFont,
+            titleColor: UIColor,
+            backgroundColor: UIColor,
+            disabledBackgroundColor: UIColor = KDriveResourcesAsset.buttonDisabledBackgroundColor.color,
+            rawValue: RawValue
+        ) {
             self.titleFont = titleFont
             self.titleColor = titleColor
             self.backgroundColor = backgroundColor
+            self.disabledBackgroundColor = disabledBackgroundColor
             self.rawValue = rawValue
         }
 
@@ -124,8 +137,8 @@ import UIKit
     }
 
     func setBackgroundColor() {
-        tintColor = isEnabled ? style.backgroundColor : disabledBackgroundColor
-        backgroundColor = isEnabled ? style.backgroundColor : disabledBackgroundColor
+        tintColor = isEnabled ? style.backgroundColor : style.disabledBackgroundColor
+        backgroundColor = isEnabled ? style.backgroundColor : style.disabledBackgroundColor
     }
 
     func setElevation() {
