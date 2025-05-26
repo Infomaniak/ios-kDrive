@@ -36,6 +36,10 @@ class WaveViewController: UIViewController {
     let slides: [Slide]
     let dismissHandler: (() -> Void)?
 
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        traitCollection.horizontalSizeClass == .compact ? .portrait : .all
+    }
+
     init(slides: [Slide], dismissHandler: (() -> Void)? = nil) {
         self.slides = slides
         self.dismissHandler = dismissHandler
