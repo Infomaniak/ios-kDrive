@@ -81,18 +81,18 @@ class WaveViewController: UIViewController {
         ])
     }
 
-    private func loginDelegateHandler(signInButton: UIButton, registerButton: UIButton) -> LoginDelegateHandler {
+    private func loginDelegateHandler(signInButton: IKLargeButton, registerButton: IKLargeButton) -> LoginDelegateHandler {
         let loginDelegateHandler = LoginDelegateHandler()
         loginDelegateHandler.didStartLoginCallback = {
-            signInButton.isEnabled = false
+            signInButton.setLoading(true)
             registerButton.isEnabled = false
         }
         loginDelegateHandler.didCompleteLoginCallback = {
-            signInButton.isEnabled = true
+            signInButton.setLoading(false)
             registerButton.isEnabled = true
         }
         loginDelegateHandler.didFailLoginWithErrorCallback = { _ in
-            signInButton.isEnabled = true
+            signInButton.setLoading(false)
             registerButton.isEnabled = true
         }
         return loginDelegateHandler
