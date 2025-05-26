@@ -159,14 +159,20 @@ class WaveViewController: UIViewController {
         stackView.addArrangedSubview(registerButton)
         containerView.addSubview(stackView)
 
+        let leadingAnchorConstraint = stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor,
+                                                                         constant: UIConstants.Padding.standard)
+        leadingAnchorConstraint.priority = .defaultHigh
+        let trailingAnchorConstraint = stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor,
+                                                                           constant: -UIConstants.Padding.standard)
+        trailingAnchorConstraint.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
             registerButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
             signInButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
             stackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor,
-                                               constant: UIConstants.Padding.standard),
-            stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor,
-                                                constant: -UIConstants.Padding.standard),
+            stackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            leadingAnchorConstraint,
+            trailingAnchorConstraint,
             stackView.widthAnchor.constraint(lessThanOrEqualToConstant: 350)
         ])
     }

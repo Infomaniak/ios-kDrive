@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "fd233a30ae84458b6e794948188bcd39975ac2f9",
-        "version" : "1.2.3"
+        "revision" : "4852806cba8001d56ded1d305f6427851ec74a48",
+        "version" : "1.2.4"
       }
     },
     {
