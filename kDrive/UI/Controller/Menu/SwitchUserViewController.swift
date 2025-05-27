@@ -46,12 +46,6 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        infomaniakLogin.setupWebviewNavbar(title: "",
-                                           titleColor: nil,
-                                           color: nil,
-                                           buttonColor: nil,
-                                           clearCookie: true,
-                                           timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
 
         accounts = accountManager.accounts.values

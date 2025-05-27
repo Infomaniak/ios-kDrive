@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AuthenticationServices
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -488,14 +489,17 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showLogin(delegate: InfomaniakLoginDelegate) {
-        guard let topMostViewController else {
+        guard let windowScene = window?.windowScene else {
             return
         }
 
         matomo.track(eventWithCategory: .account, name: "openLoginWebview")
-        infomaniakLogin.webviewLoginFrom(viewController: topMostViewController,
-                                         hideCreateAccountButton: true,
-                                         delegate: delegate)
+        infomaniakLogin.asWebAuthenticationLoginFrom(
+            anchor: ASPresentationAnchor(windowScene: windowScene),
+            useEphemeralSession: true,
+            hideCreateAccountButton: true,
+            delegate: delegate
+        )
     }
 
     // MARK: AppExtensionRouter
