@@ -177,7 +177,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     private lazy var addButton: UIButton = {
         var imageButtonConfiguration = UIButton.Configuration.filled()
-        imageButtonConfiguration.image = KDriveResourcesAsset.plus.image
+        imageButtonConfiguration.image = UIImage(
+            systemName: "plus",
+            withConfiguration: UIImage.SymbolConfiguration(font: TextStyle.header3.font)
+        )
         imageButtonConfiguration.imagePlacement = .leading
         imageButtonConfiguration.imagePadding = UIConstants.Padding.small
         imageButtonConfiguration.background.cornerRadius = UIConstants.Button.cornerRadius
