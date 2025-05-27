@@ -83,10 +83,12 @@ final class SelectFolderViewController: FileListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let bottomPadding = 32.0
+
         collectionView.contentInset = UIEdgeInsets(
             top: 0,
             left: 0,
-            bottom: UIConstants.List.floatingButtonPaddingBottom,
+            bottom: UIConstants.List.floatingButtonPaddingBottom + bottomPadding,
             right: 0
         )
 
@@ -95,7 +97,7 @@ final class SelectFolderViewController: FileListViewController {
         NSLayoutConstraint.activate([
             selectFolderButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
             selectFolderButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
-            selectFolderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -32),
+            selectFolderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -bottomPadding),
             selectFolderButton.heightAnchor.constraint(equalToConstant: 60)
         ])
         setUpDirectory()
