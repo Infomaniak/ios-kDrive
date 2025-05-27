@@ -81,6 +81,19 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         case photoList
         case file(File)
 
+        func hash(into hasher: inout Hasher) {
+            switch self {
+            case .home:
+                hasher.combine("home")
+            case .photoList:
+                hasher.combine("photolist")
+            case .file(let file):
+                hasher.combine("file")
+                hasher.combine(file.uid)
+                hasher.combine(file.name)
+            }
+        }
+
         static func == (lhs: RootMenuDestination, rhs: RootMenuDestination) -> Bool {
             switch (lhs, rhs) {
             case (.home, .home):
@@ -88,7 +101,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             case (.photoList, .photoList):
                 return true
             case (.file(let lhsFile), .file(let rhsFile)):
-                return lhsFile.id == rhsFile.id
+                return lhsFile.uid == rhsFile.uid && lhsFile.name == rhsFile.name
             default:
                 return false
             }
