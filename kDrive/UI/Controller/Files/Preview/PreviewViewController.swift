@@ -432,7 +432,15 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.editButton.transform = hideButton
             self.openButton.transform = hideButton
         }
-        floatingPanelViewController.move(to: fullScreenPreview ? .hidden : .tip, animated: true)
+        hideFloatingPanel(fullScreenPreview)
+    }
+
+    func hideFloatingPanel(_ hide: Bool) {
+        if hide {
+            floatingPanelViewController.dismiss(animated: true)
+        } else {
+            present(floatingPanelViewController, animated: true)
+        }
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

@@ -582,9 +582,25 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         #endif
     }
 
+    #if !ISEXTENSION
+    private func findPreviewViewController() -> PreviewViewController? {
+        if let detailsNavigationViewController = splitViewController?.viewController(for: .secondary) as? UINavigationController,
+           let previewViewController = detailsNavigationViewController.topViewController as? PreviewViewController {
+            return previewViewController
+        }
+        return nil
+    }
+    #endif
+
     func buttonMenuClicked() {
         #if !ISEXTENSION
-        let menuViewController = MenuViewController(driveFileManager: driveFileManager, isModallyPresented: true)
+        let previewViewController = findPreviewViewController()
+        previewViewController?.hideFloatingPanel(true)
+
+        let menuViewController = MenuViewController(driveFileManager: driveFileManager, isModallyPresented: true) {
+            previewViewController?.hideFloatingPanel(false)
+        }
+
         let menuNavigationController = UINavigationController(rootViewController: menuViewController)
         menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
             systemItem: .stop,

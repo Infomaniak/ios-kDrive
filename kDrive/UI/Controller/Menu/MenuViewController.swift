@@ -73,12 +73,14 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     private var currentAccount: Account?
     private var needsContentUpdate = false
     private let isModallyPresented: Bool
+    private let onDismiss: (() -> Void)?
 
-    init(driveFileManager: DriveFileManager, isModallyPresented: Bool = false) {
+    init(driveFileManager: DriveFileManager, isModallyPresented: Bool = false, onDismiss: (() -> Void)? = nil) {
         @InjectService var manager: AccountManageable
         currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
         self.isModallyPresented = isModallyPresented
+        self.onDismiss = onDismiss
         super.init(style: .plain)
 
         observeUploadCount()
@@ -141,6 +143,11 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         updateContentIfNeeded()
         matomo.track(view: [MatomoUtils.View.menu.displayName])
         saveSceneState()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        onDismiss?()
     }
 
     func updateContentIfNeeded() {
