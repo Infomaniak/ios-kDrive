@@ -81,7 +81,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         return floatingPanelViewController
     }
 
-    override func viewDidLayoutSubviews() { // Call après que tous les éléments soient correctement positionnés
+    override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
         if #available(iOS 16.0, *), !hasConfiguredDetents,

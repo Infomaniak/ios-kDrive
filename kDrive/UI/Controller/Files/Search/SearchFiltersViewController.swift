@@ -226,13 +226,13 @@ class SearchFiltersViewController: UITableViewController {
                 customDateOption = .custom(DateInterval(start: Date(), duration: 0))
             }
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
-            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(
+            let sheetViewController = FloatingPanelSelectOptionViewController<DateOption>.instantiateSheet(
                 options: allCases,
                 selectedOption: filters.date,
                 headerTitle: filterType.title,
                 delegate: self
             )
-            present(floatingPanelController, animated: true)
+            present(sheetViewController, animated: true)
             return nil
 
         case .type:
