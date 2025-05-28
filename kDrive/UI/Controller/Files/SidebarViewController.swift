@@ -202,8 +202,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         getItemsSnapshot(isCompactView: isCompactView)
     }
 
-    private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
-
     private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
@@ -569,19 +567,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         guard let currentDirectoryOrRoot else {
             return
         }
-        floatingPanelViewController = AdaptiveDriveFloatingPanelController()
 
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectoryOrRoot
         )
-        guard let floatingPanelViewController else { return }
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = plusButtonFloatingPanel
 
-        floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
-        floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
-        present(floatingPanelViewController, animated: true)
+        plusButtonFloatingPanel.modalPresentationStyle = .popover
+        plusButtonFloatingPanel.popoverPresentationController?.sourceView = addButton
+        present(plusButtonFloatingPanel, animated: true)
         #endif
     }
 

@@ -207,7 +207,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
         }
         dismiss(animated: true)
 
-        guard let mainTabViewController = parent?.presentingViewController else {
+        guard let mainTabViewController = presentingViewController else {
             return
         }
 
