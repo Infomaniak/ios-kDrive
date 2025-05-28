@@ -29,7 +29,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+public class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
     @LazyInjectService private var matomo: MatomoUtils
 
     let currentDirectory: File
@@ -37,6 +37,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
     let presentedFromPlusButton: Bool
     let presentedAboveFileList: Bool
+    let mediaHelper: OpenMediaHelper
 
     private struct PlusButtonMenuAction: Equatable {
         let name: String
@@ -120,6 +121,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         currentDirectory = folder
         self.presentedFromPlusButton = presentedFromPlusButton
         self.presentedAboveFileList = presentedAboveFileList
+        mediaHelper = OpenMediaHelper(currentDirectory: folder, driveFileManager: driveFileManager)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -128,7 +130,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
@@ -149,7 +151,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         #endif
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 && indexPath.section == 0 {
             return UIConstants.FloatingPanel.headerHeight
         } else {
@@ -157,18 +159,18 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         }
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    override public func numberOfSections(in tableView: UITableView) -> Int {
         return content.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 1
         }
         return content[section].count
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
             cell.titleLabel.text = currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
@@ -199,13 +201,13 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             return
         }
         dismiss(animated: true)
 
-        guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else {
+        guard let mainTabViewController = presentingViewController else {
             return
         }
 
@@ -237,22 +239,21 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         return true
     }
 
-    func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
+    public func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
         // Remove the panel when it's pushed one third down
         return location.y > fpc.backdropView.frame.height * 1 / 3
     }
 
     // MARK: Actions
 
-    private func importAction(_ mainTabViewController: MainTabViewController) {
+    private func importAction(_ mainTabViewController: UIViewController) {
         let documentPicker = DriveImportDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
         documentPicker.importDrive = driveFileManager.drive
         documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
-        documentPicker.delegate = mainTabViewController
         mainTabViewController.present(documentPicker, animated: true)
     }
 
-    private func folderAction(_ mainTabViewController: MainTabViewController) {
+    private func folderAction(_ mainTabViewController: UIViewController) {
         let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(
             parentDirectory: currentDirectory,
             driveFileManager: driveFileManager
@@ -260,7 +261,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         mainTabViewController.present(newFolderViewController, animated: true)
     }
 
-    private func scanAction(_ mainTabViewController: MainTabViewController) {
+    private func scanAction(_ mainTabViewController: UIViewController) {
         guard VNDocumentCameraViewController.isSupported else {
             DDLogError("VNDocumentCameraViewController is not supported on this device")
             return
@@ -277,12 +278,11 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         mainTabViewController.present(navigationViewController, animated: true)
     }
 
-    private func mediaAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
-        let openMediaHelper = OpenMediaHelper(currentDirectory: currentDirectory, driveFileManager: driveFileManager)
-        openMediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
+    private func mediaAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {
+        mediaHelper.openMedia(mainTabViewController, action == .importMediaAction ? .library : .camera)
     }
 
-    private func documentAction(_ mainTabViewController: MainTabViewController, action: PlusButtonMenuAction) {
+    private func documentAction(_ mainTabViewController: UIViewController, action: PlusButtonMenuAction) {
         let alertViewController = AlertDocViewController(fileType: action.docType,
                                                          directory: currentDirectory.freezeIfNeeded(),
                                                          driveFileManager: driveFileManager)

@@ -119,6 +119,14 @@ public struct AppRouter: AppNavigable {
         return topViewController
     }
 
+    @MainActor public var rootViewController: UIViewController? {
+        guard let rootViewController = window?.rootViewController as? UIViewController else {
+            return nil
+        }
+
+        return rootViewController
+    }
+
     // MARK: RouterRootNavigable
 
     @MainActor public func setRootViewController(_ viewController: UIViewController,
@@ -165,6 +173,23 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    @MainActor private func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
+        guard let rootViewController = window?.rootViewController else { return nil }
+        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
+        if rootHorizontalSizeClass == .compact {
+            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                Log.sceneDelegate("unable to access tabBarViewController", level: .error)
+                return nil
+            }
+
+            let selectedIndex = mainTabViewController.selectedIndex
+            let viewControllers = mainTabViewController.viewControllers
+            return viewControllers?[safe: selectedIndex]
+        } else {
+            return tabBarViewController?.viewControllers.last
+        }
+    }
+
     /// Entry point for scene restoration
     @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
         let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
@@ -184,7 +209,7 @@ public struct AppRouter: AppNavigable {
         }
 
         Task { @MainActor in
-            guard restoration, let tabBarViewController else {
+            guard restoration else {
                 return
             }
 
@@ -193,16 +218,17 @@ public struct AppRouter: AppNavigable {
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
                 return
             }
-
             guard let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
-                  previousDriveId == driveFileManager.drive.id else {
+                  previousDriveId == driveFileManager.driveId else {
                 Log.sceneDelegate("driveId do not match for restore :\(sceneUserInfo)", level: .error)
                 return
             }
 
-            let selectedIndex = tabBarViewController.selectedIndex
-            let viewControllers = tabBarViewController.viewControllers
-            guard let rootNavigationController = viewControllers?[safe: selectedIndex] as? UINavigationController else {
+            guard let viewController = getControllerForRestoration(tabBarViewController: tabBarViewController) else {
+                Log.sceneDelegate("unable to access viewControllers", level: .error)
+                return
+            }
+            guard let rootNavigationController = viewController as? UINavigationController else {
                 Log.sceneDelegate("unable to access navigationController", level: .error)
                 return
             }
@@ -363,19 +389,18 @@ public struct AppRouter: AppNavigable {
 
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) -> UITabBarController? {
+                                                  selectedIndex: Int?) -> UISplitViewController? {
         guard let window else {
             SentryDebug.captureNoWindow()
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? MainTabViewController)?.driveFileManager.drive.objectId
+        let currentDriveObjectId = (window.rootViewController as? RootSplitViewController)?.driveFileManager.drive.objectId
         guard currentDriveObjectId != driveFileManager.drive.objectId else {
             return nil
         }
 
-        let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager,
-                                                         selectedIndex: selectedIndex)
+        let tabBarViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
 
         window.rootViewController = tabBarViewController
         window.makeKeyAndVisible()
@@ -641,8 +666,8 @@ public struct AppRouter: AppNavigable {
         }
 
         let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-        let rootViewController = window?.rootViewController as? UpdateAccountDelegate
-        rootViewController?.didUpdateCurrentAccountInformations(account)
+        let viewController = window?.rootViewController as? UpdateAccountDelegate
+        viewController?.didUpdateCurrentAccountInformations(account)
 
         if let oldDriveId,
            let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),
@@ -795,14 +820,11 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
-            return
-        }
+        guard let rootViewController = window?.rootViewController as? UISplitViewController else { return }
+        guard let viewController = getControllerForRestoration(tabBarViewController: rootViewController) else { return }
 
-        rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navController = rootViewController.selectedViewController as? UINavigationController else {
+        viewController.dismiss(animated: false) {
+            guard let navController = viewController as? UINavigationController else {
                 return
             }
 
@@ -816,7 +838,7 @@ public struct AppRouter: AppNavigable {
                 navController.popToRootViewController(animated: false)
             }
 
-            guard let rootMenuViewController = navController.topViewController as? RootMenuViewController else {
+            guard let rootMenuViewController = navController.topViewController else {
                 return
             }
 

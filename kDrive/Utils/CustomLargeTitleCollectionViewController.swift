@@ -17,9 +17,13 @@
  */
 
 import InfomaniakCoreCommonUI
+import InfomaniakDI
+import kDriveCore
 import UIKit
 
 class CustomLargeTitleCollectionViewController: UICollectionViewController {
+    @InjectService public var appRouter: AppNavigable
+
     private var navigationBarHeight: CGFloat {
         return navigationController?.navigationBar.frame.height ?? 0
     }
@@ -27,6 +31,11 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     var headerViewHeight: CGFloat = 0
 
     private var originalTitle: String?
+
+    public var isCompactView: Bool {
+        guard let rootViewController = appRouter.rootViewController else { return false }
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +45,21 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         navigationItem.hideBackButtonText()
     }
 
-    static func generateHeaderItem() -> NSCollectionLayoutBoundarySupplementaryItem {
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        guard !isCompactView else {
+            return
+        }
+
+        coordinator.animate(alongsideTransition: { _ in
+            self.updateNavigationBarAppearance()
+        }, completion: { _ in
+            self.updateNavigationBarAppearance()
+        })
+    }
+
+    static func generateHeaderItem(leading: CGFloat = 0) -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .estimated(40))
         let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
@@ -44,7 +67,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
             elementKind: UICollectionView.elementKindSectionHeader,
             alignment: .top
         )
-        headerItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+        headerItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: leading, bottom: 0, trailing: 24)
         return headerItem
     }
 

@@ -47,7 +47,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var normalFolderHierarchy = true
     private var initialLoading = true
     private var presentationOrigin = PresentationOrigin.fileList
-    private var centerIndexPathBeforeRotate: IndexPath?
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             setTitle()
@@ -88,6 +87,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         navigationItem.hideBackButtonText()
 
+        collectionView.collectionViewLayout = createFullscreenLayout()
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
         collectionView.register(cellView: DownloadingPreviewCollectionViewCell.self)
         collectionView.register(cellView: ImagePreviewCollectionViewCell.self)
@@ -184,6 +184,24 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         observeFileUpdated()
     }
 
+    func createFullscreenLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                              heightDimension: .fractionalHeight(1.0))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                               heightDimension: .fractionalHeight(1.0))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration.scrollDirection = .horizontal
+        configuration.contentInsetsReference = .none
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
+        return layout
+    }
+
     @objc func tapPreview() {
         setFullscreen()
     }
@@ -270,9 +288,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        centerIndexPathBeforeRotate = currentIndex
+        let centerIndexPathBeforeRotate = currentIndex
         coordinator.animate { _ in
-            self.collectionView?.collectionViewLayout.invalidateLayout()
+            self.collectionView.scrollToItem(at: centerIndexPathBeforeRotate, at: .centeredVertically, animated: false)
         }
     }
 
@@ -290,11 +308,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    var isViewDidLayoutCallFirstTime = true
-
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Safe areas are set here
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
     }
 
@@ -432,7 +447,15 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.editButton.transform = hideButton
             self.openButton.transform = hideButton
         }
-        floatingPanelViewController.move(to: fullScreenPreview ? .hidden : .tip, animated: true)
+        hideFloatingPanel(fullScreenPreview)
+    }
+
+    func hideFloatingPanel(_ hide: Bool) {
+        if hide {
+            floatingPanelViewController.dismiss(animated: true)
+        } else {
+            present(floatingPanelViewController, animated: true)
+        }
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -779,33 +802,6 @@ extension PreviewViewController: UICollectionViewDataSource {
             cell.previewDelegate = self
             return cell
         }
-    }
-}
-
-// MARK: - Collection view delegate flow layout
-
-extension PreviewViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        return collectionView.bounds.size
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        targetContentOffsetForProposedContentOffset proposedContentOffset: CGPoint
-    ) -> CGPoint {
-        guard let oldCenter = centerIndexPathBeforeRotate else {
-            return proposedContentOffset
-        }
-
-        let attrs = collectionView.layoutAttributesForItem(at: oldCenter)
-
-        let newOriginForOldIndex = attrs?.frame.origin
-
-        return newOriginForOldIndex ?? proposedContentOffset
     }
 }
 

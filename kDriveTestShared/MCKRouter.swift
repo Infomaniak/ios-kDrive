@@ -25,6 +25,8 @@ import UIKit
 
 /// A NOOP implementation of AppNavigable
 public final class MCKRouter: AppNavigable {
+    public var rootViewController: UIViewController?
+
     public init(topMostViewController: UIViewController? = nil) {
         self.topMostViewController = topMostViewController
     }
@@ -58,7 +60,7 @@ public final class MCKRouter: AppNavigable {
     }
 
     public func showMainViewController(driveFileManager: kDriveCore.DriveFileManager,
-                                       selectedIndex: Int?) -> UITabBarController? {
+                                       selectedIndex: Int?) -> UISplitViewController? {
         logNoop()
         return nil
     }

@@ -72,11 +72,15 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     private var sections: [Section] = []
     private var currentAccount: Account?
     private var needsContentUpdate = false
+    private let isModallyPresented: Bool
+    private let onDismiss: (() -> Void)?
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, isModallyPresented: Bool = false, onDismiss: (() -> Void)? = nil) {
         @InjectService var manager: AccountManageable
         currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
+        self.isModallyPresented = isModallyPresented
+        self.onDismiss = onDismiss
         super.init(style: .plain)
 
         observeUploadCount()
@@ -104,7 +108,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
         updateTableContent()
 
-        navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
+        navigationItem.title = isModallyPresented ? "" : KDriveResourcesStrings.Localizable.menuTitle
         navigationItem.hideBackButtonText()
 
         NotificationCenter.default.addObserver(
@@ -124,7 +128,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.setNavigationBarHidden(!isModallyPresented, animated: false)
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 
@@ -139,6 +143,11 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         updateContentIfNeeded()
         matomo.track(view: [MatomoUtils.View.menu.displayName])
         saveSceneState()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        onDismiss?()
     }
 
     func updateContentIfNeeded() {

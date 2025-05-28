@@ -35,7 +35,7 @@ public struct InExtensionRouter: AppNavigable {
 
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {}
 
-    public func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UITabBarController? {
+    public func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UISplitViewController? {
         return nil
     }
 
@@ -127,4 +127,6 @@ public struct InExtensionRouter: AppNavigable {
     public func updateTheme() {}
 
     public var topMostViewController: UIViewController?
+
+    public var rootViewController: UIViewController?
 }
