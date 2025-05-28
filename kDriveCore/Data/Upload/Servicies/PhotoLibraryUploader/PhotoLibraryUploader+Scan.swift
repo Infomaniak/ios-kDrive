@@ -24,6 +24,7 @@ import RealmSwift
 
 public protocol PhotoLibraryScanable {
     @discardableResult func scheduleNewPicturesForUpload() -> Int
+    func cancelScan()
 }
 
 extension PhotoLibraryUploader: PhotoLibraryScanable {
@@ -38,7 +39,8 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
 
         var newAssetsCount = 0
 
-        serialQueue.sync {
+        cancelScan()
+        workerTask = Task {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
@@ -52,10 +54,15 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             let syncDate = Date()
 
             do {
-                try addImageAssetsToUploadQueue(
+                try await addImageAssetsToUploadQueue(
                     assetsFetchResult: assetsFetchResult,
                     initial: frozenSettings.lastSync.timeIntervalSince1970 == 0
                 )
+
+                if Task.isCancelled {
+                    Log.photoLibraryUploader("Scan Task cancelled")
+                    return
+                }
 
                 try uploadsDatabase.writeTransaction { writableRealm in
                     updateLastSyncDate(syncDate, writableRealm: writableRealm)
@@ -73,6 +80,11 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         return newAssetsCount
     }
 
+    public func cancelScan() {
+        workerTask?.cancel()
+        workerTask = nil
+    }
+
     // MARK: - Private
 
     private func updateLastSyncDate(_ date: Date, writableRealm: Realm) {
@@ -82,8 +94,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
     }
 
-    private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>,
-                                             initial: Bool) throws {
+    private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>, initial: Bool) async throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
         guard let frozenSettings else {
             Log.photoLibraryUploader("no settings")
@@ -131,6 +142,12 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                     burstCount: &burstCount
                 )
 
+                if Task.isCancelled {
+                    Log.photoLibraryUploader("Scan Task cancelled")
+                    stop.pointee = true
+                    return
+                }
+
                 let bestResourceSHA256: String?
                 do {
                     bestResourceSHA256 = try asset.bestResourceSHA256
@@ -142,14 +159,13 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
 
                 Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
 
-                try? uploadsDatabase.writeTransaction { writableRealm in
-                    guard !expiringActivity.shouldTerminate else {
-                        Log.photoLibraryUploader("system is asking to terminate")
-                        writableRealm.cancelWrite()
-                        stop.pointee = true
-                        return
-                    }
+                guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
+                    Log.photoLibraryUploader("Scan Task cancelled")
+                    stop.pointee = true
+                    return
+                }
 
+                try? uploadsDatabase.writeTransaction { writableRealm in
                     // Check if picture uploaded before
                     guard !assetAlreadyUploaded(assetName: finalName,
                                                 localIdentifier: asset.localIdentifier,
@@ -183,6 +199,13 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                     // Lazy creation of sub folder if required in the upload file
                     if frozenSettings.createDatedSubFolders {
                         uploadFile.setDatedRelativePath()
+                    }
+
+                    guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
+                        Log.photoLibraryUploader("Scan Task cancelled in transaction")
+                        writableRealm.cancelWrite()
+                        stop.pointee = true
+                        return
                     }
 
                     // DB insertion
