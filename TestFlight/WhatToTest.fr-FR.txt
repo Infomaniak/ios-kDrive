@@ -1,5 +1,2 @@
-- Mécanisme de soumission de bug pour les employés
-- Optimisation du scan de la librairie photo
-- Optimisation de l'affichage de la galerie photo
-- Correction d'actions en selection multiple
-- Améliorations de la stabilité et corrections de bugs
+- Nouvelle vue iPadOS
+- Résolution de bugs

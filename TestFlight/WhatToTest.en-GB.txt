@@ -1,5 +1,2 @@
-- Bug report for staff members
-- Optimized photo sync scan
-- Optimized photo gallery display
-- Fixed some actions in multiple selection
-- Stability improvements and bug fixes
+- New iPadOS interface
+- Bug fixes
