@@ -42,8 +42,6 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     var selectedOption: T?
     var options = [T]()
 
-    private var hasConfiguredDetents = false
-
     weak var delegate: SelectDelegate?
 
     override func viewDidLoad() {
@@ -84,13 +82,12 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        if #available(iOS 16.0, *), !hasConfiguredDetents,
-           let sheet = sheetPresentationController {
-            tableView.layoutIfNeeded()
+        if #available(iOS 16.0, *),
+           let sheet = sheetPresentationController,
+           sheet.detents == [.large()] {
             let contentHeight = tableView.contentSize.height
 
             sheet.detents = [.custom { _ in contentHeight }]
-            hasConfiguredDetents = true
         }
     }
 
