@@ -34,21 +34,12 @@ public enum MainTabBarIndex: Int {
     case profile = 4
 }
 
-class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
+class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
     let driveFileManager: DriveFileManager
 
-    init(driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
         self.driveFileManager = driveFileManager
         super.init(style: .doubleColumn)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
 
         let sidebarViewController = SidebarViewController(
             driveFileManager: driveFileManager,
@@ -63,8 +54,16 @@ class RootViewController: UISplitViewController, SidebarViewControllerDelegate {
         let detailNav = UINavigationController(rootViewController: detailViewController)
 
         viewControllers = [sidebarNav, detailNav]
-        setViewController(MainTabViewController(driveFileManager: driveFileManager), for: .compact)
+        setViewController(
+            MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex),
+            for: .compact
+        )
         preferredDisplayMode = .oneBesideSecondary
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - SidebarViewControllerDelegate

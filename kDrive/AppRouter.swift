@@ -395,12 +395,12 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? RootViewController)?.driveFileManager.drive.objectId
+        let currentDriveObjectId = (window.rootViewController as? RootSplitViewController)?.driveFileManager.drive.objectId
         guard currentDriveObjectId != driveFileManager.drive.objectId else {
             return nil
         }
 
-        let tabBarViewController = RootViewController(driveFileManager: driveFileManager)
+        let tabBarViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
 
         window.rootViewController = tabBarViewController
         window.makeKeyAndVisible()
