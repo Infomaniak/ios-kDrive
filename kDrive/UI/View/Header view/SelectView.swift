@@ -23,11 +23,11 @@ import UIKit
 class SelectView: UIView {
     class MultipleSelectionActionButton: UIButton {
         private(set) var action: MultipleSelectionAction
-        private var onTap: () -> Void
+        private weak var delegate: FilesHeaderViewDelegate?
 
-        init(action: MultipleSelectionAction, onTap: @escaping () -> Void) {
+        init(action: MultipleSelectionAction, delegate: FilesHeaderViewDelegate?) {
             self.action = action
-            self.onTap = onTap
+            self.delegate = delegate
             super.init(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
             addTarget(self, action: #selector(didTap), for: .touchUpInside)
             setImage(action.icon.image, for: .normal)
@@ -36,7 +36,7 @@ class SelectView: UIView {
         }
 
         @objc private func didTap() {
-            onTap()
+            delegate?.multipleSelectionActionButtonPressed(self)
         }
 
         @available(*, unavailable)
@@ -66,10 +66,7 @@ class SelectView: UIView {
     func setActions(_ actions: [MultipleSelectionAction]) {
         actionsView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for action in actions {
-            var actionButton: MultipleSelectionActionButton!
-            actionButton = MultipleSelectionActionButton(action: action) { [weak self] in
-                self?.delegate?.multipleSelectionActionButtonPressed(actionButton)
-            }
+            let actionButton = MultipleSelectionActionButton(action: action, delegate: delegate)
             actionButton.tintColor = buttonTint
             actionsView.addArrangedSubview(actionButton)
         }
