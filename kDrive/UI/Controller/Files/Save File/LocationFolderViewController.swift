@@ -26,6 +26,7 @@ import UIKit
 
 class LocationFolderViewController: SidebarViewController {
     private var selectedIndexPath: IndexPath?
+    private let selectHandler: ((File) -> Void)?
     weak var locationDelegate: SelectFolderDelegate?
 
     private static let recentItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
@@ -101,10 +102,12 @@ class LocationFolderViewController: SidebarViewController {
         viewModel: FileListViewModel,
         selectMode: Bool,
         isCompactView: Bool,
-        locationDelegate: SelectFolderDelegate? = nil
+        locationDelegate: SelectFolderDelegate? = nil,
+        selectHandler: ((File) -> Void)? = nil
     ) {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate
+        self.selectHandler = selectHandler
         super.init(driveFileManager: driveFileManager, selectMode: selectMode, isCompactView: isCompactView)
     }
 
@@ -155,7 +158,11 @@ class LocationFolderViewController: SidebarViewController {
             )
         }
 
-        let destinationViewController = SelectFolderViewController(viewModel: destinationViewModel, delegate: locationDelegate)
+        let destinationViewController = SelectFolderViewController(
+            viewModel: destinationViewModel,
+            delegate: locationDelegate,
+            selectHandler: selectHandler
+        )
         destinationViewModel.onDismissViewController = { [weak destinationViewController] in
             destinationViewController?.dismiss(animated: true)
         }
