@@ -1,2 +1,1 @@
-- Nouvelle vue iPadOS
-- Résolution de bugs
+- Correction de la sélection d'un dossier
