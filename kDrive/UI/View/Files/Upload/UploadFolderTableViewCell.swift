@@ -42,7 +42,7 @@ class UploadFolderTableViewCell: InsetTableViewCell {
         } else {
             iconImageView.image = KDriveResourcesAsset.folderFilled.image
             iconImageView.tintColor = nil
-            folderLabel.text = folder.formattedLocalizedName(drive: drive)
+            folderLabel.text = folder.formattedLocalizedName
             subtitleLabel.text = folder.path
             subtitleLabel.isHidden = folder.path?.isEmpty != false
         }

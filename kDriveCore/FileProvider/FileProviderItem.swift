@@ -108,7 +108,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
     // MARK: Static
 
     public static func getFileName(file: File, drive: Drive?) -> String {
-        file.name.isEmpty ? "Root" : file.formattedLocalizedName(drive: drive)
+        file.name.isEmpty ? "Root" : file.formattedLocalizedName
     }
 
     public static func getStorageUrl(file: File, domain: NSFileProviderDomain?) -> URL {

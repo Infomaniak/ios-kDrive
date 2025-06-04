@@ -51,7 +51,7 @@ class LocationFolderViewController: SidebarViewController {
         var snapshot = DataSourceSnapshot()
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
-                name: $0.formattedLocalizedName(drive: driveFileManager.drive),
+                name: $0.formattedLocalizedName,
                 image: $0.icon,
                 destination: .file($0)
             )

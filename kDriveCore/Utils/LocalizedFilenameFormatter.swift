@@ -20,20 +20,11 @@ import Foundation
 import kDriveResources
 
 public extension File {
-    func formattedLocalizedName(drive: Drive? = nil) -> String {
-        let isFreePack = drive?.isFreePack ?? false
-        let packId = drive?.pack.drivePackId
-        let isIndividualDrive = packId == .solo || isFreePack
-        return Self.LocalizedFilenameFormatter(isIndividualDrive: isIndividualDrive).format(self)
+    var formattedLocalizedName: String {
+        return Self.LocalizedFilenameFormatter().format(self)
     }
 
     struct LocalizedFilenameFormatter: Foundation.FormatStyle, Codable, Equatable, Hashable {
-        let isIndividualDrive: Bool
-
-        init(isIndividualDrive: Bool) {
-            self.isIndividualDrive = isIndividualDrive
-        }
-
         public func format(_ value: File) -> String {
             switch value.visibility {
             case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder, .isInSharedSpace:
