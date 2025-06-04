@@ -1345,11 +1345,8 @@
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Most recent changes";
 
-/* loco:65a13fff84b88c92410f5052 */
-"localizedFilenamePrivateSpace" = "My files";
-
 /* loco:668cfa288f78f439cc044b92 */
-"localizedFilenamePrivateTeamSpace" = "My personal folder";
+"localizedFilenamePrivateTeamSpace" = "My folder";
 
 /* loco:65a140c3cdbe107c5a025352 */
 "localizedFilenameTeamSpace" = "Common folders";

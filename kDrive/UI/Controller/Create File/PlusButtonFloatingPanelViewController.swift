@@ -173,7 +173,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
     override public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.formattedLocalizedName(drive: driveFileManager.drive)
+            cell.titleLabel.text = currentDirectory.formattedLocalizedName
             cell.accessoryImageView.image = currentDirectory.icon
             cell.accessoryImageView.tintColor = currentDirectory.tintColor
             cell.separator?.isHidden = false

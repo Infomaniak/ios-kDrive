@@ -205,7 +205,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
         let userRootFolders = rootViewChildren?.compactMap {
             RootMenuItem(
-                name: $0.formattedLocalizedName(drive: driveFileManager.drive),
+                name: $0.formattedLocalizedName,
                 image: $0.icon,
                 destination: .file($0),
                 priority: 1
