@@ -1,1 +1,1 @@
-- Fix folder selection
+- Fix folder selection.
