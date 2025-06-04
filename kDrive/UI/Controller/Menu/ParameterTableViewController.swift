@@ -343,6 +343,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             matomo.track(eventWithCategory: .settings, name: "joinBetaProgram")
         case .feedback:
             present(BugTrackerViewController(), animated: true)
+            matomo.track(eventWithCategory: .settings, name: "feedback")
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
