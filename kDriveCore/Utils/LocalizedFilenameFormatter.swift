@@ -39,11 +39,7 @@ public extension File {
             case .root, .isSharedSpace, .isTeamSpaceFolder, .isInTeamSpaceFolder, .isInSharedSpace:
                 return value.name
             case .isPrivateSpace:
-                if isIndividualDrive {
-                    return KDriveResourcesStrings.Localizable.localizedFilenamePrivateSpace
-                } else {
-                    return KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
-                }
+                return KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
             case .isTeamSpace:
                 return KDriveResourcesStrings.Localizable.localizedFilenameTeamSpace
             case nil:
