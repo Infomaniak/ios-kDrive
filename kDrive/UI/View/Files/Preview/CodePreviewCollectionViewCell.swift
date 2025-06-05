@@ -132,7 +132,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     private func displayContent(with file: File, content: String) async throws {
         if file.extension == "md" || file.extension == "markdown" {
-            displayMarkdown(for: content)
+            await displayMarkdown(for: content)
             isCode = false
         } else {
             try await displayCode(for: content)
@@ -141,13 +141,20 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         activityView.stopAnimating()
     }
 
-    private func displayMarkdown(for content: String) {
-        textView.attributedText = markdownParser.parse(content)
+    private func displayMarkdown(for content: String) async {
+        let attributedText = await markdownParser.attributedString(for: content)
+        textView.attributedText = NSAttributedString(attributedText)
     }
 
     private func displayCode(for content: String) async throws {
         let theme: HighlightColors = UITraitCollection.current.userInterfaceStyle == .light ? .light(.xcode) : .dark(.xcode)
         let attributedText = try await Highlight().attributedText(content, colors: theme)
         textView.attributedText = NSAttributedString(attributedText)
+    }
+}
+
+extension MarkdownParser {
+    func attributedString(for rawMarkdown: String) async -> AttributedString {
+        return AttributedString(parse(rawMarkdown))
     }
 }
