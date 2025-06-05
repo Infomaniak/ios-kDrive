@@ -17,7 +17,7 @@
  */
 
 import CocoaLumberjackSwift
-import Highlightr
+import HighlightSwift
 import kDriveCore
 import kDriveResources
 import MarkdownKit
@@ -67,7 +67,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         return indicator
     }()
 
-    private let highlightr = Highlightr()
     private let markdownParser = MarkdownParser(font: UIFontMetrics.default.scaledFont(for: MarkdownParser.defaultFont),
                                                 color: .label,
                                                 enabledElements: .disabledAutomaticLink)
@@ -89,9 +88,15 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        if isCode {
-            // Update content
-            displayCode(for: textView.text)
+        guard isCode && previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
+            return
+        }
+        Task {
+            let lightModeText = textView.text ?? ""
+            textView.text = ""
+            activityView.startAnimating()
+            try? await displayCode(for: lightModeText)
+            activityView.stopAnimating()
         }
     }
 
@@ -107,19 +112,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         ])
     }
 
-    private func setTheme() {
-        let theme: String
-        switch UITraitCollection.current.userInterfaceStyle {
-        case .light:
-            theme = "a11y-light"
-        case .dark:
-            theme = "a11y-dark"
-        default:
-            theme = "default"
-        }
-        highlightr?.setTheme(to: theme)
-    }
-
     func configure(with file: File) {
         textView.text = ""
         activityView.startAnimating()
@@ -130,7 +122,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         Task {
             do {
                 let contentString = try await codePreviewWorker.readDataToStringInferEncoding(localUrl: localUrl)
-                displayContent(with: file, content: contentString)
+                try await displayContent(with: file, content: contentString)
             } catch {
                 DDLogError("Failed to read file content: \(error)")
                 previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
@@ -138,23 +130,24 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    private func displayContent(with file: File, content: String) {
-        activityView.stopAnimating()
+    private func displayContent(with file: File, content: String) async throws {
         if file.extension == "md" || file.extension == "markdown" {
             displayMarkdown(for: content)
             isCode = false
         } else {
-            displayCode(for: content)
+            try await displayCode(for: content)
             isCode = true
         }
+        activityView.stopAnimating()
     }
 
     private func displayMarkdown(for content: String) {
         textView.attributedText = markdownParser.parse(content)
     }
 
-    private func displayCode(for content: String) {
-        setTheme()
-        textView.attributedText = highlightr?.highlight(content)
+    private func displayCode(for content: String) async throws {
+        let theme: HighlightColors = UITraitCollection.current.userInterfaceStyle == .light ? .light(.xcode) : .dark(.xcode)
+        let attributedText = try await Highlight().attributedText(content, colors: theme)
+        textView.attributedText = NSAttributedString(attributedText)
     }
 }
