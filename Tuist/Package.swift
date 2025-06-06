@@ -73,7 +73,7 @@ let package = Package(
         .package(url: "https://github.com/swift-server-community/mqtt-nio", .upToNextMajor(from: "2.12.0")),
         .package(url: "https://github.com/airbnb/HorizonCalendar", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
+        .package(url: "https://github.com/appstefan/HighlightSwift", .upToNextMajor(from: "1.1.0")),
         .package(url: "https://github.com/bmoliveira/MarkdownKit", .upToNextMajor(from: "1.7.0")),
         .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1"))
     ]

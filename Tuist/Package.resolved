@@ -1,5 +1,5 @@
 {
-  "originHash" : "188f3915bdcbb3ac8f5159c318d06f02924918dae3c297f8ca2081f8273b1cca",
+  "originHash" : "b97e17a680ecfd79376a0f20f2a533345a568e84bb61fdf1eac2460aec8b7429",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -65,12 +65,12 @@
       }
     },
     {
-      "identity" : "highlightr",
+      "identity" : "highlightswift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/raspu/Highlightr",
+      "location" : "https://github.com/appstefan/HighlightSwift",
       "state" : {
-        "revision" : "bcf2d0590f32ac2528feb72d7e34f5b463801a47",
-        "version" : "2.2.1"
+        "revision" : "784ca3ccfc8a2cf724fbb2f06cb6ec3329424da3",
+        "version" : "1.1.0"
       }
     },
     {
