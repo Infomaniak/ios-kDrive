@@ -63,6 +63,7 @@ class LocationFolderViewController: SidebarViewController {
                 .filter("rawType == %@", FileType.dir.rawValue)
                 .filter("id > %@", DriveFileManager.constants.rootID)
                 .filter("parentId > %@", DriveFileManager.constants.rootID)
+                .filter("_capabilities.canWrite == true")
                 .sorted(byKeyPath: "lastModifiedAt", ascending: false)
                 .freeze()
         }.prefix(3)
