@@ -35,8 +35,7 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
                                           isMultipleSelectionEnabled: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
                                           emptyViewType: .emptyFolderSelectFolder,
-                                          leftBarButtons: currentDirectory.id == DriveFileManager.constants
-                                              .rootID ? [.cancel] : nil,
+                                          leftBarButtons: nil,
                                           rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
                                           matomoViewPath: [MatomoUtils.View.save.displayName, "SelectFolder"])
 
@@ -110,31 +109,53 @@ final class SelectFolderViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
-                                                  startDirectory: File? = nil, fileToMove: Int? = nil,
+                                                  startDirectory: File? = nil,
+                                                  fileToMove: Int? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
         @InjectService var appRouter: AppNavigable
-        var viewControllers = [LocationFolderViewController]()
+        var viewControllers = [UIViewController]()
         var isCompactView: Bool {
             guard let rootViewController = appRouter.rootViewController else { return false }
             return rootViewController.traitCollection.horizontalSizeClass == .compact
         }
 
-        let selectFolderViewController = LocationFolderViewController(
+        let locationFolderViewController = LocationFolderViewController(
             driveFileManager: driveFileManager,
             viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: startDirectory),
             selectMode: true,
             isCompactView: isCompactView,
+            disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
+            fileToMove: fileToMove,
             locationDelegate: delegate,
             selectHandler: selectHandler
         )
-        selectFolderViewController.navigationItem.hideBackButtonText()
-        viewControllers.append(selectFolderViewController)
+        locationFolderViewController.navigationItem.hideBackButtonText()
+        viewControllers.append(locationFolderViewController)
+
+        if let startDirectory {
+            var selectViewControllers: [UIViewController] = []
+            var directory: File? = startDirectory
+            while let selectDirectory = directory,
+                  !selectDirectory.isRoot {
+                let selectFolderViewController = SelectFolderViewController(
+                    viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: selectDirectory),
+                    disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
+                    fileToMove: fileToMove,
+                    delegate: delegate,
+                    selectHandler: selectHandler
+                )
+                selectFolderViewController.navigationItem.hideBackButtonText()
+                selectViewControllers.append(selectFolderViewController)
+                directory = selectDirectory.parent
+            }
+            viewControllers.append(contentsOf: selectViewControllers.reversed())
+        }
 
         let navigationController = TitleSizeAdjustingNavigationController()
-        navigationController.setViewControllers(viewControllers.reversed(), animated: false)
+        navigationController.setViewControllers(viewControllers, animated: false)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }

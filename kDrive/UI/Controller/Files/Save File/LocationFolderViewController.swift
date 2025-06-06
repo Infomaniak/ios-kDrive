@@ -25,10 +25,6 @@ import RealmSwift
 import UIKit
 
 class LocationFolderViewController: SidebarViewController {
-    private var selectedIndexPath: IndexPath?
-    private let selectHandler: ((File) -> Void)?
-    weak var locationDelegate: SelectFolderDelegate?
-
     private static let recentItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                                    image: KDriveResourcesAsset.clock.image,
                                                                    destination: .file(DriveFileManager
@@ -43,8 +39,13 @@ class LocationFolderViewController: SidebarViewController {
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                                                                  image: KDriveResourcesAsset.folderSelect.image,
                                                                  destination: .file(DriveFileManager.mySharedRootFile))]
+    private var selectedIndexPath: IndexPath?
+    private let selectHandler: ((File) -> Void)?
+    private let disabledDirectoriesSelection: [Int]
+    private let fileToMove: Int?
+    private weak var locationDelegate: SelectFolderDelegate?
+    private let viewModel: FileListViewModel
 
-    var viewModel: FileListViewModel
     private var rootChildrenObservationToken: NotificationToken?
     private var dataSource: MenuDataSource?
     override var itemsSnapshot: DataSourceSnapshot {
@@ -102,11 +103,15 @@ class LocationFolderViewController: SidebarViewController {
         viewModel: FileListViewModel,
         selectMode: Bool,
         isCompactView: Bool,
+        disabledDirectoriesSelection: [Int],
+        fileToMove: Int?,
         locationDelegate: SelectFolderDelegate? = nil,
         selectHandler: ((File) -> Void)? = nil
     ) {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate
+        self.disabledDirectoriesSelection = disabledDirectoriesSelection
+        self.fileToMove = fileToMove
         self.selectHandler = selectHandler
         super.init(driveFileManager: driveFileManager, selectMode: selectMode, isCompactView: isCompactView)
     }
@@ -160,6 +165,8 @@ class LocationFolderViewController: SidebarViewController {
 
         let destinationViewController = SelectFolderViewController(
             viewModel: destinationViewModel,
+            disabledDirectoriesSelection: disabledDirectoriesSelection,
+            fileToMove: fileToMove,
             delegate: locationDelegate,
             selectHandler: selectHandler
         )
