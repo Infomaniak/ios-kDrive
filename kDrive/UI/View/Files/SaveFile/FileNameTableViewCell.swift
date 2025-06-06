@@ -38,6 +38,8 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
 
         textFieldConfiguration.apply(to: textField)
+        textField.autocorrectionType = .yes
+        textField.autocapitalizationType = .sentences
     }
 
     override func layoutSubviews() {
