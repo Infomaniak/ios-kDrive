@@ -437,7 +437,6 @@ extension PhotoSyncSettingsViewController {
                 if let driveFileManager {
                     let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
                         driveFileManager: driveFileManager,
-                        startDirectory: selectedDirectory,
                         disabledDirectoriesSelection: [driveFileManager.getCachedRootFile()],
                         delegate: self
                     )
