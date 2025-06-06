@@ -102,12 +102,8 @@ public final class SingleTrackPlayer: Pausable {
     public func setup(with playableFile: File) async { // TODO: use abstract type
         if !playableFile.isLocalVersionOlderThanRemote {
             removeAllObservers()
-            let asset = AVAsset(url: playableFile.localUrl)
-            player = AVPlayer(url: playableFile.localUrl)
-            setUpObservers()
-            Task {
-                await setMetaData(from: asset.commonMetadata, playableFileName: playableFile.name)
-            }
+            let asset = AVURLAsset(url: playableFile.localUrl)
+            await setupStreamingAsset(asset, fileName: playableFile.name)
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
             let url = Endpoint.downloadShareLinkFile(
                 driveId: publicShareProxy.driveId,
@@ -115,29 +111,24 @@ public final class SingleTrackPlayer: Pausable {
                 fileId: playableFile.id
             ).url
             let asset = AVURLAsset(url: url)
-            setupStreamingAsset(asset, fileName: playableFile.name)
+            await setupStreamingAsset(asset, fileName: playableFile.name)
         } else if let token = driveFileManager.apiFetcher.currentToken {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                guard let token else { return }
-                let url = Endpoint.download(file: playableFile).url
-                let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                self.setupStreamingAsset(asset, fileName: playableFile.name)
-            }
+            let url = Endpoint.download(file: playableFile).url
+            let headers = ["Authorization": "Bearer \(token.accessToken)"]
+            let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+            await setupStreamingAsset(asset, fileName: playableFile.name)
         } else {
             onPlaybackError.send(.previewLoadErrorNoToken)
         }
     }
 
-    private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) {
-        Task { @MainActor in
-            player = AVPlayer(playerItem: AVPlayerItem(asset: urlAsset))
-            await setMetaData(from: urlAsset.commonMetadata, playableFileName: fileName)
-            setUpObservers()
+    private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) async {
+        player = AVPlayer(playerItem: AVPlayerItem(asset: urlAsset))
+        await setMetaData(from: urlAsset.commonMetadata, playableFileName: fileName)
+        setUpObservers()
 
-            currentItemStatusObserver = player?.observe(\.currentItem?.status) { _, _ in
-                self.handleItemStatusChange()
-            }
+        currentItemStatusObserver = player?.observe(\.currentItem?.status) { _, _ in
+            self.handleItemStatusChange()
         }
     }
 
