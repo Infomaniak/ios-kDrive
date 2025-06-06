@@ -34,6 +34,8 @@ class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
         super.awakeFromNib()
 
         titleTextField.setInfomaniakColors()
+        titleTextField.autocorrectionType = .yes
+        titleTextField.autocapitalizationType = .sentences
         titleTextField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         titleTextField.delegate = self
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
