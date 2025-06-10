@@ -31,6 +31,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     private let menuIndexPath: IndexPath = [-1, -1]
+    private var plusButtonTableViewController: UITableViewController?
     let selectMode: Bool
 
     private var isMenuIndexPathSelected: Bool {
@@ -572,6 +573,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             driveFileManager: currentDriveFileManager,
             folder: currentDirectoryOrRoot
         )
+        plusButtonTableViewController = plusButtonFloatingPanel
 
         plusButtonFloatingPanel.modalPresentationStyle = .popover
         plusButtonFloatingPanel.popoverPresentationController?.sourceView = addButton
