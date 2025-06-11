@@ -132,6 +132,8 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         textField.setInfomaniakColors()
         textField.delegate = self
         textFieldConfiguration.apply(to: textField)
+        textField.autocorrectionType = .yes
+        textField.autocapitalizationType = .sentences
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         textField.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(textField)
