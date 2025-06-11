@@ -1,1 +1,2 @@
-- Correction de la sélection d'un dossier.
+- Correction de l'action déplacer
+- Correction de l'action upload de fichier
