@@ -1,1 +1,2 @@
-- Fix folder selection.
+- Fix move action
+- Fix upload File action
