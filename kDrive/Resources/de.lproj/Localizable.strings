@@ -412,9 +412,6 @@
 /* loco:6049df4d5c2c3a04bc39795d */
 "buttonPlayerRew" = "Einige Sekunden zurückspulen";
 
-/* loco:6818ae071c7e870445011a44 */
-"buttonRecent" = "Neueste";
-
 /* loco:61434c587ac8854bf40efa02 */
 "buttonRedeemPromoCode" = "Einen Promo-Code einlösen";
 
@@ -1674,6 +1671,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a2b */
 "recentActivitySeeMore" = "Mehr neue Dateien anzeigen";
+
+/* loco:6818ae071c7e870445011a44 */
+"recentTitle" = "Neueste";
 
 /* loco:6049df4d5c2c3a04bc397a2c */
 "refreshTokenError" = "Ihre Verbindung wurde unterbrochen";

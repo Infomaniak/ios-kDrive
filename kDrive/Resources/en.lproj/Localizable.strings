@@ -412,9 +412,6 @@
 /* loco:6049df4d5c2c3a04bc39795d */
 "buttonPlayerRew" = "Back a few seconds";
 
-/* loco:6818ae071c7e870445011a44 */
-"buttonRecent" = "Recent";
-
 /* loco:61434c587ac8854bf40efa02 */
 "buttonRedeemPromoCode" = "Redeem a promo code";
 
@@ -1674,6 +1671,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a2b */
 "recentActivitySeeMore" = "View more recent files";
+
+/* loco:6818ae071c7e870445011a44 */
+"recentTitle" = "Recent";
 
 /* loco:6049df4d5c2c3a04bc397a2c */
 "refreshTokenError" = "You have been disconnected";

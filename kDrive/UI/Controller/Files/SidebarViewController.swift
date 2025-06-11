@@ -52,7 +52,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         var title: String {
             switch self {
             case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
-            case .first: return KDriveResourcesStrings.Localizable.buttonRecent
+            case .first: return KDriveResourcesStrings.Localizable.recentTitle
             default: return ""
             }
         }
