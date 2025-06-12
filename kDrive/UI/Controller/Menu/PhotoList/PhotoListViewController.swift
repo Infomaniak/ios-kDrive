@@ -28,6 +28,21 @@ import UIKit
 
 extension PhotoSortMode: Selectable {}
 
+extension PhotoListViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldReceive touch: UITouch) -> Bool {
+        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else {
+            return false
+        }
+        return multipleSelectionViewModel.isMultipleSelectionEnabled
+    }
+}
+
 final class PhotoListViewController: FileListViewController {
     var headerTitleLabel: IKLabel {
         return photoHeaderView.titleLabel
@@ -70,6 +85,19 @@ final class PhotoListViewController: FileListViewController {
 
     private weak var currentNavigationController: UINavigationController?
 
+    enum SelectionMode {
+        case selecting
+        case deselecting
+        case none
+    }
+
+    var selectionMode: SelectionMode = .none
+    var lastTouchPoint: CGPoint = .zero
+    var startIndexPath: IndexPath?
+    var initialTouchPoint: CGPoint?
+    var displayLink: CADisplayLink?
+    var scrollSpeed: CGFloat = 0
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
@@ -99,6 +127,10 @@ final class PhotoListViewController: FileListViewController {
         collectionView.register(UINib(nibName: "ReusableHeaderView", bundle: nil),
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: headerIdentifier)
+        let selectionPanGesture = UIPanGestureRecognizer(target: self, action: #selector(handleSelectionPan))
+        selectionPanGesture.delegate = self
+        collectionView.addGestureRecognizer(selectionPanGesture)
+
         selectView = photoHeaderView
         selectView?.delegate = self
         bindPhotoListViewModel()
@@ -254,6 +286,123 @@ final class PhotoListViewController: FileListViewController {
 
     func updateTitle(_ count: Int) {
         headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(count)
+    }
+
+    @objc func handleSelectionPan(_ gesture: UIPanGestureRecognizer) {
+        let location = gesture.location(in: collectionView)
+
+        guard let multipleSelectionViewModel = photoListViewModel.multipleSelectionViewModel,
+              let indexPath = collectionView.indexPathForItem(at: location),
+              let file = getDisplayedFile(at: indexPath) else { return }
+
+        lastTouchPoint = location
+
+        switch gesture.state {
+        case .began:
+            if multipleSelectionViewModel.selectedItems.contains(file) {
+                selectionMode = .deselecting
+            } else {
+                selectionMode = .selecting
+            }
+
+            startIndexPath = indexPath
+            initialTouchPoint = location
+            startDisplayLink()
+
+        case .changed:
+            updateScrollSpeed(for: lastTouchPoint)
+            updateSelection(to: location, current: indexPath)
+
+        case .ended, .cancelled, .failed:
+            initialTouchPoint = nil
+            stopDisplayLink()
+            selectionMode = .none
+
+        default:
+            break
+        }
+    }
+
+    func updateSelection(to location: CGPoint, current: IndexPath) {
+        guard let start = startIndexPath,
+              let multipleSelectionViewModel = photoListViewModel.multipleSelectionViewModel else { return }
+
+        let contentRect = CGRect(origin: .zero, size: collectionView.contentSize)
+        let attributes = collectionView.collectionViewLayout.layoutAttributesForElements(in: contentRect) ?? []
+
+        let sortedAttributes = attributes.sorted {
+            if abs($0.center.y - $1.center.y) > 1 {
+                return $0.center.y < $1.center.y
+            } else {
+                return $0.center.x < $1.center.x
+            }
+        }
+
+        guard let startIndex = sortedAttributes.firstIndex(where: { $0.indexPath == start }),
+              let endIndex = sortedAttributes.firstIndex(where: { $0.indexPath == current }) else { return }
+
+        let range = startIndex <= endIndex
+            ? startIndex ... endIndex
+            : endIndex ... startIndex
+
+        for attributes in sortedAttributes[range] {
+            let indexPath = attributes.indexPath
+            guard let file = getDisplayedFile(at: indexPath) else { return }
+
+            switch selectionMode {
+            case .selecting:
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                multipleSelectionViewModel.didSelectFile(file, at: indexPath)
+
+            case .deselecting:
+                collectionView.deselectItem(at: indexPath, animated: false)
+                multipleSelectionViewModel.didDeselectFile(file, at: indexPath)
+
+            default:
+                break
+            }
+        }
+    }
+
+    func updateScrollSpeed(for locationInContent: CGPoint) {
+        let visibleY = locationInContent.y - collectionView.contentOffset.y
+
+        let threshold = collectionView.bounds.height * 0.1
+        let maxSpeed: CGFloat = 25
+
+        if visibleY < threshold {
+            let distance = threshold - visibleY
+            let percent = min(distance / threshold, 1)
+            scrollSpeed = -maxSpeed * percent * percent
+        } else if visibleY > collectionView.bounds.height - threshold {
+            let distance = visibleY - (collectionView.bounds.height - threshold)
+            let percent = min(distance / threshold, 1)
+            scrollSpeed = maxSpeed * percent * percent
+        } else {
+            scrollSpeed = 0
+        }
+    }
+
+    func startDisplayLink() {
+        stopDisplayLink()
+        displayLink = CADisplayLink(target: self, selector: #selector(handleAutoScroll))
+        displayLink?.add(to: .main, forMode: .common)
+    }
+
+    func stopDisplayLink() {
+        displayLink?.invalidate()
+        displayLink = nil
+        scrollSpeed = 0
+    }
+
+    @objc func handleAutoScroll() {
+        guard scrollSpeed != 0 else { return }
+
+        var offset = collectionView.contentOffset
+        offset.y += scrollSpeed
+
+        offset.y = max(0, min(offset.y, collectionView.contentSize.height - collectionView.bounds.height))
+        collectionView.setContentOffset(offset, animated: false)
     }
 
     // MARK: - Scroll view delegate
