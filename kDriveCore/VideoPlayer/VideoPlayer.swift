@@ -23,14 +23,27 @@ import InfomaniakDI
 import kDriveResources
 import MediaPlayer
 
+@MainActor public protocol VideoViewCellDelegate: AnyObject {
+    func readyToPlay()
+    func errorWhilePreviewing(error: Error)
+}
+
 public final class VideoPlayer: Pausable {
+    public enum ErrorDomain: Error {
+        case incompatibleFile
+    }
+
     @LazyInjectService private var orchestrator: MediaPlayerOrchestrator
 
     private var player: AVPlayer?
     private var asset: AVAsset?
     private var file: File?
 
+    private var statusObserver: NSKeyValueObservation?
+
     public var onPlaybackEnded: (() -> Void)?
+
+    public weak var previewDelegate: VideoViewCellDelegate?
 
     public var progressPercentage: Double {
         guard let player = player, let currentItem = player.currentItem else { return 0 }
@@ -45,9 +58,10 @@ public final class VideoPlayer: Pausable {
         return playerViewController
     }()
 
-    public init(frozenFile: File, driveFileManager: DriveFileManager) {
+    public init(frozenFile: File, driveFileManager: DriveFileManager, previewDelegate: VideoViewCellDelegate?) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
         file = frozenFile
+        self.previewDelegate = previewDelegate
     }
 
     public func setNowPlayingMetadata(metadata: MediaMetadata) {
@@ -157,6 +171,19 @@ public final class VideoPlayer: Pausable {
             name: .AVPlayerItemFailedToPlayToEndTime,
             object: currentItem
         )
+
+        statusObserver = currentItem.observe(\.status, options: [.new]) { [weak self] item, _ in
+            guard let previewDelegate = self?.previewDelegate else { return }
+
+            Task { @MainActor in
+                switch item.status {
+                case .readyToPlay:
+                    previewDelegate.readyToPlay()
+                default:
+                    previewDelegate.errorWhilePreviewing(error: ErrorDomain.incompatibleFile)
+                }
+            }
+        }
     }
 
     private func updateMetadata(asset: AVAsset?, defaultName: String) {

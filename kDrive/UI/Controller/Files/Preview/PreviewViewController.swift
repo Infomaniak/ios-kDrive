@@ -486,6 +486,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             handleOfficePreviewError(error, previewIndex: index)
         } else if file.convertedType == .audio {
             handleAudioPreviewError(error, previewIndex: index)
+        } else if file.convertedType == .video {
+            handleVideoPreviewError(error, previewIndex: index)
         }
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
@@ -506,6 +508,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
         guard file.isLocalVersionOlderThanRemote else { return }
         downloadFile(at: IndexPath(item: previewIndex, section: 0))
+    }
+
+    func handleVideoPreviewError(_ error: Error, previewIndex: Int) {
+        let file = previewFiles[previewIndex]
+
+        guard let videoError = error as? VideoPlayer.ErrorDomain,
+              videoError == .incompatibleFile else {
+            return
+        }
+
+        previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
     }
 
     func handleOfficePreviewError(_ error: Error, previewIndex: Int) {

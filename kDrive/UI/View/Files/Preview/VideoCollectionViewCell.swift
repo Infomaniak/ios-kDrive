@@ -27,7 +27,7 @@ import Kingfisher
 import MediaPlayer
 import UIKit
 
-class VideoCollectionViewCell: PreviewCollectionViewCell {
+class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate {
     private class VideoPlayerNavigationController: UINavigationController {
         var disappearCallback: (() -> Void)?
 
@@ -69,9 +69,9 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        Task { @MainActor in
-            videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager)
-        }
+        playButton.isEnabled = false
+
+        videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
     }
 
     override func didEndDisplaying() {
@@ -108,5 +108,16 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         if let floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController {
             floatingPanelController.dismiss(animated: true)
         }
+    }
+
+    func errorWhilePreviewing(error: any Error) {
+        guard let file, let previewDelegate else { return }
+        previewDelegate.errorWhilePreviewing(fileId: file.id, error: error)
+        videoPlayer = nil
+        playButton.isEnabled = false
+    }
+
+    func readyToPlay() {
+        playButton.isEnabled = true
     }
 }
