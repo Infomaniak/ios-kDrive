@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Thu, 15 May 2025 10:32:59 +0200
+ * Exported by: Matthieu Déglon
+ * Exported at: Wed, 11 Jun 2025 14:06:15 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -50,7 +50,7 @@
 "alertRemoveUserTitle" = "Retirar al usuario";
 
 /* loco:67c18ad0a89ca83d24067454 */
-"all3DModel" = "Modelo 3D";
+"all3DModel" = "Modelos 3D";
 
 /* loco:6049df4d5c2c3a04bc39790d */
 "allActivated" = "Activado";
@@ -411,9 +411,6 @@
 
 /* loco:6049df4d5c2c3a04bc39795d */
 "buttonPlayerRew" = "Retroceder unos segundos";
-
-/* loco:6818ae071c7e870445011a44 */
-"buttonRecent" = "Recientes";
 
 /* loco:61434c587ac8854bf40efa02 */
 "buttonRedeemPromoCode" = "Usar un código promocional";
@@ -1675,6 +1672,9 @@
 /* loco:6049df4d5c2c3a04bc397a2b */
 "recentActivitySeeMore" = "Ver más archivos recientes";
 
+/* loco:6818ae071c7e870445011a44 */
+"recentTitle" = "Recientes";
+
 /* loco:6049df4d5c2c3a04bc397a2c */
 "refreshTokenError" = "Ha sido desconectado";
 
@@ -1688,7 +1688,7 @@
 "saveExternalFileInputFileName" = "Nombre del documento";
 
 /* loco:6049df4d5c2c3a04bc397a2e */
-"saveExternalFileTitle" = "Guardar en el kDrive";
+"saveExternalFileTitle" = "Guardar en el Drive";
 
 /* loco:62864b7da70e2c3f9332b992 */
 "savePhotoJpegDetail" = "(recomendado)";
