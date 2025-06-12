@@ -60,7 +60,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                 )
 
                 if Task.isCancelled {
-                    Log.photoLibraryUploader("Scan Task cancelled")
+                    Log.photoLibraryUploader("Scan Task cancelled before updating last sync date")
                     return
                 }
 
@@ -162,7 +162,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             )
 
             if Task.isCancelled {
-                Log.photoLibraryUploader("Scan Task cancelled")
+                Log.photoLibraryUploader("Scan Task cancelled before hashing asset")
                 stop.pointee = true
                 return
             }
@@ -179,7 +179,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
 
             guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
-                Log.photoLibraryUploader("Scan Task cancelled")
+                Log.photoLibraryUploader("Scan Task cancelled after hashing asset")
                 stop.pointee = true
                 return
             }
