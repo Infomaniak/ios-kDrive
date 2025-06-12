@@ -108,117 +108,131 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
 
         autoreleasepool {
-            var burstIdentifier: String?
-            var burstCount = 0
-
-            assetsFetchResult.enumerateObjects { [self] asset, _, stop in
-                guard !expiringActivity.shouldTerminate else {
-                    Log.photoLibraryUploader("system is asking to terminate")
-                    stop.pointee = true
-                    return
-                }
-
-                @InjectService var photoLibrarySaver: PhotoLibrarySavable
-                if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
-                    let options = PHFetchOptions()
-                    options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
-                    let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(
-                        asset,
-                        with: .album,
-                        options: options
-                    )
-                    // swiftlint:disable:next empty_count
-                    if assetCollections.count > 0 {
-                        Log.photoLibraryUploader("Asset ignored because it already originates from kDrive")
-                        return
-                    }
-                }
-
-                // Get a unique file identifier while taking care of the burst state
-                let finalName = getPhotoLibraryName(
-                    forAsset: asset,
-                    settings: frozenSettings,
-                    burstIdentifier: &burstIdentifier,
-                    burstCount: &burstCount
-                )
-
-                if Task.isCancelled {
-                    Log.photoLibraryUploader("Scan Task cancelled")
-                    stop.pointee = true
-                    return
-                }
-
-                let bestResourceSHA256: String?
-                do {
-                    bestResourceSHA256 = try asset.bestResourceSHA256
-                } catch {
-                    // Error thrown while hashing a resource, we skip the asset.
-                    Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
-                    return
-                }
-
-                Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
-
-                guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
-                    Log.photoLibraryUploader("Scan Task cancelled")
-                    stop.pointee = true
-                    return
-                }
-
-                try? uploadsDatabase.writeTransaction { writableRealm in
-                    // Check if picture uploaded before
-                    guard !assetAlreadyUploaded(assetName: finalName,
-                                                localIdentifier: asset.localIdentifier,
-                                                bestResourceSHA256: bestResourceSHA256,
-                                                writableRealm: writableRealm) else {
-                        Log.photoLibraryUploader("Asset ignored because it was uploaded before")
-                        return
-                    }
-
-                    guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
-                                                     writableRealm: writableRealm) else {
-                        Log.photoLibraryUploader("Asset already in pending upload")
-                        return
-                    }
-
-                    let algorithmImportVersion = currentDiffAlgorithmVersion
-
-                    // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
-                    let uploadFile = UploadFile(
-                        parentDirectoryId: frozenSettings.parentDirectoryId,
-                        userId: frozenSettings.userId,
-                        driveId: frozenSettings.driveId,
-                        name: finalName,
-                        asset: asset,
-                        bestResourceSHA256: bestResourceSHA256,
-                        algorithmImportVersion: algorithmImportVersion,
-                        conflictOption: .version,
-                        priority: initial ? .low : .normal
-                    )
-
-                    // Lazy creation of sub folder if required in the upload file
-                    if frozenSettings.createDatedSubFolders {
-                        uploadFile.setDatedRelativePath()
-                    }
-
-                    guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
-                        Log.photoLibraryUploader("Scan Task cancelled in transaction")
-                        writableRealm.cancelWrite()
-                        stop.pointee = true
-                        return
-                    }
-
-                    // DB insertion
-                    writableRealm.add(uploadFile, update: .modified)
-                    if let creationDate = asset.creationDate {
-                        updateLastSyncDate(creationDate, writableRealm: writableRealm)
-                    }
-                }
-            }
+            processAssetsFetchResult(
+                assetsFetchResult,
+                initial: initial,
+                expiringActivity: expiringActivity,
+                frozenSettings: frozenSettings
+            )
         }
 
         guard !expiringActivity.shouldTerminate else {
             throw ErrorDomain.importCancelledBySystem
+        }
+    }
+
+    private func processAssetsFetchResult(
+        _ assetsFetchResult: PHFetchResult<PHAsset>,
+        initial: Bool,
+        expiringActivity: ExpiringActivity,
+        frozenSettings: PhotoSyncSettings
+    ) {
+        var burstIdentifier: String?
+        var burstCount = 0
+
+        assetsFetchResult.enumerateObjects { [self] asset, _, stop in
+            guard !expiringActivity.shouldTerminate else {
+                Log.photoLibraryUploader("system is asking to terminate")
+                stop.pointee = true
+                return
+            }
+
+            @InjectService var photoLibrarySaver: PhotoLibrarySavable
+            if let assetCollectionIdentifier = photoLibrarySaver.assetCollection?.localIdentifier {
+                let options = PHFetchOptions()
+                options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
+                let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(
+                    asset,
+                    with: .album,
+                    options: options
+                )
+                // swiftlint:disable:next empty_count
+                if assetCollections.count > 0 {
+                    Log.photoLibraryUploader("Asset ignored because it already originates from kDrive")
+                    return
+                }
+            }
+
+            // Get a unique file identifier while taking care of the burst state
+            let finalName = getPhotoLibraryName(
+                forAsset: asset,
+                settings: frozenSettings,
+                burstIdentifier: &burstIdentifier,
+                burstCount: &burstCount
+            )
+
+            if Task.isCancelled {
+                Log.photoLibraryUploader("Scan Task cancelled")
+                stop.pointee = true
+                return
+            }
+
+            let bestResourceSHA256: String?
+            do {
+                bestResourceSHA256 = try asset.bestResourceSHA256
+            } catch {
+                // Error thrown while hashing a resource, we skip the asset.
+                Log.photoLibraryUploader("Error while hashing:\(error) asset: \(asset.localIdentifier)", level: .error)
+                return
+            }
+
+            Log.photoLibraryUploader("Asset hash:\(String(describing: bestResourceSHA256))")
+
+            guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
+                Log.photoLibraryUploader("Scan Task cancelled")
+                stop.pointee = true
+                return
+            }
+
+            try? uploadsDatabase.writeTransaction { writableRealm in
+                // Check if picture uploaded before
+                guard !assetAlreadyUploaded(assetName: finalName,
+                                            localIdentifier: asset.localIdentifier,
+                                            bestResourceSHA256: bestResourceSHA256,
+                                            writableRealm: writableRealm) else {
+                    Log.photoLibraryUploader("Asset ignored because it was uploaded before")
+                    return
+                }
+
+                guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
+                                                 writableRealm: writableRealm) else {
+                    Log.photoLibraryUploader("Asset already in pending upload")
+                    return
+                }
+
+                let algorithmImportVersion = currentDiffAlgorithmVersion
+
+                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
+                let uploadFile = UploadFile(
+                    parentDirectoryId: frozenSettings.parentDirectoryId,
+                    userId: frozenSettings.userId,
+                    driveId: frozenSettings.driveId,
+                    name: finalName,
+                    asset: asset,
+                    bestResourceSHA256: bestResourceSHA256,
+                    algorithmImportVersion: algorithmImportVersion,
+                    conflictOption: .version,
+                    priority: initial ? .low : .normal
+                )
+
+                // Lazy creation of sub folder if required in the upload file
+                if frozenSettings.createDatedSubFolders {
+                    uploadFile.setDatedRelativePath()
+                }
+
+                guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
+                    Log.photoLibraryUploader("Scan Task cancelled in transaction")
+                    writableRealm.cancelWrite()
+                    stop.pointee = true
+                    return
+                }
+
+                // DB insertion
+                writableRealm.add(uploadFile, update: .modified)
+                if let creationDate = asset.creationDate {
+                    updateLastSyncDate(creationDate, writableRealm: writableRealm)
+                }
+            }
         }
     }
 
