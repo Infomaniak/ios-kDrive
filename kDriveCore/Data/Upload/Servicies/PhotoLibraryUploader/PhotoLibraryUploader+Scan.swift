@@ -184,54 +184,74 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                 return
             }
 
-            try? uploadsDatabase.writeTransaction { writableRealm in
-                // Check if picture uploaded before
-                guard !assetAlreadyUploaded(assetName: finalName,
-                                            localIdentifier: asset.localIdentifier,
-                                            bestResourceSHA256: bestResourceSHA256,
-                                            writableRealm: writableRealm) else {
-                    Log.photoLibraryUploader("Asset ignored because it was uploaded before")
-                    return
-                }
+            writeUploadFileInDatabase(
+                finalName: finalName,
+                asset: asset,
+                bestResourceSHA256: bestResourceSHA256,
+                initial: initial,
+                expiringActivity: expiringActivity,
+                frozenSettings: frozenSettings,
+                stop: stop
+            )
+        }
+    }
 
-                guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
-                                                 writableRealm: writableRealm) else {
-                    Log.photoLibraryUploader("Asset already in pending upload")
-                    return
-                }
+    private func writeUploadFileInDatabase(
+        finalName: String,
+        asset: PHAsset,
+        bestResourceSHA256: String?,
+        initial: Bool,
+        expiringActivity: ExpiringActivity,
+        frozenSettings: PhotoSyncSettings,
+        stop: UnsafeMutablePointer<ObjCBool>
+    ) {
+        try? uploadsDatabase.writeTransaction { writableRealm in
+            // Check if picture uploaded before
+            guard !assetAlreadyUploaded(assetName: finalName,
+                                        localIdentifier: asset.localIdentifier,
+                                        bestResourceSHA256: bestResourceSHA256,
+                                        writableRealm: writableRealm) else {
+                Log.photoLibraryUploader("Asset ignored because it was uploaded before")
+                return
+            }
 
-                let algorithmImportVersion = currentDiffAlgorithmVersion
+            guard !assetAlreadyPendingUpload(bestResourceSHA256: bestResourceSHA256,
+                                             writableRealm: writableRealm) else {
+                Log.photoLibraryUploader("Asset already in pending upload")
+                return
+            }
 
-                // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
-                let uploadFile = UploadFile(
-                    parentDirectoryId: frozenSettings.parentDirectoryId,
-                    userId: frozenSettings.userId,
-                    driveId: frozenSettings.driveId,
-                    name: finalName,
-                    asset: asset,
-                    bestResourceSHA256: bestResourceSHA256,
-                    algorithmImportVersion: algorithmImportVersion,
-                    conflictOption: .version,
-                    priority: initial ? .low : .normal
-                )
+            let algorithmImportVersion = currentDiffAlgorithmVersion
 
-                // Lazy creation of sub folder if required in the upload file
-                if frozenSettings.createDatedSubFolders {
-                    uploadFile.setDatedRelativePath()
-                }
+            // New UploadFile to be uploaded. Priority is `.low`, first sync is `.normal`
+            let uploadFile = UploadFile(
+                parentDirectoryId: frozenSettings.parentDirectoryId,
+                userId: frozenSettings.userId,
+                driveId: frozenSettings.driveId,
+                name: finalName,
+                asset: asset,
+                bestResourceSHA256: bestResourceSHA256,
+                algorithmImportVersion: algorithmImportVersion,
+                conflictOption: .version,
+                priority: initial ? .low : .normal
+            )
 
-                guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
-                    Log.photoLibraryUploader("Scan Task cancelled in transaction")
-                    writableRealm.cancelWrite()
-                    stop.pointee = true
-                    return
-                }
+            // Lazy creation of sub folder if required in the upload file
+            if frozenSettings.createDatedSubFolders {
+                uploadFile.setDatedRelativePath()
+            }
 
-                // DB insertion
-                writableRealm.add(uploadFile, update: .modified)
-                if let creationDate = asset.creationDate {
-                    updateLastSyncDate(creationDate, writableRealm: writableRealm)
-                }
+            guard !expiringActivity.shouldTerminate, !Task.isCancelled else {
+                Log.photoLibraryUploader("Scan Task cancelled in transaction")
+                writableRealm.cancelWrite()
+                stop.pointee = true
+                return
+            }
+
+            // DB insertion
+            writableRealm.add(uploadFile, update: .modified)
+            if let creationDate = asset.creationDate {
+                updateLastSyncDate(creationDate, writableRealm: writableRealm)
             }
         }
     }
