@@ -96,7 +96,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         )
         uploadService.updateQueueSuspension()
 
-        photoLibraryScan.scheduleNewPicturesForUpload()
+        await photoLibraryScan.scheduleNewPicturesForUpload()
         uploadService.rebuildUploadQueue()
     }
 
