@@ -339,7 +339,8 @@ final class PhotoListViewController: FileListViewController {
         }
 
         guard let startIndex = sortedAttributes.firstIndex(where: { $0.indexPath == start }),
-              let endIndex = sortedAttributes.firstIndex(where: { $0.indexPath == current }) else { return }
+              let endIndex = sortedAttributes.firstIndex(where: { $0.indexPath == current }),
+              startIndex != endIndex else { return }
 
         let range = startIndex <= endIndex
             ? startIndex ... endIndex
