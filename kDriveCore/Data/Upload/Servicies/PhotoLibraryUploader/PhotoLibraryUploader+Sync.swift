@@ -82,7 +82,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
     private func postSaveSettings(shouldReset: Bool, parentDirectoryId: Int, userId: Int, driveId: Int) async {
         @InjectService var photoLibraryScan: PhotoLibraryScanable
-        photoLibraryScan.cancelScan()
+        await photoLibraryScan.cancelScan()
 
         if shouldReset {
             try? await uploadService.cancelAnyPhotoSync()
@@ -107,7 +107,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
 
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
-            photoLibraryScan.cancelScan()
+            await photoLibraryScan.cancelScan()
 
             do {
                 try await uploadService.cancelAnyPhotoSync()

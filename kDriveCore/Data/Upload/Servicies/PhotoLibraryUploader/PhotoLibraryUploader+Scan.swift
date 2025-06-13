@@ -24,7 +24,7 @@ import RealmSwift
 
 public protocol PhotoLibraryScanable {
     @discardableResult func scheduleNewPicturesForUpload() -> Int
-    func cancelScan()
+    func cancelScan() async
 }
 
 extension PhotoLibraryUploader: PhotoLibraryScanable {
@@ -39,50 +39,57 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
 
         var newAssetsCount = 0
 
-        cancelScan()
-        workerTask = Task {
-            let options = PHFetchOptions()
-            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        Task {
+            await cancelScan()
+            workerTask = Task {
+                let options = PHFetchOptions()
+                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-            let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
-            let datePredicate = getDatePredicate(with: frozenSettings)
-            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+                let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
+                let datePredicate = getDatePredicate(with: frozenSettings)
+                let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+                options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
-            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assetsFetchResult = PHAsset.fetchAssets(with: options)
-            let syncDate = Date()
+                Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+                let assetsFetchResult = PHAsset.fetchAssets(with: options)
+                let syncDate = Date()
 
-            do {
-                try await addImageAssetsToUploadQueue(
-                    assetsFetchResult: assetsFetchResult,
-                    initial: frozenSettings.lastSync.timeIntervalSince1970 == 0
-                )
+                do {
+                    try await addImageAssetsToUploadQueue(
+                        assetsFetchResult: assetsFetchResult,
+                        initial: frozenSettings.lastSync.timeIntervalSince1970 == 0
+                    )
 
-                if Task.isCancelled {
-                    Log.photoLibraryUploader("Scan Task cancelled before updating last sync date")
-                    return
+                    if Task.isCancelled {
+                        Log.photoLibraryUploader("Scan Task cancelled before updating last sync date")
+                        return
+                    }
+
+                    try uploadsDatabase.writeTransaction { writableRealm in
+                        updateLastSyncDate(syncDate, writableRealm: writableRealm)
+                    }
+
+                    newAssetsCount = assetsFetchResult.count
+                    Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+                } catch ErrorDomain.importCancelledBySystem {
+                    Log.photoLibraryUploader("System is requesting to stop", level: .error)
+                } catch {
+                    Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
                 }
-
-                try uploadsDatabase.writeTransaction { writableRealm in
-                    updateLastSyncDate(syncDate, writableRealm: writableRealm)
-                }
-
-                newAssetsCount = assetsFetchResult.count
-                Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
-            } catch ErrorDomain.importCancelledBySystem {
-                Log.photoLibraryUploader("System is requesting to stop", level: .error)
-            } catch {
-                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
             }
         }
 
         return newAssetsCount
     }
 
-    public func cancelScan() {
-        workerTask?.cancel()
-        workerTask = nil
+    public func cancelScan() async {
+        guard let workerTask else {
+            return
+        }
+
+        workerTask.cancel()
+        await workerTask.finish()
+        self.workerTask = nil
     }
 
     // MARK: - Private
