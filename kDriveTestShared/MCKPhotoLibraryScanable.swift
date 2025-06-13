@@ -20,5 +20,5 @@ import Foundation
 import kDriveCore
 
 struct MCKPhotoLibraryScanable: PhotoLibraryScanable {
-    @discardableResult func scheduleNewPicturesForUpload() -> Int { 0 }
+    @discardableResult func scheduleNewPicturesForUpload() {}
 }

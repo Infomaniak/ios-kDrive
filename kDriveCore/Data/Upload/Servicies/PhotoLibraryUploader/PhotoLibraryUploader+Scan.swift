@@ -23,21 +23,18 @@ import Photos
 import RealmSwift
 
 public protocol PhotoLibraryScanable {
-    @discardableResult func scheduleNewPicturesForUpload() -> Int
+    func scheduleNewPicturesForUpload()
     func cancelScan() async
 }
 
 extension PhotoLibraryUploader: PhotoLibraryScanable {
-    @discardableResult
-    public func scheduleNewPicturesForUpload() -> Int {
+    public func scheduleNewPicturesForUpload() {
         Log.photoLibraryUploader("scheduleNewPicturesForUpload")
         guard let frozenSettings,
               PHPhotoLibrary.authorizationStatus() == .authorized else {
             Log.photoLibraryUploader("0 new assets")
-            return 0
+            return
         }
-
-        var newAssetsCount = 0
 
         Task {
             await cancelScan()
@@ -69,8 +66,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                         updateLastSyncDate(syncDate, writableRealm: writableRealm)
                     }
 
-                    newAssetsCount = assetsFetchResult.count
-                    Log.photoLibraryUploader("New assets count:\(newAssetsCount)")
+                    Log.photoLibraryUploader("New assets count:\(assetsFetchResult.count)")
                 } catch ErrorDomain.importCancelledBySystem {
                     Log.photoLibraryUploader("System is requesting to stop", level: .error)
                 } catch {
@@ -78,8 +74,6 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                 }
             }
         }
-
-        return newAssetsCount
     }
 
     public func cancelScan() async {
