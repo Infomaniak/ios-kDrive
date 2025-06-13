@@ -23,6 +23,7 @@ import UIKit
 public enum NavigationRoutes: Equatable {
     case store(driveId: Int, userId: Int)
     case saveFiles(files: [ImportedFile])
+    case sharedWithMe(driveId: Int)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
@@ -30,6 +31,8 @@ public enum NavigationRoutes: Equatable {
             return lhdDriveId == rhdDriveId && lhdUserId == rhdUserId
         case (.saveFiles(let lhdFile), .saveFiles(let rhdDile)):
             return lhdFile == rhdDile
+        case (.sharedWithMe(let lhdDriveId), .sharedWithMe(let rhdDriveId)):
+            return lhdDriveId == rhdDriveId
         default:
             return false
         }
